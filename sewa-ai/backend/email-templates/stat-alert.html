@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STAT ALERT — Critical finding detected</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f7f6; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; border: 2px solid #E03535; }
+        .header { background: #E03535; padding: 20px; text-align: center; color: #ffffff; }
+        .content { padding: 40px; }
+        .finding-box { background: #fee2e2; border: 1px solid #E03535; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .footer { background: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; }
+        .button { display: inline-block; padding: 12px 30px; background-color: #E03535; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: bold; }
+        h2 { margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>STAT ALERT</h2>
+        </div>
+        <div class="content">
+            <p><strong>Urgent clinical attention required.</strong></p>
+            <p>The SEWA AI Triage Engine has detected a critical finding on a recent scan.</p>
+            
+            <div class="finding-box">
+                <table style="width: 100%;">
+                    <tr><td style="color: #666; font-size: 12px;">PATHOLOGY</td><td style="font-weight: bold; color: #E03535;">{{pathology}}</td></tr>
+                    <tr><td style="color: #666; font-size: 12px;">MODALITY</td><td style="font-weight: bold;">{{modality}}</td></tr>
+                    <tr><td style="color: #666; font-size: 12px;">PATIENT ID</td><td style="font-weight: bold;">{{patientId}}</td></tr>
+                    <tr><td style="color: #666; font-size: 12px;">ACCESSION</td><td style="font-weight: bold;">{{accession}}</td></tr>
+                </table>
+            </div>
+
+            <p>Please log in to the diagnostic workspace immediately to review this case.</p>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="{{workspaceUrl}}" class="button">Open Workspace</a>
+            </div>
+        </div>
+        <div class="footer">
+            <p>This is an automated clinical alert from SEWA AI.<br>Do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+# SEWA AI — infrastructure/terraform-azure/terraform.tfvars.example
+# ─────────────────────────────────────────────────────────────────
+# INSTRUCTIONS:
+#   1. Copy this file: cp terraform.tfvars.example terraform.tfvars
+#   2. Fill in every value marked 🔑
+#   3. NEVER commit terraform.tfvars to git (it's in .gitignore)
+#   4. Run: terraform init && terraform apply
+# ─────────────────────────────────────────────────────────────────
+
+# ── Deployment ─────────────────────────────────────────────────
+environment  = "production"   # production | staging | dev
+azure_region = "uksouth"      # uksouth | westeurope | eastus | southafricanorth | centralindia
+region_code  = "uk"           # uk | eu | us | ng | ke | za | gh | in
+
+# ── App ────────────────────────────────────────────────────────
+app_url      = "https://api.sewaxai.health"
+cors_origins = "https://app.sewaxai.health,https://superadmin.sewaxai.health"
+log_level    = "info"
+
+# ── Database 🔑 ────────────────────────────────────────────────
+db_admin_user     = "sewaadmin"
+db_admin_password = "CHANGE_ME_Str0ng!Pass"   # 🔑 min 8 chars, upper+lower+digit+symbol
+db_sku            = "GP_Standard_D4s_v3"       # GP_Standard_D2s_v3 for staging
+
+# ── AKS ────────────────────────────────────────────────────────
+aks_system_node_count = 3
+aks_system_vm_size    = "Standard_D4s_v3"
+aks_gpu_vm_size       = "Standard_NC4as_T4_v3"
+kubernetes_version    = "1.28.5"
+
+# ── Networking ─────────────────────────────────────────────────
+vnet_address_space = "10.10.0.0/16"
+allowed_ips        = []   # Add your IP: ["203.0.113.10/32"]
+
+# ── Security Secrets 🔑 ────────────────────────────────────────
+jwt_secret         = "CHANGE_ME_jwt_secret_minimum_32_characters_long"
+jwt_refresh_secret = "CHANGE_ME_refresh_secret_min_32_chars_long!!"
+encryption_key     = "CHANGE_ME_exactly_32_characters!!"
+
+# ── Payments 🔑 ────────────────────────────────────────────────
+stripe_secret_key      = "sk_live_CHANGE_ME"     # UK / EU / US / IN
+paystack_secret_key    = "sk_live_CHANGE_ME"     # NG / ZA / GH
+flutterwave_secret_key = "FLWSECK_LIVE-CHANGE_ME" # Pan-Africa
+mpesa_consumer_key     = "CHANGE_ME"             # KE
+mpesa_consumer_secret  = "CHANGE_ME"             # KE
+
+# ── Firebase / FCM Push 🔑 ─────────────────────────────────────
+firebase_project_id   = "sewa-ai-prod"
+firebase_client_email = "firebase-adminsdk@sewa-ai-prod.iam.gserviceaccount.com"
+firebase_private_key  = "-----BEGIN RSA PRIVATE KEY-----\nCHANGE_ME\n-----END RSA PRIVATE KEY-----"
+
+# ── Email / SMTP 🔑 ────────────────────────────────────────────
+sendgrid_api_key = "SG.CHANGE_ME"    # SendGrid API key
+smtp_host  = "smtp.sendgrid.net"
+smtp_user  = "apikey"
+smtp_pass  = "SG.CHANGE_ME"    # SendGrid API key
+email_from = "info@sewaxai.health"
+
+# ── Monitoring 🔑 ──────────────────────────────────────────────
+sentry_dsn = "https://CHANGE_ME@sentry.io/CHANGE_ME"

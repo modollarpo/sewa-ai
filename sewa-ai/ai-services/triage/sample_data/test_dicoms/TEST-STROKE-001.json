@@ -1,0 +1,28 @@
+{
+  "case_id": "TEST-STROKE-001",
+  "description": "MRI Brain DWI \u2014 Acute Ischaemic Stroke (Tests Stroke Code)",
+  "metadata": {
+    "modality": "MR",
+    "body_part": "BRAIN",
+    "patient_age": 68,
+    "patient_sex": "M",
+    "study_uid": "1.2.840.10008.5.1.4.1.1.TEST-STROKE-001",
+    "series_uid": "1.2.840.10008.5.1.4.1.1.TEST-STROKE-001.1",
+    "instance_uid": "1.2.840.10008.5.1.4.1.1.TEST-STROKE-001.1.1"
+  },
+  "expected": {
+    "finding": "Ischemic Stroke",
+    "urgency": "CRITICAL",
+    "confidence_min": 0.82,
+    "metacognition": "PASS",
+    "uncertainty_min": null
+  },
+  "test_flags": {
+    "test_stroke_code": true,
+    "test_metacognition_layer1": false,
+    "test_uncertainty_gate": false
+  },
+  "clinical_notes": "Synthetic: restricted diffusion left MCA territory pattern",
+  "pixel_data_summary": "Synthetic \u2014 no PHI",
+  "generated_at": "2026-03-27T17:10:39Z"
+}

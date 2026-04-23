@@ -1,0 +1,21 @@
+# SEWA AI — pyrefly.toml (repo root)
+# Global Pyrefly config that applies to ALL Python files in this workspace.
+# Container-only packages (torch, onnxruntime, fastapi, flwr, opacus, etc.)
+# are not installed in the local dev venv — suppress all related warnings here.
+
+[pyrefly]
+python_interpreter = "c:/sewa_extract/.venv/Scripts/python.exe"
+ignore_missing_imports = true
+
+project_excludes = [
+  "**/__pycache__/**",
+  "**/*.pyc",
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/build/**",
+  ".venv/**",
+]
+
+[pyrefly.errors]
+missing-import = "hide"
+import-cycle   = "hide"

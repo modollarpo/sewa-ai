@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-frontend
+  namespace: sewa-ai
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sewa-frontend
+  template:
+    metadata:
+      labels:
+        app: sewa-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: sewaaiproductionacr.azurecr.io/sewa-frontend:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-frontend
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-frontend
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+

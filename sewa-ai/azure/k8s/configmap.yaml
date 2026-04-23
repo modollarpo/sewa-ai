@@ -1,0 +1,65 @@
+# SEWA AI — Kubernetes ConfigMap (non-secret configuration)
+# All secrets are in the 'sewa-secrets' K8s Secret (sourced from Azure Key Vault).
+# © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sewa-config
+  namespace: sewa-ai
+  labels:
+    app: sewa-ai
+    component: config
+data:
+  # ── Server ────────────────────────────────────────────────────
+  NODE_ENV:             "production"
+  PORT:                 "3000"
+  LOG_LEVEL:            "info"
+  REGION:               "uk"
+  APP_URL:              "https://api.sewaxai.health"
+  CORS_ORIGINS:         "https://sewaxai.health,https://app.sewaxai.health,https://white-grass-00dc51603.4.azurestaticapps.net"
+
+  # ── AI Service endpoints (internal cluster DNS) ────────────────
+  TRIAGE_URL:           "http://sewa-triage:8000"
+  AI_SERVICE_URL:       "http://sewa-triage:8000"
+  VLM_URL:              "http://sewa-vlm-report:8001"
+  VLM_SERVICE_URL:      "http://sewa-vlm-report:8001"
+  UNCERTAINTY_URL:      "http://sewa-uncertainty:8002"
+  AI_UNCERTAINTY_URL:   "http://sewa-uncertainty:8002"
+  METACOGNITION_URL:    "http://sewa-metacognition:8003"
+  AI_METACOGNITION_URL: "http://sewa-metacognition:8003"
+  FL_SERVICE_URL:       "http://sewa-federated:8004"
+  CL_SERVICE_URL:       "http://sewa-continuous:8005"
+
+  # ── Storage ────────────────────────────────────────────────────
+  AZURE_STORAGE_CONTAINER:   "scans"
+  AZURE_GRADCAM_CONTAINER:   "gradcam"
+  AZURE_REPORTS_CONTAINER:   "reports"
+  STORAGE_PROVIDER:          "azure"
+
+  # ── Email ──────────────────────────────────────────────────────
+  SMTP_HOST:            "smtp.sendgrid.net"
+  SMTP_PORT:            "587"
+  SMTP_USER:            "apikey"
+  EMAIL_FROM:           "info@sewaxai.health"
+
+  # ── HL7v2 ──────────────────────────────────────────────────────
+  HL7_HOST:             "localhost"
+  HL7_PORT:             "2575"
+  HL7_FACILITY:         "SEWA_AI"
+
+  # ── PACS / DICOM ───────────────────────────────────────────────
+  PACS_HOST:            "pacs.sewaxai.health"
+  PACS_PORT:            "104"
+  PACS_AE_TITLE:        "SEWA_PACS"
+
+  # ── Clinical AI thresholds ─────────────────────────────────────
+  METACOGNITION_HALLUCINATION_THRESHOLD: "0.30"
+  UNCERTAINTY_ESCALATION_THRESHOLD:      "0.25"
+  CONFIDENCE_FLOOR_CRITICAL:             "0.45"
+
+  # ── Appointments / Telehealth ──────────────────────────────────
+  VIDEO_PROVIDER:       "daily"
+
+  # ── Deployment ─────────────────────────────────────────────────
+  DEPLOY_TARGET:        "azure"
+  EDGE_SYNC_ENABLED:    "false"

@@ -1,0 +1,44 @@
+/// <reference types="vite/client" />
+// SEWA AI — frontend/src/services/apiClient.ts
+import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
+
+const isProd = typeof window !== 'undefined' && 
+  (window.location.hostname.includes('sewaxai.health') || window.location.hostname.includes('azurestaticapps.net'));
+const BASE = isProd 
+  ? 'https://api.sewaxai.health/api/v1' 
+  : (import.meta.env.VITE_API_URL ?? '/api/v1');
+
+
+export const apiClient = axios.create({ baseURL: BASE, timeout: 30_000 });
+
+apiClient.interceptors.request.use((cfg) => {
+  const token = useAuthStore.getState().token;
+  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  return cfg;
+});
+
+apiClient.interceptors.response.use(
+  (r) => r,
+  async (err) => {
+    if (err.response?.status === 401 && !err.config._retry) {
+      err.config._retry = true;
+      try {
+        await useAuthStore.getState().refreshAuth();
+        const newToken = useAuthStore.getState().token;
+        if (!newToken) {
+          // Refresh cleared auth — force logout state (already handled in refreshAuth)
+          return Promise.reject(err);
+        }
+        err.config.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(err.config);
+      } catch {
+        // Refresh failed — logout and reject original request
+        await useAuthStore.getState().logout();
+        return Promise.reject(err);
+      }
+    }
+    return Promise.reject(err);
+  }
+);
+

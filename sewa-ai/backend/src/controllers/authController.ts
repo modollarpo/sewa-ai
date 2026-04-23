@@ -1,0 +1,194 @@
+// SEWA AI — src/controllers/authController.ts
+// Feature 2: JWT + OAuth2, MFA (TOTP/SMS/Email), Biometric auth, HIPAA audit logging
+
+import { Request, Response, NextFunction } from 'express';
+import { randomUUID } from 'crypto';  // explicit import for Node 18 compat
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { authenticator } from 'otplib';
+import { prisma } from '../config/database';
+import { redisClient } from '../config/redis';
+import { config } from '../config/env';
+import { logger } from '../utils/logger';
+import { auditLog } from '../utils/audit';
+import { sendEmail } from '../services/emailService';
+import { AppError } from '../utils/AppError';
+
+const SALT_ROUNDS = 12;
+const ACCESS_TOKEN_TTL  = '15m';
+const REFRESH_TOKEN_TTL = '7d';
+
+function signTokens(userId: string, tenantId: string, role: string) {
+  const payload = { sub: userId, tenantId, role };
+  const accessToken  = jwt.sign(payload, config.JWT_SECRET, { expiresIn: ACCESS_TOKEN_TTL });
+  const refreshToken = jwt.sign(payload, config.JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_TTL });
+  return { accessToken, refreshToken };
+}
+
+// POST /api/v1/auth/login
+export async function login(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email, password, tenantSlug } = req.body;
+
+    const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+    if (!tenant || tenant.status === 'suspended') {
+      throw new AppError('Invalid tenant or account suspended', 401);
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { tenantId_email: { tenantId: tenant.id, email } },
+    });
+    if (!user) throw new AppError('Invalid credentials', 401);
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) throw new AppError('Invalid credentials', 401);
+
+    if (user.status !== 'active') throw new AppError('Account is not active', 403);
+
+    // MFA required check
+    if (user.mfaEnabled) {
+      const mfaChallenge = randomUUID();  // Node 18 safe
+      await redisClient.setex(`mfa:${mfaChallenge}`, 300, JSON.stringify({ userId: user.id, tenantId: tenant.id }));
+      return res.json({ mfaRequired: true, mfaChallenge });
+    }
+
+    const { accessToken, refreshToken } = signTokens(user.id, tenant.id, user.role);
+
+    await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    await prisma.session.create({
+      data: {
+        userId: user.id, token: refreshToken,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        ipAddress: req.ip, userAgent: req.headers['user-agent'],
+      },
+    });
+
+    await auditLog({ tenantId: tenant.id, userId: user.id, action: 'LOGIN', ipAddress: req.ip, metadata: { role: user.role } });
+
+    res.json({
+      accessToken, refreshToken,
+      user: { id: user.id, email: user.email, role: user.role,
+        firstName: user.firstName, lastName: user.lastName,
+        tenantId: tenant.id, tenantName: tenant.name,
+        region: tenant.region, currency: tenant.currency, language: user.language },
+    });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/mfa/verify
+export async function verifyMFA(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { mfaChallenge, code } = req.body;
+    const raw = await redisClient.get(`mfa:${mfaChallenge}`);
+    if (!raw) throw new AppError('MFA session expired', 401);
+
+    const { userId, tenantId } = JSON.parse(raw);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.mfaSecret) throw new AppError('MFA not configured', 400);
+
+    const valid = authenticator.verify({ token: code, secret: user.mfaSecret });
+    if (!valid) throw new AppError('Invalid MFA code', 401);
+
+    await redisClient.del(`mfa:${mfaChallenge}`);
+    const { accessToken, refreshToken } = signTokens(user.id, tenantId, user.role);
+    await auditLog({ tenantId, userId: user.id, action: 'MFA_VERIFIED', ipAddress: req.ip });
+
+    // Fetch tenant to return full user shape (matching login response)
+    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { name: true, region: true, currency: true } });
+
+    res.json({
+      accessToken, refreshToken,
+      user: {
+        id: user.id, email: user.email, role: user.role,
+        firstName: user.firstName, lastName: user.lastName,
+        tenantId,
+        tenantName: tenant?.name ?? '',
+        region: tenant?.region ?? 'uk',
+        currency: tenant?.currency ?? 'GBP',
+        language: user.language ?? 'en',
+      },
+    });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/mfa/setup
+export async function setupMFA(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user!.id;
+    const secret = authenticator.generateSecret();
+    const user   = await prisma.user.findUnique({ where: { id: userId } });
+    const otpauth = authenticator.keyuri(user!.email, 'SEWA AI', secret);
+
+    await redisClient.setex(`mfa_setup:${userId}`, 600, secret);
+    res.json({ secret, otpauthUrl: otpauth });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/mfa/confirm
+export async function confirmMFA(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user!.id;
+    const { code } = req.body;
+    const secret = await redisClient.get(`mfa_setup:${userId}`);
+    if (!secret) throw new AppError('MFA setup session expired', 400);
+
+    const valid = authenticator.verify({ token: code, secret });
+    if (!valid) throw new AppError('Invalid code', 400);
+
+    await prisma.user.update({ where: { id: userId }, data: { mfaEnabled: true, mfaSecret: secret } });
+    await redisClient.del(`mfa_setup:${userId}`);
+    await auditLog({ userId, action: 'MFA_ENABLED' });
+
+    res.json({ message: 'MFA enabled successfully' });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/refresh
+export async function refreshToken(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { refreshToken: token } = req.body;
+    if (!token) throw new AppError('Refresh token required', 400);
+
+    const session = await prisma.session.findUnique({ where: { token } });
+    if (!session || session.expiresAt < new Date()) throw new AppError('Invalid or expired session', 401);
+
+    const decoded = jwt.verify(token, config.JWT_REFRESH_SECRET) as { sub: string; tenantId: string; role: string };
+    const { accessToken, refreshToken: newRefresh } = signTokens(decoded.sub, decoded.tenantId, decoded.role);
+
+    await prisma.session.update({ where: { token }, data: { token: newRefresh, expiresAt: new Date(Date.now() + 7*24*60*60*1000) } });
+    res.json({ accessToken, refreshToken: newRefresh });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/logout
+export async function logout(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { refreshToken: token } = req.body;
+    if (token) await prisma.session.deleteMany({ where: { token } });
+    await auditLog({ userId: req.user?.id, action: 'LOGOUT', ipAddress: req.ip });
+    res.json({ message: 'Logged out successfully' });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/register (Hospital self-registration)
+export async function register(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { tenantSlug, firstName, lastName, email, password, role = 'doctor' } = req.body;
+
+    const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+    if (!tenant) throw new AppError('Tenant not found', 404);
+
+    const existing = await prisma.user.findUnique({ where: { tenantId_email: { tenantId: tenant.id, email } } });
+    if (existing) throw new AppError('Email already registered', 409);
+
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    const user = await prisma.user.create({
+      data: { tenantId: tenant.id, email, passwordHash, firstName, lastName, role },
+    });
+
+    await auditLog({ tenantId: tenant.id, userId: user.id, action: 'USER_REGISTERED', metadata: { role } });
+    await sendEmail({ to: email, subject: 'Welcome to SEWA AI', template: 'welcome', data: { firstName, tenantName: tenant.name } });
+
+    res.status(201).json({ message: 'Registration successful. Check your email for verification.' });
+  } catch (err) { next(err); }
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Verification Code</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f7f6; }
+        .container { max-width: 500px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .content { padding: 40px; text-align: center; }
+        .code-box { background: #f1f5f9; padding: 25px; border-radius: 12px; font-size: 36px; font-weight: 900; color: #08160F; letter-spacing: 12px; margin: 25px 0; border: 1px dashed #408D7B; }
+        .footer { padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h2 style="color: #408D7B; margin-bottom: 30px;">Verification Code</h2>
+            <p>Please enter the code below to complete your login to SEWA AI.</p>
+            
+            <div class="code-box">
+                {{code}}
+            </div>
+
+            <p style="font-size: 13px; color: #64748b;">This code is valid for 5 minutes.</p>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 40px;">If you didn't attempt to log in, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 SEWA AI · Secure Multifactor Authentication</p>
+        </div>
+    </div>
+</body>
+</html>

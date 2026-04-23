@@ -1,0 +1,885 @@
+# SEWA AI — infrastructure/kubernetes/deployment.yaml
+# Complete Kubernetes manifests for Azure AKS deployment
+#
+# Covers all 8 services:
+#   backend, frontend, ai-triage, ai-vlm, ai-uncertainty,
+#   ai-metacognition, ai-federated-learning, ai-continuous-learning
+#
+# Features:
+#   - Azure Key Vault CSI SecretProviderClass (no plaintext secrets in k8s)
+#   - HPA autoscaling on CPU + custom KEDA queue depth metrics
+#   - PodDisruptionBudgets for zero-downtime rolling deploys
+#   - GPU node pool scheduling via nodeSelector + tolerations
+#   - Spot pool scheduling for federated learning jobs
+#   - NGINX Ingress with TLS, rate limiting, WAF annotations
+#   - Liveness / readiness probes on every service
+#   - Resource requests/limits for QoS Guaranteed class
+#
+# Image tags and ACR server are substituted at deploy time by:
+#   scripts/deploy-azure.sh (sed substitution before kubectl apply)
+#
+# Substitution tokens:
+#   ACR_LOGIN_SERVER → e.g. sewaaiproductionacr.azurecr.io
+#   IMAGE_TAG        → e.g. a3f8c21 (git short SHA)
+# ─────────────────────────────────────────────────────────────
+
+# ── Namespace ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sewa-ai
+  labels:
+    app.kubernetes.io/name: sewa-ai
+    azure.workload.identity/use: "true"
+
+---
+# ── Azure Key Vault SecretProviderClass ───────────────────────
+# Mounts all secrets from Key Vault into pods as env vars.
+# Requires: Azure Key Vault Provider for Secrets Store CSI Driver
+# (installed automatically on AKS when key_vault_secrets_provider is enabled)
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: sewa-keyvault-secrets
+  namespace: sewa-ai
+spec:
+  provider: azure
+  secretObjects:
+    - secretName: sewa-secrets
+      type: Opaque
+      data:
+        - objectName: sewa-database-url
+          key: DATABASE_URL
+        - objectName: sewa-redis-url
+          key: REDIS_URL
+        - objectName: sewa-jwt-secret
+          key: JWT_SECRET
+        - objectName: sewa-jwt-refresh-secret
+          key: JWT_REFRESH_SECRET
+        - objectName: sewa-encryption-key
+          key: ENCRYPTION_KEY
+        - objectName: sewa-storage-connection-string
+          key: AZURE_STORAGE_CONNECTION_STRING
+        - objectName: sewa-stripe-secret-key
+          key: STRIPE_SECRET_KEY
+        - objectName: sewa-paystack-secret-key
+          key: PAYSTACK_SECRET_KEY
+        - objectName: sewa-flutterwave-secret-key
+          key: FLUTTERWAVE_SECRET_KEY
+        - objectName: sewa-mpesa-consumer-key
+          key: MPESA_CONSUMER_KEY
+        - objectName: sewa-mpesa-consumer-secret
+          key: MPESA_CONSUMER_SECRET
+        - objectName: sewa-firebase-private-key
+          key: FIREBASE_PRIVATE_KEY
+        - objectName: sewa-smtp-pass
+          key: SMTP_PASS
+        - objectName: sewa-sentry-dsn
+          key: SENTRY_DSN
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "true"
+    userAssignedIdentityID: ""    # uses AKS kubelet managed identity
+    keyvaultName: "sewa-ai-production-kv"   # matches terraform output key_vault_name
+    tenantId: "AZURE_TENANT_ID_PLACEHOLDER" # substituted by deploy-azure.sh
+
+---
+# ── ConfigMap — non-secret environment variables ───────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sewa-config
+  namespace: sewa-ai
+data:
+  NODE_ENV:                      "production"
+  PORT:                          "3000"
+  REGION:                        "uk"
+  DEPLOY_TARGET:                 "azure"
+  LOG_LEVEL:                     "info"
+  APP_URL:                       "https://api.sewaxai.health"
+  CORS_ORIGINS:                  "https://app.sewaxai.health,https://superadmin.sewaxai.health"
+  # AI service URLs — AKS internal DNS
+  AI_SERVICE_URL:                "http://sewa-ai-triage:8000"
+  VLM_SERVICE_URL:               "http://sewa-ai-vlm:8001"
+  UNCERTAINTY_SERVICE_URL:       "http://sewa-ai-uncertainty:8002"
+  METACOGNITION_SERVICE_URL:     "http://sewa-ai-metacognition:8003"
+  FL_SERVICE_URL:                "http://sewa-ai-federated:8004"
+  CL_SERVICE_URL:                "http://sewa-ai-continuous:8005"
+  # Storage containers
+  AZURE_STORAGE_CONTAINER:       "scans"
+  AZURE_GRADCAM_CONTAINER:       "gradcam"
+  AZURE_REPORTS_CONTAINER:       "reports"
+  # Service Bus queues
+  AZURE_SERVICEBUS_TRIAGE_QUEUE: "sewa-scan-triage"
+  AZURE_SERVICEBUS_HL7_QUEUE:    "sewa-hl7-messages"
+  # Email
+  SMTP_HOST:                     "smtp.sendgrid.net"
+  SMTP_PORT:                     "587"
+  SMTP_USER:                     "apikey"
+  EMAIL_FROM:                    "noreply@sewaxai.health"
+  # Firebase
+  FIREBASE_PROJECT_ID:           "sewa-ai-prod"
+  FIREBASE_CLIENT_EMAIL:         "firebase-adminsdk@sewa-ai-prod.iam.gserviceaccount.com"
+  # HL7
+  HL7_HOST:                      "hl7.sewaxai.health"
+  HL7_PORT:                      "2575"
+  HL7_FACILITY:                  "SEWA_AI"
+
+---
+# ── PVC — shared AI model cache ────────────────────────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sewa-model-cache
+  namespace: sewa-ai
+spec:
+  accessModes: [ReadOnlyMany]
+  storageClassName: azurefile-csi
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  BACKEND — Node.js API                                   ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-backend
+  namespace: sewa-ai
+  labels:
+    app: sewa-backend
+    version: IMAGE_TAG
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels:
+      app: sewa-backend
+  template:
+    metadata:
+      labels:
+        app: sewa-backend
+        version: IMAGE_TAG
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: sewa-workload-sa
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: sewa-keyvault-secrets
+      containers:
+        - name: backend
+          image: ACR_LOGIN_SERVER/sewa-ai/backend:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: sewa-config
+          env:
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: DATABASE_URL } }
+            - name: REDIS_URL
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: REDIS_URL } }
+            - name: JWT_SECRET
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: JWT_SECRET } }
+            - name: JWT_REFRESH_SECRET
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: JWT_REFRESH_SECRET } }
+            - name: ENCRYPTION_KEY
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: ENCRYPTION_KEY } }
+            - name: AZURE_STORAGE_CONNECTION_STRING
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: AZURE_STORAGE_CONNECTION_STRING } }
+            - name: STRIPE_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: STRIPE_SECRET_KEY } }
+            - name: PAYSTACK_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: PAYSTACK_SECRET_KEY } }
+            - name: FLUTTERWAVE_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: FLUTTERWAVE_SECRET_KEY } }
+            - name: MPESA_CONSUMER_KEY
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: MPESA_CONSUMER_KEY } }
+            - name: MPESA_CONSUMER_SECRET
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: MPESA_CONSUMER_SECRET } }
+            - name: FIREBASE_PRIVATE_KEY
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: FIREBASE_PRIVATE_KEY } }
+            - name: SMTP_PASS
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: SMTP_PASS } }
+            - name: SENTRY_DSN
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: SENTRY_DSN } }
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          resources:
+            requests: { cpu: "500m", memory: "512Mi" }
+            limits:   { cpu: "2000m", memory: "2Gi" }
+          livenessProbe:
+            httpGet: { path: /health, port: 3000 }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: { path: /health/ready, port: 3000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-backend
+  namespace: sewa-ai
+  labels:
+    app: sewa-backend
+spec:
+  selector:
+    app: sewa-backend
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  FRONTEND — React / NGINX                                ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-frontend
+  namespace: sewa-ai
+  labels:
+    app: sewa-frontend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels:
+      app: sewa-frontend
+  template:
+    metadata:
+      labels:
+        app: sewa-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ACR_LOGIN_SERVER/sewa-ai/frontend:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
+          livenessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-frontend
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  AI TRIAGE — EfficientNet-B4 + Grad-CAM (GPU)            ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-ai-triage
+  namespace: sewa-ai
+  labels:
+    app: sewa-ai-triage
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels:
+      app: sewa-ai-triage
+  template:
+    metadata:
+      labels:
+        app: sewa-ai-triage
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      nodeSelector:
+        accelerator: nvidia-gpu
+        role: ai-inference
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: sewa-model-cache
+      containers:
+        - name: ai-triage
+          image: ACR_LOGIN_SERVER/sewa-ai/ai-triage:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MODEL_CACHE_DIR
+              value: "/models"
+          envFrom:
+            - configMapRef:
+                name: sewa-config
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+              readOnly: true
+          resources:
+            requests: { cpu: "2000m", memory: "4Gi", nvidia.com/gpu: "1" }
+            limits:   { cpu: "4000m", memory: "8Gi", nvidia.com/gpu: "1" }
+          livenessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 5
+          readinessProbe:
+            httpGet: { path: /ready, port: 8000 }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-ai-triage
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-ai-triage
+  ports:
+    - port: 8000
+      targetPort: 8000
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  VLM REPORT GENERATOR (GPU)                              ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-ai-vlm
+  namespace: sewa-ai
+  labels:
+    app: sewa-ai-vlm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-ai-vlm
+  template:
+    metadata:
+      labels:
+        app: sewa-ai-vlm
+    spec:
+      nodeSelector:
+        accelerator: nvidia-gpu
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: sewa-model-cache
+      containers:
+        - name: ai-vlm
+          image: ACR_LOGIN_SERVER/sewa-ai/ai-vlm:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+          envFrom:
+            - configMapRef:
+                name: sewa-config
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+              readOnly: true
+          resources:
+            requests: { cpu: "2000m", memory: "6Gi", nvidia.com/gpu: "1" }
+            limits:   { cpu: "4000m", memory: "12Gi", nvidia.com/gpu: "1" }
+          livenessProbe:
+            httpGet: { path: /health, port: 8001 }
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            failureThreshold: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-ai-vlm
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-ai-vlm
+  ports:
+    - port: 8001
+      targetPort: 8001
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  UNCERTAINTY ENGINE — MC-Dropout ×20 (GPU)              ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-ai-uncertainty
+  namespace: sewa-ai
+  labels:
+    app: sewa-ai-uncertainty
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-ai-uncertainty
+  template:
+    metadata:
+      labels:
+        app: sewa-ai-uncertainty
+    spec:
+      nodeSelector:
+        accelerator: nvidia-gpu
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: sewa-model-cache
+      containers:
+        - name: ai-uncertainty
+          image: ACR_LOGIN_SERVER/sewa-ai/ai-uncertainty:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8002
+          envFrom:
+            - configMapRef:
+                name: sewa-config
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+              readOnly: true
+          resources:
+            requests: { cpu: "1000m", memory: "4Gi", nvidia.com/gpu: "1" }
+            limits:   { cpu: "2000m", memory: "8Gi", nvidia.com/gpu: "1" }
+          livenessProbe:
+            httpGet: { path: /health, port: 8002 }
+            initialDelaySeconds: 60
+            periodSeconds: 20
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-ai-uncertainty
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-ai-uncertainty
+  ports:
+    - port: 8002
+      targetPort: 8002
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  METACOGNITION ENGINE — 9-layer safety gate (CPU)       ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-ai-metacognition
+  namespace: sewa-ai
+  labels:
+    app: sewa-ai-metacognition
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-ai-metacognition
+  template:
+    metadata:
+      labels:
+        app: sewa-ai-metacognition
+    spec:
+      containers:
+        - name: ai-metacognition
+          image: ACR_LOGIN_SERVER/sewa-ai/ai-metacognition:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8003
+          envFrom:
+            - configMapRef:
+                name: sewa-config
+          resources:
+            requests: { cpu: "500m", memory: "1Gi" }
+            limits:   { cpu: "2000m", memory: "4Gi" }
+          livenessProbe:
+            httpGet: { path: /health, port: 8003 }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-ai-metacognition
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-ai-metacognition
+  ports:
+    - port: 8003
+      targetPort: 8003
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  FEDERATED LEARNING — Flower coordinator (Spot pool)    ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-ai-federated
+  namespace: sewa-ai
+  labels:
+    app: sewa-ai-federated
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sewa-ai-federated
+  template:
+    metadata:
+      labels:
+        app: sewa-ai-federated
+    spec:
+      # Prefer spot nodes for cost saving; fallback to system nodes
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: role
+                    operator: In
+                    values: [batch-training]
+      tolerations:
+        - key: "kubernetes.azure.com/scalesetpriority"
+          operator: "Equal"
+          value: "spot"
+          effect: "NoSchedule"
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: sewa-model-cache
+      containers:
+        - name: ai-federated
+          image: ACR_LOGIN_SERVER/sewa-ai/ai-federated:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8004
+          envFrom:
+            - configMapRef:
+                name: sewa-config
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+          resources:
+            requests: { cpu: "2000m", memory: "4Gi" }
+            limits:   { cpu: "8000m", memory: "16Gi" }
+          livenessProbe:
+            httpGet: { path: /health, port: 8004 }
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-ai-federated
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-ai-federated
+  ports:
+    - port: 8004
+      targetPort: 8004
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  CONTINUOUS LEARNING — drift detection + auto-retrain   ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-ai-continuous
+  namespace: sewa-ai
+  labels:
+    app: sewa-ai-continuous
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sewa-ai-continuous
+  template:
+    metadata:
+      labels:
+        app: sewa-ai-continuous
+    spec:
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: sewa-model-cache
+      containers:
+        - name: ai-continuous
+          image: ACR_LOGIN_SERVER/sewa-ai/ai-continuous:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8005
+          envFrom:
+            - configMapRef:
+                name: sewa-config
+          env:
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: sewa-secrets, key: DATABASE_URL } }
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+          resources:
+            requests: { cpu: "500m", memory: "1Gi" }
+            limits:   { cpu: "2000m", memory: "4Gi" }
+          livenessProbe:
+            httpGet: { path: /health, port: 8005 }
+            initialDelaySeconds: 30
+            periodSeconds: 30
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-ai-continuous
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-ai-continuous
+  ports:
+    - port: 8005
+      targetPort: 8005
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  WORKLOAD IDENTITY — ServiceAccount for Key Vault access ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sewa-workload-sa
+  namespace: sewa-ai
+  annotations:
+    azure.workload.identity/client-id: "WORKLOAD_IDENTITY_CLIENT_ID"  # substituted by deploy-azure.sh
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  AUTOSCALING — HPA for backend + KEDA for AI triage     ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sewa-backend-hpa
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sewa-backend
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+
+---
+# KEDA ScaledObject — scale AI triage on Service Bus queue depth
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: sewa-triage-scaler
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    name: sewa-ai-triage
+  minReplicaCount: 1
+  maxReplicaCount: 8
+  pollingInterval: 15
+  cooldownPeriod: 120
+  triggers:
+    - type: azure-servicebus
+      metadata:
+        queueName: sewa-scan-triage
+        messageCount: "5"             # scale up when > 5 messages queued
+        namespace: sewa-ai-production-sb
+      authenticationRef:
+        name: sewa-keda-auth
+
+---
+# KEDA TriggerAuthentication — uses workload identity for Service Bus
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: sewa-keda-auth
+  namespace: sewa-ai
+spec:
+  podIdentity:
+    provider: azure-workload
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  POD DISRUPTION BUDGETS — zero-downtime deploys          ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-backend-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: sewa-backend
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-ai-triage-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-ai-triage
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-frontend-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-frontend
+
+---
+# ╔══════════════════════════════════════════════════════════╗
+# ║  INGRESS — NGINX with TLS, rate limiting, WAF headers   ║
+# ╚══════════════════════════════════════════════════════════╝
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sewa-ingress
+  namespace: sewa-ai
+  annotations:
+    kubernetes.io/ingress.class:               "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect:  "true"
+    nginx.ingress.kubernetes.io/use-regex:     "true"
+    # Rate limiting — 100 req/min per IP for API
+    nginx.ingress.kubernetes.io/limit-rps:     "100"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains";
+      more_set_headers "Content-Security-Policy: default-src 'self'";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+    # TLS certificate from cert-manager (Let's Encrypt)
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Proxy settings for large DICOM uploads
+    nginx.ingress.kubernetes.io/proxy-body-size:         "500m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout:      "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout:      "300"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout:   "60"
+spec:
+  tls:
+    - hosts:
+        - api.sewaxai.health
+        - app.sewaxai.health
+      secretName: sewa-tls-cert
+  rules:
+    - host: api.sewaxai.health
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sewa-backend
+                port:
+                  number: 3000
+    - host: app.sewaxai.health
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sewa-frontend
+                port:
+                  number: 80

@@ -1,0 +1,28 @@
+{
+  "case_id": "TEST-ICH-001",
+  "description": "CT Head \u2014 Intracranial Haemorrhage (High Confidence)",
+  "metadata": {
+    "modality": "CT",
+    "body_part": "HEAD",
+    "patient_age": 72,
+    "patient_sex": "M",
+    "study_uid": "1.2.840.10008.5.1.4.1.1.TEST-ICH-001",
+    "series_uid": "1.2.840.10008.5.1.4.1.1.TEST-ICH-001.1",
+    "instance_uid": "1.2.840.10008.5.1.4.1.1.TEST-ICH-001.1.1"
+  },
+  "expected": {
+    "finding": "ICH",
+    "urgency": "CRITICAL",
+    "confidence_min": 0.85,
+    "metacognition": "PASS",
+    "uncertainty_min": null
+  },
+  "test_flags": {
+    "test_stroke_code": false,
+    "test_metacognition_layer1": false,
+    "test_uncertainty_gate": false
+  },
+  "clinical_notes": "Synthetic: hyperdense right basal ganglia region pattern",
+  "pixel_data_summary": "Synthetic \u2014 no PHI",
+  "generated_at": "2026-03-27T17:10:39Z"
+}

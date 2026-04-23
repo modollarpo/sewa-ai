@@ -1,0 +1,9 @@
+spec:
+  template:
+    spec:
+      containers:
+      - name: vlm-report
+        resources:
+          limits:
+            nvidia.com/gpu: null
+      tolerations: []

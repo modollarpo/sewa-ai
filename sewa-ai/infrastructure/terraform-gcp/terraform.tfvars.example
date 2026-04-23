@@ -1,0 +1,9 @@
+# SEWA AI — GCP terraform.tfvars.example
+# Copy to terraform.tfvars and fill in your values
+
+project_id   = "your-gcp-project-id"   # 🔑 Required
+region       = "europe-west2"           # London — EU data residency
+zone         = "europe-west2-a"
+environment  = "production"
+db_password  = "change_me_strong_password_here"  # 🔑 Required
+cluster_name = "sewa-ai-prod-gke"

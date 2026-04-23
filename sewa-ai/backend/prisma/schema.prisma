@@ -1,0 +1,639 @@
+// SEWA AI — Prisma Schema
+// PostgreSQL 15+ | Multi-tenant schema isolation
+// README.pdf: Feature 1 (Multi-Tenant), Feature 2 (Auth), Feature 3 (AI), Feature 4 (FHIR/HL7)
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── ENUMS — type-safe RBAC and status fields ──────────────────
+// Using String fields with comments for now; enums available for migration
+// to Prisma enum when ready: prevents typos like "Radioloist" vs "Radiologist"
+// enum UserRole { superadmin admin radiologist doctor technician patient }
+// enum ScanStatus { pending processing ai_complete reported approved rejected failed }
+// enum ScanPriority { STAT URGENT ROUTINE }
+// enum ReferralPriority { STAT URGENT ROUTINE }
+
+// ── TENANTS (Hospitals / Clinics) ─────────────────────────────
+model Tenant {
+  id                 String  @id @default(uuid())
+  name               String
+  slug               String  @unique
+  subdomain          String  @unique
+  region             String // uk | eu | us | ng | ke | za | gh | in
+  currency           String // GBP | EUR | USD | NGN | KES | ZAR | GHS | INR
+  language           String  @default("en")
+  plan               String  @default("starter") // starter | pro | enterprise
+  status             String  @default("active") // active | suspended | trial
+  fhirBaseUrl        String?
+  hl7Endpoint        String?
+  pacsEndpoint       String?
+  stripeCustomerId   String?
+  paystackCustomerId String?
+  providerMetadata   Json? // { mpesa: { shortcode, passkey }, flutterwave: { publicKey }, region-specific config }
+
+  // ── Billing & Quota ─────────────────────────────────────────
+  subscriptionId      String? // Stripe subscription ID / Paystack subscription code
+  subscriptionStatus  String?   @default("trial") // trial | active | past_due | cancelled | suspended
+  scanQuota           Int? // monthly scan limit (null = unlimited for enterprise)
+  scansUsedThisMonth  Int       @default(0)
+  billingCycleResetAt DateTime? // when monthly quota resets
+  trialEndsAt         DateTime? // when free trial expires
+  nextBillDate        DateTime?
+  billingEmail        String?
+  reportLanguage      String?   @default("en") // default report language for this tenant
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  users            User[]
+  scans            Scan[]
+  reports          Report[]
+  payments         Payment[]
+  auditLogs        AuditLog[]
+  aiModels         TenantAIModel[]
+  templates        ReportTemplate[]
+  appointments     Appointment[]
+  whatsappRegs     WhatsAppRegistration[]
+  notificationLogs NotificationLog[]
+  dicomNodes       DicomNode[]
+  complianceRecords ComplianceRecord[]
+
+  @@index([region])
+  @@index([status])
+}
+
+// ── USERS ──────────────────────────────────────────────────────
+model User {
+  id               String    @id @default(uuid())
+  tenantId         String
+  tenant           Tenant    @relation(fields: [tenantId], references: [id])
+  email            String
+  passwordHash     String
+  firstName        String
+  lastName         String
+  role             String // superadmin | admin | radiologist | doctor | technician | patient
+  speciality       String? // radiology | neurology | cardiology | etc
+  licenseNumber    String?
+  phone            String?
+  language         String    @default("en")
+  timezone         String    @default("UTC")
+  mfaEnabled       Boolean   @default(false)
+  mfaSecret        String?
+  biometricKey     String?
+  status           String    @default("active")
+  lastLoginAt      DateTime?
+  // Notifications & WhatsApp
+  fcmTokens        String[]  @default([])
+  whatsappNumber   String?
+  whatsappVerified Boolean   @default(false)
+  notifPrefs       Json? // { push:bool, email:bool, whatsapp:bool, sms:bool }
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  sessions            Session[]
+  scansReferred       Scan[]          @relation("ReferringDoctor")
+  reports             Report[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  secondRequester     SecondOpinion[] @relation("Requester")
+  secondReviewer      SecondOpinion[] @relation("Reviewer")
+  clinicalValidations ClinicalValidation[]
+  notificationLogs    NotificationLog[]
+  patientRecord       Patient?
+
+  @@unique([tenantId, email])
+  @@index([role])
+  @@index([tenantId])
+}
+
+// ── SESSIONS ───────────────────────────────────────────────────
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+// ── PATIENTS ───────────────────────────────────────────────────
+model Patient {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
+  tenantId          String
+  mrn               String // Medical Record Number
+  dateOfBirth       DateTime
+  sex               String // M | F | O
+  bloodType         String?
+  allergies         String[]
+  conditions        String[]
+  fhirId            String? // FHIR Patient resource ID
+  consentAI         Boolean   @default(true)
+  consentResearch   Boolean   @default(false)
+  consentThirdParty Boolean   @default(false)
+  deletedAt         DateTime? // soft delete — never hard-delete patient records (clinical record continuity)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  scans       Scan[]
+  messages    Message[]
+  Appointment Appointment[]
+
+  @@unique([tenantId, mrn])
+  @@index([tenantId])
+}
+
+// ── SCANS ──────────────────────────────────────────────────────
+model Scan {
+  id                String   @id @default(uuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id])
+  patientId         String?
+  patient           Patient? @relation(fields: [patientId], references: [id])
+  referringDoctorId String?
+  referringDoctor   User?    @relation("ReferringDoctor", fields: [referringDoctorId], references: [id])
+
+  modality     String // CT | MRI | XR | US | PET | PETCT
+  bodyPart     String // Head | Chest | Abdomen | Pelvis | Spine | etc
+  priority     String // STAT | URGENT | ROUTINE
+  status       String  @default("pending") // pending | processing | ai_complete | reported | approved | rejected | failed
+  errorMessage String? // populated when status = 'failed' — DICOM corrupt, AI service down, etc.
+
+  // DICOM
+  dicomInstanceUid String?
+  dicomStudyUid    String?
+  dicomSeriesUid   String?
+  pacsUrl          String?
+  storageUrl       String? // Azure Blob / S3 URL
+  fileSize         Int? // bytes
+
+  // Clinical
+  clinicalIndication String?
+  technique          String?
+
+  // FHIR
+  fhirImagingStudyId String?
+  hl7OrderId         String?
+
+  // Scheduling
+  scheduledAt DateTime?
+  acquiredAt  DateTime?
+  receivedAt  DateTime  @default(now())
+  deletedAt   DateTime? // soft delete — clinical records never hard-deleted
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // AI Triage result
+  urgency String? // CRITICAL | URGENT | NORMAL | ROUTINE — set after AI completes
+
+  // Human review flags (set by metacognition or uncertainty engine)
+  requiresHumanReview Boolean @default(false)
+  humanReviewReason   String? // METACOGNITION_FAIL | HIGH_UNCERTAINTY | MANUAL
+
+  aiResult       AIResult?
+  report         Report?
+  annotations    Annotation[]
+  secondOpinions SecondOpinion[]
+  clinicalValidation ClinicalValidation?
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([priority])
+  @@index([patientId])
+  @@index([urgency])
+  @@index([requiresHumanReview])
+}
+
+// ── AI RESULTS (Triage Engine output) ────────────────────────
+model AIResult {
+  id     String @id @default(uuid())
+  scanId String @unique
+  scan   Scan   @relation(fields: [scanId], references: [id])
+
+  // Triage Engine
+  primaryFinding String
+  urgency        String // CRITICAL | URGENT | NORMAL
+  confidence     Float // 0.0–1.0
+  location       String?
+  size           String?
+  midlineShift   String?
+
+  // Uncertainty Engine (Feature 3)
+  uncertaintyScore     Float?
+  epistemicUncertainty Float? // Model uncertainty (reducible with more data)
+  aleatoricUncertainty Float? // Data noise (image quality issues)
+  metacognitionFlags   String[] // NO_FINDING | AMBIGUOUS | NOISE_DETECTED
+  gradcamUrl           String? // Grad-CAM heatmap stored in blob
+  shapValues           Json? // SHAP feature importance array
+
+  // VLM Report (Feature 3 — pre-filled into report editor)
+  vlmTechnique  String?
+  vlmFindings   String?
+  vlmImpression String?
+  vlmFullText   String?
+
+  // Metacognition Engine (INDUSTRIALIZED)
+  metacognitionPassed Boolean @default(false)
+  metacognitionLayers Json? // Full 9-layer results as JSON
+  hallucinationRisk   Float?
+  selfEvalNotes       String?
+
+  // Raw Output & Metadata
+  rawJson      Json?    // Full inference payload from AI provider
+  modelId      String?
+  modelVersion String?
+  inferenceMs  Int? // latency
+
+  // A/B test tracking (Feature 7)
+  abTestGroup String?
+  abModelId   String?
+
+  // Clinical performance tracking
+  isFalsePositive Boolean?
+  isFalseNegative Boolean?
+  fROCPoint       Float? // Calibration point on Free-response ROC
+  calibrationId   String? // link to calibration cohort
+
+  createdAt DateTime @default(now())
+
+  @@index([urgency])
+  @@index([scanId])
+}
+
+// ── REPORTS ───────────────────────────────────────────────────
+model Report {
+  id         String          @id @default(uuid())
+  tenantId   String
+  tenant     Tenant          @relation(fields: [tenantId], references: [id])
+  scanId     String          @unique
+  scan       Scan            @relation(fields: [scanId], references: [id])
+  authorId   String
+  author     User            @relation(fields: [authorId], references: [id])
+  templateId String?
+  template   ReportTemplate? @relation(fields: [templateId], references: [id])
+
+  // Content
+  technique      String?
+  findings       String
+  impression     String
+  recommendation String?
+  fullText       String? // full structured report
+
+  // Status
+  status   String    @default("draft") // draft | pending_review | approved | rejected | signed
+  signedAt DateTime?
+  signedBy String?
+
+  // VLM generation metadata (Feature 3)
+  vlmGenerated  Boolean @default(false)
+  vlmVersion    String?
+  vlmPrompt     String?
+  editedByHuman Boolean @default(false)
+
+  // FHIR output
+  fhirDiagnosticReportId String?
+  hl7OruMessageId        String?
+
+  // Blockchain audit (Feature 19)
+  blockchainHash String?
+  blockchainTxId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  secondOpinions SecondOpinion[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([authorId])
+}
+
+// ── REPORT TEMPLATES (Feature 11) ─────────────────────────────
+model ReportTemplate {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  name      String
+  specialty String // radiology | neuro | cardio | msk | etc
+  modality  String?
+  bodyPart  String?
+  structure Json // template sections with placeholders
+  version   Int      @default(1)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports Report[]
+
+  @@index([tenantId, specialty])
+}
+
+// ── IMAGE ANNOTATIONS (Feature 12) ────────────────────────────
+model Annotation {
+  id        String   @id @default(uuid())
+  scanId    String
+  scan      Scan     @relation(fields: [scanId], references: [id])
+  userId    String
+  type      String // rectangle | ellipse | polygon | freehand | arrow
+  data      Json // coordinates, measurements
+  label     String?
+  color     String   @default("#FFD700")
+  createdAt DateTime @default(now())
+
+  @@index([scanId])
+}
+
+// ── SECOND OPINIONS (Feature 13) ──────────────────────────────
+model SecondOpinion {
+  id           String   @id @default(uuid())
+  scanId       String
+  scan         Scan     @relation(fields: [scanId], references: [id])
+  reportId     String?
+  report       Report?  @relation(fields: [reportId], references: [id])
+  requesterId  String
+  requester    User     @relation("Requester", fields: [requesterId], references: [id])
+  reviewerId   String?
+  reviewer     User?    @relation("Reviewer", fields: [reviewerId], references: [id])
+  status       String   @default("pending") // pending | assigned | completed | disagreement
+  notes        String?
+  reviewNotes  String?
+  agreedWithAI Boolean?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([scanId])
+  @@index([status])
+}
+
+// ── NOTIFICATIONS (Feature 6) ─────────────────────────────────
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String // critical_finding | report_ready | second_opinion | payment | system
+  title     String
+  body      String
+  data      Json?
+  read      Boolean  @default(false)
+  fcmSent   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+// ── PAYMENTS (Feature 5) ──────────────────────────────────────
+model Payment {
+  id         String   @id @default(uuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  type       String // subscription | per_scan | one_time
+  provider   String // stripe | paystack | flutterwave | mpesa
+  externalId String? // Stripe PaymentIntent ID, Paystack reference, etc
+  amount     Float
+  currency   String
+  status     String // pending | succeeded | failed | refunded
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([provider])
+}
+
+// ── AI MODEL REGISTRY (Feature 7, 18) ─────────────────────────
+model AIModel {
+  id         String   @id @default(uuid())
+  name       String
+  version    String
+  type       String // triage | uncertainty | metacognition | vlm
+  status     String   @default("production") // production | ab_test | training | deprecated
+  accuracy   Float?
+  trafficPct Float    @default(100) // % of traffic for A/B testing
+  conditions String[] // conditions it detects
+  modelPath  String? // path in Azure ML / S3
+  isGlobal   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenantModels TenantAIModel[]
+}
+
+model TenantAIModel {
+  id         String   @id @default(uuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  modelId    String
+  model      AIModel  @relation(fields: [modelId], references: [id])
+  trafficPct Float    @default(0)
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+
+  @@unique([tenantId, modelId])
+}
+
+// ── AUDIT LOG — HIPAA/GDPR Compliant (Feature 19) ────────────
+model AuditLog {
+  id           String   @id @default(uuid())
+  tenantId     String?
+  tenant       Tenant?  @relation(fields: [tenantId], references: [id])
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id])
+  action       String // LOGIN | LOGOUT | SCAN_UPLOAD | REPORT_SIGNED | etc
+  entity       String? // Scan | AIResult | Report | Notification | User
+  entityId     String?
+  previousHash String? // SHA-256 of previous audit record (Merkle chain)
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json?
+  // Blockchain (Feature 19)
+  sha256Hash   String?
+  blockIndex   Int?
+  merkleRoot   String?
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([action])
+  @@index([entityId])
+  @@index([createdAt])
+}
+
+// ── MESSAGES (Feature 8 — Patient Portal) ────────────────────
+model Message {
+  id         String   @id @default(uuid())
+  patientId  String
+  patient    Patient  @relation(fields: [patientId], references: [id])
+  fromUserId String?
+  fromRole   String // doctor | radiologist | system | patient
+  body       String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([patientId])
+}
+
+// ── USER NOTIFICATION & WHATSAPP FIELDS (migration adds to User) ─
+// Add these fields to the User model above via migration:
+// whatsappNumber    String?
+// whatsappVerified  Boolean  @default(false)
+// fcmTokens         String[] @default([])
+// notifPrefs        Json?    // { push:bool, email:bool, whatsapp:bool, sms:bool }
+
+// ── APPOINTMENTS ──────────────────────────────────────────────
+model Appointment {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  doctorId String
+  // doctor     User      (resolved via userId lookup — no Prisma relation to avoid multi-relation)
+
+  scanId   String? // optional — pre-scan appointment
+  reportId String? // optional — post-report follow-up
+
+  type     String // consultation | follow_up | imaging | telemedicine | second_opinion
+  status   String @default("scheduled") // scheduled | confirmed | cancelled | completed | no_show | rescheduled
+  priority String @default("routine") // routine | urgent | stat
+
+  scheduledDate DateTime
+  durationMins  Int      @default(30)
+  location      String? // room / video URL
+  notes         String?
+  cancelReason  String?
+  cancelledById String?
+
+  // Reminders
+  reminderSent24h Boolean @default(false)
+  reminderSent1h  Boolean @default(false)
+
+  // Telehealth
+  videoUrl    String?
+  videoRoomId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([scheduledDate])
+  @@index([status])
+}
+
+// ── NOTIFICATION PREFERENCES ──────────────────────────────────
+model NotificationPreference {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  // Channels
+  pushEnabled     Boolean  @default(true)
+  emailEnabled    Boolean  @default(true)
+  whatsappEnabled Boolean  @default(false)
+  smsEnabled      Boolean  @default(false)
+  // Per-event overrides stored as JSON: { "critical_finding": { push:true, email:true } }
+  eventOverrides  Json?
+  // Quiet hours (UTC)
+  quietStart      String? // "22:00"
+  quietEnd        String? // "07:00"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ── WHATSAPP REGISTRATIONS ─────────────────────────────────────
+model WhatsAppRegistration {
+  id           String    @id @default(uuid())
+  userId       String    @unique
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id])
+  number       String // E.164 e.g. +447911123456
+  verified     Boolean   @default(false)
+  verifyCode   String?
+  verifyExpiry DateTime?
+  optedIn      Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([tenantId])
+  @@index([number])
+}
+
+// ── NOTIFICATION LOG (delivery tracking) ──────────────────────
+model NotificationLog {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  type      String
+  channel   String // push | email | whatsapp | socket
+  status    String // sent | failed | bounced | delivered
+  metadata  Json? // FCM message ID, email message ID, WhatsApp SID
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([tenantId, createdAt])
+  @@index([channel, status])
+}
+
+// ── CLINICAL VALIDATION (Feature 13) ──────────────────────────
+model ClinicalValidation {
+  id           String   @id @default(uuid())
+  scanId       String   @unique
+  scan         Scan     @relation(fields: [scanId], references: [id])
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  status       String   @default("pending") // pending | agreed | disagreed | uncertain
+  aiConfidence Float
+  humanNotes   String?
+  findingsMatch Boolean?
+  createdAt    DateTime @default(now())
+
+  @@index([scanId])
+  @@index([status])
+}
+
+// ── DICOM NODES & CONNECTIVITY (Feature 4) ────────────────────
+model DicomNode {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  name      String
+  aeTitle   String
+  ipAddress String
+  port      Int      @default(11112)
+  status    String   @default("online")
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+// ── REGULATORY AUDIT & COMPLIANCE (Feature 19) ────────────────
+model ComplianceRecord {
+  id           String   @id @default(uuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  standard     String   // GDPR | HIPAA | NHS_DSPT | CE_MARK | FDA_510K
+  status       String   // compliant | gap_detected | in_remediation
+  evidenceUrls String[]
+  lastAuditAt  DateTime @default(now())
+  nextAuditAt  DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId, standard])
+}

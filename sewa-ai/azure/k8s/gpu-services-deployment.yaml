@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-triage
+  namespace: sewa-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-triage
+  template:
+    metadata:
+      labels:
+        app: sewa-triage
+    spec:
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Equal
+        value: true
+        effect: NoSchedule
+      containers:
+      - name: triage
+        image: sewaaiproductionacr.azurecr.io/sewa-triage:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: 6Gi
+          requests:
+            memory: 2Gi
+            cpu: 1000m
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-triage
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-triage
+  ports:
+  - port: 8000
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-vlm-report
+  namespace: sewa-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-vlm-report
+  template:
+    metadata:
+      labels:
+        app: sewa-vlm-report
+    spec:
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Equal
+        value: true
+        effect: NoSchedule
+      containers:
+      - name: vlm-report
+        image: sewaaiproductionacr.azurecr.io/sewa-vlm-report:latest
+        ports:
+        - containerPort: 8001
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: 16Gi
+          requests:
+            memory: 8Gi
+            cpu: 1000m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-vlm-report
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-vlm-report
+  ports:
+  - port: 8001
+    targetPort: 8001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-uncertainty
+  namespace: sewa-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-uncertainty
+  template:
+    metadata:
+      labels:
+        app: sewa-uncertainty
+    spec:
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Equal
+        value: true
+        effect: NoSchedule
+      containers:
+      - name: uncertainty
+        image: sewaaiproductionacr.azurecr.io/sewa-uncertainty:latest
+        ports:
+        - containerPort: 8002
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: 6Gi
+          requests:
+            memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-uncertainty
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-uncertainty
+  ports:
+  - port: 8002
+    targetPort: 8002
+

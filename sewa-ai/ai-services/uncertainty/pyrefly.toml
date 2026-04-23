@@ -1,0 +1,18 @@
+# SEWA AI — ai-services/uncertainty/pyrefly.toml
+# Pyrefly config for the UNCERTAINTY service.
+
+[pyrefly]
+python_interpreter = "c:/sewa_extract/.venv/Scripts/python.exe"
+ignore_missing_imports = true
+
+search_path = [
+  "c:/sewa_extract/sewa-ai/ai-services/uncertainty",
+  "c:/sewa_extract/sewa-ai/ai-services/triage",
+  "c:/sewa_extract/sewa-ai/ai-services/shared",
+]
+
+project_excludes = ["**/__pycache__/**", "**/*.pyc"]
+
+[pyrefly.errors]
+missing-import = "hide"
+import-cycle   = "hide"

@@ -1,0 +1,8 @@
+{
+  "name": "sewa-ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "vite-plugin-pwa": "^0.19.8"
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "name": "SEWA AI — Clinical Intelligence Platform",
+  "short_name": "SEWA AI",
+  "description": "AI-powered medical imaging triage and reporting for hospitals worldwide",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05100D",
+  "theme_color": "#408D7B",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": [
+    "medical",
+    "health",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/logo-master.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/worklist.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Clinical Worklist"
+    },
+    {
+      "src": "/screenshots/ai-result.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "AI Triage Result"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Worklist",
+      "url": "/worklist",
+      "description": "Open clinical worklist"
+    },
+    {
+      "name": "Critical Alerts",
+      "url": "/alerts",
+      "description": "View critical findings"
+    },
+    {
+      "name": "Upload Scan",
+      "url": "/upload",
+      "description": "Upload new DICOM scan"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/sewa-ai/id000000000"
+    },
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=health.sewaxai.app"
+    }
+  ]
+}

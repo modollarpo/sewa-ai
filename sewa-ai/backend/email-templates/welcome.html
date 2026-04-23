@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to SEWA AI</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f7f6; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .header { background: #08160F; padding: 30px; text-align: center; }
+        .header img { height: 40px; }
+        .content { padding: 40px; }
+        .footer { background: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; }
+        .button { display: inline-block; padding: 12px 30px; background-color: #408D7B; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
+        h1 { color: #08160F; font-size: 24px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="color: #408D7B; margin: 0; font-family: sans-serif; letter-spacing: 2px;">SEWA AI</h2>
+        </div>
+        <div class="content">
+            <h1>Welcome, {{firstName}}!</h1>
+            <p>Your account for <strong>{{tenantName}}</strong> has been successfully created on the SEWA AI Clinical Intelligence Platform.</p>
+            <p>SEWA AI helps you prioritize critical findings and streamline your radiology workflow with state-of-the-art clinical intelligence.</p>
+            <p>To get started, please log in to the portal using the link below:</p>
+            <a href="{{loginUrl}}" class="button">Access Platform</a>
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">If you have any questions, please contact your hospital administrator or our support team.</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 SEWA AI. All rights reserved.<br>NHS DSPT & GDPR Compliant</p>
+        </div>
+    </div>
+</body>
+</html>

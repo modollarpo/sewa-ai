@@ -1,0 +1,165 @@
+{
+  "generated_at": "2026-03-27T17:10:39Z",
+  "cases": [
+    {
+      "id": "TEST-ICH-001",
+      "description": "CT Head \u2014 Intracranial Haemorrhage (High Confidence)",
+      "modality": "CT",
+      "body_part": "HEAD",
+      "expected": {
+        "finding": "ICH",
+        "urgency": "CRITICAL",
+        "confidence_min": 0.85,
+        "metacognition": "PASS",
+        "uncertainty_min": null
+      },
+      "test_flags": {
+        "test_stroke_code": false,
+        "test_metacognition_layer1": false,
+        "test_uncertainty_gate": false
+      },
+      "json_path": "TEST-ICH-001.json",
+      "dicom_path": null
+    },
+    {
+      "id": "TEST-PE-001",
+      "description": "CT Chest \u2014 Pulmonary Embolism (Saddle PE pattern)",
+      "modality": "CT",
+      "body_part": "CHEST",
+      "expected": {
+        "finding": "Pulmonary Embolism",
+        "urgency": "CRITICAL",
+        "confidence_min": 0.8,
+        "metacognition": "PASS",
+        "uncertainty_min": null
+      },
+      "test_flags": {
+        "test_stroke_code": false,
+        "test_metacognition_layer1": false,
+        "test_uncertainty_gate": false
+      },
+      "json_path": "TEST-PE-001.json",
+      "dicom_path": null
+    },
+    {
+      "id": "TEST-TB-001",
+      "description": "CXR \u2014 Tuberculosis (Active TB Pattern)",
+      "modality": "CR",
+      "body_part": "CHEST",
+      "expected": {
+        "finding": "TB",
+        "urgency": "URGENT",
+        "confidence_min": 0.75,
+        "metacognition": "PASS",
+        "uncertainty_min": null
+      },
+      "test_flags": {
+        "test_stroke_code": false,
+        "test_metacognition_layer1": false,
+        "test_uncertainty_gate": false
+      },
+      "json_path": "TEST-TB-001.json",
+      "dicom_path": null
+    },
+    {
+      "id": "TEST-PNEU-001",
+      "description": "CXR \u2014 Pneumothorax (Tension)",
+      "modality": "CR",
+      "body_part": "CHEST",
+      "expected": {
+        "finding": "Pneumothorax",
+        "urgency": "CRITICAL",
+        "confidence_min": 0.88,
+        "metacognition": "PASS",
+        "uncertainty_min": null
+      },
+      "test_flags": {
+        "test_stroke_code": false,
+        "test_metacognition_layer1": false,
+        "test_uncertainty_gate": false
+      },
+      "json_path": "TEST-PNEU-001.json",
+      "dicom_path": null
+    },
+    {
+      "id": "TEST-NORMAL-001",
+      "description": "CT Head \u2014 Normal Study",
+      "modality": "CT",
+      "body_part": "HEAD",
+      "expected": {
+        "finding": "Normal",
+        "urgency": "NORMAL",
+        "confidence_min": 0.7,
+        "metacognition": "PASS",
+        "uncertainty_min": null
+      },
+      "test_flags": {
+        "test_stroke_code": false,
+        "test_metacognition_layer1": false,
+        "test_uncertainty_gate": false
+      },
+      "json_path": "TEST-NORMAL-001.json",
+      "dicom_path": null
+    },
+    {
+      "id": "TEST-UNCERTAIN-001",
+      "description": "CT Head \u2014 Low Confidence Case (Tests Uncertainty Engine)",
+      "modality": "CT",
+      "body_part": "HEAD",
+      "expected": {
+        "finding": "ICH",
+        "urgency": "URGENT",
+        "confidence_min": 0.4,
+        "metacognition": "PASS",
+        "uncertainty_min": 0.25
+      },
+      "test_flags": {
+        "test_stroke_code": false,
+        "test_metacognition_layer1": false,
+        "test_uncertainty_gate": true
+      },
+      "json_path": "TEST-UNCERTAIN-001.json",
+      "dicom_path": null
+    },
+    {
+      "id": "TEST-META-001",
+      "description": "Metacognition Test \u2014 Impossible Finding (TB on CT Head)",
+      "modality": "CT",
+      "body_part": "HEAD",
+      "expected": {
+        "finding": "TB",
+        "urgency": "CRITICAL",
+        "confidence_min": 0.5,
+        "metacognition": "REJECT",
+        "uncertainty_min": null
+      },
+      "test_flags": {
+        "test_stroke_code": false,
+        "test_metacognition_layer1": true,
+        "test_uncertainty_gate": false
+      },
+      "json_path": "TEST-META-001.json",
+      "dicom_path": null
+    },
+    {
+      "id": "TEST-STROKE-001",
+      "description": "MRI Brain DWI \u2014 Acute Ischaemic Stroke (Tests Stroke Code)",
+      "modality": "MR",
+      "body_part": "BRAIN",
+      "expected": {
+        "finding": "Ischemic Stroke",
+        "urgency": "CRITICAL",
+        "confidence_min": 0.82,
+        "metacognition": "PASS",
+        "uncertainty_min": null
+      },
+      "test_flags": {
+        "test_stroke_code": true,
+        "test_metacognition_layer1": false,
+        "test_uncertainty_gate": false
+      },
+      "json_path": "TEST-STROKE-001.json",
+      "dicom_path": null
+    }
+  ]
+}

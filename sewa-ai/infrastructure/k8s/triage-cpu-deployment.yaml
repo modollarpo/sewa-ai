@@ -1,0 +1,205 @@
+# SEWA AI — infrastructure/k8s/triage-cpu-deployment.yaml
+# AKS deployment for CPU-only triage engine
+#
+# Node selector targets CPU-optimised Azure VMs:
+#   Standard_F8s_v2  — 8 vCPU / 16GB  — target for triage + uncertainty
+#   Standard_F16s_v2 — 16 vCPU / 32GB — target for co-located multi-service
+#
+# Scaling: HPA 2-8 replicas based on CPU utilisation (target 70%)
+# Each replica: 6 vCPU / 10Gi RAM
+# With F16s_v2 node: 2 replicas per node → 16 replicas = 8 F16s nodes
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-triage-cpu
+  namespace: sewa-ai
+  labels:
+    app: sewa-triage
+    version: "2.4.1"
+    runtime: cpu-onnx-int8
+    compliance: dcb0129
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-triage
+  template:
+    metadata:
+      labels:
+        app: sewa-triage
+        version: "2.4.1"
+        runtime: cpu-onnx-int8
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Schedule on compute-optimised CPU nodes
+      nodeSelector:
+        kubernetes.io/os: linux
+        node.kubernetes.io/instance-type: Standard_F8s_v2  # change to F16s_v2 for larger
+
+      # Tolerate CPU-only node pool taints
+      tolerations:
+        - key: "cpu-only"
+          operator: "Exists"
+          effect: "NoSchedule"
+
+      # Faster image pull on large model + deps
+      imagePullSecrets:
+        - name: acr-secret
+
+      containers:
+        - name: triage
+          image: ${ACR_LOGIN_SERVER}/sewa-triage:${GITHUB_SHA}
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8000
+              name: http
+
+          # CPU resources — 6 of 8 vCPUs reserved for ORT thread pool
+          # Leave 2 vCPUs for OS, kubelet, other daemons
+          resources:
+            requests:
+              cpu: "5000m"       # 5 vCPU guaranteed
+              memory: "6Gi"
+            limits:
+              cpu: "7000m"       # 7 vCPU max (no GPU limits)
+              memory: "10Gi"
+
+          env:
+            - name: MODEL_CACHE
+              value: /models
+            - name: MODEL_VERSION
+              value: v2.4.1
+            # Tell ORT exactly how many vCPUs to use
+            - name: VCPU_COUNT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+                  divisor: "1"
+            - name: MAX_BATCH_SIZE
+              value: "4"
+            - name: MAX_BATCH_WAIT_MS
+              value: "50"
+            - name: MC_DROPOUT_PASSES
+              value: "10"
+            - name: OMP_NUM_THREADS
+              value: "1"          # prevent NumPy thread interference with ORT
+            - name: OPENBLAS_NUM_THREADS
+              value: "1"
+            - name: MKL_NUM_THREADS
+              value: "1"
+            - name: ALLOWED_ORIGINS
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-cors-config
+                  key: allowed_origins
+            - name: AZURE_STORAGE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-storage-secret
+                  key: url
+
+          # Read-only ONNX model volume (Azure Blob → PVC)
+          volumeMounts:
+            - name: models-pvc
+              mountPath: /models
+              readOnly: true
+
+          # Startup probe — allow 90s for model load + warmup
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 9   # 9 × 10s = 90s total startup window
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 3
+
+      volumes:
+        - name: models-pvc
+          persistentVolumeClaim:
+            claimName: sewa-models-pvc
+            readOnly: true
+
+---
+# HPA — scale on CPU utilisation
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sewa-triage-hpa
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sewa-triage-cpu
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70   # scale up when >70% CPU across all pods
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60      # add max 2 pods/min
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5min cooldown before scale-down
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-triage
+  namespace: sewa-ai
+  labels:
+    app: sewa-triage
+spec:
+  selector:
+    app: sewa-triage
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
+
+---
+# PVC for ONNX model files (ReadOnlyMany — multiple pods share same models)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sewa-models-pvc
+  namespace: sewa-ai
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 5Gi   # INT8 models ~150MB each × 6 services = <2GB; 5Gi has headroom
+  storageClassName: azurefile-premium   # Azure Files Premium: low-latency NFS

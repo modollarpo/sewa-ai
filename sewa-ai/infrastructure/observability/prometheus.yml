@@ -1,0 +1,62 @@
+# SEWA AI — infrastructure/observability/prometheus.yml
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    platform: sewa-ai
+    env:       production
+
+scrape_configs:
+  # Backend Node.js API
+  - job_name: sewa-backend
+    static_configs:
+      - targets: ['backend:3000']
+    metrics_path: /metrics
+
+  # AI Services
+  - job_name: ai-triage
+    static_configs:
+      - targets: ['ai-triage:8000']
+    metrics_path: /metrics
+
+  - job_name: ai-uncertainty
+    static_configs:
+      - targets: ['ai-uncertainty:8002']
+    metrics_path: /metrics
+
+  - job_name: ai-vlm
+    static_configs:
+      - targets: ['ai-vlm:8001']
+    metrics_path: /metrics
+
+  - job_name: ai-metacognition
+    static_configs:
+      - targets: ['ai-metacognition:8003']
+    metrics_path: /metrics
+
+  - job_name: ai-federated
+    static_configs:
+      - targets: ['ai-federated:8004']
+    metrics_path: /metrics
+
+  - job_name: ai-continuous-learning
+    static_configs:
+      - targets: ['ai-continuous:8005']
+    metrics_path: /metrics
+
+  # Infrastructure
+  - job_name: postgres
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: redis
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # Kubernetes nodes (production AKS)
+  - job_name: kubernetes-nodes
+    kubernetes_sd_configs:
+      - role: node
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)

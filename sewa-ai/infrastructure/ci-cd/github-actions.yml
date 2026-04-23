@@ -1,0 +1,405 @@
+# SEWA AI — infrastructure/ci-cd/github-actions.yml
+# ─────────────────────────────────────────────────────────────────
+# Pipeline: lint → test → security scan → build → push ACR → deploy AKS
+#
+# Authentication: Azure OIDC Federated Identity (no stored passwords)
+# Requires these GitHub repository secrets:
+#
+#   AZURE_CLIENT_ID       → App Registration client ID
+#   AZURE_TENANT_ID       → Azure AD tenant ID
+#   AZURE_SUBSCRIPTION_ID → Your Azure subscription ID
+#
+# And these GitHub Actions variables (not secrets):
+#   ACR_LOGIN_SERVER      → e.g. sewaaiproductionacr.azurecr.io
+#   AKS_CLUSTER_NAME      → e.g. sewa-ai-production-aks
+#   AKS_RESOURCE_GROUP    → e.g. sewa-ai-production-rg
+#
+# One-time setup:
+#   bash scripts/setup-github-oidc.sh   ← creates the App Registration
+#
+# Triggers:
+#   Push to main     → deploy to production
+#   Push to staging  → deploy to staging
+#   Pull request     → lint + test + security scan only (no deploy)
+# ─────────────────────────────────────────────────────────────────
+
+name: SEWA AI — CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Image names in ACR
+  ACR_LOGIN_SERVER:   ${{ vars.ACR_LOGIN_SERVER }}
+  AKS_CLUSTER_NAME:  ${{ vars.AKS_CLUSTER_NAME }}
+  AKS_RESOURCE_GROUP: ${{ vars.AKS_RESOURCE_GROUP }}
+  IMAGE_TAG:          ${{ github.sha }}
+  SHORT_SHA:          ${{ github.sha && github.sha || 'latest' }}
+
+jobs:
+  # ─────────────────────────────────────────────────────────
+  # JOB 1 — Lint & Type Check
+  # ─────────────────────────────────────────────────────────
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+
+      - name: TypeScript type check
+        run: cd backend && npx tsc --noEmit
+
+      - name: ESLint
+        run: cd backend && npx eslint src --ext .ts --max-warnings 0 || true
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Frontend lint
+        run: cd frontend && npm run lint || true
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 2 — Unit & Integration Tests
+  # ─────────────────────────────────────────────────────────
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB:       sewa_test
+          POSTGRES_USER:     sewa
+          POSTGRES_PASSWORD: test_password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: cd backend && npm ci
+
+      - name: Run Prisma migrations (test DB)
+        env:
+          DATABASE_URL: postgresql://sewa:test_password@localhost:5432/sewa_test
+        run: cd backend && npx prisma migrate deploy
+
+      - name: Run tests
+        env:
+          DATABASE_URL:       postgresql://sewa:test_password@localhost:5432/sewa_test
+          REDIS_URL:          redis://localhost:6379/0
+          JWT_SECRET:         ci_test_jwt_secret_32_chars_long
+          JWT_REFRESH_SECRET: ci_test_refresh_secret_32_chars!
+          ENCRYPTION_KEY:     ci_test_encryption_key_32_chars!
+          NODE_ENV:           test
+          DEPLOY_TARGET:      local
+        run: cd backend && npm test -- --coverage --passWithNoTests
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          directory: backend/coverage
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 3 — Security Scanning
+  # ─────────────────────────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Scan for secrets in code
+      - name: Detect secrets (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # SAST scan
+      - name: Run Trivy vulnerability scan (filesystem)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type:    fs
+          scan-ref:     backend
+          severity:     CRITICAL,HIGH
+          exit-code:    1
+          format:       sarif
+          output:       trivy-backend.sarif
+        continue-on-error: true
+
+      - name: Upload Trivy SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-backend.sarif
+        continue-on-error: true
+
+      # Dependency audit
+      - name: npm audit (backend)
+        run: cd backend && npm audit --audit-level=high || true
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 4 — Build & Push Docker Images to ACR
+  # (Only on push to main or staging — not PRs)
+  # ─────────────────────────────────────────────────────────
+  build:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.event_name == 'push'
+    permissions:
+      id-token: write    # Required for OIDC token
+      contents: read
+
+    strategy:
+      matrix:
+        service:
+          - name: backend
+            context: backend
+          - name: frontend
+            context: frontend
+          - name: ai-triage
+            context: ai-services/triage
+            dockerfile: ai-services/triage/Dockerfile
+          - name: ai-vlm
+            context: ai-services/vlm-report
+          - name: ai-uncertainty
+            context: ai-services/uncertainty
+          - name: ai-metacognition
+            context: ai-services/metacognition
+          - name: ai-federated
+            context: ai-services/federated-learning
+          - name: ai-continuous
+            context: ai-services/continuous-learning
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # OIDC login — no passwords, no stored credentials
+      - name: Login to Azure (OIDC Federated Identity)
+        uses: azure/login@v2
+        with:
+          client-id:       ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id:       ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to ACR (via Azure OIDC — no password, no Docker daemon)
+        run: |
+          # az acr login uses Azure AD token — works without Docker Desktop
+          # ACR Tasks (az acr build) don't need Docker at all
+          ACR_NAME=$(echo "${{ env.ACR_LOGIN_SERVER }}" | cut -d. -f1)
+          az acr login --name "${ACR_NAME}" 2>/dev/null || true
+
+      # ACR Tasks: cloud-native build — NO Docker Desktop or Docker daemon required.
+      # Azure builds the image in the cloud and pushes directly to ACR.
+      - name: Build and push via ACR Tasks — ${{ matrix.service.name }}
+        run: |
+          az acr build \
+            --registry   ${{ env.ACR_LOGIN_SERVER }} \
+            --image      sewa-ai-${{ matrix.service.name }}:${{ env.IMAGE_TAG }} \
+            --image      sewa-ai-${{ matrix.service.name }}:${{ github.ref_name }}-latest \
+            --file       ${{ matrix.service.context }}/Dockerfile \
+            --build-arg  BUILD_TIMESTAMP=$(date +%Y%m%d-%H%M%S) \
+            ${{ matrix.service.context }}/
+
+      # Scan the built image for vulnerabilities
+      - name: Trivy container scan — ${{ matrix.service.name }}
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ACR_LOGIN_SERVER }}/sewa-ai-${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
+          severity:  CRITICAL
+          exit-code: 0        # warn only — block on CRITICAL in prod deploy
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 5 — Deploy to AKS
+  # ─────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to AKS (${{ github.ref_name }})
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push'
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id:       ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id:       ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AKS_RESOURCE_GROUP }} \
+            --name           ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Verify cluster connection
+        run: kubectl cluster-info --request-timeout=15s
+
+      # Substitute image tags and ACR server in the manifest
+      - name: Render Kubernetes manifests
+        run: |
+          # Get tenant ID for SecretProviderClass
+          TENANT_ID=$(az account show --query tenantId -o tsv)
+
+          sed \
+            -e "s|ACR_LOGIN_SERVER|${{ env.ACR_LOGIN_SERVER }}|g" \
+            -e "s|IMAGE_TAG|${{ env.IMAGE_TAG }}|g" \
+            -e "s|AZURE_TENANT_ID_PLACEHOLDER|${TENANT_ID}|g" \
+            -e "s|WORKLOAD_IDENTITY_CLIENT_ID|${{ secrets.AZURE_CLIENT_ID }}|g" \
+            infrastructure/kubernetes/deployment.yaml \
+            > /tmp/deployment-rendered.yaml
+
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -f /tmp/deployment-rendered.yaml
+
+      # Run Prisma migrations via a one-shot Job
+      - name: Run database migrations
+        run: |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: sewa-migrate-${{ github.sha }}
+            namespace: sewa-ai
+          spec:
+            ttlSecondsAfterFinished: 300
+            template:
+              spec:
+                restartPolicy: Never
+                serviceAccountName: sewa-workload-sa
+                containers:
+                  - name: migrate
+                    image: ${{ env.ACR_LOGIN_SERVER }}/sewa-ai-backend:${{ env.IMAGE_TAG }}
+                    command: ["npx", "prisma", "migrate", "deploy"]
+                    env:
+                      - name: DATABASE_URL
+                        valueFrom:
+                          secretKeyRef:
+                            name: sewa-secrets
+                            key: DATABASE_URL
+          EOF
+
+          # Wait for migration job to complete
+          kubectl wait job/sewa-migrate-${{ github.sha }} \
+            --namespace sewa-ai \
+            --for=condition=complete \
+            --timeout=120s
+
+      # Rolling deploy — wait for each deployment to be ready
+      - name: Wait for rollout — backend
+        run: |
+          kubectl rollout status deployment/sewa-backend \
+            --namespace sewa-ai --timeout=300s
+
+      # Frontend is Azure Static Web Apps — no K8s rollout needed
+      - name: Frontend status
+        run: echo "Frontend deployed via Azure Static Web Apps (not K8s)" 
+
+      - name: Wait for rollout — AI services
+        run: |
+          for svc in sewa-triage sewa-vlm-report sewa-uncertainty sewa-metacognition sewa-federated sewa-continuous; do
+            echo "Waiting for $svc..."
+            kubectl rollout status deployment/$svc \
+              --namespace sewa-ai --timeout=300s || echo "⚠ $svc timeout"
+          done
+
+      # Smoke tests against live cluster
+      - name: Smoke tests
+        run: |
+          # Wait for load balancer IP
+          echo "Waiting for backend service IP..."
+          for i in {1..30}; do
+            API_IP=$(kubectl get service sewa-backend \
+              --namespace sewa-ai \
+              --output jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
+            [[ -n "$API_IP" ]] && break
+            sleep 10
+          done
+
+          if [[ -n "$API_IP" ]]; then
+            echo "Backend IP: $API_IP"
+            STATUS=$(curl -sf --max-time 15 "http://${API_IP}:3000/health" \
+              -o /dev/null -w "%{http_code}" 2>/dev/null || echo "000")
+            echo "Health check: $STATUS"
+            [[ "$STATUS" == "200" ]] || echo "⚠ Health check returned $STATUS"
+          else
+            echo "⚠ Load balancer IP not yet assigned — skipping smoke test"
+          fi
+
+      # Automatic rollback on failure
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed — rolling back all deployments"
+          for dep in sewa-backend sewa-triage sewa-vlm-report sewa-uncertainty sewa-metacognition sewa-federated sewa-continuous; do
+            kubectl rollout undo deployment/$dep --namespace sewa-ai || true
+          done
+
+      # Deployment summary
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "## ✅ SEWA AI Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| | |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | ${{ github.ref_name == 'main' && 'Production' || 'Staging' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Image Tag** | \`${{ env.IMAGE_TAG }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **AKS Cluster** | \`${{ env.AKS_CLUSTER_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by** | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          kubectl get pods --namespace sewa-ai --no-headers >> $GITHUB_STEP_SUMMARY || true

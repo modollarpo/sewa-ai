@@ -1,0 +1,25 @@
+# SEWA AI — ai-services/pyrefly.toml
+# Pyrefly static analyser configuration for AI microservices.
+# Packages (onnxruntime, torch, fastapi, etc.) are container-only deps —
+# they are NOT installed in the local dev venv, so import warnings are expected.
+#
+# Docs: https://github.com/facebook/pyrefly
+
+[pyrefly]
+
+# Use the project-level venv interpreter
+python_interpreter = "c:/sewa_extract/.venv/Scripts/python.exe"
+
+# Suppress container-only dependency warnings in all AI service files
+ignore_missing_imports = true
+
+# Do not type-check vendored / generated code
+project_excludes = [
+  "**/__pycache__/**",
+  "**/*.pyc",
+]
+
+[pyrefly.errors]
+# Suppress "Cannot find module" across all services — packages installed inside containers
+missing-import = "hide"
+import-cycle   = "hide"
