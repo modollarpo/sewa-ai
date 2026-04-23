@@ -342,11 +342,11 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
         gradcam_url = await _upload_gradcam(req.scan_id, gradcam_b64)
 
         is_uncertain = mc["epistemic"] > 0.25 or mc["aleatoric"] > 0.5
-        explanation  = (
-            f"Epistemic uncertainty: {mc['epistemic']:.3f} "
-            f"({'HIGH \u2014 model unsure' if mc['epistemic'] > 0.25 else 'LOW \u2014 model confident'}).\n"
-            f"Aleatoric uncertainty: {mc['aleatoric']:.3f} "
-            f"({'HIGH \u2014 image quality issue' if mc['aleatoric'] > 0.5 else 'ACCEPTABLE'}).\n"
+        _ep_label  = "HIGH \u2014 model unsure"    if mc["epistemic"] > 0.25 else "LOW \u2014 model confident"
+        _al_label  = "HIGH \u2014 image quality issue" if mc["aleatoric"] > 0.5  else "ACCEPTABLE"
+        explanation = (
+            f"Epistemic uncertainty: {mc['epistemic']:.3f} ({_ep_label}).\n"
+            f"Aleatoric uncertainty: {mc['aleatoric']:.3f} ({_al_label}).\n"
             f"MC-Dropout ({MC_PASSES} passes, ONNX noise-injection): "
             f"\u03bc={mc['mc_mean']:.3f}, \u03c3={mc['mc_std']:.3f}.\n"
             f"Top attribution: '{shap_values[0].f}' ({shap_values[0].v:.1%})."
