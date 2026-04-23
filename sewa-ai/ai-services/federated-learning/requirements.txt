@@ -1,9 +1,11 @@
 # SEWA AI — ai-services/federated-learning/requirements.txt
+# CPU-only production build
+# flwr (no [simulation] extra — avoids ray/tensorflow pull)
+# torch CPU wheel from PyTorch CDN (via --extra-index-url in Dockerfile)
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-flwr[simulation]==1.7.0
-torch==2.2.0
-torchvision==0.17.0
+flwr==1.7.0
+torch==2.2.0+cpu
 opacus==1.4.0
 numpy==1.26.3
 pydantic==2.5.3

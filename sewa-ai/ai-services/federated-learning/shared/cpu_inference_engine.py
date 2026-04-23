@@ -19,7 +19,7 @@ import asyncio
 import logging
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
