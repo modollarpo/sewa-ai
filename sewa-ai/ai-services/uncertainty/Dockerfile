@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=builder /install /usr/local
 COPY . .
-COPY ../shared ./shared
+
 
 RUN mkdir -p /models && chmod 777 /models
 RUN adduser --disabled-password --gecos '' aiuser \

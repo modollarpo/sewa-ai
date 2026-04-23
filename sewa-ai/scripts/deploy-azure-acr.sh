@@ -262,6 +262,11 @@ else
     IMAGE_NAME="${APP}-${svc}"
     info "Submitting ACR Task: ${IMAGE_NAME}:${IMAGE_TAG}"
 
+    # Fix build context issue by copying shared module inside service dir
+    if [[ -d "ai-services/shared" && ("$svc" == "triage" || "$svc" == "uncertainty" || "$svc" == "continuous-learning" || "$svc" == "federated-learning") ]]; then
+      cp -r "ai-services/shared" "${SVC_DIR}/shared"
+    fi
+
     RUN_ID=$(az acr build \
       --registry  "${ACR_NAME}" \
       --image     "${IMAGE_NAME}:${IMAGE_TAG}" \

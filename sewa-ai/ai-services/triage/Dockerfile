@@ -51,7 +51,7 @@ COPY --from=builder /install /usr/local
 
 # Copy source
 COPY . .
-COPY ../shared ./shared
+
 
 # Model cache directory (populated via AKS PVC in production)
 RUN mkdir -p /models && chmod 777 /models
