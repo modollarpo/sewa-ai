@@ -116,10 +116,8 @@ export const whatsappService = {
         body: {
           channelRegistrationId,
           to: [opts.to],
-          content: {
-            kind: 'text',
-            text: content,
-          },
+          kind: 'text',
+          content: content,
         },
       });
       
@@ -152,10 +150,8 @@ export const whatsappService = {
           body: {
             channelRegistrationId,
             to: [opts.number],
-            content: {
-              kind: 'text',
-              text: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
-            },
+            kind: 'text',
+            content: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
           },
         });
         logger.info(`[WhatsApp] Verification sent to ${opts.number}`);
@@ -197,10 +193,8 @@ export const whatsappService = {
           body: {
             channelRegistrationId,
             to: [number],
-            content: {
-              kind: 'text',
-              text: message,
-            },
+            kind: 'text',
+            content: message,
           },
         });
         sent++;
