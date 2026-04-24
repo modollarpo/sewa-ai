@@ -78,7 +78,8 @@ app.use(cors({
 
     const allowedOrigins = config.CORS_ORIGINS;
     const isAllowed = allowedOrigins.some(o => o === origin) || 
-                     /\.sewaxai\.health$/.test(origin) ||
+                     origin === 'https://sewaxai.health' ||
+                     origin === 'http://sewaxai.health' ||
                      origin.endsWith('.sewaxai.health');
 
     if (isAllowed) {

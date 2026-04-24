@@ -39,6 +39,13 @@ foreach ($svc in $AI_SERVICES) {
 }
 Out-Success "AI services build complete."
 
+# 3b. Build & Push Frontend (for AKS)
+Write-Host "[3b/6] Building Frontend for AKS..." -ForegroundColor Yellow
+$frontendImg = "sewa-frontend:$IMAGE_TAG"
+$frontendLatest = "sewa-frontend:production-latest"
+az acr build --registry $ACR_NAME --image $frontendImg --image $frontendLatest --build-arg VITE_API_URL=https://api.sewaxai.health/api/v1 ./frontend
+Out-Success "Frontend AKS build complete."
+
 # 4. Update AKS Manifests
 Write-Host "[4/6] Deploying to AKS..." -ForegroundColor Yellow
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing

@@ -1,8 +1,12 @@
+# SEWA AI — AI Services Deployment (GPU Node Pool)
+# © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sewa-triage
   namespace: sewa-ai
+  labels:
+    app: sewa-triage
 spec:
   replicas: 2
   selector:
@@ -16,20 +20,26 @@ spec:
       tolerations:
       - key: nvidia.com/gpu
         operator: Equal
-        value: true
+        value: "true"
         effect: NoSchedule
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: triage
-        image: sewaaiproductionacr.azurecr.io/sewa-triage:latest
+        image: "sewaaiproductionacr.azurecr.io/sewa-triage:latest"
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         resources:
           limits:
             nvidia.com/gpu: 1
-            memory: 6Gi
+            memory: "6Gi"
           requests:
-            memory: 2Gi
-            cpu: 1000m
+            memory: "2Gi"
+            cpu: "1000m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
         livenessProbe:
           httpGet:
             path: /health
@@ -67,20 +77,26 @@ spec:
       tolerations:
       - key: nvidia.com/gpu
         operator: Equal
-        value: true
+        value: "true"
         effect: NoSchedule
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: vlm-report
-        image: sewaaiproductionacr.azurecr.io/sewa-vlm-report:latest
+        image: "sewaaiproductionacr.azurecr.io/sewa-vlm-report:latest"
+        imagePullPolicy: Always
         ports:
         - containerPort: 8001
         resources:
           limits:
             nvidia.com/gpu: 1
-            memory: 16Gi
+            memory: "16Gi"
           requests:
-            memory: 8Gi
-            cpu: 1000m
+            memory: "8Gi"
+            cpu: "1000m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
 ---
 apiVersion: v1
 kind: Service
@@ -112,19 +128,25 @@ spec:
       tolerations:
       - key: nvidia.com/gpu
         operator: Equal
-        value: true
+        value: "true"
         effect: NoSchedule
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: uncertainty
-        image: sewaaiproductionacr.azurecr.io/sewa-uncertainty:latest
+        image: "sewaaiproductionacr.azurecr.io/sewa-uncertainty:latest"
+        imagePullPolicy: Always
         ports:
         - containerPort: 8002
         resources:
           limits:
             nvidia.com/gpu: 1
-            memory: 6Gi
+            memory: "6Gi"
           requests:
-            memory: 2Gi
+            memory: "2Gi"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
 ---
 apiVersion: v1
 kind: Service
@@ -153,17 +175,23 @@ spec:
       labels:
         app: sewa-metacognition
     spec:
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: metacognition
-        image: sewaaiproductionacr.azurecr.io/sewa-metacognition:latest
+        image: "sewaaiproductionacr.azurecr.io/sewa-metacognition:latest"
+        imagePullPolicy: Always
         ports:
         - containerPort: 8003
         resources:
           limits:
-            memory: 2Gi
+            memory: "2Gi"
           requests:
-            memory: 512Mi
-            cpu: 500m
+            memory: "512Mi"
+            cpu: "500m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
 ---
 apiVersion: v1
 kind: Service
@@ -177,60 +205,108 @@ spec:
   - port: 8003
     targetPort: 8003
 ---
+# ── Federated Learning Service ──────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sewa-federated-learning
+  name: sewa-federated
   namespace: sewa-ai
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sewa-federated-learning
+      app: sewa-federated
   template:
     metadata:
       labels:
-        app: sewa-federated-learning
+        app: sewa-federated
     spec:
+      imagePullSecrets:
+      - name: acr-secret
       containers:
-      - name: federated-learning
-        image: sewaaiproductionacr.azurecr.io/sewa-federated-learning:latest
+      - name: federated
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-federated-learning:latest"
+        imagePullPolicy: Always
         ports:
         - containerPort: 8004
-        env:
-        - name: FL_SERVER_PORT
-          value: 8080
+        envFrom:
+        - secretRef:
+            name: sewa-secrets
         resources:
           limits:
-            memory: 4Gi
+            memory: "4Gi"
           requests:
-            memory: 1Gi
-            cpu: 500m
+            memory: "1Gi"
+            cpu: "500m"
         livenessProbe:
           httpGet:
             path: /health
             port: 8004
           initialDelaySeconds: 60
           periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8004
-          initialDelaySeconds: 30
-          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: sewa-federated-learning
+  name: sewa-federated
   namespace: sewa-ai
 spec:
   selector:
-    app: sewa-federated-learning
+    app: sewa-federated
   ports:
-  - name: http
-    port: 8004
+  - port: 8004
     targetPort: 8004
-  - name: flower
-    port: 8080
-    targetPort: 8080
+---
+# ── Continuous Learning Service ──────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-continuous
+  namespace: sewa-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sewa-continuous
+  template:
+    metadata:
+      labels:
+        app: sewa-continuous
+    spec:
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: continuous
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-continuous-learning:latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8005
+        envFrom:
+        - secretRef:
+            name: sewa-secrets
+        - configMapRef:
+            name: sewa-config
+        resources:
+          limits:
+            memory: "4Gi"
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8005
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-continuous
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-continuous
+  ports:
+  - port: 8005
+    targetPort: 8005

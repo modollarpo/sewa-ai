@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-ARG VITE_API_URL=https://api.sewa.health/v1
+ARG VITE_API_URL=https://api.sewaxai.health/api/v1
 ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 

@@ -17,26 +17,23 @@ spec:
       labels:
         app: sewa-triage
     spec:
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: triage
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-triage:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-triage:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
         resources:
           limits:
-            nvidia.com/gpu: 1
             memory: "6Gi"
           requests:
             memory: "2Gi"
             cpu: "1000m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
         livenessProbe:
           httpGet:
             path: /health
@@ -71,26 +68,23 @@ spec:
       labels:
         app: sewa-vlm-report
     spec:
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: vlm-report
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-vlm-report:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-vlm-report:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8001
         resources:
           limits:
-            nvidia.com/gpu: 1
             memory: "16Gi"
           requests:
             memory: "8Gi"
             cpu: "1000m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
 ---
 apiVersion: v1
 kind: Service
@@ -119,25 +113,22 @@ spec:
       labels:
         app: sewa-uncertainty
     spec:
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: uncertainty
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-uncertainty:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-uncertainty:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8002
         resources:
           limits:
-            nvidia.com/gpu: 1
             memory: "6Gi"
           requests:
             memory: "2Gi"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
 ---
 apiVersion: v1
 kind: Service
@@ -170,7 +161,7 @@ spec:
       - name: acr-secret
       containers:
       - name: metacognition
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-metacognition:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-metacognition:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8003
@@ -180,6 +171,9 @@ spec:
           requests:
             memory: "512Mi"
             cpu: "500m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
 ---
 apiVersion: v1
 kind: Service
