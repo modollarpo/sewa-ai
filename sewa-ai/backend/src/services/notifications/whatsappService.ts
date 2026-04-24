@@ -2,14 +2,14 @@
 // Azure Communication Services (ACS) Advanced Messaging — clinical notifications
 // All NHS/GDPR compliant: no PHI in WhatsApp unless user opted in
 
-import { MessageClient } from '@azure/communication-messages';
+import MessagesClient from '@azure-rest/communication-messages';
 import { config } from '../../config/env';
 import { logger } from '../../utils/logger';
 import { prisma } from '../../config/database';
 
 const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING || '';
 const channelRegistrationId = process.env.AZURE_COMMUNICATION_WHATSAPP_CHANNEL_ID || '';
-const messageClient = connectionString ? new MessageClient(connectionString) : null;
+const messageClient = connectionString ? MessagesClient(connectionString) : null;
 
 // ── WhatsApp message templates ─────────────────────────────────
 // Uses Azure WhatsApp template messages (pre-approved by Meta for critical health alerts)
@@ -112,15 +112,26 @@ export const whatsappService = {
     const content = template({ firstName: opts.firstName, ...opts.data });
 
     try {
-      const result = await messageClient.send({
-        channelRegistrationId,
-        to: [opts.to],
-        kind: 'text',
-        content,
+      const result = await messageClient.path('/messages/notifications:send').post({
+        body: {
+          channelRegistrationId,
+          to: [opts.to],
+          content: {
+            kind: 'text',
+            text: {
+              content,
+            },
+          },
+        },
       });
       
-      logger.info(`[WhatsApp] Sent ${opts.type} to ${opts.to} — ID: ${result.receipts[0].messageId}`);
-      return true;
+      if (result.status === '202') {
+        logger.info(`[WhatsApp] Sent ${opts.type} to ${opts.to}`);
+        return true;
+      } else {
+        logger.error(`[WhatsApp] Failed to ${opts.to} - Status: ${result.status}`);
+        return false;
+      }
     } catch (e: any) {
       logger.error(`[WhatsApp] Failed to ${opts.to}:`, e.message);
       return false;
@@ -139,11 +150,17 @@ export const whatsappService = {
       // Send OTP via WhatsApp to verify number ownership
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       try {
-        await messageClient.send({
-          channelRegistrationId,
-          to: [opts.number],
-          kind: 'text',
-          content: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
+        await messageClient.path('/messages/notifications:send').post({
+          body: {
+            channelRegistrationId,
+            to: [opts.number],
+            content: {
+              kind: 'text',
+              text: {
+                content: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
+              },
+            },
+          },
         });
         logger.info(`[WhatsApp] Verification sent to ${opts.number}`);
         return { success: true, verificationId: code };
@@ -180,11 +197,17 @@ export const whatsappService = {
     let sent = 0, failed = 0;
     for (const number of numbers) {
       try {
-        await messageClient.send({
-          channelRegistrationId,
-          to: [number],
-          kind: 'text',
-          content: message,
+        await messageClient.path('/messages/notifications:send').post({
+          body: {
+            channelRegistrationId,
+            to: [number],
+            content: {
+              kind: 'text',
+              text: {
+                content: message,
+              },
+            },
+          },
         });
         sent++;
       } catch { failed++; }

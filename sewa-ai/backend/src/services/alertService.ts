@@ -10,6 +10,7 @@ import { auditLog } from '../utils/audit';
 import { sendHL7ORU, sendHL7ADT, sendHL7ORM } from './hl7Service';
 import { sendFCMPush } from './fcmService';
 import { sendEmail } from './emailService';
+import { smsService } from './smsService';
 import { io } from '../index';
 
 const STROKE_CODE_CONDITIONS = new Set([
