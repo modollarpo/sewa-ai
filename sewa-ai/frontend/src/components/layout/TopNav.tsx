@@ -68,7 +68,7 @@ function Dropdown({ trigger, children }: { trigger: React.ReactNode; children: R
   );
 }
 
-export function TopNav({ user, unreadCount, onNotifClick }: Omit<Props, 'region'|'lang'|'onRegionChange'|'onLangChange'>) {
+export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit<Props, 'region'|'lang'|'onRegionChange'|'onLangChange'>) {
   const { logout } = useAuthStore();
   const { lang, region, setLang, setRegion } = useSettingsStore();
   const [clock, setClock] = useState(() => new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' }));
@@ -262,7 +262,7 @@ export function TopNav({ user, unreadCount, onNotifClick }: Omit<Props, 'region'
             <div style={{ fontSize:'11px', color:C.textLo, fontFamily:"'IBM Plex Sans', system-ui, sans-serif", marginTop:'2px' }}>{user.email}</div>
           </div>
           {[
-            { icon:'👤', label:'Profile Settings', action: () => alert('Navigating to Clinical Profile Settings...') },
+            { icon:'👤', label:'Profile Settings', action: onProfileClick },
             { icon:'🔒', label:'Security & MFA', action: () => alert('Navigating to Security & MFA configuration...') },
             { icon:'🔔', label:'Notification Prefs', action: () => alert('Opening Notification Preferences...') },
             { icon:'📋', label:'Audit Log', action: () => alert('Navigating to Facility Audit Logs...') },

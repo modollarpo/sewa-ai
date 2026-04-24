@@ -32,7 +32,7 @@ export function useSuperAdminData() {
         ]);
         setData({
           stats: statsRes.data,
-          tenants: tenantsRes.data.length > 0 ? tenantsRes.data : MOCK_TENANTS,
+          tenants: tenantsRes?.data?.length > 0 ? tenantsRes.data : MOCK_TENANTS,
           loading: false,
           error: null
         });
@@ -68,7 +68,7 @@ export function useAIData() {
           apiClient.get('/ai-monitoring/health')
         ]);
         setData({
-          models: modelsRes.data.length > 0 ? modelsRes.data : MOCK_AI_MODELS,
+          models: modelsRes?.data?.length > 0 ? modelsRes.data : MOCK_AI_MODELS,
           metrics: metricsRes.data.events,
           health: healthRes.data,
           aggregates: metricsRes.data.aggregates,
@@ -160,10 +160,10 @@ export function useDoctorData() {
         setData({
           patients: mappedPatients,
           alerts: mappedAlerts,
-          loading: mappedPatients.length > 0 ? false : true // Avoid blanking if no data yet or if it was prev loading
+          loading: (mappedPatients || []).length > 0 ? false : true // Avoid blanking if no data yet or if it was prev loading
         });
         
-        if (mappedPatients.length > 0) setData(prev => ({ ...prev, loading: false }));
+        if ((mappedPatients || []).length > 0) setData(prev => ({ ...prev, loading: false }));
       } catch (err) {
         setData(prev => ({ ...prev, loading: false }));
       }
@@ -329,10 +329,10 @@ export function usePopulationHealthData() {
 
         setData({
           stats: {
-            totalScans: scans.length,
+            totalScans: (scans || []).length,
             positives: scans.filter((s:any) => s.urgency !== 'NORMAL').length,
             criticals: statsRes.data.criticalToday || 0,
-            impact: scans.length
+            impact: (scans || []).length
           },
           conditions: Object.entries(conditionCounts).map(([name, count]) => ({
             condition: name,

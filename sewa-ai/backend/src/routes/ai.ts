@@ -30,6 +30,14 @@ r.post('/triage/:scanId', authorize('admin','superadmin','radiologist'), async (
   } catch (err) { next(err); }
 });
 
+r.post('/vlm/:scanId', authorize('admin','superadmin','radiologist'), async (req, res, next) => {
+  try {
+    const { tenantId } = req.user!;
+    const result = await generateVLMReport(req.params.scanId, tenantId);
+    res.json({ message: 'VLM Report generated', data: result });
+  } catch (err) { next(err); }
+});
+
 r.get('/result/:scanId', async (req, res, next) => {
   try {
     const result = await prisma.aIResult.findUnique({ where: { scanId: req.params.scanId } });

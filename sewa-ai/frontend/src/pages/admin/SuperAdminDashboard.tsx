@@ -116,7 +116,7 @@ export function SuperAdminDashboard() {
               padding:'7px 14px',borderRadius:8,border:`1px solid ${btn.color==='#0C1D17'?C.border:btn.color}`,
               background:btn.color,color:btn.color===C.bg3?C.textMd:'white',
               fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F,
-            }}>{btn.label}</button>
+            }} onClick={() => alert(`${btn.label} functionality coming soon.`)}>{btn.label}</button>
           ))}
         </div>
       </div>
@@ -141,13 +141,13 @@ export function SuperAdminDashboard() {
       {/* Overview */}
       {tab==='overview' && (
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
-            <BigStat label="Total Tenants" value={loading ? '...' : stats.tenants} sub={`${tenants.length} regions configured`} icon="🏥"/>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))',gap:12}}>
+            <BigStat label="Total Tenants" value={loading ? '...' : stats?.tenants ?? 0} sub={`${(tenants || []).length} regions configured`} icon="🏥"/>
             <BigStat label="Global Scans Today" value={loading ? '...' : stats.totalScans} sub="Real-time ingestion active" icon="🩻" color={C.brand}/>
             <BigStat label="Critical Alerts 24h" value={loading ? '...' : stats.criticalToday} sub="All active response teams" icon="🚨" color={C.critical}/>
             <BigStat label="Platform Accuracy" value="94.1%" sub="Weighted avg across tenants" icon="🎯" color={C.normal}/>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))',gap:12}}>
             <BigStat label="AI Inferences Today" value="18,340" icon="⚡" color={C.info}/>
             <BigStat label="Avg Inference Time" value="4.1s" sub="Triage → Report" icon="⏱"/>
             <BigStat label="Uptime (30d)" value="99.97%" color={C.normal} icon="✅"/>
@@ -161,7 +161,7 @@ export function SuperAdminDashboard() {
           </div>
 
           {/* AI Service health */}
-          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:12}}>
             {[
               {name:'Triage Engine',port:8000,status:'healthy',latency:'1.2s',qps:42,gpu:'A100 × 4'},
               {name:'VLM Report',port:8001,status:'healthy',latency:'3.8s',qps:18,gpu:'A100 × 4'},
@@ -189,6 +189,14 @@ export function SuperAdminDashboard() {
         </div>
       )}
 
+      {/* Deployments Stub */}
+      {tab==='deployments' && (
+        <div style={{padding:40, textAlign:'center', background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`, color:C.textLo}}>
+          <h3 style={{margin:0, color:C.textHi}}>Global Infrastructure Deployments</h3>
+          <p style={{marginTop:8}}>Interactive 3D deployment visualizer is coming in the next release.</p>
+        </div>
+      )}
+
       {/* Tenants */}
       {tab==='tenants' && (
         <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -198,7 +206,7 @@ export function SuperAdminDashboard() {
               <input value={tenantSearch} onChange={e=>setTenantSearch(e.target.value)} placeholder="Search tenants by name or region…"
                 style={{width:'100%',height:34,padding:'0 8px 0 28px',boxSizing:'border-box',background:C.bg2,border:`1px solid ${C.border}`,borderRadius:8,color:C.textHi,fontSize:12,fontFamily:C.F,outline:'none'}}/>
             </div>
-            <span style={{fontSize:11,color:C.textLo,fontFamily:C.F,whiteSpace:'nowrap'}}>{filteredTenants.length} tenants</span>
+            <span style={{fontSize:11,color:C.textLo,fontFamily:C.F,whiteSpace:'nowrap'}}>{(filteredTenants || []).length} tenants</span>
           </div>
 
           <div style={{background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,overflow:'hidden'}}>
@@ -211,7 +219,7 @@ export function SuperAdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filteredTenants.length === 0 ? (
+                {(filteredTenants || []).length === 0 ? (
                   <tr>
                     <td colSpan={9} style={{padding:40,textAlign:'center',color:C.textLo,fontSize:12,fontFamily:C.F}}>
                       No tenants match your search.
@@ -286,7 +294,7 @@ export function SuperAdminDashboard() {
                 <span style={{fontSize:10,color:C.textLo,fontFamily:C.F,textTransform:'capitalize'}}>{m.type} engine</span>
                 <span style={{marginLeft:'auto',fontSize:11,color:C.textLo,fontFamily:C.F}}>Deployed {m.deployed}</span>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))',gap:10}}>
                 <div style={{padding:'8px 10px',background:C.bg3,borderRadius:8}}>
                   <div style={{fontSize:9,color:C.textLo,marginBottom:4,letterSpacing:'0.04em'}}>ACCURACY</div>
                   <div style={{fontSize:18,fontWeight:700,color:C.normal,fontFamily:C.FM}}>{m.accuracy}%</div>
@@ -301,10 +309,10 @@ export function SuperAdminDashboard() {
                 </div>
               </div>
               <div style={{display:'flex',gap:6,marginTop:12}}>
-                {m.status==='ab_test'&&<button style={{padding:'6px 12px',background:C.brand,border:'none',borderRadius:7,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>Promote to Production</button>}
-                {m.status==='ab_test'&&<button style={{padding:'6px 12px',background:C.critBg,border:`1px solid ${C.critical}40`,borderRadius:7,color:C.critical,fontSize:11,cursor:'pointer',fontFamily:C.F}}>Rollback</button>}
-                <button style={{padding:'6px 12px',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:7,color:C.textMd,fontSize:11,cursor:'pointer',fontFamily:C.F}}>View Metrics</button>
-                <button style={{padding:'6px 12px',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:7,color:C.textMd,fontSize:11,cursor:'pointer',fontFamily:C.F}}>View Changelog</button>
+                {m.status==='ab_test'&&<button onClick={() => alert('Promoting model to production...')} style={{padding:'6px 12px',background:C.brand,border:'none',borderRadius:7,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>Promote to Production</button>}
+                {m.status==='ab_test'&&<button onClick={() => alert('Rolling back model...')} style={{padding:'6px 12px',background:C.critBg,border:`1px solid ${C.critical}40`,borderRadius:7,color:C.critical,fontSize:11,cursor:'pointer',fontFamily:C.F}}>Rollback</button>}
+                <button onClick={() => alert('View metrics coming soon.')} style={{padding:'6px 12px',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:7,color:C.textMd,fontSize:11,cursor:'pointer',fontFamily:C.F}}>View Metrics</button>
+                <button onClick={() => alert('View changelog coming soon.')} style={{padding:'6px 12px',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:7,color:C.textMd,fontSize:11,cursor:'pointer',fontFamily:C.F}}>View Changelog</button>
               </div>
             </div>
           ))}
@@ -313,7 +321,7 @@ export function SuperAdminDashboard() {
 
       {/* Compliance */}
       {tab==='compliance' && (
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',gap:16}}>
           {[
             {label:'GDPR / UK DPA 2018',region:'UK/EU',status:'compliant',items:['Data minimisation','Right to erasure','DPIA complete','DPO appointed','Breach response < 72h']},
             {label:'NHS DSPT 2024-25',region:'UK',status:'compliant',items:['Toolkit submission','IG training 100%','Data flows mapped','Pen test Q4','Incident log current']},
@@ -402,7 +410,7 @@ export function SuperAdminDashboard() {
             </div>
           </div>
 
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(340px, 1fr))',gap:16}}>
             <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
               <h3 style={{margin:'0 0 16px',fontSize:14,color:C.textHi}}>Provision New Edge Node</h3>
               <p style={{fontSize:12,color:C.textMd,lineHeight:1.5,marginBottom:20}}>
@@ -457,7 +465,7 @@ export function SuperAdminDashboard() {
               
               <div style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,flex:1}}>
                 <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:8}}>Hardware Specs</div>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))',gap:12}}>
                   <div>
                     <div style={{fontSize:9,color:C.textLo}}>MINIMUM</div>
                     <div style={{fontSize:11,color:C.textMd}}>4-Core CPU<br/>8GB RAM<br/>128GB SSD</div>

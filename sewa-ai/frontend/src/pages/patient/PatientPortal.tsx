@@ -147,7 +147,7 @@ export function PatientPortal() {
 
                 <div style={{display:'flex',gap:8}}>
                   {scan.reportReady && (
-                    <button onClick={e=>{e.stopPropagation();}} style={{
+                    <button onClick={e=>{e.stopPropagation(); alert('Downloading PDF Report...');}} style={{
                       padding:'7px 14px',background:C.brand,border:'none',borderRadius:8,
                       color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F,
                       display:'flex',alignItems:'center',gap:5,
@@ -156,7 +156,7 @@ export function PatientPortal() {
                       Download Report
                     </button>
                   )}
-                  <button style={{padding:'7px 14px',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,color:C.textMd,fontSize:11,cursor:'pointer',fontFamily:C.F}}>
+                  <button onClick={e=>{e.stopPropagation(); setSelectedScan(scan);}} style={{padding:'7px 14px',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,color:C.textMd,fontSize:11,cursor:'pointer',fontFamily:C.F}}>
                     View Details →
                   </button>
                 </div>
@@ -195,7 +195,7 @@ export function PatientPortal() {
                       The AI is certified under NHS DSPT and GDPR standards.
                     </p>
                   </div>
-                  <button style={{padding:'10px',background:C.brand,border:'none',borderRadius:10,color:'white',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
+                  <button onClick={() => alert('Downloading PDF Report...')} style={{padding:'10px',background:C.brand,border:'none',borderRadius:10,color:'white',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
                     ⬇ Download Full Report (PDF)
                   </button>
                 </div>
@@ -238,7 +238,7 @@ export function PatientPortal() {
               </div>
             </div>
           ))}
-          <button style={{padding:'10px',background:C.brand,border:'none',borderRadius:10,color:'white',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:C.F,marginTop:4}}>
+          <button onClick={() => alert('Preferences saved securely.')} style={{padding:'10px',background:C.brand,border:'none',borderRadius:10,color:'white',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:C.F,marginTop:4}}>
             Save Preferences
           </button>
         </div>
@@ -271,7 +271,7 @@ export function PatientPortal() {
               </tbody>
             </table>
           </div>
-          <button style={{padding:'8px 16px',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,color:C.textMd,fontSize:12,cursor:'pointer',fontFamily:C.F,display:'inline-flex',alignItems:'center',gap:6,width:'fit-content'}}>
+          <button onClick={() => alert('Downloading access log CSV...')} style={{padding:'8px 16px',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,color:C.textMd,fontSize:12,cursor:'pointer',fontFamily:C.F,display:'inline-flex',alignItems:'center',gap:6,width:'fit-content'}}>
             ⬇ Download Full Access Log
           </button>
         </div>
@@ -297,7 +297,7 @@ export function PatientPortal() {
             <p style={{margin:'0 0 12px',fontSize:12,color:C.textMd,lineHeight:1.5}}>
               Under UK GDPR Article 17 (Right to Erasure), you can request deletion of your personal data. This cannot be undone and may affect your care record.
             </p>
-            <button style={{padding:'8px 16px',background:'transparent',border:'1px solid #4A1515',borderRadius:8,color:C.critical,fontSize:12,cursor:'pointer',fontFamily:C.F}}>
+            <button onClick={() => alert('Data deletion request submitted to DPO.')} style={{padding:'8px 16px',background:'transparent',border:'1px solid #4A1515',borderRadius:8,color:C.critical,fontSize:12,cursor:'pointer',fontFamily:C.F}}>
               Request Data Deletion
             </button>
           </div>

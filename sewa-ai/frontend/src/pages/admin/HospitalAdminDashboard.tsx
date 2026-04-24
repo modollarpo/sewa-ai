@@ -164,7 +164,7 @@ export function HospitalAdminDashboard() {
                     <td style={{padding:'12px 16px',fontSize:12,color:C.textHi}}>{s.firstName} {s.lastName}</td>
                     <td style={{padding:'12px 16px'}}><RoleBadge role={s.role}/></td>
                     <td style={{padding:'12px 16px'}}><div style={{display:'flex',alignItems:'center',gap:6}}><StatusDot status={s.status}/><span style={{fontSize:11,color:C.textMd}}>{s.status}</span></div></td>
-                    <td style={{padding:'12px 16px'}}><button style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button></td>
+                    <td style={{padding:'12px 16px'}}><button onClick={() => alert('Edit staff profile coming soon.')} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -173,7 +173,8 @@ export function HospitalAdminDashboard() {
         )}
         {(['integrations','billing','audit'] as const).includes(tab as any) && (
           <div style={{padding:40, textAlign:'center', background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`, color:C.textLo}}>
-            {tab.charAt(0).toUpperCase()+tab.slice(1)} view coming soon for mobile.
+            <h3 style={{margin:0, color:C.textHi, fontSize: 16}}>{tab.charAt(0).toUpperCase()+tab.slice(1)} Module</h3>
+            <p style={{marginTop: 8}}>Please navigate to the dedicated {tab} module via the left sidebar to view full details.</p>
           </div>
         )}
       </div>
