@@ -1,8 +1,11 @@
 // SEWA AI — src/services/emailService.ts
-// SendGrid transactional email with clinical alert templates
-import sgMail from '@sendgrid/mail';
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
-const FROM_EMAIL = 'info@sewaxai.health';
+// Azure Communication Services (ACS) email with clinical alert templates
+import { EmailClient } from '@azure/communication-email';
+
+const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING || '';
+const emailClient = connectionString ? new EmailClient(connectionString) : null;
+
+const FROM_EMAIL = process.env.EMAIL_FROM || 'info@sewaxai.health';
 const FROM_NAME  = 'SEWA AI Clinical';
 
 interface EmailPayload {
@@ -38,10 +41,27 @@ const TEMPLATES: Record<string, (d: any) => string> = {
 };
 
 export async function sendEmail({ to, name, subject, template, html, data }: EmailPayload): Promise<void> {
-  if (!process.env.SENDGRID_API_KEY) {
-    console.warn('[Email] SENDGRID_API_KEY not set — skipping email');
+  if (!emailClient) {
+    console.warn('[Email] AZURE_COMMUNICATION_CONNECTION_STRING not set — skipping email');
     return;
   }
   const emailHtml = html || (template && TEMPLATES[template] ? TEMPLATES[template](data || {}) : `<p>${JSON.stringify(data)}</p>`);
-  await sgMail.send({ to, from: { email: FROM_EMAIL, name: FROM_NAME }, subject, html: emailHtml });
+  
+  const message = {
+    senderAddress: FROM_EMAIL,
+    content: {
+      subject: subject,
+      html: emailHtml,
+    },
+    recipients: {
+      to: [{ address: to, displayName: name || to }],
+    },
+  };
+
+  try {
+    const poller = await emailClient.beginSend(message);
+    await poller.pollUntilDone();
+  } catch (error) {
+    console.error('[Email] Failed to send via ACS:', error);
+  }
 }

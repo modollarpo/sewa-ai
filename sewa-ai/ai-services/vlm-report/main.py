@@ -14,12 +14,23 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from openai import AsyncAzureOpenAI
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger("sewa-vlm")
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5000").split(",")
 USE_AZURE_OPENAI = bool(os.getenv("AZURE_OPENAI_ENDPOINT"))
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
+
+openai_client = None
+if USE_AZURE_OPENAI:
+    openai_client = AsyncAzureOpenAI(
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT", ""),
+        api_key=AZURE_OPENAI_API_KEY,
+        api_version="2024-02-15-preview"
+    )
 
 
 @asynccontextmanager
@@ -138,7 +149,58 @@ Supplementary observations:
 3. {rec}"""
 
         compliance_str = ", ".join(req.compliance)
-        full_text = f"""RADIOLOGY REPORT
+
+        if USE_AZURE_OPENAI and openai_client:
+            prompt = f"""You are an expert AI radiologist assistant. 
+Generate a structured radiology report for a {req.modality} of the {req.body_part}.
+Clinical indication: {req.clinical_indication or 'None provided'}
+AI Finding: {req.ai_finding} (Confidence: {req.confidence*100:.1f}%)
+Urgency: {req.urgency}
+Location: {req.location or 'Not specified'}
+
+The report must include these sections:
+TECHNIQUE
+FINDINGS
+IMPRESSION
+
+Keep it professional, clinical, and concise. Do not include introductory or concluding conversational text."""
+
+            response = await openai_client.chat.completions.create(
+                model=AZURE_OPENAI_DEPLOYMENT,
+                messages=[
+                    {"role": "system", "content": "You are a professional medical AI assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,
+                max_tokens=800
+            )
+            llm_text = response.choices[0].message.content
+            
+            findings = req.ai_finding
+            impression = req.urgency
+
+            full_text = f"""RADIOLOGY REPORT
+{'='*60}
+Examination:     {req.modality} {req.body_part}
+AI Urgency:      {req.urgency}
+AI Confidence:   {req.confidence*100:.1f}%
+Region:          {req.region.upper()}
+Compliance:      {compliance_str}
+Generated:       {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+Model:           Azure OpenAI GPT-4o
+{'='*60}
+
+{llm_text}
+
+{'='*60}
+AI-assisted report — requires authorised radiologist signature.
+FHIR DiagnosticReport will be created on approval.
+HL7 ORU message will be dispatched on signing.
+{'='*60}"""
+            
+        else:
+            # Fallback CPU template mode
+            full_text = f"""RADIOLOGY REPORT
 {'='*60}
 Examination:     {req.modality} {req.body_part}
 AI Urgency:      {req.urgency}
