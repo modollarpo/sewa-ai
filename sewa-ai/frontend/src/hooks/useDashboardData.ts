@@ -54,26 +54,24 @@ export function useAIData() {
   const [data, setData] = useState({
     models: MOCK_AI_MODELS,
     metrics: [] as any[],
-    conditionStats: [] as any[],
+    health: [] as any[],
+    aggregates: { avgConfidence: 0, avgLatencyMs: 0, totalCount: 0 },
     loading: true
   });
 
   useEffect(() => {
     async function fetch() {
       try {
-        const [modelsRes, metricsRes] = await Promise.all([
+        const [modelsRes, metricsRes, healthRes] = await Promise.all([
           apiClient.get('/ai/models'),
-          apiClient.get('/ai/ab-test/metrics')
+          apiClient.get('/ai-monitoring/metrics'),
+          apiClient.get('/ai-monitoring/health')
         ]);
         setData({
           models: modelsRes.data.length > 0 ? modelsRes.data : MOCK_AI_MODELS,
-          metrics: metricsRes.data,
-          conditionStats: [
-            {name:'Intracranial Hemorrhage',auc:0.971,sensitivity:0.942,cases:1842},
-            {name:'Pulmonary Embolism',auc:0.952,sensitivity:0.918,cases:1124},
-            {name:'Pneumothorax',auc:0.968,sensitivity:0.934,cases:892},
-            {name:'Stroke / LVO',auc:0.963,sensitivity:0.928,cases:743},
-          ],
+          metrics: metricsRes.data.events,
+          health: healthRes.data,
+          aggregates: metricsRes.data.aggregates,
           loading: false
         });
       } catch (err) {
@@ -81,6 +79,8 @@ export function useAIData() {
       }
     }
     fetch();
+    const t = setInterval(fetch, 10000); // Refresh AI data every 10s
+    return () => clearInterval(t);
   }, []);
 
   return data;

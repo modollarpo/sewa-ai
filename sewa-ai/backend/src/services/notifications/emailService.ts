@@ -1,29 +1,14 @@
 // SEWA AI — backend/src/services/notifications/emailService.ts
 // Full production email service: 18 HTML templates, multi-language stub,
-// Nodemailer + SendGrid fallback, GDPR-compliant unsubscribe footers
+// Azure Communication Services (ACS) integration
+import { EmailClient } from '@azure/communication-email';
+import { config }      from '../../config/env';
+import { logger }      from '../../utils/logger';
 
-import nodemailer, { Transporter } from 'nodemailer';
-import { config }                  from '../../config/env';
-import { logger }                  from '../../utils/logger';
-
-// ── Transport ──────────────────────────────────────────────────
-let _transporter: any = null;
-function transporter(): any {
-  if (!_transporter) {
-    _transporter = nodemailer.createTransport({
-      host:   config.SMTP_HOST   || 'smtp.sendgrid.net',
-      port:   config.SMTP_PORT   || 587,
-      secure: config.SMTP_PORT   === 465,
-      auth: {
-        user: config.SMTP_USER   || 'apikey',
-        pass: config.SMTP_PASS   || config.SENDGRID_API_KEY || '',
-      },
-      pool: true,
-      maxConnections: 10,
-    });
-  }
-  return _transporter;
-}
+// ── Client ───────────────────────────────────────────────────
+const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING || '';
+const emailClient = connectionString ? new EmailClient(connectionString) : null;
+const FROM_EMAIL = config.EMAIL_FROM || 'info@sewaxai.health';
 
 // ── Base HTML wrapper ──────────────────────────────────────────
 const BASE = (content: string, preheader = '') => `<!DOCTYPE html>
@@ -335,8 +320,8 @@ export interface SendTemplatedOptions {
 
 export const emailService = {
   async sendTemplated(opts: SendTemplatedOptions): Promise<boolean> {
-    if (!config.SMTP_HOST && !config.SENDGRID_API_KEY) {
-      logger.warn('[Email] No SMTP/SendGrid configured — skipping');
+    if (!emailClient) {
+      logger.warn('[Email] ACS not configured — skipping');
       return false;
     }
 
@@ -354,17 +339,17 @@ export const emailService = {
       .replace(/{{unsubscribeUrl}}/g,  opts.unsubscribeUrl ?? 'https://app.sewaxai.health/notifications');
 
     try {
-      await transporter().sendMail({
-        from:    `"SEWA AI" <${config.EMAIL_FROM ?? 'info@sewaxai.health'}>`,
-        to:      opts.to,
-        subject,
-        html:    finalHtml,
-        headers: {
-          'List-Unsubscribe':       `<https://app.sewaxai.health/unsubscribe?email=${encodeURIComponent(opts.to)}>`,
-          'List-Unsubscribe-Post':  'List-Unsubscribe=One-Click',
-          'X-SEWA-Event':           opts.type,
+      const poller = await emailClient.beginSend({
+        senderAddress: FROM_EMAIL,
+        content: {
+          subject: subject,
+          html: finalHtml,
+        },
+        recipients: {
+          to: [{ address: opts.to }],
         },
       });
+      await poller.pollUntilDone();
       logger.info(`[Email] Sent ${opts.type} to ${opts.to}`);
       return true;
     } catch (e: any) {
@@ -374,11 +359,19 @@ export const emailService = {
   },
 
   async sendRaw(opts: { to: string; subject: string; html: string }): Promise<boolean> {
+    if (!emailClient) return false;
     try {
-      await transporter().sendMail({
-        from: `"SEWA AI" <${config.EMAIL_FROM ?? 'info@sewaxai.health'}>`,
-        ...opts,
+      const poller = await emailClient.beginSend({
+        senderAddress: FROM_EMAIL,
+        content: {
+          subject: opts.subject,
+          html: opts.html,
+        },
+        recipients: {
+          to: [{ address: opts.to }],
+        },
       });
+      await poller.pollUntilDone();
       return true;
     } catch (e: any) {
       logger.error('[Email] Raw send failed:', e.message);

@@ -241,11 +241,7 @@ class AlertService {
     try {
       const msg = `SEWA AI CRITICAL: ${payload.primaryFinding} (${(payload.confidence * 100).toFixed(0)}%). Scan ${payload.scanId.slice(-8)}. Open app now.`;
       await Promise.all(users.map(u =>
-        axios.post(
-          `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
-          new URLSearchParams({ From: TWILIO_FROM_NUMBER, To: u.phone || '', Body: msg }),
-          { auth: { username: TWILIO_ACCOUNT_SID!, password: TWILIO_AUTH_TOKEN! } }
-        )
+        smsService.send(u.phone || '', msg)
       ));
       channels.push({ channel: 'sms', status: 'delivered', ms: Date.now() - start });
     } catch (e: any) {

@@ -23,7 +23,8 @@ const C = {
 const MOCK_CONSENTS = [
   {id:'c1',type:'AI-assisted diagnosis',description:'Allow SEWA AI to analyse your medical images using artificial intelligence to assist your doctors.',granted:true,date:'1 Jan 2026'},
   {id:'c2',type:'Federated Learning',description:'Allow anonymised data from your scans to help train AI models for future patients (fully anonymous, no personal data shared).',granted:false,date:'1 Jan 2026'},
-  {id:'c3',type:'Secondary use of data',description:'Allow your anonymised scan data to be used for medical research by approved institutions.',granted:false,date:'1 Jan 2026'},
+  {id:'c_wa',type:'WhatsApp Notifications',description:'Receive critical alerts and appointment reminders via WhatsApp Secure Messaging.',granted:true,date:'24 Apr 2026'},
+  {id:'c_sms',type:'SMS Clinical Alerts',description:'Receive urgent SMS notifications for critical findings (e.g. Stroke/ICH) even without an internet connection.',granted:true,date:'24 Apr 2026'},
   {id:'c4',type:'Marketing communications',description:'Receive updates about SEWA AI and health information relevant to you.',granted:true,date:'1 Jan 2026'},
 ];
 
@@ -66,6 +67,19 @@ export function PatientPortal() {
 
   return (
     <div style={{maxWidth:860,margin:'0 auto',padding:'24px 16px',fontFamily:C.F,minHeight:'calc(100vh-76px)'}}>
+      <style>{`
+        @media (max-width: 800px) {
+          .stats-row { flex-direction: column; }
+          .stats-card { width: 100% !important; }
+          .portal-tabs { overflow-x: auto; scrollbar-width: none; }
+          .portal-tabs::-webkit-scrollbar { display: none; }
+          .consent-row { flex-direction: column; }
+          .consent-toggle { align-self: flex-end; }
+          .detail-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+          .welcome-header { flex-direction: column; align-items: flex-start !important; }
+          .welcome-meta { margin-left: 0 !important; text-align: left !important; margin-top: 12px; }
+        }
+      `}</style>
 
       {/* Welcome header */}
       <div style={{
@@ -81,14 +95,14 @@ export function PatientPortal() {
           <div style={{fontSize:18,fontWeight:700,color:C.textHi}}>Hello, {user?.firstName || 'Patient'}</div>
           <div style={{fontSize:12,color:C.textMd,marginTop:2}}>NHS Number: 123 456 7890 · DOB: Registered on file</div>
         </div>
-        <div style={{marginLeft:'auto',textAlign:'right'}}>
+        <div className="welcome-meta" style={{marginLeft:'auto',textAlign:'right'}}>
           <div style={{fontSize:11,color:C.textLo,marginBottom:2}}>Last access</div>
           <div style={{fontSize:12,color:C.textMd,fontFamily:C.FM}}>{new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{borderBottom:`1px solid ${C.border}`,display:'flex',gap:2,marginBottom:20}}>
+      <div className="portal-tabs" style={{borderBottom:`1px solid ${C.border}`,display:'flex',gap:2,marginBottom:20}}>
         <button style={tabStyle('scans')} onClick={()=>setTab('scans')}>🩻 My Scans</button>
         <button style={tabStyle('consent')} onClick={()=>setTab('consent')}>✅ Consent</button>
         <button style={tabStyle('access')} onClick={()=>setTab('access')}>🔒 Data Access Log</button>
@@ -155,7 +169,7 @@ export function PatientPortal() {
                 ← Back to scans
               </button>
               <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
-                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+                <div className="detail-header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
                   <div>
                     <h2 style={{margin:0,fontSize:18,fontWeight:700,color:C.textHi}}>{selectedScan.modality} — {selectedScan.bodyPart}</h2>
                     <p style={{margin:'4px 0 0',fontSize:12,color:C.textLo}}>{selectedScan.date}</p>
@@ -198,14 +212,14 @@ export function PatientPortal() {
             ℹ️ <strong style={{color:C.info}}>Your data, your choice.</strong> You can change these preferences at any time. Some settings are required for your care and cannot be turned off.
           </div>
           {consents.map(consent=>(
-            <div key={consent.id} style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,display:'flex',alignItems:'flex-start',gap:14}}>
+            <div key={consent.id} className="consent-row" style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,display:'flex',alignItems:'flex-start',gap:14}}>
               <div style={{flex:1}}>
                 <div style={{fontSize:13,fontWeight:600,color:C.textHi,marginBottom:4}}>{consent.type}</div>
                 <div style={{fontSize:12,color:C.textMd,lineHeight:1.6}}>{consent.description}</div>
                 <div style={{fontSize:10,color:C.textLo,marginTop:6}}>Last updated: {consent.date}</div>
               </div>
               {/* Toggle */}
-              <div style={{flexShrink:0,marginTop:2}}>
+              <div className="consent-toggle" style={{flexShrink:0,marginTop:2}}>
                 <div
                   onClick={()=>setConsents(cs=>cs.map(c=>c.id===consent.id?{...c,granted:!c.granted}:c))}
                   style={{

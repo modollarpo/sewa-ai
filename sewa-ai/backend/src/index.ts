@@ -39,6 +39,7 @@ import auditRoutes      from './routes/audit';
 import roadmapRoutes    from './routes/roadmap/index';
 import appointmentRoutes, { sendAppointmentReminders } from './routes/appointments/index';
 import whatsappRoutes   from './routes/whatsapp';
+import aiMonitoringRoutes from './routes/ai-monitoring';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 
 const app = express();
@@ -46,7 +47,16 @@ const httpServer = createServer(app);
 
 // ── Socket.IO — Feature 6 (Real-time Notifications) ───────────
 const io = new SocketServer(httpServer, {
-  cors: { origin: config.CORS_ORIGINS, credentials: true },
+  cors: { 
+    origin: (origin, callback) => {
+      if (!origin || config.CORS_ORIGINS.includes(origin) || /\.sewaxai\.health$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }, 
+    credentials: true 
+  },
   transports: ['websocket', 'polling'],
 });
 setupSocketIO(io);
@@ -62,7 +72,22 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: config.CORS_ORIGINS,
+  origin: (origin, callback) => {
+    // Allow if no origin (e.g. server-to-server or Postman)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = config.CORS_ORIGINS;
+    const isAllowed = allowedOrigins.some(o => o === origin) || 
+                     /\.sewaxai\.health$/.test(origin) ||
+                     origin.endsWith('.sewaxai.health');
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      logger.warn(`[CORS] Blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID', 'X-Region'],
@@ -108,6 +133,7 @@ app.use(`${v1}/second-opinions`,secondOpinionRoutes);
 app.use(`${v1}/appointments`,  appointmentRoutes);
 app.use(`${v1}/whatsapp`,      whatsappRoutes);
 app.use(`${v1}/audit`,          auditRoutes);
+app.use(`${v1}/ai-monitoring`,  aiMonitoringRoutes);
 app.use(`${v1}`,               roadmapRoutes); // Roadmap features: /rules, /stroke-codes, /population-health, /referrals, /federated-learning, /continuous-learning
 
 app.use(errorHandler);

@@ -317,43 +317,36 @@ const SERVICES = [
 
 // ── Main component ─────────────────────────────────────────────
 export function AIMonitoringDashboard() {
-  const { models, metrics, loading } = useAIData();
+  const { models, metrics, health, aggregates, loading } = useAIData();
   const [events, setEvents] = useState<InferenceEvent[]>([]);
   const [paused, setPaused]   = useState(false);
   const [tab, setTab] = useState<'live'|'models'|'distribution'|'shap'|'rules'>('live');
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
-  // Seeding from real metrics if available, else blank
+  // Sync events from real metrics
   useEffect(() => {
+    if (paused) return;
     if (metrics.length > 0) {
       setEvents(metrics.map((m: any) => ({
         id: m.id,
         scanId: m.scanId || 'scan-???',
-        modality: m.modality || 'CT',
-        bodyPart: m.bodyPart || 'HEAD',
-        finding: m.primaryFinding || m.summary || 'AI Analysis',
+        modality: m.scan?.modality || 'CT',
+        bodyPart: m.scan?.bodyPart || 'HEAD',
+        finding: m.primaryFinding || 'AI Analysis',
         urgency: m.urgency || 'NORMAL',
         confidence: m.confidence || 0.9,
         latencyMs: m.inferenceMs || 1200,
         engine: m.modelVersion || 'v2.4.1',
-        tenantId: 't1', region: 'uk', ts: new Date(m.createdAt).getTime()
+        tenantId: m.scan?.tenantId || 't1', 
+        region: 'UK', 
+        ts: new Date(m.createdAt).getTime()
       })));
     }
-  }, [metrics]);
-
-  // Live stream — new event every 1.2s
-  useEffect(() => {
-    if (paused) { clearInterval(intervalRef.current); return; }
-    intervalRef.current = setInterval(() => {
-      setEvents(prev => [generateEvent(), ...prev].slice(0, 200));
-    }, 1200);
-    return () => clearInterval(intervalRef.current);
-  }, [paused]);
+  }, [metrics, paused]);
 
   const last200 = events.slice(0, 200);
   const criticalCount  = last200.filter(e => e.urgency === 'CRITICAL').length;
-  const avgConf        = last200.length > 0 ? last200.reduce((s,e) => s + e.confidence, 0) / last200.length : 0;
-  const avgLatency     = last200.length > 0 ? last200.reduce((s,e) => s + e.latencyMs, 0)  / last200.length : 0;
+  const avgConf        = aggregates.avgConfidence || (last200.length > 0 ? last200.reduce((s,e) => s + e.confidence, 0) / last200.length : 0);
+  const avgLatency     = aggregates.avgLatencyMs  || (last200.length > 0 ? last200.reduce((s,e) => s + e.latencyMs, 0)  / last200.length : 0);
   const lowConfCount   = last200.filter(e => e.confidence < 0.65).length;
 
   const tabStyle = (t:string): React.CSSProperties => ({
@@ -366,13 +359,28 @@ export function AIMonitoringDashboard() {
   return (
     <div style={{ padding:24, background:C.bg1, minHeight:'calc(100vh - 76px)', fontFamily:C.F }}>
 
+      <style>{`
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+        @media (max-width: 1200px) {
+          .kpi-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+        @media (max-width: 900px) {
+          .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .chart-grid { grid-template-columns: 1fr !important; }
+          .models-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 600px) {
+          .kpi-grid { grid-template-columns: 1fr !important; }
+          .header-stack { flex-direction: column; align-items: flex-start !important; gap: 16px; }
+        }
+      `}</style>
+
       {/* Header */}
-      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:20 }}>
+      <div className="header-stack" style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:20 }}>
         <div>
           <h2 style={{ margin:0, fontSize:20, fontWeight:700, color:C.textHi }}>AI Inference Monitor</h2>
           <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:4 }}>
             <div style={{ width:6, height:6, borderRadius:'50%', background:paused?C.textLo:C.normal, boxShadow:paused?'none':`0 0 6px ${C.normal}`, animation:paused?'none':'pulse 1.5s infinite' }}/>
-            <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
             <span style={{ fontSize:11, color:C.textMd }}>{paused ? 'Paused' : 'Live — updating every 1.2s'}</span>
           </div>
         </div>
@@ -392,7 +400,7 @@ export function AIMonitoringDashboard() {
       </div>
 
       {/* Top KPIs */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10, marginBottom:20 }}>
+      <div className="kpi-grid" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10, marginBottom:20 }}>
         <Metric label="INFERENCES / SEC"   value={paused?'0.0':'14.2'}   color={C.brand}    sub="Triage engine" />
         <Metric label="CRITICAL (200)"     value={criticalCount}         color={C.critical} sub={`${((criticalCount/Math.max(last200.length,1))*100).toFixed(1)}% of stream`} />
         <Metric label="AVG CONFIDENCE"     value={`${(avgConf*100).toFixed(1)}%`} color={avgConf>=0.85?C.normal:C.urgent} />
@@ -419,7 +427,7 @@ export function AIMonitoringDashboard() {
       {tab === 'live' && (
         <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
           {/* Sparkline + histogram side by side */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div className="chart-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
             <LatencySparkline events={last200} />
             <ConfidenceHistogram events={last200} />
           </div>
@@ -488,8 +496,8 @@ export function AIMonitoringDashboard() {
 
       {/* MODEL HEALTH */}
       {tab === 'models' && (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12 }}>
-          {SERVICES.map(svc => (
+        <div className="models-grid" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12 }}>
+          {health.map((svc: any) => (
             <div key={svc.name} style={{
               padding:16, background:C.bg2, borderRadius:14,
               border:`1px solid ${svc.status==='healthy'?`${C.normal}20`:svc.status==='running'?`${C.info}20`:C.border}`,
@@ -503,15 +511,14 @@ export function AIMonitoringDashboard() {
                 }}/>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:12, fontWeight:700, color:C.textHi }}>{svc.name}</div>
-                  <div style={{ fontSize:9, color:C.textLo, fontFamily:C.FM }}>:{svc.port} · {svc.gpu}</div>
+                  <div style={{ fontSize:9, color:C.textLo, fontFamily:C.FM }}>Version: {svc.version || 'v2.4.1'}</div>
                 </div>
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
                 {[
-                  { label:'QPS',   value: svc.qps > 0 ? `${svc.qps}` : '—' },
-                  { label:'P50',   value: svc.p50 > 0 ? `${svc.p50}s` : '—' },
-                  { label:'P99',   value: svc.p99 > 0 ? `${svc.p99}s` : '—' },
-                  { label:'Status',value: svc.status.charAt(0).toUpperCase()+svc.status.slice(1) },
+                  { label:'Latency', value: svc.latency ? `${svc.latency}ms` : '—' },
+                  { label:'Status',  value: svc.status.charAt(0).toUpperCase()+svc.status.slice(1) },
+                  { label:'Backend', value: svc.backend || 'Azure AKS' },
                 ].map(m => (
                   <div key={m.label} style={{ padding:'6px 8px', background:C.bg3, borderRadius:7 }}>
                     <div style={{ fontSize:9, color:C.textLo, marginBottom:3 }}>{m.label}</div>
@@ -519,22 +526,11 @@ export function AIMonitoringDashboard() {
                   </div>
                 ))}
               </div>
-              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                <div>
-                  <div style={{ display:'flex', justifyContent:'space-between', marginBottom:3 }}>
-                    <span style={{ fontSize:9, color:C.textLo }}>Memory</span>
-                    <span style={{ fontSize:9, fontFamily:C.FM, color:svc.memPct>80?C.urgent:C.textMd }}>{svc.memPct}%</span>
-                  </div>
-                  <MiniBar value={svc.memPct} max={100} color={svc.memPct>80?C.urgent:C.brand}/>
+              {svc.status !== 'healthy' && (
+                <div style={{ fontSize:10, color:C.critical, marginTop:10, fontFamily:C.FM }}>
+                  Error: {svc.error || 'Connection timeout'}
                 </div>
-                <div>
-                  <div style={{ display:'flex', justifyContent:'space-between', marginBottom:3 }}>
-                    <span style={{ fontSize:9, color:C.textLo }}>CPU / GPU Util</span>
-                    <span style={{ fontSize:9, fontFamily:C.FM, color:svc.cpuPct>85?C.critical:C.textMd }}>{svc.cpuPct}%</span>
-                  </div>
-                  <MiniBar value={svc.cpuPct} max={100} color={svc.cpuPct>85?C.critical:C.brandLt}/>
-                </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
@@ -542,7 +538,7 @@ export function AIMonitoringDashboard() {
 
       {/* DISTRIBUTION */}
       {tab === 'distribution' && (
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+        <div className="chart-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
           <ConfidenceHistogram events={last200} />
           {/* Urgency breakdown */}
           <div style={{ padding:16, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}` }}>

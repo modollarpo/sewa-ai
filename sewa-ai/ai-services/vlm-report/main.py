@@ -150,8 +150,11 @@ Supplementary observations:
 
         compliance_str = ", ".join(req.compliance)
 
+        full_text = None
+        
         if USE_AZURE_OPENAI and openai_client:
-            prompt = f"""You are an expert AI radiologist assistant. 
+            try:
+                prompt = f"""You are an expert AI radiologist assistant. 
 Generate a structured radiology report for a {req.modality} of the {req.body_part}.
 Clinical indication: {req.clinical_indication or 'None provided'}
 AI Finding: {req.ai_finding} (Confidence: {req.confidence*100:.1f}%)
@@ -165,21 +168,19 @@ IMPRESSION
 
 Keep it professional, clinical, and concise. Do not include introductory or concluding conversational text."""
 
-            response = await openai_client.chat.completions.create(
-                model=AZURE_OPENAI_DEPLOYMENT,
-                messages=[
-                    {"role": "system", "content": "You are a professional medical AI assistant."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.1,
-                max_tokens=800
-            )
-            llm_text = response.choices[0].message.content
-            
-            findings = req.ai_finding
-            impression = req.urgency
-
-            full_text = f"""RADIOLOGY REPORT
+                response = await openai_client.chat.completions.create(
+                    model=AZURE_OPENAI_DEPLOYMENT,
+                    messages=[
+                        {"role": "system", "content": "You are a professional medical AI assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    timeout=5.0, # Strict timeout for clinical UX
+                    temperature=0.1,
+                    max_tokens=800
+                )
+                llm_text = response.choices[0].message.content
+                
+                full_text = f"""RADIOLOGY REPORT
 {'='*60}
 Examination:     {req.modality} {req.body_part}
 AI Urgency:      {req.urgency}
@@ -197,10 +198,22 @@ AI-assisted report — requires authorised radiologist signature.
 FHIR DiagnosticReport will be created on approval.
 HL7 ORU message will be dispatched on signing.
 {'='*60}"""
-            
-        else:
-            # Fallback CPU template mode
-            full_text = f"""RADIOLOGY REPORT
+                
+                return VLMReportResponse(
+                    scan_id=req.scan_id,
+                    technique=technique,
+                    findings=req.ai_finding,
+                    impression=req.urgency,
+                    full_text=full_text,
+                    generated_at=datetime.utcnow().isoformat(),
+                    model_version="gpt-4o",
+                    generation_ms=int((time.time() - start) * 1000),
+                )
+            except Exception as e:
+                logger.warning(f"[VLM] Azure OpenAI failed, falling back to template: {e}")
+
+        # Fallback CPU template mode (runs if Azure is disabled OR failed)
+        full_text = f"""RADIOLOGY REPORT
 {'='*60}
 Examination:     {req.modality} {req.body_part}
 AI Urgency:      {req.urgency}

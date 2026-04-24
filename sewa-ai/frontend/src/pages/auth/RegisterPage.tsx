@@ -15,12 +15,36 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
   const [role, setRole] = useState<'patient'|'expert'>('patient');
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ firstName:'', lastName:'', email:'', password:'', hospitalCode:'' });
-  const { isLoading } = useAuthStore();
+  const { register, isLoading, error } = useAuthStore();
+  const [localError, setLocalError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Registration initiated for ${form.email}. Verification email sent.`);
-    onLogin();
+    setLocalError('');
+    try {
+      // Map hospital code to tenant slug for demo/production
+      let tenantSlug = 'royal-london'; // Default for patients
+      if (role === 'expert') {
+        const code = form.hospitalCode.toUpperCase();
+        if (code.includes('KNH')) tenantSlug = 'kenyatta-nh';
+        else if (code.includes('LUTH')) tenantSlug = 'luth-lagos';
+        else tenantSlug = 'royal-london';
+      }
+
+      await register({
+        tenantSlug,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+        role: role === 'patient' ? 'patient' : 'doctor' // Experts start as doctors
+      });
+      
+      alert(`Registration successful for ${form.email}. Please sign in.`);
+      onLogin();
+    } catch (err: any) {
+      setLocalError(err?.response?.data?.message || 'Registration failed. Please try again.');
+    }
   };
 
   const inputStyle = {
@@ -64,6 +88,13 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
             <div style={{ fontSize:22, fontWeight:800, color:C.textHi, letterSpacing:'-0.03em' }}>Join the Clinical Network</div>
             <p style={{ fontSize:13, color:C.textMd, marginTop:6 }}>Choose your role to begin onboarding</p>
           </div>
+
+          {/* Error */}
+          {(error || localError) && (
+            <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: '10px', background: `${C.critical}14`, border: `1px solid ${C.critical}40`, color: C.critical, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>⚠️ {(error || localError)}</span>
+            </div>
+          )}
 
         {step === 1 && (
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>

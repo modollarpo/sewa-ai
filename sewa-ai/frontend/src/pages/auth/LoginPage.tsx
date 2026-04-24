@@ -4,6 +4,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
+import { useTenant }    from '../../hooks/useTenant';
 
 const C = {
   bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A',
@@ -123,17 +124,19 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
     e.preventDefault();
     setLocalError('');
     try {
-      // Automatic tenant derivation from email domain for demo/enterprise users
-      let tenantSlug = '';
-      const domain = email.split('@')[1];
-      if (domain === 'royallondon.nhs.uk') tenantSlug = 'royal-london';
-      else if (domain === 'luth.edu.ng') tenantSlug = 'luth-lagos';
-      else if (domain === 'knh.go.ke') tenantSlug = 'kenyatta-nh';
-      else if (domain === 'sewaxai.health') tenantSlug = 'royal-london';
-      else if (domain === 'example.com') tenantSlug = 'royal-london';
-      else {
-        // Fallback or custom tenant handling
-        tenantSlug = 'royal-london'; // Default for demo
+      // Prioritize subdomain tenant, fallback to domain derivation for global login
+      let tenantSlug = subdomainTenant || '';
+      
+      if (!tenantSlug) {
+        const domain = email.split('@')[1];
+        if (domain === 'royallondon.nhs.uk') tenantSlug = 'royal-london';
+        else if (domain === 'luth.edu.ng') tenantSlug = 'luth-lagos';
+        else if (domain === 'knh.go.ke') tenantSlug = 'kenyatta-nh';
+        else if (domain === 'sewaxai.health') tenantSlug = 'royal-london';
+        else if (domain === 'example.com') tenantSlug = 'royal-london';
+        else {
+          tenantSlug = 'royal-london'; // Global fallback
+        }
       }
 
       const result = await login(email, password, tenantSlug);

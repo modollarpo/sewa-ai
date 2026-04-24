@@ -20,12 +20,11 @@ const NAV_LINKS = [
     { label:'Metacognition',     id:'metacognition-ai',desc:'AI governance & integrity layer' },
     { label:'Explainability',    id:'explainable-ai',  desc:'Grad-CAM pixel attribution' },
   ]},
+  { label:'Research',   id:'research',   children:null },
   { label:'Compliance', id:'regulatory', children:null },
   { label:'Validation', id:'clinical-validation', children:null },
   { label:'Pricing',    id:'pricing',    children:null },
   { label:'API Docs',   id:'api-docs',   children:null },
-  { label:'Technical Whitepaper', id:'whitepaper', children:null },
-  { label:'About',      id:'about',      children:null },
 ];
 
 const FOOTER_LINKS = {
@@ -40,10 +39,10 @@ const FOOTER_LINKS = {
   ],
   Evidence: [
     { label:'Clinical Validation',id:'clinical-validation' },
+    { label:'Research Portal',    id:'research' },
     { label:'Regulatory Summary', id:'regulatory' },
-    { label:'Peer-Reviewed Papers',id:'clinical-validation' },
+    { label:'Peer-Reviewed Papers',id:'research' },
     { label:'Algorithm Audit',    id:'regulatory' },
-    { label:'NHS DTAC Support',    id:'regulatory' },
   ],
   Company: [
     { label:'About Us',           id:'about' },

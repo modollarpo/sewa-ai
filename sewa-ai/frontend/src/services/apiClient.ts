@@ -15,6 +15,21 @@ export const apiClient = axios.create({ baseURL: BASE, timeout: 30_000 });
 apiClient.interceptors.request.use((cfg) => {
   const token = useAuthStore.getState().token;
   if (token) cfg.headers.Authorization = `Bearer ${token}`;
+
+  // ── Multi-tenancy: Inject X-Tenant-ID from subdomain ────────
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    const parts = host.split('.');
+    // If tenant.domain.com, parts.length >= 3
+    if (parts.length >= 3 && !host.includes('azurestaticapps.net')) {
+      cfg.headers['X-Tenant-ID'] = parts[0];
+    } else {
+      // Fallback: check localStorage or auth store if subdomain not present
+      const tenant = (window as any)._tenantSlug || 'royal-london';
+      cfg.headers['X-Tenant-ID'] = tenant;
+    }
+  }
+
   return cfg;
 });
 

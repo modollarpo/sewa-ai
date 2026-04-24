@@ -1,25 +1,19 @@
 // SEWA AI — backend/src/services/notifications/whatsappService.ts
-// Twilio WhatsApp Business API — clinical notifications
+// Azure Communication Services (ACS) Advanced Messaging — clinical notifications
 // All NHS/GDPR compliant: no PHI in WhatsApp unless user opted in
 
-import twilio from 'twilio';
+import { MessageClient } from '@azure/communication-messages';
 import { config } from '../../config/env';
 import { logger } from '../../utils/logger';
 import { prisma } from '../../config/database';
 
-let client: ReturnType<typeof twilio> | null = null;
-function getTwilio() {
-  if (!client && config.TWILIO_ACCOUNT_SID && config.TWILIO_AUTH_TOKEN) {
-    client = twilio(config.TWILIO_ACCOUNT_SID, config.TWILIO_AUTH_TOKEN);
-  }
-  return client;
-}
-
-const FROM = `whatsapp:${config.TWILIO_WHATSAPP_NUMBER || '+14155238886'}`; // Twilio sandbox default
+const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING || '';
+const channelRegistrationId = process.env.AZURE_COMMUNICATION_WHATSAPP_CHANNEL_ID || '';
+const messageClient = connectionString ? new MessageClient(connectionString) : null;
 
 // ── WhatsApp message templates ─────────────────────────────────
-// Uses Twilio WhatsApp template messages (pre-approved by Meta for critical health alerts)
-// Template names must match your approved templates in Twilio console
+// Uses Azure WhatsApp template messages (pre-approved by Meta for critical health alerts)
+// Template names must match your approved templates in Azure/Meta console
 
 const TEMPLATES: Record<string, (data: any) => string> = {
   critical_finding: (d) =>
@@ -109,22 +103,23 @@ export interface RegisterWhatsAppOptions {
 // ── Send a WhatsApp message ────────────────────────────────────
 export const whatsappService = {
   async send(opts: WhatsAppSendOptions): Promise<boolean> {
-    const tw = getTwilio();
-    if (!tw) {
-      logger.warn('[WhatsApp] Twilio not configured — skipping');
+    if (!messageClient || !channelRegistrationId) {
+      logger.warn('[WhatsApp] ACS not configured — skipping');
       return false;
     }
 
     const template = TEMPLATES[opts.type] ?? TEMPLATES.default;
-    const body = template({ firstName: opts.firstName, ...opts.data });
+    const content = template({ firstName: opts.firstName, ...opts.data });
 
     try {
-      const msg = await tw.messages.create({
-        from: FROM,
-        to:   `whatsapp:${opts.to}`,
-        body,
+      const result = await messageClient.send({
+        channelRegistrationId,
+        to: [opts.to],
+        kind: 'text',
+        content,
       });
-      logger.info(`[WhatsApp] Sent ${opts.type} to ${opts.to} — SID: ${msg.sid}`);
+      
+      logger.info(`[WhatsApp] Sent ${opts.type} to ${opts.to} — ID: ${result.receipts[0].messageId}`);
       return true;
     } catch (e: any) {
       logger.error(`[WhatsApp] Failed to ${opts.to}:`, e.message);
@@ -134,30 +129,22 @@ export const whatsappService = {
 
   // Register a WhatsApp number for a user
   async registerNumber(opts: RegisterWhatsAppOptions): Promise<{ success: boolean; verificationId?: string }> {
-    const tw = getTwilio();
-
-    // Validate E.164
-    if (!/^\+[1-9]\d{7,14}$/.test(opts.number)) {
-      return { success: false };
-    }
-
     // Update user record
     await prisma.user.update({
       where: { id: opts.userId },
       data: { whatsappNumber: opts.number },
     });
 
-    if (opts.verify && tw) {
+    if (opts.verify && messageClient) {
       // Send OTP via WhatsApp to verify number ownership
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       try {
-        await tw.messages.create({
-          from: FROM,
-          to:   `whatsapp:${opts.number}`,
-          body: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
+        await messageClient.send({
+          channelRegistrationId,
+          to: [opts.number],
+          kind: 'text',
+          content: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
         });
-        // Store in Redis for verification (10 min TTL)
-        // (requires redis import — stubbed here)
         logger.info(`[WhatsApp] Verification sent to ${opts.number}`);
         return { success: true, verificationId: code };
       } catch (e: any) {
@@ -189,14 +176,17 @@ export const whatsappService = {
 
   // Bulk broadcast (e.g. system maintenance notice)
   async broadcast(numbers: string[], message: string): Promise<{ sent: number; failed: number }> {
-    const tw = getTwilio();
-    if (!tw) return { sent: 0, failed: numbers.length };
+    if (!messageClient) return { sent: 0, failed: numbers.length };
     let sent = 0, failed = 0;
     for (const number of numbers) {
       try {
-        await tw.messages.create({ from: FROM, to: `whatsapp:${number}`, body: message });
+        await messageClient.send({
+          channelRegistrationId,
+          to: [number],
+          kind: 'text',
+          content: message,
+        });
         sent++;
-        await new Promise(r => setTimeout(r, 50)); // rate limit: 20/s
       } catch { failed++; }
     }
     return { sent, failed };

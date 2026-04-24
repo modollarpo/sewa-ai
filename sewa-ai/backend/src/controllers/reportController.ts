@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/database';
 import { generateVLMReport } from '../services/aiService';
-import { createFHIRDiagnosticReport } from '../services/fhirService';
+import { createFHIRDiagnosticReport, createFHIRObservation } from '../services/fhirService';
 import { sendHL7ORU } from '../services/hl7Service';
 import { auditLog } from '../utils/audit';
 import { AppError } from '../utils/AppError';
@@ -68,8 +68,25 @@ export async function signReport(req: Request, res: Response, next: NextFunction
 
     await prisma.scan.update({ where: { id: report.scanId }, data: { status: 'reported' } });
 
-    // FHIR DiagnosticReport (Feature 4)
-    const fhirId = await createFHIRDiagnosticReport(signed, report.scan).catch((e: any): null => { console.warn('FHIR DiagReport failed:', e.message); return null; });
+    // FHIR Integration (Feature 4) — R4 Compliance
+    let fhirId: string | null = null;
+    try {
+      const scanWithAI = await prisma.scan.findUnique({ 
+        where: { id: report.scanId }, 
+        include: { aiResult: true, patient: { include: { user: true } } } 
+      });
+
+      if (scanWithAI?.aiResult) {
+        // 1. Create atomic observation for the AI finding
+        const obsId = await createFHIRObservation(scanWithAI, scanWithAI.aiResult);
+        // 2. Link observation to the final DiagnosticReport
+        fhirId = await createFHIRDiagnosticReport(signed, scanWithAI, obsId ? [obsId] : []);
+      } else {
+        fhirId = await createFHIRDiagnosticReport(signed, report.scan);
+      }
+    } catch (e: any) {
+      console.warn('[FHIR] Sync failed during signing:', e.message);
+    }
     if (fhirId) await prisma.report.update({ where: { id }, data: { fhirDiagnosticReportId: fhirId } });
 
     // HL7v2 ORU dispatch (Feature 9)

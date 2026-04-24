@@ -1,36 +1,57 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+
 const prisma = new PrismaClient();
+const SALT_ROUNDS = 12;
+const DEMO_PW = 'SewaAI2024!';
 
 async function main() {
-  // 1. Create Starter Tenant (Hospital A)
-  const tenant = await prisma.tenant.upsert({
-    where: { slug: 'hospital-alpha' },
-    update: {},
-    create: {
-      name: 'Hospital Alpha',
-      slug: 'hospital-alpha',
-      subdomain: 'alpha',
-      region: 'ng',
-      currency: 'NGN',
-      plan: 'starter',
-    },
-  });
+  const hash = await bcrypt.hash(DEMO_PW, SALT_ROUNDS);
 
-  // 2. Create Admin for Tenant
-  await prisma.user.upsert({
-    where: { tenantId_email: { tenantId: tenant.id, email: 'admin@alpha.com' } },
-    update: {},
-    create: {
-      tenantId: tenant.id,
-      email: 'admin@alpha.com',
-      passwordHash: 'argon2_hashed_password', // Use argon2 or bcrypt
-      firstName: 'John',
-      lastName: 'Doe',
-      role: 'admin',
-    },
-  });
+  // 1. Create Demo Tenants
+  const tenants = [
+    { name: 'Royal London Hospital', slug: 'royal-london', region: 'uk', currency: 'GBP', subdomain: 'royal-london' },
+    { name: 'Kenyatta National Hospital', slug: 'kenyatta-nh', region: 'ke', currency: 'KES', subdomain: 'kenyatta-nh' },
+    { name: 'LUTH Lagos', slug: 'luth-lagos', region: 'ng', currency: 'NGN', subdomain: 'luth-lagos' },
+  ];
 
-  console.log(`✅ Seeded: ${tenant.name}`);
+  for (const t of tenants) {
+    await prisma.tenant.upsert({
+      where: { slug: t.slug },
+      update: {},
+      create: { ...t, plan: 'enterprise', status: 'active' },
+    });
+  }
+
+  const rl = await prisma.tenant.findUnique({ where: { slug: 'royal-london' } });
+  const knh = await prisma.tenant.findUnique({ where: { slug: 'kenyatta-nh' } });
+
+  // 2. Create Demo Users
+  const users = [
+    { tenantId: rl!.id, email: 'sarah.chen@royallondon.nhs.uk', role: 'radiologist', first: 'Sarah', last: 'Chen' },
+    { tenantId: rl!.id, email: 'james.okafor@royallondon.nhs.uk', role: 'doctor', first: 'James', last: 'Okafor' },
+    { tenantId: rl!.id, email: 'superadmin@sewaxai.health', role: 'superadmin', first: 'Admin', last: 'Sewa' },
+    { tenantId: rl!.id, email: 'patient.smith@example.com', role: 'patient', first: 'John', last: 'Smith' },
+    { tenantId: knh!.id, email: 'tech@knh.go.ke', role: 'technician', first: 'Kenyatta', last: 'Tech' },
+  ];
+
+  for (const u of users) {
+    await prisma.user.upsert({
+      where: { tenantId_email: { tenantId: u.tenantId, email: u.email } },
+      update: { passwordHash: hash },
+      create: {
+        tenantId: u.tenantId,
+        email: u.email,
+        passwordHash: hash,
+        firstName: u.first,
+        lastName: u.last,
+        role: u.role,
+        status: 'active',
+      },
+    });
+  }
+
+  console.log(`✅ Seeded ${tenants.length} tenants and ${users.length} demo users.`);
 }
 
 main().catch((e) => console.error(e)).finally(() => prisma.$disconnect());

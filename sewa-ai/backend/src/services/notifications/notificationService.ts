@@ -250,6 +250,21 @@ export async function dispatch(opts: DispatchOptions): Promise<void> {
       );
       await Promise.allSettled(waPromises);
     })(),
+
+    // ── SMS (Azure ACS) ──────────────────────────────────────
+    channels.includes('sms') && (async () => {
+      const { smsService } = await import('../smsService');
+      const smsUsers = users.filter((u: any) => {
+        const prefs = u.notifPrefs as any;
+        // u.whatsappNumber is used as a generic phone field in some parts of the DB, 
+        // but u.phone or whatsappNumber can both be targeted.
+        return (u.phone || u.whatsappNumber) && prefs?.sms !== false;
+      });
+      const smsPromises = smsUsers.map((u: any) =>
+        smsService.send((u.phone || u.whatsappNumber)!, `${title}: ${body}`)
+      );
+      await Promise.allSettled(smsPromises);
+    })(),
   ]);
 
   logger.info(`[Notify] ${type} → ${users.length} users (channels: ${channels.join(',')})`);

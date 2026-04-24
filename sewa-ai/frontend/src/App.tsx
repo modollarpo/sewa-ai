@@ -7,6 +7,10 @@ import { useAuthStore }              from './store/authStore';
 import { useSettingsStore }          from './store/settingsStore';
 import { useScanStore }              from './store/scanStore';
 import { useNotificationStore }      from './store/notificationStore';
+import { 
+  ChevronLeft, ChevronRight, LayoutDashboard, Brain, Map, 
+  Lock, CreditCard, Activity, Rocket, Calendar 
+} from 'lucide-react';
 
 // Clinical pages
 import { LoginPage }                 from './pages/auth/LoginPage';
@@ -39,6 +43,7 @@ import { TermsPage }                 from './pages/public/TermsPage';
 import { CookiePolicyPage }          from './pages/public/CookiePolicyPage';
 import { SecurityPage }              from './pages/public/SecurityPage';
 import { ClinicalValidationPage }    from './pages/public/ClinicalValidationPage';
+import { ResearchPortal }            from './pages/public/ResearchPortal';
 import { PartnerPortalPage }         from './pages/public/PartnerPortalPage';
 import { BlogPage }             from './pages/public/BlogPage';
 import { CareersPage }          from './pages/public/CareersPage';
@@ -78,24 +83,24 @@ const C = {
 
 // ── Sub-nav configs ────────────────────────────────────────────
 const ADMIN_NAV = [
-  { id:'overview',          label:'Overview',           icon:'📊' },
-  { id:'ai-performance',    label:'AI Performance',     icon:'🧠' },
-  { id:'population-health', label:'Population Health',  icon:'📍' },
-  { id:'ai-monitoring',     label:'AI Live Monitor',    icon:'📡' },
-  { id:'appointments',      label:'Appointments',       icon:'📅' },
-  { id:'compliance',        label:'Compliance',         icon:'🔒' },
-  { id:'billing',           label:'Billing',            icon:'💳' },
-  { id:'onboarding',        label:'Onboarding',         icon:'🚀' },
-  { id:'roadmap',           label:'Roadmap',            icon:'🗺️' },
+  { id:'overview',          label:'Overview',           icon:<LayoutDashboard size={16}/> },
+  { id:'ai-performance',    label:'AI Performance',     icon:<Brain size={16}/> },
+  { id:'population-health', label:'Population Health',  icon:<Map size={16}/> },
+  { id:'ai-monitoring',     label:'AI Live Monitor',    icon:<Activity size={16}/> },
+  { id:'appointments',      label:'Appointments',       icon:<Calendar size={16}/> },
+  { id:'compliance',        label:'Compliance',         icon:<Lock size={16}/> },
+  { id:'billing',           label:'Billing',            icon:<CreditCard size={16}/> },
+  { id:'onboarding',        label:'Onboarding',         icon:<Rocket size={16}/> },
+  { id:'roadmap',           label:'Roadmap',            icon:<Map size={16}/> },
 ] as const;
 
 const SUPER_NAV = [
-  { id:'platform',       label:'Platform Overview',  icon:'🌍' },
-  { id:'ai-monitoring',  label:'AI Live Monitor',    icon:'📡' },
-  { id:'ai-performance', label:'AI Performance',     icon:'🧠' },
-  { id:'compliance',     label:'Compliance',         icon:'🔒' },
-  { id:'billing',        label:'Global Billing',     icon:'💳' },
-  { id:'roadmap',        label:'Roadmap',            icon:'🗺️' },
+  { id:'platform',       label:'Platform Overview',  icon:<LayoutDashboard size={16}/> },
+  { id:'ai-monitoring',  label:'AI Live Monitor',    icon:<Activity size={16}/> },
+  { id:'ai-performance', label:'AI Performance',     icon:<Brain size={16}/> },
+  { id:'compliance',     label:'Compliance',         icon:<Lock size={16}/> },
+  { id:'billing',        label:'Global Billing',     icon:<CreditCard size={16}/> },
+  { id:'roadmap',        label:'Roadmap',            icon:<Map size={16}/> },
 ] as const;
 
 type AdminPage = typeof ADMIN_NAV[number]['id'];
@@ -105,20 +110,34 @@ type SuperPage = typeof SUPER_NAV[number]['id'];
 const SERVICES = ['Triage AI','VLM','Uncertainty','Metacognition','FL','CL','FHIR R4','HL7v2','PACS','Socket.IO','Stripe','Paystack'];
 
 // ── Sub-nav sidebar ────────────────────────────────────────────
-function SubNav({ items, active, onChange }: {
-  items: readonly { id:string; label:string; icon:string }[];
+function SubNav({ items, active, onChange, collapsed, onToggle }: {
+  items: readonly { id:string; label:string; icon:string|React.ReactNode }[];
   active: string;
   onChange: (id:string) => void;
+  collapsed: boolean;
+  onToggle: () => void;
 }) {
   return (
     <div style={{
-      width:200, flexShrink:0, background:C.bg1,
+      width: collapsed ? 64 : 200, flexShrink:0, background:C.bg1,
       borderRight:`1px solid ${C.border}`,
       padding:'10px 8px', display:'flex', flexDirection:'column', gap:2,
-      overflowY:'auto',
+      overflowY:'auto', transition:'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      position: 'relative'
     }}>
+      <button onClick={onToggle} style={{
+        position: 'absolute', top: 12, right: collapsed ? 20 : 8,
+        background: C.bg3, border: `1px solid ${C.border}`, color: C.textMd,
+        width: 24, height: 24, borderRadius: 6, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
+      }}>
+        {collapsed ? <ChevronRight size={14}/> : <ChevronLeft size={14}/>}
+      </button>
+
+      <div style={{ height: 40 }} /> {/* Spacer for toggle */}
+
       {items.map(item => (
-        <button key={item.id} onClick={() => onChange(item.id)} style={{
+        <button key={item.id} onClick={() => onChange(item.id)} title={collapsed ? item.label : undefined} style={{
           display:'flex', alignItems:'center', gap:8,
           padding:'8px 12px', borderRadius:9, cursor:'pointer',
           border:`1px solid ${active===item.id ? `${C.brand}30` : 'transparent'}`,
@@ -127,9 +146,11 @@ function SubNav({ items, active, onChange }: {
           fontFamily:C.F, fontSize:12,
           fontWeight: active===item.id ? 600 : 400,
           textAlign:'left', transition:'all 120ms',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          overflow: 'hidden'
         }}>
-          <span style={{ fontSize:13 }}>{item.icon}</span>
-          {item.label}
+          <span style={{ fontSize:13, flexShrink:0 }}>{item.icon}</span>
+          {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
         </button>
       ))}
     </div>
@@ -193,7 +214,8 @@ export default function App() {
   const [settingsPage, setSettingsPage] = useState(false);
   const [adminPage,   setAdminPage]   = useState<AdminPage>('overview');
   const [superPage,   setSuperPage]   = useState<SuperPage>('platform');
-  const [publicPage,  setPublicPage]  = useState<'landing'|'login'|'register'|'solutions'|'regulatory'|'clinical-validation'|'pricing'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'>('landing');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [publicPage,  setPublicPage]  = useState<'landing'|'login'|'register'|'solutions'|'research'|'regulatory'|'clinical-validation'|'pricing'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'>('landing');
 
   // Universal navigation handler for public site
   const navigate = (page: string) => {
@@ -282,6 +304,7 @@ export default function App() {
         {publicPage === 'cookie-policy'       && <CookiePolicyPage {...navProps} />}
         {publicPage === 'security'            && <SecurityPage {...navProps} />}
         {publicPage === 'clinical-validation' && <ClinicalValidationPage {...navProps} />}
+        {publicPage === 'research'            && <ResearchPortal {...navProps} />}
         {publicPage === 'partner-portal'      && <PartnerPortalPage {...navProps} />}
         {publicPage === 'whitepaper'          && <TechnicalWhitepaperPage {...navProps} />}
         {publicPage === 'blog'                && <BlogPage {...navProps} />}
@@ -301,7 +324,7 @@ export default function App() {
         {publicPage === 'api-docs'           && <ApiDocsPage {...navProps} />}
         {publicPage === 'developers'         && <DevelopersPage {...navProps} />}
         {/* Fallback for unmapped routes */}
-        {!['landing','login','register','pricing','solutions','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','regulatory','api-docs','developers'].includes(publicPage) && (
+        {!['landing','login','register','pricing','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','regulatory','api-docs','developers'].includes(publicPage) && (
           <LandingPage onLogin={() => navigate('login')} onNavigate={navigate} />
         )}
         <CookieBanner onNavigate={navigate} />
@@ -325,7 +348,13 @@ export default function App() {
 
     if (role === 'admin') return (
       <div style={{ display:'flex', height:'calc(100vh - 52px - 24px)', overflow:'hidden' }}>
-        <SubNav items={ADMIN_NAV} active={adminPage} onChange={id => setAdminPage(id as AdminPage)}/>
+        <SubNav 
+          items={ADMIN_NAV} 
+          active={adminPage} 
+          onChange={id => setAdminPage(id as AdminPage)}
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
         <div style={{ flex:1, overflowY:'auto' }}>
           {adminPage === 'overview'          && <HospitalAdminDashboard />}
           {adminPage === 'ai-performance'    && <AIPerformanceDashboard />}
@@ -342,7 +371,13 @@ export default function App() {
 
     if (role === 'superadmin') return (
       <div style={{ display:'flex', height:'calc(100vh - 52px - 24px)', overflow:'hidden' }}>
-        <SubNav items={SUPER_NAV} active={superPage} onChange={id => setSuperPage(id as SuperPage)}/>
+        <SubNav 
+          items={SUPER_NAV} 
+          active={superPage} 
+          onChange={id => setSuperPage(id as SuperPage)}
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
         <div style={{ flex:1, overflowY:'auto' }}>
           <ErrorBoundary name="SuperAdmin Dashboard">
             {superPage === 'platform'       && <SuperAdminDashboard />}

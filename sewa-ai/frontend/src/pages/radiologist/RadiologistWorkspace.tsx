@@ -370,9 +370,30 @@ export function RadiologistWorkspace() {
 
   useEffect(() => {
     fetchWorklist();
+    
+    // ── Real-time worklist updates via Socket.IO ──────────────
+    const handleUpdate = () => {
+      logger.info('[Radiologist] Refreshing worklist via Socket.IO signal');
+      fetchWorklist();
+    };
+
+    const io = (window as any).socket; // Assumes global socket established in App.tsx or similar
+    if (io) {
+      io.on('critical:alert', handleUpdate);
+      io.on('scan:processed', handleUpdate);
+      io.on('report:signed',  handleUpdate);
+    }
+
     const r = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener('resize', r);
-    return () => window.removeEventListener('resize', r);
+    return () => {
+      window.removeEventListener('resize', r);
+      if (io) {
+        io.off('critical:alert', handleUpdate);
+        io.off('scan:processed', handleUpdate);
+        io.off('report:signed',  handleUpdate);
+      }
+    };
   }, []);
 
   const stats = {

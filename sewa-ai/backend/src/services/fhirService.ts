@@ -100,8 +100,38 @@ export async function createFHIRImagingStudy(scan: any): Promise<string | null> 
   }
 }
 
+// ── Observation ──────────────────────────────────────────────────────────
+export async function createFHIRObservation(scan: any, aiResult: any): Promise<string | null> {
+  if (!fhirEnabled()) return null;
+  try {
+    const token = await getFHIRToken();
+    const resource = {
+      resourceType: 'Observation',
+      status:       'final',
+      category:     [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/observation-category', code: 'imaging' }] }],
+      code:         { text: aiResult.primaryFinding || 'AI Inference Result' },
+      subject:      scan.patientId ? { reference: `Patient/${scan.patient?.fhirId}` } : undefined,
+      effectiveDateTime: scan.receivedAt,
+      valueQuantity: aiResult.confidence ? {
+        value: aiResult.confidence * 100,
+        unit:  '%',
+        system: 'http://unitsofmeasure.org',
+        code:   '%'
+      } : undefined,
+      device: { display: `SEWA AI Triage Engine ${aiResult.modelVersion || 'v2.4.1'}` },
+      note: aiResult.location ? [{ text: `Finding location: ${aiResult.location}` }] : [],
+    };
+    const res = await client().post('/Observation', resource, { headers: buildHeaders(token) });
+    logger.info(`[FHIR] Observation created: ${res.data.id} for scan ${scan.id}`);
+    return res.data.id;
+  } catch (err: any) {
+    logger.warn(`[FHIR] Observation creation failed: ${err.message}`);
+    return null;
+  }
+}
+
 // ── DiagnosticReport ─────────────────────────────────────────────────────
-export async function createFHIRDiagnosticReport(report: any, scan: any): Promise<string | null> {
+export async function createFHIRDiagnosticReport(report: any, scan: any, observationIds: string[] = []): Promise<string | null> {
   if (!fhirEnabled()) return null;
   try {
     const token = await getFHIRToken();
@@ -114,6 +144,7 @@ export async function createFHIRDiagnosticReport(report: any, scan: any): Promis
       subject:     scan.patientId ? { reference: `Patient/${scan.patient?.fhirId}` } : undefined,
       issued:      report.createdAt.toISOString(),
       performer:   [{ reference: `Practitioner/${report.authorId}` }],
+      result:      observationIds.map(id => ({ reference: `Observation/${id}` })),
       conclusion:  report.summary || 'Study complete.',
       conclusionCode: scan.aiResult?.primaryFinding
         ? [{ text: scan.aiResult.primaryFinding }]

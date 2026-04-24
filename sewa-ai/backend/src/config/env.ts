@@ -146,21 +146,11 @@ export const config = {
   FIREBASE_PRIVATE_KEY:  optional('FIREBASE_PRIVATE_KEY'),
   FIREBASE_CLIENT_EMAIL: optional('FIREBASE_CLIENT_EMAIL'),
 
-  // ── Email ─────────────────────────────────────────────────────
-  SMTP_HOST:  optional('SMTP_HOST', 'localhost'),
-  SMTP_PORT:  optionalInt('SMTP_PORT', IS_AZURE ? 587 : 1025),
-  SMTP_USER:  optional('SMTP_USER'),
-  SMTP_PASS:  optional('SMTP_PASS'),
+  // ── Azure Communication Services (ACS) ──────────────────────
+  AZURE_COMMUNICATION_CONNECTION_STRING: optional('AZURE_COMMUNICATION_CONNECTION_STRING'),
+  AZURE_COMMUNICATION_SMS_NUMBER:        optional('AZURE_COMMUNICATION_SMS_NUMBER'),
+  AZURE_COMMUNICATION_WHATSAPP_CHANNEL_ID: optional('AZURE_COMMUNICATION_WHATSAPP_CHANNEL_ID'),
   EMAIL_FROM: optional('EMAIL_FROM', 'info@sewaxai.health'),
-
-  // ── Twilio / WhatsApp ─────────────────────────────────────────
-  TWILIO_ACCOUNT_SID:      optional('TWILIO_ACCOUNT_SID'),
-  TWILIO_AUTH_TOKEN:       optional('TWILIO_AUTH_TOKEN'),
-  TWILIO_WHATSAPP_NUMBER:  optional('TWILIO_WHATSAPP_NUMBER', '+14155238886'),
-  TWILIO_SMS_NUMBER:       optional('TWILIO_SMS_NUMBER'),
-
-  // ── SendGrid (email fallback) ─────────────────────────────────
-  SENDGRID_API_KEY:   optional('SENDGRID_API_KEY'),
 
   // ── Multi-cloud Storage ───────────────────────────────────────
   STORAGE_PROVIDER: optional('STORAGE_PROVIDER', 'azure'), // azure | aws | gcp | multi
