@@ -1,0 +1,83 @@
+# SEWA AI - Production Deployment Script
+$ErrorActionPreference = "Stop"
+$TIMESTAMP = Get-Date -Format "yyyyMMdd-HHmmss"
+$ACR_NAME = "sewaaiproductionacr"
+$ACR_SERVER = "sewaaiproductionacr.azurecr.io"
+$AKS_CLUSTER = "sewa-ai-production-aks"
+$RESOURCE_GROUP = "sewa-ai-production-rg"
+$NS = "sewa-ai"
+$IMAGE_TAG = "prod-$TIMESTAMP"
+
+function Out-Success {
+    param($msg)
+    Write-Host "  OK: $msg" -ForegroundColor Green
+}
+
+Write-Host "SEWA AI - Production Push Pipeline ($TIMESTAMP)" -ForegroundColor Cyan
+
+# 1. Commit changes
+Write-Host "[1/6] Committing local changes..." -ForegroundColor Yellow
+git add .
+git commit -m "Production push: $TIMESTAMP" --allow-empty
+Out-Success "Changes committed."
+
+# 2. Build & Push Backend via ACR Tasks
+Write-Host "[2/6] Building Backend via ACR Tasks..." -ForegroundColor Yellow
+$backendImg = "sewa-ai-backend:$IMAGE_TAG"
+$backendLatest = "sewa-ai-backend:production-latest"
+az acr build --registry $ACR_NAME --image $backendImg --image $backendLatest --file backend/Dockerfile backend/
+Out-Success "Backend build complete."
+
+# 3. Build & Push AI Services
+Write-Host "[3/6] Building AI Services via ACR Tasks..." -ForegroundColor Yellow
+$AI_SERVICES = "triage", "uncertainty", "vlm-report", "metacognition", "federated-learning", "continuous-learning"
+foreach ($svc in $AI_SERVICES) {
+    Write-Host " -> Building $svc..." -ForegroundColor Cyan
+    $svcImg = "sewa-ai-$svc`:$IMAGE_TAG"
+    $svcLatest = "sewa-ai-$svc`:production-latest"
+    az acr build --registry $ACR_NAME --image $svcImg --image $svcLatest --file "ai-services/$svc/Dockerfile" "ai-services/$svc/"
+}
+Out-Success "AI services build complete."
+
+# 4. Update AKS Manifests
+Write-Host "[4/6] Deploying to AKS..." -ForegroundColor Yellow
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing
+
+# Substitute image tags in manifests and apply
+$manifests = Get-ChildItem "azure/k8s/*.yaml"
+foreach ($m in $manifests) {
+    $content = Get-Content $m.FullName -Raw
+    $content = $content -replace "{{IMAGE_TAG}}", $IMAGE_TAG
+    $content = $content -replace "{{CONTAINER_REGISTRY}}", $ACR_SERVER
+    $content = $content -replace "{{ENV}}", "production"
+    $tmpPath = $m.FullName + ".tmp"
+    $content | Out-File $tmpPath -Encoding utf8
+    kubectl apply -f $tmpPath
+    Remove-Item $tmpPath
+}
+Out-Success "AKS manifests applied."
+
+# 5. Frontend - Azure Static Web Apps
+Write-Host "[5/6] Deploying Frontend to SWA..." -ForegroundColor Yellow
+Push-Location frontend
+npm ci --prefer-offline
+$env:VITE_API_URL="https://api.production.sewaxai.health"
+$env:VITE_APP_ENV="production"
+npm run build
+$SWA_TOKEN = az staticwebapp secrets list --name "sewa-ai-production-web" --resource-group $RESOURCE_GROUP --query "properties.apiKey" -o tsv
+npx @azure/static-web-apps-cli deploy dist --deployment-token $SWA_TOKEN --env "production"
+Pop-Location
+Out-Success "Frontend deployed."
+
+# 6. Database & Health Check
+Write-Host "[6/6] Finalizing Deployment..." -ForegroundColor Yellow
+$POD = kubectl get pods -n $NS -l app=sewa-backend -o name | Select-Object -First 1
+if ($POD) {
+    Write-Host " -> Seeding database via pod $POD..." -ForegroundColor Cyan
+    kubectl exec -n $NS $POD -- npm run db:seed
+}
+
+Write-Host "=== POD STATUS ===" -ForegroundColor Cyan
+kubectl get pods -n $NS
+
+Write-Host "Production push complete! Platform is live." -ForegroundColor Green
