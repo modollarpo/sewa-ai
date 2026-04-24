@@ -46,6 +46,7 @@ COPY --from=builder --chown=sewa:sewa /app/dist         ./dist
 COPY --from=builder --chown=sewa:sewa /app/node_modules ./node_modules
 COPY --from=builder --chown=sewa:sewa /app/prisma       ./prisma
 COPY --from=builder --chown=sewa:sewa /app/package.json ./
+COPY --from=builder --chown=sewa:sewa /app/tsconfig.json ./
 
 USER sewa
 EXPOSE 3000
