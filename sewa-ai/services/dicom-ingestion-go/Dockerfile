@@ -34,8 +34,10 @@ COPY --from=builder /build/dicom-ingestion /app/dicom-ingestion
 # Expose DICOM C-STORE port and HTTP health/metrics port
 EXPOSE 11112 8090
 
-# Install wget for healthcheck only
-RUN apt-get update && apt-get install -y --no-install-recommends wget \
+# Install required utilities for health checks & SSL
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Non-root user

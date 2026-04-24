@@ -1,7 +1,7 @@
-# SEWA AI — DICOM Ingestion Service (Go) — Kubernetes Manifest
-# High-performance DICOM C-STORE receiver + anonymisation pipeline
-# Port 11112: DICOM C-STORE (TCP)
-# Port 8090:  HTTP health / metrics (Prometheus)
+# SEWA AI — DICOM Ingestion Service (Go) — Kubernetes Manifest v2
+# Security hardened: internal LB + NetworkPolicy — DICOM never exposed to internet
+# Port 11112: DICOM C-STORE (Azure VNet internal only)
+# Port 8090:  HTTP health / metrics / /ingest REST endpoint
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -12,11 +12,17 @@ metadata:
     app: sewa-dicom-ingestion
     tier: ingestion
     language: go
+    version: "2.0.0"
 spec:
   replicas: 2
   selector:
     matchLabels:
       app: sewa-dicom-ingestion
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0   # never take all pods offline during update
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -26,6 +32,14 @@ spec:
         prometheus.io/port: "8090"
         prometheus.io/path: "/metrics"
     spec:
+      # Spread across nodes for HA
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: sewa-dicom-ingestion
       containers:
         - name: dicom-ingestion
           image: sewaaiproductionacr.azurecr.io/sewa-ai-dicom-ingestion:production-latest
@@ -89,13 +103,26 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 15
             timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /ready
               port: 8090
             initialDelaySeconds: 3
             periodSeconds: 10
+            failureThreshold: 2
+          # Security hardening
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
 ---
+# Internal LoadBalancer — DICOM C-STORE accessible from Azure VNet only
+# NOT exposed to the public internet (annotation: azure-load-balancer-internal)
 apiVersion: v1
 kind: Service
 metadata:
@@ -103,6 +130,12 @@ metadata:
   namespace: sewa-ai
   labels:
     app: sewa-dicom-ingestion
+  annotations:
+    # Internal LB — restricts DICOM port to Azure VNet (PACS systems on private network)
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    # Metrics scraping
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8090"
 spec:
   selector:
     app: sewa-dicom-ingestion
@@ -115,8 +148,57 @@ spec:
       port: 8090
       targetPort: 8090
       protocol: TCP
-  # LoadBalancer exposes DICOM C-STORE port externally to PACS/modalities
   type: LoadBalancer
+---
+# NetworkPolicy — only allow DICOM connections from trusted namespaces / PACS
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sewa-dicom-ingestion-netpol
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-dicom-ingestion
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow DICOM C-STORE from within the cluster (backend, other services)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: sewa-ai
+      ports:
+        - port: 11112
+          protocol: TCP
+    # Allow HTTP (health, metrics, /ingest) from anywhere within cluster
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - port: 8090
+          protocol: TCP
+    # Allow external DICOM from PACS systems (VNet internal LB handles routing)
+    - ports:
+        - port: 11112
+          protocol: TCP
+  egress:
+    # Allow Redis communication (Azure Cache for Redis is external, so no namespace restriction)
+    - ports:
+        - port: 6379
+          protocol: TCP
+        - port: 6380
+          protocol: TCP
+    # Allow DNS
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # Allow Azure Blob Storage HTTPS
+    - ports:
+        - port: 443
+          protocol: TCP
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -137,3 +219,12 @@ spec:
         target:
           type: Utilization
           averageUtilization: 65
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30   # scale out fast on DICOM burst
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300  # scale in slowly to avoid thrashing
