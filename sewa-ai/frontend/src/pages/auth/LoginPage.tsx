@@ -103,6 +103,7 @@ function MFAInput({ value, onChange }: { value: string; onChange: (v: string) =>
 
 export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
   const { login, verifyMFA, isLoading, error } = useAuthStore();
+  const { tenantSlug: subdomainTenant } = useTenant(); // ← was missing: caused ReferenceError on every submit
   const [step, setStep] = useState<'credentials' | 'mfa' | 'biometric'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

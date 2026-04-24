@@ -82,7 +82,7 @@ Write-Host "[6/6] Finalizing Deployment..." -ForegroundColor Yellow
 $POD = kubectl get pods -n $NS -l app=sewa-backend -o name | Select-Object -First 1
 if ($POD) {
     Write-Host " -> Seeding database via pod $POD..." -ForegroundColor Cyan
-    kubectl exec -n $NS $POD -- npm run db:seed
+    kubectl exec -n $NS $POD -- npm run db:seed:js
 }
 
 Write-Host "=== POD STATUS ===" -ForegroundColor Cyan

@@ -10,10 +10,11 @@ export function useTenant() {
 
   useEffect(() => {
     const hostname = window.location.hostname;
-    // Development fallback (localhost:3000 -> default tenant or null)
+    // Development fallback — return null so LoginPage uses email-domain derivation
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       const params = new URLSearchParams(window.location.search);
-      setTenantSlug(params.get('tenant') || 'hospital-alpha');
+      // Allow ?tenant=royal-london override for testing specific tenants
+      setTenantSlug(params.get('tenant') || null);
       setIsLoaded(true);
       return;
     }

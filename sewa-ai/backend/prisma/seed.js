@@ -43,7 +43,7 @@ async function main() {
   // Users
   const superAdmin = await prisma.user.upsert({ 
     where:{ tenantId_email: { tenantId: rlTenant.id, email: 'superadmin@sewaxai.health' } }, 
-    update:{}, 
+    update:{ passwordHash: HASH, status: 'active' }, 
     create:{ 
       tenantId: rlTenant.id, 
       email: 'superadmin@sewaxai.health', 
@@ -59,7 +59,7 @@ async function main() {
 
   const sarahUser = await prisma.user.upsert({ 
     where:{ tenantId_email: { tenantId: rlTenant.id, email: 'sarah.chen@royallondon.nhs.uk' } }, 
-    update:{}, 
+    update:{ passwordHash: HASH, status: 'active' }, 
     create:{ 
       tenantId: rlTenant.id, 
       email: 'sarah.chen@royallondon.nhs.uk', 
@@ -77,7 +77,7 @@ async function main() {
 
   const jamesUser = await prisma.user.upsert({ 
     where:{ tenantId_email: { tenantId: rlTenant.id, email: 'james.okafor@royallondon.nhs.uk' } }, 
-    update:{}, 
+    update:{ passwordHash: HASH, status: 'active' }, 
     create:{ 
       tenantId: rlTenant.id, 
       email: 'james.okafor@royallondon.nhs.uk', 
@@ -94,7 +94,7 @@ async function main() {
   // Patient User
   const patientUser = await prisma.user.upsert({ 
     where:{ tenantId_email: { tenantId: rlTenant.id, email: 'patient.smith@example.com' } }, 
-    update:{}, 
+    update:{ passwordHash: HASH, status: 'active' }, 
     create:{ 
       tenantId: rlTenant.id, 
       email: 'patient.smith@example.com', 
@@ -107,6 +107,26 @@ async function main() {
       timezone: 'UTC'
     }
   });
+
+  // KNH Technician
+  const knh = await prisma.tenant.findUnique({ where: { slug: 'kenyatta-nh' } });
+  if (knh) {
+    await prisma.user.upsert({
+      where: { tenantId_email: { tenantId: knh.id, email: 'tech@knh.go.ke' } },
+      update: { passwordHash: HASH, status: 'active' },
+      create: {
+        tenantId: knh.id,
+        email: 'tech@knh.go.ke',
+        passwordHash: HASH,
+        role: 'technician',
+        firstName: 'Kenyatta',
+        lastName: 'Tech',
+        status: 'active',
+        language: 'en',
+        timezone: 'UTC'
+      }
+    });
+  }
 
   const patient = await prisma.patient.upsert({ 
     where:{ userId: patientUser.id }, 

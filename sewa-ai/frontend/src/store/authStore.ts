@@ -18,6 +18,15 @@ interface User {
   language: string;
 }
 
+interface RegisterPayload {
+  tenantSlug: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role?: string;
+}
+
 interface AuthStore {
   user: User | null;
   token: string | null;
@@ -27,6 +36,7 @@ interface AuthStore {
   error: string | null;
 
   login: (email: string, password: string, tenantSlug: string) => Promise<{ mfaRequired?: boolean; mfaChallenge?: string }>;
+  register: (payload: RegisterPayload) => Promise<void>;
   verifyMFA: (mfaChallenge: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
@@ -61,6 +71,18 @@ export const useAuthStore = create<AuthStore>()(
           return {};
         } catch (err: any) {
           const msg = err.response?.data?.message || 'Login failed';
+          set({ error: msg, isLoading: false });
+          throw new Error(msg);
+        }
+      },
+
+      register: async (payload) => {
+        set({ isLoading: true, error: null });
+        try {
+          await apiClient.post('/auth/register', payload);
+          set({ isLoading: false });
+        } catch (err: any) {
+          const msg = err.response?.data?.message || 'Registration failed';
           set({ error: msg, isLoading: false });
           throw new Error(msg);
         }

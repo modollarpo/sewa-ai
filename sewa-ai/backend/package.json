@@ -14,7 +14,8 @@
     "prisma:seed": "ts-node prisma/seed.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed:js": "node prisma/seed.js"
   },
   "dependencies": {
     "@azure/communication-email": "^1.1.0",

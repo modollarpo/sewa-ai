@@ -38,7 +38,7 @@ async function main() {
   for (const u of users) {
     await prisma.user.upsert({
       where: { tenantId_email: { tenantId: u.tenantId, email: u.email } },
-      update: { passwordHash: hash },
+      update: { passwordHash: hash, status: 'active' }, // always reset demo passwords on re-seed
       create: {
         tenantId: u.tenantId,
         email: u.email,
