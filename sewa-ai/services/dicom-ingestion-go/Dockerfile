@@ -5,6 +5,7 @@
 # ── Stage 1: Builder ────────────────────────────────────────────
 FROM golang:1.22-alpine AS builder
 
+
 WORKDIR /build
 
 # Download dependencies first (cached layer)
@@ -21,8 +22,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o dicom-ingestion \
     ./main.go
 
-# ── Stage 2: Runtime (distroless — no shell, no package manager) ─
-FROM gcr.io/distroless/static-debian12:nonroot
+# ── Stage 2: Runtime ────────────────────────────────────────────
+# Use debian-slim instead of distroless so wget is available for HEALTHCHECK
+FROM debian:bookworm-slim AS runtime
 
 WORKDIR /app
 
@@ -32,11 +34,16 @@ COPY --from=builder /build/dicom-ingestion /app/dicom-ingestion
 # Expose DICOM C-STORE port and HTTP health/metrics port
 EXPOSE 11112 8090
 
-# Non-root user (distroless default)
+# Install wget for healthcheck only
+RUN apt-get update && apt-get install -y --no-install-recommends wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Non-root user
+RUN adduser --disabled-password --gecos '' --uid 65532 nonroot
 USER nonroot:nonroot
 
-# Health check
+# Health check via HTTP (matches actual /health endpoint)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD ["/app/dicom-ingestion", "-health-check"] || exit 1
+  CMD wget -qO- http://localhost:8090/health || exit 1
 
 ENTRYPOINT ["/app/dicom-ingestion"]

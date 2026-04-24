@@ -1,0 +1,139 @@
+# SEWA AI — DICOM Ingestion Service (Go) — Kubernetes Manifest
+# High-performance DICOM C-STORE receiver + anonymisation pipeline
+# Port 11112: DICOM C-STORE (TCP)
+# Port 8090:  HTTP health / metrics (Prometheus)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-dicom-ingestion
+  namespace: sewa-ai
+  labels:
+    app: sewa-dicom-ingestion
+    tier: ingestion
+    language: go
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-dicom-ingestion
+  template:
+    metadata:
+      labels:
+        app: sewa-dicom-ingestion
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8090"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: dicom-ingestion
+          image: sewaaiproductionacr.azurecr.io/sewa-ai-dicom-ingestion:production-latest
+          ports:
+            - name: dicom
+              containerPort: 11112
+              protocol: TCP
+            - name: http
+              containerPort: 8090
+              protocol: TCP
+          env:
+            - name: DICOM_PORT
+              value: "11112"
+            - name: HTTP_PORT
+              value: "8090"
+            - name: MAX_WORKERS
+              value: "20"
+            - name: STORAGE_PROVIDER
+              value: "azure"
+            - name: REGION
+              value: "uk"
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-secrets
+                  key: REDIS_URL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-secrets
+                  key: DATABASE_URL
+            - name: AZURE_STORAGE_ACCOUNT
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-secrets
+                  key: AZURE_STORAGE_ACCOUNT
+                  optional: true
+            - name: AZURE_STORAGE_CONTAINER
+              value: "scans"
+            - name: DICOM_ANON_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-secrets
+                  key: DICOM_ANON_SALT
+                  optional: true
+            - name: TENANT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "64Mi"
+            limits:
+              cpu: "1"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8090
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8090
+            initialDelaySeconds: 3
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-dicom-ingestion
+  namespace: sewa-ai
+  labels:
+    app: sewa-dicom-ingestion
+spec:
+  selector:
+    app: sewa-dicom-ingestion
+  ports:
+    - name: dicom
+      port: 11112
+      targetPort: 11112
+      protocol: TCP
+    - name: http
+      port: 8090
+      targetPort: 8090
+      protocol: TCP
+  # LoadBalancer exposes DICOM C-STORE port externally to PACS/modalities
+  type: LoadBalancer
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sewa-dicom-hpa
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sewa-dicom-ingestion
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
