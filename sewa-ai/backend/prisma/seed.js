@@ -21,7 +21,11 @@ async function main() {
       currency:'GBP',
       language:'en',
       plan:'enterprise', 
-      status:'active'
+      status:'active',
+      latitude: 51.5186,
+      longitude: -0.0571,
+      timezone: 'Europe/London',
+      address: 'Whitechapel Rd, London E1 1FR, UK'
     } 
   });
 
@@ -36,7 +40,11 @@ async function main() {
       currency:'NGN',
       language:'en',
       plan:'hospital', 
-      status:'active'
+      status:'active',
+      latitude: 6.5147,
+      longitude: 3.3508,
+      timezone: 'Africa/Lagos',
+      address: 'Ishaga Rd, Idi-Araba, Lagos, Nigeria'
     } 
   });
 

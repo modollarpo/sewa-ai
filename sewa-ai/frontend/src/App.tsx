@@ -7,6 +7,8 @@ import { useAuthStore }              from './store/authStore';
 import { useSettingsStore }          from './store/settingsStore';
 import { useScanStore }              from './store/scanStore';
 import { useNotificationStore }      from './store/notificationStore';
+import { useTranslation }            from './i18n/I18nContext';
+import { TranslationKey }            from './i18n/translations';
 import { 
   ChevronLeft, ChevronRight, LayoutDashboard, Brain, Map, 
   Lock, CreditCard, Activity, Rocket, Calendar 
@@ -83,24 +85,24 @@ const C = {
 
 // ── Sub-nav configs ────────────────────────────────────────────
 const ADMIN_NAV = [
-  { id:'overview',          label:'Overview',           icon:<LayoutDashboard size={16}/> },
-  { id:'ai-performance',    label:'AI Performance',     icon:<Brain size={16}/> },
-  { id:'population-health', label:'Population Health',  icon:<Map size={16}/> },
-  { id:'ai-monitoring',     label:'AI Live Monitor',    icon:<Activity size={16}/> },
-  { id:'appointments',      label:'Appointments',       icon:<Calendar size={16}/> },
-  { id:'compliance',        label:'Compliance',         icon:<Lock size={16}/> },
-  { id:'billing',           label:'Billing',            icon:<CreditCard size={16}/> },
-  { id:'onboarding',        label:'Onboarding',         icon:<Rocket size={16}/> },
-  { id:'roadmap',           label:'Roadmap',            icon:<Map size={16}/> },
+  { id:'overview',          labelKey:'overview' as TranslationKey,           icon:<LayoutDashboard size={16}/> },
+  { id:'ai-performance',    labelKey:'aiPerformance' as TranslationKey,      icon:<Brain size={16}/> },
+  { id:'population-health', labelKey:'populationHealth' as TranslationKey,   icon:<Map size={16}/> },
+  { id:'ai-monitoring',     labelKey:'aiMonitoring' as TranslationKey,       icon:<Activity size={16}/> },
+  { id:'appointments',      labelKey:'appointments' as TranslationKey,    icon:<Calendar size={16}/> },
+  { id:'compliance',        labelKey:'compliance' as TranslationKey,         icon:<Lock size={16}/> },
+  { id:'billing',           labelKey:'billing' as TranslationKey,            icon:<CreditCard size={16}/> },
+  { id:'onboarding',        labelKey:'onboarding' as TranslationKey,         icon:<Rocket size={16}/> },
+  { id:'roadmap',           labelKey:'roadmap' as TranslationKey,            icon:<Map size={16}/> },
 ] as const;
 
 const SUPER_NAV = [
-  { id:'platform',       label:'Platform Overview',  icon:<LayoutDashboard size={16}/> },
-  { id:'ai-monitoring',  label:'AI Live Monitor',    icon:<Activity size={16}/> },
-  { id:'ai-performance', label:'AI Performance',     icon:<Brain size={16}/> },
-  { id:'compliance',     label:'Compliance',         icon:<Lock size={16}/> },
-  { id:'billing',        label:'Global Billing',     icon:<CreditCard size={16}/> },
-  { id:'roadmap',        label:'Roadmap',            icon:<Map size={16}/> },
+  { id:'platform',       labelKey:'platform' as TranslationKey,       icon:<LayoutDashboard size={16}/> },
+  { id:'ai-monitoring',  labelKey:'aiMonitoring' as TranslationKey,   icon:<Activity size={16}/> },
+  { id:'ai-performance', labelKey:'aiPerformance' as TranslationKey,  icon:<Brain size={16}/> },
+  { id:'compliance',     labelKey:'compliance' as TranslationKey,     icon:<Lock size={16}/> },
+  { id:'billing',        labelKey:'billing' as TranslationKey,        icon:<CreditCard size={16}/> },
+  { id:'roadmap',        labelKey:'roadmap' as TranslationKey,        icon:<Map size={16}/> },
 ] as const;
 
 type AdminPage = typeof ADMIN_NAV[number]['id'];
@@ -111,12 +113,13 @@ const SERVICES = ['Triage AI','VLM','Uncertainty','Metacognition','FL','CL','FHI
 
 // ── Sub-nav sidebar ────────────────────────────────────────────
 function SubNav({ items, active, onChange, collapsed, onToggle }: {
-  items: readonly { id:string; label:string; icon:string|React.ReactNode }[];
+  items: readonly { id:string; labelKey:TranslationKey; icon:string|React.ReactNode }[];
   active: string;
   onChange: (id:string) => void;
   collapsed: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div style={{
       width: collapsed ? 64 : 200, flexShrink:0, background:C.bg1,
@@ -137,7 +140,7 @@ function SubNav({ items, active, onChange, collapsed, onToggle }: {
       <div style={{ height: 40 }} /> {/* Spacer for toggle */}
 
       {items.map(item => (
-        <button key={item.id} onClick={() => onChange(item.id)} title={collapsed ? item.label : undefined} style={{
+        <button key={item.id} onClick={() => onChange(item.id)} title={collapsed ? t(item.labelKey) : undefined} style={{
           display:'flex', alignItems:'center', gap:8,
           padding:'8px 12px', borderRadius:9, cursor:'pointer',
           border:`1px solid ${active===item.id ? `${C.brand}30` : 'transparent'}`,
@@ -150,7 +153,7 @@ function SubNav({ items, active, onChange, collapsed, onToggle }: {
           overflow: 'hidden'
         }}>
           <span style={{ fontSize:13, flexShrink:0 }}>{item.icon}</span>
-          {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
+          {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{t(item.labelKey)}</span>}
         </button>
       ))}
     </div>

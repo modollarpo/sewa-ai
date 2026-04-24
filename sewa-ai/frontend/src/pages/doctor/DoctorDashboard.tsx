@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useDoctorData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
+import { Skeleton } from '../../components/ui/Skeleton';
 
 const C = {
   bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
@@ -151,29 +152,41 @@ export function DoctorDashboard() {
 
       {/* List */}
       <div style={{flex:1,overflowY:'auto', background:C.bg0}}>
-        {tab==='alerts' && activeAlerts.map(alert=>(
-          <div key={alert.id} onClick={()=>setSelectedPatient({...alert,type:'alert'})}
-            style={{padding:'14px',borderBottom:`1px solid ${C.border}`,cursor:'pointer',borderLeft:`3px solid ${urgencyColor(alert.urgency)}`, background: selectedPatient?.id === alert.id ? `${C.brand}0A` : 'transparent'}}>
-            <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}><UrgencyBadge u={alert.urgency}/><span style={{fontSize:10,color:C.textLo}}>{alert.time}</span></div>
-            <div style={{fontSize:13,fontWeight:700,color:C.textHi}}>{alert.patient}</div>
-            <div style={{fontSize:11,color:urgencyColor(alert.urgency),marginTop:2}}>{alert.finding}</div>
-            <div style={{marginTop:8}}><ConfBar v={alert.confidence}/></div>
-          </div>
-        ))}
-        {tab==='patients' && filteredPatients.map(p=>(
-          <div key={p.id} onClick={()=>setSelectedPatient(p)}
-            style={{padding:'14px',borderBottom:`1px solid ${C.border}`,cursor:'pointer',background: selectedPatient?.id === p.id ? `${C.brand}0A` : 'transparent'}}>
-            <div style={{display:'flex',alignItems:'center',gap:10}}>
-              <div style={{width:32,height:32,borderRadius:'50%',background:`${C.brand}20`,color:C.brand,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700}}>{p.name[0]}</div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,fontWeight:600,color:C.textHi}}>{p.name}</div>
-                <div style={{fontSize:11,color:C.textLo}}>{p.mrn} · {p.age}y</div>
-              </div>
-              <UrgencyDot u={p.lastScan?.urgency}/>
+        {loading ? (
+          Array(6).fill(0).map((_,i)=>(
+            <div key={i} style={{padding:14,borderBottom:`1px solid ${C.border}`}}>
+              <Skeleton width="40%" height={12} style={{marginBottom:8}}/>
+              <Skeleton width="80%" height={16} style={{marginBottom:8}}/>
+              <Skeleton width="60%" height={10}/>
             </div>
-          </div>
-        ))}
-        {tab==='history' && <div style={{padding:40,textAlign:'center',color:C.textLo,fontSize:12}}>No history available</div>}
+          ))
+        ) : (
+          <>
+            {tab==='alerts' && activeAlerts.map(alert=>(
+              <div key={alert.id} onClick={()=>setSelectedPatient({...alert,type:'alert'})}
+                style={{padding:'14px',borderBottom:`1px solid ${C.border}`,cursor:'pointer',borderLeft:`3px solid ${urgencyColor(alert.urgency)}`, background: selectedPatient?.id === alert.id ? `${C.brand}0A` : 'transparent'}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}><UrgencyBadge u={alert.urgency}/><span style={{fontSize:10,color:C.textLo}}>{alert.time}</span></div>
+                <div style={{fontSize:13,fontWeight:700,color:C.textHi}}>{alert.patient}</div>
+                <div style={{fontSize:11,color:urgencyColor(alert.urgency),marginTop:2}}>{alert.finding}</div>
+                <div style={{marginTop:8}}><ConfBar v={alert.confidence}/></div>
+              </div>
+            ))}
+            {tab==='patients' && filteredPatients.map(p=>(
+              <div key={p.id} onClick={()=>setSelectedPatient(p)}
+                style={{padding:'14px',borderBottom:`1px solid ${C.border}`,cursor:'pointer',background: selectedPatient?.id === p.id ? `${C.brand}0A` : 'transparent'}}>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div style={{width:32,height:32,borderRadius:'50%',background:`${C.brand}20`,color:C.brand,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700}}>{p.name[0]}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,fontWeight:600,color:C.textHi}}>{p.name}</div>
+                    <div style={{fontSize:11,color:C.textLo}}>{p.mrn} · {p.age}y</div>
+                  </div>
+                  <UrgencyDot u={p.lastScan?.urgency}/>
+                </div>
+              </div>
+            ))}
+            {tab==='history' && <div style={{padding:40,textAlign:'center',color:C.textLo,fontSize:12}}>No history available</div>}
+          </>
+        )}
       </div>
     </div>
   );
@@ -231,18 +244,35 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
 
         <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
           {[
-            { label: 'Review Scans', color: C.brand, action: () => alert('Opening Diagnostic Viewer for this study...') },
-            { label: 'Notify Team', color: C.info, action: () => alert('Clinical team notified via secure tunnel.') },
-            { label: 'Escalate STAT', color: C.critical, action: async () => {
-                if (!patient.id) return;
+            { label: 'Confirm Findings', color: C.normal, action: async () => {
+                if (!patient.id && !patient.scanId) return;
+                const id = patient.scanId || patient.id;
                 try {
-                  await apiClient.patch(`/scans/${patient.id}/status`, { status: 'CRITICAL' });
+                  await apiClient.post(`/ai/validate/${id}`, { status: 'CONFIRMED' });
+                  alert('Clinical validation complete. Report generating...');
+                  window.location.reload();
+                } catch (err) { alert('Validation failed.'); }
+            }},
+            { label: 'Correct Finding', color: C.urgent, action: () => {
+                const correction = prompt('Enter corrected finding:');
+                if (correction) {
+                  const id = patient.scanId || patient.id;
+                  apiClient.post(`/ai/validate/${id}`, { status: 'REJECTED', correctedFinding: correction })
+                    .then(() => { alert('Correction recorded.'); window.location.reload(); })
+                    .catch(() => alert('Failed to record correction.'));
+                }
+            }},
+            { label: 'Review Scans', color: C.brand, action: () => alert('Opening Diagnostic Viewer for this study...') },
+            { label: 'Escalate STAT', color: C.critical, action: async () => {
+                const id = patient.scanId || patient.id;
+                if (!id) return;
+                try {
+                  await apiClient.patch(`/scans/${id}/status`, { status: 'CRITICAL' });
                   alert('Case successfully escalated to STAT.');
                 } catch (err) {
                   alert('Escalation failed. Patient record might be locked.');
                 }
             }},
-            { label: 'Clinical Notes', color: C.bg2, action: () => alert('Opening clinical note editor...') },
           ].map(a=>(
             <button 
               key={a.label} 

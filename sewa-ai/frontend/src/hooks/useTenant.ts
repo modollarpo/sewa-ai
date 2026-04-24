@@ -20,11 +20,11 @@ export function useTenant() {
     }
 
     const parts = hostname.split('.');
-    // If we have at least 3 parts (tenant.domain.com), use the first part
-    if (parts.length >= 3) {
+    // If we have at least 3 parts (tenant.domain.com) and it's not a static app, use the first part
+    if (parts.length >= 3 && !hostname.includes('azurestaticapps.net')) {
       setTenantSlug(parts[0]);
     } else {
-      setTenantSlug(null); // No subdomain
+      setTenantSlug(null); // No subdomain or is a static app
     }
     setIsLoaded(true);
   }, []);

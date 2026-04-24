@@ -27,8 +27,45 @@ r.post('/fcm-token', async (req, res, next) => {
 });
 r.get('/', authorize('admin','superadmin'), async (req, res, next) => {
   try {
-    const users = await prisma.user.findMany({ where: { tenantId: req.user!.tenantId }, select: { id:true, email:true, firstName:true, lastName:true, role:true, status:true, lastLoginAt:true, mfaEnabled:true } });
+    const users = await prisma.user.findMany({ 
+      where: { tenantId: req.user!.tenantId }, 
+      select: { id:true, email:true, firstName:true, lastName:true, role:true, status:true, lastLoginAt:true, mfaEnabled:true } 
+    });
     res.json(users);
+  } catch (err) { next(err); }
+});
+
+r.patch('/:id/status', authorize('admin','superadmin'), async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    // Security check: ensure admin only updates users in their own tenant
+    const target = await prisma.user.findUnique({ where: { id } });
+    if (!target || target.tenantId !== req.user!.tenantId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    const u = await prisma.user.update({ where: { id }, data: { status } });
+    res.json(u);
+  } catch (err) { next(err); }
+});
+
+r.post('/', authorize('admin','superadmin'), async (req, res, next) => {
+  try {
+    const { email, firstName, lastName, role } = req.body;
+    const { tenantId } = req.user!;
+    
+    // Check if user already exists
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) return res.status(400).json({ error: 'User already exists' });
+
+    const u = await prisma.user.create({
+      data: {
+        email, firstName, lastName, role, tenantId,
+        status: 'active',
+        password: 'ChangeMe123!', // Mock password for now
+      }
+    });
+    res.status(201).json(u);
   } catch (err) { next(err); }
 });
 export default r;

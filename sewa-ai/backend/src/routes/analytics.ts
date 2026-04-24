@@ -37,4 +37,52 @@ r.get('/scan-volume', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+r.get('/population-health', async (req, res, next) => {
+  try {
+    const { tenantId, role } = req.user!;
+    const isSuper = role === 'superadmin';
+    const where = isSuper ? {} : { tenantId };
+
+    // Group by AI findings (Conditions)
+    const conditionStats = await prisma.aIResult.groupBy({
+      by: ['primaryFinding', 'urgency'],
+      where: isSuper ? {} : { scan: { tenantId } },
+      _count: { id: true },
+    });
+
+    // Group by Tenant/Hospital (Geography)
+    const regionalStats = await prisma.scan.groupBy({
+      by: ['tenantId'],
+      where: isSuper ? {} : { tenantId },
+      _count: { id: true },
+    });
+
+    // Enrich geography with tenant info
+    const geography = await Promise.all(regionalStats.map(async (stat) => {
+      const t = await prisma.tenant.findUnique({ 
+        where: { id: stat.tenantId }, 
+        select: { name: true, region: true, latitude: true, longitude: true, timezone: true } 
+      });
+      return {
+        tenantId: stat.tenantId,
+        name: t?.name || 'Unknown',
+        region: t?.region || 'Global',
+        lat: t?.latitude || null,
+        lng: t?.longitude || null,
+        timezone: t?.timezone || 'UTC',
+        count: stat._count.id,
+      };
+    }));
+
+    res.json({
+      conditions: conditionStats.map(c => ({
+        condition: c.primaryFinding,
+        urgency: c.urgency,
+        count: c._count.id,
+      })),
+      geography,
+    });
+  } catch (err) { next(err); }
+});
+
 export default r;

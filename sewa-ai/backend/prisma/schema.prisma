@@ -36,6 +36,10 @@ model Tenant {
   pacsEndpoint       String?
   stripeCustomerId   String?
   paystackCustomerId String?
+  latitude           Float?
+  longitude          Float?
+  timezone           String  @default("UTC")
+  address            String?
   providerMetadata   Json? // { mpesa: { shortcode, passkey }, flutterwave: { publicKey }, region-specific config }
 
   // ── Billing & Quota ─────────────────────────────────────────

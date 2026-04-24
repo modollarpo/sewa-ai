@@ -1,9 +1,10 @@
 // SEWA AI — PatientPortal.tsx
 // GDPR/NHS-compliant patient portal: scans, plain-language AI findings, consent, downloads
 import React, { useState, useEffect } from 'react';
-import { usePatientData } from '../../hooks/useDashboardData';
+import { usePatientData, usePatientAppointments } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
+import { Skeleton } from '../../components/ui/Skeleton';
 
 const C = {
   bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',
@@ -52,8 +53,9 @@ function UrgencyChip({ u }:{ u:string }) {
 
 export function PatientPortal() {
   const { user } = useAuthStore();
-  const { scans, loading } = usePatientData();
-  const [tab, setTab] = useState<'scans'|'consent'|'access'|'account'>('scans');
+  const { scans, loading: scansLoading } = usePatientData();
+  const { appointments, loading: apptsLoading } = usePatientAppointments();
+  const [tab, setTab] = useState<'scans'|'appointments'|'consent'|'access'|'account'>('scans');
   const [selectedScan, setSelectedScan] = useState<any>(null);
   const [consents, setConsents] = useState(MOCK_CONSENTS);
 
@@ -104,6 +106,7 @@ export function PatientPortal() {
       {/* Tabs */}
       <div className="portal-tabs" style={{borderBottom:`1px solid ${C.border}`,display:'flex',gap:2,marginBottom:20}}>
         <button style={tabStyle('scans')} onClick={()=>setTab('scans')}>🩻 My Scans</button>
+        <button style={tabStyle('appointments')} onClick={()=>setTab('appointments')}>📅 Appointments</button>
         <button style={tabStyle('consent')} onClick={()=>setTab('consent')}>✅ Consent</button>
         <button style={tabStyle('access')} onClick={()=>setTab('access')}>🔒 Data Access Log</button>
         <button style={tabStyle('account')} onClick={()=>setTab('account')}>⚙️ Account</button>
@@ -112,10 +115,25 @@ export function PatientPortal() {
       {/* My Scans */}
       {tab==='scans' && (
         <div style={{display:'flex',flexDirection:'column',gap:12}}>
-          {!selectedScan ? (
+          {scansLoading ? (
+            Array(3).fill(0).map((_,i)=>(
+              <div key={i} style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}>
+                  <Skeleton width="40%" height={16}/>
+                  <Skeleton width="20%" height={20} style={{borderRadius:20}}/>
+                </div>
+                <Skeleton width="100%" height={60} style={{borderRadius:10,marginBottom:12}}/>
+                <Skeleton width="60%" height={12} style={{marginBottom:12}}/>
+                <div style={{display:'flex',gap:8}}>
+                  <Skeleton width="100px" height={30} style={{borderRadius:8}}/>
+                  <Skeleton width="100px" height={30} style={{borderRadius:8}}/>
+                </div>
+              </div>
+            ))
+          ) : !selectedScan ? (
             scans.length === 0 ? (
               <div style={{padding:40,textAlign:'center',background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`,color:C.textLo}}>
-                {loading ? 'Loading your health record…' : 'No scans found in your records.'}
+                No scans found in your records.
               </div>
             ) : scans.map(scan=>(
               <div key={scan.id} onClick={()=>setSelectedScan(scan)}
@@ -202,6 +220,38 @@ export function PatientPortal() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Appointments Tab */}
+      {tab==='appointments' && (
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+            <h3 style={{margin:0,fontSize:16,color:C.textHi}}>Upcoming Appointments</h3>
+            <button onClick={() => alert('Booking system integration coming soon.')} style={{padding:'7px 14px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
+              + Book Follow-up
+            </button>
+          </div>
+          
+          {apptsLoading ? (
+            <Skeleton width="100%" height={100} style={{borderRadius:14}}/>
+          ) : (appointments || []).length === 0 ? (
+            <div style={{padding:40,textAlign:'center',background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`,color:C.textLo}}>
+              No upcoming appointments.
+            </div>
+          ) : appointments.map((a:any)=>(
+            <div key={a.id} style={{padding:16,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:C.textHi,textTransform:'capitalize'}}>{a.type.replace(/_/g,' ')} with Dr. {a.doctor?.lastName || 'Radiologist'}</div>
+                <div style={{fontSize:12,color:C.textMd,marginTop:4}}>{new Date(a.scheduledDate).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' })} at {new Date(a.scheduledDate).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}</div>
+                {a.location && <div style={{fontSize:11,color:C.brand,marginTop:4}}>📍 {a.location}</div>}
+              </div>
+              <div style={{textAlign:'right'}}>
+                <span style={{padding:'2px 8px',borderRadius:20,fontSize:10,fontWeight:600,background:`${C.brand}20`,color:C.brand,border:`1px solid ${C.brand}40`,textTransform:'uppercase'}}>{a.status}</span>
+                {a.videoUrl && <button onClick={()=>window.open(a.videoUrl,'_blank')} style={{display:'block',marginTop:8,padding:'5px 10px',background:C.info,border:'none',borderRadius:6,color:'white',fontSize:10,fontWeight:700,cursor:'pointer'}}>Join Video Call</button>}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

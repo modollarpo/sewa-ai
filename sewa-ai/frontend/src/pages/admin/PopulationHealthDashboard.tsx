@@ -24,7 +24,7 @@ const POSTCODES = [
 ];
 
 export function PopulationHealthDashboard() {
-  const { stats, conditions, loading } = usePopulationHealthData();
+  const { stats, conditions, geography, loading } = usePopulationHealthData();
   const [tab, setTab] = useState<'burden'|'geography'|'trends'|'referrals'>('burden');
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'7px 13px',fontSize:11,fontWeight:tab===t?600:400,
@@ -106,28 +106,44 @@ export function PopulationHealthDashboard() {
 
       {tab==='geography' && (
         <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
-          <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:16}}>Disease Incidence by Postcode — East London</div>
-          <div style={{position:'relative',height:280,background:`linear-gradient(180deg,${C.bg3},${C.bg2})`,borderRadius:10,border:`1px solid ${C.border}`,overflow:'hidden'}}>
+          <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:16}}>Global Disease Incidence</div>
+          <div style={{position:'relative',height:320,background:`linear-gradient(180deg,${C.bg3},${C.bg2})`,borderRadius:10,border:`1px solid ${C.border}`,overflow:'hidden'}}>
             {/* Grid */}
-            {[1,2,3,4].map(i=><div key={i} style={{position:'absolute',top:`${25*i}%`,left:0,right:0,height:1,background:`${C.border}60`}}/>)}
-            {[1,2,3,4].map(i=><div key={i} style={{position:'absolute',left:`${25*i}%`,top:0,bottom:0,width:1,background:`${C.border}60`}}/>)}
-            {/* Data points */}
-            {POSTCODES.map((pc,i)=>{
-              const x = 10 + (i%4)*22;
-              const y = 15 + Math.floor(i/4)*40;
+            {[1,2,3,4,5,6,7,8].map(i=><div key={`h${i}`} style={{position:'absolute',top:`${12.5*i}%`,left:0,right:0,height:1,background:`${C.border}60`}}/>)}
+            {[1,2,3,4,5,6,7,8].map(i=><div key={`v${i}`} style={{position:'absolute',left:`${12.5*i}%`,top:0,bottom:0,width:1,background:`${C.border}60`}}/>)}
+            
+            {/* World Map Overlay (Conceptual) */}
+            <div style={{position:'absolute',inset:0,opacity:0.05,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',fontSize:200,fontFamily:'sans-serif'}}>🌍</div>
+
+            {/* Dynamic Geography Markers */}
+            {(geography && geography.length > 0 ? geography : POSTCODES).map((loc:any, i:number)=>{
+              // Dynamic global projection if lat/lng exists, else fallback to grid distribution
+              let x = 10 + (i%4)*22;
+              let y = 15 + Math.floor(i/4)*40;
+              let name = loc.name || loc.label || loc.code;
+              let count = loc.count || loc.cases;
+              let color = count > 50 ? C.critical : count > 20 ? C.urgent : C.brand;
+              let r = Math.max(8, Math.min(24, count / 2));
+
+              if (loc.lat !== undefined && loc.lng !== undefined && loc.lat !== null) {
+                // Approximate Web Mercator or simple Equirectangular
+                x = ((loc.lng + 180) / 360) * 100;
+                y = ((90 - loc.lat) / 180) * 100;
+              }
+
               return (
-                <div key={pc.code} style={{position:'absolute',left:`${x}%`,top:`${y}%`,transform:'translate(-50%,-50%)'}}>
-                  <div style={{width:pc.r*2,height:pc.r*2,borderRadius:'50%',background:pc.color,opacity:0.7,border:`2px solid ${pc.color}`,boxShadow:`0 0 ${pc.r}px ${pc.color}60`}}/>
+                <div key={loc.tenantId || loc.code || i} style={{position:'absolute',left:`${x}%`,top:`${y}%`,transform:'translate(-50%,-50%)'}}>
+                  <div style={{width:r*2,height:r*2,borderRadius:'50%',background:color,opacity:0.7,border:`2px solid ${color}`,boxShadow:`0 0 ${r}px ${color}60`}}/>
                   <div style={{position:'absolute',top:'110%',left:'50%',transform:'translateX(-50%)',whiteSpace:'nowrap',textAlign:'center'}}>
-                    <div style={{fontSize:9,color:C.textHi,fontFamily:C.FM,fontWeight:700}}>{pc.code}</div>
-                    <div style={{fontSize:8,color:C.textLo,fontFamily:C.FM}}>{pc.cases}</div>
+                    <div style={{fontSize:10,color:C.textHi,fontFamily:C.FM,fontWeight:700,textShadow:`0 2px 4px rgba(0,0,0,0.8)`}}>{name}</div>
+                    <div style={{fontSize:9,color:C.textLo,fontFamily:C.FM}}>{count} cases</div>
                   </div>
                 </div>
               );
             })}
             {/* Legend */}
             <div style={{position:'absolute',bottom:10,right:12,display:'flex',gap:8,background:C.bg3,padding:'6px 8px',borderRadius:8,border:`1px solid ${C.border}`}}>
-              {[{color:C.critical,label:'High'},{color:C.urgent,label:'Med'},{color:C.brand,label:'Low'}].map(l=>(
+              {[{color:C.critical,label:'High Volume'},{color:C.urgent,label:'Medium Volume'},{color:C.brand,label:'Low Volume'}].map(l=>(
                 <div key={l.label} style={{display:'flex',alignItems:'center',gap:4}}>
                   <div style={{width:8,height:8,borderRadius:'50%',background:l.color}}/>
                   <span style={{fontSize:9,color:C.textLo,fontFamily:C.F}}>{l.label}</span>
@@ -135,11 +151,12 @@ export function PopulationHealthDashboard() {
               ))}
             </div>
           </div>
-          <div style={{marginTop:12,display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
-            {POSTCODES.slice(0,4).map(pc=>(
-              <div key={pc.code} style={{padding:'8px 10px',background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`}}>
-                <div style={{fontSize:11,fontWeight:700,color:C.textHi}}>{pc.code} – {pc.label}</div>
-                <div style={{fontSize:14,fontWeight:700,color:pc.color,fontFamily:C.FM,marginTop:4}}>{pc.cases} cases</div>
+          <div style={{marginTop:12,display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))',gap:8}}>
+            {(geography || []).slice(0, 4).map((loc:any)=>(
+              <div key={loc.tenantId} style={{padding:'10px 12px',background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`}}>
+                <div style={{fontSize:12,fontWeight:700,color:C.textHi,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{loc.name}</div>
+                <div style={{fontSize:10,color:C.textLo,marginTop:2}}>{loc.region.toUpperCase()} • {loc.timezone}</div>
+                <div style={{fontSize:14,fontWeight:700,color:loc.count > 50 ? C.critical : C.brand,fontFamily:C.FM,marginTop:6}}>{loc.count} cases logged</div>
               </div>
             ))}
           </div>

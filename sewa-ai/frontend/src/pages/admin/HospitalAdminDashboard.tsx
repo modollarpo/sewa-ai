@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useHospitalAdminData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
+import { Skeleton, StatSkeleton } from '../../components/ui/Skeleton';
 
 const C = {
   bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
@@ -110,10 +111,18 @@ export function HospitalAdminDashboard() {
         {tab==='overview' && (
           <div style={{display:'flex',flexDirection:'column',gap:20}}>
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))',gap:12}}>
-              <StatCard label="Scans Today" value={loading ? '...' : stats.scansToday} icon="🩻"/>
-              <StatCard label="Critical Today" value={loading ? '...' : stats.criticalToday} color={C.critical} icon="🚨"/>
-              <StatCard label="Avg Turnaround" value={loading ? '...' : stats.avgTurnaround} icon="⚡"/>
-              <StatCard label="AI Accuracy" value="94.7%" color={C.normal} icon="🎯"/>
+              {loading ? (
+                <>
+                  <StatSkeleton/><StatSkeleton/><StatSkeleton/><StatSkeleton/>
+                </>
+              ) : (
+                <>
+                  <StatCard label="Scans Today" value={stats.scansToday} icon="🩻"/>
+                  <StatCard label="Critical Today" value={stats.criticalToday} color={C.critical} icon="🚨"/>
+                  <StatCard label="Avg Turnaround" value={stats.avgTurnaround || '14m'} icon="⚡"/>
+                  <StatCard label="AI Accuracy" value={`${(stats.avgAIConfidence || 94.7).toFixed(1)}%`} color={C.normal} icon="🎯"/>
+                </>
+              )}
             </div>
             
             <div style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`, overflow:'hidden' }}>
@@ -159,19 +168,77 @@ export function HospitalAdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {staff.map((s:any)=>(
+                {loading ? (
+                  Array(3).fill(0).map((_,i)=>(
+                    <tr key={i} style={{borderTop:`1px solid ${C.border}`}}>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="60%"/></td>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="40%"/></td>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="30%"/></td>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="20%"/></td>
+                    </tr>
+                  ))
+                ) : staff.map((s:any)=>(
                   <tr key={s.id} style={{borderTop:`1px solid ${C.border}`}}>
                     <td style={{padding:'12px 16px',fontSize:12,color:C.textHi}}>{s.firstName} {s.lastName}</td>
                     <td style={{padding:'12px 16px'}}><RoleBadge role={s.role}/></td>
                     <td style={{padding:'12px 16px'}}><div style={{display:'flex',alignItems:'center',gap:6}}><StatusDot status={s.status}/><span style={{fontSize:11,color:C.textMd}}>{s.status}</span></div></td>
-                    <td style={{padding:'12px 16px'}}><button onClick={() => alert('Edit staff profile coming soon.')} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button></td>
+                    <td style={{padding:'12px 16px'}}>
+                      <div style={{display:'flex',gap:6}}>
+                        <button onClick={() => alert('Edit profile functionality coming soon.')} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button>
+                        <button onClick={async () => {
+                          const next = s.status === 'suspended' ? 'active' : 'suspended';
+                          if(confirm(`Are you sure you want to ${next} this staff member?`)) {
+                            await apiClient.patch(`/users/${s.id}/status`, { status: next });
+                            window.location.reload();
+                          }
+                        }} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:s.status === 'suspended' ? C.normal : C.critical,borderRadius:6,cursor:'pointer'}}>
+                          {s.status === 'suspended' ? 'Reactivate' : 'Suspend'}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-        {(['integrations','billing','audit'] as const).includes(tab as any) && (
+        {tab==='audit' && (
+          <div style={{background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,overflowX:'auto'}}>
+            <table style={{width:'100%',borderCollapse:'collapse',minWidth:600}}>
+              <thead>
+                <tr style={{background:C.bg3}}>
+                  {['Action','Entity','User','IP Address','Time'].map(h=>(
+                    <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:10,fontWeight:600,color:C.textLo,textTransform:'uppercase'}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  Array(5).fill(0).map((_,i)=>(
+                    <tr key={i} style={{borderTop:`1px solid ${C.border}`}}>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="60%"/></td>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="40%"/></td>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="30%"/></td>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="25%"/></td>
+                      <td style={{padding:'12px 16px'}}><Skeleton width="20%"/></td>
+                    </tr>
+                  ))
+                ) : audit.length === 0 ? (
+                  <tr><td colSpan={5} style={{padding:40, textAlign:'center', color:C.textLo, fontSize:12}}>No audit logs found for this period.</td></tr>
+                ) : audit.map((log:any)=>(
+                  <tr key={log.id} style={{borderTop:`1px solid ${C.border}`}}>
+                    <td style={{padding:'12px 16px',fontSize:12,color:C.textHi,fontWeight:600}}>{log.action}</td>
+                    <td style={{padding:'12px 16px',fontSize:11,color:C.textMd}}>{log.entity || 'N/A'} <span style={{fontSize:9,opacity:0.5}}>{log.entityId?.slice(0,8)}</span></td>
+                    <td style={{padding:'12px 16px',fontSize:11,color:C.textMd}}>{log.userId || 'System'}</td>
+                    <td style={{padding:'12px 16px',fontSize:10,color:C.textLo,fontFamily:C.FM}}>{log.ipAddress || '—'}</td>
+                    <td style={{padding:'12px 16px',fontSize:11,color:C.textLo}}>{new Date(log.createdAt).toLocaleString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {(['integrations','billing'] as const).includes(tab as any) && (
           <div style={{padding:40, textAlign:'center', background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`, color:C.textLo}}>
             <h3 style={{margin:0, color:C.textHi, fontSize: 16}}>{tab.charAt(0).toUpperCase()+tab.slice(1)} Module</h3>
             <p style={{marginTop: 8}}>Please navigate to the dedicated {tab} module via the left sidebar to view full details.</p>

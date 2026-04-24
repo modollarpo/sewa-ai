@@ -15,6 +15,7 @@ interface ScanStore {
   selectScan(id: string): Promise<void>;
   handleAIResult(data: { scanId:string; urgency:string; primaryFinding:string; confidence:number; }): void;
   updateScanStatus(scanId: string, status: string): void;
+  acknowledgeAlert(scanId: string): void;
 }
 
 export const useScanStore = create<ScanStore>((set, get) => ({
@@ -48,5 +49,8 @@ export const useScanStore = create<ScanStore>((set, get) => ({
 
   updateScanStatus: (scanId, status) => {
     set(s => ({ scans: s.scans.map(scan => scan.id === scanId ? { ...scan, status } : scan) }));
+  },
+  acknowledgeAlert: (scanId) => {
+    set(s => ({ criticalAlerts: s.criticalAlerts.filter(a => a.id !== scanId) }));
   },
 }));

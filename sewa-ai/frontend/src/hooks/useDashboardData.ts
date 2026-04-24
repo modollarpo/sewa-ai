@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../services/apiClient';
 
 // --- MOCK FALLBACKS (Used if API fails to ensure UI stays populated) ---
@@ -16,74 +17,58 @@ const MOCK_AI_MODELS = [
 // --- HOOKS ---
 
 export function useSuperAdminData() {
-  const [data, setData] = useState({
-    stats: { tenants: 0, totalScans: 0, criticalToday: 0, totalRevenueUSD: 0 },
-    tenants: MOCK_TENANTS,
-    loading: true,
-    error: null as string | null
+  const { data: dashboardRes, isLoading: statsLoading } = useQuery({
+    queryKey: ['admin-dashboard'],
+    queryFn: () => apiClient.get('/admin/dashboard'),
+    refetchInterval: 60000,
   });
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const [statsRes, tenantsRes] = await Promise.all([
-          apiClient.get('/admin/dashboard'),
-          apiClient.get('/admin/tenants')
-        ]);
-        setData({
-          stats: statsRes.data,
-          tenants: tenantsRes?.data?.length > 0 ? tenantsRes.data : MOCK_TENANTS,
-          loading: false,
-          error: null
-        });
-      } catch (err: any) {
-        console.error('SuperAdmin fetch failed:', err);
-        // Fail gracefully to mocks but stop loading
-        setData(prev => ({ ...prev, loading: false }));
-      }
-    }
-    fetch();
-    const t = setInterval(fetch, 60000); // Refresh every minute
-    return () => clearInterval(t);
-  }, []);
+  const { data: tenantsRes, isLoading: tenantsLoading } = useQuery({
+    queryKey: ['admin-tenants'],
+    queryFn: () => apiClient.get('/admin/tenants'),
+    refetchInterval: 60000,
+  });
 
-  return data;
+  const { data: analyticsRes, isLoading: analyticsLoading } = useQuery({
+    queryKey: ['analytics'],
+    queryFn: () => apiClient.get('/analytics'),
+    refetchInterval: 60000,
+  });
+
+  return {
+    stats: dashboardRes?.data || { tenants: 0, totalScans: 0, criticalToday: 0, totalRevenueUSD: 0, avgAIConfidence: 0, avgInferenceMs: 0, uptime: '100%' },
+    tenants: tenantsRes?.data?.length > 0 ? tenantsRes.data : MOCK_TENANTS,
+    regionalStats: analyticsRes?.data?.regionalStats || [],
+    loading: statsLoading || tenantsLoading || analyticsLoading,
+    error: null
+  };
 }
 
 export function useAIData() {
-  const [data, setData] = useState({
-    models: MOCK_AI_MODELS,
-    metrics: [] as any[],
-    health: [] as any[],
-    aggregates: { avgConfidence: 0, avgLatencyMs: 0, totalCount: 0 },
-    loading: true
+  const { data: modelsRes } = useQuery({
+    queryKey: ['ai-models'],
+    queryFn: () => apiClient.get('/ai/models'),
   });
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const [modelsRes, metricsRes, healthRes] = await Promise.all([
-          apiClient.get('/ai/models'),
-          apiClient.get('/ai-monitoring/metrics'),
-          apiClient.get('/ai-monitoring/health')
-        ]);
-        setData({
-          models: modelsRes?.data?.length > 0 ? modelsRes.data : MOCK_AI_MODELS,
-          metrics: metricsRes.data.events,
-          health: healthRes.data,
-          aggregates: metricsRes.data.aggregates,
-          loading: false
-        });
-      } catch (err) {
-        setData(prev => ({ ...prev, loading: false }));
-      }
-    }
-    fetch();
-    const t = setInterval(fetch, 10000); // Refresh AI data every 10s
-    return () => clearInterval(t);
-  }, []);
+  const { data: metricsRes, isLoading } = useQuery({
+    queryKey: ['ai-metrics'],
+    queryFn: () => apiClient.get('/ai-monitoring/metrics'),
+    refetchInterval: 10000,
+  });
 
-  return data;
+  const { data: healthRes } = useQuery({
+    queryKey: ['ai-health'],
+    queryFn: () => apiClient.get('/ai-monitoring/health'),
+    refetchInterval: 30000,
+  });
+
+  return {
+    models: modelsRes?.data?.length > 0 ? modelsRes.data : MOCK_AI_MODELS,
+    metrics: metricsRes?.data?.events || [],
+    health: healthRes?.data || [],
+    aggregates: metricsRes?.data?.aggregates || { avgConfidence: 0, avgLatencyMs: 0, totalCount: 0 },
+    loading: isLoading
+  };
 }
 
 export function useBillingData() {
@@ -102,7 +87,7 @@ export function useBillingData() {
         ]);
         setData({
           stats: statsRes.data,
-          history: historyRes.data,
+          history: Array.isArray(historyRes.data) ? historyRes.data : (historyRes.data?.payments || []),
           loading: false
         });
       } catch (err) {
@@ -116,64 +101,48 @@ export function useBillingData() {
 }
 
 export function useDoctorData() {
-  const [data, setData] = useState({
-    patients: [] as any[],
-    alerts: [] as any[],
-    loading: true
+  const { data: scansRes, isLoading, error } = useQuery({
+    queryKey: ['scans'],
+    queryFn: () => apiClient.get('/scans'),
+    refetchInterval: 30000, // Still poll every 30s as fallback to Socket.IO
   });
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const [scansRes] = await Promise.all([
-          apiClient.get('/scans')
-        ]);
-        
-        const mappedPatients = (scansRes.data || []).map((s: any) => ({
-          id: s.id,
-          name: s.patient ? `${s.patient.firstName} ${s.patient.lastName}` : 'Unknown Patient',
-          age: s.patient?.dateOfBirth ? Math.floor((new Date().getTime() - new Date(s.patient.dateOfBirth).getTime()) / 3.154e+10) : '??',
-          mrn: s.patient?.mrn || 'N/A',
-          lastScan: {
-            modality: s.modality,
-            bodyPart: s.bodyPart,
-            urgency: s.aiResult?.urgency || 'ROUTINE',
-            finding: s.aiResult?.primaryFinding || 'Pending AI Triage',
-            confidence: s.aiResult?.confidence || 0,
-            time: new Date(s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          },
-          status: s.status
-        }));
+  const rawScans = Array.isArray(scansRes?.data) ? scansRes.data : (scansRes?.data?.scans || []);
+  
+  const mappedPatients = rawScans.map((s: any) => ({
+    id: s.id,
+    name: s.patient ? `${s.patient.firstName} ${s.patient.lastName}` : 'Unknown Patient',
+    age: s.patient?.dateOfBirth ? Math.floor((new Date().getTime() - new Date(s.patient.dateOfBirth).getTime()) / 3.154e+10) : '??',
+    mrn: s.patient?.mrn || 'N/A',
+    lastScan: {
+      modality: s.modality,
+      bodyPart: s.bodyPart,
+      urgency: s.aiResult?.urgency || 'ROUTINE',
+      finding: s.aiResult?.primaryFinding || 'Pending AI Triage',
+      confidence: s.aiResult?.confidence || 0,
+      time: new Date(s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    },
+    status: s.status
+  }));
 
-        const mappedAlerts = mappedPatients
-          .filter((p: any) => p.lastScan.urgency === 'CRITICAL' || p.lastScan.urgency === 'URGENT')
-          .map((p: any) => ({
-            id: `alert-${p.id}`,
-            patient: p.name,
-            finding: p.lastScan.finding,
-            urgency: p.lastScan.urgency,
-            confidence: p.lastScan.confidence,
-            time: p.lastScan.time,
-            scanId: p.id
-          }));
+  const mappedAlerts = mappedPatients
+    .filter((p: any) => p.lastScan.urgency === 'CRITICAL' || p.lastScan.urgency === 'URGENT')
+    .map((p: any) => ({
+      id: `alert-${p.id}`,
+      patient: p.name,
+      finding: p.lastScan.finding,
+      urgency: p.lastScan.urgency,
+      confidence: p.lastScan.confidence,
+      time: p.lastScan.time,
+      scanId: p.id
+    }));
 
-        setData({
-          patients: mappedPatients,
-          alerts: mappedAlerts,
-          loading: (mappedPatients || []).length > 0 ? false : true // Avoid blanking if no data yet or if it was prev loading
-        });
-        
-        if ((mappedPatients || []).length > 0) setData(prev => ({ ...prev, loading: false }));
-      } catch (err) {
-        setData(prev => ({ ...prev, loading: false }));
-      }
-    }
-    fetch();
-    const t = setInterval(fetch, 30000);
-    return () => clearInterval(t);
-  }, []);
-
-  return data;
+  return {
+    patients: mappedPatients,
+    alerts: mappedAlerts,
+    loading: isLoading,
+    error
+  };
 }
 
 export function useTechnicianData() {
@@ -213,7 +182,8 @@ export function usePatientData() {
     async function fetch() {
       try {
         const res = await apiClient.get('/scans');
-        const mapped = (res.data || []).map((s: any) => ({
+        const rawScans = Array.isArray(res.data) ? res.data : (res.data?.scans || []);
+        const mapped = rawScans.map((s: any) => ({
           id: s.id,
           date: new Date(s.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
           modality: s.modality,
@@ -237,69 +207,55 @@ export function usePatientData() {
 }
 
 export function useHospitalAdminData() {
-  const [data, setData] = useState({
-    stats: { scansToday: 0, scansMonth: 0, criticalToday: 0, avgTurnaround: '0m', activeUsers: 0 },
-    staff: [] as any[],
-    audit: [] as any[],
-    integrations: [] as any[],
-    loading: true
+  const { data: statsRes, isLoading: statsLoading } = useQuery({
+    queryKey: ['hospital-stats'],
+    queryFn: () => apiClient.get('/admin/dashboard'),
+    refetchInterval: 60000,
   });
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const [statsRes, staffRes, auditRes, integRes] = await Promise.all([
-          apiClient.get('/admin/dashboard'),
-          apiClient.get('/users'),
-          apiClient.get('/audit'),
-          apiClient.get('/admin/integrations').catch(() => ({ data: [] }))
-        ]);
-        setData({
-          stats: statsRes.data,
-          staff: staffRes.data,
-          audit: auditRes.data,
-          integrations: integRes.data,
-          loading: false
-        });
-      } catch (err) {
-        setData(prev => ({ ...prev, loading: false }));
-      }
-    }
-    fetch();
-  }, []);
+  const { data: staffRes, isLoading: staffLoading } = useQuery({
+    queryKey: ['hospital-staff'],
+    queryFn: () => apiClient.get('/users'),
+  });
 
-  return data;
+  const { data: auditRes, isLoading: auditLoading } = useQuery({
+    queryKey: ['hospital-audit'],
+    queryFn: () => apiClient.get('/audit'),
+    refetchInterval: 10000, // Faster sync for audit
+  });
+
+  const { data: integRes, isLoading: integLoading } = useQuery({
+    queryKey: ['hospital-integrations'],
+    queryFn: () => apiClient.get('/admin/integrations'),
+  });
+
+  return {
+    stats: statsRes?.data || { scansToday: 0, scansMonth: 0, criticalToday: 0, avgTurnaround: '0m', activeUsers: 0 },
+    staff: staffRes?.data || [],
+    audit: Array.isArray(auditRes?.data) ? auditRes.data : (auditRes?.data?.logs || []),
+    integrations: integRes?.data || [],
+    loading: statsLoading || staffLoading || auditLoading || integLoading
+  };
 }
 
 export function useComplianceData() {
-  const [data, setData] = useState({
-    audit: [] as any[],
-    metrics: [] as any[],
-    verification: { status: 'loading', chainHeight: 0 },
-    loading: true
+  const { data: auditRes, isLoading: auditLoading } = useQuery({
+    queryKey: ['compliance-audit'],
+    queryFn: () => apiClient.get('/audit'),
+    refetchInterval: 10000,
   });
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const [auditRes, verifyRes] = await Promise.all([
-          apiClient.get('/audit'),
-          apiClient.get('/audit/verify').catch(() => ({ data: { status: 'healthy', height: 0 } }))
-        ]);
-        setData({
-          audit: auditRes.data,
-          metrics: [], // To be wired to a real metrics endpoint later
-          verification: verifyRes.data,
-          loading: false
-        });
-      } catch (err) {
-        setData(prev => ({ ...prev, loading: false }));
-      }
-    }
-    fetch();
-  }, []);
+  const { data: verifyRes, isLoading: verifyLoading } = useQuery({
+    queryKey: ['compliance-verify'],
+    queryFn: () => apiClient.get('/audit/verify'),
+  });
 
-  return data;
+  return {
+    audit: Array.isArray(auditRes?.data) ? auditRes.data : (auditRes?.data?.logs || []),
+    metrics: [], // To be wired to a real metrics endpoint later
+    verification: verifyRes?.data || { status: 'loading', chainHeight: 0 },
+    loading: auditLoading || verifyLoading
+  };
 }
 
 export function usePopulationHealthData() {
@@ -313,35 +269,25 @@ export function usePopulationHealthData() {
   useEffect(() => {
     async function fetch() {
       try {
-        const [statsRes, scansRes] = await Promise.all([
+        const [statsRes, phRes] = await Promise.all([
           apiClient.get('/admin/dashboard'),
-          apiClient.get('/scans')
+          apiClient.get('/analytics/population-health')
         ]);
         
-        const scans = scansRes.data;
-        const conditionCounts: Record<string, number> = {};
-        scans.forEach((s: any) => {
-          if (s.aiResult?.primaryFinding) {
-            const f = s.aiResult.primaryFinding.split(',')[0];
-            conditionCounts[f] = (conditionCounts[f] || 0) + 1;
-          }
-        });
-
         setData({
           stats: {
-            totalScans: (scans || []).length,
-            positives: scans.filter((s:any) => s.urgency !== 'NORMAL').length,
+            totalScans: statsRes.data.totalScans || 0,
+            positives: phRes.data.conditions.length,
             criticals: statsRes.data.criticalToday || 0,
-            impact: (scans || []).length
+            impact: statsRes.data.totalScans || 0
           },
-          conditions: Object.entries(conditionCounts).map(([name, count]) => ({
-            condition: name,
-            count,
-            trend: Math.floor(Math.random() * 20) - 10,
-            mortality: 'N/A',
-            ageMedian: 60
+          conditions: phRes.data.conditions.map((c:any) => ({
+            condition: c.condition,
+            count: c.count,
+            trend: Math.floor(Math.random() * 10) - 5, // Mock trend for now
+            urgency: c.urgency
           })),
-          geography: [],
+          geography: phRes.data.geography,
           loading: false
         });
       } catch (err) {
@@ -388,4 +334,17 @@ export function useAppointmentData() {
   }, []);
 
   return data;
+}
+
+export function usePatientAppointments() {
+  const { data: apptRes, isLoading } = useQuery({
+    queryKey: ['patient-appointments'],
+    queryFn: () => apiClient.get('/appointments'),
+    refetchInterval: 60000,
+  });
+
+  return {
+    appointments: apptRes?.data?.appointments || [],
+    loading: isLoading
+  };
 }

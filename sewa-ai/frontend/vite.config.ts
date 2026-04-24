@@ -17,7 +17,22 @@ export default defineConfig({
           {
             urlPattern: /^https:\/\/api\.sewa\.health\/v1\/scans/,
             handler: 'NetworkFirst',
-            options: { cacheName: 'sewa-api-cache', expiration: { maxAgeSeconds: 300 } },
+            options: { cacheName: 'sewa-scans-cache', expiration: { maxAgeSeconds: 300, maxEntries: 50 } },
+          },
+          {
+            urlPattern: /^https:\/\/api\.sewa\.health\/v1\/reports/,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'sewa-reports-cache', expiration: { maxAgeSeconds: 3600, maxEntries: 20 } },
+          },
+          {
+            urlPattern: /^https:\/\/api\.sewa\.health\/v1\/users\/me/,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'sewa-user-cache' },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|woff2)$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'sewa-assets-cache', expiration: { maxEntries: 100 } },
           },
         ],
       },

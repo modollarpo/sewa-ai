@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useSettingsStore } from '../../store/settingsStore';
-import { getTranslation } from '../../services/i18n';
+import { useTranslation } from '../../i18n/I18nContext';
 
 const C = {
   bg:       '#08160F', border: '#1B3028', brand: '#408D7B', brandLt: '#52B09A',
@@ -11,14 +11,14 @@ const C = {
 };
 
 const REGIONS = [
-  { key:'uk', label:'🇬🇧 United Kingdom', currency:'GBP', compliance:'NHS DSPT' },
-  { key:'eu', label:'🇪🇺 European Union',  currency:'EUR', compliance:'MDR' },
-  { key:'us', label:'🇺🇸 North America',   currency:'USD', compliance:'HIPAA' },
-  { key:'ng', label:'🇳🇬 Nigeria',         currency:'NGN', compliance:'NDPR' },
-  { key:'ke', label:'🇰🇪 Kenya',           currency:'KES', compliance:'DPA 2019' },
-  { key:'za', label:'🇿🇦 South Africa',    currency:'ZAR', compliance:'POPIA' },
-  { key:'gh', label:'🇬🇭 Ghana',           currency:'GHS', compliance:'DPA 2012' },
-  { key:'in', label:'🇮🇳 India',           currency:'INR', compliance:'DPDP' },
+  { key:'uk', label:'🇬🇧 United Kingdom', currency:'GBP', compliance:'NHS DSPT', timezone:'Europe/London', server:'London (uksouth)' },
+  { key:'eu', label:'🇪🇺 European Union',  currency:'EUR', compliance:'MDR',      timezone:'Europe/Paris',  server:'Frankfurt (germanywestcentral)' },
+  { key:'us', label:'🇺🇸 North America',   currency:'USD', compliance:'HIPAA',    timezone:'America/New_York', server:'East US 2' },
+  { key:'ng', label:'🇳🇬 Nigeria',         currency:'NGN', compliance:'NDPR',     timezone:'Africa/Lagos',  server:'South Africa North' },
+  { key:'ke', label:'🇰🇪 Kenya',           currency:'KES', compliance:'DPA 2019', timezone:'Africa/Nairobi',server:'South Africa North' },
+  { key:'za', label:'🇿🇦 South Africa',    currency:'ZAR', compliance:'POPIA',    timezone:'Africa/Johannesburg', server:'South Africa North' },
+  { key:'gh', label:'🇬🇭 Ghana',           currency:'GHS', compliance:'DPA 2012', timezone:'Africa/Accra',  server:'South Africa North' },
+  { key:'in', label:'🇮🇳 India',           currency:'INR', compliance:'DPDP',     timezone:'Asia/Kolkata',  server:'Central India' },
 ];
 const LANGS = [
   { key:'en',label:'EN' },{ key:'fr',label:'FR' },{ key:'de',label:'DE' },
@@ -71,6 +71,7 @@ function Dropdown({ trigger, children }: { trigger: React.ReactNode; children: R
 export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit<Props, 'region'|'lang'|'onRegionChange'|'onLangChange'>) {
   const { logout } = useAuthStore();
   const { lang, region, setLang, setRegion } = useSettingsStore();
+  const { t } = useTranslation();
   const [clock, setClock] = useState(() => new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' }));
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -175,6 +176,7 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit
                   <div style={{ flex:1 }}>
                     <div>{r.label.slice(2).trim()}</div>
                     <div style={{ fontSize:'10px', color:C.textLo }}>{r.compliance} · {r.currency}</div>
+                    <div style={{ fontSize:'9px', color:C.textMd, opacity:0.7, marginTop:2, fontFamily:"'IBM Plex Mono', monospace" }}>{r.server}</div>
                   </div>
                   {r.key === region && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.brand} strokeWidth="2.5"><path d="m5 12 5 5L20 7"/></svg>}
                 </button>
@@ -246,7 +248,7 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit
           {!isMobile && (
             <div style={{ display:'flex', flexDirection:'column' }}>
               <span style={{ fontSize:'12px', fontWeight:'600', color:C.textHi, fontFamily:"'IBM Plex Sans', system-ui, sans-serif", lineHeight:1.2 }}>
-                {getTranslation(lang, 'welcome')} {user.firstName}
+                {t('welcome')} {user.firstName}
               </span>
               <span style={{ fontSize:'10px', color:C.textLo, fontFamily:"'IBM Plex Sans', system-ui, sans-serif" }}>
                 {user.email}

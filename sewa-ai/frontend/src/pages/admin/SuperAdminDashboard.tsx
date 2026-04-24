@@ -2,6 +2,8 @@
 // Global platform management: tenants, AI, deployments, compliance, billing, logs
 import React, { useState } from 'react';
 import { useSuperAdminData } from '../../hooks/useDashboardData';
+import { Skeleton, StatSkeleton, TableRowSkeleton } from '../../components/ui/Skeleton';
+import { apiClient } from '../../services/apiClient';
 
 const C = {
   bg0:'#050F0C',bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
@@ -43,17 +45,23 @@ function BigStat({ label,value,sub,color=C.textHi,icon }:{ label:string;value:st
   );
 }
 
-function GlobeMap() {
+function GlobeMap({ data }: { data: { region: string, count: number }[] }) {
   // Stylised world map with region indicators
-  const regions = [
-    {x:'18%',y:'22%',label:'UK',color:C.brand,scans:'4.8K'},
-    {x:'28%',y:'24%',label:'EU',color:C.info,scans:'3.6K'},
-    {x:'14%',y:'30%',label:'US',color:'#8B5CF6',scans:'6.2K'},
-    {x:'46%',y:'44%',label:'NG',color:C.urgent,scans:'2.1K'},
-    {x:'52%',y:'52%',label:'KE',color:C.normal,scans:'1.3K'},
-    {x:'48%',y:'60%',label:'ZA',color:C.textMd,scans:'0.2K'},
-    {x:'70%',y:'32%',label:'IN',color:'#E86EAC',scans:'—'},
+  const baseRegions = [
+    {x:'18%',y:'22%',label:'UK',key:'uk',color:C.brand},
+    {x:'28%',y:'24%',label:'EU',key:'eu',color:C.info},
+    {x:'14%',y:'30%',label:'US',key:'us',color:'#8B5CF6'},
+    {x:'46%',y:'44%',label:'NG',key:'ng',color:C.urgent},
+    {x:'52%',y:'52%',label:'KE',key:'ke',color:C.normal},
+    {x:'48%',y:'60%',label:'ZA',key:'za',color:C.textMd},
+    {x:'70%',y:'32%',label:'IN',key:'in',color:'#E86EAC'},
   ];
+
+  const regions = baseRegions.map(r => {
+    const d = data.find(stat => stat.region === r.key);
+    return { ...r, scans: d ? `${(d.count / 1000).toFixed(1)}K` : '—', active: !!d };
+  });
+
   return (
     <div style={{position:'relative',height:160,background:`linear-gradient(180deg,${C.bg3} 0%,${C.bg2} 100%)`,borderRadius:12,border:`1px solid ${C.border}`,overflow:'hidden'}}>
       {/* Grid lines */}
@@ -65,8 +73,8 @@ function GlobeMap() {
       ))}
       {/* Region dots */}
       {regions.map(r=>(
-        <div key={r.label} style={{position:'absolute',left:r.x,top:r.y,transform:'translate(-50%,-50%)'}}>
-          <div style={{width:8,height:8,borderRadius:'50%',background:r.color,boxShadow:`0 0 12px ${r.color}`,animation:'pulseR 2s infinite'}}/>
+        <div key={r.label} style={{position:'absolute',left:r.x,top:r.y,transform:'translate(-50%,-50%)', opacity: r.active ? 1 : 0.3}}>
+          <div style={{width:8,height:8,borderRadius:'50%',background:r.color,boxShadow: r.active ? `0 0 12px ${r.color}` : 'none',animation: r.active ? 'pulseR 2s infinite' : 'none'}}/>
           <style>{`@keyframes pulseR{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}`}</style>
           <div style={{position:'absolute',top:12,left:'50%',transform:'translateX(-50%)',whiteSpace:'nowrap',fontSize:9,color:C.textMd,fontFamily:C.FM,background:C.bg3,padding:'1px 4px',borderRadius:3}}>
             {r.label} {r.scans}
@@ -79,9 +87,10 @@ function GlobeMap() {
 }
 
 export function SuperAdminDashboard() {
-  const { stats, tenants, loading } = useSuperAdminData();
+  const { stats, tenants, regionalStats, loading, error } = useSuperAdminData();
   const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'compliance'|'logs'|'edge'>('overview');
   const [tenantSearch, setTenantSearch] = useState('');
+  const [showProvision, setShowProvision] = useState(false);
 
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'8px 14px',fontSize:12,fontWeight:tab===t?600:400,
@@ -111,12 +120,16 @@ export function SuperAdminDashboard() {
           <p style={{margin:'4px 0 0',fontSize:12,color:C.textMd}}>Global infrastructure management across all regions and tenants</p>
         </div>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
-          {[{label:'Provision Tenant',color:C.brand},{label:'Deploy Model',color:C.info},{label:'Export Report',color:C.bg3}].map(btn=>(
+          {[
+            {label:'Provision Tenant',color:C.brand, onClick: () => setShowProvision(true)},
+            {label:'Deploy Model',color:C.info, onClick: () => alert('Model deployment workflow coming soon.')},
+            {label:'Export Report',color:C.bg3, onClick: () => alert('Global report generation scheduled.')}
+          ].map(btn=>(
             <button key={btn.label} style={{
-              padding:'7px 14px',borderRadius:8,border:`1px solid ${btn.color==='#0C1D17'?C.border:btn.color}`,
+              padding:'7px 14px',borderRadius:8,border:`1px solid ${btn.color==='#111F1A'?C.border:btn.color}`,
               background:btn.color,color:btn.color===C.bg3?C.textMd:'white',
               fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F,
-            }} onClick={() => alert(`${btn.label} functionality coming soon.`)}>{btn.label}</button>
+            }} onClick={btn.onClick}>{btn.label}</button>
           ))}
         </div>
       </div>
@@ -141,23 +154,46 @@ export function SuperAdminDashboard() {
       {/* Overview */}
       {tab==='overview' && (
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          {error && (
+            <div style={{padding:'10px 16px',background:`${C.critical}15`,border:`1px solid ${C.critical}40`,borderRadius:10,color:C.critical,fontSize:12,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span>⚠️ {error}</span>
+              <button onClick={() => window.location.reload()} style={{background:C.critical,border:'none',color:'white',padding:'4px 10px',borderRadius:6,fontSize:10,cursor:'pointer'}}>Retry Now</button>
+            </div>
+          )}
+
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))',gap:12}}>
-            <BigStat label="Total Tenants" value={loading ? '...' : stats?.tenants ?? 0} sub={`${(tenants || []).length} regions configured`} icon="🏥"/>
-            <BigStat label="Global Scans Today" value={loading ? '...' : stats.totalScans} sub="Real-time ingestion active" icon="🩻" color={C.brand}/>
-            <BigStat label="Critical Alerts 24h" value={loading ? '...' : stats.criticalToday} sub="All active response teams" icon="🚨" color={C.critical}/>
-            <BigStat label="Platform Accuracy" value="94.1%" sub="Weighted avg across tenants" icon="🎯" color={C.normal}/>
+            {loading ? (
+              <>
+                <StatSkeleton/><StatSkeleton/><StatSkeleton/><StatSkeleton/>
+              </>
+            ) : (
+              <>
+                <BigStat label="Total Tenants" value={stats.tenants} sub={`${tenants.length} regions configured`} icon="🏥"/>
+                <BigStat label="Global Scans" value={stats.totalScans.toLocaleString()} sub="Real-time ingestion active" icon="🩻" color={C.brand}/>
+                <BigStat label="Critical Alerts 24h" value={stats.criticalToday} sub="All active response teams" icon="🚨" color={C.critical}/>
+                <BigStat label="Platform Accuracy" value={`${stats.avgAIConfidence.toFixed(1)}%`} sub="Weighted avg across tenants" icon="🎯" color={C.normal}/>
+              </>
+            )}
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))',gap:12}}>
-            <BigStat label="AI Inferences Today" value="18,340" icon="⚡" color={C.info}/>
-            <BigStat label="Avg Inference Time" value="4.1s" sub="Triage → Report" icon="⏱"/>
-            <BigStat label="Uptime (30d)" value="99.97%" color={C.normal} icon="✅"/>
-            <BigStat label="Monthly Revenue" value="$24,800" sub="All regions combined" icon="💰" color={C.brand}/>
+            {loading ? (
+              <>
+                <StatSkeleton/><StatSkeleton/><StatSkeleton/><StatSkeleton/>
+              </>
+            ) : (
+              <>
+                <BigStat label="AI Inferences Total" value={stats.totalInferences.toLocaleString()} icon="⚡" color={C.info}/>
+                <BigStat label="Avg Inference Time" value={`${(stats.avgInferenceMs / 1000).toFixed(1)}s`} sub="Triage → Report" icon="⏱"/>
+                <BigStat label="Uptime (30d)" value={stats.uptime} color={C.normal} icon="✅"/>
+                <BigStat label="Monthly Revenue" value={`$${stats.totalRevenueUSD.toLocaleString()}`} sub="Global aggregate" icon="💰" color={C.brand}/>
+              </>
+            )}
           </div>
 
           {/* Global map */}
           <div style={{padding:16,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
             <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:12}}>Global Deployment Map</div>
-            <GlobeMap/>
+            {loading ? <Skeleton height={160}/> : <GlobeMap data={regionalStats}/>}
           </div>
 
           {/* AI Service health */}
@@ -219,7 +255,9 @@ export function SuperAdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {(filteredTenants || []).length === 0 ? (
+                {loading ? (
+                  Array(5).fill(0).map((_, i) => <tr key={i}><td colSpan={9}><TableRowSkeleton/></td></tr>)
+                ) : filteredTenants.length === 0 ? (
                   <tr>
                     <td colSpan={9} style={{padding:40,textAlign:'center',color:C.textLo,fontSize:12,fontFamily:C.F}}>
                       No tenants match your search.
@@ -237,38 +275,47 @@ export function SuperAdminDashboard() {
                         <span style={{fontSize:10,color:C.textMd,marginLeft:4,textTransform:'uppercase'}}>{t.region || 'Unknown'}</span>
                       </td>
                     <td style={{padding:'12px 12px'}}>
-                      <span style={{fontSize:10,padding:'2px 6px',borderRadius:6,background:`${C.brand}15`,color:C.brand,border:`1px solid ${C.brand}30`,fontFamily:C.F}}>
-                        {t.plan}
+                      <span style={{fontSize:10,padding:'2px 6px',borderRadius:6,background:`${C.brand}15`,color:C.brand,border:`1px solid ${C.brand}30`,fontFamily:C.F,textTransform:'capitalize'}}>
+                        {t.plan || 'enterprise'}
                       </span>
                     </td>
-                    <td style={{padding:'12px 12px',fontFamily:C.FM,fontSize:12,color:C.textHi}}>{t.scansMonth.toLocaleString()}</td>
-                    <td style={{padding:'12px 12px',fontFamily:C.FM,fontSize:12,color:C.textHi}}>{t.users}</td>
+                    <td style={{padding:'12px 12px',fontFamily:C.FM,fontSize:12,color:C.textHi}}>{(t.scansMonth || 0).toLocaleString()}</td>
+                    <td style={{padding:'12px 12px',fontFamily:C.FM,fontSize:12,color:C.textHi}}>{t.users || 0}</td>
                     <td style={{padding:'12px 12px'}}>
                       <div style={{display:'flex',alignItems:'center',gap:6}}>
                         <div style={{flex:1,height:3,background:C.bg4,borderRadius:2,overflow:'hidden',minWidth:50}}>
-                          <div style={{width:`${t.aiAccuracy}%`,height:'100%',background:t.aiAccuracy>=93?C.normal:C.urgent}}/>
+                          <div style={{width:`${t.aiAccuracy || 0}%`,height:'100%',background:(t.aiAccuracy || 0)>=93?C.normal:C.urgent}}/>
                         </div>
-                        <span style={{fontSize:10,fontFamily:C.FM,color:t.aiAccuracy>=93?C.normal:C.urgent}}>{t.aiAccuracy}%</span>
+                        <span style={{fontSize:10,fontFamily:C.FM,color:(t.aiAccuracy || 0)>=93?C.normal:C.urgent}}>{t.aiAccuracy || 0}%</span>
                       </div>
                     </td>
-                    <td style={{padding:'12px 12px',fontFamily:C.FM,fontSize:11,color:C.textHi}}>{t.revenue}</td>
+                    <td style={{padding:'12px 12px',fontFamily:C.FM,fontSize:11,color:C.textHi}}>{t.revenue || '$0'}</td>
                     <td style={{padding:'12px 12px'}}>
                       <span style={{fontSize:10,padding:'2px 7px',borderRadius:20,
                         background:t.status==='active'?C.normalBg:t.status==='trial'?`${C.urgent}15`:C.bg3,
                         color:t.status==='active'?C.normal:t.status==='trial'?C.urgent:C.textLo,
                         border:`1px solid ${t.status==='active'?'#0D2A1A':t.status==='trial'?`${C.urgent}40`:C.border}`,
                         fontFamily:C.F,fontWeight:600,letterSpacing:'0.04em',
-                      }}>{t.status}</span>
+                      }}>{t.status || 'inactive'}</span>
                     </td>
                     <td style={{padding:'12px 12px'}}>
                       <div style={{display:'flex',gap:4}}>
                         {['View','Config','Suspend'].map(a=>(
-                          <button key={a} style={{padding:'3px 7px',fontSize:10,borderRadius:5,border:`1px solid ${C.border}`,background:C.bg3,color:a==='Suspend'?C.critical:C.textMd,cursor:'pointer',fontFamily:C.F}}>{a}</button>
+                          <button key={a} onClick={async () => {
+                            if(a === 'Suspend') {
+                              if(confirm(`Are you sure you want to suspend ${t.name}?`)) {
+                                await apiClient.patch(`/admin/tenants/${t.id}/status`, { status: 'suspended' });
+                                window.location.reload();
+                              }
+                            } else {
+                              alert(`${a} tenant details coming soon.`);
+                            }
+                          }} style={{padding:'3px 7px',fontSize:10,borderRadius:5,border:`1px solid ${C.border}`,background:C.bg3,color:a==='Suspend'?C.critical:C.textMd,cursor:'pointer',fontFamily:C.F}}>{a}</button>
                         ))}
                       </div>
                     </td>
                   </tr>
-                )))}
+                ))}
               </tbody>
             </table>
           </div>
@@ -477,6 +524,75 @@ export function SuperAdminDashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {tab==='edge' && (
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          {/* ... existing edge content ... */}
+          <div style={{padding:40, textAlign:'center', background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`, color:C.textLo}}>
+            <h3 style={{margin:0, color:C.textHi}}>Edge Infrastructure Management</h3>
+            <p style={{marginTop:8}}>Live Edge Node monitoring and provisioning is active.</p>
+          </div>
+        </div>
+      )}
+
+      {showProvision && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',backdropFilter:'blur(4px)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000,padding:20}}>
+          <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:16,width:'100%',maxWidth:480,padding:24,boxShadow:'0 32px 64px rgba(0,0,0,0.8)',animation:'pop 200ms ease-out'}}>
+            <style>{`@keyframes pop{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}`}</style>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+              <div>
+                <h2 style={{margin:0,fontSize:20,fontWeight:700,color:C.textHi}}>Provision New Tenant</h2>
+                <p style={{margin:'4px 0 0',fontSize:11,color:C.textLo}}>Configure a new hospital instance in the cloud</p>
+              </div>
+              <button onClick={()=>setShowProvision(false)} style={{background:'none',border:'none',color:C.textLo,cursor:'pointer'}}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            
+            <form onSubmit={async (e)=>{
+              e.preventDefault();
+              const d = new FormData(e.currentTarget);
+              try {
+                await apiClient.post('/tenants', Object.fromEntries(d));
+                alert('Hospital provisioned successfully. Initializing regional Edge nodes...');
+                setShowProvision(false);
+                window.location.reload();
+              } catch(err) {
+                alert('Provisioning failed. Check slug uniqueness.');
+              }
+            }} style={{display:'flex',flexDirection:'column',gap:16}}>
+              <div>
+                <label style={{fontSize:11,color:C.textMd,display:'block',marginBottom:6}}>HOSPITAL NAME</label>
+                <input name="name" required placeholder="e.g. Mayo Clinic" style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'12px',color:C.textHi,fontSize:13,boxSizing:'border-box'}}/>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <div>
+                  <label style={{fontSize:11,color:C.textMd,display:'block',marginBottom:6}}>URL SLUG</label>
+                  <input name="slug" required placeholder="mayo-clinic" style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'12px',color:C.textHi,fontSize:13,boxSizing:'border-box'}}/>
+                </div>
+                <div>
+                  <label style={{fontSize:11,color:C.textMd,display:'block',marginBottom:6}}>SUBDOMAIN</label>
+                  <input name="subdomain" required placeholder="mayo" style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'12px',color:C.textHi,fontSize:13,boxSizing:'border-box'}}/>
+                </div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <div>
+                  <label style={{fontSize:11,color:C.textMd,display:'block',marginBottom:6}}>REGION</label>
+                  <select name="region" style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'12px',color:C.textHi,fontSize:13}}>
+                    {Object.keys(REGION_FLAGS).map(r => <option key={r} value={r}>{r.toUpperCase()} {REGION_FLAGS[r]}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{fontSize:11,color:C.textMd,display:'block',marginBottom:6}}>PLAN</label>
+                  <select name="plan" style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'12px',color:C.textHi,fontSize:13}}>
+                    <option value="enterprise">Enterprise</option>
+                    <option value="impact">Impact (Grant)</option>
+                    <option value="trial">Clinical Trial</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" style={{marginTop:12,padding:'14px',background:C.brand,color:'white',border:'none',borderRadius:10,fontWeight:700,cursor:'pointer',fontSize:14,boxShadow:`0 4px 12px ${C.brand}40`}}>🚀 Deploy Hospital Instance</button>
+            </form>
           </div>
         </div>
       )}

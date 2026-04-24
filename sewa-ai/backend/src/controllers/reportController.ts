@@ -7,6 +7,7 @@ import { sendHL7ORU } from '../services/hl7Service';
 import { auditLog } from '../utils/audit';
 import { AppError } from '../utils/AppError';
 import { io } from '../index';
+import { generateClinicalPDF } from '../services/reportGenerationService';
 
 // POST /api/v1/reports/generate/:scanId
 export async function generateReport(req: Request, res: Response, next: NextFunction) {
@@ -65,6 +66,9 @@ export async function signReport(req: Request, res: Response, next: NextFunction
       where: { id },
       data: { status: 'approved', signedAt: new Date(), signedBy: userId },
     });
+
+    // Generate Final High-Fidelity Report (Feature 36)
+    await generateClinicalPDF(id).catch(e => logger.warn(`[ReportGen] Failed for ${id}: ${e.message}`));
 
     await prisma.scan.update({ where: { id: report.scanId }, data: { status: 'reported' } });
 

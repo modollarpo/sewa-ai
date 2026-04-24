@@ -1,6 +1,7 @@
 // SEWA AI — CriticalAlertBanner.tsx
 // Sticky top banner for STAT/CRITICAL AI findings — animated, dismissible, multi-alert
 import React, { useState, useEffect } from 'react';
+import { useScanStore } from '../../store/scanStore';
 
 const C = {
   critical:'#E03535', critBg:'#2A0A0A', critBorder:'#5A1515',
@@ -27,13 +28,10 @@ interface Props {
 }
 
 export function CriticalAlertBanner({ alerts }: Props) {
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const acknowledgeAlert = useScanStore(s => s.acknowledgeAlert);
   const [activeIdx, setActiveIdx] = useState(0);
 
-  const visible = alerts.filter(a => {
-    const id = a.id ?? a.scanId ?? 'unknown';
-    return !dismissed.has(id);
-  });
+  const visible = alerts; // Filtered by the store's logic
 
   // Cycle through multiple alerts
   useEffect(() => {
@@ -142,7 +140,7 @@ export function CriticalAlertBanner({ alerts }: Props) {
         )}
 
         {/* Dismiss */}
-        <button onClick={() => setDismissed(d => new Set([...d, id]))}
+        <button onClick={() => acknowledgeAlert(id)}
           style={{ width:26, height:26, borderRadius:6, border:`1px solid ${colors.border}`, background:'transparent', cursor:'pointer', color:colors.accent, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13 }}>
           ✕
         </button>

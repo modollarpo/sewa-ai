@@ -118,11 +118,11 @@ export function BillingDashboard() {
         <div>
           <div style={{ fontSize:11, color:C.textMd, marginBottom:3 }}>Current Plan</div>
           <div style={{ fontSize:18, fontWeight:800, color:C.brand }}>
-            NHS Enterprise  <span style={{ fontSize:13, fontWeight:400, color:C.textMd }}>· {gateways[0]?.currencies[0]} — Billed monthly</span>
+            {loading ? '...' : (stats.plan?.toUpperCase() || 'PRO')} <span style={{ fontSize:13, fontWeight:400, color:C.textMd }}>· {gateways[0]?.currencies[0]} — {stats.subscriptionStatus || 'Active'}</span>
           </div>
         </div>
         <div style={{ display:'flex', gap:8 }}>
-          <button style={{ padding:'7px 14px', background:'transparent', border:`1px solid ${C.brand}`, borderRadius:8, color:C.brand, fontSize:11, cursor:'pointer', fontFamily:C.F }}>
+          <button onClick={()=>setTab('plans')} style={{ padding:'7px 14px', background:'transparent', border:`1px solid ${C.brand}`, borderRadius:8, color:C.brand, fontSize:11, cursor:'pointer', fontFamily:C.F }}>
             Change Plan
           </button>
           <button style={{ padding:'7px 14px', background:C.brand, border:'none', borderRadius:8, color:'white', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:C.F }}>
@@ -148,8 +148,8 @@ export function BillingDashboard() {
           <div style={{ padding:20, background:C.bg2, borderRadius:14, border:`1px solid ${C.border}` }}>
             <div style={{ fontSize:13, fontWeight:700, color:C.textHi, marginBottom:16 }}>Current Usage & Quota</div>
             <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              <UsageBar label="Monthly Active Scans" used={loading ? 0 : 4820} total={999999} color={C.brand}/>
-              <UsageBar label="AI Reports Generated" used={loading ? 0 : 4820} total={999999} color={C.brandLt}/>
+              <UsageBar label="Monthly Active Scans" used={loading ? 0 : (stats.quota?.used || 0)} total={stats.quota?.monthly || 1000} color={C.brand}/>
+              <UsageBar label="AI Reports Generated" used={loading ? 0 : (stats.quota?.used || 0)} total={stats.quota?.monthly || 1000} color={C.brandLt}/>
               <UsageBar label="Storage (GB)" used={loading ? 0 : 2457} total={10240} color={C.info}/>
               <UsageBar label="Active Users" used={loading ? 0 : 34} total={100} color={C.normal}/>
             </div>

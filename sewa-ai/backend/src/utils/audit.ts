@@ -3,6 +3,7 @@
 // © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import crypto from 'crypto';
 import { prisma } from '../config/database';
+import { io } from '../index';
 
 export interface AuditEntry {
   tenantId?: string;
@@ -24,7 +25,7 @@ export async function auditLog(entry: AuditEntry): Promise<void> {
     const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
     const chainHash = crypto.createHash('sha256')
       .update(payloadHash + (last?.sha256Hash || 'genesis')).digest('hex');
-    await prisma.auditLog.create({
+    const log = await prisma.auditLog.create({
       data: {
         tenantId: entry.tenantId,
         userId: entry.userId || 'SYSTEM',
@@ -38,6 +39,12 @@ export async function auditLog(entry: AuditEntry): Promise<void> {
         previousHash: last?.sha256Hash || 'genesis',
       }
     });
+
+    // Stream audit log to relevant rooms (Feature 19)
+    if (entry.tenantId) {
+      io.to(`tenant:${entry.tenantId}`).emit('audit:new', log);
+    }
+    io.to('role:superadmin').emit('audit:new', log);
   } catch (e: any) {
     console.error('[Audit] Failed to write audit log:', e.message);
   }
