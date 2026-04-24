@@ -207,7 +207,7 @@ spec:
       - name: acr-secret
       containers:
       - name: federated
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-federated-learning:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-federated:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8004
@@ -259,7 +259,7 @@ spec:
       - name: acr-secret
       containers:
       - name: continuous
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-continuous-learning:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-continuous:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8005

@@ -30,12 +30,13 @@ Out-Success "Backend build complete."
 
 # 3. Build & Push AI Services
 Write-Host "[3/6] Building AI Services via ACR Tasks..." -ForegroundColor Yellow
-$AI_SERVICES = "triage", "uncertainty", "vlm-report", "metacognition", "federated", "continuous"
-foreach ($svc in $AI_SERVICES) {
-    Write-Host " -> Building $svc..." -ForegroundColor Cyan
+$AI_SERVICES = @{ "triage"="triage"; "uncertainty"="uncertainty"; "vlm-report"="vlm-report"; "metacognition"="metacognition"; "federated"="federated-learning"; "continuous"="continuous-learning" }
+foreach ($svc in $AI_SERVICES.Keys) {
+    $dir = $AI_SERVICES[$svc]
+    Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan
     $svcImg = "sewa-$svc`:$IMAGE_TAG"
     $svcLatest = "sewa-$svc`:production-latest"
-    az acr build --registry $ACR_NAME --image $svcImg --image $svcLatest --file "ai-services/$svc/Dockerfile" "ai-services/$svc/"
+    az acr build --registry $ACR_NAME --image $svcImg --image $svcLatest --file "ai-services/$dir/Dockerfile" "ai-services/$dir/"
 }
 Out-Success "AI services build complete."
 
