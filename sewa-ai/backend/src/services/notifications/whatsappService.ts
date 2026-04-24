@@ -118,9 +118,7 @@ export const whatsappService = {
           to: [opts.to],
           content: {
             kind: 'text',
-            text: {
-              content,
-            },
+            text: content,
           },
         },
       });
@@ -156,9 +154,7 @@ export const whatsappService = {
             to: [opts.number],
             content: {
               kind: 'text',
-              text: {
-                content: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
-              },
+              text: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
             },
           },
         });
@@ -203,9 +199,7 @@ export const whatsappService = {
             to: [number],
             content: {
               kind: 'text',
-              text: {
-                content: message,
-              },
+              text: message,
             },
           },
         });
