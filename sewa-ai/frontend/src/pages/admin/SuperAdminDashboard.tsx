@@ -384,7 +384,7 @@ export function SuperAdminDashboard() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>
