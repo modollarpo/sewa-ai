@@ -192,6 +192,72 @@ export async function getFHIRImagingStudy(fhirId: string): Promise<any | null> {
   }
 }
 
+// ── DiagnosticReport GET ──────────────────────────────────────────
+export async function getFHIRDiagnosticReport(fhirId: string): Promise<any | null> {
+  if (!fhirEnabled()) return null;
+  try {
+    const token = await getFHIRToken();
+    const res = await client().get(`/DiagnosticReport/${fhirId}`, { headers: buildHeaders(token) });
+    return res.data;
+  } catch (err: any) {
+    logger.warn(`[FHIR] DiagnosticReport fetch failed: ${err.message}`);
+    return null;
+  }
+}
+
+// ── Observation GET ───────────────────────────────────────────────
+export async function getFHIRObservation(fhirId: string): Promise<any | null> {
+  if (!fhirEnabled()) return null;
+  try {
+    const token = await getFHIRToken();
+    const res = await client().get(`/Observation/${fhirId}`, { headers: buildHeaders(token) });
+    return res.data;
+  } catch (err: any) {
+    logger.warn(`[FHIR] Observation fetch failed: ${err.message}`);
+    return null;
+  }
+}
+
+// ── Search DiagnosticReports ──────────────────────────────────────
+export async function searchFHIRDiagnosticReports(patientFhirId: string): Promise<any> {
+  if (!fhirEnabled()) return { resourceType: 'Bundle', type: 'searchset', total: 0, entry: [] };
+  try {
+    const token = await getFHIRToken();
+    const res = await client().get(`/DiagnosticReport?subject=Patient/${patientFhirId}`, { headers: buildHeaders(token) });
+    return res.data;
+  } catch (err: any) {
+    logger.warn(`[FHIR] DiagnosticReport search failed: ${err.message}`);
+    return { resourceType: 'Bundle', type: 'searchset', total: 0, entry: [] };
+  }
+}
+
+// ── Practitioner Mapping ──────────────────────────────────────────
+export async function getFHIRPractitioner(userId: string): Promise<any | null> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return null;
+  return {
+    resourceType: 'Practitioner',
+    id: user.id,
+    identifier: [{ system: 'https://sewaxai.health/users', value: user.id }],
+    name: [{ family: user.lastName, given: [user.firstName] }],
+    telecom: [{ system: 'email', value: user.email }],
+    qualification: user.speciality ? [{ code: { text: user.speciality } }] : [],
+  };
+}
+
+// ── Organization Mapping ──────────────────────────────────────────
+export async function getFHIROrganization(tenantId: string): Promise<any | null> {
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+  if (!tenant) return null;
+  return {
+    resourceType: 'Organization',
+    id: tenant.id,
+    name: tenant.name,
+    address: [{ city: tenant.region || 'UK' }],
+    contact: [{ telecom: [{ system: 'email', value: tenant.primaryContactEmail }] }],
+  };
+}
+
 // ── Health check ─────────────────────────────────────────────────────────
 export async function checkFHIRHealth(): Promise<{ enabled: boolean; reachable: boolean; server: string }> {
   if (!fhirEnabled()) return { enabled: false, reachable: false, server: 'not configured' };
