@@ -48,7 +48,7 @@ export function useSuperAdminData() {
   });
 
   return {
-    stats: dashboardRes?.data || { tenants: 0, totalScans: 0, criticalToday: 0, totalRevenueUSD: 0, avgAIConfidence: 0, avgInferenceMs: 0, uptime: '100%' },
+    stats: dashboardRes?.data || { tenants: 0, totalScans: 0, criticalToday: 0, totalRevenueUSD: 0, avgAIConfidence: 0, avgInferenceMs: 0, totalInferences: 0, uptime: '100%' },
     tenants: tenantsRes?.data?.length > 0 ? tenantsRes.data : MOCK_TENANTS,
     regionalStats: analyticsRes?.data?.regionalStats || [],
     health: healthRes?.data || [],

@@ -169,10 +169,10 @@ export function SuperAdminDashboard() {
               </>
             ) : (
               <>
-                <BigStat label="Total Tenants" value={stats.tenants} sub={`${tenants.length} regions configured`} icon="🏥"/>
-                <BigStat label="Global Scans" value={stats.totalScans.toLocaleString()} sub="Real-time ingestion active" icon="🩻" color={C.brand}/>
-                <BigStat label="Critical Alerts 24h" value={stats.criticalToday} sub="All active response teams" icon="🚨" color={C.critical}/>
-                <BigStat label="Platform Accuracy" value={`${stats.avgAIConfidence.toFixed(1)}%`} sub="Weighted avg across tenants" icon="🎯" color={C.normal}/>
+                <BigStat label="Total Tenants" value={stats.tenants || 0} sub={`${tenants?.length || 0} regions configured`} icon="🏥"/>
+                <BigStat label="Global Scans" value={(stats.totalScans || 0).toLocaleString()} sub="Real-time ingestion active" icon="🩻" color={C.brand}/>
+                <BigStat label="Critical Alerts 24h" value={stats.criticalToday || 0} sub="All active response teams" icon="🚨" color={C.critical}/>
+                <BigStat label="Platform Accuracy" value={`${(stats.avgAIConfidence || 0).toFixed(1)}%`} sub="Weighted avg across tenants" icon="🎯" color={C.normal}/>
               </>
             )}
           </div>
@@ -183,10 +183,10 @@ export function SuperAdminDashboard() {
               </>
             ) : (
               <>
-                <BigStat label="AI Inferences Total" value={stats.totalInferences.toLocaleString()} icon="⚡" color={C.info}/>
-                <BigStat label="Avg Inference Time" value={`${(stats.avgInferenceMs / 1000).toFixed(1)}s`} sub="Triage → Report" icon="⏱"/>
-                <BigStat label="Uptime (30d)" value={stats.uptime} color={C.normal} icon="✅"/>
-                <BigStat label="Monthly Revenue" value={`$${stats.totalRevenueUSD.toLocaleString()}`} sub="Global aggregate" icon="💰" color={C.brand}/>
+                <BigStat label="AI Inferences Total" value={(stats.totalInferences || 0).toLocaleString()} icon="⚡" color={C.info}/>
+                <BigStat label="Avg Inference Time" value={`${((stats.avgInferenceMs || 0) / 1000).toFixed(1)}s`} sub="Triage → Report" icon="⏱"/>
+                <BigStat label="Uptime (30d)" value={stats.uptime || '100%'} color={C.normal} icon="✅"/>
+                <BigStat label="Monthly Revenue" value={`$${(stats.totalRevenueUSD || 0).toLocaleString()}`} sub="Global aggregate" icon="💰" color={C.brand}/>
               </>
             )}
           </div>
