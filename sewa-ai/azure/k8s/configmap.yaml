@@ -61,6 +61,9 @@ data:
   # ── Appointments / Telehealth ──────────────────────────────────
   VIDEO_PROVIDER:       "daily"
 
+  # ── Infrastructure ───────────────────────────────────────────
+  REDIS_URL:            "redis://sewa-redis:6379"
+  
   # ── Deployment ─────────────────────────────────────────────────
   DEPLOY_TARGET:        "azure"
   EDGE_SYNC_ENABLED:    "false"

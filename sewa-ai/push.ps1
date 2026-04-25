@@ -35,7 +35,7 @@ foreach ($svc in $AI_SERVICES.Keys) {
     $dir = $AI_SERVICES[$svc]
     Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan
     $svcImg = "sewa-$svc`:$IMAGE_TAG"
-    $svcLatest = "sewa-$svc`:production-latest"
+    $svcLatest = "sewa-$svc`:latest" # Ensure 'latest' is pushed for K8s manifests
     az acr build --registry $ACR_NAME --image $svcImg --image $svcLatest --file "ai-services/$dir/Dockerfile" "ai-services/$dir/"
 }
 Out-Success "AI services build complete."
@@ -59,6 +59,16 @@ foreach ($m in $manifests) {
     $content = $content -replace "{{CONTAINER_REGISTRY}}", $ACR_SERVER
     $content = $content -replace "{{ENV}}", "production"
     $tmpPath = $m.FullName + ".tmp"
+    
+    # Special handling for ACR secret placeholder
+    if ($m.Name -eq "acr-secret.yaml") {
+        $DOCKER_CONFIG = az acr credential show --name $ACR_NAME --query "to_string(auths)" -o tsv
+        # Wrap in dockerconfigjson structure and base64 encode
+        $JSON = "{`"auths`":$DOCKER_CONFIG}"
+        $B64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($JSON))
+        $content = $content -replace "PLACEHOLDER_SET_BY_DEPLOY_SCRIPT", $B64
+    }
+
     $content | Out-File $tmpPath -Encoding utf8
     kubectl apply -f $tmpPath
     Remove-Item $tmpPath

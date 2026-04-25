@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-redis
+  namespace: sewa-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sewa-redis
+  template:
+    metadata:
+      labels:
+        app: sewa-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          limits:
+            memory: "1Gi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-redis
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-redis
+  ports:
+  - port: 6379
+    targetPort: 6379
