@@ -1,7 +1,7 @@
 // SEWA AI — backend/src/routes/ai.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
-import { triggerAITriage, generateVLMReport } from '../services/aiService';
+import { triggerAITriage, generateVLMReport, generateICDCodes } from '../services/aiService';
 import { prisma } from '../config/database';
 import { AppError } from '../utils/AppError';
 const r = Router();
@@ -35,6 +35,13 @@ r.post('/vlm/:scanId', authorize('admin','superadmin','radiologist'), async (req
     const { tenantId } = req.user!;
     const result = await generateVLMReport(req.params.scanId, tenantId);
     res.json({ message: 'VLM Report generated', data: result });
+  } catch (err) { next(err); }
+});
+
+r.post('/icd10/:scanId', authorize('admin','superadmin','radiologist'), async (req, res, next) => {
+  try {
+    const codes = await generateICDCodes(req.params.scanId);
+    res.json({ message: 'ICD-10 Codes generated', codes });
   } catch (err) { next(err); }
 });
 

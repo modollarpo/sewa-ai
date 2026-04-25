@@ -9,7 +9,8 @@ import { prisma } from '../../config/database';
 
 const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING || '';
 const channelRegistrationId = process.env.AZURE_COMMUNICATION_WHATSAPP_CHANNEL_ID || '';
-const messageClient = connectionString ? MessagesClient(connectionString) : null;
+// @ts-ignore - ACS beta library type mismatch
+const messageClient = connectionString ? (MessagesClient as any)(connectionString) : null;
 
 // ── WhatsApp message templates ─────────────────────────────────
 // Uses Azure WhatsApp template messages (pre-approved by Meta for critical health alerts)

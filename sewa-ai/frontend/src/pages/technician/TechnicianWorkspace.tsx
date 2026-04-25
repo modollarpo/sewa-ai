@@ -1,7 +1,7 @@
 // SEWA AI — TechnicianWorkspace.tsx
 // DICOM upload (drag-drop), live worklist, PACS sync status, queue management
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useTechnicianData } from '../../hooks/useDashboardData';
+import { useTechnicianData, useAppointmentData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 
@@ -85,6 +85,42 @@ function UrgencyBadge({ urgency }: { urgency: string }) {
   );
 }
 
+function ScheduleView() {
+  const { appointments, loading } = useAppointmentData();
+  return (
+    <div style={{display:'flex',flexDirection:'column',gap:12}}>
+      <div style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div>
+          <div style={{fontSize:14,fontWeight:700,color:C.textHi}}>Scanner Throughput</div>
+          <div style={{fontSize:11,color:C.textMd}}>Daily schedule for MRI-01 and CT-02</div>
+        </div>
+        <span style={{fontSize:11,color:C.textLo}}>{new Date().toLocaleDateString()}</span>
+      </div>
+      
+      {loading ? (
+        <div style={{padding:40,textAlign:'center',color:C.textLo}}>Loading schedule...</div>
+      ) : appointments.length === 0 ? (
+        <div style={{padding:40,textAlign:'center',background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,color:C.textLo}}>
+          No scans scheduled for today.
+        </div>
+      ) : appointments.map((a: any) => (
+        <div key={a.id} style={{padding:14,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:12}}>
+          <div style={{width:40,textAlign:'center',borderRight:`1px solid ${C.border}`,paddingRight:12}}>
+            <div style={{fontSize:12,fontWeight:700,color:C.brand,fontFamily:C.FM}}>{new Date(a.scheduledDate).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:13,fontWeight:600,color:C.textHi}}>{a.patient?.name || 'Unknown Patient'}</div>
+            <div style={{fontSize:11,color:C.textLo}}>{a.type.replace(/_/g,' ').toUpperCase()} · Ref: Dr. {a.doctor?.lastName || 'Anon'}</div>
+          </div>
+          <span style={{padding:'3px 8px',borderRadius:20,fontSize:10,fontWeight:700,background:a.status==='completed'?C.normalBg:C.bg3,color:a.status==='completed'?C.normal:C.textMd,border:`1px solid ${a.status==='completed'?'#0D2A1A':C.border}`}}>
+            {a.status.toUpperCase()}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function TechnicianWorkspace() {
   const { user } = useAuthStore();
   const { worklist, loading } = useTechnicianData();
@@ -113,7 +149,7 @@ export function TechnicianWorkspace() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [formError, setFormError] = useState('');
-  const [tab, setTab] = useState<'upload'|'queue'|'pacs'>('upload');
+  const [tab, setTab] = useState<'upload'|'queue'|'schedule'|'pacs'>('upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
@@ -201,10 +237,10 @@ export function TechnicianWorkspace() {
         scanId: scan.id, urgency: 'PENDING'
       };
       setJobs(prev => [newJob, ...prev]);
-      alert('Synthetic demo scan generated. AI result will populate in ~10s.');
+      alert('Demo scan queued. Analysis will populate shortly.');
       setTab('queue');
-    } catch (err) {
-      alert('Demo engine busy. Retrying via secondary cluster...');
+    } catch (err: any) {
+      alert(`Upload failed: ${err.response?.data?.message || err.message}`);
     } finally {
       setUploading(false);
     }
@@ -302,6 +338,9 @@ export function TechnicianWorkspace() {
           <button style={tabStyle('queue')} onClick={()=>setTab('queue')}>
             📋 Full Queue
             {processing>0&&<span style={{padding:'1px 5px',borderRadius:10,background:C.brand,color:'white',fontSize:9,fontWeight:700}}>{processing}</span>}
+          </button>
+          <button style={tabStyle('schedule')} onClick={()=>setTab('schedule')}>
+            📅 Schedule
           </button>
           <button style={tabStyle('pacs')} onClick={()=>setTab('pacs')}>
             🔗 PACS Status
@@ -507,7 +546,13 @@ export function TechnicianWorkspace() {
                     </div>
                     {job.status==='ai_complete' && (
                       <button 
-                        onClick={() => alert(`Opening Clinical Viewer for scan ${job.scanId}...`)}
+                        onClick={() => {
+                          if (job.scanId) {
+                            window.open(`/dashboard?scanId=${job.scanId}`, '_blank');
+                          } else {
+                            alert('Viewer unavailable: Scan ID missing.');
+                          }
+                        }}
                         style={{padding:'6px 12px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F,flexShrink:0}}>
                         View Scan
                       </button>
@@ -517,6 +562,9 @@ export function TechnicianWorkspace() {
               ))}
             </div>
           )}
+
+          {/* SCHEDULE TAB */}
+          {tab==='schedule' && <ScheduleView />}
 
           {/* PACS STATUS TAB */}
           {tab==='pacs' && (

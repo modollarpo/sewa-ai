@@ -2,6 +2,32 @@
 # yarn lockfile v1
 
 
+"@azure-rest/communication-messages@^1.0.0-beta.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@azure-rest/communication-messages/-/communication-messages-1.0.1.tgz"
+  integrity sha512-skL8BrXBDannwkOOE6DQ3pVIpknL2iUt5rzSoAcFkHj/SRlvoSglkerivSObzZ/DUhUzJSMY+ZHeLat4tdEd3w==
+  dependencies:
+    "@azure-rest/core-client" "^1.1.6"
+    "@azure/communication-common" "^2.2.0"
+    "@azure/core-auth" "^1.3.0"
+    "@azure/core-paging" "^1.5.0"
+    "@azure/core-rest-pipeline" "^1.12.0"
+    "@azure/core-util" "^1.7.0"
+    "@azure/logger" "^1.0.0"
+    tslib "^2.2.0"
+
+"@azure-rest/core-client@^1.1.6":
+  version "1.4.0"
+  resolved "https://registry.npmjs.org/@azure-rest/core-client/-/core-client-1.4.0.tgz"
+  integrity sha512-ozTDPBVUDR5eOnMIwhggbnVmOrka4fXCs8n8mvUo4WLLc38kki6bAOByDoVZZPz/pZy2jMt2kwfpvy/UjALj6w==
+  dependencies:
+    "@azure/abort-controller" "^2.0.0"
+    "@azure/core-auth" "^1.3.0"
+    "@azure/core-rest-pipeline" "^1.5.0"
+    "@azure/core-tracing" "^1.0.1"
+    "@azure/core-util" "^1.0.0"
+    tslib "^2.6.2"
+
 "@azure-rest/core-client@^2.3.3":
   version "2.6.0"
   resolved "https://registry.npmjs.org/@azure-rest/core-client/-/core-client-2.6.0.tgz"
@@ -28,7 +54,7 @@
   dependencies:
     tslib "^2.6.2"
 
-"@azure/communication-common@^2.3.1":
+"@azure/communication-common@^2.2.0", "@azure/communication-common@^2.3.1":
   version "2.4.0"
   resolved "https://registry.npmjs.org/@azure/communication-common/-/communication-common-2.4.0.tgz"
   integrity sha512-wwn4AoOgTgoA9OZkO34SKBpQg7/kfcABnzbaYEbc+9bCkBtwwjgMEk6xM+XLEE/uuODZ8q8jidUoNcZHQyP5AQ==
@@ -126,14 +152,14 @@
     "@azure/logger" "^1.0.0"
     tslib "^2.6.2"
 
-"@azure/core-paging@^1.1.1":
+"@azure/core-paging@^1.1.1", "@azure/core-paging@^1.5.0":
   version "1.6.2"
   resolved "https://registry.npmjs.org/@azure/core-paging/-/core-paging-1.6.2.tgz"
   integrity sha512-YKWi9YuCU04B55h25cnOYZHxXYtEvQEbKST5vqRga7hWY9ydd3FZHdeQF8pyh+acWZvppw13M/LMGx0LABUVMA==
   dependencies:
     tslib "^2.6.2"
 
-"@azure/core-rest-pipeline@^1.17.0", "@azure/core-rest-pipeline@^1.18.0", "@azure/core-rest-pipeline@^1.18.2", "@azure/core-rest-pipeline@^1.22.0":
+"@azure/core-rest-pipeline@^1.12.0", "@azure/core-rest-pipeline@^1.17.0", "@azure/core-rest-pipeline@^1.18.0", "@azure/core-rest-pipeline@^1.18.2", "@azure/core-rest-pipeline@^1.22.0", "@azure/core-rest-pipeline@^1.5.0":
   version "1.23.0"
   resolved "https://registry.npmjs.org/@azure/core-rest-pipeline/-/core-rest-pipeline-1.23.0.tgz"
   integrity sha512-Evs1INHo+jUjwHi1T6SG6Ua/LHOQBCLuKEEE6efIpt4ZOoNonaT1kP32GoOcdNDbfqsD2445CPri3MubBy5DEQ==
@@ -144,6 +170,13 @@
     "@azure/core-util" "^1.13.0"
     "@azure/logger" "^1.3.0"
     "@typespec/ts-http-runtime" "^0.3.4"
+    tslib "^2.6.2"
+
+"@azure/core-tracing@^1.0.1":
+  version "1.3.1"
+  resolved "https://registry.npmjs.org/@azure/core-tracing/-/core-tracing-1.3.1.tgz"
+  integrity sha512-9MWKevR7Hz8kNzzPLfX4EAtGM2b8mr50HPDBvio96bURP/9C+HjdH3sBlLSNNrvRAr5/k/svoH457gB5IKpmwQ==
+  dependencies:
     tslib "^2.6.2"
 
 "@azure/core-tracing@^1.2.0":
@@ -168,7 +201,7 @@
     "@opentelemetry/api" "^1.0.1"
     tslib "^2.2.0"
 
-"@azure/core-util@^1.1.1", "@azure/core-util@^1.11.0", "@azure/core-util@^1.13.0", "@azure/core-util@^1.2.0":
+"@azure/core-util@^1.0.0", "@azure/core-util@^1.1.1", "@azure/core-util@^1.11.0", "@azure/core-util@^1.13.0", "@azure/core-util@^1.2.0", "@azure/core-util@^1.7.0":
   version "1.13.1"
   resolved "https://registry.npmjs.org/@azure/core-util/-/core-util-1.13.1.tgz"
   integrity sha512-XPArKLzsvl0Hf0CaGyKHUyVgF7oDnhKoP85Xv6M4StF/1AhfORhZudHtOyf2s+FcbuQ9dPRAjB8J2KvRRMUK2A==

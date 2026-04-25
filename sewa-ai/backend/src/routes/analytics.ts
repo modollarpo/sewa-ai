@@ -58,7 +58,7 @@ r.get('/population-health', async (req, res, next) => {
     });
 
     // Enrich geography with tenant info
-    const geography = await Promise.all(regionalStats.map(async (stat) => {
+    const geography = await Promise.all(regionalStats.map(async (stat: any) => {
       const t = await prisma.tenant.findUnique({ 
         where: { id: stat.tenantId }, 
         select: { name: true, region: true, latitude: true, longitude: true, timezone: true } 
@@ -75,7 +75,7 @@ r.get('/population-health', async (req, res, next) => {
     }));
 
     res.json({
-      conditions: conditionStats.map(c => ({
+      conditions: conditionStats.map((c: any) => ({
         condition: c.primaryFinding,
         urgency: c.urgency,
         count: c._count.id,

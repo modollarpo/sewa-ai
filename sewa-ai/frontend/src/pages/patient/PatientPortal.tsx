@@ -165,7 +165,11 @@ export function PatientPortal() {
 
                 <div style={{display:'flex',gap:8}}>
                   {scan.reportReady && (
-                    <button onClick={e=>{e.stopPropagation(); alert('Downloading PDF Report...');}} style={{
+                    <button onClick={e=>{
+                      e.stopPropagation(); 
+                      if (scan.reportUrl || scan.pdfUrl) window.open(scan.reportUrl || scan.pdfUrl, '_blank');
+                      else alert('Report document is currently generating. Please check back shortly.');
+                    }} style={{
                       padding:'7px 14px',background:C.brand,border:'none',borderRadius:8,
                       color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F,
                       display:'flex',alignItems:'center',gap:5,
@@ -213,7 +217,10 @@ export function PatientPortal() {
                       The AI is certified under NHS DSPT and GDPR standards.
                     </p>
                   </div>
-                  <button onClick={() => alert('Downloading PDF Report...')} style={{padding:'10px',background:C.brand,border:'none',borderRadius:10,color:'white',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
+                  <button onClick={() => {
+                    if (selectedScan.reportUrl || selectedScan.pdfUrl) window.open(selectedScan.reportUrl || selectedScan.pdfUrl, '_blank');
+                    else alert('Report document is currently generating. Please check back shortly.');
+                  }} style={{padding:'10px',background:C.brand,border:'none',borderRadius:10,color:'white',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
                     ⬇ Download Full Report (PDF)
                   </button>
                 </div>
@@ -228,7 +235,18 @@ export function PatientPortal() {
         <div style={{display:'flex',flexDirection:'column',gap:12}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
             <h3 style={{margin:0,fontSize:16,color:C.textHi}}>Upcoming Appointments</h3>
-            <button onClick={() => alert('Booking system integration coming soon.')} style={{padding:'7px 14px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
+            <button onClick={async () => {
+              const followUpDate = prompt('Enter follow-up date (YYYY-MM-DD):');
+              if (followUpDate) {
+                try {
+                  await apiClient.post('/appointments', { date: followUpDate, type: 'follow_up' });
+                  alert('Appointment requested successfully.');
+                  window.location.reload(); // Refresh to show new appointment
+                } catch(e:any) {
+                  alert('Booking failed: ' + (e.response?.data?.message || e.message));
+                }
+              }
+            }} style={{padding:'7px 14px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
               + Book Follow-up
             </button>
           </div>
@@ -310,14 +328,16 @@ export function PatientPortal() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_ACCESS_LOG.map((log,i)=>(
-                  <tr key={i} style={{borderTop:`1px solid ${C.border}`}}>
-                    <td style={{padding:'12px 14px',fontSize:11,color:C.textLo,fontFamily:C.FM,whiteSpace:'nowrap'}}>{log.date}</td>
-                    <td style={{padding:'12px 14px',fontSize:12,fontWeight:600,color:C.textHi}}>{log.who}</td>
-                    <td style={{padding:'12px 14px',fontSize:12,color:C.textMd}}>{log.action}</td>
-                    <td style={{padding:'12px 14px',fontSize:11,color:C.textLo}}>{log.device}</td>
-                  </tr>
-                ))}
+                {MOCK_ACCESS_LOG.map((log, i) => {
+                  return (
+                    <tr key={i} style={{ borderTop: `1px solid ${C.border}` }}>
+                      <td style={{ padding: '12px 14px', fontSize: 11, color: C.textLo, fontFamily: C.FM, whiteSpace: 'nowrap' }}>{log.date}</td>
+                      <td style={{ padding: '12px 14px', fontSize: 12, fontWeight: 600, color: C.textHi }}>{log.who}</td>
+                      <td style={{ padding: '12px 14px', fontSize: 12, color: C.textMd }}>{log.action}</td>
+                      <td style={{ padding: '12px 14px', fontSize: 11, color: C.textLo }}>{log.device}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

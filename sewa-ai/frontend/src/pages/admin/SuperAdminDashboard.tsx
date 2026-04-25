@@ -87,7 +87,7 @@ function GlobeMap({ data }: { data: { region: string, count: number }[] }) {
 }
 
 export function SuperAdminDashboard() {
-  const { stats, tenants, regionalStats, loading, error } = useSuperAdminData();
+  const { stats, tenants, regionalStats, health, audit, loading, error } = useSuperAdminData();
   const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'compliance'|'logs'|'edge'>('overview');
   const [tenantSearch, setTenantSearch] = useState('');
   const [showProvision, setShowProvision] = useState(false);
@@ -122,8 +122,8 @@ export function SuperAdminDashboard() {
         <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
           {[
             {label:'Provision Tenant',color:C.brand, onClick: () => setShowProvision(true)},
-            {label:'Deploy Model',color:C.info, onClick: () => alert('Model deployment workflow coming soon.')},
-            {label:'Export Report',color:C.bg3, onClick: () => alert('Global report generation scheduled.')}
+            {label:'Deploy Model',color:C.info, onClick: () => setTab('aimodels')},
+            {label:'Platform Audit',color:C.bg3, onClick: () => setTab('logs')}
           ].map(btn=>(
             <button key={btn.label} style={{
               padding:'7px 14px',borderRadius:8,border:`1px solid ${btn.color==='#111F1A'?C.border:btn.color}`,
@@ -198,29 +198,26 @@ export function SuperAdminDashboard() {
 
           {/* AI Service health */}
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:12}}>
-            {[
-              {name:'Triage Engine',port:8000,status:'healthy',latency:'1.2s',qps:42,gpu:'A100 × 4'},
-              {name:'VLM Report',port:8001,status:'healthy',latency:'3.8s',qps:18,gpu:'A100 × 4'},
-              {name:'Uncertainty Engine',port:8002,status:'healthy',latency:'2.1s',qps:42,gpu:'A100 × 2'},
-              {name:'Metacognition',port:8003,status:'healthy',latency:'0.4s',qps:42,gpu:'CPU × 8'},
-              {name:'Federated Learning',port:8004,status:'idle',latency:'—',qps:0,gpu:'A100 × 2'},
-              {name:'Continuous Learning',port:8005,status:'running',latency:'—',qps:0,gpu:'CPU × 4'},
-            ].map(svc=>(
+            {health.length > 0 ? health.map((svc: any)=>(
               <div key={svc.name} style={{padding:14,background:C.bg2,borderRadius:12,border:`1px solid ${svc.status==='healthy'?`${C.normal}20`:C.border}`}}>
                 <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
-                  <span style={{width:7,height:7,borderRadius:'50%',background:svc.status==='healthy'?C.normal:svc.status==='running'?C.info:C.textLo,boxShadow:`0 0 5px ${svc.status==='healthy'?C.normal:svc.status==='running'?C.info:C.textLo}`}}/>
+                  <span style={{width:7,height:7,borderRadius:'50%',background:svc.status==='healthy'?C.normal:svc.status==='running'?C.info:C.critical,boxShadow:`0 0 5px ${svc.status==='healthy'?C.normal:svc.status==='running'?C.info:C.critical}`}}/>
                   <span style={{fontSize:11,fontWeight:600,color:C.textHi,fontFamily:C.F}}>{svc.name}</span>
-                  <span style={{fontSize:10,color:C.textLo,fontFamily:C.FM,marginLeft:'auto'}}>:{svc.port}</span>
+                  <span style={{fontSize:10,color:C.textLo,fontFamily:C.FM,marginLeft:'auto'}}>{svc.version}</span>
                 </div>
                 <div style={{display:'flex',gap:8,fontSize:10,color:C.textLo,fontFamily:C.FM}}>
-                  <span>{svc.latency}</span>
+                  <span>{svc.latency ? `${svc.latency}ms` : '—'}</span>
                   <span>·</span>
-                  <span>{svc.qps} qps</span>
+                  <span>{svc.status.toUpperCase()}</span>
                   <span>·</span>
-                  <span>{svc.gpu}</span>
+                  <span>{svc.backend || 'UK-SOUTH'}</span>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div style={{gridColumn:'1/-1', padding:20, textAlign:'center', color:C.textLo, fontSize:12}}>
+                📡 Connecting to AI service telemetry...
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -418,31 +415,25 @@ export function SuperAdminDashboard() {
             </div>
           </div>
           <div style={{fontFamily:C.FM,fontSize:11,padding:'8px 0',maxHeight:400,overflowY:'auto'}}>
-            {[
-              {t:'2026-03-12T10:42:33Z',level:'INFO',service:'ai-triage',msg:'Scan scan-4821 classified: ICH CRITICAL confidence=0.941 latency=1241ms'},
-              {t:'2026-03-12T10:42:31Z',level:'INFO',service:'sewa-backend',msg:'AI pipeline triggered: scanId=scan-4821 tenantId=t1 model=v2.4.1'},
-              {t:'2026-03-12T10:42:28Z',level:'INFO',service:'sewa-backend',msg:'FHIR ImagingStudy created: fhirId=ImagingStudy/f-4821'},
-              {t:'2026-03-12T10:40:15Z',level:'WARN',service:'ehr-integration',msg:'EHR response latency 220ms (threshold: 200ms) tenant=t1'},
-              {t:'2026-03-12T10:38:02Z',level:'INFO',service:'sewa-backend',msg:'Report signed: reportId=r-3291 radiologist=u1 fhirId=DiagnosticReport/fd-3291'},
-              {t:'2026-03-12T10:35:44Z',level:'INFO',service:'stroke-code',msg:'Stroke code NOT triggered: metacognition_passed=true urgency=CRITICAL finding="ICH" — awaiting physician confirmation'},
-              {t:'2026-03-12T10:30:00Z',level:'INFO',service:'federated-learning',msg:'FL round 47 complete: participants=12 accuracy_delta=+0.003 epsilon=8.0'},
-              {t:'2026-03-12T10:15:22Z',level:'ERROR',service:'hl7-gateway',msg:'HL7 NACK received msgId=abc123 tenant=t2 — retrying (1/3)'},
-              {t:'2026-03-12T10:14:59Z',level:'INFO',service:'continuous-learning',msg:'Drift check: Cohen kappa=0.847 (threshold: 0.75) PSI=0.02 — no drift detected'},
-            ].map((log,i)=>(
+            {audit.length > 0 ? audit.map((log: any,i: number)=>(
               <div key={i} style={{
                 display:'flex',gap:12,padding:'5px 16px',
                 borderBottom:`1px solid ${C.border}30`,
                 background:log.level==='ERROR'?`${C.critical}08`:log.level==='WARN'?`${C.urgent}06`:'transparent',
               }}>
-                <span style={{color:C.textLo,flexShrink:0,fontSize:10}}>{log.t.split('T')[1].slice(0,8)}</span>
+                <span style={{color:C.textLo,flexShrink:0,fontSize:10}}>{new Date(log.createdAt).toLocaleTimeString()}</span>
                 <span style={{
                   width:34,flexShrink:0,fontSize:9,fontWeight:700,textAlign:'center',
-                  color:log.level==='ERROR'?C.critical:log.level==='WARN'?C.urgent:C.info,
-                }}>{log.level}</span>
-                <span style={{color:C.brand,flexShrink:0,fontSize:10,minWidth:110}}>{log.service}</span>
-                <span style={{color:log.level==='ERROR'?C.critical:log.level==='WARN'?C.urgent:C.textMd,fontSize:11,flex:1}}>{log.msg}</span>
+                  color:log.action.includes('ERROR')?C.critical:log.action.includes('WARN')?C.urgent:C.info,
+                }}>{log.action.split('_')[0]}</span>
+                <span style={{color:C.brand,flexShrink:0,fontSize:10,minWidth:110}}>{log.entity}</span>
+                <span style={{color:C.textMd,fontSize:11,flex:1}}>{log.action}: {log.entityId} — User: {log.userId}</span>
               </div>
-            ))}
+            )) : (
+              <div style={{padding:20, textAlign:'center', color:C.textLo, fontSize:11}}>
+                Loading platform ledger...
+              </div>
+            )}
           </div>
         </div>
       )}

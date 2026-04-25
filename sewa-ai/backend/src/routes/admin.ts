@@ -58,7 +58,7 @@ r.get('/tenants', async (req, res, next) => {
     });
 
     // Map to include more stats
-    const enriched = await Promise.all(tenants.map(async (t) => {
+    const enriched = await Promise.all(tenants.map(async (t: any) => {
       const [accuracy, revenue] = await Promise.all([
         prisma.aiResult.aggregate({
           where: { scan: { tenantId: t.id } },

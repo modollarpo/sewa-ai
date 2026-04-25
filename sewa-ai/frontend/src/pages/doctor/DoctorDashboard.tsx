@@ -262,7 +262,10 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
                     .catch(() => alert('Failed to record correction.'));
                 }
             }},
-            { label: 'Review Scans', color: C.brand, action: () => alert('Opening Diagnostic Viewer for this study...') },
+            { label: 'Review Scans', color: C.brand, action: () => {
+                const id = patient.scanId || patient.id;
+                if (id) window.open(`/dashboard?scanId=${id}`, '_blank');
+            }},
             { label: 'Escalate STAT', color: C.critical, action: async () => {
                 const id = patient.scanId || patient.id;
                 if (!id) return;

@@ -278,7 +278,28 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
           style={{ padding:'8px', borderRadius:8, background:C.infoBg, color:C.info, border:`1px solid ${C.info}30`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
           📡 NOTIFY TEAM
         </button>
+        <button 
+          onClick={async () => {
+            if (!scan || actionBusy) return;
+            setActionBusy(true);
+            try {
+              await apiClient.post(`/ai/icd10/${scan.id}`);
+              alert('Automated ICD-10 coding complete.');
+              onRequestVLM(); // Refresh
+            } catch(e) { alert('Coding failed.'); }
+            finally { setActionBusy(false); }
+          }}
+          disabled={actionBusy}
+          style={{ padding:'8px', borderRadius:8, background:C.bg3, color:C.brand, border:`1px solid ${C.border}`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
+          🔖 AUTO ICD-10
+        </button>
       </div>
+
+      {ai.icd10Codes && (
+        <div style={{ padding:'8px 12px', background:C.bg3, borderRadius:10, border:`1px solid ${C.border}`, fontSize:10, color:C.textMd }}>
+          <span style={{ fontWeight:700, color:C.brand }}>ICD-10:</span> {ai.icd10Codes}
+        </div>
+      )}
 
       {ai.vlmImpression ? (
         <div style={{ padding:'12px', background:`${C.info}0A`, borderRadius:'12px', border:`1px solid ${C.info}30` }}>
@@ -404,11 +425,11 @@ export function RadiologistWorkspace() {
   const handleRequestVLM = async () => {
     if (!selected) return;
     try {
-      const res = await apiClient.post(`/ai/vlm/${selected.id}`);
-      fetchWorklist(); // Refresh to get the AI impression
-      alert('VLM Analysis triggered. It will occupy the Report panel in ~5s.');
-    } catch (err) {
-      alert('VLM Engine currently saturated. Retrying via secondary node...');
+      await apiClient.post(`/ai/vlm/${selected.id}`);
+      alert('VLM Analysis complete. Impression loaded into the report panel.');
+      fetchWorklist(); // Refresh to populate the AI impression in the UI
+    } catch (err: any) {
+      alert(`VLM Engine Error: ${err.response?.data?.message || err.message}`);
     }
   };
 

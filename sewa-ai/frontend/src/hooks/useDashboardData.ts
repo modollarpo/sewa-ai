@@ -35,14 +35,29 @@ export function useSuperAdminData() {
     refetchInterval: 60000,
   });
 
+  const { data: healthRes, isLoading: healthLoading } = useQuery({
+    queryKey: ['admin-health'],
+    queryFn: () => apiClient.get('/ai-monitoring/health'),
+    refetchInterval: 30000,
+  });
+
+  const { data: auditRes, isLoading: auditLoading } = useQuery({
+    queryKey: ['admin-audit'],
+    queryFn: () => apiClient.get('/audit'),
+    refetchInterval: 15000,
+  });
+
   return {
     stats: dashboardRes?.data || { tenants: 0, totalScans: 0, criticalToday: 0, totalRevenueUSD: 0, avgAIConfidence: 0, avgInferenceMs: 0, uptime: '100%' },
     tenants: tenantsRes?.data?.length > 0 ? tenantsRes.data : MOCK_TENANTS,
     regionalStats: analyticsRes?.data?.regionalStats || [],
-    loading: statsLoading || tenantsLoading || analyticsLoading,
+    health: healthRes?.data || [],
+    audit: Array.isArray(auditRes?.data?.logs) ? auditRes.data.logs : [],
+    loading: statsLoading || tenantsLoading || analyticsLoading || healthLoading || auditLoading,
     error: null
   };
 }
+
 
 export function useAIData() {
   const { data: modelsRes } = useQuery({
