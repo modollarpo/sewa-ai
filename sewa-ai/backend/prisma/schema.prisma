@@ -41,6 +41,7 @@ model Tenant {
   timezone           String  @default("UTC")
   address            String?
   providerMetadata   Json? // { mpesa: { shortcode, passkey }, flutterwave: { publicKey }, region-specific config }
+  apiKey             String?   @unique @default(uuid())
 
   // ── Billing & Quota ─────────────────────────────────────────
   subscriptionId      String? // Stripe subscription ID / Paystack subscription code

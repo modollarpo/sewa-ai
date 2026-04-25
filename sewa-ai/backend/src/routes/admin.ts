@@ -90,6 +90,19 @@ r.patch('/tenants/:id/status', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+r.post('/tenants/:id/rotate-key', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { crypto } = require('crypto');
+    const newKey = require('crypto').randomUUID();
+    const t = await prisma.tenant.update({
+      where: { id },
+      data: { apiKey: newKey }
+    });
+    res.json({ message: 'API Key rotated successfully', apiKey: newKey });
+  } catch (err) { next(err); }
+});
+
 r.post('/tenants', async (req, res, next) => {
   try {
     const { name, region, plan, currency, primaryContactEmail } = req.body;
