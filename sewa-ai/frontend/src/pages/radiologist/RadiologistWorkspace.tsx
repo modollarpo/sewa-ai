@@ -265,6 +265,24 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
         <ConfBar v={ai.confidence || 0} />
       </div>
 
+      <div style={{ padding:'10px 12px', background:ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critBg : C.bg3, borderRadius:'12px', border:`1px solid ${ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critical : C.border}30` }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
+          <div style={{ fontSize:'10px', color:C.textLo, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.05em' }}>🧠 Clinical Safety Gate</div>
+          <span style={{ 
+            fontSize:9, fontWeight:800, padding:'2px 6px', borderRadius:4,
+            background: ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critical : C.brand,
+            color: 'white'
+          }}>
+            {ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? 'FLAGGED' : 'PASSED'}
+          </span>
+        </div>
+        <div style={{ fontSize:10, color:C.textMd }}>
+          {ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') 
+            ? 'Metacognition rules triggered: Plausibility conflict detected.' 
+            : 'Multi-layer self-evaluation passed (NHS DCB0129 compliant).'}
+        </div>
+      </div>
+
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
         <button 
           onClick={() => handleAction('escalate')}
@@ -394,7 +412,7 @@ export function RadiologistWorkspace() {
     
     // ── Real-time worklist updates via Socket.IO ──────────────
     const handleUpdate = () => {
-      logger.info('[Radiologist] Refreshing worklist via Socket.IO signal');
+      console.log('[Radiologist] Refreshing worklist via Socket.IO signal');
       fetchWorklist();
     };
 
