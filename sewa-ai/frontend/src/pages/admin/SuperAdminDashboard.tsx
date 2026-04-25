@@ -594,7 +594,7 @@ export function SuperAdminDashboard() {
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
           {/* ... existing edge content consolidates here ... */}
           <div style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`, textAlign:'center'}}>
-            <div style={{fontSize:11,color:C.textLo}}>Global Edge Overlay Management · Platform Version {config.VERSION || '2.4.1'}</div>
+            <div style={{fontSize:11,color:C.textLo}}>Global Edge Overlay Management · Platform Version 2.4.1</div>
           </div>
         </div>
       )}
