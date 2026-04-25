@@ -23,9 +23,9 @@ r.post('/launch', async (req, res, next) => {
     logger.info(`[Onboarding] Launching institution: ${name} (${region})`);
 
     // 1. Transactional creation of Tenant and Admin
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Check if tenant exists
-      const existing = await prisma.tenant.findFirst({ where: { name } });
+      const existing = await tx.tenant.findFirst({ where: { name } });
       if (existing) throw new AppError('Institution already registered', 400);
 
       // Map region to currency
@@ -46,18 +46,19 @@ r.post('/launch', async (req, res, next) => {
           fhirBaseUrl: fhirEndpoint,
           // slug is name-based
           slug: name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          subdomain: name.toLowerCase().replace(/[^a-z0-9]/g, '-'), // required field
         }
       });
 
       // Create Admin User
-      const hashedPassword = await bcrypt.hash('SewaTemporaryPassword2026!', 10);
+      const hashedPassword = await bcrypt.hash('SewaTemporaryPassword2026!', 12);
       const user = await tx.user.create({
         data: {
           email: adminEmail,
           firstName: adminFirst,
           lastName: adminLast,
-          password: hashedPassword,
-          role: 'ADMIN',
+          passwordHash: hashedPassword,
+          role: 'admin',
           tenantId: tenant.id,
           status: 'active'
         }
