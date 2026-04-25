@@ -12,8 +12,11 @@ r.get('/me', async (req, res, next) => {
 });
 r.patch('/me', async (req, res, next) => {
   try {
-    const { firstName, lastName, language, timezone, speciality } = req.body;
-    const u = await prisma.user.update({ where: { id: req.user!.id }, data: { firstName, lastName, language, timezone, speciality } });
+    const { firstName, lastName, language, timezone, speciality, notifPrefs } = req.body;
+    const u = await prisma.user.update({ 
+      where: { id: req.user!.id }, 
+      data: { firstName, lastName, language, timezone, speciality, notifPrefs } 
+    });
     res.json(u);
   } catch (err) { next(err); }
 });

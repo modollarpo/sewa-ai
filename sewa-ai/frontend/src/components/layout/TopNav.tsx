@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useTranslation } from '../../i18n/I18nContext';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '../../services/apiClient';
 
 const C = {
   bg:       '#08160F', border: '#1B3028', brand: '#408D7B', brandLt: '#52B09A',
@@ -83,6 +85,17 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit
     return () => { clearInterval(t); window.removeEventListener('resize', r); };
   }, []);
 
+  const { data: billingRes } = useQuery({
+    queryKey: ['billing-status'],
+    queryFn: () => apiClient.get('/payments/status'),
+    enabled: !!user,
+    refetchInterval: 300000, // 5 min
+  });
+
+  const billing = billingRes?.data;
+  const usagePct = billing?.quota?.monthly ? Math.round((billing.quota.used / billing.quota.monthly) * 100) : 0;
+  const isNearLimit = usagePct > 80;
+
   const currentRegion = REGIONS.find(r => r.key === region) ?? REGIONS[0];
   const roleColor = ROLE_COLORS[user.role] ?? C.brand;
 
@@ -145,6 +158,27 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit
               {ROLE_LABELS[user.role] ?? user.role}
             </span>
           </div>
+
+          {billing?.quota && (
+            <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'0 14px', borderRight:`1px solid ${C.border}`, borderLeft:`1px solid ${C.border}`, height:'32px' }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', width:100 }}>
+                  <span style={{ fontSize:9, color:C.textLo, fontWeight:700 }}>AI USAGE</span>
+                  <span style={{ fontSize:9, color:isNearLimit ? C.critical : C.textMd, fontWeight:800 }}>{usagePct}%</span>
+                </div>
+                <div style={{ width:100, height:3, background:C.bg3, borderRadius:2, overflow:'hidden' }}>
+                  <div style={{ 
+                    width:`${usagePct}%`, height:'100%', 
+                    background: isNearLimit ? C.critical : C.brand,
+                    transition:'width 1s ease'
+                  }} />
+                </div>
+              </div>
+              <div style={{ fontSize:9, color:C.textLo, maxWidth:80, lineHeight:1.1 }}>
+                {billing.quota.used} / {billing.quota.monthly || '∞'} scans
+              </div>
+            </div>
+          )}
 
           <div style={{ flex:1 }} />
 

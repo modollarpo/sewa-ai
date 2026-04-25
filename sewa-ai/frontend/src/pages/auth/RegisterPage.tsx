@@ -22,13 +22,13 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
     e.preventDefault();
     setLocalError('');
     try {
-      // Map hospital code to tenant slug for demo/production
-      let tenantSlug = 'royal-london'; // Default for patients
-      if (role === 'expert') {
-        const code = form.hospitalCode.toUpperCase();
-        if (code.includes('KNH')) tenantSlug = 'kenyatta-nh';
-        else if (code.includes('LUTH')) tenantSlug = 'luth-lagos';
-        else tenantSlug = 'royal-london';
+      // Logic: Patients are often global or assigned to a default 'Sewa Patient Portal' tenant
+      // Experts MUST provide a valid hospital code/slug.
+      const tenantSlug = role === 'patient' ? 'sewa-public' : form.hospitalCode.toLowerCase().trim();
+
+      if (role === 'expert' && !tenantSlug) {
+        setLocalError('Hospital facility code is required for practitioners.');
+        return;
       }
 
       await register({
@@ -37,13 +37,13 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
         lastName: form.lastName,
         email: form.email,
         password: form.password,
-        role: role === 'patient' ? 'patient' : 'doctor' // Experts start as doctors
+        role: role === 'patient' ? 'patient' : 'doctor' 
       });
       
       alert(`Registration successful for ${form.email}. Please sign in.`);
       onLogin();
     } catch (err: any) {
-      setLocalError(err?.response?.data?.message || 'Registration failed. Please try again.');
+      setLocalError(err.message || 'Registration failed. Please check your hospital code.');
     }
   };
 

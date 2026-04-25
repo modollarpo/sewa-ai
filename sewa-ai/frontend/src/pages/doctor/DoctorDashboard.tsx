@@ -5,6 +5,7 @@ import { useDoctorData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Skeleton } from '../../components/ui/Skeleton';
+import { Tooltip } from '../../components/ui/Tooltip';
 
 const C = {
   bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
@@ -123,15 +124,17 @@ export function DoctorDashboard() {
         {/* Stats */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,marginBottom:12}}>
           {[
-            {label:'Patients',value:patients.length,color:C.textMd},
-            {label:'STAT',value:activeAlerts.filter(a=>a.urgency==='CRITICAL').length,color:C.critical},
-            {label:'Pending',value:patients.filter(p=>p.status==='ai_complete').length,color:C.urgent},
-            {label:'Signed',value:patients.filter(p=>p.status==='signed').length,color:C.normal},
+            {label:'Patients',value:patients.length,color:C.textMd,tip:'Total unique patients assigned to you.'},
+            {label:'STAT',value:activeAlerts.filter(a=>a.urgency==='CRITICAL').length,color:C.critical,tip:'Critical scans requiring immediate diagnostic attention.'},
+            {label:'Pending',value:patients.filter(p=>p.status==='ai_complete').length,color:C.urgent,tip:'Scans processed by AI but not yet signed by a radiologist.'},
+            {label:'Signed',value:patients.filter(p=>p.status==='signed').length,color:C.normal,tip:'Completed cases where a final report is released.'},
           ].map(s=>(
-            <div key={s.label} style={{textAlign:'center',padding:'6px 4px',background:C.bg2,borderRadius:8,border:`1px solid ${C.border}`}}>
-              <div style={{fontSize:16,fontWeight:700,color:s.color,fontFamily:C.FM}}>{s.value}</div>
-              <div style={{fontSize:9,color:C.textLo}}>{s.label}</div>
-            </div>
+            <Tooltip key={s.label} content={s.tip}>
+              <div style={{textAlign:'center',padding:'6px 4px',background:C.bg2,borderRadius:8,border:`1px solid ${C.border}`,cursor:'help'}}>
+                <div style={{fontSize:16,fontWeight:700,color:s.color,fontFamily:C.FM}}>{s.value}</div>
+                <div style={{fontSize:9,color:C.textLo}}>{s.label}</div>
+              </div>
+            </Tooltip>
           ))}
         </div>
 

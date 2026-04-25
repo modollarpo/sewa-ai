@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useBillingData } from '../../hooks/useDashboardData';
 import { useAuthStore } from '../../store/authStore';
+import { apiClient } from '../../services/apiClient';
 
 const C = {
   bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
@@ -89,6 +90,22 @@ export function BillingDashboard() {
   const plans = PLANS[region] ?? PLANS.uk;
   const gateways = PAYMENT_GATEWAYS[region] ?? PAYMENT_GATEWAYS.uk;
 
+  const handleUpgrade = async (plan: string) => {
+    try {
+      const res = await apiClient.post('/payments/subscription', { plan: plan.toLowerCase() });
+      if (res.data.authorizationUrl) {
+        window.location.href = res.data.authorizationUrl;
+      } else if (res.data.paymentLink) {
+        window.location.href = res.data.paymentLink;
+      } else {
+        alert(`Successfully switched to ${plan} plan.`);
+        window.location.reload();
+      }
+    } catch (err: any) {
+      alert(`Upgrade failed: ${err.response?.data?.message || err.message}`);
+    }
+  };
+
   const tabStyle = (t:string): React.CSSProperties => ({
     padding:'8px 16px', fontSize:12, fontWeight:tab===t?600:400,
     color:tab===t?C.brand:C.textLo, background:'none', border:'none',
@@ -125,7 +142,7 @@ export function BillingDashboard() {
           <button onClick={()=>setTab('plans')} style={{ padding:'7px 14px', background:'transparent', border:`1px solid ${C.brand}`, borderRadius:8, color:C.brand, fontSize:11, cursor:'pointer', fontFamily:C.F }}>
             Change Plan
           </button>
-          <button style={{ padding:'7px 14px', background:C.brand, border:'none', borderRadius:8, color:'white', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:C.F }}>
+          <button onClick={()=>{ if(selectedPlan) handleUpgrade(selectedPlan); else setTab('plans'); }} style={{ padding:'7px 14px', background:C.brand, border:'none', borderRadius:8, color:'white', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:C.F }}>
             Renew Now
           </button>
         </div>
@@ -237,7 +254,10 @@ export function BillingDashboard() {
               </div>
 
               <button
-                onClick={()=>setSelectedPlan(plan.label)}
+                onClick={() => {
+                  if (plan.price === 'Custom') window.location.href = '/contact';
+                  else handleUpgrade(plan.label);
+                }}
                 style={{
                   padding:'10px', borderRadius:10, cursor:'pointer', fontFamily:C.F, fontSize:13, fontWeight:700, marginTop:'auto',
                   background: plan.highlight ? `linear-gradient(135deg,${C.brand},${C.brandDk})` : C.bg3,

@@ -13,6 +13,7 @@ async function main() {
     { name: 'Royal London Hospital', slug: 'royal-london', region: 'uk', currency: 'GBP', subdomain: 'royal-london' },
     { name: 'Kenyatta National Hospital', slug: 'kenyatta-nh', region: 'ke', currency: 'KES', subdomain: 'kenyatta-nh' },
     { name: 'LUTH Lagos', slug: 'luth-lagos', region: 'ng', currency: 'NGN', subdomain: 'luth-lagos' },
+    { name: 'Sewa Patient Portal', slug: 'sewa-public', region: 'uk', currency: 'GBP', subdomain: 'portal' },
   ];
 
   for (const t of tenants) {

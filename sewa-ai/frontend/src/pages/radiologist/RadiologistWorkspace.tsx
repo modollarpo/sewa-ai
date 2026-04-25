@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { getTranslation } from '../../services/i18n';
 import { apiClient } from '../../services/apiClient';
+import { Tooltip } from '../../components/ui/Tooltip';
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -267,7 +268,12 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
 
       <div style={{ padding:'10px 12px', background:ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critBg : C.bg3, borderRadius:'12px', border:`1px solid ${ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critical : C.border}30` }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
-          <div style={{ fontSize:'10px', color:C.textLo, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.05em' }}>🧠 Clinical Safety Gate</div>
+          <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+            <div style={{ fontSize:'10px', color:C.textLo, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.05em' }}>🧠 Clinical Safety Gate</div>
+            <Tooltip clinical content="Metacognition Engine: Validates Triage findings against the generated report and clinical logic. If red, human review is mandatory due to a safety mismatch.">
+              <span style={{ fontSize:10, color:C.textLo, cursor:'help' }}>ⓘ</span>
+            </Tooltip>
+          </div>
           <span style={{ 
             fontSize:9, fontWeight:800, padding:'2px 6px', borderRadius:4,
             background: ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critical : C.brand,

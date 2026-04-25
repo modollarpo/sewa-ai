@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useSuperAdminData } from '../../hooks/useDashboardData';
 import { Skeleton, StatSkeleton, TableRowSkeleton } from '../../components/ui/Skeleton';
 import { apiClient } from '../../services/apiClient';
+import { Tooltip } from '../../components/ui/Tooltip';
 
 const C = {
   bg0:'#050F0C',bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
@@ -227,8 +228,13 @@ export function SuperAdminDashboard() {
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',gap:16}}>
             <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
-              <div style={{display:'flex',justifyContent:'space-between',marginBottom:16}}>
-                <span style={{fontSize:12,fontWeight:700,color:C.textHi}}>AKS Cluster: sewa-prod-aks</span>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                <div style={{display:'flex',alignItems:'center',gap:6}}>
+                  <span style={{fontSize:12,fontWeight:700,color:C.textHi}}>AKS Cluster: sewa-prod-aks</span>
+                  <Tooltip position="right" content="Azure Kubernetes Service: Host for the entire AI pipeline and API layer. High-availability mode active.">
+                    <span style={{fontSize:10,color:C.textLo,cursor:'help'}}>ⓘ</span>
+                  </Tooltip>
+                </div>
                 <span style={{fontSize:10,color:C.normal,fontWeight:700}}>ONLINE</span>
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -298,7 +304,16 @@ export function SuperAdminDashboard() {
               <thead>
                 <tr style={{background:C.bg3}}>
                   {['Institution','Region','Plan','Scans/mo','Users','AI Accuracy','Revenue','Status','Actions'].map(h=>(
-                    <th key={h} style={{padding:'10px 12px',textAlign:'left',fontSize:10,fontWeight:600,color:C.textLo,letterSpacing:'0.05em',textTransform:'uppercase',fontFamily:C.F,whiteSpace:'nowrap'}}>{h}</th>
+                    <th key={h} style={{padding:'10px 12px',textAlign:'left',fontSize:10,fontWeight:600,color:C.textLo,letterSpacing:'0.05em',textTransform:'uppercase',fontFamily:C.F,whiteSpace:'nowrap'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:4}}>
+                        {h}
+                        {h==='Actions' && (
+                          <Tooltip content="Management controls: View details, rotate edge API keys, or suspend tenant access.">
+                            <span style={{fontSize:9,cursor:'help'}}>ⓘ</span>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </th>
                   ))}
                 </tr>
               </thead>

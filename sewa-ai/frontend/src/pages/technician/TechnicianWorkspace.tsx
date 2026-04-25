@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useTechnicianData, useAppointmentData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
+import { Tooltip } from '../../components/ui/Tooltip';
 
 const C = {
   bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
@@ -420,7 +421,12 @@ export function TechnicianWorkspace() {
 
               {/* Priority selector */}
               <div>
-                <label style={{display:'block',fontSize:11,fontWeight:600,color:C.textMd,marginBottom:6}}>Priority</label>
+                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6}}>
+                  <label style={{display:'block',fontSize:11,fontWeight:600,color:C.textMd}}>Priority</label>
+                  <Tooltip content="Sets the urgency of the AI processing queue. STAT scans bypass the regular worklist.">
+                    <span style={{fontSize:10,color:C.textLo,cursor:'help'}}>ⓘ</span>
+                  </Tooltip>
+                </div>
                 <div style={{display:'flex',gap:8}}>
                   {PRIORITIES.map(p=>{
                     const colors: Record<string,[string,string,string]> = {ROUTINE:[C.brand,`${C.brand}20`,`${C.brand}40`],URGENT:[C.urgent,`${C.urgent}18`,`${C.urgent}50`],STAT:[C.critical,C.critBg,'#4A1515']};

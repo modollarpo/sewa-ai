@@ -40,6 +40,7 @@ import roadmapRoutes    from './routes/roadmap/index';
 import appointmentRoutes, { sendAppointmentReminders } from './routes/appointments/index';
 import whatsappRoutes   from './routes/whatsapp';
 import aiMonitoringRoutes from './routes/ai-monitoring';
+import onboardingRoutes from './routes/onboarding';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 
 const app = express();
@@ -135,6 +136,7 @@ app.use(`${v1}/appointments`,  appointmentRoutes);
 app.use(`${v1}/whatsapp`,      whatsappRoutes);
 app.use(`${v1}/audit`,          auditRoutes);
 app.use(`${v1}/ai-monitoring`,  aiMonitoringRoutes);
+app.use(`${v1}/onboarding`,     onboardingRoutes);
 app.use(`${v1}`,               roadmapRoutes); // Roadmap features: /rules, /stroke-codes, /population-health, /referrals, /federated-learning, /continuous-learning
 
 app.use(errorHandler);

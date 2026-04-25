@@ -1,6 +1,7 @@
 // SEWA AI — OnboardingWizard.tsx
 // Multi-step hospital onboarding: institution → compliance → integrations → go-live
 import React, { useState } from 'react';
+import { apiClient } from '../../services/apiClient';
 
 const C = {
   bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
@@ -110,11 +111,50 @@ export function OnboardingWizard() {
     benchmarkComplete:false, benchmarkAUC:0, benchmarkLatency:0,
   });
 
+  const [loading, setLoading] = useState(false);
   const [integrationStatus, setIntegrationStatus] = useState<Record<string,string>>({});
   const [benchmarkRunning, setBenchmarkRunning] = useState(false);
   const [benchmarkProgress, setBenchmarkProgress] = useState(0);
 
   const update = (fields: Partial<typeof data>) => setData(d => ({ ...d, ...fields }));
+
+  const handleLaunch = async () => {
+    setLoading(true);
+    try {
+      const res = await apiClient.post('/onboarding/launch', {
+        ...data,
+        // Map frontend fields to backend route expectations
+        adminEmail: data.adminEmail,
+        adminFirst: data.adminFirst,
+        adminLast: data.adminLast,
+      });
+
+      const { payment } = res.data;
+      
+      if (payment.authorizationUrl) {
+        // Paystack handshake
+        window.location.href = payment.authorizationUrl;
+      } else if (payment.paymentLink) {
+        // Flutterwave handshake
+        window.location.href = payment.paymentLink;
+      } else if (payment.clientSecret) {
+        // Stripe handshake (ideally would use Stripe Elements here, but for now we confirm creation)
+        alert('Institution created. Please check your email to complete Stripe payment setup.');
+        window.location.href = '/login';
+      } else if (payment.checkoutRequestId) {
+        // M-Pesa handshake
+        alert(`STK Push sent to your phone. Request ID: ${payment.checkoutRequestId}`);
+        window.location.href = '/login';
+      } else {
+        alert('Launch successful! Redirecting to login...');
+        window.location.href = '/login';
+      }
+    } catch (err: any) {
+      alert(`Launch failed: ${err.response?.data?.message || err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const testIntegration = async (type: string) => {
     setIntegrationStatus(s => ({ ...s, [type]: 'testing' }));
@@ -504,8 +544,11 @@ export function OnboardingWizard() {
                   </div>
                 </div>
 
-                <button style={{ height:52, borderRadius:14, border:'none', cursor:'pointer', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, color:'white', fontSize:15, fontWeight:800, fontFamily:C.F, boxShadow:`0 6px 24px ${C.brand}50`, letterSpacing:'0.02em', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
-                  🚀 Launch SEWA AI Deployment
+                <button 
+                  onClick={handleLaunch}
+                  disabled={loading}
+                  style={{ height:52, borderRadius:14, border:'none', cursor:loading?'not-allowed':'pointer', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, color:'white', fontSize:15, fontWeight:800, fontFamily:C.F, boxShadow:loading?'none':`0 6px 24px ${C.brand}50`, letterSpacing:'0.02em', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
+                  {loading ? 'Provisioning...' : '🚀 Launch SEWA AI Deployment'}
                 </button>
               </div>
             )}

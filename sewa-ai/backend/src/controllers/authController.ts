@@ -176,10 +176,12 @@ export async function register(req: Request, res: Response, next: NextFunction) 
     const { tenantSlug, firstName, lastName, email, password, role = 'doctor' } = req.body;
 
     const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
-    if (!tenant) throw new AppError('Tenant not found', 404);
+    if (!tenant) {
+      throw new AppError(`Facility code "${tenantSlug}" not recognized. Please contact your hospital administrator.`, 404);
+    }
 
     const existing = await prisma.user.findUnique({ where: { tenantId_email: { tenantId: tenant.id, email } } });
-    if (existing) throw new AppError('Email already registered', 409);
+    if (existing) throw new AppError('This email is already registered at this institution.', 409);
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await prisma.user.create({
