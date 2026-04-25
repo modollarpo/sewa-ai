@@ -51,24 +51,28 @@ Out-Success "Frontend AKS build complete."
 Write-Host "[4/6] Deploying to AKS..." -ForegroundColor Yellow
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing
 
+# 4b. Recreate ACR Secret (Imperative is more robust than patching)
+Write-Host " -> Recreating ACR pull secret..." -ForegroundColor Cyan
+kubectl delete secret acr-secret -n $NS --ignore-not-found
+$ACR_PWD = az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv
+kubectl create secret docker-registry acr-secret `
+    --namespace $NS `
+    --docker-server=$ACR_SERVER `
+    --docker-username=$ACR_NAME `
+    --docker-password=$ACR_PWD `
+    --docker-email="deploy@sewaxai.health"
+
 # Substitute image tags in manifests and apply
 $manifests = Get-ChildItem "azure/k8s/*.yaml"
 foreach ($m in $manifests) {
+    if ($m.Name -eq "acr-secret.yaml") { continue } # Skip the template
+    
     $content = Get-Content $m.FullName -Raw
     $content = $content -replace "{{IMAGE_TAG}}", $IMAGE_TAG
     $content = $content -replace "{{CONTAINER_REGISTRY}}", $ACR_SERVER
     $content = $content -replace "{{ENV}}", "production"
-    $tmpPath = $m.FullName + ".tmp"
     
-    # Special handling for ACR secret placeholder
-    if ($m.Name -eq "acr-secret.yaml") {
-        $DOCKER_CONFIG = az acr credential show --name $ACR_NAME --query "to_string(auths)" -o tsv
-        # Wrap in dockerconfigjson structure and base64 encode
-        $JSON = "{`"auths`":$DOCKER_CONFIG}"
-        $B64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($JSON))
-        $content = $content -replace "PLACEHOLDER_SET_BY_DEPLOY_SCRIPT", $B64
-    }
-
+    $tmpPath = $m.FullName + ".tmp"
     $content | Out-File $tmpPath -Encoding utf8
     kubectl apply -f $tmpPath
     Remove-Item $tmpPath
