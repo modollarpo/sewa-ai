@@ -1,7 +1,12 @@
 // SEWA AI — backend/src/routes/fhir.ts
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
-import { getFHIRPatient, getFHIRImagingStudy } from '../services/fhirService';
+import { 
+  getFHIRPatient, getFHIRImagingStudy, getFHIRDiagnosticReport, 
+  getFHIRObservation, getFHIRPractitioner, getFHIROrganization,
+  searchFHIRDiagnosticReports 
+} from '../services/fhirService';
+import { fhirSyncWorker } from '../services/fhirSyncWorker';
 const r = Router();
 r.get('/health', (_req, res) => res.json({ status: 'operational', service: 'FHIR R4 Interface' }));
 r.use(authenticate);
@@ -18,6 +23,16 @@ r.get('/r4/DiagnosticReport', async (req, res, next) => {
     const patient = req.query.patient as string;
     res.json(await searchFHIRDiagnosticReports(patient)); 
   } catch (e) { next(e); } 
+});
+
+// Inbound Webhook (EHR -> SEWA AI)
+r.post('/webhook', async (req, res, next) => {
+  try {
+    const { tenantId } = req.user!;
+    const resourceType = req.headers['x-fhir-resource'] as string || req.body.resourceType;
+    await fhirSyncWorker.handleInboundWebhook(resourceType, req.body, tenantId);
+    res.status(202).json({ message: 'Accepted for processing' });
+  } catch (e) { next(e); }
 });
 
 export default r;

@@ -92,14 +92,47 @@ export class FHIRSyncWorker {
 
   /**
    * Inbound Sync: FHIR -> Prisma (Webhook receiver)
+   * Essential for syncing patient demographics from EHR to SEWA AI.
    */
   public async handleInboundWebhook(resourceType: string, data: any, tenantId: string) {
-    logger.info(`[FHIR Inbound] Received ${resourceType} from tenant ${tenantId}`);
-    
-    // Logic to map FHIR resource to Prisma models using validators.ts
-    // 1. Check if Patient exists (by MRN)
-    // 2. Update Patient or Scan status
-    // 3. Audit
+    logger.info(`[FHIR Inbound] Processing ${resourceType} for tenant ${tenantId}`);
+
+    try {
+      if (resourceType === 'Patient') {
+        const mrn = data.identifier?.find((i: any) => i.system?.includes('mrn'))?.value || data.id;
+        const firstName = data.name?.[0]?.given?.[0];
+        const lastName = data.name?.[0]?.family;
+        const email = data.telecom?.find((t: any) => t.system === 'email')?.value;
+        const birthDate = data.birthDate; // YYYY-MM-DD
+
+        if (mrn) {
+          await prisma.patient.upsert({
+            where: { mrn },
+            update: {
+              dateOfBirth: birthDate ? new Date(birthDate) : undefined,
+              user: email ? { update: { firstName, lastName, email } } : undefined,
+            },
+            create: {
+              tenantId,
+              mrn,
+              dateOfBirth: birthDate ? new Date(birthDate) : new Date(),
+              user: {
+                create: {
+                  tenantId,
+                  email: email || `${mrn}@placeholder.sewaxai.health`,
+                  firstName: firstName || 'FHIR',
+                  lastName: lastName || 'IMPORT',
+                  role: 'patient',
+                }
+              }
+            }
+          });
+          logger.info(`[FHIR Inbound] Patient MRN:${mrn} synchronized.`);
+        }
+      }
+    } catch (err: any) {
+      logger.error(`[FHIR Inbound] Error: ${err.message}`);
+    }
   }
 }
 
