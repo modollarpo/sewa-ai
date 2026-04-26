@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
 import { prisma } from '../config/database';
 import { logger } from '../utils/logger';
+import { config } from '../config/env';
 
 const r = Router();
 r.use(authenticate);
@@ -11,7 +12,7 @@ r.use(authenticate);
 r.post('/', async (req, res, next) => {
   try {
     const { scanId, targetTenantId, priority, notes } = req.body;
-    const { userId, tenantId } = req.user!;
+    const { id: userId, tenantId } = req.user as { id: string; tenantId: string };
 
     logger.info(`[Referral] Case ${scanId} referred from ${tenantId} to ${targetTenantId}`);
 
@@ -36,7 +37,7 @@ r.post('/', async (req, res, next) => {
 /** GET /api/v1/referrals/incoming */
 r.get('/incoming', async (req, res, next) => {
   try {
-    const { tenantId } = req.user!;
+    const { tenantId } = req.user as { tenantId: string };
     const incoming = await (prisma as any).referral?.findMany({
       where: { toTenantId: tenantId, status: 'PENDING' },
       include: { scan: true }

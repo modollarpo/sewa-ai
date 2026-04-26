@@ -5,6 +5,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
+import axios from 'axios';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -109,8 +110,8 @@ app.use(auditMiddleware);
 app.get('/health', async (_req, res) => {
   const [dbOk, redisOk, triageOk] = await Promise.all([
     prisma.$queryRaw`SELECT 1`.then(()=>true).catch(()=>false),
-    redisClient.ping().then(r=>r==='PONG').catch(()=>false),
-    axios.get(`${config.AI_SERVICE_URL}/health`, { timeout: 2000 }).then(r=>r.status===200).catch(()=>false)
+    redisClient.ping().then((r: string | null) => r === 'PONG').catch(() => false),
+    axios.get(`${config.AI_SERVICE_URL}/health`, { timeout: 2000 }).then((r: any) => r.status === 200).catch(() => false)
   ]);
 
   res.json({

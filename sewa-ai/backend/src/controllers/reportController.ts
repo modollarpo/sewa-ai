@@ -9,6 +9,7 @@ import { AppError } from '../utils/AppError';
 import { io } from '../index';
 import { generateClinicalPDF } from '../services/reportGenerationService';
 import { logger } from '../utils/logger';
+import { config } from '../config/env';
 
 // POST /api/v1/reports/generate/:scanId
 export async function generateReport(req: Request, res: Response, next: NextFunction) {

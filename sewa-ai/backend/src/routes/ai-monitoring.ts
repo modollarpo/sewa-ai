@@ -71,7 +71,7 @@ r.get('/metrics', async (req, res, next) => {
     ]);
 
     // Map condition stats to the format expected by the frontend
-    const byCondition = statsByCondition.map(c => ({
+    const byCondition = (statsByCondition as any[]).map((c: any) => ({
       name: c.primaryFinding,
       auc: 0.9 + (Math.random() * 0.08), // Simulated AUC based on real confidence
       sensitivity: 0.88 + (Math.random() * 0.07), // Simulated Sensitivity
