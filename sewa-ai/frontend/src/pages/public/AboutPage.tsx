@@ -147,7 +147,7 @@ export function AboutPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         <div style={{ marginBottom:80, padding:'clamp(20px, 5vw, 40px)', background:`${C.brand}08`, border:`1px solid ${C.brand}30`, borderRadius:20, textAlign:'center' }}>
           <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:16 }}>Intellectual Property</div>
           <p style={{ fontSize:'clamp(13px, 2.5vw, 15px)', color:C.textHi, fontWeight:600, lineHeight:1.8, margin:'0 auto', maxWidth:700 }}>
-            The SEWA AI multi-engine architecture, metacognition safety layer, federated learning subsystem, and sovereign deployment architecture are the sole invention of <strong style={{ color:C.brand }}>Dolapo Ariyo</strong>, protected by UK Provisional Patent Application (UKIPO, March 2026).
+            The SEWA AI 4-Engine Safety Architecture, metacognition layer, and sovereign deployment models are protected by <strong style={{ color:C.brand }}>UK Patent Pending: GB2609706.3</strong> — Storegrill Inc Ltd (Company No. 14581073).
           </p>
         </div>
 

@@ -61,17 +61,11 @@ function notifIcon(type: string): string {
   return m[type] ?? '🔔';
 }
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  { id:'n1', type:'critical_finding', title:'CRITICAL: ICH detected', body:'Scan #4821 — Right parietal ICH, confidence 94.1%', read:false, createdAt:new Date(Date.now()-120000).toISOString(), urgency:'CRITICAL', scanId:'scan-4821' },
-  { id:'n2', type:'critical_finding', title:'CRITICAL: Pulmonary Embolism', body:'Scan #4820 — Bilateral PE, saddle embolus, confidence 89%', read:false, createdAt:new Date(Date.now()-240000).toISOString(), urgency:'CRITICAL', scanId:'scan-4820' },
-  { id:'n3', type:'report_signed', title:'Report signed', body:'Dr. Sarah Chen signed report for scan #4818', read:false, createdAt:new Date(Date.now()-600000).toISOString() },
-  { id:'n4', type:'scan_complete', title:'AI analysis complete', body:'Scan #4817 — No acute findings, confidence 91%', read:true, createdAt:new Date(Date.now()-1800000).toISOString() },
-  { id:'n5', type:'system', title:'Federated learning round complete', body:'FL Round 47 — accuracy +0.3%, ε = 8.0', read:true, createdAt:new Date(Date.now()-3600000).toISOString() },
-];
+
 
 export function NotificationPanel({ notifications: propNotifs, onClose, onMarkRead }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const notifications = propNotifs.length > 0 ? propNotifs : MOCK_NOTIFICATIONS;
+  const notifications = propNotifs;
   const unread = notifications.filter(n => !n.read);
   const hasUnread = unread.length > 0;
 

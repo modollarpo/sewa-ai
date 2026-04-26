@@ -6,16 +6,25 @@ const r = Router();
 r.use(authenticate);
 r.get('/me', async (req, res, next) => {
   try {
-    const u = await prisma.user.findUnique({ where: { id: req.user!.id }, select: { id:true, email:true, firstName:true, lastName:true, role:true, speciality:true, licenseNumber:true, language:true, mfaEnabled:true, lastLoginAt:true, tenant:{ select:{ name:true, region:true, currency:true, plan:true } } } });
+    const u = await prisma.user.findUnique({ 
+      where: { id: req.user!.id }, 
+      select: { 
+        id:true, email:true, firstName:true, lastName:true, role:true, speciality:true, 
+        licenseNumber:true, language:true, timezone:true, mfaEnabled:true, lastLoginAt:true, 
+        notifPrefs:true, consentPrefs:true,
+        tenant:{ select:{ name:true, region:true, currency:true, plan:true } },
+        patientRecord: { select: { id:true, mrn:true, dateOfBirth:true, sex:true, consentAI:true, consentResearch:true, consentThirdParty:true } }
+      } 
+    });
     res.json(u);
   } catch (err) { next(err); }
 });
 r.patch('/me', async (req, res, next) => {
   try {
-    const { firstName, lastName, language, timezone, speciality, notifPrefs } = req.body;
+    const { firstName, lastName, language, timezone, speciality, notifPrefs, consentPrefs } = req.body;
     const u = await prisma.user.update({ 
       where: { id: req.user!.id }, 
-      data: { firstName, lastName, language, timezone, speciality, notifPrefs } 
+      data: { firstName, lastName, language, timezone, speciality, notifPrefs, consentPrefs } 
     });
     res.json(u);
   } catch (err) { next(err); }

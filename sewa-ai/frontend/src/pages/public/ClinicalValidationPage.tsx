@@ -67,7 +67,10 @@ export function ClinicalValidationPage({ onNavigate }: { onNavigate:(p:string)=>
       {/* Hero */}
       <div style={{ padding:'110px 24px 70px', background:`linear-gradient(180deg,${C.bg1},${C.bg0})`, textAlign:'center' }}>
         <div style={{ maxWidth:760, margin:'0 auto' }}>
-          <Tag label="Peer-Reviewed Evidence" color={C.brand} />
+          <div style={{ display:'flex', justifyContent:'center', gap:8, marginBottom:20 }}>
+            <Tag label="Peer-Reviewed Evidence" color={C.brand} />
+            <Tag label="UK Patent Pending" color={C.info} />
+          </div>
           <h1 style={{ fontSize:50, fontWeight:900, color:C.textHi, margin:'20px 0 18px', letterSpacing:'-2px', lineHeight:1.1 }}>
             Clinical evidence,<br/>not marketing claims
           </h1>

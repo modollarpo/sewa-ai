@@ -226,7 +226,17 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
                 style={{ flex:'1 1 300px', maxWidth:400, height:52, padding:'0 20px', background:C.bg2, border:`1px solid ${demoFocus?C.brand:C.border}`, borderRadius:14, color:C.textHi, fontSize:15, fontFamily:C.F, outline:'none' }}
               />
               <button
-                onClick={()=>{if(demoEmail)setDemoSubmitted(true);}}
+                onClick={async ()=>{
+                  if(!demoEmail) return;
+                  setDemoSubmitted(true);
+                  try {
+                    await fetch('/api/v1/onboarding/lead', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email: demoEmail, source: 'landing_demo' })
+                    });
+                  } catch (e) { console.error('Demo lead capture failed'); }
+                }}
                 style={{ padding:'0 32px', height:52, background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:14, color:'white', fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:C.F, boxShadow:`0 4px 16px ${C.brand}40`, whiteSpace:'nowrap' }}>
                 Book Demo Now
               </button>

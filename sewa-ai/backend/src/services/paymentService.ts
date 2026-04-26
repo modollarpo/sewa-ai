@@ -52,9 +52,8 @@ export const PLANS = {
 
 // FX conversion via fxService (live rates with Redis cache + ECB fallback)
 export async function convertFromUSD(usdAmount: number, currency: string): Promise<number> {
-  // USD → GBP → target currency
-  const usdToGbp = 1 / 1.27; // approximate; fxService uses live rates
-  const gbpAmount = usdAmount * usdToGbp;
+  const { convertToGBP, convertFromGBP } = await import('./fxService');
+  const gbpAmount = await convertToGBP(usdAmount, 'USD');
   return convertFromGBP(gbpAmount, currency);
 }
 
@@ -85,6 +84,72 @@ export async function createSubscription(tenantId: string, plan: string, region:
   }
 
   throw new AppError(`No payment provider for region ${region}`, 400);
+}
+
+/**
+ * ── Feature 13: Referral Marketplace Revenue Split ────────────────
+ * Splits a referral fee between the specialist (90%) and the platform (10%).
+ * Uses Stripe Connect Transfers to move funds to the specialist's account.
+ */
+export async function splitReferralFee(scanId: string, opinionId: string) {
+  try {
+    const opinion = await prisma.secondOpinion.findUnique({
+      where: { id: opinionId },
+      include: { reviewer: true, scan: { include: { tenant: true } } }
+    });
+
+    if (!opinion || !opinion.reviewerId || !opinion.reviewer?.stripeAccountId) {
+      logger.warn(`[Payment] Cannot split fee for opinion ${opinionId}: No reviewer or Stripe Account ID`);
+      return;
+    }
+
+    // Standard referral fee: $50 USD (Hardcoded for MVP, should be dynamic in production)
+    const totalAmountCents = 5000; 
+    const platformFeeCents = 500; // 10%
+    const specialistAmountCents = totalAmountCents - platformFeeCents;
+
+    logger.info(`[Payment] Splitting referral fee for scan ${scanId}. specialist: ${specialistAmountCents} cents`);
+
+    // In a real production scenario, we would first charge the referring hospital's card
+    // For this implementation, we assume the platform has already collected the funds
+    // and we are now transferring the specialist's share to their connected account.
+    
+    const transfer = await stripe.transfers.create({
+      amount: specialistAmountCents,
+      currency: 'usd',
+      destination: opinion.reviewer.stripeAccountId,
+      transfer_group: `referral_${scanId}`,
+      metadata: {
+        scanId,
+        opinionId,
+        specialistId: opinion.reviewerId
+      }
+    });
+
+    // Record the payment split in the database
+    await prisma.payment.create({
+      data: {
+        tenantId: opinion.scan.tenantId,
+        amount: totalAmountCents / 100,
+        currency: 'USD',
+        status: 'completed',
+        provider: 'stripe',
+        providerId: transfer.id,
+        type: 'referral_split',
+        metadata: {
+          specialistAmount: specialistAmountCents / 100,
+          platformFee: platformFeeCents / 100,
+          transferId: transfer.id
+        }
+      }
+    });
+
+    logger.info(`[Payment] Successfully transferred specialist share for opinion ${opinionId}`);
+    return transfer;
+  } catch (err: any) {
+    logger.error(`[Payment] Split fee failed: ${err.message}`);
+    throw new AppError('Fee split failed', 500);
+  }
 }
 
 async function createStripeSubscription(tenant: any, plan: string, currency: string) {
@@ -200,9 +265,60 @@ export async function chargePerScan(tenantId: string, scanCount: number = 1) {
   return payment;
 }
 
+// ── Referral Marketplace (Stripe Connect) ─────────────────────
+/**
+ * Splits a referral fee between a specialist (90%) and SEWA AI (10%).
+ * Requires Stripe Connect destination account ID for the specialist.
+ */
+export async function splitReferralFee(tenantId: string, specialistStripeId: string, amountUSD: number) {
+  const commission = amountUSD * 0.10;
+  const specialistCut = amountUSD - commission;
+  
+  logger.info(`[Billing] Splitting referral: Platform=$${commission.toFixed(2)}, Specialist=$${specialistCut.toFixed(2)}`);
+  
+  if (config.NODE_ENV === 'production') {
+    // Real Stripe Connect Transfer logic would go here
+    // return stripe.transfers.create({ ... });
+  }
+  
+  return { commission, specialistCut, status: 'pending_transfer' };
+}
+
+/**
+ * Creates a Stripe Connect Express account for a clinical specialist.
+ * Returns the account ID and an onboarding link.
+ */
+export async function createSpecialistAccount(email: string, userId: string) {
+  if (config.NODE_ENV !== 'production' && !config.STRIPE_SECRET_KEY) {
+    return { accountId: `acct_mock_${userId}`, onboardingUrl: `${config.APP_URL}/onboarding/specialist/mock-stripe` };
+  }
+
+  const account = await stripe.accounts.create({
+    type: 'express',
+    email,
+    capabilities: { transfers: { requested: true } },
+    metadata: { userId },
+  });
+
+  const accountLink = await stripe.accountLinks.create({
+    account: account.id,
+    refresh_url: `${config.APP_URL}/onboarding/specialist?refresh=true`,
+    return_url: `${config.APP_URL}/dashboard?stripe_success=true`,
+    type: 'account_onboarding',
+  });
+
+  return { accountId: account.id, onboardingUrl: accountLink.url };
+}
+
 // ── Webhook handlers ───────────────────────────────────────────
 export async function handleStripeWebhook(payload: Buffer, signature: string) {
-  const event = stripe.webhooks.constructEvent(payload, signature, config.STRIPE_WEBHOOK_SECRET);
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(payload, signature, config.STRIPE_WEBHOOK_SECRET);
+  } catch (err: any) {
+    logger.error(`[Billing] Stripe webhook signature verification failed: ${err.message}`);
+    throw new AppError('Webhook Signature Invalid', 400);
+  }
 
   if (event.type === 'payment_intent.succeeded') {
     const pi = event.data.object as Stripe.PaymentIntent;

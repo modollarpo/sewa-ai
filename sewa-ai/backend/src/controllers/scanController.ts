@@ -242,3 +242,60 @@ export async function generateDemoScan(req: Request, res: Response, next: NextFu
     res.status(201).json({ scan, message: 'Synthetic demo scan generated. AI processing in progress.' });
   } catch (err) { next(err); }
 }
+
+/**
+ * POST /api/v1/scans/sync-batch
+ * Synchronizes multiple offline scans from a medical tablet/edge node.
+ * Includes locally-inferred AI results (INT8 inference).
+ */
+export async function syncOfflineBatch(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { tenantId, id: userId } = req.user!;
+    const { scans } = req.body; // Array of scan metadata + AI results
+
+    if (!Array.isArray(scans)) throw new AppError('Invalid batch payload', 400);
+
+    const results = [];
+
+    for (const s of scans) {
+      // 1. Create the scan record
+      const scan = await prisma.scan.create({
+        data: {
+          tenantId,
+          patientId: s.patientId || null,
+          modality: s.modality || 'CT',
+          bodyPart: s.bodyPart || 'UNKNOWN',
+          priority: s.priority || 'ROUTINE',
+          status: 'ai_complete', // Already processed on the edge
+          receivedAt: new Date(s.timestamp || Date.now()),
+          clinicalIndication: s.clinicalIndication,
+          technique: s.technique,
+          dicomStudyUid: s.dicomStudyUid,
+        }
+      });
+
+      // 2. Attach the local AI result
+      if (s.aiResult) {
+        await prisma.aiResult.create({
+          data: {
+            scanId: scan.id,
+            primaryFinding: s.aiResult.finding,
+            urgency: s.aiResult.urgency || 'NORMAL',
+            confidence: s.aiResult.confidence || 1.0,
+            uncertaintyScore: s.aiResult.uncertainty || 0,
+            rawJson: s.aiResult, // Store the full edge payload
+          }
+        });
+      }
+
+      results.push({ id: scan.id, localId: s.localId });
+    }
+
+    await auditLog({ 
+      tenantId, userId, action: 'OFFLINE_SYNC_COMPLETE', 
+      metadata: { count: scans.length } 
+    });
+
+    res.json({ success: true, count: scans.length, synced: results });
+  } catch (err) { next(err); }
+}

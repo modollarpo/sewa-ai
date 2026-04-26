@@ -49,7 +49,17 @@ export function ContactPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
   const handleSubmit = async () => {
     if (!form.firstName || !form.email || !form.org || !form.consent) return;
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1200)); // simulate API call
+    try {
+      await fetch('/api/v1/onboarding/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: form.email, 
+          source: `contact_${form.type.toLowerCase().replace(/ /g,'_')}`,
+          interest: { ...form }
+        })
+      });
+    } catch (e) { console.error('Contact lead capture failed'); }
     setSubmitted(true);
     setSubmitting(false);
   };

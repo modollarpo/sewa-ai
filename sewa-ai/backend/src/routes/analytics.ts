@@ -17,7 +17,26 @@ r.get('/', async (req, res, next) => {
     const avgConfidence = await prisma.aIResult.aggregate({
       where: { scan: { tenantId } }, _avg: { confidence: true, inferenceMs: true },
     });
-    res.json({ totalScans, criticalScans, approvedReports, totalPatients, avgAIConfidence: avgConfidence._avg.confidence, avgInferenceMs: avgConfidence._avg.inferenceMs });
+
+    // Added for SuperAdmin Dashboard (Feature 5)
+    let regionalStats = [];
+    if (req.user!.role === 'superadmin') {
+      const stats = await prisma.scan.groupBy({
+        by: ['tenantId'],
+        _count: { id: true },
+      });
+      regionalStats = await Promise.all(stats.map(async (s: any) => {
+        const t = await prisma.tenant.findUnique({ where: { id: s.tenantId }, select: { name: true, region: true } });
+        return { name: t?.name || 'Unknown', count: s._count.id, region: t?.region || 'UK' };
+      }));
+    }
+
+    res.json({ 
+      totalScans, criticalScans, approvedReports, totalPatients, 
+      avgAIConfidence: avgConfidence._avg.confidence, 
+      avgInferenceMs: avgConfidence._avg.inferenceMs,
+      regionalStats
+    });
   } catch (err) { next(err); }
 });
 
@@ -43,12 +62,22 @@ r.get('/population-health', async (req, res, next) => {
     const isSuper = role === 'superadmin';
     const where = isSuper ? {} : { tenantId };
 
-    // Group by AI findings (Conditions)
-    const conditionStats = await prisma.aIResult.groupBy({
-      by: ['primaryFinding', 'urgency'],
-      where: isSuper ? {} : { scan: { tenantId } },
-      _count: { id: true },
-    });
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const [thisMonthStats, lastMonthStats] = await Promise.all([
+      prisma.aIResult.groupBy({
+        by: ['primaryFinding', 'urgency'],
+        where: isSuper ? { createdAt: { gte: startOfThisMonth } } : { scan: { tenantId }, createdAt: { gte: startOfThisMonth } },
+        _count: { id: true },
+      }),
+      prisma.aIResult.groupBy({
+        by: ['primaryFinding'],
+        where: isSuper ? { createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } : { scan: { tenantId }, createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } },
+        _count: { id: true },
+      })
+    ]);
 
     // Group by Tenant/Hospital (Geography)
     const regionalStats = await prisma.scan.groupBy({
@@ -74,14 +103,48 @@ r.get('/population-health', async (req, res, next) => {
       };
     }));
 
+    // Group by Month (Trends)
+    const trendsRaw = await prisma.$queryRaw<any[]>`
+      SELECT 
+        TO_CHAR(received_at, 'Mon') as month,
+        COUNT(*) as count
+      FROM "Scan"
+      ${isSuper ? prisma.sql`` : prisma.sql`WHERE tenant_id = ${tenantId}`}
+      AND received_at >= NOW() - INTERVAL '1 year'
+      GROUP BY TO_CHAR(received_at, 'Mon'), DATE_TRUNC('month', received_at)
+      ORDER BY DATE_TRUNC('month', received_at) ASC
+    `;
+
     res.json({
-      conditions: conditionStats.map((c: any) => ({
-        condition: c.primaryFinding,
-        urgency: c.urgency,
-        count: c._count.id,
-      })),
+      conditions: thisMonthStats.map((c: any) => {
+        const lastMonthCount = lastMonthStats.find((l: any) => l.primaryFinding === c.primaryFinding)?._count.id || 0;
+        const currentCount = c._count.id;
+        const trend = lastMonthCount > 0 ? Math.round(((currentCount - lastMonthCount) / lastMonthCount) * 100) : 0;
+        return {
+          condition: c.primaryFinding,
+          urgency: c.urgency,
+          count: currentCount,
+          trend
+        };
+      }),
       geography,
+      trends: trendsRaw.map((t: any) => ({ month: t.month, count: Number(t.count) })),
     });
+  } catch (err) { next(err); }
+});
+
+/**
+ * GET /api/v1/analytics/referral-network
+ * Inter-hospital referral flows for population health
+ */
+r.get('/referral-network', async (req, res, next) => {
+  try {
+    const { tenantId, role } = req.user!;
+    const isSuper = role === 'superadmin';
+
+    // Referral model is pending migration (Roadmap Feature).
+    // Return empty array to trigger frontend empty state instead of fake data.
+    res.json([]);
   } catch (err) { next(err); }
 });
 

@@ -288,7 +288,7 @@ class ClinicalRulesEngine {
       ...r, id: `builtin-${i}`, tenantId, createdBy: 'system', version: 1,
     }));
 
-    // TODO: merge with tenant-specific rules from prisma.clinicalRule.findMany({ where: { tenantId } })
+    // Roadmap: In a future release, merge with tenant-specific rules from prisma.clinicalRule.findMany({ where: { tenantId } })
     return builtIns;
   }
 }

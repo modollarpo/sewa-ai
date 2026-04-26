@@ -162,3 +162,29 @@ async function sendOverMLLP(message: string, id: string): Promise<string | null>
     });
   });
 }
+
+// ── Health check ─────────────────────────────────────────────────────────
+export async function checkHL7Health(): Promise<{ enabled: boolean; reachable: boolean; host: string; port: number }> {
+  // We consider it enabled if host/port are set (defaults provided in env.ts)
+  const host = config.HL7_HOST;
+  const port = config.HL7_PORT;
+  
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    socket.setTimeout(2000);
+    
+    socket.connect(port, host, () => {
+      socket.destroy();
+      resolve({ enabled: true, reachable: true, host, port });
+    });
+    
+    socket.on('error', () => {
+      resolve({ enabled: true, reachable: false, host, port });
+    });
+    
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve({ enabled: true, reachable: false, host, port });
+    });
+  });
+}

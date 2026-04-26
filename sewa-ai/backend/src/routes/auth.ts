@@ -10,5 +10,6 @@ r.post('/mfa/setup',   authenticate, ctrl.setupMFA);
 r.post('/mfa/confirm', authenticate, ctrl.confirmMFA);
 r.post('/refresh',     ctrl.refreshToken);
 r.post('/logout',      ctrl.logout);
-r.post('/register',    ctrl.register);
+r.post('/register',    authLimiter, ctrl.register);
+r.post('/register-specialist', authLimiter, ctrl.registerSpecialist);
 export default r;

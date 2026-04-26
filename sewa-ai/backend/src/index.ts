@@ -44,6 +44,8 @@ import onboardingRoutes from './routes/onboarding';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 
 const app = express();
+app.set('trust proxy', 1);
+app.use(helmet());
 const httpServer = createServer(app);
 
 // ── Socket.IO — Feature 6 (Real-time Notifications) ───────────
@@ -105,13 +107,22 @@ app.use(auditMiddleware);
 
 // ── Health ─────────────────────────────────────────────────────
 app.get('/health', async (_req, res) => {
-  const dbOk = await prisma.$queryRaw`SELECT 1`.then(()=>true).catch(()=>false);
-  const redisOk = await redisClient.ping().then(r=>r==='PONG').catch(()=>false);
+  const [dbOk, redisOk, triageOk] = await Promise.all([
+    prisma.$queryRaw`SELECT 1`.then(()=>true).catch(()=>false),
+    redisClient.ping().then(r=>r==='PONG').catch(()=>false),
+    axios.get(`${config.AI_SERVICE_URL}/health`, { timeout: 2000 }).then(r=>r.status===200).catch(()=>false)
+  ]);
+
   res.json({
-    status: dbOk && redisOk ? 'healthy' : 'degraded',
+    status: dbOk && redisOk && triageOk ? 'healthy' : 'degraded',
     version: '2.4.1',
     timestamp: new Date().toISOString(),
-    services: { database: dbOk, redis: redisOk, socket: io.engine.clientsCount },
+    services: { 
+      database: dbOk, 
+      redis: redisOk, 
+      triage_ai: triageOk,
+      socket: io.engine.clientsCount 
+    },
   });
 });
 
@@ -132,7 +143,10 @@ app.use(`${v1}/admin`,          adminRoutes);
 app.use(`${v1}/templates`,      templateRoutes);
 app.use(`${v1}/annotations`,    annotationRoutes);
 app.use(`${v1}/second-opinions`,secondOpinionRoutes);
-app.use(`${v1}/appointments`,  appointmentRoutes);
+import referralRoutes   from './routes/referrals';
+
+// ...
+app.use(`${v1}/referrals`,     referralRoutes);
 app.use(`${v1}/whatsapp`,      whatsappRoutes);
 app.use(`${v1}/audit`,          auditRoutes);
 app.use(`${v1}/ai-monitoring`,  aiMonitoringRoutes);
@@ -166,6 +180,19 @@ async function bootstrap() {
       catch (e: any) { logger.error('[Cron] Referral SLA escalation failed:', e.message); }
     }, 30 * 60 * 1000);
     logger.info('[Cron] Referral SLA escalation scheduler started (every 30 min)');
+
+    // ── Scan processing cleanup cron — every 5 minutes ─────────
+    setInterval(async () => {
+      try {
+        const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const stuck = await prisma.scan.updateMany({
+          where: { status: 'processing', receivedAt: { lt: tenMinsAgo } },
+          data: { status: 'failed', errorMessage: 'Processing timeout (10m)' },
+        });
+        if (stuck.count > 0) logger.warn(`[Cron] Cleaned up ${stuck.count} stuck scans.`);
+      } catch (e: any) { logger.error('[Cron] Scan cleanup failed:', e.message); }
+    }, 5 * 60 * 1000);
+    logger.info('[Cron] Scan processing cleanup scheduler started (every 5 min)');
   } catch (err) {
     logger.error('Bootstrap error:', err);
     process.exit(1);

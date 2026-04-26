@@ -40,9 +40,14 @@ const STUDIES = [
   }
 ];
 
+import { RadiologySimulator } from './RadiologySimulator';
+
 export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void }) {
+  const [showSim, setShowSim] = React.useState(false);
+
   return (
     <div style={{ background: C.bg0, minHeight: '100vh', fontFamily: C.F }}>
+      {showSim && <RadiologySimulator onClose={() => setShowSim(false)} />}
       <style>{`
         @media (max-width: 900px) {
           .research-grid { grid-template-columns: 1fr !important; }
@@ -120,7 +125,21 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
                 <div style={{ fontSize: 14, color: C.textHi, fontWeight: 600 }}>{study.results}</div>
               </div>
 
-              <button style={{ 
+              <button 
+                onClick={async () => {
+                  const email = prompt('Enter your institutional email to request full dataset access:');
+                  if (email && email.includes('@')) {
+                    try {
+                      await fetch('/api/v1/onboarding/lead', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, source: `research_${study.title.substring(0,20)}` })
+                      });
+                      alert('Access request received. Our research team will verify your credentials and respond within 48 hours.');
+                    } catch (e) { alert('Request failed.'); }
+                  }
+                }}
+                style={{ 
                 marginTop: 'auto', padding: '10px', background: 'transparent', border: `1px solid ${C.border}`, 
                 borderRadius: 10, color: C.textMd, fontSize: 12, fontWeight: 600, cursor: 'pointer' 
               }}>
@@ -143,6 +162,30 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
           </p>
         </div>
       </div>
+
+      {/* 🎓 Radiology Training Simulator (Roadmap 2026 - Task 9) */}
+      <section style={{ maxWidth: 1000, margin: '60px auto 100px', padding: '0 24px' }}>
+        <div style={{ padding: 40, background: `linear-gradient(135deg, ${C.brand}15, ${C.bg2})`, border: `1px solid ${C.brand}40`, borderRadius: 32, textAlign: 'center' }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🎓</div>
+          <h2 style={{ fontSize: 28, color: C.textHi, margin: '0 0 12px' }}>SEWA Sim: Radiology Training Suite</h2>
+          <p style={{ fontSize: 16, color: C.textMd, maxWidth: 600, margin: '0 auto 24px', lineHeight: 1.6 }}>
+            Gamified diagnostic simulation for medical students. Practice STAT triage on 5,000+ anonymised cases 
+            and compare your accuracy against board-certified consensus and SEWA AI's baseline.
+          </p>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button 
+              onClick={() => setShowSim(true)}
+              style={{ padding: '12px 32px', background: C.brand, color: 'white', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: `0 8px 24px ${C.brand}40` }}>
+              Launch Student Simulator
+            </button>
+            <button 
+              onClick={() => onNavigate('contact')}
+              style={{ padding: '12px 32px', background: 'transparent', color: C.textHi, border: `1px solid ${C.border}`, borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+              Academic Licensing Inquiry
+            </button>
+          </div>
+        </div>
+      </section>
 
       <PublicFooter onNavigate={onNavigate} />
     </div>

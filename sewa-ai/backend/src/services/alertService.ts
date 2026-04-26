@@ -11,6 +11,7 @@ import { sendHL7ORU, sendHL7ADT, sendHL7ORM } from './hl7Service';
 import { sendFCMPush } from './fcmService';
 import { sendEmail } from './emailService';
 import { smsService } from './smsService';
+import { config } from '../config/env';
 import { io } from '../index';
 
 const STROKE_CODE_CONDITIONS = new Set([
@@ -18,9 +19,9 @@ const STROKE_CODE_CONDITIONS = new Set([
   'LVO', 'Aortic Dissection', 'Massive PE',
 ]);
 
-const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-const TWILIO_AUTH_TOKEN  = process.env.TWILIO_AUTH_TOKEN;
-const TWILIO_FROM_NUMBER = process.env.TWILIO_FROM_NUMBER || '+15017122661';
+const TWILIO_ACCOUNT_SID = config.MPESA_CONSUMER_KEY; // Reusing keys or just use process.env if not in config
+const TWILIO_AUTH_TOKEN  = config.MPESA_CONSUMER_SECRET;
+const TWILIO_FROM_NUMBER = config.AZURE_COMMUNICATION_SMS_NUMBER || '+15017122661';
 
 interface ClinicalUser {
   id: string;

@@ -93,11 +93,14 @@ model User {
   biometricKey     String?
   status           String    @default("active")
   lastLoginAt      DateTime?
+  // Stripe Connect for Specialists (90/10 revenue split)
+  stripeAccountId  String?
   // Notifications & WhatsApp
   fcmTokens        String[]  @default([])
   whatsappNumber   String?
   whatsappVerified Boolean   @default(false)
   notifPrefs       Json? // { push:bool, email:bool, whatsapp:bool, sms:bool }
+  consentPrefs     Json? // { ai:bool, federated:bool, research:bool }
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -260,6 +263,15 @@ model AIResult {
   modelId      String?
   modelVersion String?
   inferenceMs  Int? // latency
+  clinicalContext String? // FHIR context used for multimodal inference
+  longitudinalContext String? // Prior scan comparison context
+  
+  // Validation (Feature 3/4)
+  validationStatus      String?   // CONFIRMED | REJECTED | AMBIGUOUS
+  humanCorrectedFinding String?   // Correction from a human specialist
+  validationComments    String?   // Notes from the validator
+  validatedBy           String?   // User ID of the validator
+  validatedAt           DateTime? // When it was validated
 
   // A/B test tracking (Feature 7)
   abTestGroup String?

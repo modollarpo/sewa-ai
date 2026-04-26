@@ -13,6 +13,7 @@ import { logger } from '../utils/logger';
 import { auditLog } from '../utils/audit';
 import { sendEmail } from '../services/emailService';
 import { AppError } from '../utils/AppError';
+import { createSpecialistAccount } from '../services/paymentService';
 
 const SALT_ROUNDS = 12;
 const ACCESS_TOKEN_TTL  = '15m';
@@ -192,5 +193,100 @@ export async function register(req: Request, res: Response, next: NextFunction) 
     await sendEmail({ to: email, subject: 'Welcome to SEWA AI', template: 'welcome', data: { firstName, tenantName: tenant.name } });
 
     res.status(201).json({ message: 'Registration successful. Check your email for verification.' });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/register-specialist
+export async function registerSpecialist(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { firstName, lastName, email, password, speciality, licenseNumber } = req.body;
+
+    // Use a special global tenant for independent specialists if no specific tenant is provided
+    let tenant = await prisma.tenant.findUnique({ where: { slug: 'specialists' } });
+    if (!tenant) {
+      tenant = await prisma.tenant.create({
+        data: {
+          name: 'SEWA Specialist Network', slug: 'specialists', subdomain: 'specialists', region: 'uk', currency: 'GBP', status: 'active'
+        }
+      });
+    }
+
+    const existing = await prisma.user.findUnique({ where: { tenantId_email: { tenantId: tenant.id, email } } });
+    if (existing) throw new AppError('This email is already registered in the specialist network.', 409);
+
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    const user = await prisma.user.create({
+      data: {
+        tenantId: tenant.id, email, passwordHash, firstName, lastName,
+        role: 'radiologist', speciality, licenseNumber, status: 'active'
+      },
+    });
+
+    // Create Stripe Connect account
+    const stripeInfo = await createSpecialistAccount(email, user.id);
+    await prisma.user.update({ where: { id: user.id }, data: { stripeAccountId: stripeInfo.accountId } });
+
+    await auditLog({ tenantId: tenant.id, userId: user.id, action: 'SPECIALIST_REGISTERED', metadata: { speciality } });
+    
+    res.status(201).json({ 
+      message: 'Specialist account created', 
+      stripeOnboardingUrl: stripeInfo.onboardingUrl 
+    });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/forgot-password
+export async function forgotPassword(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email, tenantSlug } = req.body;
+    const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+    if (!tenant) throw new AppError('Tenant not found', 404);
+
+    const user = await prisma.user.findUnique({ where: { tenantId_email: { tenantId: tenant.id, email } } });
+    if (!user) {
+      // Don't leak user existence in prod, but for demo we can be explicit or just return success
+      return res.json({ message: 'If an account exists, a reset link has been sent.' });
+    }
+
+    const token = randomUUID();
+    await redisClient.setex(`reset:${token}`, 3600, user.id); // 1 hour
+
+    await sendEmail({
+      to: email,
+      subject: 'Reset your SEWA AI password',
+      template: 'forgot_password',
+      data: { firstName: user.firstName, resetLink: `${config.FRONTEND_URL}/reset-password?token=${token}&tenant=${tenantSlug}` }
+    });
+
+    res.json({ message: 'Password reset link sent to your email.' });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/reset-password
+export async function resetPassword(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { token, password } = req.body;
+    const userId = await redisClient.get(`reset:${token}`);
+    if (!userId) throw new AppError('Invalid or expired reset token', 400);
+
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    await redisClient.del(`reset:${token}`);
+
+    res.json({ message: 'Password reset successful. You can now log in.' });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/verify-email
+export async function verifyEmail(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { token } = req.body;
+    const userId = await redisClient.get(`verify:${token}`);
+    if (!userId) throw new AppError('Invalid or expired verification token', 400);
+
+    await prisma.user.update({ where: { id: userId }, data: { status: 'active' } });
+    await redisClient.del(`verify:${token}`);
+
+    res.json({ message: 'Email verified successfully. Account is now active.' });
   } catch (err) { next(err); }
 }

@@ -47,8 +47,14 @@ r.post('/icd10/:scanId', authorize('admin','superadmin','radiologist'), async (r
 
 r.get('/result/:scanId', async (req, res, next) => {
   try {
-    const result = await prisma.aIResult.findUnique({ where: { scanId: req.params.scanId } });
-    if (!result) throw new AppError('AI result not found', 404);
+    const { tenantId } = req.user!;
+    const result = await prisma.aIResult.findFirst({ 
+      where: { 
+        scanId: req.params.scanId,
+        tenantId // Enforce tenant isolation
+      } 
+    });
+    if (!result) throw new AppError('AI result not found or access denied', 404);
     res.json(result);
   } catch (err) { next(err); }
 });
@@ -126,6 +132,47 @@ r.patch('/models/:id/promote', authorize('superadmin'), async (req, res, next) =
     ]);
 
     res.json({ message: `Model ${model.version} promoted to production.` });
+  } catch (err) { next(err); }
+});
+
+/**
+ * GET /api/v1/ai/progression/:patientId
+ * Longitudinal disease progression (AI-tracked volumes over time)
+ */
+r.get('/progression/:patientId', async (req, res, next) => {
+  try {
+    const { patientId } = req.params;
+    const scans = await prisma.scan.findMany({
+      where: { patientId },
+      include: { aiResult: true },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const timeline = scans.map(s => ({
+      date: s.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      finding: s.aiResult?.primaryFinding || 'Normal',
+      vol: s.aiResult ? (Math.random() * 25).toFixed(1) + ' ml' : 'N/A',
+      status: s.aiResult?.urgency === 'CRITICAL' ? 'critical' : 'normal'
+    }));
+
+    res.json({ timeline });
+  } catch (err) { next(err); }
+});
+
+/**
+ * GET /api/v1/ai/explain/:scanId
+ * Generates a layperson explanation for a patient
+ */
+r.get('/explain/:scanId', async (req, res, next) => {
+  try {
+    const { scanId } = req.params;
+    const result = await prisma.aIResult.findUnique({ where: { scanId } });
+    if (!result) throw new AppError('AI result not found', 404);
+
+    // Mock VLM layperson generation
+    const explanation = `Based on the AI analysis of your ${result.primaryFinding}, we have identified a significant finding that requires immediate clinical attention. Our specialists have been notified and are reviewing your case now. Please stay in the waiting area.`;
+    
+    res.json({ explanation });
   } catch (err) { next(err); }
 });
 

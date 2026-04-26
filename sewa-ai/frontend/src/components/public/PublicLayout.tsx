@@ -247,7 +247,7 @@ export function PublicFooter({ onNavigate }: { onNavigate: (page: string) => voi
         <div style={{ padding:'40px 0', borderTop:`1px solid ${C.border}`, borderBottom:`1px solid ${C.border}`, marginBottom:40 }}>
            <div style={{ display:'flex', gap:40, flexWrap:'wrap', justifyContent:'space-between' }}>
              {[
-               { region:'United Kingdom', addr:'London, EC2A 4BX' },
+               { region:'United Kingdom', addr:'Coventry, CV3 2FP' },
                { region:'European Union', addr:'Amsterdam, Netherlands' },
                { region:'West Africa', addr:'Lagos, Nigeria' },
                { region:'North America', addr:'Delaware, USA' },
@@ -264,6 +264,7 @@ export function PublicFooter({ onNavigate }: { onNavigate: (page: string) => voi
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:24 }}>
           <div style={{ fontSize:12, color:C.textLo }}>
             © {new Date().getFullYear()} SEWA AI — a Storegrill Inc Ltd company. No. 14581073.
+            <div style={{ marginTop:4, fontSize:10, color:C.textLo, opacity:0.8 }}>UK Patent Pending: GB2609706.3 — Storegrill Inc Ltd (Company No. 14581073)</div>
           </div>
           <div style={{ display:'flex', gap:24 }}>
              {[['Privacy','privacy-policy'],['Terms','terms'],['Cookies','cookie-policy'],['Accessibility','accessibility']].map(([lbl, id]) => (

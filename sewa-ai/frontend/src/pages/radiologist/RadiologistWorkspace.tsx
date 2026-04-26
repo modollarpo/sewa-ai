@@ -7,6 +7,7 @@ import { useSettingsStore } from '../../store/settingsStore';
 import { getTranslation } from '../../services/i18n';
 import { apiClient } from '../../services/apiClient';
 import { Tooltip } from '../../components/ui/Tooltip';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -78,6 +79,9 @@ function ConfBar({ v }: { v:number }) {
 // ── DICOM Canvas Renderer ──────────────────────────────────────
 function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [measurements, setMeasurements] = useState<{ x1:number; y1:number; x2:number; y2:number }[]>([]);
+  const [activeM, setActiveM] = useState<{ x1:number; y1:number; x2:number; y2:number } | null>(null);
+  const [tool, setTool] = useState<'pan'|'measure'>('pan');
   const [wl, setWl]   = useState({ w:400, l:40 }); // window/level
   const [zoom, setZoom] = useState(1);
   const [pan, setPan]   = useState({ x:0, y:0 });
@@ -98,6 +102,7 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
 
     const modality = scan?.modality ?? 'CT';
     if (modality === 'CT' || !modality) {
+      // (Keep existing drawing logic...)
       ctx.beginPath();
       ctx.ellipse(w/2, h*0.5, w*0.37, h*0.43, 0, 0, Math.PI*2);
       ctx.fillStyle = '#1e1e1e'; ctx.fill();
@@ -145,6 +150,28 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
       ctx.fillStyle = rGrd;
       ctx.beginPath(); ctx.ellipse(w*0.65, h*0.48, w*0.20, h*0.30, 0.1, 0, Math.PI*2); ctx.fill();
     }
+
+    // Draw measurements
+    const allM = activeM ? [...measurements, activeM] : measurements;
+    allM.forEach(m => {
+      ctx.strokeStyle = C.brandLt; ctx.lineWidth = 2 / zoom;
+      ctx.setLineDash([5/zoom, 5/zoom]);
+      ctx.beginPath(); ctx.moveTo(m.x1, m.y1); ctx.lineTo(m.x2, m.y2); ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Draw endpoints
+      ctx.fillStyle = C.brandLt;
+      ctx.beginPath(); ctx.arc(m.x1, m.y1, 4/zoom, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(m.x2, m.y2, 4/zoom, 0, Math.PI*2); ctx.fill();
+
+      // Label distance
+      const dist = Math.sqrt(Math.pow(m.x2-m.x1,2) + Math.pow(m.y2-m.y1,2));
+      const mm = (dist * 0.23).toFixed(1); // 0.23mm/px approx
+      ctx.font = `${12/zoom}px ${C.fontMono}`;
+      ctx.fillStyle = 'white';
+      ctx.fillText(`${mm}mm`, (m.x1+m.x2)/2 + 5/zoom, (m.y1+m.y2)/2 - 5/zoom);
+    });
+
     ctx.restore();
     ctx.fillStyle='rgba(0,255,180,0.7)'; ctx.font=`9px ${C.fontMono}`;
     const metadata = [
@@ -153,7 +180,7 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
       'SEWA AI v2.4.1',
     ];
     metadata.forEach((m,i) => ctx.fillText(m, 8, 14+i*14));
-  }, [scan, wl, zoom, pan, showGradcam]);
+  }, [scan, wl, zoom, pan, showGradcam, measurements, activeM]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -168,20 +195,42 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
     return () => window.removeEventListener('resize', handleResize);
   }, [render]);
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    setZoom(z => Math.max(0.3, Math.min(5, z - e.deltaY*0.001)));
+  const screenToCanvas = (sx: number, sy: number) => {
+    const cvs = canvasRef.current!;
+    const rect = cvs.getBoundingClientRect();
+    const x = (sx - rect.left - (cvs.width/2 + pan.x)) / zoom + cvs.width/2;
+    const y = (sy - rect.top - (cvs.height/2 + pan.y)) / zoom + cvs.height/2;
+    return { x, y };
   };
+
   const handleMouseDown = (e: React.MouseEvent) => {
-    dragging.current = true;
-    lastPos.current = { x:e.clientX, y:e.clientY };
+    if (tool === 'pan') {
+      dragging.current = true;
+      lastPos.current = { x:e.clientX, y:e.clientY };
+    } else if (tool === 'measure') {
+      const pos = screenToCanvas(e.clientX, e.clientY);
+      setActiveM({ x1:pos.x, y1:pos.y, x2:pos.x, y2:pos.y });
+    }
   };
+
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragging.current) return;
-    const dx = e.clientX - lastPos.current.x;
-    const dy = e.clientY - lastPos.current.y;
-    lastPos.current = { x:e.clientX, y:e.clientY };
-    setPan(p => ({ x:p.x+dx, y:p.y+dy }));
+    if (tool === 'pan' && dragging.current) {
+      const dx = e.clientX - lastPos.current.x;
+      const dy = e.clientY - lastPos.current.y;
+      lastPos.current = { x:e.clientX, y:e.clientY };
+      setPan(p => ({ x:p.x+dx, y:p.y+dy }));
+    } else if (tool === 'measure' && activeM) {
+      const pos = screenToCanvas(e.clientX, e.clientY);
+      setActiveM(m => m ? { ...m, x2:pos.x, y2:pos.y } : null);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (tool === 'pan') dragging.current = false;
+    else if (tool === 'measure' && activeM) {
+      setMeasurements([...measurements, activeM]);
+      setActiveM(null);
+    }
   };
 
   return (
@@ -197,25 +246,50 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
       />
       <div style={{
         position:'absolute', bottom:'12px', left:'50%', transform:'translateX(-50%)',
-        display:'flex', gap:'8px', background:'rgba(8,22,15,0.85)',
-        border:`1px solid ${C.border}`, borderRadius:'12px', padding:'6px',
-        backdropFilter:'blur(8px)',
+        display:'flex', gap:'12px', background:'rgba(8,22,15,0.9)', padding:'6px 12px',
+        borderRadius:'16px', border:`1px solid ${C.border}`, backdropFilter:'blur(12px)',
+        boxShadow:'0 10px 25px rgba(0,0,0,0.5)', alignItems:'center'
       }}>
-        {[
-          { icon:'🔍', action:() => setZoom(z=>Math.min(5,z+0.25)), title:'Zoom In' },
-          { icon:'🔎', action:() => setZoom(z=>Math.max(0.3,z-0.25)), title:'Zoom Out' },
-          { icon:'⊕',  action:() => { setZoom(1); setPan({x:0,y:0}); }, title:'Reset' },
-          { icon:'⬛', action:() => setWl(w=>({...w,l:w.l-20})), title:'Level -' },
-          { icon:'⬜', action:() => setWl(w=>({...w,l:w.l+20})), title:'Level +' },
-        ].map(b => (
-          <button key={b.icon} onClick={b.action} title={b.title} style={{
-            width:'32px', height:'32px', borderRadius:'8px',
-            background:'transparent', border:'none', cursor:'pointer',
-            color:C.textMd, fontSize:'16px', display:'flex', alignItems:'center', justifyContent:'center',
-          }}>
-            {b.icon}
+        {/* Tool Selector */}
+        <div style={{ display:'flex', gap:'4px', borderRight:`1px solid ${C.border}`, paddingRight:'12px' }}>
+          {[
+            { id:'pan', icon:'🖐️', title:'Pan & Zoom' },
+            { id:'measure', icon:'📏', title:'Caliper Measurement' },
+          ].map(t => (
+            <button key={t.id} onClick={() => setTool(t.id as any)} title={t.title} style={{
+              width:'36px', height:'36px', background: tool === t.id ? C.brand : 'transparent',
+              border:'none', borderRadius:'8px', color: tool === t.id ? 'white' : C.textMd,
+              fontSize:'18px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center'
+            }}>
+              <span>{t.icon}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* View Controls */}
+        <div style={{ display:'flex', gap:'4px' }}>
+          {[
+            { icon:'🔍', action:() => setZoom(z=>Math.min(5,z+0.25)), title:'Zoom In' },
+            { icon:'🔎', action:() => setZoom(z=>Math.max(0.3,z-0.25)), title:'Zoom Out' },
+            { icon:'⊕',  action:() => { setZoom(1); setPan({x:0,y:0}); }, title:'Reset View' },
+            { icon:'⬛', action:() => setWl(w=>({...w,l:w.l-20})), title:'Decrease Level (Darker)' },
+            { icon:'⬜', action:() => setWl(w=>({...w,l:w.l+20})), title:'Increase Level (Brighter)' },
+          ].map(b => (
+            <button key={b.title} onClick={b.action} title={b.title} style={{
+              width:'32px', height:'32px', borderRadius:'8px',
+              background:'transparent', border:'none', cursor:'pointer',
+              color:C.textMd, fontSize:'16px', display:'flex', alignItems:'center', justifyContent:'center',
+            }}>
+              {b.icon}
+            </button>
+          ))}
+        </div>
+        
+        {measurements.length > 0 && (
+          <button onClick={() => setMeasurements([])} style={{ marginLeft:'8px', padding:'6px 12px', background:`${C.critical}20`, border:`1px solid ${C.critical}40`, color:C.critical, borderRadius:'8px', fontSize:'11px', fontWeight:'700', cursor:'pointer' }}>
+            Clear Measures
           </button>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -305,6 +379,22 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
         <button 
           onClick={async () => {
             if (!scan || actionBusy) return;
+            const specialist = prompt('Enter Specialist Email or ID (e.g., neurorad_expert_01):');
+            if (!specialist) return;
+            setActionBusy(true);
+            try {
+              await apiClient.post('/second-opinions', { scanId: scan.id, reviewerId: specialist, status: 'pending', reason: 'Challenging pathology' });
+              alert('Second opinion request sent successfully.');
+            } catch(e) { alert('Request failed. Ensure specialist ID is valid.'); }
+            finally { setActionBusy(false); }
+          }}
+          disabled={actionBusy}
+          style={{ padding:'8px', borderRadius:8, background:C.bg3, color:C.textHi, border:`1px solid ${C.border}`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
+          🤝 SECOND OPINION
+        </button>
+        <button 
+          onClick={async () => {
+            if (!scan || actionBusy) return;
             setActionBusy(true);
             try {
               await apiClient.post(`/ai/icd10/${scan.id}`);
@@ -359,8 +449,57 @@ function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
   const { lang } = useSettingsStore();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
-  
-  useEffect(() => { if (scan?.aiResult?.vlmImpression) setText(scan.aiResult.vlmImpression); }, [scan?.id]);
+  const [isListening, setIsListening] = useState(false);
+
+  // Load draft from localStorage or AI result
+  useEffect(() => { 
+    if (!scan) return;
+    const saved = localStorage.getItem(`report_draft:${scan.id}`);
+    if (saved) {
+      setText(saved);
+    } else if (scan?.aiResult?.vlmImpression) {
+      setText(scan.aiResult.vlmImpression); 
+    } else {
+      setText('');
+    }
+  }, [scan?.id]);
+
+  // Auto-save draft
+  useEffect(() => {
+    if (!scan || !text) return;
+    localStorage.setItem(`report_draft:${scan.id}`, text);
+  }, [text, scan?.id]);
+
+  const startScribe = async () => {
+    if (!('webkitSpeechRecognition' in window) && !('speechRecognition' in window)) {
+      alert('Speech recognition not supported in this browser.');
+      return;
+    }
+    
+    setIsListening(true);
+    const Recognition = (window as any).webkitSpeechRecognition || (window as any).speechRecognition;
+    const recognition = new Recognition();
+    
+    recognition.lang = lang === 'en' ? 'en-US' : lang === 'sw' ? 'sw-KE' : 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setText(t => t + (t ? '\n\n' : '') + `[ACI Scribe]: ${transcript}`);
+    };
+
+    recognition.onerror = (err: any) => {
+      console.error('[ACI] Speech Error:', err);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   const handleSignAndRelease = async () => {
     if (!scan || busy) return;
@@ -368,6 +507,7 @@ function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
     try {
       await apiClient.patch(`/scans/${scan.id}/status`, { status: 'COMPLETED' });
       await apiClient.post(`/reports`, { scanId: scan.id, content: text });
+      localStorage.removeItem(`report_draft:${scan.id}`); // Clear on success
       onSign();
       alert('Report signed and released successfully.');
     } catch (err) {
@@ -380,7 +520,66 @@ function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100%', padding:'12px' }}>
-      <div style={{ fontSize:'12px', fontWeight:'700', color:C.textHi, marginBottom:'8px' }}>Clinical Report</div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' }}>
+        <div style={{ fontSize:'12px', fontWeight:'700', color:C.textHi }}>Clinical Report</div>
+        <button 
+          onClick={startScribe}
+          disabled={isListening}
+          style={{ 
+            padding:'4px 10px', 
+            background: isListening ? C.critBg : `${C.brand}14`, 
+            border:`1px solid ${isListening ? C.critical : C.brand}30`, 
+            borderRadius:20, fontSize:10, fontWeight:700, 
+            color: isListening ? C.critical : C.brand, 
+            cursor: isListening ? 'wait' : 'pointer', 
+            display:'flex', alignItems:'center', gap:4 
+          }}>
+          {isListening ? (
+            <>
+              <span style={{ width:6, height:6, borderRadius:'50%', background:C.critical, animation:'pulse 1s infinite' }} />
+              Listening...
+            </>
+          ) : '🎙 Ambient Scribe'}
+          <style>{`@keyframes pulse{0%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0.5}100%{transform:scale(1);opacity:1}}`}</style>
+        </button>
+      </div>
+
+      {/* Multimodal Clinical Context Panel (FHIR) */}
+      <div style={{ padding:10, background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, marginBottom:12 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+          <div style={{ fontSize:10, fontWeight:700, color:C.textLo, textTransform:'uppercase' }}>FHIR Multimodal Context</div>
+          {scan?.aiResult?.clinicalContext && <span style={{ fontSize:8, color:C.normal, fontWeight:700 }}>● CONNECTED</span>}
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+          <div>
+            <div style={{ fontSize:9, color:C.textLo }}>RELEVANT LABS</div>
+            <div style={{ fontSize:11, color:C.textHi, marginTop:2, whiteSpace:'pre-wrap' }}>
+              {scan?.aiResult?.clinicalContext?.split('|')?.[1]?.replace('[RECENT_LABS]: ', '').trim() || 'No recent labs available.'}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize:9, color:C.textLo }}>PATIENT HISTORY</div>
+            <div style={{ fontSize:11, color:C.textHi, marginTop:2, whiteSpace:'pre-wrap' }}>
+              {scan?.aiResult?.clinicalContext?.split('|')?.[0]?.replace('[HISTORY]: ', '').trim() || 'No history recorded.'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Longitudinal Progression Analysis (Feature 8) */}
+      <div style={{ padding:10, background:`${C.info}10`, border:`1px solid ${C.info}30`, borderRadius:10, marginBottom:12 }}>
+        <div style={{ fontSize:10, fontWeight:700, color:C.info, textTransform:'uppercase', marginBottom:6, display:'flex', alignItems:'center', gap:4 }}>
+          <span style={{ fontSize:12 }}>⏳</span> Longitudinal Progression
+        </div>
+        <div style={{ fontSize:11, color:C.textHi, lineHeight:1.4 }}>
+          {scan?.aiResult?.longitudinalContext?.includes('[PRIOR SCAN]') ? (
+            <>
+              <div style={{ fontWeight:700, color:C.textMd, fontSize:9, marginBottom:2 }}>MOST RECENT PRIOR: {new Date(scan.aiResult.longitudinalContext.split('|')[0].replace('[PRIOR SCAN]: ', '')).toLocaleDateString()}</div>
+              <div style={{ fontSize:11 }}>{scan.aiResult.longitudinalContext.split('|')[2]?.replace('[IMPRESSION]: ', '') || 'No impression recorded in prior.'}</div>
+            </>
+          ) : 'Baseline scan. No priors found for longitudinal comparison.'}
+        </div>
+      </div>
       <textarea
         value={text}
         onChange={e => setText(e.target.value)}
@@ -404,7 +603,15 @@ function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
 }
 
 // ── MAIN COMPONENT ─────────────────────────────────────────────
-export function RadiologistWorkspace() {
+export function RadiologistWorkspace({ onNavigate }: { onNavigate: (p:string)=>void }) {
+  return (
+    <ErrorBoundary name="Radiologist Workspace">
+      <WorkspaceContent onNavigate={onNavigate} />
+    </ErrorBoundary>
+  );
+}
+
+function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
   const { user } = useAuthStore();
   const { lang } = useSettingsStore();
   const { scans, fetchWorklist } = useScanStore();

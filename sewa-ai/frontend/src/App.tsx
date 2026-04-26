@@ -25,7 +25,6 @@ import { HospitalAdminDashboard }    from './pages/admin/HospitalAdminDashboard'
 import { AIPerformanceDashboard }    from './pages/admin/AIPerformanceDashboard';
 import { PopulationHealthDashboard } from './pages/admin/PopulationHealthDashboard';
 import { SuperAdminDashboard }       from './pages/admin/SuperAdminDashboard';
-import { AIMonitoringDashboard }     from './pages/ai-monitoring/AIMonitoringDashboard';
 import { ComplianceDashboard }       from './pages/compliance/ComplianceDashboard';
 import { BillingDashboard }          from './pages/billing/BillingDashboard';
 import { OnboardingWizard }          from './pages/onboarding/OnboardingWizard';
@@ -88,7 +87,6 @@ const ADMIN_NAV = [
   { id:'overview',          labelKey:'overview' as TranslationKey,           icon:<LayoutDashboard size={16}/> },
   { id:'ai-performance',    labelKey:'aiPerformance' as TranslationKey,      icon:<Brain size={16}/> },
   { id:'population-health', labelKey:'populationHealth' as TranslationKey,   icon:<Map size={16}/> },
-  { id:'ai-monitoring',     labelKey:'aiMonitoring' as TranslationKey,       icon:<Activity size={16}/> },
   { id:'appointments',      labelKey:'appointments' as TranslationKey,    icon:<Calendar size={16}/> },
   { id:'compliance',        labelKey:'compliance' as TranslationKey,         icon:<Lock size={16}/> },
   { id:'billing',           labelKey:'billing' as TranslationKey,            icon:<CreditCard size={16}/> },
@@ -98,7 +96,6 @@ const ADMIN_NAV = [
 
 const SUPER_NAV = [
   { id:'platform',       labelKey:'platform' as TranslationKey,       icon:<LayoutDashboard size={16}/> },
-  { id:'ai-monitoring',  labelKey:'aiMonitoring' as TranslationKey,   icon:<Activity size={16}/> },
   { id:'ai-performance', labelKey:'aiPerformance' as TranslationKey,  icon:<Brain size={16}/> },
   { id:'compliance',     labelKey:'compliance' as TranslationKey,     icon:<Lock size={16}/> },
   { id:'billing',        labelKey:'billing' as TranslationKey,        icon:<CreditCard size={16}/> },
@@ -362,7 +359,6 @@ export default function App() {
           {adminPage === 'overview'          && <HospitalAdminDashboard />}
           {adminPage === 'ai-performance'    && <AIPerformanceDashboard />}
           {adminPage === 'population-health' && <PopulationHealthDashboard />}
-          {adminPage === 'ai-monitoring'     && <AIMonitoringDashboard />}
           {adminPage === 'appointments'      && <AppointmentsPage />}
           {adminPage === 'compliance'        && <ComplianceDashboard />}
           {adminPage === 'billing'           && <BillingDashboard />}
@@ -384,7 +380,6 @@ export default function App() {
         <div style={{ flex:1, overflowY:'auto' }}>
           <ErrorBoundary name="SuperAdmin Dashboard">
             {superPage === 'platform'       && <SuperAdminDashboard />}
-            {superPage === 'ai-monitoring'  && <AIMonitoringDashboard />}
             {superPage === 'ai-performance' && <AIPerformanceDashboard />}
             {superPage === 'compliance'     && <ComplianceDashboard />}
             {superPage === 'billing'        && <BillingDashboard />}

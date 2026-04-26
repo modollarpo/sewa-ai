@@ -253,7 +253,7 @@ const RIGHTS = [
             <h2 style={{ ...h2, fontSize:16 }}>13. Contact & Complaints</h2>
             <p style={{ ...p, fontSize:12, margin:'0 0 16px' }}>For any privacy questions, data subject requests, or concerns, contact our Data Protection Officer:</p>
             <div className="contact-split" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-              {[['DPO Email','dpo@sewaxai.health'],['Postal','SEWA AI — a Storegrill Inc Ltd company, London EC2A 4BX'],['ICO (UK)','ico.org.uk · 0303 123 1113'],['CNIL (EU)','cnil.fr (French supervisory authority)']].map(([l,v]) => (
+              {[['DPO Email','dpo@sewaxai.health'],['Postal','SEWA AI — a Storegrill Inc Ltd company, Coventry CV3 2FP'],['ICO (UK)','ico.org.uk · 0303 123 1113'],['CNIL (EU)','cnil.fr (French supervisory authority)']].map(([l,v]) => (
                 <div key={l} style={{ padding:'9px 12px', background:C.bg3, borderRadius:8 }}>
                   <div style={{ fontSize:9, color:C.textLo, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>{l}</div>
                   <div style={{ fontSize:12, color:C.textHi, marginTop:3 }}>{v}</div>

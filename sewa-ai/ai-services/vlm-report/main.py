@@ -117,7 +117,14 @@ async def generate_report(req: VLMReportRequest) -> VLMReportResponse:
         age_sex = f"{req.patient_age}{req.patient_sex}" if req.patient_age else "adult"
 
         # Build findings section
-        findings = f"""{req.ai_finding} identified at {req.location or req.body_part + ' region'}.
+        is_normal = req.ai_finding.lower() in ["normal", "no acute finding", "unremarkable"]
+        
+        if is_normal:
+            findings_header = f"No acute {req.modality} abnormalities identified within the {req.body_part.lower()}."
+        else:
+            findings_header = f"{req.ai_finding} identified at {req.location or req.body_part + ' region'}."
+
+        findings = f"""{findings_header}
 
 AI Triage Engine (SEWA AI v2.4.1) detected this finding with {req.confidence*100:.1f}% confidence.
 Urgency classification: {req.urgency}.

@@ -13,12 +13,18 @@ const C = {
 export function DevelopersPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
   return (
     <div style={{ background:C.bg0, minHeight:'100vh', fontFamily:C.F }}>
+      <style>{`
+        @media (max-width: 800px) {
+          .dev-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .hero-title { font-size: 36px !important; }
+        }
+      `}</style>
       <PublicNav activePage="solutions" onNavigate={onNavigate} />
 
       {/* Hero */}
       <section style={{ padding:'120px 24px 80px', background:`linear-gradient(180deg,${C.bg1},${C.bg0})` }}>
         <div style={{ maxWidth:900, margin:'0 auto' }}>
-          <h1 style={{ fontSize:56, fontWeight:900, color:C.textHi, margin:'0 0 20px', letterSpacing:'-2px', lineHeight:1.1 }}>
+          <h1 className="hero-title" style={{ fontSize:56, fontWeight:900, color:C.textHi, margin:'0 0 20px', letterSpacing:'-2px', lineHeight:1.1 }}>
             Built for interoperability.
           </h1>
           <p style={{ fontSize:18, color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
@@ -28,7 +34,7 @@ export function DevelopersPage({ onNavigate }: { onNavigate:(p:string)=>void }) 
       </section>
 
       {/* API Overview */}
-      <section style={{ maxWidth:1100, margin:'0 auto', padding:'0 24px 80px', display:'grid', gridTemplateColumns:'1fr 1.2fr', gap:40 }}>
+      <section className="dev-grid" style={{ maxWidth:1100, margin:'0 auto', padding:'0 24px 80px', display:'grid', gridTemplateColumns:'1fr 1.2fr', gap:40 }}>
         <div>
            <h2 style={{ fontSize:32, fontWeight:800, color:C.textHi, marginBottom:24 }}>Unified Engine API</h2>
            <div style={{ display:'flex', flexDirection:'column', gap:16, marginBottom:32 }}>

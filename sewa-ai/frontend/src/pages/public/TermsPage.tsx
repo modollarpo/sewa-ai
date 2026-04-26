@@ -110,8 +110,8 @@ export function TermsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
           .toc-sidebar { 
             position: sticky !important; 
             top: 64px !important;
-            margin: 0 -24px 32px;
-            padding: 12px 24px !important;
+            margin: 0 0 32px;
+            padding: 12px 0 !important;
             background: ${C.bg1};
             border-bottom: 1px solid ${C.border}; 
             display: flex !important; 

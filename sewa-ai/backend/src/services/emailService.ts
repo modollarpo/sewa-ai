@@ -1,11 +1,10 @@
-// SEWA AI — src/services/emailService.ts
-// Azure Communication Services (ACS) email with clinical alert templates
 import { EmailClient } from '@azure/communication-email';
+import { config } from '../config/env';
 
-const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING || '';
+const connectionString = config.AZURE_COMMUNICATION_CONNECTION_STRING || '';
 const emailClient = connectionString ? new EmailClient(connectionString) : null;
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'info@sewaxai.health';
+const FROM_EMAIL = config.EMAIL_FROM || 'info@sewaxai.health';
 const FROM_NAME  = 'SEWA AI Clinical';
 
 interface EmailPayload {
@@ -23,19 +22,30 @@ const TEMPLATES: Record<string, (d: any) => string> = {
         <p><strong>AI Confidence:</strong> ${Math.round(d.confidence * 100)}%</p>
         <p><strong>Door-to-Alert:</strong> ${d.doorToAlertMs}ms</p>
         <p><strong>Scan ID:</strong> ${d.scanId}</p>
-        <a href="https://app.sewaxai.health/scans/${d.scanId}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:16px">Review Now →</a>
+        <a href="${config.FRONTEND_URL}/scans/${d.scanId}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:16px">Review Now →</a>
       </div>
-      <div style="padding:16px 24px;border-top:1px solid #1A3028;font-size:11px;color:#5E9488">
-        © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
-      </div>
+    </div>`,
+  'forgot_password': (d) => `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px;background:#f9fafb;border-radius:12px">
+      <h2>Reset your SEWA AI password</h2>
+      <p>Hello ${d.firstName || 'there'},</p>
+      <p>We received a request to reset your password. Click the button below to choose a new one. This link expires in 1 hour.</p>
+      <a href="${d.resetLink}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Reset Password →</a>
+      <p style="font-size:12px;color:#666;margin-top:24px">If you didn't request this, you can safely ignore this email.</p>
+    </div>`,
+  'verify_email': (d) => `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px;background:#f9fafb;border-radius:12px">
+      <h2>Verify your clinical account</h2>
+      <p>Hello ${d.firstName || 'there'},</p>
+      <p>Please verify your email address to activate your SEWA AI clinical dashboard access.</p>
+      <a href="${d.verifyLink}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Verify Email →</a>
     </div>`,
   'report-ready': (d) => `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <h2>Your SEWA AI Report is Ready</h2>
       <p>Dear ${d.patientName},</p>
       <p>Your ${d.modality} ${d.bodyPart} scan report has been reviewed and signed by a qualified radiologist.</p>
-      <a href="https://app.sewaxai.health/patient/reports" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none">View Report →</a>
-      <p style="font-size:11px;color:#888;margin-top:24px">© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).</p>
+      <a href="${config.FRONTEND_URL}/portal/scans" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none">View Report →</a>
     </div>`,
   'welcome': (d) => `<h2>Welcome to SEWA AI, ${d.name}</h2><p>Your account is ready. <a href="${d.loginUrl}">Sign in →</a></p>`,
 };

@@ -232,6 +232,32 @@ export async function searchFHIRDiagnosticReports(patientFhirId: string): Promis
   }
 }
 
+// ── Search Conditions (History) ───────────────────────────────────
+export async function searchFHIRConditions(patientFhirId: string): Promise<any> {
+  if (!fhirEnabled()) return { resourceType: 'Bundle', type: 'searchset', total: 0, entry: [] };
+  try {
+    const token = await getFHIRToken();
+    const res = await client().get(`/Condition?subject=Patient/${patientFhirId}`, { headers: buildHeaders(token) });
+    return res.data;
+  } catch (err: any) {
+    logger.warn(`[FHIR] Condition search failed: ${err.message}`);
+    return { resourceType: 'Bundle', type: 'searchset', total: 0, entry: [] };
+  }
+}
+
+// ── Search Observations (Labs) ────────────────────────────────────
+export async function searchFHIRObservations(patientFhirId: string, category: string = 'vital-signs,laboratory'): Promise<any> {
+  if (!fhirEnabled()) return { resourceType: 'Bundle', type: 'searchset', total: 0, entry: [] };
+  try {
+    const token = await getFHIRToken();
+    const res = await client().get(`/Observation?subject=Patient/${patientFhirId}&category=${category}`, { headers: buildHeaders(token) });
+    return res.data;
+  } catch (err: any) {
+    logger.warn(`[FX] Observation search failed: ${err.message}`);
+    return { resourceType: 'Bundle', type: 'searchset', total: 0, entry: [] };
+  }
+}
+
 // ── Practitioner Mapping ──────────────────────────────────────────
 export async function getFHIRPractitioner(userId: string): Promise<any | null> {
   const user = await prisma.user.findUnique({ where: { id: userId } });

@@ -164,12 +164,23 @@ export function OnboardingWizard() {
 
   const runBenchmark = async () => {
     setBenchmarkRunning(true); setBenchmarkProgress(0);
-    const interval = setInterval(() => {
-      setBenchmarkProgress(p => {
-        if (p >= 100) { clearInterval(interval); setBenchmarkRunning(false); update({ benchmarkComplete:true, benchmarkAUC:0.951, benchmarkLatency:1.3 }); return 100; }
-        return p + 2;
+    const interval = setInterval(() => setBenchmarkProgress(p => Math.min(95, p + 2)), 100);
+    
+    try {
+      const res = await apiClient.post('/onboarding/benchmark', { region: data.region });
+      clearInterval(interval);
+      setBenchmarkProgress(100);
+      setBenchmarkRunning(false);
+      update({ 
+        benchmarkComplete: true, 
+        benchmarkAUC: res.data.auc, 
+        benchmarkLatency: res.data.latency 
       });
-    }, 80);
+    } catch (err) {
+      clearInterval(interval);
+      setBenchmarkRunning(false);
+      alert('Benchmark failed. Resource allocation error.');
+    }
   };
 
   const currentStep = STEPS[step];

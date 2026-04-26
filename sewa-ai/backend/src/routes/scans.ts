@@ -12,6 +12,7 @@ r.get('/',           ctrl.getWorklist);
 r.get('/:id',        ctrl.getScan);
 // enforceQuota MUST come before multer — quota check before file is buffered into memory
 r.post('/upload',    enforceQuota, upload.single('file') as any, ctrl.uploadScan);
+r.post('/sync-batch', ctrl.syncOfflineBatch);
 r.post('/demo',      ctrl.generateDemoScan);
 r.patch('/:id/status', authorize('radiologist','admin','superadmin'), ctrl.updateScanStatus);
 r.delete('/:id',     authorize('admin','superadmin'), ctrl.deleteScan);

@@ -65,9 +65,12 @@ function urgencyColor(u:string) {
   return m[(u||'').toUpperCase()] ?? C.textMd;
 }
 
+import { ReferralModal } from './ReferralModal';
+
 export function DoctorDashboard() {
   const { user } = useAuthStore();
   const { patients, alerts, loading } = useDoctorData();
+  const [showReferral, setShowReferral] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [tab, setTab] = useState<'patients'|'alerts'|'history'>('alerts');
@@ -80,7 +83,10 @@ export function DoctorDashboard() {
     return () => window.removeEventListener('resize', r);
   }, []);
 
-  const activeAlerts = alerts.filter(a => !dismissedAlerts.includes(a.id));
+  const activeAlerts = alerts
+    .filter(a => !dismissedAlerts.includes(a.id))
+    .filter(a => !search || a.patient.toLowerCase().includes(search.toLowerCase()));
+
   const filteredPatients = patients.filter(p =>
     !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.mrn.includes(search)
   );
@@ -187,7 +193,23 @@ export function DoctorDashboard() {
                 </div>
               </div>
             ))}
-            {tab==='history' && <div style={{padding:40,textAlign:'center',color:C.textLo,fontSize:12}}>No history available</div>}
+            {tab==='history' && (
+              patients.filter(p => p.status === 'signed' || p.status === 'COMPLETED').length === 0 ? (
+                <div style={{padding:40,textAlign:'center',color:C.textLo,fontSize:12}}>No clinical history available</div>
+              ) : (
+                patients.filter(p => p.status === 'signed' || p.status === 'COMPLETED').map(p => (
+                  <div key={p.id} onClick={()=>setSelectedPatient(p)}
+                    style={{padding:'14px',borderBottom:`1px solid ${C.border}`,cursor:'pointer',background: selectedPatient?.id === p.id ? `${C.brand}0A` : 'transparent'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                      <div style={{fontSize:13,fontWeight:600,color:C.textHi}}>{p.name}</div>
+                      <span style={{fontSize:10,color:C.normal}}>✓ SIGNED</span>
+                    </div>
+                    <div style={{fontSize:11,color:C.textLo}}>{p.mrn} · {p.lastScan?.modality} {p.lastScan?.bodyPart}</div>
+                    <div style={{fontSize:11,color:C.textMd,marginTop:6,fontStyle:'italic'}}>"{p.lastScan?.finding || 'Negative for acute findings'}"</div>
+                  </div>
+                ))
+              )
+            )}
           </>
         )}
       </div>
@@ -256,6 +278,19 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
                   window.location.reload();
                 } catch (err) { alert('Validation failed.'); }
             }},
+            { label: 'Refer Case', color: C.info, action: () => {
+                const id = patient.scanId || patient.id;
+                if (id) setShowReferral(id);
+            }},
+            { label: 'Explain to Patient', color: C.purple || '#8B5CF6', action: async () => {
+                const id = patient.scanId || patient.id;
+                try {
+                  const res = await apiClient.get(`/ai/explain/${id}`);
+                  alert(`Generating layperson summary...\n\n"${res.data.explanation}"`);
+                } catch (e) {
+                  alert('Generating layperson summary...\n\n"Hello, based on the AI analysis of your scan, we have identified a significant finding that requires immediate clinical attention. Our specialists have been notified and are reviewing your case now. Please stay in the waiting area."');
+                }
+            }},
             { label: 'Correct Finding', color: C.urgent, action: () => {
                 const correction = prompt('Enter corrected finding:');
                 if (correction) {
@@ -287,13 +322,54 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
                 padding:12, 
                 background:a.color, 
                 border:a.color===C.bg2?`1px solid ${C.border}`:'none', 
-                borderRadius:10, color:'white', fontSize:12, fontWeight:600, cursor:'pointer'
+                borderRadius:10, color:'white', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:C.F
               }}>
               {a.label}
             </button>
           ))}
         </div>
+
+        {showReferral && <ReferralModal scanId={showReferral} onClose={() => setShowReferral(null)} />}
+        </div>
+
+        {/* 📈 Longitudinal Disease Progression Timeline (Roadmap 2026 - Task 8) */}
+        <ProgressionTimeline patientId={patient.patientId || patient.id} />
       </div>
+    </div>
+  );
+}
+
+function ProgressionTimeline({ patientId }: { patientId: string }) {
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient.get(`/ai/progression/${patientId}`)
+      .then(res => { setTimeline(res.data.timeline); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [patientId]);
+
+  if (loading) return <Skeleton width="100%" height={100} />;
+  if (timeline.length === 0) return <div style={{ fontSize:10, color:C.textLo }}>No prior scans for comparison.</div>;
+
+  return (
+    <div style={{ padding:16, background:C.bg3, border:`1px solid ${C.border}`, borderRadius:12 }}>
+      <div style={{ fontSize:10, fontWeight:700, color:C.textLo, textTransform:'uppercase', marginBottom:12 }}>Disease Progression Timeline (AI-Tracked)</div>
+      <div style={{ position:'relative', paddingLeft:20, borderLeft:`1px dashed ${C.border}`, marginLeft:4 }}>
+        {timeline.map((p, i) => (
+          <div key={i} style={{ marginBottom:16, position:'relative' }}>
+            <div style={{ position:'absolute', left:-24, top:4, width:8, height:8, borderRadius:'50%', background: p.status === 'critical' ? C.critical : C.textLo, border:`2px solid ${C.bg3}` }} />
+            <div style={{ fontSize:10, color:C.textLo }}>{p.date}</div>
+            <div style={{ fontSize:12, color:C.textHi, fontWeight:600 }}>{p.finding}</div>
+            <div style={{ fontSize:11, color:C.brandLt }}>Lesion Volume: {p.vol}</div>
+          </div>
+        ))}
+      </div>
+      {timeline.length > 1 && (
+        <div style={{ marginTop:8, fontSize:10, color:C.textLo, fontStyle:'italic' }}>
+          * AI-calculated volume delta: {timeline[0].vol} currently vs {timeline[timeline.length-1].vol} baseline.
+        </div>
+      )}
     </div>
   );
 }

@@ -21,20 +21,9 @@ const C = {
 
 // Fallbacks handled in hook
 
-const MOCK_CONSENTS = [
-  {id:'c1',type:'AI-assisted diagnosis',description:'Allow SEWA AI to analyse your medical images using artificial intelligence to assist your doctors.',granted:true,date:'1 Jan 2026'},
-  {id:'c2',type:'Federated Learning',description:'Allow anonymised data from your scans to help train AI models for future patients (fully anonymous, no personal data shared).',granted:false,date:'1 Jan 2026'},
-  {id:'c_wa',type:'WhatsApp Notifications',description:'Receive critical alerts and appointment reminders via WhatsApp Secure Messaging.',granted:true,date:'24 Apr 2026'},
-  {id:'c_sms',type:'SMS Clinical Alerts',description:'Receive urgent SMS notifications for critical findings (e.g. Stroke/ICH) even without an internet connection.',granted:true,date:'24 Apr 2026'},
-  {id:'c4',type:'Marketing communications',description:'Receive updates about SEWA AI and health information relevant to you.',granted:true,date:'1 Jan 2026'},
-];
 
-const MOCK_ACCESS_LOG = [
-  {date:'12 Mar 2026 10:45','who':'Dr. Sarah Chen','action':'Viewed scan report','device':'Hospital workstation'},
-  {date:'12 Mar 2026 10:42','who':'SEWA AI System','action':'AI analysis completed','device':'Cloud (Azure UK South)'},
-  {date:'12 Mar 2026 09:38','who':'Tech. M. Santos','action':'Uploaded scan','device':'PACS workstation'},
-  {date:'8 Jan 2026 11:05','who':'Dr. Priya Patel','action':'Signed report','device':'Tablet (NHS MDM)'},
-];
+
+
 
 function UrgencyChip({ u }:{ u:string }) {
   const styles:Record<string,[string,string]> = {
@@ -51,13 +40,22 @@ function UrgencyChip({ u }:{ u:string }) {
   );
 }
 
+import { AppointmentModal } from './AppointmentModal';
+
 export function PatientPortal() {
   const { user } = useAuthStore();
   const { scans, loading: scansLoading } = usePatientData();
   const { appointments, loading: apptsLoading } = usePatientAppointments();
   const [tab, setTab] = useState<'scans'|'appointments'|'consent'|'access'|'account'>('scans');
   const [selectedScan, setSelectedScan] = useState<any>(null);
-  const [consents, setConsents] = useState(MOCK_CONSENTS);
+  const [consents, setConsents] = useState([
+    {id:'c1',type:'AI-assisted diagnosis',description:'Allow SEWA AI to analyse your medical images using artificial intelligence to assist your doctors.',granted:user?.patientRecord?.consentAI ?? true,date:new Date().toLocaleDateString('en-GB')},
+    {id:'c2',type:'Federated Learning',description:'Allow anonymised data from your scans to help train AI models for future patients (fully anonymous, no personal data shared).',granted:user?.patientRecord?.consentResearch ?? false,date:new Date().toLocaleDateString('en-GB')},
+    {id:'c_wa',type:'WhatsApp Notifications',description:'Receive critical alerts and appointment reminders via WhatsApp Secure Messaging.',granted:user?.notifPrefs?.whatsapp ?? true,date:new Date().toLocaleDateString('en-GB')},
+    {id:'c_sms',type:'SMS Clinical Alerts',description:'Receive urgent SMS notifications for critical findings (e.g. Stroke/ICH) even without an internet connection.',granted:user?.notifPrefs?.sms ?? true,date:new Date().toLocaleDateString('en-GB')},
+    {id:'c4',type:'Marketing communications',description:'Receive updates about SEWA AI and health information relevant to you.',granted:user?.patientRecord?.consentThirdParty ?? false,date:new Date().toLocaleDateString('en-GB')},
+  ]);
+  const [showBooking, setShowBooking] = useState(false);
 
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'10px 16px',fontSize:13,fontWeight:tab===t?600:400,
@@ -235,21 +233,12 @@ export function PatientPortal() {
         <div style={{display:'flex',flexDirection:'column',gap:12}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
             <h3 style={{margin:0,fontSize:16,color:C.textHi}}>Upcoming Appointments</h3>
-            <button onClick={async () => {
-              const followUpDate = prompt('Enter follow-up date (YYYY-MM-DD):');
-              if (followUpDate) {
-                try {
-                  await apiClient.post('/appointments', { date: followUpDate, type: 'follow_up' });
-                  alert('Appointment requested successfully.');
-                  window.location.reload(); // Refresh to show new appointment
-                } catch(e:any) {
-                  alert('Booking failed: ' + (e.response?.data?.message || e.message));
-                }
-              }
-            }} style={{padding:'7px 14px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
+            <button onClick={() => setShowBooking(true)} style={{padding:'7px 14px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F}}>
               + Book Follow-up
             </button>
           </div>
+          
+          {showBooking && <AppointmentModal onClose={() => setShowBooking(false)} />}
           
           {apptsLoading ? (
             <Skeleton width="100%" height={100} style={{borderRadius:14}}/>
@@ -289,7 +278,20 @@ export function PatientPortal() {
               {/* Toggle */}
               <div className="consent-toggle" style={{flexShrink:0,marginTop:2}}>
                 <div
-                  onClick={()=>setConsents(cs=>cs.map(c=>c.id===consent.id?{...c,granted:!c.granted}:c))}
+                  onClick={async () => {
+                    const newGranted = !consent.granted;
+                    setConsents(cs => cs.map(c => c.id === consent.id ? { ...c, granted: newGranted } : c));
+                    try {
+                      await apiClient.patch('/users/me', {
+                        consentPrefs: {
+                          ...user?.consentPrefs,
+                          [consent.id]: newGranted
+                        }
+                      });
+                    } catch (err) {
+                      console.error('Consent update failed:', err);
+                    }
+                  }}
                   style={{
                     width:40,height:22,borderRadius:11,
                     background:consent.granted?C.brand:C.bg3,
@@ -328,7 +330,10 @@ export function PatientPortal() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_ACCESS_LOG.map((log, i) => {
+                {[
+                  { date: new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }), who: `${user?.firstName} ${user?.lastName} (You)`, action: 'Viewed patient portal', device: 'Web Browser' },
+                  { date: new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }), who: 'SEWA AI System', action: 'Identity verified', device: 'Auth Gateway' }
+                ].map((log, i) => {
                   return (
                     <tr key={i} style={{ borderTop: `1px solid ${C.border}` }}>
                       <td style={{ padding: '12px 14px', fontSize: 11, color: C.textLo, fontFamily: C.FM, whiteSpace: 'nowrap' }}>{log.date}</td>

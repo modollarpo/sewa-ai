@@ -154,15 +154,15 @@ export function AIPerformanceDashboard() {
       {tab==='drift' && (
         <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:16}}>
-            <span style={{width:8,height:8,borderRadius:'50%',background:C.normal,boxShadow:`0 0 6px ${C.normal}`}}/>
-            <span style={{fontSize:12,fontWeight:700,color:C.textHi}}>No Drift Detected</span>
+            <span style={{width:8,height:8,borderRadius:'50%',background:drift.status==='stable'?C.normal:C.critical,boxShadow:`0 0 6px ${drift.status==='stable'?C.normal:C.critical}`}}/>
+            <span style={{fontSize:12,fontWeight:700,color:C.textHi}}>{drift.status==='stable'?'No Drift Detected':'⚠️ Drift Detected'}</span>
             <span style={{fontSize:11,color:C.textLo,fontFamily:C.F}}>Checked every 30 min via Cohen's Kappa + PSI</span>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
             {[
-              {label:"Cohen's Kappa",value:0.847,threshold:0.75,good:true},
-              {label:'PSI Score',value:0.02,threshold:0.1,good:true},
-              {label:'Covariate Shift',value:'None',threshold:'—',good:true},
+              {label:"Cohen's Kappa",value:drift.kappa.toFixed(3),threshold:0.75,good:drift.kappa > 0.75},
+              {label:'PSI Score',value:drift.psi.toFixed(3),threshold:0.1,good:drift.psi < 0.1},
+              {label:'Covariate Shift',value:drift.status==='stable'?'None':'Low',threshold:'—',good:drift.status==='stable'},
             ].map(m=>(
               <div key={m.label} style={{padding:'12px 14px',background:C.bg3,borderRadius:10}}>
                 <div style={{fontSize:10,color:C.textLo,marginBottom:6}}>{m.label}</div>
@@ -180,16 +180,16 @@ export function AIPerformanceDashboard() {
             ✓ Bias monitoring active across age groups, sex, and geographic region. Last audit: Q1 2026.
           </div>
           {[
-            {group:'By Age Group',metrics:[{label:'18-40',auc:0.943},{label:'41-60',auc:0.951},{label:'61-80',auc:0.949},{label:'80+',auc:0.932}]},
-            {group:'By Sex',metrics:[{label:'Male',auc:0.950},{label:'Female',auc:0.951},{label:'Other',auc:0.948}]},
-            {group:'By Region',metrics:[{label:'UK',auc:0.947},{label:'EU',auc:0.938},{label:'Africa',auc:0.933},{label:'US',auc:0.961}]},
+            {group:'By Age Group',metrics: bias.age || []},
+            {group:'By Sex',metrics: bias.sex || []},
+            {group:'By Region',metrics: bias.region || []},
           ].map(group=>(
             <div key={group.group} style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
               <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:12}}>{group.group}</div>
-              <div style={{display:'flex',gap:8}}>
-                {group.metrics.map(m=>(
-                  <div key={m.label} style={{flex:1,padding:'10px 8px',background:C.bg3,borderRadius:8,textAlign:'center'}}>
-                    <div style={{fontSize:9,color:C.textLo,marginBottom:4}}>{m.label}</div>
+              <div style={{display:'flex',gap:8, flexWrap:'wrap'}}>
+                {group.metrics.length === 0 ? <span style={{fontSize:11, color:C.textLo}}>Auditing...</span> : group.metrics.map((m:any)=>(
+                  <div key={m.group} style={{flex:'1 1 120px',padding:'10px 8px',background:C.bg3,borderRadius:8,textAlign:'center'}}>
+                    <div style={{fontSize:9,color:C.textLo,marginBottom:4}}>{m.group}</div>
                     <div style={{fontSize:14,fontWeight:700,color:m.auc>=0.93?C.normal:C.urgent,fontFamily:C.FM}}>{m.auc.toFixed(3)}</div>
                   </div>
                 ))}

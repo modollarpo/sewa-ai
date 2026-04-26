@@ -3,8 +3,10 @@
 import { SmsClient } from '@azure/communication-sms';
 import { logger } from '../utils/logger';
 
-const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING || '';
-const smsNumber = process.env.AZURE_COMMUNICATION_SMS_NUMBER || '';
+import { config } from '../config/env';
+
+const connectionString = config.AZURE_COMMUNICATION_CONNECTION_STRING || '';
+const smsNumber = config.AZURE_COMMUNICATION_SMS_NUMBER || '';
 const smsClient = connectionString ? new SmsClient(connectionString) : null;
 
 export const smsService = {
@@ -12,29 +14,35 @@ export const smsService = {
    * Send a single SMS via Azure Communication Services
    */
   async send(to: string, message: string): Promise<boolean> {
-    if (!smsClient || !smsNumber) {
-      logger.warn('[SMS] ACS not configured — skipping message');
-      return false;
-    }
-
     try {
-      const sendResults = await smsClient.send({
-        from: smsNumber,
-        to: [to],
-        message: message,
-      });
-
-      for (const res of sendResults) {
-        if (res.successful) {
-          logger.info(`[SMS] Delivered to ${to} (ID: ${res.messageId})`);
-        } else {
-          logger.error(`[SMS] Failed for ${to}: ${res.errorMessage}`);
-          return false;
+      // ── 1. Try Azure Communication Services ──
+      if (smsClient && smsNumber) {
+        const sendResults = await smsClient.send({
+          from: smsNumber, to: [to], message: message,
+        });
+        if (sendResults[0]?.successful) {
+          logger.info(`[SMS] Delivered via ACS to ${to}`);
+          return true;
         }
       }
-      return true;
+
+      // ── 2. Fallback to Twilio (Roadmap 2026 - Task 6) ──
+      if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+        const twilio = await import('twilio');
+        const client = twilio.default(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+        await client.messages.create({
+          body: message,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: to
+        });
+        logger.info(`[SMS] Delivered via Twilio to ${to}`);
+        return true;
+      }
+
+      logger.warn('[SMS] No providers available or configured');
+      return false;
     } catch (e: any) {
-      logger.error(`[SMS] Critical failure sending to ${to}:`, e.message);
+      logger.error(`[SMS] Provider failure for ${to}:`, e.message);
       return false;
     }
   },

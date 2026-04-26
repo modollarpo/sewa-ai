@@ -257,7 +257,10 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
                         </div>
                       </div>
                       {canAccess ? (
-                        <button style={{ padding:'6px 14px', background:`${cat.color}14`, border:`1px solid ${cat.color}30`, borderRadius:7, color:cat.color, fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:C.F, flexShrink:0 }}>
+                        <button onClick={() => {
+                          if (doc.format === 'PDF' && doc.name.includes('Whitepaper')) onNavigate('api-docs');
+                          else alert(`Accessing ${doc.name}...\n\nIn production, this triggers a secure, watermarked download tracked via your Partner ID.`);
+                        }} style={{ padding:'6px 14px', background:`${cat.color}14`, border:`1px solid ${cat.color}30`, borderRadius:7, color:cat.color, fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:C.F, flexShrink:0 }}>
                           Download
                         </button>
                       ) : (

@@ -154,23 +154,7 @@ export function TechnicianWorkspace() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  // Simulate progress for in-progress jobs
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setJobs(prev => prev.map(j => {
-        if (j.status === 'uploading' && j.progress < 100) {
-          const newProg = Math.min(100, j.progress + Math.random() * 8);
-          return { ...j, progress: newProg, status: newProg >= 100 ? 'processing' : 'uploading' };
-        }
-        if (j.status === 'processing' && j.progress < 100) {
-          const newProg = Math.min(100, j.progress + Math.random() * 5);
-          return { ...j, progress: newProg };
-        }
-        return j;
-      }));
-    }, 800);
-    return () => clearInterval(interval);
-  }, []);
+
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault(); setIsDragging(false);
@@ -575,10 +559,25 @@ export function TechnicianWorkspace() {
           {/* PACS STATUS TAB */}
           {tab==='pacs' && (
             <div style={{maxWidth:640,margin:'0 auto',display:'flex',flexDirection:'column',gap:12}}>
-              <div style={{padding:16,background:`${C.normal}0A`,borderRadius:12,border:`1px solid ${C.normal}30`,display:'flex',alignItems:'center',gap:8}}>
-                <span style={{width:8,height:8,borderRadius:'50%',background:C.normal,boxShadow:`0 0 8px ${C.normal}`,flexShrink:0}}/>
-                <span style={{fontSize:12,fontWeight:600,color:C.normal}}>PACS Connected</span>
-                <span style={{fontSize:11,color:C.textMd}}>Sectra PACS · Last sync 30s ago · {C.normal} healthy</span>
+              <div style={{padding:16,background:`${C.normal}0A`,borderRadius:12,border:`1px solid ${C.normal}30`,display:'flex',alignItems:'center',gap:8, justifyContent:'space-between'}}>
+                <div style={{display:'flex', alignItems:'center', gap:8}}>
+                  <span style={{width:8,height:8,borderRadius:'50%',background:C.normal,boxShadow:`0 0 8px ${C.normal}`,flexShrink:0}}/>
+                  <div>
+                    <div style={{fontSize:12,fontWeight:600,color:C.normal}}>PACS Connected</div>
+                    <div style={{fontSize:10,color:C.textMd}}>Sectra PACS · Last sync 30s ago</div>
+                  </div>
+                </div>
+                <button 
+                  onClick={async () => {
+                    const btn = document.activeElement as HTMLButtonElement;
+                    if (btn) btn.innerText = 'SYNCING...';
+                    await new Promise(r => setTimeout(r, 2000));
+                    alert('PACS Worklist synchronized successfully.');
+                    if (btn) btn.innerText = 'FORCE SYNC';
+                  }}
+                  style={{padding:'6px 12px', background:C.bg3, border:`1px solid ${C.border}`, borderRadius:8, color:C.textHi, fontSize:10, fontWeight:700, cursor:'pointer'}}>
+                  FORCE SYNC
+                </button>
               </div>
 
               {[

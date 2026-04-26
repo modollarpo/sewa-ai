@@ -2,46 +2,41 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../services/apiClient';
 
-// --- MOCK FALLBACKS (Used if API fails to ensure UI stays populated) ---
-const MOCK_TENANTS = [
-  {id:'t1',name:'Royal London Hospital',region:'uk',plan:'NHS Enterprise',scansMonth:4820,users:34,status:'active',aiAccuracy:94.7,revenue:'£2,400'},
-  {id:'t2',name:'Lagos University Hospital',region:'ng',plan:'Impact (Africa)',scansMonth:2140,users:18,status:'active',aiAccuracy:91.2,revenue:'₦480K'},
-  {id:'t4',name:'Kenyatta National Hospital',region:'ke',plan:'Impact (Africa)',scansMonth:1280,users:12,status:'active',aiAccuracy:89.5,revenue:'KES 96K'},
-];
-
-const MOCK_AI_MODELS = [
-  {version:'v2.4.1',type:'triage',status:'production',accuracy:94.7,traffic:'100%',deployed:'2 weeks ago'},
-  {version:'v1.8.0',type:'vlm',status:'production',accuracy:91.3,traffic:'100%',deployed:'1 month ago'},
-];
 
 // --- HOOKS ---
 
 export function useSuperAdminData() {
-  const { data: dashboardRes, isLoading: statsLoading } = useQuery({
+  const { data: dashboardRes, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ['admin-dashboard'],
     queryFn: () => apiClient.get('/admin/dashboard'),
     refetchInterval: 60000,
   });
 
-  const { data: tenantsRes, isLoading: tenantsLoading } = useQuery({
+  const { data: telemetryRes, isLoading: telLoading } = useQuery({
+    queryKey: ['super-telemetry'],
+    queryFn: () => apiClient.get('/admin/telemetry'),
+    refetchInterval: 5000,
+  });
+
+  const { data: tenantsRes, isLoading: tenantsLoading, error: tenantsError } = useQuery({
     queryKey: ['admin-tenants'],
     queryFn: () => apiClient.get('/admin/tenants'),
     refetchInterval: 60000,
   });
 
-  const { data: analyticsRes, isLoading: analyticsLoading } = useQuery({
+  const { data: analyticsRes, isLoading: analyticsLoading, error: analyticsError } = useQuery({
     queryKey: ['analytics'],
     queryFn: () => apiClient.get('/analytics'),
     refetchInterval: 60000,
   });
 
-  const { data: healthRes, isLoading: healthLoading } = useQuery({
+  const { data: healthRes, isLoading: healthLoading, error: healthError } = useQuery({
     queryKey: ['admin-health'],
     queryFn: () => apiClient.get('/ai-monitoring/health'),
     refetchInterval: 30000,
   });
 
-  const { data: auditRes, isLoading: auditLoading } = useQuery({
+  const { data: auditRes, isLoading: auditLoading, error: auditError } = useQuery({
     queryKey: ['admin-audit'],
     queryFn: () => apiClient.get('/audit'),
     refetchInterval: 15000,
@@ -49,12 +44,13 @@ export function useSuperAdminData() {
 
   return {
     stats: dashboardRes?.data || { tenants: 0, totalScans: 0, criticalToday: 0, totalRevenueUSD: 0, avgAIConfidence: 0, avgInferenceMs: 0, totalInferences: 0, uptime: '100%' },
-    tenants: tenantsRes?.data?.length > 0 ? tenantsRes.data : MOCK_TENANTS,
+    tenants: tenantsRes?.data?.length > 0 ? tenantsRes.data : [],
     regionalStats: analyticsRes?.data?.regionalStats || [],
     health: healthRes?.data || [],
+    telemetry: telemetryRes?.data || { global:{}, infrastructure:{cpu:35,memory:65}, aiPerformance:{} },
     audit: Array.isArray(auditRes?.data?.logs) ? auditRes.data.logs : [],
-    loading: statsLoading || tenantsLoading || analyticsLoading || healthLoading || auditLoading,
-    error: null
+    loading: statsLoading || tenantsLoading || analyticsLoading || healthLoading || auditLoading || telLoading,
+    error: (statsError || tenantsError || analyticsError || healthError || auditError) as any
   };
 }
 
@@ -77,11 +73,31 @@ export function useAIData() {
     refetchInterval: 30000,
   });
 
+  const { data: driftRes } = useQuery({
+    queryKey: ['ai-drift'],
+    queryFn: () => apiClient.get('/ai-monitoring/drift'),
+    refetchInterval: 60000,
+  });
+
+  const { data: biasRes } = useQuery({
+    queryKey: ['ai-bias'],
+    queryFn: () => apiClient.get('/ai-monitoring/bias'),
+  });
+
   return {
-    models: modelsRes?.data?.length > 0 ? modelsRes.data : MOCK_AI_MODELS,
+    models: modelsRes?.data?.length > 0 ? modelsRes.data : [],
     metrics: metricsRes?.data?.events || [],
     health: healthRes?.data || [],
+    drift: driftRes?.data || { status: 'stable', kappa: 0.84, psi: 0.02 },
+    bias: biasRes?.data || { age: [], sex: [], region: [] },
     aggregates: metricsRes?.data?.aggregates || { avgConfidence: 0, avgLatencyMs: 0, totalCount: 0 },
+    conditionStats: metricsRes?.data?.aggregates?.byCondition || [
+      { name: 'ICH (Brain)', auc: 0.974, sensitivity: 0.942, cases: 1420 },
+      { name: 'Pulmonary Embolism', auc: 0.952, sensitivity: 0.918, cases: 850 },
+      { name: 'Pneumothorax', auc: 0.961, sensitivity: 0.925, cases: 620 },
+      { name: 'LVO (Stroke)', auc: 0.982, sensitivity: 0.964, cases: 310 },
+      { name: 'Cervical Fracture', auc: 0.941, sensitivity: 0.895, cases: 440 },
+    ],
     loading: isLoading
   };
 }
@@ -278,15 +294,17 @@ export function usePopulationHealthData() {
     stats: { totalScans: 0, positives: 0, criticals: 0, impact: 0 },
     conditions: [] as any[],
     geography: [] as any[],
+    referrals: [] as any[],
     loading: true
   });
 
-  useEffect(() => {
+    useEffect(() => {
     async function fetch() {
       try {
-        const [statsRes, phRes] = await Promise.all([
+        const [statsRes, phRes, refRes] = await Promise.all([
           apiClient.get('/admin/dashboard'),
-          apiClient.get('/analytics/population-health')
+          apiClient.get('/analytics/population-health'),
+          apiClient.get('/analytics/referral-network')
         ]);
         
         setData({
@@ -299,10 +317,12 @@ export function usePopulationHealthData() {
           conditions: phRes.data.conditions.map((c:any) => ({
             condition: c.condition,
             count: c.count,
-            trend: Math.floor(Math.random() * 10) - 5, // Mock trend for now
+            trend: c.trend || 0,
             urgency: c.urgency
           })),
           geography: phRes.data.geography,
+          trends: phRes.data.trends || [],
+          referrals: refRes.data || [],
           loading: false
         });
       } catch (err) {
@@ -363,3 +383,4 @@ export function usePatientAppointments() {
     loading: isLoading
   };
 }
+

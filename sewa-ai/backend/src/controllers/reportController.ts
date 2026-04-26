@@ -101,6 +101,17 @@ export async function signReport(req: Request, res: Response, next: NextFunction
     // Notify patient (Feature 6)
     io.to(`tenant:${tenantId}`).emit('report:signed', { reportId: id, scanId: report.scanId });
 
+    // Send WhatsApp/SMS alert
+    if (report.scan.patient.user.phoneNumber) {
+      const { sendNotification } = await import('../services/notificationService');
+      await sendNotification({
+        to: report.scan.patient.user.phoneNumber,
+        priority: 'urgent',
+        subject: 'Your SEWA AI Report is Ready',
+        body: `Hello ${report.scan.patient.user.firstName}, your clinical report from ${report.scan.tenant.name} is now available in your patient portal. View it here: ${config.FRONTEND_URL}/portal/scans/${report.scanId}`
+      }).catch(e => logger.warn(`[Notify] Patient alert failed: ${e.message}`));
+    }
+
     await auditLog({ tenantId, userId, action: 'REPORT_SIGNED', entity: 'Report', entityId: id, metadata: { fhirId, hl7Id } });
     res.json({ report: signed, fhirDiagnosticReportId: fhirId, hl7OruMessageId: hl7Id });
   } catch (err) { next(err); }

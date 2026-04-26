@@ -3,10 +3,11 @@
 import axios from 'axios';
 export { triggerAITriage, runAIPipeline } from './aiOrchestrator';
 
-const VLM_URL = process.env.VLM_URL || 'http://sewa-vlm-report:8001';
-
+import { config } from '../config/env';
 import { prisma } from '../config/database';
 import { logger } from '../utils/logger';
+
+const VLM_URL = config.VLM_SERVICE_URL;
 
 export async function generateVLMReport(scanId: string, tenantId: string) {
   let impressionText = '';

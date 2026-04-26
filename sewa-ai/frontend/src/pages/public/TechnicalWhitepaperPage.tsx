@@ -33,9 +33,16 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
   const [email, setEmail]                 = useState('');
   const [gateSubmitted, setGateSubmitted] = useState(false);
 
-  const submitGate = () => {
+  const submitGate = async () => {
     if (!email.includes('@')) return;
     setGateSubmitted(true);
+    try {
+      await fetch('/api/v1/onboarding/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'whitepaper' })
+      });
+    } catch (e) { console.error('Lead capture failed'); }
     setTimeout(() => setEmailGate(false), 800);
   };
 
@@ -116,6 +123,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
         <div style={{ maxWidth:860, margin:'0 auto' }}>
           <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap' }}>
             <Tag label="Technical Whitepaper" color={C.brand} />
+            <Tag label="UK Patent Pending: GB2609706.3" color={C.amber} />
             <Tag label="Version 1.2" color={C.info} />
             <Tag label="March 2026" color={C.textLo} />
             <Tag label="HIPAA · GDPR · NHS DSPT · EU AI Act" color={C.normal} />

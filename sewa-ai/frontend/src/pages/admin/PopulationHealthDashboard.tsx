@@ -24,7 +24,7 @@ const POSTCODES = [
 ];
 
 export function PopulationHealthDashboard() {
-  const { stats, conditions, geography, loading } = usePopulationHealthData();
+  const { stats, conditions, geography, trends, loading } = usePopulationHealthData();
   const [tab, setTab] = useState<'burden'|'geography'|'trends'|'referrals'>('burden');
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'7px 13px',fontSize:11,fontWeight:tab===t?600:400,
@@ -167,14 +167,18 @@ export function PopulationHealthDashboard() {
         <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
           <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:16}}>12-Month Incidence Trends</div>
           <div style={{display:'flex',alignItems:'flex-end',gap:4,height:120,marginBottom:8}}>
-            {[42,38,45,51,48,56,62,58,67,71,68,74].map((v,i)=>(
+            {trends?.length > 0 ? trends.map((v:any,i:number)=>(
               <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
-                <div style={{width:'100%',height:`${(v/74)*100}%`,background:`linear-gradient(180deg,${C.critical},${C.urgent})`,borderRadius:'3px 3px 0 0',opacity:0.8}}/>
+                <div style={{width:'100%',height:`${Math.max(5, (v.count/Math.max(...trends.map((x:any)=>x.count)||1))*100)}%`,background:`linear-gradient(180deg,${C.critical},${C.urgent})`,borderRadius:'3px 3px 0 0',opacity:0.8}}/>
               </div>
+            )) : Array(12).fill(0).map((_,i)=>(
+              <div key={i} style={{flex:1,height:4,background:C.bg3,borderRadius:2}}/>
             ))}
           </div>
           <div style={{display:'flex',justifyContent:'space-between',marginBottom:16}}>
-            {['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'].map(m=>(
+            {trends?.length > 0 ? trends.map((v:any)=>(
+              <span key={v.month} style={{fontSize:9,color:C.textLo,fontFamily:C.FM}}>{v.month}</span>
+            )) : ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'].map(m=>(
               <span key={m} style={{fontSize:9,color:C.textLo,fontFamily:C.FM}}>{m}</span>
             ))}
           </div>
@@ -189,11 +193,9 @@ export function PopulationHealthDashboard() {
         <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
           <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:16}}>SEWA Referral Network</div>
           <div style={{display:'flex',flexDirection:'column',gap:10}}>
-            {[
-              {from:'Royal London Hospital',to:'The National Hospital for Neurology',count:28,type:'ICH/Stroke',time:'Avg 18 min'},
-              {from:'Royal London Hospital',to:'St Bartholomew\'s Hospital',count:14,type:'Cardiac',time:'Avg 22 min'},
-              {from:'Royal London Hospital',to:'Homerton University Hospital',count:9,type:'General',time:'Avg 35 min'},
-            ].map(r=>(
+            {referrals.length === 0 ? (
+              <div style={{padding:40,textAlign:'center',color:C.textLo}}>{loading?'Fetching network flows...':'No active referrals in this region.'}</div>
+            ) : referrals.map((r:any)=>(
               <div key={r.to} style={{padding:14,background:C.bg3,borderRadius:10,border:`1px solid ${C.border}`}}>
                 <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
                   <span style={{fontSize:11,color:C.textMd}}>{r.from}</span>

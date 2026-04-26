@@ -56,6 +56,7 @@ export const config = {
   PORT:         optionalInt('PORT', 5000),
   REGION:       optional('REGION', 'uk'),
   APP_URL:      optional('APP_URL', 'http://localhost:5000'),
+  FRONTEND_URL: optional('FRONTEND_URL', 'http://localhost:3000'),
   CORS_ORIGINS: (optional('CORS_ORIGINS', 'http://localhost:3000')).split(',').map(s => s.trim()),
   LOG_LEVEL:    optional('LOG_LEVEL', 'info'),
 

@@ -23,6 +23,8 @@ import { alertService } from './alertService';
 import { io } from '../index';
 import { AIResultSchema } from '../utils/validators';
 import { config } from '../config/env';
+import * as fhirService from './fhirService';
+import * as longitudinalService from './longitudinalService';
 
 // ── Service URLs — CPU-only endpoints (same pods, just no GPU flag needed) ──
 const TRIAGE_URL        = config.AI_SERVICE_URL;
@@ -88,7 +90,7 @@ async function safePOST<T>(
   url: string,
   data: Record<string, unknown>,
   cfg: { timeout: number },
-  retries = 1,
+  retries = 2,
 ): Promise<T> {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -96,10 +98,11 @@ async function safePOST<T>(
       return resp.data;
     } catch (err: any) {
       const status = (err as AxiosError).response?.status;
-      const isRetryable = status === 503 || err.code === 'ECONNABORTED' || err.code === 'ECONNRESET';
+      const isRetryable = status === 503 || status === 429 || err.code === 'ECONNABORTED' || err.code === 'ECONNRESET';
 
       if (isRetryable && attempt < retries) {
-        const delayMs = 200 * (attempt + 1);
+        // Exponential backoff: 300ms, 900ms
+        const delayMs = 300 * Math.pow(3, attempt);
         logger.warn(`[AI Orch] ${url} returned ${status ?? err.code} — retry ${attempt + 1}/${retries} in ${delayMs}ms`);
         await new Promise(r => setTimeout(r, delayMs));
         continue;
@@ -174,6 +177,36 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     const patientAge = scan.patient?.dateOfBirth ? _getAge(scan.patient.dateOfBirth) : null;
     const patientSex = (scan.patient as any)?.sex ?? null;
 
+    // ── 0. Fetch FHIR Clinical Context (Feature 7) ────────────────────────
+    let clinicalContext = '';
+    if (scan.patient?.fhirId) {
+      try {
+        const [conditions, labs] = await Promise.all([
+          fhirService.searchFHIRConditions(scan.patient.fhirId),
+          fhirService.searchFHIRObservations(scan.patient.fhirId)
+        ]);
+
+        const history = conditions.entry?.map((e: any) => e.resource.code?.text || e.resource.code?.coding?.[0]?.display).filter(Boolean).join(', ');
+        const recentLabs = labs.entry?.slice(0, 5).map((e: any) => {
+          const res = e.resource;
+          return `${res.code?.text || 'Lab'}: ${res.valueQuantity?.value}${res.valueQuantity?.unit || ''}`;
+        }).join(' · ');
+
+        clinicalContext = `[HISTORY]: ${history || 'None'} | [RECENT_LABS]: ${recentLabs || 'None'}`;
+        logger.info(`[AI Pipeline] FHIR Context: ${clinicalContext}`);
+      } catch (err: any) {
+        logger.warn(`[AI Pipeline] FHIR context fetch failed: ${err.message}`);
+      }
+    }
+
+    // ── 0.1 Fetch Longitudinal Context (Feature 8) ───────────────────────
+    let longitudinalContext = 'No prior scans for comparison.';
+    if (scan.patientId) {
+      const prior = await longitudinalService.findPriorScan(scan.patientId, scan.id, scan.modality, scan.bodyPart);
+      longitudinalContext = longitudinalService.formatLongitudinalPrompt(prior);
+      logger.info(`[AI Pipeline] Longitudinal: ${longitudinalContext}`);
+    }
+
     // ──────────────────────────────────────────────────────────────────────
     // STAGE 1: Triage ‖ Uncertainty (PARALLEL)
     //
@@ -246,6 +279,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           confidence:           triage.confidence,
           location:             (triage as any).location,
           shap_values:          triage.shapValues,
+          clinical_context:     clinicalContext,
+          longitudinal_context: longitudinalContext,
           region:               scan.tenant?.region ?? 'uk',
           language:             (scan.tenant as any)?.reportLanguage ?? 'en',
         },
@@ -316,6 +351,10 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           pipeline: { stage1ParallelMs: stage1Ms, backend: triage.backend },
         } as any,
         modelId: 'sewa-cpu-onnx-int8-v2',
+        clinicalContext,
+        longitudinalContext,
+        vlmFindings:   vlm.findings,
+        vlmImpression: vlm.impression,
       },
     });
 

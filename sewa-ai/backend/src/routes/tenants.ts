@@ -15,6 +15,20 @@ r.get('/me', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+r.get('/integrations/health', authorize('admin', 'superadmin'), async (req, res, next) => {
+  try {
+    const { checkFHIRHealth } = await import('../services/fhirService');
+    const { checkHL7Health }  = await import('../services/hl7Service');
+    
+    const [fhir, hl7] = await Promise.all([
+      checkFHIRHealth(),
+      checkHL7Health(),
+    ]);
+    
+    res.json({ fhir, hl7 });
+  } catch (err) { next(err); }
+});
+
 r.post('/', authorize('superadmin'), validate(TenantOnboardSchema), async (req, res, next) => {
   try {
     const t = await prisma.tenant.create({ data: req.body });

@@ -303,13 +303,27 @@ export function DownloadsPage({ onNavigate }: { onNavigate: (page: string) => vo
           </div>
         </section>
 
-        {/* Enterprise deployment */}
-        <section style={{ padding:32, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:16 }}>
+        {/* Enterprise & Africa deployment */}
+        <section style={{ padding:32, background:`linear-gradient(135deg,${C.bg2},${C.bg3})`, border:`1px solid ${C.border}`, borderRadius:16 }}>
           <div className="enterprise-split" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:32, alignItems:'center' }}>
             <div>
-              <h2 style={{ ...h2, fontSize:22, marginBottom:12 }}>Enterprise & MDM Deployment</h2>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'4px 12px', background:`${C.normal}14`, border:`1px solid ${C.normal}30`, borderRadius:20, marginBottom:16 }}>
+                <span style={{ fontSize:10, fontWeight:700, color:C.normal, letterSpacing:'0.1em' }}>AFRICA PROGRAMME</span>
+              </div>
+              <h2 style={{ ...h2, fontSize:22, marginBottom:12 }}>Edge Tablet Portal (Offline-First)</h2>
               <p style={{ ...p, marginBottom:16 }}>
-                Deploy SEWA AI through your MDM solution. Pre-configure FHIR endpoints and compliance policies.
+                Specifically designed for clinical environments in Sub-Saharan Africa. 
+                Full diagnostic capabilities with zero-latency INT8 inference, operating entirely without an active internet connection.
+              </p>
+              <button onClick={() => onNavigate('contact')} style={{ padding:'10px 20px', background:C.brand, border:'none', borderRadius:10, color:'white', fontWeight:700, fontSize:13, cursor:'pointer' }}>
+                Request Tablet Deployment
+              </button>
+            </div>
+            <div style={{ padding:20, background:C.bg2, borderRadius:14, border:`1px solid ${C.border}` }}>
+              <div style={{ fontSize:13, fontWeight:700, color:C.textHi, marginBottom:12 }}>MDM & Enterprise Control</div>
+              <p style={{ fontSize:12, color:C.textLo, lineHeight:1.6 }}>
+                Deploy SEWA AI through your MDM solution (InTune, MobileIron, Jamf). 
+                Pre-configure FHIR endpoints, DICOM gateway settings, and compliance policies across your entire fleet.
               </p>
             </div>
           </div>

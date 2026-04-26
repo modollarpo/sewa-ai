@@ -16,6 +16,9 @@ interface User {
   region: string;
   currency: string;
   language: string;
+  consentPrefs?: Record<string, boolean>;
+  notifPrefs?: { push: boolean; email: boolean; whatsapp: boolean; sms: boolean };
+  patientRecord?: { id: string; mrn: string; dateOfBirth: string; sex: string; consentAI: boolean; consentResearch: boolean; consentThirdParty: boolean };
 }
 
 interface RegisterPayload {
