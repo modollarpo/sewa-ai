@@ -226,6 +226,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           storage_url: scan.storageUrl,
           modality: scan.modality,
           body_part: scan.bodyPart,
+          clinical_context: clinicalContext,
         },
         SVC_TIMEOUT,
       ).catch((e: Error) => {

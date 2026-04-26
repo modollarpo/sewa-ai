@@ -57,13 +57,6 @@ export async function convertFromUSD(usdAmount: number, currency: string): Promi
   return convertFromGBP(gbpAmount, currency);
 }
 
-// Sync fallback for places that can't await
-export function convertFromUSDSync(usdAmount: number, currency: string): number {
-  const FX: Record<string, number> = {
-    GBP: 1, EUR: 1.18, USD: 1.27, NGN: 1905, KES: 164, ZAR: 23.8, GHS: 17.4, INR: 106, CAD: 1.73,
-  };
-  return Math.round(usdAmount / 1.27 * (FX[currency] ?? 1));
-}
 
 // ── Create Subscription ───────────────────────────────────────
 export async function createSubscription(tenantId: string, plan: string, region: string, currency: string) {

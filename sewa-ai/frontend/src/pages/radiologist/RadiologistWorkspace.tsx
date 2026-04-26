@@ -8,6 +8,7 @@ import { getTranslation } from '../../services/i18n';
 import { apiClient } from '../../services/apiClient';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
+import { VoiceDictation } from '../../components/ui/VoiceDictation';
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -454,7 +455,6 @@ function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
   const { lang } = useSettingsStore();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
-  const [isListening, setIsListening] = useState(false);
 
   // Load draft from localStorage or AI result
   useEffect(() => { 
@@ -475,35 +475,8 @@ function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
     localStorage.setItem(`report_draft:${scan.id}`, text);
   }, [text, scan?.id]);
 
-  const startScribe = async () => {
-    if (!('webkitSpeechRecognition' in window) && !('speechRecognition' in window)) {
-      alert('Speech recognition not supported in this browser.');
-      return;
-    }
-    
-    setIsListening(true);
-    const Recognition = (window as any).webkitSpeechRecognition || (window as any).speechRecognition;
-    const recognition = new Recognition();
-    
-    recognition.lang = lang === 'en' ? 'en-US' : lang === 'sw' ? 'sw-KE' : 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setText(t => t + (t ? '\n\n' : '') + `[ACI Scribe]: ${transcript}`);
-    };
-
-    recognition.onerror = (err: any) => {
-      console.error('[ACI] Speech Error:', err);
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
+  const handleTranscript = (transcript: string) => {
+    setText(t => t + (t ? '\n\n' : '') + `[ACI Scribe]: ${transcript}`);
   };
 
   const handleSignAndRelease = async () => {
@@ -527,26 +500,7 @@ function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
     <div style={{ display:'flex', flexDirection:'column', height:'100%', padding:'12px' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' }}>
         <div style={{ fontSize:'12px', fontWeight:'700', color:C.textHi }}>Clinical Report</div>
-        <button 
-          onClick={startScribe}
-          disabled={isListening}
-          style={{ 
-            padding:'4px 10px', 
-            background: isListening ? C.critBg : `${C.brand}14`, 
-            border:`1px solid ${isListening ? C.critical : C.brand}30`, 
-            borderRadius:20, fontSize:10, fontWeight:700, 
-            color: isListening ? C.critical : C.brand, 
-            cursor: isListening ? 'wait' : 'pointer', 
-            display:'flex', alignItems:'center', gap:4 
-          }}>
-          {isListening ? (
-            <>
-              <span style={{ width:6, height:6, borderRadius:'50%', background:C.critical, animation:'pulse 1s infinite' }} />
-              Listening...
-            </>
-          ) : '🎙 Ambient Scribe'}
-          <style>{`@keyframes pulse{0%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0.5}100%{transform:scale(1);opacity:1}}`}</style>
-        </button>
+        <VoiceDictation onTranscript={handleTranscript} lang={lang} />
       </div>
 
       {/* Multimodal Clinical Context Panel (FHIR) */}
@@ -733,8 +687,11 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
     <div style={{ display:'flex', height:'calc(100vh - 52px - 24px)', background:C.bg0, overflow:'hidden', fontFamily:C.fontBase }}>
       {/* Desktop Layout - Fluid & Responsive */}
       <div style={{ flex:'0 1 300px', minWidth:'240px', display:'flex', flexDirection:'column', background:C.bg1, borderRight:`1px solid ${C.border}` }}>
-        <div style={{ padding:'16px', borderBottom:`1px solid ${C.border}` }}>
+        <div style={{ padding:'16px', borderBottom:`1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize:'14px', fontWeight:'700', color:C.textHi }}>Worklist ({stats.total})</span>
+          <button onClick={() => onNavigate('training')} style={{ padding:'4px 8px', background:C.brand, color:'white', border:'none', borderRadius:4, fontSize:10, fontWeight:700, cursor:'pointer' }}>
+            🎓 Simulator
+          </button>
         </div>
         <div style={{ flex:1, overflowY:'auto' }}>
           {(scans || []).map(s => (

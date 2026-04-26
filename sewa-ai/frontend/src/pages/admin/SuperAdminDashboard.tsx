@@ -146,7 +146,7 @@ export function SuperAdminDashboard() {
             {t==='deployments'&&'🚀 Deployments'}
             {t==='compliance'&&'🔒 Compliance'}
             {t==='logs'&&'📋 Logs'}
-            {t==='edge'&&'📡 Edge'}
+            {t==='edge'&&'📡 Hardware Health'}
             {t==='federated'&&'🧠 Federated Learning'}
           </button>
         ))}
@@ -524,8 +524,8 @@ export function SuperAdminDashboard() {
           <div style={{padding:16,background:`${C.brand}10`,borderRadius:12,border:`1px solid ${C.brand}30`,display:'flex',alignItems:'center',gap:12}}>
             <span style={{fontSize:24}}>📡</span>
             <div>
-              <div style={{fontSize:14,fontWeight:700,color:C.textHi}}>Edge Infrastructure Management</div>
-              <div style={{fontSize:11,color:C.textMd}}>Deploy and monitor offline-first DICOM gateways at clinical sites.</div>
+              <div style={{fontSize:14,fontWeight:700,color:C.textHi}}>Edge Node Hardware Health</div>
+              <div style={{fontSize:11,color:C.textMd}}>Monitor local hardware metrics, heartbeats, and push quantised model updates over low-bandwidth connections.</div>
             </div>
           </div>
 
@@ -561,9 +561,9 @@ export function SuperAdminDashboard() {
 
             <div style={{display:'flex',flexDirection:'column',gap:12}}>
               {[
-                { id:'NODE-UK-01', location:'Coventry, UK', status:'ONLINE', load:42, temp:58, uptime:'14d 6h', version:'2.4.1' },
-                { id:'NODE-NG-04', location:'Lagos, NG', status:'ONLINE', load:18, temp:64, uptime:'3d 12h', version:'2.4.0' },
-                { id:'NODE-US-12', location:'Boston, US', status:'OFFLINE', load:0, temp:22, uptime:'0d 0h', version:'2.3.9' },
+                { id:'NODE-UK-01', location:'Coventry, UK', status:'ONLINE', load:42, temp:58, uptime:'14d 6h', version:'2.4.1', heartbeat:'2s ago', storage:'12%' },
+                { id:'NODE-NG-04', location:'Lagos, NG', status:'ONLINE', load:18, temp:64, uptime:'3d 12h', version:'2.4.0', heartbeat:'15s ago', storage:'45%' },
+                { id:'NODE-US-12', location:'Boston, US', status:'OFFLINE', load:0, temp:22, uptime:'0d 0h', version:'2.3.9', heartbeat:'3h ago', storage:'88%' },
               ].map(node => (
                 <div key={node.id} style={{padding:16,background:C.bg2,borderRadius:14,border:`1px solid ${node.status==='ONLINE'?C.border:C.critical}40`,position:'relative'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12}}>
@@ -571,12 +571,15 @@ export function SuperAdminDashboard() {
                       <div style={{fontSize:13,fontWeight:700,color:C.textHi}}>{node.id}</div>
                       <div style={{fontSize:10,color:C.textLo}}>{node.location}</div>
                     </div>
-                    <span style={{fontSize:8,fontWeight:800,color:node.status==='ONLINE'?C.normal:C.critical,padding:'2px 6px',background:node.status==='ONLINE'?`${C.normal}14`:`${C.critical}14`,borderRadius:10,border:`1px solid ${node.status==='ONLINE'?C.normal:C.critical}40`}}>
-                      ● {node.status}
-                    </span>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      <span style={{fontSize:9,color:C.textMd}}>Beat: {node.heartbeat}</span>
+                      <span style={{fontSize:8,fontWeight:800,color:node.status==='ONLINE'?C.normal:C.critical,padding:'2px 6px',background:node.status==='ONLINE'?`${C.normal}14`:`${C.critical}14`,borderRadius:10,border:`1px solid ${node.status==='ONLINE'?C.normal:C.critical}40`}}>
+                        ● {node.status}
+                      </span>
+                    </div>
                   </div>
 
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:12}}>
                     <div>
                       <div style={{fontSize:8,color:C.textLo,marginBottom:4}}>COMPUTE LOAD</div>
                       <div style={{height:3,background:C.bg4,borderRadius:2,overflow:'hidden',marginBottom:4}}>
@@ -588,11 +591,25 @@ export function SuperAdminDashboard() {
                       <div style={{fontSize:8,color:C.textLo,marginBottom:4}}>CORE TEMP</div>
                       <div style={{fontSize:10,fontWeight:700,color:node.temp>70?C.critical:C.textHi,fontFamily:C.FM}}>{node.temp}°C</div>
                     </div>
+                    <div>
+                      <div style={{fontSize:8,color:C.textLo,marginBottom:4}}>STORAGE</div>
+                      <div style={{height:3,background:C.bg4,borderRadius:2,overflow:'hidden',marginBottom:4}}>
+                        <div style={{width:node.storage,height:'100%',background:parseInt(node.storage)>80?C.critical:C.brand}}/>
+                      </div>
+                      <div style={{fontSize:10,fontWeight:700,color:C.textHi,fontFamily:C.FM}}>{node.storage}</div>
+                    </div>
                   </div>
 
-                  <div style={{display:'flex',justifyContent:'space-between',paddingTop:10,borderTop:`1px solid ${C.border}`,fontSize:9,color:C.textLo}}>
-                    <span>Uptime: {node.uptime}</span>
-                    <span>v{node.version}</span>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:10,borderTop:`1px solid ${C.border}`}}>
+                    <div style={{fontSize:9,color:C.textLo}}>
+                      <span style={{marginRight:12}}>Uptime: {node.uptime}</span>
+                      <span>v{node.version}</span>
+                    </div>
+                    <button 
+                      onClick={() => alert(`Initiating Starlink-optimized delta push to ${node.id}...`)}
+                      style={{padding:'4px 10px',background:C.bg3,border:`1px solid ${C.brand}50`,borderRadius:6,color:C.brand,fontSize:9,fontWeight:700,cursor:'pointer'}}>
+                      Push Update (Starlink-Opt)
+                    </button>
                   </div>
                 </div>
               ))}

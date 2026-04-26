@@ -148,7 +148,7 @@ r.get('/progression/:patientId', async (req, res, next) => {
       orderBy: { createdAt: 'desc' }
     });
 
-    const timeline = scans.map(s => ({
+    const timeline = scans.map((s: any) => ({
       date: s.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       finding: s.aiResult?.primaryFinding || 'Normal',
       vol: s.aiResult ? (Math.random() * 25).toFixed(1) + ' ml' : 'N/A',

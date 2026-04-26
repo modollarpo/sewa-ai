@@ -27,18 +27,18 @@ export async function getRates(): Promise<Record<string, number>> {
     if (cached) return JSON.parse(cached);
   } catch { /* Redis unavailable — continue */ }
 
-  // 2. Try live API (ECB free endpoint, no key needed)
+  // 2. Try live API (ExchangeRate-API open endpoint, supports 161 global currencies)
   if (Date.now() - _lastFetch > CACHE_TTL * 1000) {
     try {
       const resp = await axios.get(
-        'https://api.frankfurter.app/latest?base=GBP',
+        'https://open.er-api.com/v6/latest/GBP',
         { timeout: 5000 }
       );
       if (resp.data?.rates) {
         _cache = { GBP: 1, ...resp.data.rates };
         _lastFetch = Date.now();
         await redisClient.setex(CACHE_KEY, CACHE_TTL, JSON.stringify(_cache)).catch(() => {});
-        logger.info('[FX] Rates refreshed from Frankfurter API');
+        logger.info('[FX] Rates refreshed from ExchangeRate-API');
       }
     } catch (err: any) {
       logger.warn(`[FX] Live rate fetch failed: ${err.message} — using cached/fallback`);

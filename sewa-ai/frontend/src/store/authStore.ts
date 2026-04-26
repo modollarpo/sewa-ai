@@ -40,6 +40,7 @@ interface AuthStore {
 
   login: (email: string, password: string, tenantSlug: string) => Promise<{ mfaRequired?: boolean; mfaChallenge?: string }>;
   register: (payload: RegisterPayload) => Promise<void>;
+  registerSpecialist: (payload: any) => Promise<string>;
   verifyMFA: (mfaChallenge: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
@@ -86,6 +87,19 @@ export const useAuthStore = create<AuthStore>()(
           set({ isLoading: false });
         } catch (err: any) {
           const msg = err.response?.data?.message || 'Registration failed';
+          set({ error: msg, isLoading: false });
+          throw new Error(msg);
+        }
+      },
+
+      registerSpecialist: async (payload) => {
+        set({ isLoading: true, error: null });
+        try {
+          const res = await apiClient.post('/auth/register-specialist', payload);
+          set({ isLoading: false });
+          return res.data.stripeOnboardingUrl;
+        } catch (err: any) {
+          const msg = err.response?.data?.message || 'Specialist registration failed';
           set({ error: msg, isLoading: false });
           throw new Error(msg);
         }

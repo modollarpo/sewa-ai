@@ -46,7 +46,7 @@ export function PatientPortal() {
   const { user } = useAuthStore();
   const { scans, loading: scansLoading } = usePatientData();
   const { appointments, loading: apptsLoading } = usePatientAppointments();
-  const [tab, setTab] = useState<'scans'|'appointments'|'consent'|'access'|'account'>('scans');
+  const [tab, setTab] = useState<'scans'|'appointments'|'progression'|'consent'|'access'|'account'>('scans');
   const [selectedScan, setSelectedScan] = useState<any>(null);
   const [consents, setConsents] = useState([
     {id:'c1',type:'AI-assisted diagnosis',description:'Allow SEWA AI to analyse your medical images using artificial intelligence to assist your doctors.',granted:user?.patientRecord?.consentAI ?? true,date:new Date().toLocaleDateString('en-GB')},
@@ -105,6 +105,7 @@ export function PatientPortal() {
       <div className="portal-tabs" style={{borderBottom:`1px solid ${C.border}`,display:'flex',gap:2,marginBottom:20}}>
         <button style={tabStyle('scans')} onClick={()=>setTab('scans')}>🩻 My Scans</button>
         <button style={tabStyle('appointments')} onClick={()=>setTab('appointments')}>📅 Appointments</button>
+        <button style={tabStyle('progression')} onClick={()=>setTab('progression')}>📈 Disease Progression</button>
         <button style={tabStyle('consent')} onClick={()=>setTab('consent')}>✅ Consent</button>
         <button style={tabStyle('access')} onClick={()=>setTab('access')}>🔒 Data Access Log</button>
         <button style={tabStyle('account')} onClick={()=>setTab('account')}>⚙️ Account</button>
@@ -259,6 +260,37 @@ export function PatientPortal() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Disease Progression Timeline Tab */}
+      {tab==='progression' && (
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          <div style={{padding:16,background:`${C.brand}10`,borderRadius:12,border:`1px solid ${C.brand}30`,display:'flex',alignItems:'center',gap:12}}>
+            <span style={{fontSize:24}}>📈</span>
+            <div>
+              <div style={{fontSize:14,fontWeight:700,color:C.textHi}}>Disease Progression Timeline</div>
+              <div style={{fontSize:11,color:C.textMd}}>AI-driven volumetric tracking using Deformable Image Registration (SimpleElastix).</div>
+            </div>
+          </div>
+          <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`,position:'relative'}}>
+             <div style={{position:'absolute',left:32,top:40,bottom:40,width:2,background:C.border}}></div>
+             
+             {[
+               { date: '12 Oct 2026', finding: 'Acute Intracranial Hemorrhage', change: '+12% Volume (Progression)', color: C.critical, details: 'The hyperdense area has expanded by 12% compared to the prior scan. Urgent clinical review required.' },
+               { date: '15 Sep 2026', finding: 'Intracranial Hemorrhage', change: 'Baseline Scan', color: C.info, details: 'Initial detection of hyperdense area in the left basal ganglia. Midline shift: 4mm.' }
+             ].map((evt, idx) => (
+                <div key={idx} style={{position:'relative',paddingLeft:40,marginBottom:idx===0?30:0}}>
+                   <div style={{position:'absolute',left:21,top:4,width:12,height:12,borderRadius:'50%',background:evt.color,border:`2px solid ${C.bg2}`}}></div>
+                   <div style={{fontSize:10,color:C.textLo,fontFamily:C.FM,marginBottom:4}}>{evt.date}</div>
+                   <div style={{fontSize:14,fontWeight:700,color:C.textHi}}>{evt.finding}</div>
+                   <div style={{fontSize:12,fontWeight:600,color:evt.color,marginTop:4}}>{evt.change}</div>
+                   <div style={{fontSize:12,color:C.textMd,marginTop:8,background:C.bg3,padding:12,borderRadius:8,border:`1px solid ${C.border}`}}>
+                     {evt.details}
+                   </div>
+                </div>
+             ))}
+          </div>
         </div>
       )}
 

@@ -18,6 +18,7 @@ import {
 import { LoginPage }                 from './pages/auth/LoginPage';
 import { RegisterPage }              from './pages/auth/RegisterPage';
 import { RadiologistWorkspace }      from './pages/radiologist/RadiologistWorkspace';
+import { TrainingSimulator }         from './pages/radiologist/TrainingSimulator';
 import { DoctorDashboard }           from './pages/doctor/DoctorDashboard';
 import { PatientPortal }             from './pages/patient/PatientPortal';
 import { TechnicianWorkspace }       from './pages/technician/TechnicianWorkspace';
@@ -341,7 +342,16 @@ export default function App() {
   // ── Content resolver ─────────────────────────────────────────
   const renderContent = () => {
 
-    if (role === 'radiologist') return <ErrorBoundary name="Radiologist Workspace"><RadiologistWorkspace /></ErrorBoundary>;
+    if (publicPage === 'training' as any) {
+      return (
+        <div>
+          <button onClick={() => setPublicPage('workspace' as any)} style={{ margin:'20px 20px 0', padding:'8px 16px', background:C.bg3, border:`1px solid ${C.border}`, color:C.textMd, borderRadius:8, cursor:'pointer', fontFamily: C.F }}>← Back to Workspace</button>
+          <TrainingSimulator />
+        </div>
+      );
+    }
+
+    if (role === 'radiologist') return <ErrorBoundary name="Radiologist Workspace"><RadiologistWorkspace onNavigate={navigate} /></ErrorBoundary>;
     if (role === 'doctor')      return <DoctorDashboard />;
     if (role === 'patient')     return <PatientPortal />;
     if (role === 'technician')  return <TechnicianWorkspace />;

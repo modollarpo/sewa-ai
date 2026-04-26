@@ -12,9 +12,9 @@ const C = {
 };
 
 export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
-  const [role, setRole] = useState<'patient'|'expert'>('patient');
+  const [role, setRole] = useState<'patient'|'expert'|'specialist'>('patient');
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ firstName:'', lastName:'', email:'', password:'', hospitalCode:'' });
+  const [form, setForm] = useState({ firstName:'', lastName:'', email:'', password:'', hospitalCode:'', speciality:'', licenseNumber:'' });
   const { register, isLoading, error } = useAuthStore();
   const [localError, setLocalError] = useState('');
 
@@ -22,6 +22,20 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
     e.preventDefault();
     setLocalError('');
     try {
+      if (role === 'specialist') {
+        const url = await useAuthStore.getState().registerSpecialist({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          password: form.password,
+          speciality: form.speciality,
+          licenseNumber: form.licenseNumber
+        });
+        alert(`Specialist account created! Redirecting you to Stripe Connect...`);
+        window.location.href = url; // Redirect to Stripe Onboarding
+        return;
+      }
+
       // Logic: Patients are often global or assigned to a default 'Sewa Patient Portal' tenant
       // Experts MUST provide a valid hospital code/slug.
       const tenantSlug = role === 'patient' ? 'sewa-public' : form.hospitalCode.toLowerCase().trim();
@@ -43,7 +57,7 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
       alert(`Registration successful for ${form.email}. Please sign in.`);
       onLogin();
     } catch (err: any) {
-      setLocalError(err.message || 'Registration failed. Please check your hospital code.');
+      setLocalError(err.message || 'Registration failed. Please check your details.');
     }
   };
 
@@ -105,8 +119,13 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
             </button>
             <button onClick={()=>{setRole('expert'); setStep(2);}} style={{ padding:20, background:C.bg2, border:`1px solid ${role==='expert'?C.brand:C.border}`, borderRadius:16, textAlign:'left', cursor:'pointer' }}>
               <div style={{ fontSize:24, marginBottom:8 }}>🩻</div>
-              <div style={{ fontWeight:700, color:C.textHi }}>Practitioner Enrollment</div>
+              <div style={{ fontWeight:700, color:C.textHi }}>Hospital Practitioner</div>
               <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>Doctors, Radiologists, and Techs. Requires secondary facility verification.</div>
+            </button>
+            <button onClick={()=>{setRole('specialist'); setStep(2);}} style={{ padding:20, background:C.bg2, border:`1px solid ${role==='specialist'?C.info:C.border}`, borderRadius:16, textAlign:'left', cursor:'pointer' }}>
+              <div style={{ fontSize:24, marginBottom:8 }}>🌟</div>
+              <div style={{ fontWeight:700, color:C.textHi }}>Independent Specialist Network</div>
+              <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>Provide second opinions on the SEWA marketplace and earn revenue.</div>
             </button>
             <button onClick={onLogin} style={{ marginTop:12, background:'none', border:'none', color:C.textLo, fontSize:13, cursor:'pointer' }}>Already have an account? Sign In</button>
           </div>
@@ -123,11 +142,17 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
             {role === 'expert' && (
               <div><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>HOSPITAL FACILITY CODE</label><input placeholder="RLH-UK-001" value={form.hospitalCode} onChange={e=>setForm({...form, hospitalCode:e.target.value})} style={inputStyle} /></div>
             )}
+            {role === 'specialist' && (
+              <div style={{ display:'flex', gap:12 }}>
+                <div style={{ flex:1 }}><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>SPECIALITY</label><input required placeholder="e.g. Neuroradiology" value={form.speciality} onChange={e=>setForm({...form, speciality:e.target.value})} style={inputStyle} /></div>
+                <div style={{ flex:1 }}><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>MEDICAL LICENSE #</label><input required placeholder="e.g. GMC 1234567" value={form.licenseNumber} onChange={e=>setForm({...form, licenseNumber:e.target.value})} style={inputStyle} /></div>
+              </div>
+            )}
 
             <div><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>PASSWORD</label><input type="password" required value={form.password} onChange={e=>setForm({...form, password:e.target.value})} style={inputStyle} /></div>
             
-            <button type="submit" disabled={isLoading} style={{ marginTop:12, height:48, background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer', fontSize:15 }}>
-              {isLoading ? 'Creating Account...' : 'Continue Registration →'}
+            <button type="submit" disabled={isLoading} style={{ marginTop:12, height:48, background: role === 'specialist' ? `linear-gradient(135deg,${C.info},#1038A0)` : `linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer', fontSize:15 }}>
+              {isLoading ? 'Processing...' : role === 'specialist' ? 'Connect Stripe & Join →' : 'Continue Registration →'}
             </button>
             <button onClick={()=>setStep(1)} type="button" style={{ background:'none', border:'none', color:C.textLo, fontSize:13, cursor:'pointer' }}>Back to role selection</button>
           </form>
