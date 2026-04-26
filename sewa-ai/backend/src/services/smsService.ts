@@ -28,6 +28,7 @@ export const smsService = {
 
       // ── 2. Fallback to Twilio (Roadmap 2026 - Task 6) ──
       if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+        // @ts-expect-error - Twilio dependency is pending for Roadmap 2026 Task 6
         const twilio = await import('twilio');
         const client = twilio.default(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
         await client.messages.create({

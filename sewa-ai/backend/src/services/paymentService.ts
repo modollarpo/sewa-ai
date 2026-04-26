@@ -266,23 +266,7 @@ export async function chargePerScan(tenantId: string, scanCount: number = 1) {
 }
 
 // ── Referral Marketplace (Stripe Connect) ─────────────────────
-/**
- * Splits a referral fee between a specialist (90%) and SEWA AI (10%).
- * Requires Stripe Connect destination account ID for the specialist.
- */
-export async function splitReferralFee(tenantId: string, specialistStripeId: string, amountUSD: number) {
-  const commission = amountUSD * 0.10;
-  const specialistCut = amountUSD - commission;
-  
-  logger.info(`[Billing] Splitting referral: Platform=$${commission.toFixed(2)}, Specialist=$${specialistCut.toFixed(2)}`);
-  
-  if (config.NODE_ENV === 'production') {
-    // Real Stripe Connect Transfer logic would go here
-    // return stripe.transfers.create({ ... });
-  }
-  
-  return { commission, specialistCut, status: 'pending_transfer' };
-}
+
 
 /**
  * Creates a Stripe Connect Express account for a clinical specialist.

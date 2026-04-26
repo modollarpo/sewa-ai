@@ -240,6 +240,7 @@ export function DoctorDashboard() {
 }
 
 function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void }) {
+  const [showReferral, setShowReferral] = useState<string | null>(null);
   const urgency = patient.urgency || patient.lastScan?.urgency || 'ROUTINE';
   return (
     <div style={{flex:1, display:'flex', flexDirection:'column', overflowY:'auto', background:C.bg1}}>
@@ -335,7 +336,6 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
         {/* 📈 Longitudinal Disease Progression Timeline (Roadmap 2026 - Task 8) */}
         <ProgressionTimeline patientId={patient.patientId || patient.id} />
       </div>
-    </div>
   );
 }
 
