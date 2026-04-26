@@ -233,6 +233,11 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
     }
   };
 
+  const handleWheel = (e: React.WheelEvent) => {
+    const newZoom = Math.max(0.5, Math.min(10, zoom - e.deltaY * 0.005));
+    setZoom(newZoom);
+  };
+
   return (
     <div style={{ position:'relative', flex:1, background:'#000', overflow:'hidden' }}>
       <canvas
@@ -241,8 +246,8 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
-        onMouseUp={() => dragging.current=false}
-        onMouseLeave={() => dragging.current=false}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
       />
       <div style={{
         position:'absolute', bottom:'12px', left:'50%', transform:'translateX(-50%)',

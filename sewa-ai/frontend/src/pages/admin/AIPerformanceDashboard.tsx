@@ -31,7 +31,7 @@ function Metric({ label,value,color=C.textHi,sub }:{ label:string;value:string|n
 }
 
 export function AIPerformanceDashboard() {
-  const { models, metrics, conditionStats, loading } = useAIData();
+  const { models, metrics, conditionStats, drift, bias, loading } = useAIData();
   const [tab, setTab] = useState<'accuracy'|'latency'|'abtests'|'drift'|'bias'>('accuracy');
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'7px 13px',fontSize:11,fontWeight:tab===t?600:400,

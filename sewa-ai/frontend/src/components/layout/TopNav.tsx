@@ -299,9 +299,9 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit
           </div>
           {[
             { icon:'👤', label:'Profile Settings', action: onProfileClick },
-            { icon:'🔒', label:'Security & MFA', action: () => alert('Navigating to Security & MFA configuration...') },
-            { icon:'🔔', label:'Notification Prefs', action: () => alert('Opening Notification Preferences...') },
-            { icon:'📋', label:'Audit Log', action: () => alert('Navigating to Facility Audit Logs...') },
+            { icon:'🔒', label:'Security & MFA', action: onProfileClick },
+            { icon:'🔔', label:'Notification Prefs', action: onProfileClick },
+            { icon:'📋', label:'Audit Log', action: onProfileClick },
           ].map(item => (
             <button key={item.label} onClick={item.action} style={{
               width:'100%', textAlign:'left', padding:'7px 12px',

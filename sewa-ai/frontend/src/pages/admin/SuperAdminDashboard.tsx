@@ -157,7 +157,7 @@ export function SuperAdminDashboard() {
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
           {error && (
             <div style={{padding:'10px 16px',background:`${C.critical}15`,border:`1px solid ${C.critical}40`,borderRadius:10,color:C.critical,fontSize:12,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-              <span>⚠️ {error}</span>
+              <span>⚠️ {error instanceof Error ? error.message : String(error)}</span>
               <button onClick={() => window.location.reload()} style={{background:C.critical,border:'none',color:'white',padding:'4px 10px',borderRadius:6,fontSize:10,cursor:'pointer'}}>Retry Now</button>
             </div>
           )}

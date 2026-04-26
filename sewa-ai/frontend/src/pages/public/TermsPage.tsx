@@ -106,7 +106,7 @@ export function TermsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
     <div style={{ background:C.bg0, minHeight:'100vh', fontFamily:C.F }}>
       <style>{`
         @media (max-width: 900px) {
-          .legal-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .legal-grid { grid-template-columns: 1fr !important; gap: 32px !important; padding: 32px 16px 80px !important; }
           .toc-sidebar { 
             position: sticky !important; 
             top: 64px !important;
@@ -128,8 +128,8 @@ export function TermsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         }
         @media (max-width: 600px) {
           .meta-boxes { flex-direction: column !important; }
-          .meta-boxes > div { width: 100% !important; flex: none !important; }
-          .hero-section { padding-top: 80px !important; padding-bottom: 40px !important; }
+          .meta-boxes > div { width: 100% !important; flex: none !important; box-sizing: border-box; }
+          .hero-section { padding: 80px 16px 40px !important; }
         }
       `}</style>
       <PublicNav activePage="terms" onNavigate={onNavigate} />
@@ -153,7 +153,7 @@ export function TermsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         </div>
       </div>
 
-      <div className="legal-grid" style={{ maxWidth:1100, margin:'0 auto', padding:'clamp(24px, 5vw, 48px) 24px 80px', display:'grid', gridTemplateColumns:'220px 1fr', gap:40 }}>
+      <div className="legal-grid" style={{ maxWidth:1100, margin:'0 auto', padding:'48px 24px 80px', display:'grid', gridTemplateColumns:'220px 1fr', gap:40 }}>
         {/* TOC */}
         <div className="toc-sidebar" style={{ position:'sticky', top:80, alignSelf:'start' }}>
           <div style={{ fontSize:10, fontWeight:700, color:C.textLo, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:12 }}>Contents</div>
