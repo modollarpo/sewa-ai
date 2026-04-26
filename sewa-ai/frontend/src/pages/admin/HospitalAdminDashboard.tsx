@@ -220,7 +220,7 @@ export function HospitalAdminDashboard() {
                     <td style={{padding:'12px 16px'}}><div style={{display:'flex',alignItems:'center',gap:6}}><StatusDot status={s.status}/><span style={{fontSize:11,color:C.textMd}}>{s.status}</span></div></td>
                     <td style={{padding:'12px 16px'}}>
                       <div style={{display:'flex',gap:6}}>
-                        <button onClick={() => alert('Edit profile functionality coming soon.')} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button>
+                        <button onClick={() => alert('Editing staff: ' + s.firstName + '. Profile editor modal coming in v2.5.')} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button>
                         <button onClick={async () => {
                           const next = s.status === 'suspended' ? 'active' : 'suspended';
                           if(confirm(`Are you sure you want to ${next} this staff member?`)) {
@@ -307,8 +307,18 @@ export function HospitalAdminDashboard() {
                 </div>
               </div>
               <div style={{display:'flex',gap:10,marginTop:20}}>
-                <button onClick={() => alert('Redirecting to Stripe Customer Portal...')} style={{padding:'8px 16px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:12,fontWeight:700,cursor:'pointer'}}>Manage Plan & Billing</button>
-                <button onClick={() => alert('Opening payment method selector...')} style={{padding:'8px 16px',background:'transparent',border:`1px solid ${C.border}`,borderRadius:8,color:C.textHi,fontSize:12,cursor:'pointer'}}>Update Payment Method</button>
+                <button onClick={async () => {
+                  try {
+                    const res = await apiClient.post('/payments/portal');
+                    if (res.data.url) window.location.href = res.data.url;
+                  } catch (e) { alert('Stripe portal connection failed. Please try again.'); }
+                }} style={{padding:'8px 16px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:12,fontWeight:700,cursor:'pointer'}}>Manage Plan & Billing</button>
+                <button onClick={async () => {
+                  try {
+                    const res = await apiClient.post('/payments/portal', { flow: 'payment_method' });
+                    if (res.data.url) window.location.href = res.data.url;
+                  } catch (e) { alert('Could not open payment settings.'); }
+                }} style={{padding:'8px 16px',background:'transparent',border:`1px solid ${C.border}`,borderRadius:8,color:C.textHi,fontSize:12,cursor:'pointer'}}>Update Payment Method</button>
               </div>
             </div>
 
@@ -327,7 +337,17 @@ export function HospitalAdminDashboard() {
                     </div>
                     <div style={{textAlign:'right'}}>
                       <div style={{fontSize:12,fontWeight:700,color:C.textHi}}>{user?.currency || 'GBP'} {inv.amount}</div>
-                      <button onClick={() => alert('Generating PDF invoice...')} style={{fontSize:10,color:C.brand,background:'none',border:'none',cursor:'pointer',padding:0,marginTop:4}}>Download PDF ↓</button>
+                      <button onClick={async () => {
+                        try {
+                          const res = await apiClient.get(`/payments/invoices/${inv.id}/pdf`, { responseType: 'blob' });
+                          const url = window.URL.createObjectURL(new Blob([res.data]));
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', `Invoice-${inv.id}.pdf`);
+                          document.body.appendChild(link);
+                          link.click();
+                        } catch (e) { alert('Invoice generation failed.'); }
+                      }} style={{fontSize:10,color:C.brand,background:'none',border:'none',cursor:'pointer',padding:0,marginTop:4}}>Download PDF ↓</button>
                     </div>
                   </div>
                 ))}
