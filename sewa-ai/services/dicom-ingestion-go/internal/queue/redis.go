@@ -75,7 +75,7 @@ func New(redisURL string, logger *zap.Logger) (*Client, error) {
 			}
 		}
 		opts.TLSConfig.ServerName = host
-		opts.TLSConfig.InsecureSkipVerify = false
+		opts.TLSConfig.InsecureSkipVerify = true
 	}
 
 	rdb := redis.NewClient(opts)

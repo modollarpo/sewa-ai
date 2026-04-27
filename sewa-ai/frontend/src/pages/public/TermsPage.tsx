@@ -105,6 +105,7 @@ export function TermsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
   return (
     <div style={{ background:C.bg0, minHeight:'100vh', fontFamily:C.F }}>
       <style>{`
+        .legal-grid > div { min-width: 0; }
         @media (max-width: 900px) {
           .legal-grid { grid-template-columns: 1fr !important; gap: 32px !important; padding: 32px 16px 80px !important; }
           .toc-sidebar { 
@@ -120,6 +121,7 @@ export function TermsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             overflow-x: auto; 
             scrollbar-width: none;
             z-index: 10;
+            width: 100%;
           }
           .toc-sidebar::-webkit-scrollbar { display: none; }
           .toc-sidebar > div { display: none !important; }
@@ -135,7 +137,7 @@ export function TermsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
       <PublicNav activePage="terms" onNavigate={onNavigate} />
 
       {/* Hero */}
-      <div className="hero-section" style={{ background:`linear-gradient(180deg,${C.bg1},${C.bg0})`, padding:'clamp(80px, 12vh, 110px) 24px 48px', borderBottom:`1px solid ${C.border}` }}>
+      <div className="hero-section" style={{ background:`linear-gradient(180deg,${C.bg1},${C.bg0})`, padding:'clamp(80px, 12vh, 110px) 24px', borderBottom:`1px solid ${C.border}` }}>
         <div style={{ maxWidth:800, margin:'0 auto' }}>
           <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'4px 14px', background:`${C.brand}14`, border:`1px solid ${C.brand}30`, borderRadius:20, marginBottom:20 }}>
             <span style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase' }}>Legal</span>

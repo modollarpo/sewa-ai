@@ -19,7 +19,6 @@ const C = {
 const DEMO_CREDENTIALS = [
   { role: 'Radiologist', email: 'sarah.chen@royallondon.nhs.uk', hint: 'Full PACS workspace' },
   { role: 'Physician', email: 'james.okafor@royallondon.nhs.uk', hint: 'Clinical alerts & patient list' },
-  { role: 'Super Admin', email: 'superadmin@sewaxai.health', hint: 'Global platform management' },
   { role: 'Patient', email: 'patient.smith@example.com', hint: 'Patient portal & consent' },
   { role: 'Technician', email: 'tech@knh.go.ke', hint: 'Upload & worklist' },
 ];

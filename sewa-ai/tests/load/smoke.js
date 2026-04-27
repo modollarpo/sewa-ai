@@ -6,8 +6,8 @@ import { check, sleep } from 'k6';
 import { Trend, Rate, Counter } from 'k6/metrics';
 
 const API_URL = __ENV.API_URL || 'https://api.sewaxai.health';
-const TEST_EMAIL = __ENV.TEST_EMAIL || 'loadtest@sewaxai.health';
-const TEST_PASS  = __ENV.TEST_PASS  || 'LoadTest2026!';
+const TEST_EMAIL = __ENV.TEST_EMAIL || 'superadmin@sewaxai.health';
+const TEST_PASS  = __ENV.TEST_PASS  || 'SewaAI2024!';
 
 // Custom metrics
 const doorToAlert  = new Trend('door_to_alert_ms', true);
@@ -32,12 +32,12 @@ let authToken = '';
 
 export function setup() {
   const res = http.post(`${API_URL}/api/v1/auth/login`, JSON.stringify({
-    email: TEST_EMAIL, password: TEST_PASS,
+    email: TEST_EMAIL, password: TEST_PASS, tenantSlug: 'royal-london',
   }), { headers: { 'Content-Type': 'application/json' } });
   
   check(res, { 'login 200': (r) => r.status === 200 });
   const body = JSON.parse(res.body);
-  return { token: body.token };
+  return { token: body.accessToken };
 }
 
 export default function(data) {
@@ -53,15 +53,24 @@ export default function(data) {
 
   // 2. List scans (worklist)
   const worklist = http.get(`${API_URL}/api/v1/scans?status=ai_complete&limit=10`, { headers });
+  if (worklist.status !== 200 && __VU === 1) {
+    console.log(`Worklist failed: ${worklist.status} ${worklist.body}`);
+  }
   check(worklist, { 'worklist 200': (r) => r.status === 200 });
   errorRate.add(worklist.status !== 200);
 
   // 3. Payment status
   const billing = http.get(`${API_URL}/api/v1/payments/status`, { headers });
+  if (billing.status !== 200 && __VU === 1) {
+    console.log(`Billing failed: ${billing.status} ${billing.body}`);
+  }
   check(billing, { 'billing 200': (r) => r.status === 200 });
 
   // 4. Notifications
   const notifs = http.get(`${API_URL}/api/v1/notifications`, { headers });
+  if (notifs.status !== 200 && __VU === 1) {
+    console.log(`Notifs failed: ${notifs.status} ${notifs.body}`);
+  }
   check(notifs, { 'notifs 200': (r) => r.status === 200 });
 
   sleep(1);
