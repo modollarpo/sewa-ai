@@ -143,7 +143,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: sewa-federated
-  minReplicas: 0          # scale to zero between training rounds
+  minReplicas: 1          # standard HPA requires at least 1 replica
   maxReplicas: 4
   metrics:
   - type: Resource
