@@ -17,11 +17,6 @@ spec:
       labels:
         app: sewa-triage
     spec:
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -32,7 +27,6 @@ spec:
         - containerPort: 8000
         resources:
           limits:
-            nvidia.com/gpu: 1
             memory: "6Gi"
           requests:
             memory: "2Gi"
@@ -74,11 +68,6 @@ spec:
       labels:
         app: sewa-vlm-report
     spec:
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -89,7 +78,6 @@ spec:
         - containerPort: 8001
         resources:
           limits:
-            nvidia.com/gpu: 1
             memory: "16Gi"
           requests:
             memory: "8Gi"
@@ -125,11 +113,6 @@ spec:
       labels:
         app: sewa-uncertainty
     spec:
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -140,7 +123,6 @@ spec:
         - containerPort: 8002
         resources:
           limits:
-            nvidia.com/gpu: 1
             memory: "6Gi"
           requests:
             memory: "2Gi"
