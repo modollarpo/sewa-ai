@@ -27,7 +27,7 @@ spec:
       - name: acr-secret
       containers:
       - name: backend
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-backend:latest"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-backend:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

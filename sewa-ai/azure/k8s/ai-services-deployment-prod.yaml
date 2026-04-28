@@ -26,7 +26,7 @@ spec:
       - name: acr-secret
       containers:
       - name: triage
-        image: "sewaaiproductionacr.azurecr.io/sewa-triage:latest"
+        image: "{{CONTAINER_REGISTRY}}/sewa-triage:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -83,7 +83,7 @@ spec:
       - name: acr-secret
       containers:
       - name: vlm-report
-        image: "sewaaiproductionacr.azurecr.io/sewa-vlm-report:latest"
+        image: "{{CONTAINER_REGISTRY}}/sewa-vlm-report:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8001
@@ -134,7 +134,7 @@ spec:
       - name: acr-secret
       containers:
       - name: uncertainty
-        image: "sewaaiproductionacr.azurecr.io/sewa-uncertainty:latest"
+        image: "{{CONTAINER_REGISTRY}}/sewa-uncertainty:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8002
@@ -179,7 +179,7 @@ spec:
       - name: acr-secret
       containers:
       - name: metacognition
-        image: "sewaaiproductionacr.azurecr.io/sewa-metacognition:latest"
+        image: "{{CONTAINER_REGISTRY}}/sewa-metacognition:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8003
@@ -225,7 +225,7 @@ spec:
       - name: acr-secret
       containers:
       - name: federated
-        image: "sewaaiproductionacr.azurecr.io/sewa-federated:latest"
+        image: "{{CONTAINER_REGISTRY}}/sewa-federated:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8004
@@ -277,7 +277,7 @@ spec:
       - name: acr-secret
       containers:
       - name: continuous
-        image: "sewaaiproductionacr.azurecr.io/sewa-continuous:latest"
+        image: "{{CONTAINER_REGISTRY}}/sewa-continuous:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8005

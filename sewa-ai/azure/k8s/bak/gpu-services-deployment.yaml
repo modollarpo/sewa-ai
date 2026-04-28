@@ -18,9 +18,11 @@ spec:
         operator: Equal
         value: true
         effect: NoSchedule
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: triage
-        image: sewaaiproductionacr.azurecr.io/sewa-triage:latest
+        image: "{{CONTAINER_REGISTRY}}/sewa-triage:{{IMAGE_TAG}}"
         ports:
         - containerPort: 8000
         resources:
@@ -69,9 +71,11 @@ spec:
         operator: Equal
         value: true
         effect: NoSchedule
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: vlm-report
-        image: sewaaiproductionacr.azurecr.io/sewa-vlm-report:latest
+        image: "{{CONTAINER_REGISTRY}}/sewa-vlm-report:{{IMAGE_TAG}}"
         ports:
         - containerPort: 8001
         resources:
@@ -114,9 +118,11 @@ spec:
         operator: Equal
         value: true
         effect: NoSchedule
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: uncertainty
-        image: sewaaiproductionacr.azurecr.io/sewa-uncertainty:latest
+        image: "{{CONTAINER_REGISTRY}}/sewa-uncertainty:{{IMAGE_TAG}}"
         ports:
         - containerPort: 8002
         resources:
