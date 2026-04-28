@@ -32,6 +32,8 @@ spec:
             memory: "2Gi"
             cpu: "1000m"
         envFrom:
+        - secretRef:
+            name: sewa-secrets
         - configMapRef:
             name: sewa-config
         livenessProbe:
@@ -83,6 +85,8 @@ spec:
             memory: "8Gi"
             cpu: "1000m"
         envFrom:
+        - secretRef:
+            name: sewa-secrets
         - configMapRef:
             name: sewa-config
 ---
@@ -127,6 +131,8 @@ spec:
           requests:
             memory: "2Gi"
         envFrom:
+        - secretRef:
+            name: sewa-secrets
         - configMapRef:
             name: sewa-config
 ---
@@ -172,6 +178,8 @@ spec:
             memory: "512Mi"
             cpu: "500m"
         envFrom:
+        - secretRef:
+            name: sewa-secrets
         - configMapRef:
             name: sewa-config
 ---
