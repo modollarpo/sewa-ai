@@ -25,7 +25,7 @@ Out-Success "Changes committed."
 Write-Host "[2/6] Building Backend via ACR Tasks..." -ForegroundColor Yellow
 $backendImg = "sewa-ai-backend:$IMAGE_TAG"
 $backendLatest = "sewa-ai-backend:production-latest"
-az acr build --registry $ACR_NAME --image $backendImg --image $backendLatest --file backend/Dockerfile backend/
+az acr build --registry $ACR_NAME --image $backendImg --image $backendLatest --file backend/Dockerfile backend/ 2>&1 | Write-Host
 Out-Success "Backend build complete."
 
 # 3. Build & Push AI Services
@@ -36,7 +36,7 @@ foreach ($svc in $AI_SERVICES.Keys) {
     Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan
     $svcImg = "sewa-$svc`:$IMAGE_TAG"
     $svcLatest = "sewa-$svc`:latest" # Ensure 'latest' is pushed for K8s manifests
-    az acr build --registry $ACR_NAME --image $svcImg --image $svcLatest --file "ai-services/$dir/Dockerfile" "ai-services/$dir/"
+    az acr build --registry $ACR_NAME --image $svcImg --image $svcLatest --file "ai-services/$dir/Dockerfile" "ai-services/$dir/" 2>&1 | Write-Host
 }
 Out-Success "AI services build complete."
 
@@ -44,7 +44,7 @@ Out-Success "AI services build complete."
 Write-Host "[3b/6] Building Frontend for AKS..." -ForegroundColor Yellow
 $frontendImg = "sewa-frontend:$IMAGE_TAG"
 $frontendLatest = "sewa-frontend:production-latest"
-az acr build --registry $ACR_NAME --image $frontendImg --image $frontendLatest --build-arg VITE_API_URL=https://api.sewaxai.health/api/v1 ./frontend
+az acr build --registry $ACR_NAME --image $frontendImg --image $frontendLatest --build-arg VITE_API_URL=https://api.sewaxai.health/api/v1 ./frontend 2>&1 | Write-Host
 Out-Success "Frontend AKS build complete."
 
 # 4. Update AKS Manifests
