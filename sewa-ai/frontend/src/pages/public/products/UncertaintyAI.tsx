@@ -99,7 +99,7 @@ export function UncertaintyAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
               </div>
             </div>
             <p style={{ color:C.textMd, fontSize:13, lineHeight:1.6, fontStyle:'italic' }}>
-              "By evaluating the variance across 20 stochastic forward passes, we identify the 'grey areas' of clinical diagnosis that other AI systems hide."
+              "By evaluating the variance across stochastic Monte Carlo dropout with multi-pass uncertainty quantification, we identify the 'grey areas' of clinical diagnosis that other AI systems hide."
             </p>
           </div>
         </div>

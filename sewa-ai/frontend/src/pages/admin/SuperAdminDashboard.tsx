@@ -1,6 +1,6 @@
 // SEWA AI — SuperAdminDashboard.tsx
 // Global platform management: tenants, AI, deployments, compliance, billing, logs
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSuperAdminData } from '../../hooks/useDashboardData';
 import { Skeleton, StatSkeleton, TableRowSkeleton } from '../../components/ui/Skeleton';
 import { apiClient } from '../../services/apiClient';
@@ -94,7 +94,7 @@ export function SuperAdminDashboard() {
     display:'flex',alignItems:'center',gap:5,
   });
 
-  const filteredTenants = tenants.filter(t=>!tenantSearch||(t.name||'').toLowerCase().includes(tenantSearch.toLowerCase())||(t.region||'').includes(tenantSearch));
+  const filteredTenants = useMemo(() => tenants.filter(t=>!tenantSearch||(t.name||'').toLowerCase().includes(tenantSearch.toLowerCase())||(t.region||'').includes(tenantSearch)), [tenants, tenantSearch]);
 
   return (
     <div style={{minHeight:'calc(100vh - 76px)',background:C.bg0,fontFamily:C.F,padding:24}}>
@@ -198,7 +198,17 @@ export function SuperAdminDashboard() {
            <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
               <div style={{fontSize:16,fontWeight:700,color:C.textHi}}>Federated Learning</div>
               <p style={{fontSize:12,color:C.textMd}}>Aggregating weights from {tenants.length} nodes.</p>
-              <button onClick={()=>apiClient.post('/ai/federated/train')} style={{padding:'8px 16px',background:C.info,color:'white',border:'none',borderRadius:8,cursor:'pointer'}}>Start Training Round</button>
+              <button onClick={async ()=>{
+                const confirmed = confirm('Are you sure you want to trigger a global federated training round? This consumes massive GPU resources.');
+                if(!confirmed) return;
+                try {
+                  await apiClient.post('/ai/federated/train');
+                  alert('Federated training round initiated successfully.');
+                } catch(e: any) {
+                  console.error('[SuperAdmin] FL Train trigger failed:', e);
+                  alert(`Training trigger failed: ${e.message || 'System error'}`);
+                }
+              }} style={{padding:'8px 16px',background:C.info,color:'white',border:'none',borderRadius:8,cursor:'pointer'}}>Start Training Round</button>
            </div>
         </div>
       )}

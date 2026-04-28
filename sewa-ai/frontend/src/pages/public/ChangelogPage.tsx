@@ -30,7 +30,7 @@ const RELEASES = [
     { cat:'improve', text:'Multi-region payments: Stripe + Paystack + Flutterwave + M-Pesa routing' },
   ]},
   { version:'v2.2.0', date:'January 2026', type:'minor', changes:[
-    { cat:'feature', text:'Metacognition Engine: 9-layer hallucination detection and safe-to-alert gate' },
+    { cat:'feature', text:'Metacognition Engine: Advanced hallucination detection and safe-to-alert gate' },
     { cat:'feature', text:'Federated Learning: differential-privacy FL with Flower framework' },
     { cat:'feature', text:'Population Health Dashboard: k-anonymity disease surveillance' },
     { cat:'feature', text:'Patient Portal mobile app: 7-tab navigation, consent management' },

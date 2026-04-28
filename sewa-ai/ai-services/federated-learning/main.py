@@ -11,7 +11,7 @@ import asyncio
 import hashlib
 import time
 from typing import Dict, List, Optional, Tuple, Any, Union
-from datetime import datetime
+from datetime import datetime, timezone
 
 import numpy as np
 import torch
@@ -19,21 +19,21 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
-import flwr as fl
-from flwr.common import (
+import flwr as fl # type: ignore
+from flwr.common import ( # type: ignore
     EvaluateIns, EvaluateRes, FitIns, FitRes,
     GetParametersIns, GetParametersRes, NDArrays,
     Parameters, Scalar, ndarrays_to_parameters, parameters_to_ndarrays,
 )
-from flwr.server.strategy import FedAvg, FedProx
+from flwr.server.strategy import FedAvg, FedProx # type: ignore
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # Differential Privacy — add calibrated Gaussian noise to gradients
-from opacus import PrivacyEngine
-from opacus.validators import ModuleValidator
+from opacus import PrivacyEngine # type: ignore
+from opacus.validators import ModuleValidator # type: ignore
 
 # ── Config ─────────────────────────────────────────────────────
 FL_SERVER_HOST    = os.getenv("FL_SERVER_HOST",    "0.0.0.0")
@@ -108,8 +108,9 @@ class SEWAFederatedClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
         self.model.train()
 
-        total_loss  = 0.0
-        num_batches = 0
+        total_loss    = 0.0
+        num_batches   = 0
+        total_samples = 0
 
         for images, labels in self.train_loader:
             images, labels = images.to(self.device), labels.to(self.device)
@@ -118,14 +119,15 @@ class SEWAFederatedClient(fl.client.NumPyClient):
             loss   = self.criterion(logits, labels)
             loss.backward()
             self.optimizer.step()
-            total_loss  += loss.item()
-            num_batches += 1
+            total_loss    += loss.item()
+            num_batches   += 1
+            total_samples += len(images)
 
         epsilon = self.privacy_engine.get_epsilon(DP_DELTA)
 
         return (
             self.get_parameters(config={}),
-            len(self.train_loader.dataset),
+            total_samples,
             {
                 "loss":     total_loss / max(num_batches, 1),
                 "epsilon":  epsilon,
@@ -205,7 +207,7 @@ class SEWAFedStrategy(FedAvg):
             round_state["round_history"].append({
                 "round":       server_round,
                 "num_clients": len(results),
-                "timestamp":   datetime.utcnow().isoformat(),
+                "timestamp":   datetime.now(timezone.utc).isoformat(),
                 "avg_epsilon": sum(epsilons)/len(epsilons) if epsilons else 0,
             })
 
@@ -227,9 +229,9 @@ class SEWAFedStrategy(FedAvg):
 
 # ── FastAPI REST endpoints ──────────────────────────────────────
 class TrainingConfig(BaseModel):
-    num_rounds: int = NUM_ROUNDS
-    min_fit_clients: int = MIN_FIT_CLIENTS
-    dp_epsilon: float = DP_EPSILON
+    num_rounds: int = Field(NUM_ROUNDS, ge=1, le=100)
+    min_fit_clients: int = Field(MIN_FIT_CLIENTS, ge=1, le=50)
+    dp_epsilon: float = Field(DP_EPSILON, ge=0.1, le=100.0)
 
 
 @app.get("/health")
@@ -262,7 +264,7 @@ async def start_training(config: TrainingConfig, background_tasks: BackgroundTas
     )
 
     background_tasks.add_task(_run_fl_server, strategy, config.num_rounds)
-    return {"message": "Federated training started", "config": config.dict()}
+    return {"message": "Federated training started", "config": config.model_dump()}
 
 
 async def _run_fl_server(strategy: SEWAFedStrategy, num_rounds: int) -> None:

@@ -6,7 +6,7 @@ import os
 import json
 import uuid
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any, Union
 from enum import Enum
 
@@ -17,7 +17,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import httpx
 
 app = FastAPI(title="SEWA AI — Continuous Learning Service", version="1.0.0")
@@ -46,19 +46,19 @@ class CorrectionType(str, Enum):
 
 
 class CorrectionEvent(BaseModel):
-    scan_id:           str
-    tenant_id:         str
-    radiologist_id:    str
-    ai_finding:        str
-    ai_urgency:        str
-    ai_confidence:     float
-    human_finding:     str
-    human_urgency:     str
+    scan_id:           str = Field(..., pattern=r"^[A-Z0-9\-_]{4,64}$")
+    tenant_id:         str = Field(..., pattern=r"^[a-z0-9\-]{4,64}$")
+    radiologist_id:    str = Field(..., pattern=r"^[a-z0-9\.@\-]{4,64}$")
+    ai_finding:        str = Field(..., min_length=2, max_length=100)
+    ai_urgency:        str = Field(..., pattern=r"^(CRITICAL|URGENT|NORMAL)$")
+    ai_confidence:     float = Field(..., ge=0.0, le=1.0)
+    human_finding:     str = Field(..., min_length=2, max_length=100)
+    human_urgency:     str = Field(..., pattern=r"^(CRITICAL|URGENT|NORMAL)$")
     correction_type:   CorrectionType
-    modality:          str
-    body_part:         str
-    ground_truth_label: Optional[int] = None
-    notes:             Optional[str]  = None
+    modality:          str = Field(..., pattern=r"^(CT|MRI|XR)$")
+    body_part:         str = Field(..., min_length=2, max_length=50)
+    ground_truth_label: Optional[int] = Field(None, ge=0, le=20)
+    notes:             Optional[str]  = Field(None, max_length=1000)
 
 
 class DriftAlert(BaseModel):
@@ -163,7 +163,7 @@ async def trigger_retraining(corrections: List[Dict[str, Any]]) -> None:
     training_state.update({
         "status":           "completed",
         "model_version":    new_version,
-        "last_trained":     datetime.utcnow().isoformat(),
+        "last_trained":     datetime.now(timezone.utc).isoformat(),
         "training_samples": len(labeled),
         "prev_version":     current,
     })
@@ -178,9 +178,9 @@ async def health() -> Dict[str, Any]:
 @app.post("/corrections")
 async def submit_correction(correction: CorrectionEvent, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """Radiologist submits a correction to an AI finding."""
-    record = correction.dict()
+    record = correction.model_dump()
     record["id"]         = str(uuid.uuid4())  # cryptographically random, not MD5
-    record["timestamp"]  = datetime.utcnow().isoformat()
+    record["timestamp"]  = datetime.now(timezone.utc).isoformat()
     record["is_critical_miss"] = (
         correction.ai_urgency != "CRITICAL" and correction.human_urgency == "CRITICAL"
     )

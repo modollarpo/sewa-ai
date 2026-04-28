@@ -399,7 +399,7 @@ export default function App() {
       </div>
     );
 
-    return <RadiologistWorkspace />;
+    return <RadiologistWorkspace onNavigate={navigate} />;
   };
 
   return (

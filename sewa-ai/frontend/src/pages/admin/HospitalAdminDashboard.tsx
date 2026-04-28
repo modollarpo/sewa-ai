@@ -1,6 +1,6 @@
 // SEWA AI — HospitalAdminDashboard.tsx
 // Hospital administration: staff mgmt, RBAC, integration health, billing, audit
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useHospitalAdminData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
@@ -60,12 +60,12 @@ export function HospitalAdminDashboard() {
   const [tab, setTab] = useState<'overview'|'staff'|'integrations'|'billing'|'audit'>('overview');
   const [search, setSearch] = useState('');
 
-  const filteredStaff = (staff || []).filter((s:any) => 
+  const filteredStaff = useMemo(() => (staff || []).filter((s:any) => 
     !search || 
     `${s.firstName} ${s.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
     s.email?.toLowerCase().includes(search.toLowerCase()) ||
     s.role?.toLowerCase().includes(search.toLowerCase())
-  );
+  ), [staff, search]);
   const [showAddUser, setShowAddUser] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -184,8 +184,9 @@ export function HospitalAdminDashboard() {
                       try {
                         await apiClient.post('/users/invite', { email, role });
                         alert(`Invite sent to ${email} as ${role}.`);
-                      } catch (e) {
-                        alert('Invite sent successfully (Simulated).');
+                      } catch (e: any) {
+                        console.error('[Admin] Invite failed:', e);
+                        alert(`Invitation failed: ${e.message || 'System error.'}`);
                       }
                     }
                   }}
@@ -220,7 +221,18 @@ export function HospitalAdminDashboard() {
                     <td style={{padding:'12px 16px'}}><div style={{display:'flex',alignItems:'center',gap:6}}><StatusDot status={s.status}/><span style={{fontSize:11,color:C.textMd}}>{s.status}</span></div></td>
                     <td style={{padding:'12px 16px'}}>
                       <div style={{display:'flex',gap:6}}>
-                        <button onClick={() => alert('Editing staff: ' + s.firstName + '. Profile editor modal coming in v2.5.')} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button>
+                        <button onClick={async () => {
+                          const newRole = prompt(`Enter new role for ${s.firstName} (doctor, radiologist, technician, admin):`, s.role);
+                          if(newRole && newRole !== s.role) {
+                            try {
+                              await apiClient.patch(`/users/${s.id}/role`, { role: newRole });
+                              alert('Role updated successfully.');
+                              window.location.reload();
+                            } catch(e: any) {
+                              alert(`Failed to update role: ${e.message}`);
+                            }
+                          }
+                        }} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button>
                         <button onClick={async () => {
                           const next = s.status === 'suspended' ? 'active' : 'suspended';
                           if(confirm(`Are you sure you want to ${next} this staff member?`)) {
@@ -346,7 +358,11 @@ export function HospitalAdminDashboard() {
                           link.setAttribute('download', `Invoice-${inv.id}.pdf`);
                           document.body.appendChild(link);
                           link.click();
-                        } catch (e) { alert('Invoice generation failed.'); }
+                          setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                        } catch (e: any) { 
+                          console.error('[Admin] Invoice gen failed:', e);
+                          alert('Invoice generation failed.'); 
+                        }
                       }} style={{fontSize:10,color:C.brand,background:'none',border:'none',cursor:'pointer',padding:0,marginTop:4}}>Download PDF ↓</button>
                     </div>
                   </div>
@@ -374,7 +390,7 @@ export function HospitalAdminDashboard() {
                   <div style={{fontSize:11,color:C.textMd,marginBottom:12,fontFamily:C.FM}}>Endpoint: {(user as any)?.fhirEndpoint || 'https://fhir.london.nhs.uk/r4'}</div>
                   <button onClick={async ()=>{
                     try { await apiClient.get('/tenants/integrations/health'); alert('FHIR connectivity test passed (200 OK)'); }
-                    catch(e){ alert('FHIR test failed: Connection refused'); }
+                    catch(e: any){ console.error('[Admin] FHIR test error:', e); alert(`FHIR test failed: ${e.message || 'Connection refused'}`); }
                   }} style={{width:'100%',padding:'8px',background:C.bg4,border:`1px solid ${C.border}`,color:C.textHi,fontSize:11,borderRadius:8,cursor:'pointer'}}>
                     Test Connectivity
                   </button>
@@ -392,7 +408,7 @@ export function HospitalAdminDashboard() {
                   <div style={{fontSize:11,color:C.textMd,marginBottom:12,fontFamily:C.FM}}>Endpoint: {(user as any)?.hl7Host || '10.5.22.41'}:{(user as any)?.hl7Port || 2575}</div>
                   <button onClick={async ()=>{
                     try { await apiClient.get('/tenants/integrations/health'); alert('HL7 ACK test successful (AA)'); }
-                    catch(e){ alert('HL7 test failed: Socket timeout'); }
+                    catch(e: any){ console.error('[Admin] HL7 test error:', e); alert(`HL7 test failed: ${e.message || 'Socket timeout'}`); }
                   }} style={{width:'100%',padding:'8px',background:C.bg4,border:`1px solid ${C.border}`,color:C.textHi,fontSize:11,borderRadius:8,cursor:'pointer'}}>
                     Test Connectivity
                   </button>

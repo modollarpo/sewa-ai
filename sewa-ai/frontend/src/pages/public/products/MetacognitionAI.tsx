@@ -1,5 +1,5 @@
 // SEWA AI — MetacognitionAI.tsx
-// Dedicated landing page for the Metacognition Engine (Port 8003)
+// Dedicated landing page for the Metacognition Engine
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../../components/public/PublicLayout';
 

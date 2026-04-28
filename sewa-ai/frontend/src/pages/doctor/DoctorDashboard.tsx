@@ -1,6 +1,6 @@
 // SEWA AI — DoctorDashboard.tsx
 // Physician workflow: patient list, AI alerts, critical findings, quick actions
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDoctorData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
@@ -83,15 +83,15 @@ export function DoctorDashboard() {
     return () => window.removeEventListener('resize', r);
   }, []);
 
-  const activeAlerts = alerts
+  const activeAlerts = useMemo(() => alerts
     .filter(a => !dismissedAlerts.includes(a.id))
-    .filter(a => !search || a.patient.toLowerCase().includes(search.toLowerCase()));
+    .filter(a => !search || a.patient.toLowerCase().includes(search.toLowerCase())), [alerts, dismissedAlerts, search]);
 
-  const filteredPatients = patients.filter(p =>
+  const filteredPatients = useMemo(() => patients.filter(p =>
     !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.mrn.includes(search)
-  );
+  ), [patients, search]);
 
-  const criticalCount = activeAlerts.filter(a=>a.urgency==='CRITICAL').length;
+  const criticalCount = useMemo(() => activeAlerts.filter(a=>a.urgency==='CRITICAL').length, [activeAlerts]);
 
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'8px 16px', borderRadius:'8px 8px 0 0', fontSize:12, fontWeight:600,
@@ -283,13 +283,14 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
                 const id = patient.scanId || patient.id;
                 if (id) setShowReferral(id);
             }},
-            { label: 'Explain to Patient', color: C.purple || '#8B5CF6', action: async () => {
+            { label: 'Explain to Patient', color: '#8B5CF6', action: async () => {
                 const id = patient.scanId || patient.id;
                 try {
                   const res = await apiClient.get(`/ai/explain/${id}`);
                   alert(`Generating layperson summary...\n\n"${res.data.explanation}"`);
-                } catch (e) {
-                  alert('Generating layperson summary...\n\n"Hello, based on the AI analysis of your scan, we have identified a significant finding that requires immediate clinical attention. Our specialists have been notified and are reviewing your case now. Please stay in the waiting area."');
+                } catch (e: any) {
+                  console.error('[DoctorDashboard] Explain API failed:', e);
+                  alert('Unable to generate layperson summary. Please refer to clinical guidelines or try again later.');
                 }
             }},
             { label: 'Correct Finding', color: C.urgent, action: () => {
@@ -308,11 +309,18 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
             { label: 'Escalate STAT', color: C.critical, action: async () => {
                 const id = patient.scanId || patient.id;
                 if (!id) return;
+                const reason = prompt('Enter clinical justification for STAT escalation (Audit required):');
+                if (!reason) {
+                  alert('Escalation cancelled: Justification is required.');
+                  return;
+                }
                 try {
-                  await apiClient.patch(`/scans/${id}/status`, { status: 'CRITICAL' });
+                  await apiClient.patch(`/scans/${id}/status`, { status: 'CRITICAL', auditReason: reason });
                   alert('Case successfully escalated to STAT.');
-                } catch (err) {
-                  alert('Escalation failed. Patient record might be locked.');
+                  window.location.reload();
+                } catch (err: any) {
+                  console.error('[DoctorDashboard] Escalation failed:', err);
+                  alert(`Escalation failed: ${err.message || 'System error'}`);
                 }
             }},
           ].map(a=>(

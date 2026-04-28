@@ -24,7 +24,7 @@ const POSTCODES = [
 ];
 
 export function PopulationHealthDashboard() {
-  const { stats, conditions, geography, trends, loading } = usePopulationHealthData();
+  const { stats, conditions, geography, trends, referrals = [], loading } = usePopulationHealthData();
   const [tab, setTab] = useState<'burden'|'geography'|'trends'|'referrals'>('burden');
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'7px 13px',fontSize:11,fontWeight:tab===t?600:400,
@@ -169,7 +169,7 @@ export function PopulationHealthDashboard() {
           <div style={{display:'flex',alignItems:'flex-end',gap:4,height:120,marginBottom:8}}>
             {trends?.length > 0 ? trends.map((v:any,i:number)=>(
               <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
-                <div style={{width:'100%',height:`${Math.max(5, (v.count/Math.max(...trends.map((x:any)=>x.count)||1))*100)}%`,background:`linear-gradient(180deg,${C.critical},${C.urgent})`,borderRadius:'3px 3px 0 0',opacity:0.8}}/>
+                <div style={{width:'100%',height:`${Math.max(5, (v.count/Math.max(...trends.map((x:any)=>x.count), 1))*100)}%`,background:`linear-gradient(180deg,${C.critical},${C.urgent})`,borderRadius:'3px 3px 0 0',opacity:0.8}}/>
               </div>
             )) : Array(12).fill(0).map((_,i)=>(
               <div key={i} style={{flex:1,height:4,background:C.bg3,borderRadius:2}}/>

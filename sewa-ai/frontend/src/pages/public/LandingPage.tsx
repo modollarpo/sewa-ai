@@ -15,8 +15,8 @@ const C = {
 
 const FEATURES = [
   { id:'triage-ai',          icon:'⚡', title:'Triage in Seconds', desc:'EfficientNet-B4 deep learning detects ICH, PE, pneumothorax, TB and stroke with AUC > 0.95 in under 2 seconds.', tag:'Triage Engine' },
-  { id:'uncertainty-ai',     icon:'🎯', title:'Uncertainty Engine', desc:'MC-Dropout × 20 forward passes quantify epistemic and aleatoric uncertainty. Flags low-confidence scans for human review.', tag:'Safety' },
-  { id:'metacognition-ai',   icon:'🧠', title:'Metacognition AI', desc:'9-layer self-evaluation detects hallucinations before reports reach clinicians. Confidence integrity score per result.', tag:'Quality Assurance' },
+  { id:'uncertainty-ai',     icon:'🎯', title:'Uncertainty Engine', desc:'Stochastic Monte Carlo dropout with multi-pass uncertainty quantification computes epistemic and aleatoric uncertainty. Flags low-confidence scans for human review.', tag:'Safety' },
+  { id:'metacognition-ai',   icon:'🧠', title:'Metacognition AI', desc:'Advanced multi-layer self-evaluation detects hallucinations before reports reach clinicians. Confidence integrity score per result.', tag:'Quality Assurance' },
   { id:'vision-language-ai', icon:'📋', title:'VLM Report Generator', desc:'Vision-Language Model generates structured, editable radiology reports in seconds — with clinical findings, impression, and recommendations.', tag:'Reporting' },
   { id:'explainable-ai',     icon:'🔒', title:'Explainable AI', desc:'Grad-CAM pixel attribution show exactly what the AI detected and why — pixel by pixel.', tag:'Explainability' },
   { id:'downloads',          icon:'🌍', title:'Global Deployment', desc:'Multi-region on Azure (UK, EU, US, Africa). Data residency, compliance, and billing adapted per region automatically.', tag:'Infrastructure' },

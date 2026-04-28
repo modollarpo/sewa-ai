@@ -26,15 +26,16 @@ from typing import Optional, List, Dict, Any
 import numpy as np
 import cv2
 from PIL import Image
+from urllib.parse import urlparse
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import uvicorn
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
-from cpu_inference_engine import registry, run_async
+from cpu_inference_engine import registry, run_async # type: ignore
 
 from utils.dicom_loader import load_dicom_from_url
 from utils.preprocessing import preprocess_scan
@@ -85,14 +86,14 @@ app.add_middleware(
 
 # ── Schemas ────────────────────────────────────────────────────
 class UncertaintyRequest(BaseModel):
-    scan_id: str
-    storage_url: Optional[str]   = None
-    image_data: Optional[str]    = None
-    modality: str
-    body_part: str
-    primary_finding: str
-    confidence: float
-    model_version: str           = MODEL_VERSION
+    scan_id: str = Field(..., pattern=r"^[A-Z0-9\-_]{4,64}$")
+    storage_url: Optional[str] = Field(None, pattern=r"^https?://.*")
+    image_data: Optional[str] = None
+    modality: str = Field(..., pattern=r"^(CT|MRI|XR)$")
+    body_part: str = Field(..., min_length=2, max_length=50)
+    primary_finding: str = Field(..., min_length=2, max_length=100)
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    model_version: str = MODEL_VERSION
 
 class SHAPValue(BaseModel):
     f: str    # feature name
@@ -260,10 +261,13 @@ def compute_saliency_map_onnx(
 
 
 def _render_heatmap_png(cam: np.ndarray, original: Optional[np.ndarray] = None) -> str:
-    heatmap = cv2.applyColorMap(np.uint8(255 * cam), cv2.COLORMAP_JET)
+    # Ensure cam is a numpy array and of correct type for applyColorMap
+    cam_uint8 = (255 * cam).astype(np.uint8)
+    heatmap = cv2.applyColorMap(cam_uint8, cv2.COLORMAP_JET)
     heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
     if original is not None and original.ndim == 2:
-        bg = cv2.cvtColor(np.uint8(original), cv2.COLOR_GRAY2RGB)
+        orig_uint8 = original.astype(np.uint8)
+        bg = cv2.cvtColor(orig_uint8, cv2.COLOR_GRAY2RGB)
         bg = cv2.resize(bg, (224, 224))
         overlay = cv2.addWeighted(bg, 0.55, heatmap, 0.45, 0)
     else:
@@ -312,12 +316,26 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
     try:
         # Load image
         if req.storage_url:
+            parsed = urlparse(req.storage_url)
+            if parsed.scheme != "https":
+                raise HTTPException(status_code=400, detail="Invalid storage_url: Only HTTPS is allowed")
+            
+            blacklist = ("localhost", "127.0.0.1", "169.254.169.254", "::1", "metadata.google.internal")
+            if parsed.hostname in blacklist or (parsed.hostname and (parsed.hostname.startswith("10.") or parsed.hostname.startswith("192.168."))):
+                logger.warning(f"[Uncertainty] SSRF attempt blocked for scan_id {req.scan_id}: {parsed.hostname}")
+                raise HTTPException(status_code=400, detail="Invalid storage_url: SSRF protection active")
+                
             image_array = await load_dicom_from_url(req.storage_url)
         elif req.image_data:
-            raw = base64.b64decode(req.image_data)
-            image_array = cv2.imdecode(np.frombuffer(raw, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+            def decode():
+                raw = base64.b64decode(req.image_data)
+                return cv2.imdecode(np.frombuffer(raw, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+            image_array = await asyncio.to_thread(decode)
         else:
             image_array = np.random.randint(0, 255, (512, 512), dtype=np.uint8)
+
+        if image_array is None:
+            raise HTTPException(status_code=400, detail="Failed to decode image")
 
         tensor = preprocess_scan(image_array, req.modality, req.body_part)
         input_arr = (tensor.numpy() if hasattr(tensor, "numpy") else np.array(tensor))[np.newaxis, ...]
@@ -337,8 +355,8 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
         # Feature attribution + heatmap render (CPU-fast)
         key = f"{req.modality}_{req.body_part}"
         features    = SHAP_FEATURES.get(key, [f"Feature_{i}" for i in range(8)])
-        shap_values = compute_onnx_attribution(input_arr, features, class_idx)
-        gradcam_b64 = _render_heatmap_png(cam_array, image_array)
+        shap_values = await asyncio.to_thread(compute_onnx_attribution, input_arr, features, class_idx)
+        gradcam_b64 = await asyncio.to_thread(_render_heatmap_png, cam_array, image_array)
         gradcam_url = await _upload_gradcam(req.scan_id, gradcam_b64)
 
         is_uncertain = mc["epistemic"] > 0.25 or mc["aleatoric"] > 0.5
@@ -385,7 +403,7 @@ async def health() -> Dict[str, Any]:
         "mc_passes": MC_PASSES,
         "models_loaded": registry.loaded_models,
         "latency_stats": registry.get_latency_stats(MODEL_ID) if MODEL_ID in registry.loaded_models else {},
-        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+        "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
     }
 
 

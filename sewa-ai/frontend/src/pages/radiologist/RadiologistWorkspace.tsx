@@ -1,6 +1,6 @@
 // SEWA AI — RadiologistWorkspace.tsx
 // Enterprise 3-panel PACS layout: Worklist | DICOM Viewer + AI | Report Editor
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useScanStore } from '../../store/scanStore';
 import { useAuthStore } from '../../store/authStore';
 import { useSettingsStore } from '../../store/settingsStore';
@@ -391,7 +391,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
             try {
               await apiClient.post('/second-opinions', { scanId: scan.id, reviewerId: specialist, status: 'pending', reason: 'Challenging pathology' });
               alert('Second opinion request sent successfully.');
-            } catch(e) { alert('Request failed. Ensure specialist ID is valid.'); }
+            } catch(e: any) { console.error('[Radiologist] Second opinion failed:', e); alert(`Request failed: ${e.message || 'System error'}`); }
             finally { setActionBusy(false); }
           }}
           disabled={actionBusy}
@@ -406,7 +406,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
               await apiClient.post(`/ai/icd10/${scan.id}`);
               alert('Automated ICD-10 coding complete.');
               onRequestVLM(); // Refresh
-            } catch(e) { alert('Coding failed.'); }
+            } catch(e: any) { console.error('[Radiologist] ICD-10 Coding failed:', e); alert(`Coding failed: ${e.message || 'System error'}`); }
             finally { setActionBusy(false); }
           }}
           disabled={actionBusy}
@@ -607,10 +607,10 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
     };
   }, []);
 
-  const stats = {
+  const stats = useMemo(() => ({
     total: (scans||[]).length,
     critical: (scans||[]).filter(s=>s.priority==='STAT'||s.aiResult?.urgency==='CRITICAL').length,
-  };
+  }), [scans]);
 
   const handleRequestVLM = async () => {
     if (!selected) return;

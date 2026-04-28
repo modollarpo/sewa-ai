@@ -23,6 +23,8 @@ import base64
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Union
+from enum import Enum
+from urllib.parse import urlparse
 
 import numpy as np
 import cv2
@@ -30,7 +32,7 @@ from PIL import Image
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import httpx
 import uvicorn
 
@@ -119,7 +121,7 @@ def _resolve_model() -> Path:
 def _export_and_quantize(pt_path: Path) -> Path:
     """Export PyTorch model to INT8 ONNX. Runs once on first boot if no ONNX exists."""
     try:
-        from cpu_inference_engine import export_pytorch_to_onnx, quantize_model_int8
+        from cpu_inference_engine import export_pytorch_to_onnx, quantize_model_int8 # type: ignore
         from model import load_model_checkpoint
         import torch
 
@@ -182,17 +184,23 @@ app.add_middleware(
 )
 
 # ── Schemas ────────────────────────────────────────────────────
+class Modality(str, Enum):
+    CT = "CT"
+    MRI = "MRI"
+    XR = "XR"
+
 class TriagePredictRequest(BaseModel):
-    scan_id: str
-    storage_url: Optional[str]    = None
-    modality: str                          # CT | MRI | XR
-    body_part: str
-    model_version: str                     = MODEL_VERSION
-    image_data: Optional[str]     = None   # base64 fallback
+    scan_id: str = Field(..., pattern=r"^[A-Z0-9\-_]{4,64}$")
+    storage_url: Optional[str] = Field(None, pattern=r"^https?://.*")
+    modality: Modality
+    body_part: str = Field(..., min_length=2, max_length=50)
+    model_version: str = MODEL_VERSION
+    image_data: Optional[str] = None
 
 class TriagePredictResponse(BaseModel):
     scan_id: str
     primary_finding: str
+    snomed_code: str                       # FHIR/UK NHS Coding
     urgency: str                           # CRITICAL | URGENT | NORMAL
     confidence: float
     location: Optional[str]
@@ -245,11 +253,12 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
         return TriagePredictResponse(
             scan_id=req.scan_id,
             primary_finding=finding,
+            snomed_code=_get_snomed_code(finding),
             urgency=urgency,
             confidence=confidence,
-            location=_estimate_location(req.modality, req.body_part, finding),
-            size=_estimate_size(image_array, finding),
-            midline_shift=_estimate_midline(image_array, finding) if "head" in req.body_part.lower() else "N/A",
+            location=await asyncio.to_thread(_estimate_location, req.modality, req.body_part, finding),
+            size=await asyncio.to_thread(_estimate_size, image_array, finding),
+            midline_shift=await asyncio.to_thread(_estimate_midline, image_array, finding) if "head" in req.body_part.lower() else "N/A",
             inference_ms=inference_ms,
             model_version=req.model_version,
             backend="onnx-int8" if INT8_MODEL.exists() else ("onnx-fp32" if FP32_MODEL.exists() else "demo"),
@@ -263,22 +272,57 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
 
 async def _load_image(req: TriagePredictRequest) -> np.ndarray:
     if req.storage_url:
+        parsed = urlparse(req.storage_url)
+        if parsed.scheme != "https":
+            raise HTTPException(status_code=400, detail="Invalid storage_url: Only HTTPS is allowed")
+        
+        # SSRF protection: block internal ranges and local hostnames
+        blacklist = ("localhost", "127.0.0.1", "169.254.169.254", "::1", "metadata.google.internal")
+        if parsed.hostname in blacklist or (parsed.hostname and parsed.hostname.startswith("10.")) or (parsed.hostname and parsed.hostname.startswith("192.168.")):
+            logger.warning(f"[Triage] SSRF attempt blocked for scan_id {req.scan_id}: {parsed.hostname}")
+            raise HTTPException(status_code=400, detail="Invalid storage_url: SSRF protection active")
+            
         return await load_dicom_from_url(req.storage_url)
+        
     if req.image_data:
-        raw = base64.b64decode(req.image_data)
-        arr = np.frombuffer(raw, dtype=np.uint8)
-        decoded = cv2.imdecode(arr, cv2.IMREAD_GRAYSCALE)
-        if decoded is not None:
-            return decoded
-        # Fallback: corrupt/unsupported image format
-        logger.warning("[Triage] cv2 failed to decode image — using synthetic fallback")
-    # Synthetic for CI/testing
-    return np.random.randint(0, 255, (512, 512), dtype=np.uint8)
+        def decode() -> Optional[np.ndarray]:
+            raw = base64.b64decode(req.image_data)
+            arr = np.frombuffer(raw, dtype=np.uint8)
+            return cv2.imdecode(arr, cv2.IMREAD_GRAYSCALE)
+            
+        try:
+            decoded = await asyncio.to_thread(decode)
+            if decoded is not None:
+                return decoded
+        except Exception as e:
+            logger.error(f"[Triage] Image decode failed for scan_id {req.scan_id} (Modality: {req.modality}): {e}")
+            raise HTTPException(status_code=400, detail="Invalid base64 image data")
+            
+        logger.error(f"[Triage] cv2 failed to decode image for scan_id {req.scan_id}")
+        raise HTTPException(status_code=400, detail="cv2 failed to decode image data")
+        
+    raise HTTPException(status_code=400, detail="Must provide either storage_url or image_data")
 
 
 def _softmax(x: np.ndarray) -> np.ndarray:
+    if x.size == 0:
+        return x
     e = np.exp(x - x.max())
     return e / e.sum()
+
+def _get_snomed_code(finding: str) -> str:
+    # Basic mapping for UK GDPR / FHIR alignment
+    snomed_map = {
+        "ICH": "116288000",
+        "Ischemic Stroke": "422504002",
+        "Hemorrhagic Stroke": "230690007",
+        "Pulmonary Embolism": "59282003",
+        "Pneumothorax": "36118008",
+        "Tension Pneumothorax": "70083008",
+        "Bowel Perforation": "315481005",
+        "Aortic Dissection": "28169009"
+    }
+    return snomed_map.get(finding, "27313000") # default undetermined finding
 
 
 def _classify_urgency(finding: str, confidence: float) -> str:
@@ -306,8 +350,10 @@ def _estimate_size(image: np.ndarray, finding: str) -> str:
         if contours:
             x, y, w, h = cv2.boundingRect(max(contours, key=cv2.contourArea))
             return f"{w // 5}×{h // 5}mm (approx)"
-    except Exception:
-        pass
+    except cv2.error as e:
+        logger.error(f"[Triage] OpenCV thresholding/contour error during size estimation: {e}")
+    except Exception as e:
+        logger.error(f"[Triage] Unexpected error during size estimation: {e}")
     return "See full report"
 
 
@@ -331,7 +377,7 @@ async def health() -> Dict[str, Any]:
         "backend": "onnx-int8-cpu",
         "models_loaded": registry.loaded_models,
         "latency_stats": registry.get_latency_stats(MODEL_ID) if MODEL_ID in registry.loaded_models else {},
-        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+        "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
     }
 
 
@@ -345,7 +391,7 @@ async def metrics() -> Dict[str, Any]:
         "triage_inference_p99_ms": stats.get("p99", 0),
         "triage_requests_total":   stats.get("count", 0),
         "backend": "onnx-int8-cpu",
-        "vcpu_count": int(os.cpu_count() or 0),
+        "vcpu_count": os.cpu_count() or 0,
     }
 
 

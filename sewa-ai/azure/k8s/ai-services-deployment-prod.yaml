@@ -225,7 +225,7 @@ spec:
       - name: acr-secret
       containers:
       - name: federated
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-federated-learning:latest"
+        image: "sewaaiproductionacr.azurecr.io/sewa-federated:latest"
         imagePullPolicy: Always
         ports:
         - containerPort: 8004
@@ -277,7 +277,7 @@ spec:
       - name: acr-secret
       containers:
       - name: continuous
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-continuous-learning:latest"
+        image: "sewaaiproductionacr.azurecr.io/sewa-continuous:latest"
         imagePullPolicy: Always
         ports:
         - containerPort: 8005

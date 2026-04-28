@@ -12,7 +12,7 @@ const C = {
 
 const ENGINES = [
   {
-    id:'triage', icon:'⚡', label:'Triage Engine', color:C.critical, port:8000,
+    id:'triage', icon:'⚡', label:'Triage Engine', color:C.critical,
     headline:'Critical conditions detected in under 2 seconds',
     description:'Our EfficientNet-B4 deep learning model analyses CT, MRI, and X-ray scans at 94% accuracy across 14 pathology classes. The triage engine fires before a radiologist opens a case — ensuring critical findings reach the right clinician immediately.',
     conditions:['Intracranial Haemorrhage (ICH)','Large Vessel Occlusion (LVO) / Stroke','Pulmonary Embolism (PE)','Pneumothorax','Aortic Dissection','Rib Fractures','Pleural Effusion','Pneumonia / COVID-19','Tuberculosis','Spinal Cord Compression','Liver Lesions','Renal Calculi','Appendicitis','Bowel Obstruction'],
@@ -25,22 +25,22 @@ const ENGINES = [
     pipeline:'DICOM → Preprocessing → EfficientNet-B4 → Multi-label classifier → Priority score → Worklist sort',
   },
   {
-    id:'uncertainty', icon:'🎯', label:'Uncertainty Engine', color:C.amber, port:8002,
+    id:'uncertainty', icon:'🎯', label:'Uncertainty Engine', color:C.amber,
     headline:'Know when to trust the AI — and when not to',
-    description:'SEWA AI is the only clinical AI platform that quantifies its own uncertainty. Using Monte Carlo Dropout with 20 forward passes, we compute both epistemic (model) and aleatoric (data) uncertainty — flagging borderline cases for mandatory human review.',
+    description:'SEWA AI is the only clinical AI platform that quantifies its own uncertainty. Using stochastic Monte Carlo dropout with multi-pass uncertainty quantification, we compute both epistemic (model) and aleatoric (data) uncertainty — flagging borderline cases for mandatory human review.',
     conditions:['Low-quality DICOM inputs (motion artefact, noise)','Rare or out-of-distribution pathologies','Multi-pathology overlapping findings','Paediatric anatomy (OOD vs adult training)','Post-surgical anatomy','Contrast vs non-contrast ambiguity'],
     metrics:[
-      { label:'Uncertainty method', value:'MC-Dropout ×20' },
+      { label:'Uncertainty method', value:'Stochastic MC Dropout' },
       { label:'Calibration (ECE)', value:'<0.04' },
       { label:'OOD detection rate', value:'89.1%' },
       { label:'False positive reduction', value:'31%' },
     ],
-    pipeline:'AI Result → MC-Dropout ×20 → Epistemic variance → Aleatoric variance → Confidence score → Flag/Pass',
+    pipeline:'AI Result → Stochastic Pass → Epistemic variance → Aleatoric variance → Confidence score → Flag/Pass',
   },
   {
-    id:'metacognition', icon:'🧠', label:'Metacognition Engine', color:C.purple, port:8003,
+    id:'metacognition', icon:'🧠', label:'Metacognition Engine', color:C.purple,
     headline:'AI that checks its own work before you see it',
-    description:'Our 9-layer metacognition pipeline evaluates every AI result before it reaches a clinician. It checks internal consistency, cross-references against clinical rules, detects hallucinations, and assigns a Confidence Integrity Score (CIS) to every output.',
+    description:'Our advanced metacognition pipeline evaluates every AI result before it reaches a clinician. It checks internal consistency, cross-references against clinical rules, detects hallucinations, and assigns a Confidence Integrity Score (CIS) to every output.',
     conditions:['Anatomical hallucinations (findings in wrong location)','Physiologically impossible combinations','Contradictions with prior scans','Clinical rule violations (e.g. ICH without hyperdensity)','Report-finding misalignment','Uncertainty-confidence contradiction'],
     metrics:[
       { label:'Hallucination catch rate', value:'96.3%' },
@@ -51,7 +51,7 @@ const ENGINES = [
     pipeline:'AI Result → Anatomical consistency → Clinical rules → Prior comparison → CIS scoring → Pass/Flag/Block',
   },
   {
-    id:'vlm', icon:'📋', label:'VLM Report Generator', color:C.info, port:8001,
+    id:'vlm', icon:'📋', label:'VLM Report Generator', color:C.info,
     headline:'Structured radiology reports in seconds, not hours',
     description:'Our Vision-Language Model combines the DICOM image, AI findings, patient history, and clinical context to generate a fully-structured, editable radiology report. Radiologists review, edit, and sign — reducing reporting time by 60–70%.',
     conditions:['Structured findings section (per organ system)','Impression with differential diagnosis','Clinical recommendations (urgent/routine)','Comparison with prior studies','Laterality, size, and HU measurements','ICD-10 coding suggestions','DICOM SR structured report output'],
@@ -64,7 +64,7 @@ const ENGINES = [
     pipeline:'DICOM + AI findings + EHR → VLM prompt → Structured report → Radiologist review → Sign & FHIR export',
   },
   {
-    id:'xai', icon:'🔍', label:'Explainability (XAI)', color:C.normal, port:8000,
+    id:'xai', icon:'🔍', label:'Explainability (XAI)', color:C.normal,
     headline:'See exactly what the AI saw — pixel by pixel',
     description:'Every SEWA AI result comes with a Grad-CAM heatmap overlaid on the DICOM image and SHAP feature attribution values. Clinicians can inspect precisely which regions drove the diagnosis — building trust and enabling faster, more confident decisions.',
     conditions:['Grad-CAM activation maps (pixel-level attribution)','SHAP feature importance (per clinical variable)','Attention rollout for transformer layers','Contrastive explanations (why NOT another class)','Interactive threshold adjustment','PDF export for audit and legal records'],
@@ -163,7 +163,7 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
               <div style={{ width:48, height:48, background:`${engine.color}14`, border:`1px solid ${engine.color}30`, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:24 }}>{engine.icon}</div>
               <div>
                 <div style={{ fontSize:11, fontWeight:700, color:engine.color, letterSpacing:'0.08em', textTransform:'uppercase' }}>{engine.label}</div>
-                <div style={{ fontSize:9, color:C.textLo, fontFamily:C.FM }}>AI Service :{engine.port}</div>
+                <div style={{ fontSize:9, color:C.textLo, fontFamily:C.FM }}>AI Service Process</div>
               </div>
             </div>
             <h2 style={{ fontSize:'clamp(24px, 5vw, 30px)', fontWeight:800, color:C.textHi, margin:'0 0 16px', letterSpacing:'-0.5px', fontFamily:C.F }}>{engine.headline}</h2>

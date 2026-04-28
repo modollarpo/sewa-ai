@@ -204,10 +204,10 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             <p style={p}>SEWA AI\'s core innovation is the layered 4-Engine pipeline. Each engine independently validates the previous engine's output before delivery to a clinician. This architecture is specifically designed to meet EU AI Act Article 14 (human oversight of high-risk AI) and FDA 510(k) requirements for clinical decision support.</p>
 
             {[
-              { n:1, label:'Triage Engine (Port :8000)', color:C.critical, detail:'EfficientNet-B4 · 14 pathology classes · AUC >0.95 · <2s inference', sub:'DICOM → Preprocessing → Deep learning inference → Priority classification → Worklist sorting' },
-              { n:2, label:'Uncertainty Engine (Port :8002)', color:C.amber, detail:'Monte Carlo Dropout ×20 · Epistemic + aleatoric variance · OOD detection 89.1%', sub:'AI Result → 20 stochastic forward passes → Uncertainty decomposition → Confidence integrity score' },
-              { n:3, label:'Metacognition Engine (Port :8003)', color:C.purple, detail:'9-layer self-evaluation · Hallucination catch rate 96.3% · Anatomical consistency checks', sub:'Result + uncertainty → Anatomical validation → Clinical rule matching → Prior comparison → CIS scoring' },
-              { n:4, label:'VLM Report Generator (Port :8001)', color:C.normal, detail:'Vision-Language Model · <8s report generation · 23% radiologist edit rate · 8 languages', sub:'DICOM + AI findings + EHR → VLM prompt → Structured report → Radiologist review queue' },
+              { n:1, label:'Triage Engine', color:C.critical, detail:'EfficientNet-B4 · 14 pathology classes · AUC >0.95 · <2s inference', sub:'Scan Processing → Pathological Assessment → Priority classification → Worklist sorting' },
+              { n:2, label:'Uncertainty Engine', color:C.amber, detail:'Stochastic Monte Carlo dropout · Epistemic + aleatoric variance · OOD detection 89.1%', sub:'Scan Processing → Uncertainty Quantification → Confidence Assessment' },
+              { n:3, label:'Metacognition Engine', color:C.purple, detail:'Multi-layer self-evaluation · Hallucination catch rate 96.3% · Anatomical consistency checks', sub:'Validation Processing → Clinical rule matching → Prior comparison → CIS scoring' },
+              { n:4, label:'VLM Report Generator', color:C.normal, detail:'Vision-Language Model · <8s report generation · 23% radiologist edit rate · 8 languages', sub:'Scan + Findings + History → Clinical Synthesis → Structured report → Radiologist review queue' },
             ].map(engine => (
               <div key={engine.n} style={{ marginBottom:16, padding:20, background:C.bg2, border:`1px solid ${engine.color}30`, borderRadius:14 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>

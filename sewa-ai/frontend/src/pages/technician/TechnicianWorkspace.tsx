@@ -1,6 +1,6 @@
 // SEWA AI — TechnicianWorkspace.tsx
 // DICOM upload (drag-drop), live worklist, PACS sync status, queue management
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useTechnicianData, useAppointmentData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
@@ -197,8 +197,9 @@ export function TechnicianWorkspace() {
           : j
         ));
       } catch (err: any) {
+        console.error('[Technician] Upload error:', err);
         setJobs(prev => prev.map(j => j.id === jobId
-          ? { ...j, status: 'error', error: err.response?.data?.message || 'Upload failed' }
+          ? { ...j, status: 'error', error: err.response?.data?.message || err.message || 'Upload failed' }
           : j
         ));
       }
@@ -245,9 +246,9 @@ export function TechnicianWorkspace() {
     display:'flex', alignItems:'center', gap:5,
   });
 
-  const processing = jobs.filter(j=>j.status==='uploading'||j.status==='processing').length;
-  const complete   = jobs.filter(j=>j.status==='ai_complete').length;
-  const critical   = jobs.filter(j=>j.urgency==='CRITICAL').length;
+  const processing = useMemo(() => jobs.filter(j=>j.status==='uploading'||j.status==='processing').length, [jobs]);
+  const complete   = useMemo(() => jobs.filter(j=>j.status==='ai_complete').length, [jobs]);
+  const critical   = useMemo(() => jobs.filter(j=>j.urgency==='CRITICAL').length, [jobs]);
 
   return (
     <div className="workspace-layout" style={{display:'flex',height:'calc(100vh - 52px - 24px)',background:C.bg1,fontFamily:C.F,overflow:'hidden'}}>
@@ -571,8 +572,13 @@ export function TechnicianWorkspace() {
                   onClick={async () => {
                     const btn = document.activeElement as HTMLButtonElement;
                     if (btn) btn.innerText = 'SYNCING...';
-                    await new Promise(r => setTimeout(r, 2000));
-                    alert('PACS Worklist synchronized successfully.');
+                    try {
+                      await apiClient.post('/tenants/integrations/sync');
+                      alert('PACS Worklist synchronized successfully.');
+                    } catch(e: any) {
+                      console.error('[Technician] PACS Sync failed:', e);
+                      alert(`PACS Sync failed: ${e.message || 'Connection refused'}`);
+                    }
                     if (btn) btn.innerText = 'FORCE SYNC';
                   }}
                   style={{padding:'6px 12px', background:C.bg3, border:`1px solid ${C.border}`, borderRadius:8, color:C.textHi, fontSize:10, fontWeight:700, cursor:'pointer'}}>

@@ -104,7 +104,7 @@ export function useAIData() {
 
 export function useBillingData() {
   const [data, setData] = useState({
-    stats: { monthlyRevenue: 0, activePlans: 0, pendingInvoices: 0 },
+    stats: { monthlyRevenue: 0, activePlans: 0, pendingInvoices: 0 } as any,
     history: [] as any[],
     loading: true
   });
@@ -294,6 +294,7 @@ export function usePopulationHealthData() {
     stats: { totalScans: 0, positives: 0, criticals: 0, impact: 0 },
     conditions: [] as any[],
     geography: [] as any[],
+    trends: [] as any[],
     referrals: [] as any[],
     loading: true
   });

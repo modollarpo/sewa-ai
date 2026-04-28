@@ -8,9 +8,9 @@ import time
 import logging
 from contextlib import asynccontextmanager
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -55,20 +55,20 @@ app.add_middleware(
 
 # ── Request / Response ─────────────────────────────────────────
 class VLMReportRequest(BaseModel):
-    scan_id: str
-    storage_url: Optional[str] = None
-    modality: str
-    body_part: str
-    patient_age: Optional[int] = None
-    patient_sex: Optional[str] = None
-    clinical_indication: Optional[str] = None
-    ai_finding: str
-    urgency: str
-    confidence: float
-    location: Optional[str] = None
+    scan_id: str = Field(..., pattern=r"^[A-Z0-9\-_]{4,64}$")
+    storage_url: Optional[str] = Field(None, pattern=r"^https?://.*")
+    modality: str = Field(..., pattern=r"^(CT|MRI|XR)$")
+    body_part: str = Field(..., min_length=2, max_length=50)
+    patient_age: Optional[int] = Field(None, ge=0, le=150)
+    patient_sex: Optional[str] = Field(None, pattern=r"^(M|F|O|U)$")
+    clinical_indication: Optional[str] = Field(None, max_length=500)
+    ai_finding: str = Field(..., min_length=2, max_length=100)
+    urgency: str = Field(..., pattern=r"^(CRITICAL|URGENT|NORMAL)$")
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    location: Optional[str] = Field(None, max_length=100)
     shap_values: Optional[List[Dict[str, Any]]] = None
-    region: str = "uk"
-    language: str = "en"
+    region: str = Field("uk", pattern=r"^[a-z]{2}$")
+    language: str = Field("en", pattern=r"^[a-z]{2}$")
     compliance: List[str] = ["HIPAA", "ISO 13485"]
 
 class VLMReportResponse(BaseModel):
@@ -161,10 +161,14 @@ Supplementary observations:
         
         if USE_AZURE_OPENAI and openai_client:
             try:
+                # Simple sanitization for prompt injection prevention
+                safe_finding = req.ai_finding.replace("{", "").replace("}", "").replace('"', "")
+                safe_indication = (req.clinical_indication or "None provided").replace("{", "").replace("}", "")
+
                 prompt = f"""You are an expert AI radiologist assistant. 
 Generate a structured radiology report for a {req.modality} of the {req.body_part}.
-Clinical indication: {req.clinical_indication or 'None provided'}
-AI Finding: {req.ai_finding} (Confidence: {req.confidence*100:.1f}%)
+Clinical indication: {safe_indication}
+AI Finding: {safe_finding} (Confidence: {req.confidence*100:.1f}%)
 Urgency: {req.urgency}
 Location: {req.location or 'Not specified'}
 
@@ -194,7 +198,7 @@ AI Urgency:      {req.urgency}
 AI Confidence:   {req.confidence*100:.1f}%
 Region:          {req.region.upper()}
 Compliance:      {compliance_str}
-Generated:       {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+Generated:       {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}
 Model:           Azure OpenAI GPT-4o
 {'='*60}
 
@@ -212,7 +216,7 @@ HL7 ORU message will be dispatched on signing.
                     findings=req.ai_finding,
                     impression=req.urgency,
                     full_text=full_text,
-                    generated_at=datetime.utcnow().isoformat(),
+                    generated_at=datetime.now(timezone.utc).isoformat(),
                     model_version="gpt-4o",
                     generation_ms=int((time.time() - start) * 1000),
                 )
@@ -227,7 +231,7 @@ AI Urgency:      {req.urgency}
 AI Confidence:   {req.confidence*100:.1f}%
 Region:          {req.region.upper()}
 Compliance:      {compliance_str}
-Generated:       {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+Generated:       {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}
 Model:           SEWA AI VLM v1.8.0
 {'='*60}
 
@@ -258,7 +262,7 @@ HL7 ORU message will be dispatched on signing.
             findings=findings,
             impression=impression,
             full_text=full_text,
-            generated_at=datetime.utcnow().isoformat(),
+            generated_at=datetime.now(timezone.utc).isoformat(),
             model_version="vlm-v1.8.0",
             generation_ms=generation_ms,
         )
@@ -274,7 +278,7 @@ async def health() -> Dict[str, Any]:
         "service": "vlm-report-generator",
         "version": "1.8.0",
         "backend": "azure-openai" if USE_AZURE_OPENAI else "cpu-template",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 

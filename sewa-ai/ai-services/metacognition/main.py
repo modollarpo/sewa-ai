@@ -10,7 +10,7 @@ import time
 import logging
 from contextlib import asynccontextmanager
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 import numpy as np
@@ -101,20 +101,18 @@ class SHAPValue(BaseModel):
     v: float         # importance value 0–1
 
 class MetacognitionRequest(BaseModel):
-    scan_id: str
-    primary_finding: str
-    urgency: str
-    confidence: float                    # 0.0–1.0
-    uncertainty_score: float             # from uncertainty engine
+    scan_id: str = Field(..., pattern=r"^[A-Z0-9\-_]{4,64}$")
+    primary_finding: str = Field(..., min_length=2, max_length=100)
+    urgency: str = Field(..., pattern=r"^(CRITICAL|URGENT|NORMAL)$")
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    uncertainty_score: float = Field(..., ge=0.0, le=1.0)
     shap_values: Optional[List[SHAPValue]] = []
-    modality: str
-    body_part: str
-    patient_age: Optional[int] = None
-    patient_sex: Optional[str] = None
-    # Secondary findings from triage engine
+    modality: str = Field(..., pattern=r"^(CT|MRI|XR)$")
+    body_part: str = Field(..., min_length=2, max_length=50)
+    patient_age: Optional[int] = Field(None, ge=0, le=150)
+    patient_sex: Optional[str] = Field(None, pattern=r"^(M|F|O|U)$")
     all_findings: Optional[List[Dict[str, Any]]] = []
-    # VLM report text for contradiction check
-    report_text: Optional[str] = None
+    report_text: Optional[str] = Field(None, max_length=10000) # DoS protection
 
 class MetacognitionFlag(BaseModel):
     code: str
@@ -181,6 +179,8 @@ class MetacognitionEvaluator:
             corrected_urgency = expected_urgency
             hallucination_risk += 0.25
             logger.warning(f"[{req.scan_id}] Urgency mismatch: {req.urgency} → {expected_urgency}")
+        elif not expected_urgency and req.primary_finding != "Normal":
+            logger.warning(f"[{req.scan_id}] Missing urgency map for finding: {req.primary_finding}")
 
         # ── 3. Confidence calibration ──────────────────────────
         min_conf = CONFIDENCE_THRESHOLDS.get(req.urgency, 0.5)
@@ -276,7 +276,7 @@ class MetacognitionEvaluator:
             corrected_confidence=corrected_confidence,
             safe_to_alert=safe_to_alert,
             evaluation_ms=eval_ms,
-            evaluated_at=datetime.utcnow().isoformat(),
+            evaluated_at=datetime.now(timezone.utc).isoformat(),
         )
 
     def _check_shap_coherence(
@@ -361,7 +361,7 @@ class MetacognitionEvaluator:
         lines += [
             "",
             f"Evaluated by: SEWA AI Metacognition Engine v2.0.0",
-            f"Timestamp: {datetime.utcnow().isoformat()}",
+            f"Timestamp: {datetime.now(timezone.utc).isoformat()}",
         ]
         return "\n".join(lines)
 
@@ -403,7 +403,7 @@ async def health() -> Dict[str, Any]:
         "version": "2.0.0",
         "backend": "cpu-rules",
         "rules_loaded": len(MODALITY_FINDING_MATRIX),
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 

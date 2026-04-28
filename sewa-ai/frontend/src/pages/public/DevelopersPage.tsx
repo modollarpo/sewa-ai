@@ -39,18 +39,18 @@ export function DevelopersPage({ onNavigate }: { onNavigate:(p:string)=>void }) 
            <h2 style={{ fontSize:32, fontWeight:800, color:C.textHi, marginBottom:24 }}>Unified Engine API</h2>
            <div style={{ display:'flex', flexDirection:'column', gap:16, marginBottom:32 }}>
               {[
-                { port:'8000', name:'Triage Engine', type:'REST / WebSocket' },
-                { port:'8001', name:'VLM Engine', type:'REST / gRPC' },
-                { port:'8002', name:'Uncertainty Engine', type:'REST' },
-                { port:'8003', name:'Metacognition', type:'Internal Sync' },
-                { port:'8004', name:'Explainability', type:'Static JSON/Heatmap' },
+                { id:'triage', name:'Triage Engine', type:'REST / WebSocket' },
+                { id:'vlm', name:'VLM Engine', type:'REST / gRPC' },
+                { id:'uncertainty', name:'Uncertainty Engine', type:'REST' },
+                { id:'meta', name:'Metacognition', type:'Internal Sync' },
+                { id:'xai', name:'Explainability', type:'Static JSON/Heatmap' },
               ].map(e => (
-                <div key={e.port} style={{ padding:'12px 16px', background:C.bg2, borderRadius:10, border:`1px solid ${C.border}`, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <div key={e.id} style={{ padding:'12px 16px', background:C.bg2, borderRadius:10, border:`1px solid ${C.border}`, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                    <div>
                       <div style={{ fontSize:14, fontWeight:700, color:C.textHi }}>{e.name}</div>
                       <div style={{ fontSize:11, color:C.textLo }}>{e.type}</div>
                    </div>
-                   <div style={{ fontSize:12, color:C.brand, fontFamily:C.FM, fontWeight:700 }}>PORT {e.port}</div>
+                   <div style={{ fontSize:12, color:C.brand, fontFamily:C.FM, fontWeight:700 }}>Active</div>
                 </div>
               ))}
            </div>

@@ -50,7 +50,11 @@ export function PatientPortal() {
 
       {tab==='scans' && (
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
-          {scansLoading ? <Skeleton height={100}/> : scans.map(s=>(
+          {scansLoading ? <Skeleton height={100}/> : scans.length === 0 ? (
+            <div style={{padding:40,background:C.bg2,borderRadius:16,border:`1px solid ${C.border}`,textAlign:'center',color:C.textLo}}>
+              No scans available in your record yet.
+            </div>
+          ) : scans.map((s:any)=>(
             <div key={s.id} style={{padding:20,background:C.bg2,borderRadius:16,border:`1px solid ${C.border}`}}>
               <div style={{display:'flex',justifyContent:'space-between',marginBottom:12}}>
                 <div style={{fontSize:16,fontWeight:700,color:C.textHi}}>{s.modality} {s.bodyPart}</div>
@@ -81,10 +85,14 @@ export function PatientPortal() {
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
            <div style={{padding:20,background:C.bg2,borderRadius:16,border:`1px solid ${C.border}`}}>
               <h3 style={{color:C.textHi}}>Billing History</h3>
-              {scans.filter(s=>s.status==='complete').map(s=>(
+              {scans.filter(s=>s.status==='complete').length === 0 ? (
+                <div style={{padding:'20px 0',color:C.textLo,fontSize:12,textAlign:'center'}}>No completed scans found for billing.</div>
+              ) : scans.filter(s=>s.status==='complete').map((s:any)=>(
                 <div key={s.id} style={{display:'flex',justifyContent:'space-between',padding:'12px 0',borderTop:`1px solid ${C.border}`}}>
                   <div style={{color:C.textHi}}>{s.modality} Analysis</div>
-                  <div style={{color:C.brand,fontWeight:700}}>£49.00</div>
+                  <div style={{color:s.cost ? C.brand : C.textLo,fontWeight:700}}>
+                    {s.cost ? `£${Number(s.cost).toFixed(2)}` : 'Pending'}
+                  </div>
                 </div>
               ))}
            </div>
