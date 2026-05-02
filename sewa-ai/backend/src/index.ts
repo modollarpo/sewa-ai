@@ -44,6 +44,7 @@ import aiMonitoringRoutes from './routes/ai-monitoring';
 import onboardingRoutes from './routes/onboarding';
 import complianceRoutes from './routes/compliance';
 import trainingRoutes   from './routes/training';
+import referralRoutes   from './routes/referrals';
 import { sendAppointmentReminders } from './routes/appointments/index';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 import { dlq } from './services/dlqService';

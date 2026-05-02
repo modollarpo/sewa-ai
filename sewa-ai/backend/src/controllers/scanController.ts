@@ -336,11 +336,13 @@ export async function notifyScan(req: Request, res: Response, next: NextFunction
     // In production, this would invoke the WhatsApp/SMS gateway or HL7 bridge
     logger.info(`[Notify] Alerting referring physician for Scan ${id} (Finding: ${scan.aiResult?.primaryFinding})`);
     
-    await notifyUsers([scan.referringDoctorId || userId], {
+    await notifyUsers({
+      tenantId,
+      userIds: [scan.referringDoctorId || userId],
+      type: 'critical_finding',
       title: 'CRITICAL RESULT ALERT',
       body: `STAT Finding detected for scan ${id}. Please review immediately.`,
-      urgency: 'CRITICAL',
-      data: { scanId: id }
+      data: { scanId: id, urgency: 'CRITICAL' }
     });
 
     await auditLog({ 

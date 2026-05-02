@@ -18,7 +18,7 @@ r.get('/student-cases', async (req, res, next) => {
       include: { aiResult: true }
     });
 
-    const cases = scans.map(s => ({
+    const cases = scans.map((s: any) => ({
       id: s.id,
       type: `${s.modality} ${s.bodyPart}`,
       clinicalInfo: s.clinicalIndication || 'No clinical history provided.',
@@ -46,7 +46,7 @@ r.get('/cases', async (req, res, next) => {
       include: { aiResult: true }
     });
 
-    const cases = scans.map(s => ({
+    const cases = scans.map((s: any) => ({
       id: s.id,
       modality: s.modality,
       bodyPart: s.bodyPart,

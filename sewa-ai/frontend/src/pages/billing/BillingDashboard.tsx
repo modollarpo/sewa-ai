@@ -86,6 +86,7 @@ export function BillingDashboard() {
   const { stats, history, loading } = useBillingData();
   const region = user?.region ?? 'uk';
   const [tab, setTab] = useState<'overview'|'plans'|'payment'|'history'>('overview');
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string|null>(null);
   const plans = PLANS[region] ?? PLANS.uk;
   const gateways = PAYMENT_GATEWAYS[region] ?? PAYMENT_GATEWAYS.uk;
@@ -98,11 +99,11 @@ export function BillingDashboard() {
       } else if (res.data.paymentLink) {
         window.location.href = res.data.paymentLink;
       } else {
-        alert(`Successfully switched to ${plan} plan.`);
-        window.location.reload();
+        setStatus({ msg: `Successfully switched to ${plan} plan.`, type: 'ok' });
+        setTimeout(() => window.location.reload(), 1500);
       }
     } catch (err: any) {
-      alert(`Upgrade failed: ${err.response?.data?.message || err.message}`);
+      setStatus({ msg: `Upgrade failed: ${err.response?.data?.message || err.message}`, type: 'err' });
     }
   };
 
@@ -117,6 +118,18 @@ export function BillingDashboard() {
     <div style={{ padding:24, background:C.bg1, minHeight:'calc(100vh - 76px)', fontFamily:C.F }}>
       <style>{S}</style>
 
+      {status && (
+        <div style={{ 
+          padding:'12px 20px', background: status.type==='ok'?C.normalBg:C.bg2, 
+          border:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
+          borderRadius:12, marginBottom:24, display:'flex', justifyContent:'space-between', alignItems:'center',
+          color: status.type==='ok'?C.normal:C.critical, fontSize:13, fontWeight:600
+        }}>
+          <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
+          <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="billing-header" style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:24 }}>
         <div>
@@ -129,9 +142,9 @@ export function BillingDashboard() {
           onClick={async () => {
             try {
               await apiClient.post('/payments/audit-invoice', { region });
-              alert('Invoice generation initiated. Your monthly summary will be sent to your registered clinical email.');
+              setStatus({ msg: 'Invoice generation initiated. Your monthly summary will be sent to your registered clinical email.', type: 'ok' });
             } catch (e) {
-              alert('Invoice service currently unavailable.');
+              setStatus({ msg: 'Invoice service currently unavailable.', type: 'err' });
             }
           }}
           style={{ padding:'8px 16px', background:C.brand, border:'none', borderRadius:8, color:'white', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:C.F }}>
