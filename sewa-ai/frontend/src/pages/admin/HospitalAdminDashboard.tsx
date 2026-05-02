@@ -70,6 +70,8 @@ export function HospitalAdminDashboard() {
   const [invoices, setInvoices]       = useState<any[]>([]);
   const [pacsStatus, setPacsStatus]   = useState<'idle'|'loading'|'ok'|'fail'>('idle');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [selectedStaff, setSelectedStaff] = useState<any>(null);
+  const [actionType, setActionType] = useState<'invite'|'edit'|'suspend'|null>(null);
 
   useEffect(() => {
     apiClient.get('/payments/history').then(r => {
@@ -103,7 +105,7 @@ export function HospitalAdminDashboard() {
             {user?.tenantName || 'Royal London Hospital'} · {user?.region?.toUpperCase() || 'UK'} Region
           </p>
         </div>
-        <button onClick={()=>setShowAddUser(true)} style={{
+        <button onClick={()=>{ setActionType('invite'); setShowAddUser(true); }} style={{
           padding:'8px 16px',background:C.brand,border:'none',borderRadius:8,
           color:'white',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:C.F,
           display:'flex',alignItems:'center',gap:6,
@@ -186,19 +188,7 @@ export function HospitalAdminDashboard() {
                   style={{padding:'8px 12px', background:C.bg2, border:`1px solid ${C.border}`, borderRadius:8, color:C.textHi, fontSize:12, width:200}}
                 />
                 <button 
-                  onClick={async () => {
-                    const email = prompt('Enter staff email to invite:');
-                    const role = prompt('Enter role (doctor, radiologist, technician):', 'doctor');
-                    if (email && role) {
-                      try {
-                        await apiClient.post('/users/invite', { email, role });
-                        alert(`Invite sent to ${email} as ${role}.`);
-                      } catch (e: any) {
-                        console.error('[Admin] Invite failed:', e);
-                        alert(`Invitation failed: ${e.message || 'System error.'}`);
-                      }
-                    }
-                  }}
+                  onClick={() => { setActionType('invite'); setShowAddUser(true); }}
                   style={{padding:'8px 16px', background:C.brand, color:'white', border:'none', borderRadius:8, fontSize:12, fontWeight:700, cursor:'pointer'}}>
                   + Invite Staff
                 </button>
@@ -230,25 +220,8 @@ export function HospitalAdminDashboard() {
                     <td style={{padding:'12px 16px'}}><div style={{display:'flex',alignItems:'center',gap:6}}><StatusDot status={s.status}/><span style={{fontSize:11,color:C.textMd}}>{s.status}</span></div></td>
                     <td style={{padding:'12px 16px'}}>
                       <div style={{display:'flex',gap:6}}>
-                        <button onClick={async () => {
-                          const newRole = prompt(`Enter new role for ${s.firstName} (doctor, radiologist, technician, admin):`, s.role);
-                          if(newRole && newRole !== s.role) {
-                            try {
-                              await apiClient.patch(`/users/${s.id}/role`, { role: newRole });
-                              alert('Role updated successfully.');
-                              window.location.reload();
-                            } catch(e: any) {
-                              alert(`Failed to update role: ${e.message}`);
-                            }
-                          }
-                        }} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button>
-                        <button onClick={async () => {
-                          const next = s.status === 'suspended' ? 'active' : 'suspended';
-                          if(confirm(`Are you sure you want to ${next} this staff member?`)) {
-                            await apiClient.patch(`/users/${s.id}/status`, { status: next });
-                            window.location.reload();
-                          }
-                        }} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:s.status === 'suspended' ? C.normal : C.critical,borderRadius:6,cursor:'pointer'}}>
+                        <button onClick={() => { setSelectedStaff(s); setActionType('edit'); setShowAddUser(true); }} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.textMd,borderRadius:6,cursor:'pointer'}}>Edit</button>
+                        <button onClick={() => { setSelectedStaff(s); setActionType('suspend'); setShowAddUser(true); }} style={{padding:'4px 8px',fontSize:10,background:C.bg3,border:`1px solid ${C.border}`,color:s.status === 'suspended' ? C.normal : C.critical,borderRadius:6,cursor:'pointer'}}>
                           {s.status === 'suspended' ? 'Reactivate' : 'Suspend'}
                         </button>
                       </div>
@@ -460,40 +433,96 @@ export function HospitalAdminDashboard() {
           <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:16,width:'100%',maxWidth:440,padding:24,boxShadow:'0 24px 64px rgba(0,0,0,0.8)',animation:'pop 200ms ease'}}>
             <style>{`@keyframes pop{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}`}</style>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
-              <h2 style={{margin:0,fontSize:18,fontWeight:700,color:C.textHi}}>Add New Staff Member</h2>
-              <button onClick={()=>setShowAddUser(false)} style={{background:'none',border:'none',color:C.textLo,cursor:'pointer'}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              <h2 style={{margin:0,fontSize:18,fontWeight:700,color:C.textHi}}>
+                {actionType === 'invite' ? 'Invite New Staff' : actionType === 'edit' ? 'Update Staff Role' : 'Manage Account Status'}
+              </h2>
+              <button onClick={()=>{ setShowAddUser(false); setSelectedStaff(null); setActionType(null); }} style={{background:'none',border:'none',color:C.textLo,cursor:'pointer'}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             
-            <form onSubmit={async (e)=>{
-              e.preventDefault();
-              const d = new FormData(e.currentTarget);
-              try {
-                await apiClient.post('/users', Object.fromEntries(d));
-                alert('Staff member invited successfully.');
-                setShowAddUser(false);
-              } catch(err) {
-                alert('Invitation failed. Check role permissions.');
-              }
-            }} style={{display:'flex',flexDirection:'column',gap:16}}>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-                <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:6}}>FIRST NAME</label><input name="firstName" required style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'10px',color:C.textHi,fontSize:13,boxSizing:'border-box'}}/></div>
-                <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:6}}>LAST NAME</label><input name="lastName" required style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'10px',color:C.textHi,fontSize:13,boxSizing:'border-box'}}/></div>
+            {actionType === 'invite' && (
+              <form onSubmit={async (e)=>{
+                e.preventDefault();
+                const d = new FormData(e.currentTarget);
+                try {
+                  await apiClient.post('/users/invite', Object.fromEntries(d));
+                  alert('Staff member invited successfully.');
+                  setShowAddUser(false);
+                } catch(err: any) { alert(err.response?.data?.message || 'Invitation failed.'); }
+              }} style={{display:'flex',flexDirection:'column',gap:16}}>
+                <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:6}}>EMAIL ADDRESS (@nhs.uk / @tenant.com)</label><input name="email" type="email" required style={modalInputStyle}/></div>
+                <div>
+                  <label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:6}}>CLINICAL ROLE</label>
+                  <select name="role" style={modalInputStyle}>
+                    <option value="radiologist">Radiologist</option>
+                    <option value="doctor">Physician</option>
+                    <option value="technician">Technician</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+                <button type="submit" style={modalBtnStyle}>🚀 Send Invitation</button>
+              </form>
+            )}
+
+            {actionType === 'edit' && selectedStaff && (
+              <div style={{display:'flex', flexDirection:'column', gap:16}}>
+                <div style={{color:C.textMd, fontSize:13}}>Update role for <b>{selectedStaff.firstName} {selectedStaff.lastName}</b></div>
+                <div>
+                  <label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:6}}>NEW CLINICAL ROLE</label>
+                  <select id="roleSelect" defaultValue={selectedStaff.role} style={modalInputStyle}>
+                    <option value="radiologist">Radiologist</option>
+                    <option value="doctor">Physician</option>
+                    <option value="technician">Technician</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+                <button onClick={async () => {
+                  const role = (document.getElementById('roleSelect') as HTMLSelectElement).value;
+                  try {
+                    await apiClient.patch(`/users/${selectedStaff.id}/role`, { role });
+                    alert('Role updated successfully.');
+                    setShowAddUser(false);
+                    window.location.reload();
+                  } catch(e: any) { alert(e.message); }
+                }} style={modalBtnStyle}>Save Changes</button>
               </div>
-              <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:6}}>EMAIL ADDRESS (@nhs.uk / @tenant.com)</label><input name="email" type="email" required style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'10px',color:C.textHi,fontSize:13,boxSizing:'border-box'}}/></div>
-              <div>
-                <label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:6}}>CLINICAL ROLE</label>
-                <select name="role" style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'10px',color:C.textHi,fontSize:13}}>
-                  <option value="radiologist">Radiologist</option>
-                  <option value="doctor">Physician</option>
-                  <option value="technician">Technician</option>
-                  <option value="admin">Administrator</option>
-                </select>
+            )}
+
+            {actionType === 'suspend' && selectedStaff && (
+              <div style={{display:'flex', flexDirection:'column', gap:16}}>
+                <div style={{color:C.textHi, fontSize:14}}>
+                  {selectedStaff.status === 'suspended' ? 'Reactivate account?' : 'Suspend clinical access?'}
+                </div>
+                <p style={{fontSize:12, color:C.textLo, margin:0}}>
+                  {selectedStaff.status === 'suspended' 
+                    ? 'This will restore full system access for the user.' 
+                    : 'This will immediately revoke all clinical and administrative access for this user.'}
+                </p>
+                <div style={{display:'flex', gap:12, marginTop:8}}>
+                  <button onClick={()=>setShowAddUser(false)} style={{flex:1, padding:12, background:C.bg3, border:`1px solid ${C.border}`, color:C.textHi, borderRadius:10, cursor:'pointer'}}>Cancel</button>
+                  <button onClick={async () => {
+                    const next = selectedStaff.status === 'suspended' ? 'active' : 'suspended';
+                    try {
+                      await apiClient.patch(`/users/${selectedStaff.id}/status`, { status: next });
+                      setShowAddUser(false);
+                      window.location.reload();
+                    } catch(e: any) { alert(e.message); }
+                  }} style={{flex:1, padding:12, background:selectedStaff.status === 'suspended' ? C.normal : C.critical, border:'none', color:'white', borderRadius:10, fontWeight:700, cursor:'pointer'}}>
+                    {selectedStaff.status === 'suspended' ? 'Reactivate' : 'Suspend'}
+                  </button>
+                </div>
               </div>
-              <button type="submit" style={{marginTop:8,padding:'12px',background:C.brand,color:'white',border:'none',borderRadius:10,fontWeight:700,cursor:'pointer',fontSize:14}}>🚀 Invite Staff Member</button>
-            </form>
+            )}
           </div>
         </div>
       )}
     </div>
   );
 }
+
+const modalInputStyle = {
+  width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:10,padding:'12px',color:C.textHi,fontSize:14,boxSizing:'border-box',fontFamily:C.F
+} as React.CSSProperties;
+
+const modalBtnStyle = {
+  marginTop:8,padding:'12px',background:C.brand,color:'white',border:'none',borderRadius:10,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:C.F
+} as React.CSSProperties;

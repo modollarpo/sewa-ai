@@ -27,6 +27,10 @@ export function ProfileSettings() {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'profile'|'security'|'notifications'>('profile');
   const [isSaving, setIsSaving] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [isChangingPass, setIsChangingPass] = useState(false);
+
   const [form, setForm] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -59,28 +63,98 @@ export function ProfileSettings() {
     borderRadius:10, color:C.textHi, fontSize:14, fontFamily:C.F, outline:'none', marginBottom:16
   };
 
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+
   const handleSave = async () => {
     setIsSaving(true);
+    setStatus(null);
     try {
       await apiClient.patch('/users/me', form);
-      // Update local auth store if needed
       useAuthStore.setState(state => ({
         user: state.user ? { ...state.user, ...form } : null
       }));
-      alert('Clinical profile updated successfully.');
+      setStatus({ msg: 'Clinical profile updated successfully.', type: 'ok' });
     } catch (err: any) {
-      alert(`Update failed: ${err.response?.data?.message || err.message}`);
+      setStatus({ msg: err.response?.data?.message || 'Update failed.', type: 'err' });
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handlePasswordChange = async () => {
+    if (!passForm.currentPassword || !passForm.newPassword) {
+      setStatus({ msg: 'Please fill in all password fields.', type: 'err' });
+      return;
+    }
+    if (passForm.newPassword !== passForm.confirmPassword) {
+      setStatus({ msg: 'New passwords do not match.', type: 'err' });
+      return;
+    }
+    setIsChangingPass(true);
+    setStatus(null);
+    try {
+      await apiClient.patch('/users/me/password', {
+        currentPassword: passForm.currentPassword,
+        newPassword: passForm.newPassword
+      });
+      setStatus({ msg: 'Password updated successfully.', type: 'ok' });
+      setShowPasswordModal(false);
+      setPassForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      setStatus({ msg: err.response?.data?.message || 'Password update failed.', type: 'err' });
+    } finally {
+      setIsChangingPass(false);
+    }
+  };
+
+
   return (
     <div style={{ maxWidth: 800, margin: '40px auto', padding: '0 20px', fontFamily: C.F }}>
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', padding: 20
+        }}>
+          <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 16, padding: 32, width: '100%', maxWidth: 400 }}>
+            <h3 style={{ color: C.textHi, margin: '0 0 24px', fontSize: 18 }}>Change Password</h3>
+            <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>CURRENT PASSWORD</label>
+            <input type="password" value={passForm.currentPassword} onChange={e=>setPassForm({...passForm, currentPassword:e.target.value})} style={inputStyle} />
+            <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>NEW PASSWORD</label>
+            <input type="password" value={passForm.newPassword} onChange={e=>setPassForm({...passForm, newPassword:e.target.value})} style={inputStyle} />
+            <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>CONFIRM NEW PASSWORD</label>
+            <input type="password" value={passForm.confirmPassword} onChange={e=>setPassForm({...passForm, confirmPassword:e.target.value})} style={inputStyle} />
+            <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+              <button onClick={() => setShowPasswordModal(false)} style={{ flex: 1, padding: '12px', background: C.bg3, color: C.textHi, border: 'none', borderRadius: 10, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handlePasswordChange} disabled={isChangingPass} style={{
+                flex: 1, padding: '12px', background: C.brand, color: 'white', border: 'none', borderRadius: 10,
+                fontWeight: 700, cursor: 'pointer', opacity: isChangingPass ? 0.6 : 1
+              }}>
+                {isChangingPass ? 'Updating...' : 'Update'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ color: C.textHi, fontSize: 24, fontWeight: 800, margin: '0 0 8px' }}>Account Settings</h1>
         <p style={{ color: C.textMd, margin: 0, fontSize: 14 }}>Manage your clinical identity and platform preferences.</p>
       </div>
+
+      {status && (
+        <div style={{ 
+          padding: 16, borderRadius: 12, marginBottom: 24,
+          background: status.type === 'ok' ? `${C.normal}10` : `${C.critical}10`,
+          border: `1px solid ${status.type === 'ok' ? C.normal : C.critical}30`,
+          color: status.type === 'ok' ? C.normal : C.critical,
+          fontSize: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        }}>
+          <span>{status.type === 'ok' ? '✓' : '⚠'} {status.msg}</span>
+          <button onClick={() => setStatus(null)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 18 }}>×</button>
+        </div>
+      )}
 
       <style>{S}</style>
       <div className="settings-layout" style={{ display: 'flex', gap: 24 }}>
@@ -137,7 +211,12 @@ export function ProfileSettings() {
                   <button style={{ padding: '8px 16px', background: C.bg2, border: `1px solid ${C.border}`, color: C.textMd, borderRadius: 8, cursor: 'pointer' }}>Manage</button>
                 </div>
               </div>
-              <button style={{ padding: '12px 20px', background: 'transparent', border: `1px solid ${C.border}`, color: C.textHi, borderRadius: 10, cursor: 'pointer', fontSize: 13 }}>Change Password</button>
+              <button 
+                onClick={() => setShowPasswordModal(true)}
+                style={{ padding: '12px 20px', background: 'transparent', border: `1px solid ${C.border}`, color: C.textHi, borderRadius: 10, cursor: 'pointer', fontSize: 13 }}
+              >
+                Change Password
+              </button>
             </div>
           )}
 

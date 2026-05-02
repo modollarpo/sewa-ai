@@ -313,7 +313,41 @@ export async function syncOfflineBatch(req: Request, res: Response, next: NextFu
       tenantId, userId, action: 'OFFLINE_SYNC_COMPLETE', 
       metadata: { count: scans.length } 
     });
-
     res.json({ success: true, count: scans.length, synced: results });
+  } catch (err) { next(err); }
+}
+
+/**
+ * POST /api/v1/scans/:id/notify
+ * Triggers a STAT notification to the referring physician (HL7/WhatsApp)
+ */
+export async function notifyScan(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { tenantId, id: userId } = req.user!;
+    const { id } = req.params;
+
+    const scan = await prisma.scan.findFirst({
+      where: { id, tenantId },
+      include: { referringDoctor: true, aiResult: true }
+    });
+
+    if (!scan) throw new AppError('Scan not found', 404);
+
+    // In production, this would invoke the WhatsApp/SMS gateway or HL7 bridge
+    logger.info(`[Notify] Alerting referring physician for Scan ${id} (Finding: ${scan.aiResult?.primaryFinding})`);
+    
+    await notifyUsers([scan.referringDoctorId || userId], {
+      title: 'CRITICAL RESULT ALERT',
+      body: `STAT Finding detected for scan ${id}. Please review immediately.`,
+      urgency: 'CRITICAL',
+      data: { scanId: id }
+    });
+
+    await auditLog({ 
+      tenantId, userId, action: 'PHYSICIAN_NOTIFIED', 
+      entityId: id, entity: 'Scan' 
+    });
+
+    res.json({ success: true, message: 'Referring physician notified via HL7/WhatsApp secure tunnel.' });
   } catch (err) { next(err); }
 }

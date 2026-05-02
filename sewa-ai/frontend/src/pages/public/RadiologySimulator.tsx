@@ -10,22 +10,34 @@ const C = {
   border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif", FM:"'IBM Plex Mono',monospace",
 };
 
-const CASES = [
-  { id: 1, type: 'Head CT', clinicalInfo: '72M, sudden onset aphasia, fall.', findings: 'Hyperdense MCA sign, sylvian fissure effacement.', label: 'critical', diagnosis: 'ICH / Acute Stroke' },
-  { id: 2, type: 'Chest CT', clinicalInfo: '45F, pleuritic chest pain, post-op.', findings: 'Filling defect in right main pulmonary artery.', label: 'critical', diagnosis: 'Pulmonary Embolism' },
-  { id: 3, type: 'C-Spine XR', clinicalInfo: '19M, high-velocity RTA.', findings: 'Anterior displacement of C2 on C3.', label: 'critical', diagnosis: 'Cervical Fracture' },
-  { id: 4, type: 'Chest XR', clinicalInfo: '60M, routine pre-op.', findings: 'Clear lung fields, normal cardiothoracic ratio.', label: 'normal', diagnosis: 'Normal' },
-  { id: 5, type: 'Head CT', clinicalInfo: '28F, chronic migraine.', findings: 'No intracranial haemorrhage or mass effect.', label: 'normal', diagnosis: 'Normal' },
-];
+import { apiClient } from '../../services/apiClient';
 
 export function RadiologySimulator({ onClose }: { onClose: () => void }) {
+  const [cases, setCases] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
   const [gameState, setGameState] = useState<'playing' | 'finished'>('playing');
 
-  const currentCase = CASES[currentIdx];
+  useEffect(() => {
+    apiClient.get('/training/student-cases')
+      .then(res => {
+        setCases(res.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        // Fallback
+        setCases([
+          { id: 1, type: 'Head CT', clinicalInfo: '72M, sudden onset aphasia, fall.', findings: 'Hyperdense MCA sign, sylvian fissure effacement.', label: 'critical', diagnosis: 'ICH / Acute Stroke' }
+        ]);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return null;
+  const currentCase = cases[currentIdx];
 
   const handleAnswer = (choice: string) => {
     if (answered) return;
@@ -36,7 +48,7 @@ export function RadiologySimulator({ onClose }: { onClose: () => void }) {
   };
 
   const nextCase = () => {
-    if (currentIdx < CASES.length - 1) {
+    if (currentIdx < cases.length - 1) {
       setCurrentIdx(currentIdx + 1);
       setAnswered(false);
       setLastResult(null);
@@ -61,7 +73,7 @@ export function RadiologySimulator({ onClose }: { onClose: () => void }) {
         {gameState === 'playing' ? (
           <div style={{ padding:32 }}>
             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:24, fontSize:12, color:C.textLo, fontFamily:C.FM }}>
-              <span>CASE {currentIdx + 1} OF {CASES.length}</span>
+              <span>CASE {currentIdx + 1} OF {cases.length}</span>
               <span>SCORE: {score}</span>
             </div>
 
@@ -99,9 +111,9 @@ export function RadiologySimulator({ onClose }: { onClose: () => void }) {
           <div style={{ padding:48, textAlign:'center' }}>
             <div style={{ fontSize:64, marginBottom:24 }}>🎓</div>
             <h2 style={{ fontSize:28, fontWeight:900, color:C.textHi, margin:'0 0 12px' }}>Training Complete</h2>
-            <div style={{ fontSize:48, fontWeight:900, color:C.brand, fontFamily:C.FM, marginBottom:8 }}>{Math.round((score/CASES.length)*100)}%</div>
+            <div style={{ fontSize:48, fontWeight:900, color:C.brand, fontFamily:C.FM, marginBottom:8 }}>{Math.round((score/cases.length)*100)}%</div>
             <p style={{ fontSize:14, color:C.textMd, marginBottom:32 }}>
-              You identified {score} out of {CASES.length} critical findings correctly.<br/>
+              You identified {score} out of {cases.length} critical findings correctly.<br/>
               SEWA AI's baseline for this dataset is 97.4%.
             </p>
             <button onClick={onClose} style={{ padding:'14px 40px', background:C.brand, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer' }}>Return to Portal</button>

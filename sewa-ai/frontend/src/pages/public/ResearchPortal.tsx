@@ -42,8 +42,34 @@ const STUDIES = [
 
 import { RadiologySimulator } from './RadiologySimulator';
 
+import { apiClient } from '../../services/apiClient';
+
 export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void }) {
   const [showSim, setShowSim] = React.useState(false);
+  const [requestStudy, setRequestStudy] = React.useState<string | null>(null);
+  const [status, setStatus] = React.useState<{ msg:string; type:'ok'|'err' } | null>(null);
+
+  const handleDatasetRequest = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const studyTitle = requestStudy;
+
+    if (!email || !email.includes('@')) return;
+
+    try {
+      await apiClient.post('/onboarding/lead', {
+        email,
+        organization: formData.get('organization') || 'Research Inquiry',
+        message: `Dataset Request: ${studyTitle}`,
+        source: 'research_portal'
+      });
+      setStatus({ msg: 'Access request received. Our research team will verify your credentials shortly.', type: 'ok' });
+      setRequestStudy(null);
+    } catch (e) {
+      setStatus({ msg: 'Request failed. Please try again later.', type: 'err' });
+    }
+  };
 
   return (
     <div style={{ background: C.bg0, minHeight: '100vh', fontFamily: C.F }}>
@@ -81,6 +107,13 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
       </div>
 
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 24px 100px' }}>
+
+        {status && (
+          <div style={{ padding: 16, background: status.type==='ok'?`${C.normal}10`:C.bg3, border: `1px solid ${status.type==='ok'?C.normal:C.critical}40`, borderRadius: 12, color: status.type==='ok'?C.normal:C.critical, fontSize: 14, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{status.msg}</span>
+            <button onClick={() => setStatus(null)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>✕</button>
+          </div>
+        )}
         
         {/* PI Profile */}
         <div style={{ 
@@ -126,19 +159,7 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
               </div>
 
               <button 
-                onClick={async () => {
-                  const email = prompt('Enter your institutional email to request full dataset access:');
-                  if (email && email.includes('@')) {
-                    try {
-                      await fetch('/api/v1/onboarding/lead', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, source: `research_${study.title.substring(0,20)}` })
-                      });
-                      alert('Access request received. Our research team will verify your credentials and respond within 48 hours.');
-                    } catch (e) { alert('Request failed.'); }
-                  }
-                }}
+                onClick={() => setRequestStudy(study.title)}
                 style={{ 
                 marginTop: 'auto', padding: '10px', background: 'transparent', border: `1px solid ${C.border}`, 
                 borderRadius: 10, color: C.textMd, fontSize: 12, fontWeight: 600, cursor: 'pointer' 
@@ -162,6 +183,30 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
           </p>
         </div>
       </div>
+
+      {/* Dataset Request Modal */}
+      {requestStudy && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:2000, padding:20 }}>
+          <div style={{ background:C.bg2, padding:32, borderRadius:24, width:'100%', maxWidth:400, border:`1px solid ${C.border}`, boxShadow:'0 24px 64px rgba(0,0,0,0.5)' }}>
+            <h3 style={{ margin:'0 0 8px', color:C.textHi, fontSize:20, fontWeight:800 }}>Dataset Access Request</h3>
+            <p style={{ fontSize:13, color:C.textMd, marginBottom:24, lineHeight:1.5 }}>You are requesting the raw dataset for:<br/><strong style={{color:C.brandLt}}>{requestStudy}</strong></p>
+            <form onSubmit={handleDatasetRequest} style={{ display:'flex', flexDirection:'column', gap:16 }}>
+              <div>
+                <label style={{ fontSize:10, fontWeight:700, color:C.textLo, display:'block', marginBottom:6 }}>INSTITUTIONAL EMAIL</label>
+                <input name="email" type="email" required placeholder="e.g. name@university.edu" style={{ width:'100%', background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, padding:12, color:C.textHi, fontSize:14, boxSizing:'border-box', outline:'none' }} />
+              </div>
+              <div>
+                <label style={{ fontSize:10, fontWeight:700, color:C.textLo, display:'block', marginBottom:6 }}>ORGANIZATION / DEPARTMENT</label>
+                <input name="organization" required placeholder="e.g. Imperial College London" style={{ width:'100%', background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, padding:12, color:C.textHi, fontSize:14, boxSizing:'border-box', outline:'none' }} />
+              </div>
+              <div style={{ display:'flex', gap:12, marginTop:8 }}>
+                <button type="button" onClick={() => setRequestStudy(null)} style={{ flex:1, padding:14, background:'transparent', color:C.textLo, border:`1px solid ${C.border}`, borderRadius:12, cursor:'pointer', fontWeight:600 }}>Cancel</button>
+                <button type="submit" style={{ flex:2, padding:14, background:C.brand, color:'white', border:'none', borderRadius:12, fontWeight:700, cursor:'pointer' }}>Submit Request</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* 🎓 Radiology Training Simulator (Roadmap 2026 - Task 9) */}
       <section style={{ maxWidth: 1000, margin: '60px auto 100px', padding: '0 24px' }}>

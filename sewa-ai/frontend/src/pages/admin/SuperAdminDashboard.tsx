@@ -118,8 +118,27 @@ export function SuperAdminDashboard() {
 
   const filteredTenants = useMemo(() => tenants.filter(t=>!tenantSearch||(t.name||'').toLowerCase().includes(tenantSearch.toLowerCase())||(t.region||'').includes(tenantSearch)), [tenants, tenantSearch]);
 
+  const [adminStatus, setAdminStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+  const [showTrainingConfirm, setShowTrainingConfirm] = useState(false);
+
   return (
     <div style={{minHeight:'calc(100vh - 76px)',background:C.bg0,fontFamily:C.F,padding:24}}>
+      {/* Admin Action Feed */}
+      {adminStatus && (
+        <div style={{ 
+          position:'fixed', top:80, right:24, zIndex:3000, padding:'12px 20px', 
+          background: adminStatus.type === 'ok' ? C.normalBg : C.critBg,
+          border: `1px solid ${adminStatus.type === 'ok' ? C.normal : C.critical}40`,
+          borderRadius:10, color: adminStatus.type === 'ok' ? C.normal : C.critical,
+          fontSize:12, fontWeight:600, display:'flex', alignItems:'center', gap:12,
+          boxShadow: '0 10px 30px rgba(0,0,0,0.5)', animation: 'slideIn 300ms ease'
+        }}>
+          <style>{`@keyframes slideIn{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}`}</style>
+          <span>{adminStatus.type === 'ok' ? '✓' : '⚠'} {adminStatus.msg}</span>
+          <button onClick={() => setAdminStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+        </div>
+      )}
+
       <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:20}}>
         <div>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
@@ -314,18 +333,30 @@ export function SuperAdminDashboard() {
            <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
               <div style={{fontSize:16,fontWeight:700,color:C.textHi}}>Federated Learning</div>
               <p style={{fontSize:12,color:C.textMd}}>Aggregating weights from {tenants.length} nodes.</p>
+              <button onClick={()=>setShowTrainingConfirm(true)} style={{padding:'8px 16px',background:C.info,color:'white',border:'none',borderRadius:8,cursor:'pointer'}}>Start Training Round</button>
+           </div>
+        </div>
+      )}
+
+      {showTrainingConfirm && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:4000,padding:20}}>
+          <div style={{background:C.bg2,padding:24,borderRadius:16,width:'100%',maxWidth:400,border:`1px solid ${C.border}`,boxShadow:'0 24px 64px rgba(0,0,0,0.8)'}}>
+            <h3 style={{margin:0,color:C.textHi,fontSize:18,fontWeight:700,marginBottom:12}}>Trigger Federated Round?</h3>
+            <p style={{fontSize:13,color:C.textMd,lineHeight:1.5,marginBottom:20}}>This will initiate a global aggregation of neural weights from all clinical nodes. This is a high-resource operation requiring massive GPU orchestration.</p>
+            <div style={{display:'flex',gap:12}}>
+              <button onClick={()=>setShowTrainingConfirm(false)} style={{flex:1,padding:12,background:'transparent',color:C.textLo,border:`1px solid ${C.border}`,borderRadius:10,cursor:'pointer'}}>Cancel</button>
               <button onClick={async ()=>{
-                const confirmed = confirm('Are you sure you want to trigger a global federated training round? This consumes massive GPU resources.');
-                if(!confirmed) return;
+                setShowTrainingConfirm(false);
+                setAdminStatus(null);
                 try {
                   await apiClient.post('/ai/federated/train');
-                  alert('Federated training round initiated successfully.');
+                  setAdminStatus({ msg: 'Federated training round initiated.', type:'ok' });
                 } catch(e: any) {
-                  console.error('[SuperAdmin] FL Train trigger failed:', e);
-                  alert(`Training trigger failed: ${e.message || 'System error'}`);
+                  setAdminStatus({ msg: `Training trigger failed: ${e.message}`, type:'err' });
                 }
-              }} style={{padding:'8px 16px',background:C.info,color:'white',border:'none',borderRadius:8,cursor:'pointer'}}>Start Training Round</button>
-           </div>
+              }} style={{flex:1,padding:12,background:C.info,color:'white',border:'none',borderRadius:10,fontWeight:700,cursor:'pointer'}}>Initiate Round</button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -339,11 +370,14 @@ export function SuperAdminDashboard() {
             <form onSubmit={async (e)=>{
               e.preventDefault();
               const d = new FormData(e.currentTarget);
+              setAdminStatus(null);
               try {
                 await apiClient.post('/tenants', Object.fromEntries(d));
-                alert('Tenant provisioned successfully.');
+                setAdminStatus({ msg: 'Tenant provisioned successfully.', type:'ok' });
                 setShowProvision(false);
-              } catch(err:any) { alert(`Provisioning failed: ${err.message}`); }
+              } catch(err:any) { 
+                setAdminStatus({ msg: `Provisioning failed: ${err.message}`, type:'err' });
+              }
             }} style={{display:'flex',flexDirection:'column',gap:14}}>
               <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:4}}>INSTITUTION NAME</label>
                 <input name="name" required style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'10px',color:C.textHi,fontSize:13,boxSizing:'border-box'}}/>

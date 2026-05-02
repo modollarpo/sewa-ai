@@ -15,16 +15,19 @@ export function AppointmentModal({ onClose }: { onClose: () => void }) {
   const [type, setType] = useState('follow_up');
   const [loading, setLoading] = useState(false);
 
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+
   const handleSubmit = async () => {
     if (!date || !time) return;
     setLoading(true);
+    setStatus(null);
     try {
       const scheduledDate = new Date(`${date}T${time}`).toISOString();
       await apiClient.post('/appointments', { scheduledDate, type });
-      alert('Appointment request submitted. The clinic will confirm shortly via WhatsApp/SMS.');
-      onClose();
+      setStatus({ msg: 'Appointment request submitted. The clinic will confirm shortly.', type: 'ok' });
+      setTimeout(onClose, 2000);
     } catch (e) {
-      alert('Request failed. Please ensure the date/time is in the future.');
+      setStatus({ msg: 'Request failed. Please ensure the date/time is in the future.', type: 'err' });
     } finally {
       setLoading(false);
     }
@@ -37,6 +40,12 @@ export function AppointmentModal({ onClose }: { onClose: () => void }) {
           <h2 style={{ margin:0, fontSize:20, fontWeight:800, color:C.textHi }}>Book Follow-up</h2>
           <button onClick={onClose} style={{ background:'none', border:'none', color:C.textLo, fontSize:20, cursor:'pointer' }}>✕</button>
         </div>
+
+        {status && (
+          <div style={{ padding:14, borderRadius:12, marginBottom:20, background:status.type==='ok'?`${C.brand}15`:C.bg3, border:`1px solid ${status.type==='ok'?C.brand:C.textLo}40`, color:status.type==='ok'?C.brand:C.textHi, fontSize:12, fontWeight:600 }}>
+            {status.type==='ok'?'✓':'⚠'} {status.msg}
+          </div>
+        )}
 
         <div style={{ display:'flex', flexDirection:'column', gap:16, marginBottom:24 }}>
           <div>

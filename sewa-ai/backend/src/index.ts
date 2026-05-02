@@ -42,6 +42,8 @@ import appointmentRoutes from './routes/appointments/index';
 import whatsappRoutes   from './routes/whatsapp';
 import aiMonitoringRoutes from './routes/ai-monitoring';
 import onboardingRoutes from './routes/onboarding';
+import complianceRoutes from './routes/compliance';
+import trainingRoutes   from './routes/training';
 import { sendAppointmentReminders } from './routes/appointments/index';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 import { dlq } from './services/dlqService';
@@ -146,15 +148,15 @@ app.use(`${v1}/admin`,          adminRoutes);
 app.use(`${v1}/templates`,      templateRoutes);
 app.use(`${v1}/annotations`,    annotationRoutes);
 app.use(`${v1}/second-opinions`,secondOpinionRoutes);
-import referralRoutes   from './routes/referrals';
-
-// ...
-app.use(`${v1}/referrals`,     referralRoutes);
-app.use(`${v1}/whatsapp`,      whatsappRoutes);
+app.use(`${v1}/onboarding`,     onboardingRoutes);
+app.use(`${v1}/compliance`,     complianceRoutes);
+app.use(`${v1}/training`,       trainingRoutes);
+app.use(`${v1}/referrals`,      referralRoutes);
+app.use(`${v1}/whatsapp`,       whatsappRoutes);
 app.use(`${v1}/audit`,          auditRoutes);
 app.use(`${v1}/ai-monitoring`,  aiMonitoringRoutes);
-app.use(`${v1}/onboarding`,     onboardingRoutes);
-app.use(`${v1}`,               roadmapRoutes); // Roadmap features: /rules, /stroke-codes, /population-health, /referrals, /federated-learning, /continuous-learning
+app.use(`${v1}/appointments`,   appointmentRoutes);
+app.use(`${v1}`,                roadmapRoutes);
 
 app.use(errorHandler);
 

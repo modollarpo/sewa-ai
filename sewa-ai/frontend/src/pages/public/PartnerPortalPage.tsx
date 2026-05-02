@@ -85,6 +85,8 @@ const inp: React.CSSProperties = {
   boxSizing:'border-box', outline:'none',
 };
 
+import { apiClient } from '../../services/apiClient';
+
 export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
   const [access,      setAccess]      = useState<AccessLevel>('none');
   const [visitorType, setVisitorType] = useState<VisitorType>('investor');
@@ -94,12 +96,25 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
 
   const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
 
+  const [status,      setStatus]      = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+
   const handleRequest = async () => {
     if (!form.name || !form.email || !form.org || !form.nda) return;
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setStep('pending');
-    setSubmitting(false);
+    setStatus(null);
+    try {
+      await apiClient.post('/onboarding/lead', {
+        name: form.name,
+        email: form.email,
+        organization: form.org,
+        message: `Visitor Type: ${visitorType}, Role: ${form.role}, NDA: ${form.nda}`
+      });
+      setStep('pending');
+    } catch (err) {
+      setStatus({ msg: 'Request submission failed. Please try again later.', type:'err' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Quick demo access (in production: email verification + manual approval)
@@ -218,6 +233,17 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
       {/* Data Room Portal */}
       {step === 'portal' && (
         <div style={{ maxWidth:1100, margin:'0 auto', padding:'100px 24px 80px' }}>
+          {status && (
+            <div style={{ 
+              padding:'12px 20px', background: status.type==='ok'?`${C.normal}10`:C.critBg, 
+              border:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
+              borderRadius:12, marginBottom:32, display:'flex', justifyContent:'space-between', alignItems:'center',
+              color: status.type==='ok'?C.normal:C.critical, fontSize:13, fontWeight:600
+            }}>
+              <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
+              <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+            </div>
+          )}
           {/* Portal header */}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:48 }}>
             <div>
@@ -257,9 +283,21 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
                         </div>
                       </div>
                       {canAccess ? (
-                        <button onClick={() => {
-                          if (doc.format === 'PDF' && doc.name.includes('Whitepaper')) onNavigate('api-docs');
-                          else alert(`Accessing ${doc.name}...\n\nIn production, this triggers a secure, watermarked download tracked via your Partner ID.`);
+                        <button onClick={async () => {
+                          if (doc.format === 'PDF' && doc.name.includes('Whitepaper')) {
+                            onNavigate('api-docs');
+                          } else {
+                            try {
+                              await apiClient.post('/onboarding/lead', {
+                                organization: 'Partner Portal',
+                                message: `Document Access: ${doc.name}`,
+                                source: 'partner_portal_download'
+                              });
+                              setStatus({ msg: `Accessing ${doc.name}. The secure download link will be sent to your verified email.`, type:'ok' });
+                            } catch (e) {
+                              setStatus({ msg: 'Unable to process download request.', type:'err' });
+                            }
+                          }
                         }} style={{ padding:'6px 14px', background:`${cat.color}14`, border:`1px solid ${cat.color}30`, borderRadius:7, color:cat.color, fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:C.F, flexShrink:0 }}>
                           Download
                         </button>

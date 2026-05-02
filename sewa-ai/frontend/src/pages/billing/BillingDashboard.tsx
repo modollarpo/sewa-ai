@@ -125,7 +125,16 @@ export function BillingDashboard() {
             Region: {region.toUpperCase()} · Payment via {gateways[0]?.name} · Currency: {gateways[0]?.currencies[0]}
           </p>
         </div>
-        <button style={{ padding:'8px 16px', background:C.brand, border:'none', borderRadius:8, color:'white', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:C.F }}>
+        <button 
+          onClick={async () => {
+            try {
+              await apiClient.post('/payments/audit-invoice', { region });
+              alert('Invoice generation initiated. Your monthly summary will be sent to your registered clinical email.');
+            } catch (e) {
+              alert('Invoice service currently unavailable.');
+            }
+          }}
+          style={{ padding:'8px 16px', background:C.brand, border:'none', borderRadius:8, color:'white', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:C.F }}>
           Download Invoice
         </button>
       </div>

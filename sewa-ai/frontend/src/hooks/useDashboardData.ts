@@ -281,9 +281,21 @@ export function useComplianceData() {
     queryFn: () => apiClient.get('/audit/verify'),
   });
 
+  const { data: metricsRes } = useQuery({
+    queryKey: ['compliance-metrics'],
+    queryFn: () => apiClient.get('/compliance/consent-metrics'),
+    refetchInterval: 60000,
+  });
+
+  const { data: frameworksRes } = useQuery({
+    queryKey: ['compliance-frameworks'],
+    queryFn: () => apiClient.get('/compliance/frameworks'),
+  });
+
   return {
     audit: Array.isArray(auditRes?.data) ? auditRes.data : (auditRes?.data?.logs || []),
-    metrics: [], // To be wired to a real metrics endpoint later
+    metrics: metricsRes?.data || { total: 0, aiConsent: 0, researchConsent: 0, optOuts: 0 },
+    frameworks: frameworksRes?.data || [],
     verification: verifyRes?.data || { status: 'loading', chainHeight: 0 },
     loading: auditLoading || verifyLoading
   };

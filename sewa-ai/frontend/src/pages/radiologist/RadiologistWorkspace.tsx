@@ -304,6 +304,7 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
 // ── AI Results Panel ──────────────────────────────────────────
 function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>void }) {
   const [actionBusy, setActionBusy] = useState(false);
+  const [showOpinionModal, setShowOpinionModal] = useState(false);
   const ai = scan?.aiResult;
   
   const handleAction = async (type: string) => {
@@ -312,12 +313,12 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
     try {
       if (type === 'escalate') {
         await apiClient.patch(`/scans/${scan.id}/status`, { status: 'CRITICAL' });
-        alert('Case escalated to STAT Priority.');
+        // Feedback via toast or status update in real app
       } else if (type === 'notify') {
-        alert('Referring physician notified via HL7/WhatsApp secure tunnel.');
+        await apiClient.post(`/scans/${scan.id}/notify`);
       }
     } catch (err) {
-      alert('Action failed. Check connectivity.');
+      console.error('[Radiologist] Action failed:', err);
     } finally {
       setActionBusy(false);
     }
@@ -374,7 +375,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
           onClick={() => handleAction('escalate')}
           disabled={actionBusy}
           style={{ padding:'8px', borderRadius:8, background:C.critBg, color:C.critical, border:`1px solid ${C.critical}30`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
-          🚨 ESCALATE STAT
+          🚨 {scan?.priority === 'CRITICAL' ? 'ESCALATED' : 'ESCALATE STAT'}
         </button>
         <button 
           onClick={() => handleAction('notify')}
@@ -383,17 +384,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
           📡 NOTIFY TEAM
         </button>
         <button 
-          onClick={async () => {
-            if (!scan || actionBusy) return;
-            const specialist = prompt('Enter Specialist Email or ID (e.g., neurorad_expert_01):');
-            if (!specialist) return;
-            setActionBusy(true);
-            try {
-              await apiClient.post('/second-opinions', { scanId: scan.id, reviewerId: specialist, status: 'pending', reason: 'Challenging pathology' });
-              alert('Second opinion request sent successfully.');
-            } catch(e: any) { console.error('[Radiologist] Second opinion failed:', e); alert(`Request failed: ${e.message || 'System error'}`); }
-            finally { setActionBusy(false); }
-          }}
+          onClick={() => setShowOpinionModal(true)}
           disabled={actionBusy}
           style={{ padding:'8px', borderRadius:8, background:C.bg3, color:C.textHi, border:`1px solid ${C.border}`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
           🤝 SECOND OPINION
@@ -404,9 +395,8 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
             setActionBusy(true);
             try {
               await apiClient.post(`/ai/icd10/${scan.id}`);
-              alert('Automated ICD-10 coding complete.');
-              onRequestVLM(); // Refresh
-            } catch(e: any) { console.error('[Radiologist] ICD-10 Coding failed:', e); alert(`Coding failed: ${e.message || 'System error'}`); }
+              onRequestVLM(); 
+            } catch(e) { console.error('[Radiologist] ICD-10 failed'); }
             finally { setActionBusy(false); }
           }}
           disabled={actionBusy}
@@ -414,6 +404,37 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
           🔖 AUTO ICD-10
         </button>
       </div>
+
+      {showOpinionModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:2000, padding:20 }}>
+          <div style={{ background:C.bg2, padding:24, borderRadius:16, width:'100%', maxWidth:400, border:`1px solid ${C.border}` }}>
+            <h3 style={{ margin:0, color:C.textHi, fontSize:16, marginBottom:16 }}>Request Second Opinion</h3>
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <label style={{ fontSize:11, color:C.textLo }}>SELECT SPECIALIST</label>
+              <select id="specialistSelect" style={{ width:'100%', background:C.bg3, border:`1px solid ${C.border}`, color:C.textHi, padding:10, borderRadius:8 }}>
+                <option value="neurorad_expert_01">Dr. S. Chen (Neuro)</option>
+                <option value="chest_rad_02">Dr. J. Miller (Thoracic)</option>
+                <option value="msk_specialist_03">Dr. A. Gupta (MSK)</option>
+              </select>
+              <label style={{ fontSize:11, color:C.textLo }}>REASON FOR REVIEW</label>
+              <textarea id="opinionReason" defaultValue="Challenging pathology, requires expert verification." style={{ width:'100%', height:80, background:C.bg3, border:`1px solid ${C.border}`, color:C.textHi, padding:10, borderRadius:8, fontSize:12, resize:'none' }} />
+              <div style={{ display:'flex', gap:10, marginTop:8 }}>
+                <button onClick={()=>setShowOpinionModal(false)} style={{ flex:1, padding:10, background:'transparent', color:C.textLo, border:`1px solid ${C.border}`, borderRadius:8, cursor:'pointer' }}>Cancel</button>
+                <button onClick={async () => {
+                  const reviewerId = (document.getElementById('specialistSelect') as HTMLSelectElement).value;
+                  const reason = (document.getElementById('opinionReason') as HTMLTextAreaElement).value;
+                  setActionBusy(true);
+                  try {
+                    await apiClient.post('/second-opinions', { scanId: scan.id, reviewerId, status: 'pending', reason });
+                    setShowOpinionModal(false);
+                  } catch(e) { }
+                  finally { setActionBusy(false); }
+                }} style={{ flex:1, padding:10, background:C.brand, color:'white', border:'none', borderRadius:8, fontWeight:700, cursor:'pointer' }}>Send Request</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {ai.icd10Codes && (
         <div style={{ padding:'8px 12px', background:C.bg3, borderRadius:10, border:`1px solid ${C.border}`, fontSize:10, color:C.textMd }}>
@@ -584,7 +605,6 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
     
     // ── Real-time worklist updates via Socket.IO ──────────────
     const handleUpdate = () => {
-      console.log('[Radiologist] Refreshing worklist via Socket.IO signal');
       fetchWorklist();
     };
 

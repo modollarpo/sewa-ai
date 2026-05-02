@@ -294,10 +294,13 @@ export function AppointmentsPage() {
 
   useEffect(() => { loadCalendar(); loadList(); }, [loadCalendar, loadList]);
 
-  const handleCancel = async (id: string) => {
-    if (!confirm('Cancel this appointment?')) return;
+  const [cancelId, setCancelId] = useState<string | null>(null);
+
+  const handleCancel = async () => {
+    if (!cancelId) return;
     try {
-      await apiClient.patch(`/appointments/${id}`, { status:'cancelled', cancelReason:'Cancelled by user' });
+      await apiClient.patch(`/appointments/${cancelId}`, { status:'cancelled', cancelReason:'Cancelled by user' });
+      setCancelId(null);
       loadCalendar(); loadList();
     } catch {}
   };
@@ -453,7 +456,7 @@ export function AppointmentsPage() {
                           📅 iCal
                         </button>
                         {!['cancelled','completed'].includes(a.status) && (
-                          <button onClick={() => handleCancel(a.id)}
+                          <button onClick={() => setCancelId(a.id)}
                             style={{ padding:'3px 8px', fontSize:10, background:C.critBg, border:`1px solid #3A1515`, borderRadius:6, color:C.critical, cursor:'pointer', fontFamily:C.F }}>
                             Cancel
                           </button>
@@ -513,7 +516,7 @@ export function AppointmentsPage() {
                     📅 Add to Calendar (.ics)
                   </button>
                   {!['cancelled','completed'].includes(selected.status) && (
-                    <button onClick={() => { handleCancel(selected.id); setSelected(null); }}
+                    <button onClick={() => { setCancelId(selected.id); setSelected(null); }}
                       style={{ padding:'9px 0', background:C.critBg, border:`1px solid #3A1515`, borderRadius:9, color:C.critical, cursor:'pointer', fontFamily:C.F, fontSize:12 }}>
                       Cancel Appointment
                     </button>
@@ -533,6 +536,21 @@ export function AppointmentsPage() {
           doctors={doctors}
           patients={patients}
         />
+      )}
+
+      {/* Cancel confirmation */}
+      {cancelId && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:20 }}>
+          <div style={{ background:C.bg2, padding:24, borderRadius:16, width:'100%', maxWidth:360, border:`1px solid ${C.border}`, textAlign:'center' }}>
+            <div style={{ fontSize:32, marginBottom:16 }}>⚠️</div>
+            <h3 style={{ margin:0, color:C.textHi, fontSize:17, fontWeight:700, marginBottom:8 }}>Cancel Appointment?</h3>
+            <p style={{ fontSize:13, color:C.textMd, lineHeight:1.5, marginBottom:24 }}>Are you sure you want to cancel this clinical appointment? This action will notify the patient and staff immediately.</p>
+            <div style={{ display:'flex', gap:12 }}>
+              <button onClick={() => setCancelId(null)} style={{ flex:1, padding:12, background:'transparent', color:C.textLo, border:`1px solid ${C.border}`, borderRadius:10, cursor:'pointer', fontFamily:C.F }}>No, Keep it</button>
+              <button onClick={handleCancel} style={{ flex:1, padding:12, background:C.critical, color:'white', border:'none', borderRadius:10, fontWeight:700, cursor:'pointer', fontFamily:C.F }}>Yes, Cancel</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

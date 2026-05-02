@@ -234,14 +234,52 @@ export function DoctorDashboard() {
             <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:C.textLo}}>Select a patient to view details</div>
           )}
         </div>
-      )}
     </div>
   );
 }
 
 function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void }) {
   const [showReferral, setShowReferral] = useState<string | null>(null);
+  const [explaining, setExplaining] = useState(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [correcting, setCorrecting] = useState(false);
+  const [escalating, setEscalating] = useState(false);
+  const [busy, setBusy] = useState(false);
+  
   const urgency = patient.urgency || patient.lastScan?.urgency || 'ROUTINE';
+  const scanId = patient.scanId || patient.id;
+
+  const handleAction = async (type: string, payload?: any) => {
+    if (!scanId || busy) return;
+    setBusy(true);
+    try {
+      if (type === 'confirm') {
+        await apiClient.post(`/ai/validate/${scanId}`, { status: 'CONFIRMED' });
+        onClose();
+        window.location.reload();
+      } else if (type === 'explain') {
+        setExplaining(true);
+        const res = await apiClient.get(`/ai/explain/${scanId}`);
+        setExplanation(res.data.explanation);
+        setExplaining(false);
+      } else if (type === 'correct') {
+        await apiClient.post(`/ai/validate/${scanId}`, { status: 'REJECTED', correctedFinding: payload });
+        setCorrecting(false);
+        onClose();
+        window.location.reload();
+      } else if (type === 'escalate') {
+        await apiClient.patch(`/scans/${scanId}/status`, { status: 'CRITICAL', auditReason: payload });
+        setEscalating(false);
+        onClose();
+        window.location.reload();
+      }
+    } catch (err: any) {
+      alert(`Action failed: ${err.message || 'System error'}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div style={{flex:1, display:'flex', flexDirection:'column', overflowY:'auto', background:C.bg1}}>
       <div style={{padding:'20px', borderBottom:`1px solid ${C.border}`, background: urgency === 'CRITICAL' ? C.critBg : 'transparent', borderTop:`2px solid ${urgency === 'CRITICAL' ? C.critical : 'transparent'}`}}>
@@ -256,6 +294,14 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
       </div>
       
       <div style={{padding:'20px', display:'flex', flexDirection:'column', gap:16}}>
+        {explanation && (
+          <div style={{padding:20, background:`${C.brand}10`, border:`1px solid ${C.brand}40`, borderRadius:14, position:'relative'}}>
+            <div style={{fontSize:12, fontWeight:700, color:C.brand, marginBottom:8}}>Patient Explanation (AI Generated)</div>
+            <p style={{fontSize:14, color:C.textHi, lineHeight:1.6, margin:0}}>"{explanation}"</p>
+            <button onClick={() => setExplanation(null)} style={{position:'absolute', top:12, right:12, background:'none', border:'none', color:C.brand, cursor:'pointer'}}>✕</button>
+          </div>
+        )}
+
         <div style={{padding:16, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`}}>
           <div style={{fontSize:12, fontWeight:700, color:C.textHi, marginBottom:12}}>AI Triage Summary</div>
           <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12}}>
@@ -269,81 +315,49 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
         </div>
 
         <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
-          {[
-            { label: 'Confirm Findings', color: C.normal, action: async () => {
-                if (!patient.id && !patient.scanId) return;
-                const id = patient.scanId || patient.id;
-                try {
-                  await apiClient.post(`/ai/validate/${id}`, { status: 'CONFIRMED' });
-                  alert('Clinical validation complete. Report generating...');
-                  window.location.reload();
-                } catch (err) { alert('Validation failed.'); }
-            }},
-            { label: 'Refer Case', color: C.info, action: () => {
-                const id = patient.scanId || patient.id;
-                if (id) setShowReferral(id);
-            }},
-            { label: 'Explain to Patient', color: '#8B5CF6', action: async () => {
-                const id = patient.scanId || patient.id;
-                try {
-                  const res = await apiClient.get(`/ai/explain/${id}`);
-                  alert(`Generating layperson summary...\n\n"${res.data.explanation}"`);
-                } catch (e: any) {
-                  console.error('[DoctorDashboard] Explain API failed:', e);
-                  alert('Unable to generate layperson summary. Please refer to clinical guidelines or try again later.');
-                }
-            }},
-            { label: 'Correct Finding', color: C.urgent, action: () => {
-                const correction = prompt('Enter corrected finding:');
-                if (correction) {
-                  const id = patient.scanId || patient.id;
-                  apiClient.post(`/ai/validate/${id}`, { status: 'REJECTED', correctedFinding: correction })
-                    .then(() => { alert('Correction recorded.'); window.location.reload(); })
-                    .catch(() => alert('Failed to record correction.'));
-                }
-            }},
-            { label: 'Review Scans', color: C.brand, action: () => {
-                const id = patient.scanId || patient.id;
-                if (id) window.open(`/dashboard?scanId=${id}`, '_blank');
-            }},
-            { label: 'Escalate STAT', color: C.critical, action: async () => {
-                const id = patient.scanId || patient.id;
-                if (!id) return;
-                const reason = prompt('Enter clinical justification for STAT escalation (Audit required):');
-                if (!reason) {
-                  alert('Escalation cancelled: Justification is required.');
-                  return;
-                }
-                try {
-                  await apiClient.patch(`/scans/${id}/status`, { status: 'CRITICAL', auditReason: reason });
-                  alert('Case successfully escalated to STAT.');
-                  window.location.reload();
-                } catch (err: any) {
-                  console.error('[DoctorDashboard] Escalation failed:', err);
-                  alert(`Escalation failed: ${err.message || 'System error'}`);
-                }
-            }},
-          ].map(a=>(
-            <button 
-              key={a.label} 
-              onClick={a.action}
-              style={{
-                padding:12, 
-                background:a.color, 
-                border:a.color===C.bg2?`1px solid ${C.border}`:'none', 
-                borderRadius:10, color:'white', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:C.F
-              }}>
-              {a.label}
-            </button>
-          ))}
+          <button onClick={() => handleAction('confirm')} disabled={busy} style={{padding:12, background:C.normal, border:'none', borderRadius:10, color:'white', fontSize:11, fontWeight:700, cursor:'pointer'}}>Confirm Findings</button>
+          <button onClick={() => setShowReferral(scanId)} style={{padding:12, background:C.info, border:'none', borderRadius:10, color:'white', fontSize:11, fontWeight:700, cursor:'pointer'}}>Refer Case</button>
+          <button onClick={() => handleAction('explain')} disabled={busy} style={{padding:12, background:'#8B5CF6', border:'none', borderRadius:10, color:'white', fontSize:11, fontWeight:700, cursor:'pointer'}}>{explaining ? 'Analysing...' : 'Explain to Patient'}</button>
+          <button onClick={() => setCorrecting(true)} style={{padding:12, background:C.urgent, border:'none', borderRadius:10, color:'white', fontSize:11, fontWeight:700, cursor:'pointer'}}>Correct Finding</button>
+          <button onClick={() => window.open(`/dashboard?scanId=${scanId}`, '_blank')} style={{padding:12, background:C.brand, border:'none', borderRadius:10, color:'white', fontSize:11, fontWeight:700, cursor:'pointer'}}>Review Scans</button>
+          <button onClick={() => setEscalating(true)} style={{padding:12, background:C.critical, border:'none', borderRadius:10, color:'white', fontSize:11, fontWeight:700, cursor:'pointer'}}>Escalate STAT</button>
         </div>
 
         {showReferral && <ReferralModal scanId={showReferral} onClose={() => setShowReferral(null)} />}
-        </div>
+        
+        {correcting && (
+          <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:20}}>
+            <div style={{background:C.bg2, padding:24, borderRadius:16, width:'100%', maxWidth:400, border:`1px solid ${C.border}`}}>
+              <h3 style={{color:C.textHi, margin:'0 0 8px'}}>Correct Finding</h3>
+              <p style={{fontSize:12, color:C.textLo, marginBottom:20}}>Provide the board-certified correction for the AI's feedback loop.</p>
+              <textarea id="correctionInput" style={{width:'100%', height:100, background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, color:C.textHi, padding:12, marginBottom:16, fontFamily:C.F}} placeholder="e.g. Subdural haematoma (4mm) rather than Epidural." />
+              <div style={{display:'flex', gap:10}}>
+                <button onClick={() => setCorrecting(false)} style={{flex:1, padding:10, background:C.bg3, border:`1px solid ${C.border}`, color:C.textLo, borderRadius:8, cursor:'pointer'}}>Cancel</button>
+                <button onClick={() => handleAction('correct', (document.getElementById('correctionInput') as HTMLTextAreaElement).value)} style={{flex:1, padding:10, background:C.urgent, border:'none', color:'white', borderRadius:8, cursor:'pointer'}}>Save Correction</button>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* 📈 Longitudinal Disease Progression Timeline (Roadmap 2026 - Task 8) */}
+        {escalating && (
+          <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:20}}>
+            <div style={{background:C.bg2, padding:24, borderRadius:16, width:'100%', maxWidth:400, border:`1px solid ${C.critical}40`}}>
+              <h3 style={{color:C.critical, margin:'0 0 8px'}}>STAT Escalation</h3>
+              <p style={{fontSize:12, color:C.textLo, marginBottom:20}}>Escalating a scan to STAT requires a clinical justification for the audit log.</p>
+              <textarea id="escalateReason" style={{width:'100%', height:100, background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, color:C.textHi, padding:12, marginBottom:16, fontFamily:C.F}} placeholder="e.g. Significant neurological deterioration observed in ward." />
+              <div style={{display:'flex', gap:10}}>
+                <button onClick={() => setEscalating(false)} style={{flex:1, padding:10, background:C.bg3, border:`1px solid ${C.border}`, color:C.textLo, borderRadius:8, cursor:'pointer'}}>Cancel</button>
+                <button onClick={() => handleAction('escalate', (document.getElementById('escalateReason') as HTMLTextAreaElement).value)} style={{flex:1, padding:10, background:C.critical, border:'none', color:'white', borderRadius:8, cursor:'pointer'}}>Escalate Now</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{padding:'0 20px 20px'}}>
         <ProgressionTimeline patientId={patient.patientId || patient.id} />
       </div>
+    </div>
   );
 }
 

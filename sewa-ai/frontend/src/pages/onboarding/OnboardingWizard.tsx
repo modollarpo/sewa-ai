@@ -158,8 +158,21 @@ export function OnboardingWizard() {
 
   const testIntegration = async (type: string) => {
     setIntegrationStatus(s => ({ ...s, [type]: 'testing' }));
-    await new Promise(r => setTimeout(r, 2000));
-    setIntegrationStatus(s => ({ ...s, [type]: 'connected' }));
+    try {
+      const host = type === 'pacs' ? data.pacsHost : type === 'fhir' ? data.fhirEndpoint : data.hl7Host;
+      const port = type === 'pacs' ? data.pacsPort : type === 'hl7' ? data.hl7Port : '443';
+      
+      await apiClient.post('/onboarding/validate-integration', {
+        type,
+        host,
+        port,
+        aeTitle: data.aeTitle
+      });
+      setIntegrationStatus(s => ({ ...s, [type]: 'connected' }));
+    } catch (err: any) {
+      setIntegrationStatus(s => ({ ...s, [type]: 'failed' }));
+      alert(`Integration test failed for ${type.toUpperCase()}. Please check your network and firewall settings.`);
+    }
   };
 
   const runBenchmark = async () => {

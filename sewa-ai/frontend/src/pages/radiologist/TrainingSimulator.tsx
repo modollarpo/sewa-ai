@@ -33,30 +33,26 @@ export function TrainingSimulator() {
   const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
-    // In a real app, this would fetch from a /training/cases endpoint
-    setTimeout(() => {
-      setCases([
-        {
-          id: 'case-1',
-          modality: 'CT',
-          bodyPart: 'HEAD',
-          groundTruth: 'Acute Intracranial Hemorrhage',
-          options: ['Normal', 'Acute Intracranial Hemorrhage', 'Ischemic Stroke', 'Tumor'],
-          difficulty: 'MEDIUM',
-          explanation: 'The hyperdense area in the left basal ganglia indicates acute bleeding.'
-        },
-        {
-          id: 'case-2',
-          modality: 'CXR',
-          bodyPart: 'CHEST',
-          groundTruth: 'Pneumothorax',
-          options: ['Pneumonia', 'Normal', 'Pneumothorax', 'Pleural Effusion'],
-          difficulty: 'HARD',
-          explanation: 'Notice the absent lung markings in the apical region and the visible visceral pleural edge.'
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
+    apiClient.get('/training/cases')
+      .then(res => {
+        setCases(res.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        // Fallback for demo if API fails
+        setCases([
+          {
+            id: 'case-1',
+            modality: 'CT',
+            bodyPart: 'HEAD',
+            groundTruth: 'Acute Intracranial Hemorrhage',
+            options: ['Normal', 'Acute Intracranial Hemorrhage', 'Ischemic Stroke', 'Tumor'],
+            difficulty: 'MEDIUM',
+            explanation: 'The hyperdense area in the left basal ganglia indicates acute bleeding.'
+          }
+        ]);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return (

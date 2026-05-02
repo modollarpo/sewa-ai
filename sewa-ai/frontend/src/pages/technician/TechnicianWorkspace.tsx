@@ -153,8 +153,7 @@ export function TechnicianWorkspace() {
   const [tab, setTab] = useState<'upload'|'queue'|'schedule'|'pacs'>('upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
-
-
+  const [feedback, setFeedback] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault(); setIsDragging(false);
@@ -212,6 +211,7 @@ export function TechnicianWorkspace() {
 
   const handleGenerateDemo = async () => {
     setUploading(true);
+    setFeedback(null);
     try {
       const res = await apiClient.post('/scans/demo');
       const scan = res.data.scan;
@@ -223,10 +223,10 @@ export function TechnicianWorkspace() {
         scanId: scan.id, urgency: 'PENDING'
       };
       setJobs(prev => [newJob, ...prev]);
-      alert('Demo scan queued. Analysis will populate shortly.');
+      setFeedback({ msg: 'Synthetic test case queued for processing.', type: 'ok' });
       setTab('queue');
     } catch (err: any) {
-      alert(`Upload failed: ${err.response?.data?.message || err.message}`);
+      setFeedback({ msg: err.response?.data?.message || 'Synthetic generation failed.', type: 'err' });
     } finally {
       setUploading(false);
     }
@@ -338,6 +338,13 @@ export function TechnicianWorkspace() {
           {/* UPLOAD TAB */}
           {tab==='upload' && (
             <div style={{maxWidth:680,margin:'0 auto',display:'flex',flexDirection:'column',gap:16}}>
+
+              {feedback && (
+                <div style={{ padding:12, background:feedback.type==='ok'?C.normalBg:C.critBg, border:`1px solid ${feedback.type==='ok'?C.normal:C.critical}40`, borderRadius:10, color:feedback.type==='ok'?C.normal:C.critical, fontSize:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <span>{feedback.msg}</span>
+                  <button onClick={()=>setFeedback(null)} style={{ background:'none', border:'none', color:C.textLo, cursor:'pointer' }}>✕</button>
+                </div>
+              )}
 
               {/* Drop zone */}
               <div
@@ -540,8 +547,6 @@ export function TechnicianWorkspace() {
                         onClick={() => {
                           if (job.scanId) {
                             window.open(`/dashboard?scanId=${job.scanId}`, '_blank');
-                          } else {
-                            alert('Viewer unavailable: Scan ID missing.');
                           }
                         }}
                         style={{padding:'6px 12px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F,flexShrink:0}}>
@@ -560,6 +565,12 @@ export function TechnicianWorkspace() {
           {/* PACS STATUS TAB */}
           {tab==='pacs' && (
             <div style={{maxWidth:640,margin:'0 auto',display:'flex',flexDirection:'column',gap:12}}>
+              {feedback && (
+                <div style={{ padding:12, background:feedback.type==='ok'?C.normalBg:C.critBg, border:`1px solid ${feedback.type==='ok'?C.normal:C.critical}40`, borderRadius:10, color:feedback.type==='ok'?C.normal:C.critical, fontSize:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <span>{feedback.msg}</span>
+                  <button onClick={()=>setFeedback(null)} style={{ background:'none', border:'none', color:C.textLo, cursor:'pointer' }}>✕</button>
+                </div>
+              )}
               <div style={{padding:16,background:`${C.normal}0A`,borderRadius:12,border:`1px solid ${C.normal}30`,display:'flex',alignItems:'center',gap:8, justifyContent:'space-between'}}>
                 <div style={{display:'flex', alignItems:'center', gap:8}}>
                   <span style={{width:8,height:8,borderRadius:'50%',background:C.normal,boxShadow:`0 0 8px ${C.normal}`,flexShrink:0}}/>
@@ -570,16 +581,13 @@ export function TechnicianWorkspace() {
                 </div>
                 <button 
                   onClick={async () => {
-                    const btn = document.activeElement as HTMLButtonElement;
-                    if (btn) btn.innerText = 'SYNCING...';
+                    setFeedback(null);
                     try {
                       await apiClient.post('/tenants/integrations/sync');
-                      alert('PACS Worklist synchronized successfully.');
+                      setFeedback({ msg: 'PACS Worklist synchronized successfully.', type: 'ok' });
                     } catch(e: any) {
-                      console.error('[Technician] PACS Sync failed:', e);
-                      alert(`PACS Sync failed: ${e.message || 'Connection refused'}`);
+                      setFeedback({ msg: `PACS Sync failed: ${e.message || 'Connection refused'}`, type: 'err' });
                     }
-                    if (btn) btn.innerText = 'FORCE SYNC';
                   }}
                   style={{padding:'6px 12px', background:C.bg3, border:`1px solid ${C.border}`, borderRadius:8, color:C.textHi, fontSize:10, fontWeight:700, cursor:'pointer'}}>
                   FORCE SYNC
