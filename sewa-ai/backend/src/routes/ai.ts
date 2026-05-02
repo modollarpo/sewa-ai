@@ -1,17 +1,36 @@
 // SEWA AI — backend/src/routes/ai.ts
 import { Router } from 'express';
+import axios from 'axios';
 import { authenticate, authorize } from '../middleware/auth';
 import { triggerAITriage, generateVLMReport, generateICDCodes } from '../services/aiService';
 import { prisma } from '../config/database';
 import { AppError } from '../utils/AppError';
+import { config } from '../config/env';
+import { logger } from '../utils/logger';
 const r = Router();
 
-// Health Checks — Proxies or baseline status for AI engines (Publicly accessible for status page)
+// Health Checks — Actively proxy to each AI microservice (C2 fix)
+const AI_SERVICE_URLS: Record<string, string> = {
+  triage:        config.AI_SERVICE_URL,
+  vlm:           config.VLM_SERVICE_URL,
+  uncertainty:   config.UNCERTAINTY_SERVICE_URL,
+  metacognition: config.METACOGNITION_SERVICE_URL,
+};
+
 const aiHealthHandler = (engine: string) => async (req: any, res: any) => {
+  const serviceUrl = AI_SERVICE_URLS[engine];
   try {
-    res.json({ status: 'operational', engine, mode: 'cpu_fallback', timestamp: new Date() });
-  } catch (e) {
-    res.status(503).json({ status: 'down', engine });
+    const upstream = await axios.get(`${serviceUrl}/health`, { timeout: 3000 });
+    res.json({
+      status: upstream.data?.status ?? 'operational',
+      engine,
+      mode: upstream.data?.mode ?? 'cpu',
+      upstreamLatencyMs: upstream.data?.latencyMs,
+      timestamp: new Date(),
+    });
+  } catch (e: any) {
+    logger.warn(`[AI Health] ${engine} health check failed: ${e.message}`);
+    res.status(503).json({ status: 'down', engine, error: e.message, timestamp: new Date() });
   }
 };
 
@@ -151,7 +170,8 @@ r.get('/progression/:patientId', async (req, res, next) => {
     const timeline = scans.map((s: any) => ({
       date: s.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       finding: s.aiResult?.primaryFinding || 'Normal',
-      vol: s.aiResult ? (Math.random() * 25).toFixed(1) + ' ml' : 'N/A',
+      vol: (s.aiResult?.rawJson as any)?.triage?.size
+           ?? (s.aiResult ? 'Measured' : 'N/A'),
       status: s.aiResult?.urgency === 'CRITICAL' ? 'critical' : 'normal'
     }));
 
@@ -161,18 +181,42 @@ r.get('/progression/:patientId', async (req, res, next) => {
 
 /**
  * GET /api/v1/ai/explain/:scanId
- * Generates a layperson explanation for a patient
+ * Generates a contextual layperson explanation for a patient
+ * AP3 fix: uses real AI result fields instead of hardcoded mock string
  */
 r.get('/explain/:scanId', async (req, res, next) => {
   try {
     const { scanId } = req.params;
-    const result = await prisma.aIResult.findUnique({ where: { scanId } });
+    const result = await prisma.aIResult.findFirst({
+      where: { scanId },
+      include: { scan: { select: { modality: true, bodyPart: true } } }
+    });
     if (!result) throw new AppError('AI result not found', 404);
 
-    // Mock VLM layperson generation
-    const explanation = `Based on the AI analysis of your ${result.primaryFinding}, we have identified a significant finding that requires immediate clinical attention. Our specialists have been notified and are reviewing your case now. Please stay in the waiting area.`;
-    
-    res.json({ explanation });
+    const urgency  = (result as any).urgency  ?? 'NORMAL';
+    const finding  = result.primaryFinding ?? 'No significant findings';
+    const conf     = result.confidence ? Math.round((result as any).confidence * 100) : null;
+    const vlm      = (result as any).vlmFindings ?? '';
+    const modality = (result as any).scan?.modality ?? 'scan';
+    const bodyPart = (result as any).scan?.bodyPart ?? 'area';
+
+    let urgencyText = 'Our clinical team has been informed and will review your results soon.';
+    if (urgency === 'CRITICAL') {
+      urgencyText = 'Our clinical team has been urgently alerted and is reviewing your case right now. Please remain available for immediate contact.';
+    } else if (urgency === 'URGENT') {
+      urgencyText = 'Your results have been flagged for priority review. A clinician will contact you shortly.';
+    }
+
+    const confidenceText = conf ? ` The AI system assessed this finding with ${conf}% confidence.` : '';
+    const vlmText = vlm ? ` Additional detail: ${vlm}` : '';
+
+    const explanation = `Your ${modality} scan of the ${bodyPart.toLowerCase()} has been analysed by the SEWA AI system. `
+      + `The main finding identified is: ${finding}.`
+      + confidenceText
+      + ` ${urgencyText}`
+      + vlmText;
+
+    res.json({ explanation, finding, urgency, confidence: conf });
   } catch (err) { next(err); }
 });
 

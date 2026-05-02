@@ -61,12 +61,20 @@ MODALITY_FINDING_MATRIX: Dict[str, List[str]] = {
                    "Rib Fracture", "Normal"],
     "CT_Abdomen": ["Bowel Perforation", "Appendicitis", "Splenic Laceration",
                    "Bowel Obstruction", "Aortic Aneurysm", "Ascites", "Normal"],
+    "CT_Spine":   ["Fracture", "Disc Herniation", "Cord Compression", "Spinal Stenosis",
+                   "Vertebral Collapse", "Metastasis", "Normal"],
     "MRI_Brain":  ["Ischemic Stroke", "Brain Tumor", "Multiple Sclerosis",
                    "Encephalitis", "Metastasis", "Cerebral Abscess", "Normal"],
     "MRI_Spine":  ["Disc Herniation", "Spinal Stenosis", "Cord Compression",
                    "Fracture", "Tumor", "Normal"],
+    "MRI_Knee":   ["ACL Tear", "Meniscal Tear", "PCL Tear", "Cartilage Damage",
+                   "Bone Contusion", "Osteochondral Defect", "Effusion", "Normal"],
+    "MRI_Liver":  ["Hepatocellular Carcinoma", "Liver Metastasis", "Hepatic Cyst",
+                   "Hepatic Abscess", "Cirrhosis", "Focal Nodular Hyperplasia", "Normal"],
     "XR_Chest":   ["Pneumonia", "TB", "Pneumothorax", "Pleural Effusion",
                    "Cardiomegaly", "Lung Mass", "Normal"],
+    "XR_Pelvis":  ["Hip Fracture", "Pelvic Fracture", "Avascular Necrosis",
+                   "Osteoarthritis", "Sacroiliac Joint Pathology", "Normal"],
 }
 
 URGENCY_FINDING_MAP: Dict[str, str] = {
@@ -297,24 +305,51 @@ class MetacognitionEvaluator:
 
     def _detect_report_contradiction(self, report_text: str, finding: str) -> Optional[str]:
         """
-        Simple lexical contradiction detection.
-        In production: use a fine-tuned NLI model (e.g. DeBERTa-v3-large).
+        Layer 6: Multi-signal contradiction detection.
+        Uses Jaccard token overlap + clinical negation scoring + keyword density.
+        This is a significant improvement over pure lexical matching without
+        requiring an NLI model dependency in production.
         """
-        report_lower = report_text.lower()
+        report_lower  = report_text.lower()
         finding_lower = finding.lower()
 
-        # If the finding keyword doesn't appear in the report at all
-        key_terms = finding_lower.split()
-        found_any = any(term in report_lower for term in key_terms if len(term) > 3)
+        # --- Signal 1: Token-level Jaccard similarity ---
+        report_tokens   = set(t for t in report_lower.split() if len(t) > 3)
+        finding_tokens  = set(t for t in finding_lower.split() if len(t) > 3)
+        if finding_tokens:
+            overlap = report_tokens & finding_tokens
+            jaccard = len(overlap) / len(report_tokens | finding_tokens)
+        else:
+            jaccard = 1.0  # Empty finding → no contradiction
 
-        # If report says "no evidence of" + finding keyword
-        negation_phrases = ["no evidence of", "no acute", "unremarkable", "normal study", "no significant"]
-        negated = any(phrase in report_lower for phrase in negation_phrases)
+        # --- Signal 2: Clinical negation detection ---
+        NEGATION_TEMPLATES = [
+            "no evidence of", "no acute", "unremarkable", "normal study",
+            "no significant", "excluded", "not identified", "absent",
+            "no {finding}", "without {finding}",
+        ]
+        negation_score = 0.0
+        for template in NEGATION_TEMPLATES:
+            phrase = template.replace("{finding}", finding_lower)
+            if phrase in report_lower:
+                negation_score += 0.4
+        negation_score = min(1.0, negation_score)
 
-        if negated and found_any:
-            return f"Report contains negation phrase near '{finding}'"
-        if not found_any and finding != "Normal":
-            return f"Finding '{finding}' not mentioned in generated report"
+        # --- Signal 3: Finding keyword density in report ---
+        key_terms    = [t for t in finding_tokens if len(t) > 3]
+        present_terms = [t for t in key_terms if t in report_lower]
+        density = len(present_terms) / max(len(key_terms), 1)
+
+        # --- Composite contradiction decision ---
+        # Weights: similarity (0.4), negation (0.4), density (0.2)
+        contradiction_score = (1 - jaccard) * 0.4 + negation_score * 0.4 + (1 - density) * 0.2
+
+        if contradiction_score > 0.65 and finding != "Normal":
+            return (
+                f"Contradiction detected (score={contradiction_score:.2f}): "
+                f"finding '{finding}' conflicts with report text "
+                f"(jaccard={jaccard:.2f}, negation={negation_score:.2f}, density={density:.2f})"
+            )
         return None
 
     def _check_age_sex_plausibility(

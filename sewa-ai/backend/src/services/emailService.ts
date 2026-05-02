@@ -1,5 +1,6 @@
 import { EmailClient } from '@azure/communication-email';
 import { config } from '../config/env';
+import { logger } from '../utils/logger';
 
 const connectionString = config.AZURE_COMMUNICATION_CONNECTION_STRING || '';
 const emailClient = connectionString ? new EmailClient(connectionString) : null;
@@ -48,11 +49,26 @@ const TEMPLATES: Record<string, (d: any) => string> = {
       <a href="${config.FRONTEND_URL}/portal/scans" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none">View Report →</a>
     </div>`,
   'welcome': (d) => `<h2>Welcome to SEWA AI, ${d.name}</h2><p>Your account is ready. <a href="${d.loginUrl}">Sign in →</a></p>`,
+  'staff-invite': (d) => `
+    <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;background:#0C1D17;color:#D0ECE6;border-radius:16px;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#408D7B,#2E6B5E);padding:28px 32px">
+        <div style="font-size:11px;color:#A8D8CC;letter-spacing:0.08em;margin-bottom:8px">SEWA AI · NHS Clinical Platform</div>
+        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700">You've been invited to join ${d.tenantName || 'your NHS trust'}</h1>
+      </div>
+      <div style="padding:32px">
+        <p style="margin-top:0">You have been invited as a <strong>${d.role}</strong> on the SEWA AI platform by your hospital administrator.</p>
+        <p>Click the button below to create your account and set your password. This invitation expires in <strong>72 hours</strong>.</p>
+        <a href="${d.inviteLink}" style="display:inline-block;background:#408D7B;color:#fff;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;margin-top:8px">Accept Invitation &amp; Set Password →</a>
+        <hr style="border:none;border-top:1px solid #1B3028;margin:28px 0"/>
+        <p style="font-size:12px;color:#6FA898;margin:0">If you did not expect this invitation, please ignore this email or contact <a href="mailto:support@sewa.ai" style="color:#52B09A">support@sewa.ai</a>.</p>
+        <p style="font-size:11px;color:#3A6055;margin:8px 0 0">SEWA AI · a Storegrill Inc Ltd company · Registered in England &amp; Wales (14581073)</p>
+      </div>
+    </div>`,
 };
 
 export async function sendEmail({ to, name, subject, template, html, data }: EmailPayload): Promise<void> {
   if (!emailClient) {
-    console.warn('[Email] AZURE_COMMUNICATION_CONNECTION_STRING not set — skipping email');
+    logger.warn(`[Email] AZURE_COMMUNICATION_CONNECTION_STRING not set — skipping email to ${to}`);
     return;
   }
   const emailHtml = html || (template && TEMPLATES[template] ? TEMPLATES[template](data || {}) : `<p>${JSON.stringify(data)}</p>`);
@@ -71,7 +87,9 @@ export async function sendEmail({ to, name, subject, template, html, data }: Ema
   try {
     const poller = await emailClient.beginSend(message);
     await poller.pollUntilDone();
-  } catch (error) {
-    console.error('[Email] Failed to send via ACS:', error);
+    logger.info(`[Email] Sent '${subject}' to ${to}`);
+  } catch (error: any) {
+    // BG4: Log failure but do NOT rethrow — email is non-fatal for most flows
+    logger.error(`[Email] Failed to send '${subject}' to ${to}: ${error.message}`);
   }
 }

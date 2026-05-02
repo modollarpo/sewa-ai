@@ -25,6 +25,7 @@ import { AIResultSchema } from '../utils/validators';
 import { config } from '../config/env';
 import * as fhirService from './fhirService';
 import * as longitudinalService from './longitudinalService';
+import { dlq } from './dlqService';
 
 // ── Service URLs — CPU-only endpoints (same pods, just no GPU flag needed) ──
 const TRIAGE_URL        = config.AI_SERVICE_URL;
@@ -348,7 +349,12 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         epistemicUncertainty: uncertainty.epistemicUncertainty,
         aleatoricUncertainty: uncertainty.aleatoricUncertainty,
         rawJson: {
-          triage, uncertainty, vlm, metacog, doorToAlertMs,
+          triage,
+          uncertainty: {
+            ...uncertainty,
+            mcPassesUsed: uncertainty.mcPassesUsed ?? null, // M3: expose passes used
+          },
+          vlm, metacog, doorToAlertMs,
           pipeline: { stage1ParallelMs: stage1Ms, backend: triage.backend },
         } as any,
         modelId: 'sewa-cpu-onnx-int8-v2',
@@ -435,6 +441,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       where: { id: scanId },
       data: { status: 'failed', errorMessage: err.message },
     }).catch(() => {});
+    // BG1/BG2: Push to DLQ for automatic retry with exponential backoff
+    await dlq.enqueue(scanId, tenantId, err.message, 0).catch(() => {});
     throw err;
   }
 }

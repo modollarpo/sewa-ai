@@ -38,11 +38,13 @@ import annotationRoutes from './routes/annotations';
 import secondOpinionRoutes from './routes/secondOpinions';
 import auditRoutes      from './routes/audit';
 import roadmapRoutes    from './routes/roadmap/index';
-import appointmentRoutes, { sendAppointmentReminders } from './routes/appointments/index';
+import appointmentRoutes from './routes/appointments/index';
 import whatsappRoutes   from './routes/whatsapp';
 import aiMonitoringRoutes from './routes/ai-monitoring';
 import onboardingRoutes from './routes/onboarding';
+import { sendAppointmentReminders } from './routes/appointments/index';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
+import { dlq } from './services/dlqService';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -194,6 +196,18 @@ async function bootstrap() {
       } catch (e: any) { logger.error('[Cron] Scan cleanup failed:', e.message); }
     }, 5 * 60 * 1000);
     logger.info('[Cron] Scan processing cleanup scheduler started (every 5 min)');
+
+    // ── DLQ processor cron — every 5 minutes (BG1/BG2) ──────────
+    setInterval(async () => {
+      try {
+        const depth = await dlq.depth();
+        if (depth > 0) {
+          logger.info(`[DLQ] Processing ${depth} queued scans`);
+          await dlq.process();
+        }
+      } catch (e: any) { logger.error('[DLQ] Cron error:', e.message); }
+    }, 5 * 60 * 1000);
+    logger.info('[Cron] DLQ processor started (every 5 min)');
   } catch (err) {
     logger.error('Bootstrap error:', err);
     process.exit(1);

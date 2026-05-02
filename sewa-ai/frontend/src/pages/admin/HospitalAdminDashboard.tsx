@@ -67,7 +67,16 @@ export function HospitalAdminDashboard() {
     s.role?.toLowerCase().includes(search.toLowerCase())
   ), [staff, search]);
   const [showAddUser, setShowAddUser] = useState(false);
+  const [invoices, setInvoices]       = useState<any[]>([]);
+  const [pacsStatus, setPacsStatus]   = useState<'idle'|'loading'|'ok'|'fail'>('idle');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    apiClient.get('/payments/history').then(r => {
+      const list = Array.isArray(r.data.payments) ? r.data.payments : (Array.isArray(r.data) ? r.data : []);
+      setInvoices(list);
+    }).catch(() => {/* silent — will show empty state */});
+  }, []);
 
   useEffect(() => {
     const r = () => setIsMobile(window.innerWidth < 768);
@@ -337,18 +346,18 @@ export function HospitalAdminDashboard() {
             <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
               <h3 style={{margin:0,fontSize:16,color:C.textHi,marginBottom:20}}>Invoice History</h3>
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                {[
-                  { id: 'INV-2026-004', date: '2026-04-01', amount: '499.00', status: 'PAID' },
-                  { id: 'INV-2026-003', date: '2026-03-01', amount: '499.00', status: 'PAID' },
-                  { id: 'INV-2026-002', date: '2026-02-01', amount: '499.00', status: 'PAID' },
-                ].map(inv => (
+                {invoices.length === 0 ? (
+                  <div style={{padding:24,textAlign:'center',color:C.textLo,fontSize:12}}>No invoices found.</div>
+                ) : invoices.map((inv:any) => (
                   <div key={inv.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:12,background:C.bg3,borderRadius:10,border:`1px solid ${C.border}`}}>
                     <div>
                       <div style={{fontSize:12,fontWeight:700,color:C.textHi}}>{inv.id}</div>
-                      <div style={{fontSize:10,color:C.textLo}}>{inv.date}</div>
+                      <div style={{fontSize:10,color:C.textLo}}>{inv.createdAt ? new Date(inv.createdAt).toLocaleDateString('en-GB') : inv.date}</div>
                     </div>
                     <div style={{textAlign:'right'}}>
-                      <div style={{fontSize:12,fontWeight:700,color:C.textHi}}>{user?.currency || 'GBP'} {inv.amount}</div>
+                      <div style={{fontSize:12,fontWeight:700,color:C.textHi}}>
+                        {user?.currency || 'GBP'} {inv.amount ? (Number(inv.amount)/100).toFixed(2) : inv.amountDisplay || '—'}
+                      </div>
                       <button onClick={async () => {
                         try {
                           const res = await apiClient.get(`/payments/invoices/${inv.id}/pdf`, { responseType: 'blob' });
@@ -360,8 +369,7 @@ export function HospitalAdminDashboard() {
                           link.click();
                           setTimeout(() => window.URL.revokeObjectURL(url), 1000);
                         } catch (e: any) { 
-                          console.error('[Admin] Invoice gen failed:', e);
-                          alert('Invoice generation failed.'); 
+                          alert('Invoice generation failed. Please try again.');
                         }
                       }} style={{fontSize:10,color:C.brand,background:'none',border:'none',cursor:'pointer',padding:0,marginTop:4}}>Download PDF ↓</button>
                     </div>
@@ -424,8 +432,21 @@ export function HospitalAdminDashboard() {
                     <div style={{padding:'4px 8px',borderRadius:20,fontSize:10,fontWeight:700,background:`${C.normal}20`,color:C.normal}}>CONNECTED</div>
                   </div>
                   <div style={{fontSize:11,color:C.textMd,marginBottom:12,fontFamily:C.FM}}>AE Title: {(user as any)?.aeTitle || 'SEWA_AI'}</div>
-                  <button onClick={() => alert('PACS Echo (C-ECHO) successful.')} style={{width:'100%',padding:'8px',background:C.bg4,border:`1px solid ${C.border}`,color:C.textHi,fontSize:11,borderRadius:8,cursor:'pointer'}}>
-                    C-ECHO Ping
+                  <button
+                    onClick={async () => {
+                      setPacsStatus('loading');
+                      try {
+                        await apiClient.post('/tenants/integrations/pacs/echo');
+                        setPacsStatus('ok');
+                        setTimeout(() => setPacsStatus('idle'), 4000);
+                      } catch (e: any) {
+                        setPacsStatus('fail');
+                        setTimeout(() => setPacsStatus('idle'), 5000);
+                      }
+                    }}
+                    disabled={pacsStatus === 'loading'}
+                    style={{width:'100%',padding:'8px',background:C.bg4,border:`1px solid ${pacsStatus==='ok'?C.normal:pacsStatus==='fail'?C.critical:C.border}`,color:pacsStatus==='ok'?C.normal:pacsStatus==='fail'?C.critical:C.textHi,fontSize:11,borderRadius:8,cursor:'pointer'}}>
+                    {pacsStatus === 'loading' ? '⏳ Pinging...' : pacsStatus === 'ok' ? '✓ C-ECHO Successful' : pacsStatus === 'fail' ? '✗ C-ECHO Failed' : 'C-ECHO Ping'}
                   </button>
                 </div>
               </div>

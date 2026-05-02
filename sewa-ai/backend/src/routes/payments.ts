@@ -243,4 +243,99 @@ r.get('/usage', async (req: Request, res: Response, next: NextFunction) => {
   } catch (err) { next(err); }
 });
 
+// ── GET /invoices/:id/pdf — Generate and stream invoice PDF (AP1 fix) ─
+r.get('/invoices/:id/pdf',
+  authorize('admin', 'superadmin'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const { tenantId } = req.user!;
+
+      // 1. Look up the payment record
+      const payment = await prisma.payment.findFirst({
+        where: { id, tenantId },
+        include: { tenant: { select: { name: true, region: true, currency: true, plan: true } } },
+      });
+      if (!payment) throw new AppError('Invoice not found', 404);
+
+      // 2. Try Stripe hosted PDF first (if payment was via Stripe)
+      if ((payment as any).stripeInvoiceId) {
+        try {
+          const Stripe = (await import('stripe')).default;
+          const { config: cfg } = await import('../config/env');
+          const stripe = new Stripe(cfg.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' });
+          const inv = await stripe.invoices.retrieve((payment as any).stripeInvoiceId);
+          if (inv.invoice_pdf) {
+            return res.redirect(302, inv.invoice_pdf);
+          }
+        } catch (e: any) {
+          logger.warn(`[Billing] Stripe PDF retrieval failed: ${e.message} — falling back to generated PDF`);
+        }
+      }
+
+      // 3. Generate PDF using PDFKit for non-Stripe payments
+      const PDFDocument = (await import('pdfkit')).default;
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="Invoice-${id}.pdf"`);
+      doc.pipe(res);
+
+      // Header
+      doc.fontSize(24).font('Helvetica-Bold').text('SEWA AI', 50, 50);
+      doc.fontSize(10).font('Helvetica').fillColor('#666')
+         .text('a Storegrill Inc Ltd company', 50, 80)
+         .text('Registered in England & Wales (14581073)', 50, 92);
+
+      doc.fontSize(20).font('Helvetica-Bold').fillColor('#000')
+         .text('INVOICE', 400, 50, { align: 'right' });
+      doc.fontSize(10).font('Helvetica').fillColor('#333')
+         .text(`Invoice #: ${id}`, 400, 80, { align: 'right' })
+         .text(`Date: ${new Date((payment as any).createdAt).toLocaleDateString('en-GB')}`, 400, 92, { align: 'right' });
+
+      doc.moveTo(50, 120).lineTo(545, 120).stroke('#E0E0E0');
+
+      // Bill To
+      doc.fontSize(10).font('Helvetica-Bold').fillColor('#000').text('BILL TO', 50, 140);
+      doc.font('Helvetica').fillColor('#333')
+         .text(payment.tenant?.name ?? 'NHS Trust', 50, 155)
+         .text(`Region: ${(payment.tenant?.region ?? 'UK').toUpperCase()}`, 50, 167)
+         .text(`Plan: ${(payment.tenant?.plan ?? 'Pro').toUpperCase()}`, 50, 179);
+
+      // Line items
+      doc.moveTo(50, 210).lineTo(545, 210).stroke('#E0E0E0');
+      doc.font('Helvetica-Bold').fillColor('#000')
+         .text('Description', 50, 220).text('Amount', 450, 220, { align: 'right' });
+      doc.moveTo(50, 235).lineTo(545, 235).stroke('#E0E0E0');
+
+      const currency = payment.tenant?.currency ?? 'GBP';
+      const amount   = ((payment as any).amount ?? 0) / 100; // assuming pence
+      doc.font('Helvetica').fillColor('#333')
+         .text(`SEWA AI Platform — ${payment.tenant?.plan ?? 'Pro'} Plan`, 50, 248)
+         .text(`${currency} ${amount.toFixed(2)}`, 450, 248, { align: 'right' });
+
+      doc.moveTo(50, 270).lineTo(545, 270).stroke('#E0E0E0');
+      doc.font('Helvetica-Bold')
+         .text('TOTAL', 350, 280)
+         .text(`${currency} ${amount.toFixed(2)}`, 450, 280, { align: 'right' });
+
+      doc.moveTo(50, 300).lineTo(545, 300).stroke('#E0E0E0');
+
+      // Status badge
+      const status = (payment as any).status ?? 'PAID';
+      doc.fontSize(12).font('Helvetica-Bold')
+         .fillColor(status === 'PAID' ? '#1DBF73' : '#E08A20')
+         .text(`Status: ${status}`, 50, 320);
+
+      // Footer
+      doc.fontSize(8).font('Helvetica').fillColor('#999')
+         .text('This is a computer-generated invoice and does not require a signature.', 50, 750, { align: 'center' })
+         .text('SEWA AI · support@sewa.ai · www.sewa.ai', 50, 762, { align: 'center' });
+
+      doc.end();
+    } catch (err) { next(err); }
+  }
+);
+
 export default r;
+

@@ -4,6 +4,24 @@
 import crypto from 'crypto';
 import { prisma } from '../config/database';
 import { io } from '../index';
+import { logger } from './logger';
+
+// G2: Validate AUDIT_PRIVATE_KEY at module load time.
+// In production this key must come from Azure Key Vault via the sewa-secrets AKS secret.
+// If missing or mock, log a CRITICAL warning. In strict mode (production) throw to fail the pod.
+const _RAW_KEY = process.env.AUDIT_PRIVATE_KEY ?? '';
+const _KEY_IS_MOCK = !_RAW_KEY || _RAW_KEY.includes('MOCK') || _RAW_KEY.length < 64;
+if (_KEY_IS_MOCK) {
+  const msg = '[AUDIT] CRITICAL: AUDIT_PRIVATE_KEY is missing or is a mock value. '
+    + 'Audit log signatures are NOT cryptographically valid. '
+    + 'Set AUDIT_PRIVATE_KEY in the sewa-secrets AKS secret from Azure Key Vault before NHS go-live.';
+  if (process.env.NODE_ENV === 'production') {
+    // In production: throw so the pod fails fast and ops is immediately alerted
+    throw new Error(msg);
+  }
+  // In dev/staging: warn loudly but continue
+  console.warn(msg);
+}
 
 export interface AuditEntry {
   tenantId?: string;
@@ -29,9 +47,11 @@ export async function auditLog(entry: AuditEntry): Promise<void> {
     // ── Digital Signature (Feature 20: Tamper-proof Legality) ──
     const signer = crypto.createSign('RSA-SHA256');
     signer.update(chainHash);
-    // In production, AUDIT_PRIVATE_KEY is pulled from Azure Key Vault
-    const privateKey = process.env.AUDIT_PRIVATE_KEY || '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA76...[MOCK]...';
-    const signature = privateKey.includes('MOCK') ? 'signed:' + chainHash : signer.sign(privateKey, 'hex');
+    // In production, AUDIT_PRIVATE_KEY is loaded from Azure Key Vault via AKS secret
+    const privateKey = _RAW_KEY;
+    const signature = _KEY_IS_MOCK
+      ? 'unsigned:' + chainHash   // clearly marked as unsigned for non-prod
+      : signer.sign(privateKey, 'hex');
 
     const log = await prisma.auditLog.create({
       data: {
@@ -55,7 +75,7 @@ export async function auditLog(entry: AuditEntry): Promise<void> {
     }
     io.to('role:superadmin').emit('audit:new', log);
   } catch (e: any) {
-    console.error('[Audit] Failed to write audit log:', e.message);
+    logger.error(`[Audit] Failed to write audit log: ${e.message}`);
   }
 }
 
@@ -96,9 +116,8 @@ export async function verifyChain(limit = 1000): Promise<{ valid: boolean; broke
       .update(payloadHash + (entry.previousHash || 'genesis')).digest('hex');
 
     if (entry.sha256Hash !== expectedChainHash) {
-      // In a real system, we'd need to be extremely careful with JSON key order
-      // but for this implementation, we'll flag it as a potential mismatch
-      // return { valid: false, brokenId: entry.id };
+      // Flag as mismatch - chain integrity violated
+      return { valid: false, brokenId: entry.id };
     }
   }
   return { valid: true };

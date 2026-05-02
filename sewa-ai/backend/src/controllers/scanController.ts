@@ -13,7 +13,13 @@ import { notifyUsers } from '../services/notifications/notificationService';
 import { auditLog } from '../utils/audit';
 import { AppError } from '../utils/AppError';
 import { incrementQuota } from '../middleware/scanQuota';
+import { logger } from '../utils/logger';
 import { io } from '../index';
+
+// Valid DICOM modality codes (DICOM PS 3.3 Table C.7-5a)
+const VALID_MODALITIES = new Set([
+  'CT','MRI','XR','US','PET','PETCT','NM','MG','DX','CR','RF','DSA','FLU','OT'
+]);
 
 // POST /api/v1/scans/upload
 export async function uploadScan(req: Request, res: Response, next: NextFunction) {
@@ -26,6 +32,19 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
       clinicalIndication, technique, referringDoctorId,
       dicomStudyUid, dicomSeriesUid, dicomInstanceUid,
     } = req.body;
+
+    // C4: Validate required DICOM metadata before committing to DB or invoking pipeline
+    if (!modality) throw new AppError('modality is required', 400);
+    if (!VALID_MODALITIES.has(modality.toUpperCase())) {
+      throw new AppError(
+        `Invalid modality '${modality}'. Accepted values: ${[...VALID_MODALITIES].join(', ')}`,
+        400
+      );
+    }
+    // C3: Guard against missing bodyPart — pipeline cannot route without it
+    if (!bodyPart || bodyPart.trim() === '') {
+      throw new AppError('bodyPart is required (e.g. HEAD, CHEST, ABDOMEN)', 400);
+    }
 
     // Upload DICOM to Azure Blob / S3
     let storageUrl: string | undefined;
@@ -53,8 +72,7 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
 
     // FHIR ImagingStudy creation (Feature 4)
     const fhirStudyId = await createFHIRImagingStudy(scan).catch((err: any): null => {
-      // Non-fatal — log and continue
-      console.warn('FHIR ImagingStudy creation failed:', err.message);
+      logger.warn(`[Scan] FHIR ImagingStudy creation failed: ${err.message}`);
       return null;
     });
 
@@ -64,7 +82,7 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
 
     // HL7v2 ORM message (Feature 9)
     const hl7OrderId = await sendHL7ORM(scan).catch((err: any): null => {
-      console.warn('HL7 ORM failed:', err.message);
+      logger.warn(`[Scan] HL7 ORM dispatch failed: ${err.message}`);
       return null;
     });
 
@@ -74,12 +92,12 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
 
     // Trigger AI Triage Engine asynchronously (Feature 3)
     triggerAITriage(scan.id, tenantId).catch(err => {
-      console.error('AI Triage trigger failed:', err.message);
+      logger.error(`[Scan] AI Triage trigger failed: ${err.message}`);
     });
 
     // Increment monthly quota counter (and charge overage if applicable)
     incrementQuota(tenantId, req.body._overage ?? false, req.body._overageRate ?? 0)
-      .catch(err => console.error('Quota increment failed:', err.message));
+      .catch(err => logger.error(`[Scan] Quota increment failed: ${err.message}`));
 
     await auditLog({
       tenantId, userId, action: 'SCAN_UPLOADED',

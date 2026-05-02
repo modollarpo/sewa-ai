@@ -1,7 +1,11 @@
 // SEWA AI — backend/src/routes/users.ts
 import { Router } from 'express';
+import crypto from 'crypto';
 import { authenticate, authorize } from '../middleware/auth';
 import { prisma } from '../config/database';
+import { sendEmail } from '../services/emailService';
+import { config } from '../config/env';
+import { logger } from '../utils/logger';
 const r = Router();
 r.use(authenticate);
 r.get('/me', async (req, res, next) => {
@@ -73,11 +77,68 @@ r.post('/', authorize('admin','superadmin'), async (req, res, next) => {
     const u = await prisma.user.create({
       data: {
         email, firstName, lastName, role, tenantId,
-        status: 'active',
-        password: 'ChangeMe123!', // Mock password for now
+        status: 'pending_invite',
+        // No password set — user must complete invitation flow to set one
       }
     });
+
+    // C5/BG4: Send branded invitation email (non-fatal — failure logged but not thrown)
+    const inviteToken = crypto.randomBytes(24).toString('hex');
+    await prisma.user.update({ where: { id: u.id }, data: { inviteToken } as any }).catch((): void => {});
+    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { name: true } }).catch((): null => null);
+    const inviteLink = `${config.FRONTEND_URL}/auth/accept-invite?token=${inviteToken}`;
+    sendEmail({
+      to: email,
+      name: `${firstName} ${lastName}`.trim() || email,
+      subject: `You've been invited to SEWA AI — ${tenant?.name ?? 'NHS Trust'}`,
+      template: 'staff-invite',
+      data: { role, tenantName: tenant?.name, inviteLink },
+    }).catch((e: any) => logger.warn(`[Users] Invite email failed for ${email}: ${e.message}`));
+
     res.status(201).json(u);
   } catch (err) { next(err); }
 });
+
+// POST /api/v1/users/invite — called from HospitalAdminDashboard "+ Invite Staff" button
+r.post('/invite', authorize('admin','superadmin'), async (req, res, next) => {
+  try {
+    const { email, role } = req.body;
+    const { tenantId } = req.user!;
+    if (!email || !role) return res.status(400).json({ error: 'email and role are required' });
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) return res.status(409).json({ error: 'User already exists' });
+    const u = await prisma.user.create({
+      data: { email, firstName: '', lastName: '', role, tenantId, status: 'pending_invite' }
+    });
+
+    // C5/BG4: Send invitation email
+    const inviteToken = crypto.randomBytes(24).toString('hex');
+    await prisma.user.update({ where: { id: u.id }, data: { inviteToken } as any }).catch((): void => {});
+    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { name: true } }).catch((): null => null);
+    const inviteLink = `${config.FRONTEND_URL}/auth/accept-invite?token=${inviteToken}`;
+    sendEmail({
+      to: email,
+      subject: `You've been invited to SEWA AI — ${tenant?.name ?? 'NHS Trust'}`,
+      template: 'staff-invite',
+      data: { role, tenantName: tenant?.name, inviteLink },
+    }).catch((e: any) => logger.warn(`[Invite] Email failed for ${email}: ${e.message}`));
+
+    res.status(201).json({ message: `Invitation sent to ${email}`, userId: u.id });
+  } catch (err) { next(err); }
+});
+
+// PATCH /api/v1/users/:id/role — called from HospitalAdminDashboard staff table "Edit" button
+r.patch('/:id/role', authorize('admin','superadmin'), async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    const target = await prisma.user.findUnique({ where: { id } });
+    if (!target || target.tenantId !== req.user!.tenantId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    const u = await prisma.user.update({ where: { id }, data: { role } });
+    res.json(u);
+  } catch (err) { next(err); }
+});
+
 export default r;
