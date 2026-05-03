@@ -3,47 +3,53 @@
 
 import { Router } from 'express';
 import { prisma } from '../config/database';
-import { authenticate } from '../middleware/auth';
+import { authenticate, authorize } from '../middleware/auth';
 
 const r = Router();
 
+// ── ALL training routes require authentication ─────────────────────────────
+// PREVIOUSLY: /student-cases was unauthenticated and leaked real patient scan
+// data (clinicalIndication, AI findings) to any anonymous internet request.
+// GDPR Art. 9 violation — special category health data exposed without consent.
+r.use(authenticate);
+
 /**
- * GET /api/v1/training/student-cases (Public)
+ * GET /api/v1/training/student-cases (Authenticated — any role)
+ * Returns anonymised scan cases filtered to this tenant only.
  */
 r.get('/student-cases', async (req, res, next) => {
   try {
+    const { tenantId } = req.user!;
     const scans = await prisma.scan.findMany({
-      where: { status: 'COMPLETED' },
+      where: { status: 'COMPLETED', tenantId },  // tenant-scoped
       take: 10,
-      include: { aiResult: true }
+      include: { aiResult: true },
     });
 
     const cases = scans.map((s: any) => ({
       id: s.id,
       type: `${s.modality} ${s.bodyPart}`,
-      clinicalInfo: s.clinicalIndication || 'No clinical history provided.',
+      // Never expose clinicalIndication — it may contain patient-identifiable info
+      clinicalInfo: 'Clinical history available to treating clinicians only.',
       findings: s.aiResult?.vlmFindings || 'Findings are being analyzed.',
       label: s.aiResult?.urgency?.toLowerCase() === 'critical' ? 'critical' : 'normal',
-      diagnosis: s.aiResult?.primaryFinding || 'Normal'
+      diagnosis: s.aiResult?.primaryFinding || 'Normal',
     }));
 
     res.json(cases);
   } catch (err) { next(err); }
 });
 
-r.use(authenticate);
-
 /**
- * GET /api/v1/training/cases (Authenticated)
+ * GET /api/v1/training/cases (Authenticated radiologist/doctor)
  */
-r.get('/cases', async (req, res, next) => {
+r.get('/cases', authorize('radiologist', 'doctor', 'admin', 'superadmin'), async (req, res, next) => {
   try {
-    // In production, this would pull from a curated 'TrainingCase' table.
-    // For now, we fetch a few completed scans and anonymize them for the simulator.
+    const { tenantId } = req.user!;
     const scans = await prisma.scan.findMany({
-      where: { status: 'COMPLETED' },
+      where: { status: 'COMPLETED', tenantId },  // tenant-scoped
       take: 5,
-      include: { aiResult: true }
+      include: { aiResult: true },
     });
 
     const cases = scans.map((s: any) => ({
@@ -55,10 +61,10 @@ r.get('/cases', async (req, res, next) => {
         'Normal',
         s.aiResult?.primaryFinding || 'Acute Finding',
         'Artifact / Quality issue',
-        'Uncertain / Human review needed'
+        'Uncertain / Human review needed',
       ].sort(() => Math.random() - 0.5),
       difficulty: s.aiResult?.confidence && s.aiResult.confidence > 0.9 ? 'EASY' : 'MEDIUM',
-      explanation: s.aiResult?.vlmImpression || 'The AI detected signs of pathology consistent with the primary finding.'
+      explanation: s.aiResult?.vlmImpression || 'The AI detected signs of pathology consistent with the primary finding.',
     }));
 
     res.json(cases);

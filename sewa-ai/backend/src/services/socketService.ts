@@ -3,7 +3,10 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+import { prisma } from '../config/database';
+import { config } from '../config/env';
+
+const JWT_SECRET = config.JWT_SECRET;
 export function setupSocketIO(io: Server) {
   io.use((socket, next) => {
     try {
@@ -22,7 +25,20 @@ export function setupSocketIO(io: Server) {
       if (role === 'radiologist' || role === 'doctor') socket.join(`clinical:${tenantId}`);
       logger.info(`[WS] Connected: ${userId} (${role}) tenant:${tenantId}`);
     }
-    socket.on('join:scan', (scanId) => socket.join(`scan:${scanId}`));
+    socket.on('join:scan', async (scanId) => {
+      if (!tenantId) return;
+      try {
+        const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
+        if (scan) {
+          socket.join(`scan:${scanId}`);
+          logger.info(`[WS] ${userId} joined scan:${scanId}`);
+        } else {
+          logger.warn(`[WS] ${userId} denied access to scan:${scanId}`);
+        }
+      } catch (err) {
+        logger.error(`[WS] Error joining scan: ${err}`);
+      }
+    });
     socket.on('disconnect', () => logger.info(`[WS] Disconnected: ${userId}`));
   });
 }

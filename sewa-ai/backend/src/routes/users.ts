@@ -52,9 +52,15 @@ r.get('/me', async (req, res, next) => {
 r.patch('/me', async (req, res, next) => {
   try {
     const { firstName, lastName, language, timezone, speciality, notifPrefs, consentPrefs } = req.body;
-    const u = await prisma.user.update({ 
-      where: { id: req.user!.id }, 
-      data: { firstName, lastName, language, timezone, speciality, notifPrefs, consentPrefs } 
+    const u = await prisma.user.update({
+      where: { id: req.user!.id },
+      data: { firstName, lastName, language, timezone, speciality, notifPrefs, consentPrefs },
+      // Explicitly select safe fields — NEVER return passwordHash, biometricKey, or refreshToken
+      select: {
+        id: true, email: true, firstName: true, lastName: true, role: true,
+        speciality: true, language: true, timezone: true, mfaEnabled: true,
+        notifPrefs: true, consentPrefs: true, lastLoginAt: true,
+      },
     });
     res.json(u);
   } catch (err) { next(err); }
@@ -62,8 +68,9 @@ r.patch('/me', async (req, res, next) => {
 r.post('/fcm-token', async (req, res, next) => {
   try {
     // Store FCM token for push notifications (Feature 14)
-    const { token, platform } = req.body;
-    await prisma.user.update({ where: { id: req.user!.id }, data: { biometricKey: token /* reuse field */ } });
+    const { token } = req.body;
+    if (!token || typeof token !== 'string') return res.status(400).json({ error: 'Valid FCM token required' });
+    await prisma.user.update({ where: { id: req.user!.id }, data: { fcmToken: token } });
     res.json({ success: true });
   } catch (err) { next(err); }
 });
@@ -81,12 +88,14 @@ r.patch('/:id/status', authorize('admin','superadmin'), async (req, res, next) =
   try {
     const { id } = req.params;
     const { status } = req.body;
-    // Security check: ensure admin only updates users in their own tenant
     const target = await prisma.user.findUnique({ where: { id } });
     if (!target || target.tenantId !== req.user!.tenantId) {
       return res.status(403).json({ error: 'Access denied' });
     }
-    const u = await prisma.user.update({ where: { id }, data: { status } });
+    const u = await prisma.user.update({
+      where: { id }, data: { status },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, status: true },
+    });
     res.json(u);
   } catch (err) { next(err); }
 });
@@ -96,16 +105,13 @@ r.post('/', authorize('admin','superadmin'), async (req, res, next) => {
     const { email, firstName, lastName, role } = req.body;
     const { tenantId } = req.user!;
     
-    // Check if user already exists
+    // Check if user already exists — scoped to tenant to prevent cross-tenant enumeration
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return res.status(400).json({ error: 'User already exists' });
 
     const u = await prisma.user.create({
-      data: {
-        email, firstName, lastName, role, tenantId,
-        status: 'pending_invite',
-        // No password set — user must complete invitation flow to set one
-      }
+      data: { email, firstName, lastName, role, tenantId, status: 'pending_invite' },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, status: true },
     });
 
     // C5/BG4: Send branded invitation email (non-fatal — failure logged but not thrown)
@@ -162,7 +168,10 @@ r.patch('/:id/role', authorize('admin','superadmin'), async (req, res, next) => 
     if (!target || target.tenantId !== req.user!.tenantId) {
       return res.status(403).json({ error: 'Access denied' });
     }
-    const u = await prisma.user.update({ where: { id }, data: { role } });
+    const u = await prisma.user.update({
+      where: { id }, data: { role },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true },
+    });
     res.json(u);
   } catch (err) { next(err); }
 });

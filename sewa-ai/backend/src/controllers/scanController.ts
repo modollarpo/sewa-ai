@@ -65,6 +65,14 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
       }
     }
 
+    // C6: Security - validate that the provided patientId belongs to the same tenant
+    if (patientId) {
+      const patient = await prisma.patient.findUnique({ where: { id: patientId } });
+      if (!patient || patient.tenantId !== tenantId) {
+        throw new AppError('Invalid patient ID or patient belongs to a different institution', 400);
+      }
+    }
+
     // Upload DICOM to Azure Blob / S3
     let storageUrl: string | undefined;
     if (file) {
@@ -86,7 +94,7 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
         storageUrl, status: 'processing',
         fileSize: file?.size,
       },
-      include: { patient: { include: { user: true } }, tenant: true },
+      include: { patient: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } } }, tenant: true },
     });
 
     // FHIR ImagingStudy creation (Feature 4)
@@ -189,7 +197,7 @@ export async function getScan(req: Request, res: Response, next: NextFunction) {
     const scan = await prisma.scan.findFirst({
       where: { id, tenantId },
       include: {
-        patient: { include: { user: true } },
+        patient: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true, status: true } } } },
         aiResult: true,
         report: { include: { author: { select: { firstName: true, lastName: true } }, template: true } },
         annotations: true,

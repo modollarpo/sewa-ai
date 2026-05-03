@@ -2,6 +2,7 @@
 // WhatsApp number registration, OTP verification, opt-in/out management
 
 import { Router, Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 import { prisma }           from '../config/database';
 import { authenticate }     from '../middleware/auth';
 import { whatsappService }  from '../services/notifications/whatsappService';
@@ -32,9 +33,10 @@ r.post('/register', async (req: Request, res: Response, next: NextFunction) => {
 
     const user = req.user!;
 
-    // Generate 6-digit OTP
-    const code    = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry  = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+    // ── SECURITY: Use crypto.randomInt — Math.random() is NOT cryptographically
+    // secure and can be predicted, allowing OTP brute-force attacks
+    const code   = crypto.randomInt(100000, 1000000).toString();
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
 
     // Upsert registration record (unverified until OTP confirmed)
     await prisma.whatsAppRegistration.upsert({

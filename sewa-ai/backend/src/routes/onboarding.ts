@@ -1,11 +1,13 @@
 // SEWA AI — backend/src/routes/onboarding.ts
 // Secure institution onboarding & subscription handshake.
 import { Router } from 'express';
+import crypto from 'crypto';
 import { prisma } from '../config/database';
 import { createSubscription } from '../services/paymentService';
 import { logger } from '../utils/logger';
 import { AppError } from '../utils/AppError';
 import bcrypt from 'bcryptjs';
+import { config } from '../config/env';
 
 const r = Router();
 
@@ -111,8 +113,16 @@ r.post('/launch', async (req, res, next) => {
         }
       });
 
-      // Create Admin User
-      const hashedPassword = await bcrypt.hash('SewaTemporaryPassword2026!', 12);
+      // Create Admin User with a cryptographically secure random password.
+      // The admin MUST set their own password via the invite/reset flow.
+      // NEVER use a hardcoded shared password — it would allow any attacker
+      // knowing the string to log in to every freshly-onboarded hospital.
+      const randomPw = crypto.randomBytes(32).toString('base64url');
+      const hashedPassword = await bcrypt.hash(randomPw, 12);
+
+      // Generate a one-time invite token so the admin gets the set-password email
+      const inviteToken = crypto.randomBytes(24).toString('hex');
+
       const user = await tx.user.create({
         data: {
           email: adminEmail,
@@ -121,11 +131,12 @@ r.post('/launch', async (req, res, next) => {
           passwordHash: hashedPassword,
           role: 'admin',
           tenantId: tenant.id,
-          status: 'active'
+          status: 'pending_invite',
+          inviteToken,
         }
       });
 
-      return { tenant, user };
+      return { tenant, user, inviteToken };
     });
 
     // 2. Initiate Payment Handshake (Async but required for response)
@@ -140,11 +151,14 @@ r.post('/launch', async (req, res, next) => {
         result.tenant.currency
       );
 
+      const inviteLink = `${config.FRONTEND_URL}/auth/accept-invite?token=${result.inviteToken}`;
       res.status(201).json({
         message: 'Onboarding initiated successfully',
         tenantId: result.tenant.id,
         payment: paymentHandshake,
-        adminId: result.user.id
+        adminId: result.user.id,
+        // Frontend must direct admin to this link to complete account setup
+        adminSetupLink: inviteLink,
       });
     } catch (payErr: any) {
       logger.error(`[Onboarding] Payment initialization failed for ${name}: ${payErr.message}`);

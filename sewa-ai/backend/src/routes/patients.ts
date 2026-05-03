@@ -50,7 +50,7 @@ r.get('/:id', async (req, res, next) => {
     const { tenantId } = req.user!;
     const patient = await prisma.patient.findFirst({
       where: { id: req.params.id, tenantId },
-      include: { user: true, scans: { include: { aiResult:true, report:{ select:{ id:true, status:true, signedAt:true } } }, orderBy:{ receivedAt:'desc' } }, messages: { take:20, orderBy:{ createdAt:'desc' } } },
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true, status: true } }, scans: { include: { aiResult:true, report:{ select:{ id:true, status:true, signedAt:true } } }, orderBy:{ receivedAt:'desc' } }, messages: { take:20, orderBy:{ createdAt:'desc' } } },
     });
     if (!patient) throw new AppError('Patient not found', 404);
     res.json(patient);

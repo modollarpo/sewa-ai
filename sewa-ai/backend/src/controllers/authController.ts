@@ -231,7 +231,7 @@ export async function registerSpecialist(req: Request, res: Response, next: Next
     const user = await prisma.user.create({
       data: {
         tenantId: tenant.id, email, passwordHash, firstName, lastName,
-        role: 'radiologist', speciality, licenseNumber, status: 'active'
+        role: 'radiologist', speciality, licenseNumber, status: 'pending_verification'  // requires email verify
       },
     });
 
@@ -240,10 +240,21 @@ export async function registerSpecialist(req: Request, res: Response, next: Next
     await prisma.user.update({ where: { id: user.id }, data: { stripeAccountId: stripeInfo.accountId } });
 
     await auditLog({ tenantId: tenant.id, userId: user.id, action: 'SPECIALIST_REGISTERED', metadata: { speciality } });
-    
-    res.status(201).json({ 
-      message: 'Specialist account created', 
-      stripeOnboardingUrl: stripeInfo.onboardingUrl 
+
+    // Send email verification before account becomes active
+    const verifyToken = randomUUID();
+    await redisClient.setex(`verify:${verifyToken}`, 24 * 60 * 60, user.id);
+    const verifyLink = `${config.FRONTEND_URL}/verify-email?token=${verifyToken}`;
+    sendEmail({
+      to: email,
+      subject: 'Verify your SEWA AI Specialist account',
+      template: 'verify_email',
+      data: { firstName, verifyLink },
+    }).catch((e: any) => logger.warn(`[Auth] Specialist verification email failed: ${e.message}`));
+
+    res.status(201).json({
+      message: 'Specialist account created. Please verify your email before using the platform.',
+      stripeOnboardingUrl: stripeInfo.onboardingUrl
     });
   } catch (err) { next(err); }
 }
@@ -282,9 +293,17 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
     const userId = await redisClient.get(`reset:${token}`);
     if (!userId) throw new AppError('Invalid or expired reset token', 400);
 
+    // Enforce same strength policy as changePassword
+    if (!password || password.length < 8) throw new AppError('Password must be at least 8 characters', 400);
+    if (!/[A-Z]/.test(password)) throw new AppError('Password must contain at least one uppercase letter', 400);
+    if (!/[0-9]/.test(password)) throw new AppError('Password must contain at least one number', 400);
+
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
     await redisClient.del(`reset:${token}`);
+
+    // Invalidate all existing sessions for this user after password reset
+    await prisma.session.deleteMany({ where: { userId } });
 
     res.json({ message: 'Password reset successful. You can now log in.' });
   } catch (err) { next(err); }

@@ -49,7 +49,7 @@ export async function updateReport(req: Request, res: Response, next: NextFuncti
     if (existing.status === 'approved') throw new AppError('Cannot modify a signed report. An addendum must be created instead.', 403);
 
     const report = await prisma.report.update({
-      where: { id, tenantId },
+      where: { id },
       data: { technique, findings, impression, recommendation, fullText, editedByHuman: true, status: 'draft' },
     });
     await auditLog({ tenantId, userId, action: 'REPORT_EDITED', entity: 'Report', entityId: id });
@@ -150,7 +150,7 @@ export async function getReport(req: Request, res: Response, next: NextFunction)
     const report = await prisma.report.findFirst({
       where: { id: req.params.id, tenantId },
       include: {
-        scan: { include: { aiResult: true, patient: { include: { user: true } }, annotations: true } },
+        scan: { include: { aiResult: true, patient: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true, status: true } } } }, annotations: true } },
         author: { select: { firstName: true, lastName: true, speciality: true, licenseNumber: true } },
         template: true,
         secondOpinions: { include: { reviewer: { select: { firstName: true, lastName: true } } } },
