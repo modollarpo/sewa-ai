@@ -15,6 +15,11 @@ r.patch('/me/password', async (req, res, next) => {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Missing passwords' });
 
+    // Password strength validation — minimum 8 chars, at least 1 uppercase, 1 digit
+    if (newPassword.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    if (!/[A-Z]/.test(newPassword)) return res.status(400).json({ error: 'Password must contain at least one uppercase letter' });
+    if (!/[0-9]/.test(newPassword)) return res.status(400).json({ error: 'Password must contain at least one number' });
+
     const u = await prisma.user.findUnique({ where: { id: req.user!.id } });
     if (!u || !u.passwordHash) return res.status(404).json({ error: 'User not found' });
 
@@ -24,6 +29,7 @@ r.patch('/me/password', async (req, res, next) => {
     const passwordHash = await bcrypt.hash(newPassword, 12);
     await prisma.user.update({ where: { id: req.user!.id }, data: { passwordHash } });
 
+    logger.info(`[Users] Password changed for user ${req.user!.id}`);
     res.json({ message: 'Password updated' });
   } catch (err) { next(err); }
 });

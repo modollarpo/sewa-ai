@@ -185,14 +185,27 @@ export async function register(req: Request, res: Response, next: NextFunction) 
     if (existing) throw new AppError('This email is already registered at this institution.', 409);
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    // New accounts start as 'pending_verification' until email is confirmed
     const user = await prisma.user.create({
-      data: { tenantId: tenant.id, email, passwordHash, firstName, lastName, role },
+      data: { tenantId: tenant.id, email, passwordHash, firstName, lastName, role, status: 'pending_verification' },
     });
 
     await auditLog({ tenantId: tenant.id, userId: user.id, action: 'USER_REGISTERED', metadata: { role } });
-    await sendEmail({ to: email, subject: 'Welcome to SEWA AI', template: 'welcome', data: { firstName, tenantName: tenant.name } });
 
-    res.status(201).json({ message: 'Registration successful. Check your email for verification.' });
+    // Generate email verification token (expires 24 hours)
+    const verifyToken = randomUUID();
+    await redisClient.setex(`verify:${verifyToken}`, 24 * 60 * 60, user.id);
+    const verifyLink = `${config.FRONTEND_URL}/verify-email?token=${verifyToken}`;
+
+    // Send email verification (non-fatal)
+    sendEmail({
+      to: email,
+      subject: 'Verify your SEWA AI clinical account',
+      template: 'verify_email',
+      data: { firstName, verifyLink },
+    }).catch((e: any) => logger.warn(`[Auth] Verification email failed for ${email}: ${e.message}`));
+
+    res.status(201).json({ message: 'Registration successful. Please check your email to verify your account before signing in.' });
   } catch (err) { next(err); }
 }
 

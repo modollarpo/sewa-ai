@@ -23,9 +23,15 @@ const REGIONS = [
   { key:'in', label:'🇮🇳 India',           currency:'INR', compliance:'DPDP',     timezone:'Asia/Kolkata',  server:'Central India' },
 ];
 const LANGS = [
-  { key:'en',label:'EN' },{ key:'fr',label:'FR' },{ key:'de',label:'DE' },
-  { key:'es',label:'ES' },{ key:'ar',label:'AR' },{ key:'sw',label:'SW' },
-  { key:'pt',label:'PT' },{ key:'hi',label:'HI' },
+  { key:'en', label:'EN', supported: true  },
+  { key:'fr', label:'FR', supported: true  },
+  { key:'yo', label:'YO', supported: true  },
+  { key:'sw', label:'SW', supported: true  },
+  { key:'ar', label:'AR', supported: true  },
+  { key:'hi', label:'HI', supported: true  },
+  { key:'de', label:'DE', supported: false },
+  { key:'es', label:'ES', supported: false },
+  { key:'pt', label:'PT', supported: false },
 ];
 const ROLE_LABELS: Record<string,string> = {
   radiologist:'Radiologist', doctor:'Physician', admin:'Hospital Admin',
@@ -226,18 +232,28 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit
               {lang.toUpperCase()}
             </button>
           }>
-            <div style={{ padding:'8px', display:'flex', flexWrap:'wrap', gap:'4px', width:'140px' }}>
-              {LANGS.map(l => (
-                <button key={l.key} onClick={() => setLang(l.key)} style={{
-                  padding:'5px 8px', borderRadius:'6px',
-                  background: l.key === lang ? C.brand : C.bg3,
-                  color: l.key === lang ? 'white' : C.textMd,
-                  border:'none', cursor:'pointer', fontSize:'11px', fontWeight:'600',
-                  fontFamily:"'IBM Plex Sans', system-ui, sans-serif",
-                }}>
-                  {l.label}
-                </button>
-              ))}
+            <div style={{ padding:'8px', width:'180px' }}>
+              <div style={{ fontSize:'10px', color:C.textLo, padding:'4px 8px 6px', letterSpacing:'0.06em', fontFamily:"'IBM Plex Sans', system-ui, sans-serif" }}>INTERFACE LANGUAGE</div>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>
+                {LANGS.map(l => (
+                  <button key={l.key} onClick={() => setLang(l.key)} title={!l.supported ? 'Coming soon — displays in English' : undefined} style={{
+                    padding:'5px 8px', borderRadius:'6px',
+                    background: l.key === lang ? C.brand : C.bg3,
+                    color: l.key === lang ? 'white' : l.supported ? C.textMd : C.textLo,
+                    border: l.supported ? 'none' : `1px dashed ${C.border}`,
+                    cursor:'pointer', fontSize:'11px', fontWeight:'600',
+                    fontFamily:"'IBM Plex Sans', system-ui, sans-serif",
+                    opacity: l.supported ? 1 : 0.55,
+                    position: 'relative',
+                  }}>
+                    {l.label}
+                    {!l.supported && <span style={{ fontSize:'7px', color: C.textLo, display:'block', lineHeight:1 }}>EN</span>}
+                  </button>
+                ))}
+              </div>
+              <div style={{ fontSize:'9px', color:C.textLo, padding:'8px 8px 2px', lineHeight:1.4, fontFamily:"'IBM Plex Sans', system-ui, sans-serif", borderTop:`1px solid ${C.border}`, marginTop:6 }}>
+                Dashed = English fallback. Full translations available for EN, FR, YO, SW, AR, HI.
+              </div>
             </div>
           </Dropdown>
         </>

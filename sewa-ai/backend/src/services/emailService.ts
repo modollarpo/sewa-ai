@@ -48,7 +48,25 @@ const TEMPLATES: Record<string, (d: any) => string> = {
       <p>Your ${d.modality} ${d.bodyPart} scan report has been reviewed and signed by a qualified radiologist.</p>
       <a href="${config.FRONTEND_URL}/portal/scans" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none">View Report →</a>
     </div>`,
-  'welcome': (d) => `<h2>Welcome to SEWA AI, ${d.name}</h2><p>Your account is ready. <a href="${d.loginUrl}">Sign in →</a></p>`,
+  'welcome': (d) => `
+    <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;padding:40px;background:#f9fafb;border-radius:12px">
+      <h2 style="color:#0C1D17">Welcome to SEWA AI, ${d.firstName || d.name || 'there'}!</h2>
+      <p>Your clinical account at <strong>${d.tenantName || 'SEWA AI'}</strong> has been created and is ready to use.</p>
+      <a href="${d.loginUrl || d.inviteLink || '#'}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Sign in to SEWA AI →</a>
+      <p style="font-size:12px;color:#666;margin-top:24px">If you did not register for this account, please contact support@sewa.ai immediately.</p>
+    </div>`,
+  'appointment-reminder': (d) => `
+    <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;padding:40px;background:#f9fafb;border-radius:12px">
+      <h2 style="color:#0C1D17">Appointment Reminder — SEWA AI</h2>
+      <p>Dear ${d.patientName || 'Patient'},</p>
+      <p>This is a reminder that you have a <strong>${d.appointmentType || 'medical'}</strong> appointment scheduled for:</p>
+      <div style="background:#0C1D17;color:#D0ECE6;padding:16px 20px;border-radius:8px;margin:16px 0">
+        <strong>${d.appointmentDate}</strong> at <strong>${d.appointmentTime}</strong><br/>
+        <span style="font-size:13px;color:#6FA898">${d.location || 'Please check your patient portal for location details'}</span>
+      </div>
+      <a href="${d.portalUrl || '#'}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">View Appointment →</a>
+      <p style="font-size:12px;color:#666;margin-top:24px">To cancel or reschedule, please contact your healthcare provider at least 24 hours in advance.</p>
+    </div>`,
   'staff-invite': (d) => `
     <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;background:#0C1D17;color:#D0ECE6;border-radius:16px;overflow:hidden">
       <div style="background:linear-gradient(135deg,#408D7B,#2E6B5E);padding:28px 32px">

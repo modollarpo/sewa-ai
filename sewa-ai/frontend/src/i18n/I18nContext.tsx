@@ -1,33 +1,49 @@
 // SEWA AI — frontend/src/i18n/I18nContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { translations, Language, TranslationKey } from './translations';
 import { useAuthStore } from '../store/authStore';
+import { useSettingsStore } from '../store/settingsStore';
 
 interface I18nContextType {
   t: (key: TranslationKey) => string;
   language: Language;
-  setLanguage: (lang: Language) => void;
+  isRTL: boolean;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
+// Languages supported by our translation dictionary
+const SUPPORTED_LANGS = new Set<string>(['en', 'fr', 'yo', 'sw', 'ar', 'hi']);
+// Right-to-left languages
+const RTL_LANGS = new Set<string>(['ar']);
+
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuthStore();
-  const [language, setLanguage] = useState<Language>((user?.language as Language) || 'en');
+  const { lang, setLang } = useSettingsStore();
 
-  // Sync language with user profile changes
+  // On first load, sync settingsStore with user's saved language preference
   useEffect(() => {
-    if (user?.language) {
-      setLanguage(user.language as Language);
+    if (user?.language && SUPPORTED_LANGS.has(user.language)) {
+      setLang(user.language);
     }
   }, [user?.language]);
 
+  // Resolve to a supported language — graceful fallback to 'en' for DE/ES/PT etc.
+  const resolvedLang: Language = SUPPORTED_LANGS.has(lang) ? (lang as Language) : 'en';
+  const isRTL = RTL_LANGS.has(resolvedLang);
+
+  // Apply RTL/LTR direction and lang attribute to <html> for correct font + layout rendering
+  useEffect(() => {
+    document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', resolvedLang);
+  }, [resolvedLang, isRTL]);
+
   const t = (key: TranslationKey): string => {
-    return translations[language][key] || translations.en[key] || key;
+    return translations[resolvedLang]?.[key] || translations.en[key] || key;
   };
 
   return (
-    <I18nContext.Provider value={{ t, language, setLanguage }}>
+    <I18nContext.Provider value={{ t, language: resolvedLang, isRTL }}>
       {children}
     </I18nContext.Provider>
   );

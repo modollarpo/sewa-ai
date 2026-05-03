@@ -46,6 +46,25 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
       throw new AppError('bodyPart is required (e.g. HEAD, CHEST, ABDOMEN)', 400);
     }
 
+    // C5: Validate file MIME type — only DICOM, NIfTI, and medical imaging formats accepted
+    if (file) {
+      const ALLOWED_MIMES = new Set([
+        'application/dicom',
+        'application/octet-stream', // DICOM is often sent as octet-stream
+        'image/jpeg', 'image/png',  // Plain radiographs (DX, CR)
+        'image/tiff',               // High-res scans
+        'application/zip',          // DICOM zip archives
+      ]);
+      const ext = (file.originalname || '').split('.').pop()?.toLowerCase();
+      const ALLOWED_EXTS = new Set(['dcm', 'dicom', 'jpg', 'jpeg', 'png', 'tiff', 'tif', 'nii', 'nii.gz', 'zip']);
+      if (!ALLOWED_MIMES.has(file.mimetype) && !ALLOWED_EXTS.has(ext || '')) {
+        throw new AppError(
+          `File type '${file.mimetype}' (${ext}) is not accepted. Upload DICOM (.dcm), NIfTI (.nii), or medical imaging files only.`,
+          415
+        );
+      }
+    }
+
     // Upload DICOM to Azure Blob / S3
     let storageUrl: string | undefined;
     if (file) {
@@ -253,7 +272,7 @@ export async function generateDemoScan(req: Request, res: Response, next: NextFu
         await prisma.scan.update({ where: { id: scan.id }, data: { status: 'COMPLETED' } });
         io.to(`tenant:${tenantId}`).emit('scan:updated', { scanId: scan.id, status: 'COMPLETED' });
       } catch (err) {
-        console.error('Demo AI result failed:', err);
+        logger.error('[Demo] AI result generation failed:', err);
       }
     }, 5000);
 
@@ -272,6 +291,7 @@ export async function syncOfflineBatch(req: Request, res: Response, next: NextFu
     const { scans } = req.body; // Array of scan metadata + AI results
 
     if (!Array.isArray(scans)) throw new AppError('Invalid batch payload', 400);
+    if (scans.length > 100) throw new AppError('Batch size cannot exceed 100 scans per sync', 400);
 
     const results = [];
 

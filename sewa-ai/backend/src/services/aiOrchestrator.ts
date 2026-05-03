@@ -173,7 +173,26 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       include: { patient: { include: { user: true } }, tenant: true },
     });
 
-    await prisma.scan.update({ where: { id: scanId }, data: { status: 'processing' } });
+    // ── GDPR / NHS DSPT: Consent Gate ─────────────────────────────────────
+    // AI processing is only permitted if the patient has given explicit consent.
+    // If consentAI is explicitly false, halt pipeline and flag for human review.
+    if (scan.patient && scan.patient.consentAI === false) {
+      logger.warn(`[AI Pipeline] CONSENT_BLOCKED: scan ${scanId} — patient has consentAI=false. Routing to human review.`);
+      await prisma.scan.update({
+        where: { id: scanId },
+        data: { status: 'pending_review', requiresHumanReview: true, humanReviewReason: 'CONSENT_NOT_GIVEN' },
+      });
+      await auditLog({
+        tenantId, userId: 'SYSTEM', action: 'AI_BLOCKED_NO_CONSENT',
+        entity: 'Scan', entityId: scanId,
+        metadata: { reason: 'Patient consentAI=false — GDPR Article 9 compliance gate' },
+      });
+      io.to(`tenant:${tenantId}`).emit('scan:review_required', {
+        scanId, reason: 'consent_not_given', urgency: 'ROUTINE',
+      });
+      return; // Exit pipeline — no AI processing
+    }
+    // ──────────────────────────────────────────────────────────────────────
 
     const patientAge = scan.patient?.dateOfBirth ? _getAge(scan.patient.dateOfBirth) : null;
     const patientSex = (scan.patient as any)?.sex ?? null;

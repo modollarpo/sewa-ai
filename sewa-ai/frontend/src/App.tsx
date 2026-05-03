@@ -17,6 +17,9 @@ import {
 // Clinical pages
 import { LoginPage }                 from './pages/auth/LoginPage';
 import { RegisterPage }              from './pages/auth/RegisterPage';
+import { AcceptInvitePage }          from './pages/auth/AcceptInvitePage';
+import { ResetPasswordPage }         from './pages/auth/ResetPasswordPage';
+import { VerifyEmailPage }           from './pages/auth/VerifyEmailPage';
 import { RadiologistWorkspace }      from './pages/radiologist/RadiologistWorkspace';
 import { TrainingSimulator }         from './pages/radiologist/TrainingSimulator';
 import { DoctorDashboard }           from './pages/doctor/DoctorDashboard';
@@ -210,12 +213,34 @@ export default function App() {
   const { notifications, markRead }       = useNotificationStore();
   const { lang, region, setLang, setRegion } = useSettingsStore();
   const { tenantSlug, isLoaded }          = useTenant();
+  const { isRTL }                         = useTranslation();
 
   const [notifOpen,   setNotifOpen]   = useState(false);
   const [settingsPage, setSettingsPage] = useState(false);
   const [adminPage,   setAdminPage]   = useState<AdminPage>('overview');
   const [superPage,   setSuperPage]   = useState<SuperPage>('platform');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Detect staff invite link: /auth/accept-invite?token=...
+  const inviteToken = (() => {
+    const p = new URLSearchParams(window.location.search);
+    const path = window.location.pathname;
+    return (path === '/auth/accept-invite' || path.includes('accept-invite')) ? p.get('token') : null;
+  })();
+
+  // Detect password reset link: /reset-password?token=...
+  const resetToken = (() => {
+    const p = new URLSearchParams(window.location.search);
+    const path = window.location.pathname;
+    return (path === '/reset-password' || path.includes('reset-password')) ? p.get('token') : null;
+  })();
+
+  // Detect email verification link: /verify-email?token=...
+  const verifyToken = (() => {
+    const p = new URLSearchParams(window.location.search);
+    const path = window.location.pathname;
+    return (path === '/verify-email' || path.includes('verify-email')) ? p.get('token') : null;
+  })();
   const [publicPage,  setPublicPage]  = useState<'landing'|'login'|'register'|'solutions'|'research'|'regulatory'|'clinical-validation'|'pricing'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'>('landing');
 
   // Universal navigation handler for public site
@@ -275,6 +300,21 @@ export default function App() {
   }, [user]);
 
   if (!isLoaded) return null; // Or a high-fidelity spinner
+
+  // ── Staff invite link — intercept before any auth check ─────
+  if (inviteToken) {
+    return <AcceptInvitePage token={inviteToken} onLogin={() => navigate('login')} />;
+  }
+
+  // ── Password reset link — intercept before any auth check ────
+  if (resetToken) {
+    return <ResetPasswordPage token={resetToken} onLogin={() => navigate('login')} />;
+  }
+
+  // ── Email verification link — intercept before any auth check ─
+  if (verifyToken) {
+    return <VerifyEmailPage token={verifyToken} onLogin={() => navigate('login')} />;
+  }
 
   // ── Unauthenticated ──────────────────────────────────────────
   if (!isAuthenticated) {
@@ -352,9 +392,9 @@ export default function App() {
     }
 
     if (role === 'radiologist') return <ErrorBoundary name="Radiologist Workspace"><RadiologistWorkspace onNavigate={navigate} /></ErrorBoundary>;
-    if (role === 'doctor')      return <DoctorDashboard />;
-    if (role === 'patient')     return <PatientPortal />;
-    if (role === 'technician')  return <TechnicianWorkspace />;
+    if (role === 'doctor')      return <ErrorBoundary name="Doctor Dashboard"><DoctorDashboard /></ErrorBoundary>;
+    if (role === 'patient')     return <ErrorBoundary name="Patient Portal"><PatientPortal /></ErrorBoundary>;
+    if (role === 'technician')  return <ErrorBoundary name="Technician Workspace"><TechnicianWorkspace /></ErrorBoundary>;
 
     if (role === 'admin') return (
       <div style={{ display:'flex', height:'calc(100vh - 52px - 24px)', overflow:'hidden' }}>
@@ -366,7 +406,7 @@ export default function App() {
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
         <div style={{ flex:1, overflowY:'auto' }}>
-          {adminPage === 'overview'          && <HospitalAdminDashboard />}
+          {adminPage === 'overview'          && <ErrorBoundary name="Hospital Admin Dashboard"><HospitalAdminDashboard /></ErrorBoundary>}
           {adminPage === 'ai-performance'    && <AIPerformanceDashboard />}
           {adminPage === 'population-health' && <PopulationHealthDashboard />}
           {adminPage === 'appointments'      && <AppointmentsPage />}
@@ -403,7 +443,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight:'100vh', background:C.bg0, fontFamily:C.F }} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+    <div style={{ minHeight:'100vh', background:C.bg0, fontFamily:C.F }} dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* STAT / CRITICAL alert banner — above everything */}
       {criticalAlerts.length > 0 && (

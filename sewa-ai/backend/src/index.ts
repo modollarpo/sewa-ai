@@ -51,7 +51,6 @@ import { dlq } from './services/dlqService';
 
 const app = express();
 app.set('trust proxy', 1);
-app.use(helmet());
 const httpServer = createServer(app);
 
 // ── Socket.IO — Feature 6 (Real-time Notifications) ───────────
@@ -75,8 +74,21 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'blob:', '*.sewaxai.health'],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'blob:', '*.sewaxai.health', 'https:'],
+      connectSrc: ["'self'", '*.sewaxai.health'],
+      frameAncestors: ["'none'"],
+      upgradeInsecureRequests: [],
     },
+  },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+  frameguard: {
+    action: 'deny', // Explicitly deny framing (clickjacking protection)
   },
 }));
 
@@ -88,8 +100,7 @@ app.use(cors({
     const allowedOrigins = config.CORS_ORIGINS;
     const isAllowed = allowedOrigins.some(o => o === origin) || 
                      origin === 'https://sewaxai.health' ||
-                     origin === 'http://sewaxai.health' ||
-                     origin.endsWith('.sewaxai.health');
+                     (origin.startsWith('https://') && origin.endsWith('.sewaxai.health'));
 
     if (isAllowed) {
       callback(null, true);

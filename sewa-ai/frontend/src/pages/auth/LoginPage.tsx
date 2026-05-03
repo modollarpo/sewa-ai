@@ -103,7 +103,7 @@ function MFAInput({ value, onChange }: { value: string; onChange: (v: string) =>
 export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
   const { login, verifyMFA, isLoading, error } = useAuthStore();
   const { tenantSlug: subdomainTenant } = useTenant(); // ← was missing: caused ReferenceError on every submit
-  const [step, setStep] = useState<'credentials' | 'mfa' | 'biometric'>('credentials');
+  const [step, setStep] = useState<'credentials' | 'mfa' | 'forgot' | 'forgot-sent'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mfaCode, setMfaCode] = useState('');
@@ -112,6 +112,8 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
   const [showDemoPanel, setShowDemoPanel] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
   const [localError, setLocalError] = useState('');
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   // Auto-submit MFA when 6 digits entered
   useEffect(() => {
@@ -156,6 +158,31 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
     } catch {
       setLocalError('Invalid code — please try again');
       setMfaCode('');
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      // Derive tenant from email domain, same as login flow
+      let tenantSlug = subdomainTenant || '';
+      if (!tenantSlug) {
+        const domain = forgotEmail.split('@')[1];
+        if (domain === 'royallondon.nhs.uk') tenantSlug = 'royal-london';
+        else if (domain === 'luth.edu.ng') tenantSlug = 'luth-lagos';
+        else if (domain === 'knh.go.ke') tenantSlug = 'kenyatta-nh';
+        else tenantSlug = 'royal-london';
+      }
+      await import('../../services/apiClient').then(({ apiClient }) =>
+        apiClient.post('/auth/forgot-password', { email: forgotEmail, tenantSlug })
+      );
+      setStep('forgot-sent');
+    } catch {
+      // Always show sent message to avoid user enumeration
+      setStep('forgot-sent');
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -301,6 +328,14 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
                 </div>
               </div>
 
+              {/* Forgot password link */}
+              <div style={{ textAlign: 'right', marginTop: -8, marginBottom: 12 }}>
+                <button type="button" onClick={() => { setStep('forgot'); setForgotEmail(email); setLocalError(''); }}
+                  style={{ background: 'none', border: 'none', color: C.textLo, fontSize: '12px', cursor: 'pointer', fontFamily: C.F }}>
+                  Forgot password?
+                </button>
+              </div>
+
               <button type="submit" disabled={isLoading || !email || !password} style={{
                 width: '100%', height: '44px', borderRadius: '10px', border: 'none', cursor: 'pointer',
                 background: `linear-gradient(135deg, ${C.brand}, ${C.brandDk})`,
@@ -412,10 +447,62 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
 
               <p style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', color: C.textLo }}>
                 Lost access to your authenticator?{' '}
-                <button style={{ background: 'none', border: 'none', color: C.brand, cursor: 'pointer', fontFamily: C.F, fontSize: '12px' }}>
-                  Use recovery code
+                <button onClick={() => { setStep('forgot'); setLocalError(''); }} style={{ background: 'none', border: 'none', color: C.brand, cursor: 'pointer', fontFamily: C.F, fontSize: '12px' }}>
+                  Reset via email
                 </button>
               </p>
+            </div>
+          )}
+
+          {/* FORGOT PASSWORD STEP */}
+          {step === 'forgot' && (
+            <form onSubmit={handleForgotPassword}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                <button type="button" onClick={() => setStep('credentials')} style={{ background: 'none', border: 'none', color: C.textLo, cursor: 'pointer', padding: 2, display: 'flex' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span style={{ fontSize: 12, color: C.textMd }}>Reset your password</span>
+              </div>
+              <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: C.textHi }}>Forgot password?</h2>
+              <p style={{ margin: '0 0 20px', fontSize: 12, color: C.textLo, lineHeight: 1.5 }}>
+                Enter your clinical email address and we'll send you a secure reset link valid for 1 hour.
+              </p>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: C.textMd, marginBottom: 6 }}>Email address</label>
+                <input
+                  type="email" value={forgotEmail}
+                  onChange={e => setForgotEmail(e.target.value)}
+                  placeholder="doctor@hospital.nhs.uk" required
+                  onFocus={() => setFocused('forgot-email')} onBlur={() => setFocused(null)}
+                  style={inputStyle('forgot-email')}
+                />
+              </div>
+              <button type="submit" disabled={forgotLoading || !forgotEmail} style={{
+                width: '100%', height: 44, borderRadius: 10, border: 'none', cursor: 'pointer',
+                background: `linear-gradient(135deg, ${C.brand}, ${C.brandDk})`,
+                color: 'white', fontSize: 14, fontWeight: 700, fontFamily: C.F,
+                opacity: forgotLoading || !forgotEmail ? 0.6 : 1, transition: 'opacity 150ms',
+                boxShadow: `0 4px 16px ${C.brand}40`,
+              }}>
+                {forgotLoading ? 'Sending…' : 'Send Reset Link'}
+              </button>
+            </form>
+          )}
+
+          {/* FORGOT PASSWORD — SENT CONFIRMATION */}
+          {step === 'forgot-sent' && (
+            <div style={{ textAlign: 'center', padding: '12px 0' }}>
+              <div style={{ fontSize: 44, marginBottom: 12 }}>📧</div>
+              <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: C.textHi }}>Check your email</h2>
+              <p style={{ margin: '0 0 20px', fontSize: 12, color: C.textLo, lineHeight: 1.6 }}>
+                If an account exists for <strong style={{ color: C.brandLt }}>{forgotEmail}</strong>, a password reset link has been sent. It expires in 1 hour. Check your inbox and spam folder.
+              </p>
+              <button onClick={() => { setStep('credentials'); setLocalError(''); }} style={{
+                padding: '10px 28px', background: C.brand, border: 'none',
+                borderRadius: 10, color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              }}>
+                Back to Sign In
+              </button>
             </div>
           )}
         </div>
