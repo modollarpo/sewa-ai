@@ -234,6 +234,7 @@ export function DoctorDashboard() {
             <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:C.textLo}}>Select a patient to view details</div>
           )}
         </div>
+      )}
     </div>
   );
 }

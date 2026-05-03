@@ -25,6 +25,36 @@ export function PatientPortal() {
   const { appointments, loading: apptsLoading } = usePatientAppointments();
   const [tab, setTab] = useState<'scans'|'appointments'|'progression'|'consent'|'access'|'account'|'billing'>('scans');
   const [showBooking, setShowBooking] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [isChangingPass, setIsChangingPass] = useState(false);
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+
+  const handlePasswordChange = async () => {
+    if (!passForm.currentPassword || !passForm.newPassword) {
+      setStatus({ msg: 'Please fill in all password fields.', type: 'err' });
+      return;
+    }
+    if (passForm.newPassword !== passForm.confirmPassword) {
+      setStatus({ msg: 'New passwords do not match.', type: 'err' });
+      return;
+    }
+    setIsChangingPass(true);
+    setStatus(null);
+    try {
+      await apiClient.patch('/users/me/password', {
+        currentPassword: passForm.currentPassword,
+        newPassword: passForm.newPassword
+      });
+      setStatus({ msg: 'Password updated successfully.', type: 'ok' });
+      setTimeout(() => { setShowPasswordModal(false); setStatus(null); }, 1500);
+      setPassForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      setStatus({ msg: err.response?.data?.message || 'Password update failed.', type: 'err' });
+    } finally {
+      setIsChangingPass(false);
+    }
+  };
 
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'8px 16px',fontSize:12,fontWeight:tab===t?600:400,
@@ -142,9 +172,45 @@ export function PatientPortal() {
               <div style={{color:C.textHi, fontSize:15, fontWeight:600}}>{user?.firstName} {user?.lastName}</div>
               <div style={{color:C.textLo, fontSize:12, marginTop:4}}>{user?.email}</div>
               <div style={{marginTop:16, paddingTop:16, borderTop:`1px solid ${C.border}`}}>
-                <button style={{background:'none', border:`1px solid ${C.border}`, color:C.textHi, padding:'8px 16px', borderRadius:8, fontSize:11, cursor:'pointer'}}>Change Password</button>
+                <button 
+                  onClick={() => setShowPasswordModal(true)}
+                  style={{background:'none', border:`1px solid ${C.border}`, color:C.textHi, padding:'8px 16px', borderRadius:8, fontSize:11, cursor:'pointer'}}
+                >
+                  Change Password
+                </button>
               </div>
            </div>
+        </div>
+      )}
+
+      {showPasswordModal && (
+        <div style={{
+          position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:1000, 
+          display:'flex', alignItems:'center', justifyContent:'center', padding:20
+        }}>
+          <div style={{ background:C.bg2, border:`1px solid ${C.border}`, borderRadius:16, padding:24, width:'100%', maxWidth:400 }}>
+            <h3 style={{ color:C.textHi, margin:'0 0 20px', fontSize:16 }}>Change Password</h3>
+            {status && (
+              <div style={{ padding:10, borderRadius:8, marginBottom:16, background:`${status.type==='ok'?C.normal:C.critical}15`, border:`1px solid ${status.type==='ok'?C.normal:C.critical}30`, color:status.type==='ok'?C.normal:C.critical, fontSize:12 }}>
+                {status.msg}
+              </div>
+            )}
+            <label style={{ fontSize:10, color:C.textLo, display:'block', marginBottom:4 }}>CURRENT PASSWORD</label>
+            <input type="password" value={passForm.currentPassword} onChange={e=>setPassForm({...passForm, currentPassword:e.target.value})} style={inputStyle} />
+            <label style={{ fontSize:10, color:C.textLo, display:'block', marginBottom:4 }}>NEW PASSWORD</label>
+            <input type="password" value={passForm.newPassword} onChange={e=>setPassForm({...passForm, newPassword:e.target.value})} style={inputStyle} />
+            <label style={{ fontSize:10, color:C.textLo, display:'block', marginBottom:4 }}>CONFIRM NEW PASSWORD</label>
+            <input type="password" value={passForm.confirmPassword} onChange={e=>setPassForm({...passForm, confirmPassword:e.target.value})} style={inputStyle} />
+            <div style={{ display:'flex', gap:10, marginTop:10 }}>
+              <button onClick={() => { setShowPasswordModal(false); setStatus(null); }} style={{ flex:1, padding:10, background:C.bg3, color:C.textHi, border:'none', borderRadius:8, cursor:'pointer' }}>Cancel</button>
+              <button onClick={handlePasswordChange} disabled={isChangingPass} style={{
+                flex:1, padding:10, background:C.brand, color:'white', border:'none', borderRadius:8,
+                fontWeight:700, cursor:'pointer', opacity: isChangingPass ? 0.6 : 1
+              }}>
+                {isChangingPass ? 'Updating...' : 'Update'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -152,3 +218,8 @@ export function PatientPortal() {
     </div>
   );
 }
+
+const inputStyle = {
+  width:'100%', padding:10, background:'#111F1A', border:'1px solid #1B3028',
+  borderRadius:8, color:'#D0ECE6', fontSize:13, outline:'none', marginBottom:12
+};

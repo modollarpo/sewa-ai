@@ -472,7 +472,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
 }
 
 // ── Report Editor ─────────────────────────────────────────────
-function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
+function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, setStatus:(s:{msg:string;type:'ok'|'err'}|null)=>void }) {
   const { lang } = useSettingsStore();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -508,10 +508,10 @@ function ReportEditor({ scan, onSign }: { scan:any, onSign:()=>void }) {
       await apiClient.post(`/reports`, { scanId: scan.id, content: text });
       localStorage.removeItem(`report_draft:${scan.id}`); // Clear on success
       onSign();
-      alert('Report signed and released successfully.');
+      setStatus({ msg: 'Report signed and released successfully.', type: 'ok' });
     } catch (err) {
       console.error('Sign failed:', err);
-      alert('Failed to sign report. Please try again.');
+      setStatus({ msg: 'Failed to sign report. Please try again.', type: 'err' });
     } finally {
       setBusy(false);
     }
@@ -599,6 +599,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
   const [showGradcam, setShowGradcam] = useState(true);
   const [tab, setTab] = useState<'worklist'|'viewer'|'report'>('worklist');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
   useEffect(() => {
     fetchWorklist();
@@ -636,10 +637,10 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
     if (!selected) return;
     try {
       await apiClient.post(`/ai/vlm/${selected.id}`);
-      alert('VLM Analysis complete. Impression loaded into the report panel.');
-      fetchWorklist(); // Refresh to populate the AI impression in the UI
+      setStatus({ msg: 'VLM Analysis complete. Impression loaded into the report panel.', type: 'ok' });
+      fetchWorklist(); 
     } catch (err: any) {
-      alert(`VLM Engine Error: ${err.response?.data?.message || err.message}`);
+      setStatus({ msg: `VLM Engine Error: ${err.response?.data?.message || err.message}`, type: 'err' });
     }
   };
 
@@ -650,7 +651,18 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
 
   if (isMobile) {
     return (
-      <div style={{ height:'calc(100vh - 52px)', background:C.bg0, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+        {status && (
+          <div style={{ 
+            padding:'10px 16px', background: status.type==='ok'?C.normalBg:C.critBg, 
+            borderBottom:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
+            display:'flex', justifyContent:'space-between', alignItems:'center',
+            color: status.type==='ok'?C.normal:C.critical, fontSize:11, fontWeight:600
+          }}>
+            <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
+            <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+          </div>
+        )}
         <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
           {tab === 'worklist' && (
             <div style={{ flex:1, display:'flex', flexDirection:'column', overflowY:'auto' }}>
@@ -677,7 +689,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
                 <AIResultsPanel scan={selected} onRequestVLM={handleRequestVLM} />
               </div>
               <div style={{ flex:'0 0 60%' }}>
-                <ReportEditor scan={selected} onSign={() => { fetchWorklist(); setTab('worklist'); }} />
+                <ReportEditor scan={selected} onSign={() => { fetchWorklist(); setTab('worklist'); }} setStatus={setStatus} />
               </div>
             </div>
           )}
@@ -704,9 +716,19 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
   }
 
   return (
-    <div style={{ display:'flex', height:'calc(100vh - 52px - 24px)', background:C.bg0, overflow:'hidden', fontFamily:C.fontBase }}>
-      {/* Desktop Layout - Fluid & Responsive */}
-      <div style={{ flex:'0 1 300px', minWidth:'240px', display:'flex', flexDirection:'column', background:C.bg1, borderRight:`1px solid ${C.border}` }}>
+    <div style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 52px - 24px)', background:C.bg0, overflow:'hidden', fontFamily:C.fontBase }}>
+      {status && (
+        <div style={{ 
+          padding:'10px 20px', background: status.type==='ok'?C.normalBg:C.critBg, 
+          borderBottom:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
+          display:'flex', justifyContent:'space-between', alignItems:'center',
+          color: status.type==='ok'?C.normal:C.critical, fontSize:12, fontWeight:600
+        }}>
+          <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
+          <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+        </div>
+      )}
+      <div style={{ display:'flex', flex:1, overflow:'hidden' }}>
         <div style={{ padding:'16px', borderBottom:`1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize:'14px', fontWeight:'700', color:C.textHi }}>Worklist ({stats.total})</span>
           <button onClick={() => onNavigate('training')} style={{ padding:'4px 8px', background:C.brand, color:'white', border:'none', borderRadius:4, fontSize:10, fontWeight:700, cursor:'pointer' }}>
@@ -740,7 +762,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
           <AIResultsPanel scan={selected} onRequestVLM={handleRequestVLM} />
         </div>
         <div style={{ flex:'0 0 55%' }}>
-          <ReportEditor scan={selected} onSign={() => { fetchWorklist(); setSelected(null); }} />
+          <ReportEditor scan={selected} onSign={() => { fetchWorklist(); setSelected(null); }} setStatus={setStatus} />
         </div>
       </div>
     </div>

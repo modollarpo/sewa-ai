@@ -59,6 +59,7 @@ export function HospitalAdminDashboard() {
   const { stats, staff, audit, integrations, loading } = useHospitalAdminData();
   const [tab, setTab] = useState<'overview'|'staff'|'integrations'|'billing'|'audit'>('overview');
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
   const filteredStaff = useMemo(() => (staff || []).filter((s:any) => 
     !search || 
@@ -96,6 +97,18 @@ export function HospitalAdminDashboard() {
 
   return (
     <div style={{minHeight:'calc(100vh - 52px)',background:C.bg1,fontFamily:C.F,padding: isMobile ? '16px' : '24px'}}>
+
+      {status && (
+        <div style={{ 
+          padding:'12px 20px', background: status.type==='ok'?C.normalBg:C.critBg, 
+          border:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
+          borderRadius:12, marginBottom:24, display:'flex', justifyContent:'space-between', alignItems:'center',
+          color: status.type==='ok'?C.normal:C.critical, fontSize:13, fontWeight:600
+        }}>
+          <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
+          <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+        </div>
+      )}
 
       {/* Page header */}
       <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:24, flexWrap:'wrap', gap:12}}>
@@ -305,13 +318,13 @@ export function HospitalAdminDashboard() {
                   try {
                     const res = await apiClient.post('/payments/portal');
                     if (res.data.url) window.location.href = res.data.url;
-                  } catch (e) { alert('Stripe portal connection failed. Please try again.'); }
+                  } catch (e) { setStatus({ msg: 'Stripe portal connection failed. Please try again.', type: 'err' }); }
                 }} style={{padding:'8px 16px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:12,fontWeight:700,cursor:'pointer'}}>Manage Plan & Billing</button>
                 <button onClick={async () => {
                   try {
                     const res = await apiClient.post('/payments/portal', { flow: 'payment_method' });
                     if (res.data.url) window.location.href = res.data.url;
-                  } catch (e) { alert('Could not open payment settings.'); }
+                  } catch (e) { setStatus({ msg: 'Could not open payment settings.', type: 'err' }); }
                 }} style={{padding:'8px 16px',background:'transparent',border:`1px solid ${C.border}`,borderRadius:8,color:C.textHi,fontSize:12,cursor:'pointer'}}>Update Payment Method</button>
               </div>
             </div>
@@ -342,7 +355,8 @@ export function HospitalAdminDashboard() {
                           link.click();
                           setTimeout(() => window.URL.revokeObjectURL(url), 1000);
                         } catch (e: any) { 
-                          alert('Invoice generation failed. Please try again.');
+                        } catch (e: any) { 
+                          setStatus({ msg: 'Invoice generation failed. Please try again.', type: 'err' });
                         }
                       }} style={{fontSize:10,color:C.brand,background:'none',border:'none',cursor:'pointer',padding:0,marginTop:4}}>Download PDF ↓</button>
                     </div>
@@ -370,8 +384,8 @@ export function HospitalAdminDashboard() {
                   </div>
                   <div style={{fontSize:11,color:C.textMd,marginBottom:12,fontFamily:C.FM}}>Endpoint: {(user as any)?.fhirEndpoint || 'https://fhir.london.nhs.uk/r4'}</div>
                   <button onClick={async ()=>{
-                    try { await apiClient.get('/tenants/integrations/health'); alert('FHIR connectivity test passed (200 OK)'); }
-                    catch(e: any){ console.error('[Admin] FHIR test error:', e); alert(`FHIR test failed: ${e.message || 'Connection refused'}`); }
+                    try { await apiClient.get('/tenants/integrations/health'); setStatus({ msg: 'FHIR connectivity test passed (200 OK)', type: 'ok' }); }
+                    catch(e: any){ console.error('[Admin] FHIR test error:', e); setStatus({ msg: `FHIR test failed: ${e.message || 'Connection refused'}`, type: 'err' }); }
                   }} style={{width:'100%',padding:'8px',background:C.bg4,border:`1px solid ${C.border}`,color:C.textHi,fontSize:11,borderRadius:8,cursor:'pointer'}}>
                     Test Connectivity
                   </button>
@@ -388,8 +402,8 @@ export function HospitalAdminDashboard() {
                   </div>
                   <div style={{fontSize:11,color:C.textMd,marginBottom:12,fontFamily:C.FM}}>Endpoint: {(user as any)?.hl7Host || '10.5.22.41'}:{(user as any)?.hl7Port || 2575}</div>
                   <button onClick={async ()=>{
-                    try { await apiClient.get('/tenants/integrations/health'); alert('HL7 ACK test successful (AA)'); }
-                    catch(e: any){ console.error('[Admin] HL7 test error:', e); alert(`HL7 test failed: ${e.message || 'Socket timeout'}`); }
+                    try { await apiClient.get('/tenants/integrations/health'); setStatus({ msg: 'HL7 ACK test successful (AA)', type: 'ok' }); }
+                    catch(e: any){ console.error('[Admin] HL7 test error:', e); setStatus({ msg: `HL7 test failed: ${e.message || 'Socket timeout'}`, type: 'err' }); }
                   }} style={{width:'100%',padding:'8px',background:C.bg4,border:`1px solid ${C.border}`,color:C.textHi,fontSize:11,borderRadius:8,cursor:'pointer'}}>
                     Test Connectivity
                   </button>
@@ -445,9 +459,9 @@ export function HospitalAdminDashboard() {
                 const d = new FormData(e.currentTarget);
                 try {
                   await apiClient.post('/users/invite', Object.fromEntries(d));
-                  alert('Staff member invited successfully.');
+                  setStatus({ msg: 'Staff member invited successfully.', type: 'ok' });
                   setShowAddUser(false);
-                } catch(err: any) { alert(err.response?.data?.message || 'Invitation failed.'); }
+                } catch(err: any) { setStatus({ msg: err.response?.data?.message || 'Invitation failed.', type: 'err' }); }
               }} style={{display:'flex',flexDirection:'column',gap:16}}>
                 <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:6}}>EMAIL ADDRESS (@nhs.uk / @tenant.com)</label><input name="email" type="email" required style={modalInputStyle}/></div>
                 <div>
@@ -479,10 +493,10 @@ export function HospitalAdminDashboard() {
                   const role = (document.getElementById('roleSelect') as HTMLSelectElement).value;
                   try {
                     await apiClient.patch(`/users/${selectedStaff.id}/role`, { role });
-                    alert('Role updated successfully.');
+                    setStatus({ msg: 'Role updated successfully.', type: 'ok' });
                     setShowAddUser(false);
-                    window.location.reload();
-                  } catch(e: any) { alert(e.message); }
+                    setTimeout(() => window.location.reload(), 1500);
+                  } catch(e: any) { setStatus({ msg: e.message, type: 'err' }); }
                 }} style={modalBtnStyle}>Save Changes</button>
               </div>
             )}
@@ -503,9 +517,10 @@ export function HospitalAdminDashboard() {
                     const next = selectedStaff.status === 'suspended' ? 'active' : 'suspended';
                     try {
                       await apiClient.patch(`/users/${selectedStaff.id}/status`, { status: next });
+                      setStatus({ msg: `User ${next} successfully.`, type: 'ok' });
                       setShowAddUser(false);
-                      window.location.reload();
-                    } catch(e: any) { alert(e.message); }
+                      setTimeout(() => window.location.reload(), 1500);
+                    } catch(e: any) { setStatus({ msg: e.message, type: 'err' }); }
                   }} style={{flex:1, padding:12, background:selectedStaff.status === 'suspended' ? C.normal : C.critical, border:'none', color:'white', borderRadius:10, fontWeight:700, cursor:'pointer'}}>
                     {selectedStaff.status === 'suspended' ? 'Reactivate' : 'Suspend'}
                   </button>
