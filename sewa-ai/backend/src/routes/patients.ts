@@ -1,21 +1,26 @@
-// SEWA AI — backend/src/routes/patients.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { prisma } from '../config/database';
 import { AppError } from '../utils/AppError';
 import { validate } from '../middleware/validate';
 import { PatientSchema, PatientConsentSchema } from '../utils/validators';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 const r = Router();
 r.use(authenticate);
 
-r.post('/', validate(PatientSchema), async (req, res, next) => {
+r.post('/', authorize('admin','superadmin','doctor','radiologist'), validate(PatientSchema), async (req, res, next) => {
   try {
     const { tenantId } = req.user!;
     const { mrn, dateOfBirth, sex, firstName, lastName, email } = req.body;
 
+    // Generate a secure random password — patient uses 'forgot password' to set their own
+    const randomPw = crypto.randomBytes(24).toString('base64url');
+    const passwordHash = await bcrypt.hash(randomPw, 12);
+
     const patient = await prisma.$transaction(async (tx: any) => {
       const user = await tx.user.create({
-        data: { firstName, lastName, email, role: 'patient' }
+        data: { firstName, lastName, email, role: 'patient', tenantId, passwordHash, status: 'pending_verification' }
       });
       return tx.patient.create({
         data: { tenantId, mrn, dateOfBirth: new Date(dateOfBirth), sex, userId: user.id }
@@ -54,8 +59,17 @@ r.get('/:id', async (req, res, next) => {
 
 r.patch('/:id/consent', validate(PatientConsentSchema), async (req, res, next) => {
   try {
-    const { tenantId } = req.user!;
+    const { tenantId, role, id: requestingUserId } = req.user!;
     const { consentAI, consentResearch, consentThirdParty } = req.body;
+
+    // Patients can only update their own consent record
+    if (role === 'patient') {
+      const self = await prisma.patient.findFirst({ where: { userId: requestingUserId, tenantId } });
+      if (!self || self.id !== req.params.id) {
+        throw new AppError('You can only update your own consent preferences.', 403);
+      }
+    }
+
     const patient = await prisma.patient.updateMany({ where: { id: req.params.id, tenantId }, data: { consentAI, consentResearch, consentThirdParty } });
     res.json({ updated: patient.count });
   } catch (err) { next(err); }

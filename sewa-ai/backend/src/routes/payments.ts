@@ -33,12 +33,20 @@ r.post('/webhooks/stripe',
 );
 
 r.post('/webhooks/paystack', async (req: Request, res: Response, next: NextFunction) => {
-  try { await handlePaystackWebhook(req.body); res.json({ received: true }); }
+  try {
+    const sig = req.headers['x-paystack-signature'] as string;
+    await handlePaystackWebhook(req.body, sig);
+    res.json({ received: true });
+  }
   catch (err) { next(err); }
 });
 
 r.post('/webhooks/flutterwave', async (req: Request, res: Response, next: NextFunction) => {
-  try { await handleFlutterwaveWebhook(req.body); res.json({ received: true }); }
+  try {
+    const hash = req.headers['verif-hash'] as string;
+    await handleFlutterwaveWebhook(req.body, hash);
+    res.json({ received: true });
+  }
   catch (err) { next(err); }
 });
 

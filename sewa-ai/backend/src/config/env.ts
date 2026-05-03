@@ -130,17 +130,18 @@ export const config = {
   ACR_LOGIN_SERVER:                     optional('ACR_LOGIN_SERVER'),
 
   // ── Payments ──────────────────────────────────────────────────
-  STRIPE_SECRET_KEY:       optional('STRIPE_SECRET_KEY'),
-  STRIPE_WEBHOOK_SECRET:   optional('STRIPE_WEBHOOK_SECRET'),
-  STRIPE_PUBLISHABLE_KEY:  optional('STRIPE_PUBLISHABLE_KEY'),
-  PAYSTACK_SECRET_KEY:     optional('PAYSTACK_SECRET_KEY'),
-  PAYSTACK_PUBLIC_KEY:     optional('PAYSTACK_PUBLIC_KEY'),
-  FLUTTERWAVE_SECRET_KEY:  optional('FLUTTERWAVE_SECRET_KEY'),
-  FLUTTERWAVE_PUBLIC_KEY:  optional('FLUTTERWAVE_PUBLIC_KEY'),
-  MPESA_CONSUMER_KEY:      optional('MPESA_CONSUMER_KEY'),
-  MPESA_CONSUMER_SECRET:   optional('MPESA_CONSUMER_SECRET'),
-  MPESA_SHORTCODE:         optional('MPESA_SHORTCODE'),
-  MPESA_PASSKEY:           optional('MPESA_PASSKEY'),
+  STRIPE_SECRET_KEY:        optional('STRIPE_SECRET_KEY'),
+  STRIPE_WEBHOOK_SECRET:    optional('STRIPE_WEBHOOK_SECRET'),
+  STRIPE_PUBLISHABLE_KEY:   optional('STRIPE_PUBLISHABLE_KEY'),
+  PAYSTACK_SECRET_KEY:      optional('PAYSTACK_SECRET_KEY'),
+  PAYSTACK_PUBLIC_KEY:      optional('PAYSTACK_PUBLIC_KEY'),
+  FLUTTERWAVE_SECRET_KEY:   optional('FLUTTERWAVE_SECRET_KEY'),
+  FLUTTERWAVE_PUBLIC_KEY:   optional('FLUTTERWAVE_PUBLIC_KEY'),
+  FLUTTERWAVE_SECRET_HASH:  optional('FLUTTERWAVE_SECRET_HASH'),  // verif-hash for webhook verification
+  MPESA_CONSUMER_KEY:       optional('MPESA_CONSUMER_KEY'),
+  MPESA_CONSUMER_SECRET:    optional('MPESA_CONSUMER_SECRET'),
+  MPESA_SHORTCODE:          optional('MPESA_SHORTCODE'),
+  MPESA_PASSKEY:            optional('MPESA_PASSKEY'),
 
   // ── Firebase / FCM ────────────────────────────────────────────
   FIREBASE_PROJECT_ID:   optional('FIREBASE_PROJECT_ID'),

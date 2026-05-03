@@ -161,8 +161,14 @@ r.patch('/models/:id/promote', authorize('superadmin'), async (req, res, next) =
 r.get('/progression/:patientId', async (req, res, next) => {
   try {
     const { patientId } = req.params;
+    const { tenantId } = req.user!;
+
+    // Verify patient belongs to this tenant
+    const patient = await prisma.patient.findFirst({ where: { id: patientId, tenantId } });
+    if (!patient) throw new AppError('Patient not found', 404);
+
     const scans = await prisma.scan.findMany({
-      where: { patientId },
+      where: { patientId, tenantId },
       include: { aiResult: true },
       orderBy: { createdAt: 'desc' }
     });
@@ -187,11 +193,14 @@ r.get('/progression/:patientId', async (req, res, next) => {
 r.get('/explain/:scanId', async (req, res, next) => {
   try {
     const { scanId } = req.params;
+    const { tenantId } = req.user!;
+
+    // Enforce tenant isolation — patients/staff can only explain scans in their facility
     const result = await prisma.aIResult.findFirst({
-      where: { scanId },
-      include: { scan: { select: { modality: true, bodyPart: true } } }
+      where: { scanId, scan: { tenantId } },
+      include: { scan: { select: { modality: true, bodyPart: true, tenantId: true } } }
     });
-    if (!result) throw new AppError('AI result not found', 404);
+    if (!result) throw new AppError('AI result not found or access denied', 404);
 
     const urgency  = (result as any).urgency  ?? 'NORMAL';
     const finding  = result.primaryFinding ?? 'No significant findings';

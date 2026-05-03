@@ -1,8 +1,9 @@
 // SEWA AI — backend/src/routes/secondOpinions.ts
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth';
+import { authenticate, authorize } from '../middleware/auth';
 import { prisma } from '../config/database';
 import { auditLog } from '../utils/audit';
+import { AppError } from '../utils/AppError';
 const r = Router();
 r.use(authenticate);
 r.post('/', async (req, res, next) => {
@@ -15,6 +16,13 @@ r.post('/', async (req, res, next) => {
 });
 r.patch('/:id', async (req, res, next) => {
   try {
+    const { id: userId, role } = req.user!;
+    const opinion = await prisma.secondOpinion.findUnique({ where: { id: req.params.id } });
+    if (!opinion) throw new AppError('Second opinion not found', 404);
+    // Only the assigned reviewer or an admin can update the opinion
+    const isReviewer = opinion.reviewerId === userId;
+    const isAdmin = ['admin', 'superadmin'].includes(role);
+    if (!isReviewer && !isAdmin) throw new AppError('Only the assigned reviewer can submit this opinion', 403);
     const so = await prisma.secondOpinion.update({ where: { id: req.params.id }, data: req.body });
     res.json(so);
   } catch (err) { next(err); }

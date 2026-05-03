@@ -19,9 +19,10 @@ const STROKE_CODE_CONDITIONS = new Set([
   'LVO', 'Aortic Dissection', 'Massive PE',
 ]);
 
-const TWILIO_ACCOUNT_SID = config.MPESA_CONSUMER_KEY; // Reusing keys or just use process.env if not in config
-const TWILIO_AUTH_TOKEN  = config.MPESA_CONSUMER_SECRET;
-const TWILIO_FROM_NUMBER = config.AZURE_COMMUNICATION_SMS_NUMBER || '+15017122661';
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
+const TWILIO_AUTH_TOKEN  = process.env.TWILIO_AUTH_TOKEN  || '';
+const TWILIO_FROM_NUMBER = process.env.TWILIO_FROM_NUMBER || config.AZURE_COMMUNICATION_SMS_NUMBER || '';
+if (!TWILIO_ACCOUNT_SID) logger.warn('[Alert] TWILIO_ACCOUNT_SID not set — WhatsApp alerts will fail');
 
 interface ClinicalUser {
   id: string;

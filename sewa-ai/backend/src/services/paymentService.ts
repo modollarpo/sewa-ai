@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import Paystack from 'paystack';
 import Flutterwave from 'flutterwave-node-v3';
 import axios from 'axios';
+import crypto from 'crypto';
 import { prisma } from '../config/database';
 import { config } from '../config/env';
 import { logger } from '../utils/logger';
@@ -17,7 +18,7 @@ try {
     flutterwave = new (Flutterwave as any)(config.FLUTTERWAVE_PUBLIC_KEY, config.FLUTTERWAVE_SECRET_KEY);
   }
 } catch (e: unknown) {
-  console.warn(`[Payment] Flutterwave initialization failed: ${e instanceof Error ? e.message : String(e)}`);
+  logger.warn(`[Payment] Flutterwave initialization failed: ${e instanceof Error ? e.message : String(e)}`);
 }
 
 // Region → Payment provider routing
@@ -353,7 +354,19 @@ export async function handleStripeWebhook(payload: Buffer, signature: string) {
   }
 }
 
-export async function handlePaystackWebhook(body: any) {
+export async function handlePaystackWebhook(body: any, signature: string) {
+  // ── SECURITY: Verify Paystack HMAC-SHA512 signature ──────────
+  // Without this, any attacker can POST a fake charge.success event
+  if (!config.PAYSTACK_SECRET_KEY) throw new AppError('Paystack not configured', 500);
+  const expectedSig = crypto
+    .createHmac('sha512', config.PAYSTACK_SECRET_KEY)
+    .update(JSON.stringify(body))
+    .digest('hex');
+  if (signature !== expectedSig) {
+    logger.error('[Billing] Paystack webhook signature mismatch — possible forgery attempt');
+    throw new AppError('Webhook Signature Invalid', 400);
+  }
+
   if (body.event === 'charge.success') {
     const ref = body.data?.reference;
     const payment = await prisma.payment.findFirst({ where: { externalId: ref } });
@@ -376,15 +389,44 @@ export async function handlePaystackWebhook(body: any) {
         },
       });
       logger.info(`[Billing] Tenant ${payment.tenantId} activated on plan "${plan}" via Paystack`);
+      generateInvoice(payment.id).catch(e => logger.warn(`[Invoice] ${e.message}`));
     }
     logger.info(`Paystack charge succeeded: ${ref}`);
   }
 }
 
-export async function handleFlutterwaveWebhook(body: any) {
+export async function handleFlutterwaveWebhook(body: any, secretHash: string) {
+  // ── SECURITY: Verify Flutterwave verif-hash header ────────────
+  if (!config.FLUTTERWAVE_SECRET_HASH) throw new AppError('Flutterwave not configured', 500);
+  if (secretHash !== config.FLUTTERWAVE_SECRET_HASH) {
+    logger.error('[Billing] Flutterwave webhook hash mismatch — possible forgery attempt');
+    throw new AppError('Webhook Signature Invalid', 400);
+  }
+
   if (body.event === 'charge.completed' && body.data?.status === 'successful') {
     const ref = body.data?.tx_ref;
+    const payment = await prisma.payment.findFirst({ where: { externalId: ref } });
     await prisma.payment.updateMany({ where: { externalId: ref }, data: { status: 'succeeded' } });
+
+    // ── Activate tenant plan (was MISSING — critical fix) ─────
+    if (payment?.tenantId && payment.metadata) {
+      const meta = payment.metadata as any;
+      const plan = meta.plan as string;
+      const quota = PLANS[plan as keyof typeof PLANS]?.scans ?? null;
+      const now = new Date();
+      await prisma.tenant.update({
+        where: { id: payment.tenantId },
+        data: {
+          plan,
+          subscriptionStatus: 'active',
+          scanQuota: quota,
+          scansUsedThisMonth: 0,
+          billingCycleResetAt: new Date(now.getFullYear(), now.getMonth() + 1, 1),
+        },
+      });
+      logger.info(`[Billing] Tenant ${payment.tenantId} activated on plan "${plan}" via Flutterwave`);
+      generateInvoice(payment.id).catch(e => logger.warn(`[Invoice] ${e.message}`));
+    }
     logger.info(`Flutterwave charge succeeded: ${ref}`);
   }
 }
@@ -398,12 +440,15 @@ export async function initiateMpesaSTK(tenantId: string, phone: string, amount: 
   const callbackRef = `SEWA-${tenantId.slice(0,8)}-${Date.now()}`;
 
   // Get M-Pesa OAuth token
-  const authRes = await axios.get('https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials', {
+  const mpesaBaseUrl = config.NODE_ENV === 'production'
+    ? 'https://api.safaricom.co.ke'
+    : 'https://sandbox.safaricom.co.ke';
+  const authRes = await axios.get(`${mpesaBaseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
     auth: { username: config.MPESA_CONSUMER_KEY, password: config.MPESA_CONSUMER_SECRET },
   });
   const accessToken = authRes.data.access_token;
 
-  const stkRes = await axios.post('https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest', {
+  const stkRes = await axios.post(`${mpesaBaseUrl}/mpesa/stkpush/v1/processrequest`, {
     BusinessShortCode: shortcode,
     Password: password,
     Timestamp: timestamp,

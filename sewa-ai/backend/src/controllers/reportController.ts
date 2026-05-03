@@ -44,6 +44,10 @@ export async function updateReport(req: Request, res: Response, next: NextFuncti
     const { id } = req.params;
     const { technique, findings, impression, recommendation, fullText } = req.body;
 
+    const existing = await prisma.report.findFirst({ where: { id, tenantId } });
+    if (!existing) throw new AppError('Report not found', 404);
+    if (existing.status === 'approved') throw new AppError('Cannot modify a signed report. An addendum must be created instead.', 403);
+
     const report = await prisma.report.update({
       where: { id, tenantId },
       data: { technique, findings, impression, recommendation, fullText, editedByHuman: true, status: 'draft' },
@@ -91,19 +95,19 @@ export async function signReport(req: Request, res: Response, next: NextFunction
         fhirId = await createFHIRDiagnosticReport(signed, report.scan);
       }
     } catch (e: any) {
-      console.warn('[FHIR] Sync failed during signing:', e.message);
+      logger.warn(`[FHIR] Sync failed during signing: ${e.message}`);
     }
     if (fhirId) await prisma.report.update({ where: { id }, data: { fhirDiagnosticReportId: fhirId } });
 
     // HL7v2 ORU dispatch (Feature 9)
-    const hl7Id = await sendHL7ORU({ ...report.scan, ...signed }).catch((e: any): null => { console.warn('HL7 ORU failed:', e.message); return null; });
+    const hl7Id = await sendHL7ORU({ ...report.scan, ...signed }).catch((e: any): null => { logger.warn(`HL7 ORU failed: ${e.message}`); return null; });
     if (hl7Id) await prisma.report.update({ where: { id }, data: { hl7OruMessageId: hl7Id } });
 
     // Notify patient (Feature 6)
     io.to(`tenant:${tenantId}`).emit('report:signed', { reportId: id, scanId: report.scanId });
 
-    // Send WhatsApp/SMS alert
-    if (report.scan.patient.user.phoneNumber) {
+    // Send WhatsApp/SMS alert (only if patient and user exist)
+    if (report.scan.patient?.user?.phoneNumber) {
       const { sendNotification } = await import('../services/notificationService');
       await sendNotification({
         to: report.scan.patient.user.phoneNumber,
