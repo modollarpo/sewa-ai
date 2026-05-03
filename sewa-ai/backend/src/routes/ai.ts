@@ -59,6 +59,10 @@ r.post('/vlm/:scanId', authorize('admin','superadmin','radiologist'), async (req
 
 r.post('/icd10/:scanId', authorize('admin','superadmin','radiologist'), async (req, res, next) => {
   try {
+    const { tenantId } = req.user!;
+    const scan = await prisma.scan.findFirst({ where: { id: req.params.scanId, tenantId } });
+    if (!scan) throw new AppError('Scan not found', 404);
+
     const codes = await generateICDCodes(req.params.scanId);
     res.json({ message: 'ICD-10 Codes generated', codes });
   } catch (err) { next(err); }
@@ -103,10 +107,12 @@ r.post('/validate/:scanId', authorize('radiologist','doctor','admin','superadmin
     const { scanId } = req.params;
     const { status, correctedFinding, comments } = req.body; // status: 'CONFIRMED' | 'REJECTED'
 
-    const result = await prisma.aiResult.findUnique({ where: { scanId } });
-    if (!result) throw new AppError('AI result not found', 404);
+    const result = await prisma.aIResult.findFirst({ 
+      where: { scanId, tenantId } 
+    });
+    if (!result) throw new AppError('AI result not found or access denied', 404);
 
-    const updated = await prisma.aiResult.update({
+    const updated = await prisma.aIResult.update({
       where: { scanId },
       data: {
         validationStatus: status,

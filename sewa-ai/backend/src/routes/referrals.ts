@@ -4,6 +4,7 @@ import { authenticate } from '../middleware/auth';
 import { prisma } from '../config/database';
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
+import { AppError } from '../utils/AppError';
 
 const r = Router();
 r.use(authenticate);
@@ -13,6 +14,10 @@ r.post('/', async (req, res, next) => {
   try {
     const { scanId, targetTenantId, priority, notes } = req.body;
     const { id: userId, tenantId } = req.user as { id: string; tenantId: string };
+
+    // Security Gap: verify the scan actually belongs to the user's tenant
+    const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
+    if (!scan) throw new AppError('Scan not found or access denied', 404);
 
     logger.info(`[Referral] Case ${scanId} referred from ${tenantId} to ${targetTenantId}`);
 

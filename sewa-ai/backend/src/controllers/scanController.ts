@@ -304,6 +304,14 @@ export async function syncOfflineBatch(req: Request, res: Response, next: NextFu
     const results = [];
 
     for (const s of scans) {
+      // Security: validate that the provided patientId belongs to the same tenant
+      if (s.patientId) {
+        const patient = await prisma.patient.findUnique({ where: { id: s.patientId } });
+        if (!patient || patient.tenantId !== tenantId) {
+          throw new AppError(`Invalid patient ID or patient belongs to a different institution: ${s.patientId}`, 400);
+        }
+      }
+
       // 1. Create the scan record
       const scan = await prisma.scan.create({
         data: {
