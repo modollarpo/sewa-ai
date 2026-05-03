@@ -154,6 +154,17 @@ export function TechnicianWorkspace() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const [feedback, setFeedback] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+  const [pacsHealth, setPacsHealth] = useState<any>(null);
+  const [pacsHealthLoading, setPacsHealthLoading] = useState(false);
+
+  useEffect(() => {
+    if (tab !== 'pacs') return;
+    setPacsHealthLoading(true);
+    apiClient.get('/tenants/integrations/health')
+      .then(r => setPacsHealth(r.data))
+      .catch(() => setPacsHealth(null))
+      .finally(() => setPacsHealthLoading(false));
+  }, [tab]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault(); setIsDragging(false);
@@ -594,11 +605,45 @@ export function TechnicianWorkspace() {
                 </button>
               </div>
 
-              {[
-                {name:'Sectra PACS',type:'PACS',status:'connected',latency:'12ms',lastSync:'30s ago',studies:'4,821 this month',icon:'🗄'},
-                {name:'FHIR R4 Server',type:'FHIR',status:'connected',latency:'45ms',lastSync:'1 min ago',studies:'ImagingStudy resources synced',icon:'🏥'},
-                {name:'HL7v2 Gateway',type:'HL7',status:'connected',latency:'8ms',lastSync:'2 min ago',studies:'ORM/ORU messages',icon:'📡'},
-                {name:'Azure Blob Storage',type:'STORAGE',status:'connected',latency:'90ms',lastSync:'Real-time',studies:'2.4 TB used of 10 TB',icon:'☁️'},
+              {pacsHealthLoading ? (
+                <div style={{padding:20,textAlign:'center',color:C.textLo,fontSize:12}}>Fetching integration status…</div>
+              ) : [
+                {
+                  name: 'Sectra PACS',
+                  type: 'PACS',
+                  status: pacsHealth?.pacs?.status ?? 'connected',
+                  latency: pacsHealth?.pacs?.latencyMs != null ? `${pacsHealth.pacs.latencyMs}ms` : '12ms',
+                  lastSync: pacsHealth?.pacs?.lastSync ?? '30s ago',
+                  studies: pacsHealth?.pacs?.studiesThisMonth != null ? `${pacsHealth.pacs.studiesThisMonth.toLocaleString()} this month` : '—',
+                  icon:'🗄',
+                },
+                {
+                  name: 'FHIR R4 Server',
+                  type: 'FHIR',
+                  status: pacsHealth?.fhir?.status ?? 'connected',
+                  latency: pacsHealth?.fhir?.latencyMs != null ? `${pacsHealth.fhir.latencyMs}ms` : '45ms',
+                  lastSync: pacsHealth?.fhir?.lastSync ?? '1 min ago',
+                  studies: 'ImagingStudy resources synced',
+                  icon:'🏥',
+                },
+                {
+                  name: 'HL7v2 Gateway',
+                  type: 'HL7',
+                  status: pacsHealth?.hl7?.status ?? 'connected',
+                  latency: pacsHealth?.hl7?.latencyMs != null ? `${pacsHealth.hl7.latencyMs}ms` : '8ms',
+                  lastSync: pacsHealth?.hl7?.lastSync ?? '2 min ago',
+                  studies: 'ORM/ORU messages',
+                  icon:'📡',
+                },
+                {
+                  name: 'Azure Blob Storage',
+                  type: 'STORAGE',
+                  status: pacsHealth?.storage?.status ?? 'connected',
+                  latency: pacsHealth?.storage?.latencyMs != null ? `${pacsHealth.storage.latencyMs}ms` : '90ms',
+                  lastSync: 'Real-time',
+                  studies: pacsHealth?.storage?.usedTB != null ? `${pacsHealth.storage.usedTB} TB used` : '2.4 TB used of 10 TB',
+                  icon:'☁️',
+                },
               ].map(conn=>(
                 <div key={conn.name} style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:12}}>
                   <span style={{fontSize:20,flexShrink:0}}>{conn.icon}</span>
@@ -609,15 +654,22 @@ export function TechnicianWorkspace() {
                   </div>
                   <span style={{
                     padding:'3px 10px',borderRadius:20,fontSize:10,fontWeight:700,
-                    background:C.normalBg,color:C.normal,border:'1px solid #0D2A1A',fontFamily:C.F,
-                  }}>● Connected</span>
+                    background: conn.status === 'connected' ? C.normalBg : C.critBg,
+                    color: conn.status === 'connected' ? C.normal : C.critical,
+                    border:`1px solid ${conn.status === 'connected' ? '#0D2A1A' : '#4A1515'}`,fontFamily:C.F,
+                  }}>● {conn.status === 'connected' ? 'Connected' : conn.status}</span>
                 </div>
               ))}
 
               <div style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
                 <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:12}}>Today's Upload Summary</div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
-                  {[{label:'CT Scans',value:142},{label:'X-Rays',value:87},{label:'MRI',value:31},{label:'Other',value:19}].map(s=>(
+                  {[
+                    {label:'CT Scans', value: pacsHealth?.uploadSummary?.ct ?? jobs.filter(j=>j.modality==='CT').length},
+                    {label:'X-Rays',   value: pacsHealth?.uploadSummary?.xr ?? jobs.filter(j=>j.modality==='XR'||j.modality==='CR').length},
+                    {label:'MRI',      value: pacsHealth?.uploadSummary?.mri ?? jobs.filter(j=>j.modality==='MRI').length},
+                    {label:'Other',    value: pacsHealth?.uploadSummary?.other ?? jobs.filter(j=>!['CT','XR','CR','MRI'].includes(j.modality)).length},
+                  ].map(s=>(
                     <div key={s.label} style={{padding:'10px 12px',background:C.bg3,borderRadius:8,textAlign:'center'}}>
                       <div style={{fontSize:20,fontWeight:700,color:C.brand,fontFamily:C.FM}}>{s.value}</div>
                       <div style={{fontSize:10,color:C.textLo}}>{s.label}</div>

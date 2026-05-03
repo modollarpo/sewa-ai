@@ -197,9 +197,36 @@ export function BillingDashboard() {
           {/* Cost summary */}
           <div className="stats-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:12 }}>
             {[
-              { label:'Current Bill', value: loading ? '...' : (gateways[0]?.currencies[0] === 'NGN' ? '₦480K' : '£2,400'), sub:'Standard flat rate', color:C.brand },
-              { label:'Pending', value: loading ? '...' : (gateways[0]?.currencies[0] === 'NGN' ? '₦0' : '£0'), sub:'Next bill: 1 Apr 2026', color:C.textHi },
-              { label:'Last Payment', value: loading ? '...' : (gateways[0]?.currencies[0] === 'NGN' ? '₦480K' : '£2,400'), sub:'Paid on 1 Mar 2026', color:C.textMd },
+              {
+                label:'Current Bill',
+                value: loading ? '...' : stats.currentBill
+                  ? `${gateways[0]?.currencies[0] ?? '£'} ${Number(stats.currentBill).toFixed(2)}`
+                  : `${gateways[0]?.currencies[0] ?? 'GBP'} 0.00`,
+                sub: stats.nextBillDate
+                  ? `Next bill: ${new Date(stats.nextBillDate).toLocaleDateString('en-GB')}`
+                  : 'Next billing date pending',
+                color: C.brand,
+              },
+              {
+                label:'Pending',
+                value: loading ? '...' : stats.pendingAmount
+                  ? `${gateways[0]?.currencies[0] ?? '£'} ${Number(stats.pendingAmount).toFixed(2)}`
+                  : `${gateways[0]?.currencies[0] ?? 'GBP'} 0.00`,
+                sub: stats.nextBillDate
+                  ? `Due: ${new Date(stats.nextBillDate).toLocaleDateString('en-GB')}`
+                  : 'No pending charges',
+                color: C.textHi,
+              },
+              {
+                label:'Last Payment',
+                value: loading ? '...' : stats.lastPaymentAmount
+                  ? `${gateways[0]?.currencies[0] ?? '£'} ${Number(stats.lastPaymentAmount).toFixed(2)}`
+                  : '—',
+                sub: stats.lastPaymentDate
+                  ? `Paid on ${new Date(stats.lastPaymentDate).toLocaleDateString('en-GB')}`
+                  : 'No payment on record',
+                color: C.textMd,
+              },
             ].map(s=>(
               <div key={s.label} style={{ padding:16, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}` }}>
                 <div style={{ fontSize:11, color:C.textLo, marginBottom:8 }}>{s.label}</div>
@@ -320,10 +347,10 @@ export function BillingDashboard() {
             <div style={{ fontSize:13, fontWeight:700, color:C.textHi, marginBottom:12 }}>Billing Contact</div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               {[
-                { label:'Billing email',   value:'finance@royallondon.nhs.uk' },
-                { label:'PO Number',       value:'PO-2025-0147' },
-                { label:'VAT / Tax ID',    value:'GB 123 456 789' },
-                { label:'Billing address', value:'Royal London Hospital, Whitechapel Road, E1 1BB' },
+                { label:'Billing email',   value:(user as any)?.billingEmail || user?.email || '—' },
+                { label:'PO Number',       value:(user as any)?.poNumber     || stats.poNumber || '—' },
+                { label:'VAT / Tax ID',    value:(user as any)?.vatId        || stats.vatId    || '—' },
+                { label:'Billing address', value:(user as any)?.billingAddress || stats.billingAddress || user?.tenantName || '—' },
               ].map(row=>(
                 <div key={row.label} style={{ display:'flex', justifyContent:'space-between', padding:'8px 10px', background:C.bg3, borderRadius:8 }}>
                   <span style={{ fontSize:11, color:C.textMd }}>{row.label}</span>

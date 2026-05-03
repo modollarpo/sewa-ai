@@ -12,6 +12,7 @@ interface VoiceDictationProps {
 export function VoiceDictation({ onTranscript, lang = 'en-US' }: VoiceDictationProps) {
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -48,7 +49,8 @@ export function VoiceDictation({ onTranscript, lang = 'en-US' }: VoiceDictationP
 
   const toggleScribe = () => {
     if (!recognition) {
-      alert('Azure AI Speech is not supported in this browser environment.');
+      setErrorMsg('Azure Speech not supported in this browser.');
+      setTimeout(() => setErrorMsg(''), 3000);
       return;
     }
     
@@ -66,8 +68,10 @@ export function VoiceDictation({ onTranscript, lang = 'en-US' }: VoiceDictationP
   };
 
   return (
-    <button 
-      onClick={toggleScribe}
+    <div style={{ position: 'relative' }}>
+      {errorMsg && <div style={{ position:'absolute', bottom:'100%', left:0, background:C.critical, color:'white', padding:'4px 8px', borderRadius:6, fontSize:10, whiteSpace:'nowrap', marginBottom:8, zIndex:10 }}>{errorMsg}</div>}
+      <button 
+        onClick={toggleScribe}
       style={{ 
         padding:'4px 10px', 
         background: isListening ? `${C.critical}14` : `${C.brand}14`, 
@@ -87,6 +91,7 @@ export function VoiceDictation({ onTranscript, lang = 'en-US' }: VoiceDictationP
         </>
       ) : '🎙 Ambient Scribe'}
       <style>{`@keyframes pulse{0%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0.5}100%{transform:scale(1);opacity:1}}`}</style>
-    </button>
+      </button>
+    </div>
   );
 }

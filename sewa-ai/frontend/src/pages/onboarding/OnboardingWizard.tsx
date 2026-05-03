@@ -115,6 +115,7 @@ export function OnboardingWizard() {
   const [integrationStatus, setIntegrationStatus] = useState<Record<string,string>>({});
   const [benchmarkRunning, setBenchmarkRunning] = useState(false);
   const [benchmarkProgress, setBenchmarkProgress] = useState(0);
+  const [statusMsg, setStatusMsg] = useState<{msg:string, type:'ok'|'err'} | null>(null);
 
   const update = (fields: Partial<typeof data>) => setData(d => ({ ...d, ...fields }));
 
@@ -139,18 +140,18 @@ export function OnboardingWizard() {
         window.location.href = payment.paymentLink;
       } else if (payment.clientSecret) {
         // Stripe handshake (ideally would use Stripe Elements here, but for now we confirm creation)
-        alert('Institution created. Please check your email to complete Stripe payment setup.');
-        window.location.href = '/login';
+        setStatusMsg({ msg: 'Institution created. Please check your email to complete Stripe payment setup.', type: 'ok' });
+        setTimeout(() => window.location.href = '/login', 2500);
       } else if (payment.checkoutRequestId) {
         // M-Pesa handshake
-        alert(`STK Push sent to your phone. Request ID: ${payment.checkoutRequestId}`);
-        window.location.href = '/login';
+        setStatusMsg({ msg: `STK Push sent to your phone. Request ID: ${payment.checkoutRequestId}`, type: 'ok' });
+        setTimeout(() => window.location.href = '/login', 2500);
       } else {
-        alert('Launch successful! Redirecting to login...');
-        window.location.href = '/login';
+        setStatusMsg({ msg: 'Launch successful! Redirecting to login...', type: 'ok' });
+        setTimeout(() => window.location.href = '/login', 2000);
       }
     } catch (err: any) {
-      alert(`Launch failed: ${err.response?.data?.message || err.message}`);
+      setStatusMsg({ msg: `Launch failed: ${err.response?.data?.message || err.message}`, type: 'err' });
     } finally {
       setLoading(false);
     }
@@ -171,7 +172,7 @@ export function OnboardingWizard() {
       setIntegrationStatus(s => ({ ...s, [type]: 'connected' }));
     } catch (err: any) {
       setIntegrationStatus(s => ({ ...s, [type]: 'failed' }));
-      alert(`Integration test failed for ${type.toUpperCase()}. Please check your network and firewall settings.`);
+      setStatusMsg({ msg: `Integration test failed for ${type.toUpperCase()}. Please check your network and firewall settings.`, type: 'err' });
     }
   };
 
@@ -192,7 +193,7 @@ export function OnboardingWizard() {
     } catch (err) {
       clearInterval(interval);
       setBenchmarkRunning(false);
-      alert('Benchmark failed. Resource allocation error.');
+      setStatusMsg({ msg: 'Benchmark failed. Resource allocation error.', type: 'err' });
     }
   };
 
@@ -218,6 +219,15 @@ export function OnboardingWizard() {
         </div>
         <span style={{ fontSize:11, color:C.textLo }}>Step {step+1} of {STEPS.length}</span>
       </div>
+
+      {/* Global Status Message */}
+      {statusMsg && (
+        <div style={{ position:'fixed', top:24, left:'50%', transform:'translateX(-50%)', zIndex:3000, padding:'12px 20px', background: statusMsg.type === 'ok' ? C.normalBg : C.critBg, border: `1px solid ${statusMsg.type === 'ok' ? C.normal : C.critical}40`, borderRadius:10, color: statusMsg.type === 'ok' ? C.normal : C.critical, fontSize:13, fontWeight:600, display:'flex', alignItems:'center', gap:12, boxShadow: '0 10px 30px rgba(0,0,0,0.5)', animation: 'fadeDown 300ms ease' }}>
+          <style>{`@keyframes fadeDown{from{transform:translate(-50%,-20px);opacity:0}to{transform:translate(-50%,0);opacity:1}}`}</style>
+          <span>{statusMsg.type === 'ok' ? '✓' : '⚠'} {statusMsg.msg}</span>
+          <button onClick={() => setStatusMsg(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+        </div>
+      )}
 
       <div style={{ flex:1, display:'flex' }}>
 

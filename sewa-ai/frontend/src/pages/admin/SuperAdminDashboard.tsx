@@ -182,6 +182,24 @@ export function SuperAdminDashboard() {
 
       {tab==='tenants' && (
         <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          {/* Search + actions row */}
+          <div style={{display:'flex',alignItems:'center',gap:10,justifyContent:'space-between'}}>
+            <div style={{position:'relative',flex:1,maxWidth:320}}>
+              <svg style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:C.textLo}} width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input
+                value={tenantSearch}
+                onChange={e => setTenantSearch(e.target.value)}
+                placeholder="Search institution or region…"
+                style={{width:'100%',height:34,padding:'0 10px 0 30px',boxSizing:'border-box',background:C.bg2,border:`1px solid ${C.border}`,borderRadius:8,color:C.textHi,fontSize:12,fontFamily:C.F,outline:'none'}}
+              />
+            </div>
+            <span style={{fontSize:11,color:C.textLo,fontFamily:C.FM,flexShrink:0}}>
+              {filteredTenants.length} / {tenants.length} tenants
+            </span>
+            <button onClick={() => setShowProvision(true)} style={{padding:'6px 14px',borderRadius:8,background:C.brand,color:'white',border:'none',fontSize:11,fontWeight:600,cursor:'pointer',flexShrink:0}}>
+              + Provision
+            </button>
+          </div>
           <div style={{background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,overflow:'hidden'}}>
             <table style={{width:'100%',borderCollapse:'collapse'}}>
               <thead>
@@ -192,7 +210,11 @@ export function SuperAdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filteredTenants.map((t,i)=>(
+                {filteredTenants.length === 0 ? (
+                  <tr><td colSpan={4} style={{padding:32,textAlign:'center',color:C.textLo,fontSize:12}}>
+                    {tenantSearch ? `No tenants matching "${tenantSearch}"` : 'No tenants provisioned yet.'}
+                  </td></tr>
+                ) : filteredTenants.map((t,i)=>(
                   <tr key={i} style={{borderTop:`1px solid ${C.border}`}}>
                     <td style={{padding:'12px 12px',fontSize:12,color:C.textHi}}>{t.name}</td>
                     <td style={{padding:'12px 12px',fontSize:10,color:C.textMd}}>{t.region}</td>
@@ -205,6 +227,7 @@ export function SuperAdminDashboard() {
           </div>
         </div>
       )}
+
 
       {tab==='aimodels' && (
         <div style={{display:'flex',flexDirection:'column',gap:12}}>

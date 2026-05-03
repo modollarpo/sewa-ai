@@ -20,6 +20,7 @@ export function SpecialistOnboarding() {
   });
   const [loading, setLoading] = useState(false);
   const [stripeLink, setStripeLink] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const update = (fields: Partial<typeof data>) => setData(d => ({ ...d, ...fields }));
 
@@ -30,7 +31,7 @@ export function SpecialistOnboarding() {
       setStripeLink(res.data.stripeOnboardingUrl);
       setStep(2);
     } catch (err: any) {
-      alert(`Registration failed: ${err.response?.data?.message || err.message}`);
+      setErrorMsg(`Registration failed: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }
@@ -47,6 +48,13 @@ export function SpecialistOnboarding() {
           <h1 style={{ margin:0, fontSize:22, fontWeight:800, color:C.textHi }}>Specialist Network</h1>
           <p style={{ margin:'8px 0 0', fontSize:13, color:C.textLo }}>Join the SEWA AI clinical referral marketplace</p>
         </div>
+
+        {errorMsg && (
+          <div style={{ padding:'10px 14px', background:`${C.critical}14`, border:`1px solid ${C.critical}40`, borderRadius:10, color:C.critical, fontSize:12, marginBottom:20, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <span>⚠ {errorMsg}</span>
+            <button onClick={() => setErrorMsg('')} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+          </div>
+        )}
 
         {step === 1 && (
           <div style={{ display:'flex', flexDirection:'column', gap:16 }}>

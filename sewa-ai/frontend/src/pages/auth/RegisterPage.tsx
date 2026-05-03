@@ -17,6 +17,7 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
   const [form, setForm] = useState({ firstName:'', lastName:'', email:'', password:'', hospitalCode:'', speciality:'', licenseNumber:'' });
   const { register, isLoading, error } = useAuthStore();
   const [localError, setLocalError] = useState('');
+  const [localSuccess, setLocalSuccess] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,8 +32,8 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
           speciality: form.speciality,
           licenseNumber: form.licenseNumber
         });
-        alert(`Specialist account created! Redirecting you to Stripe Connect...`);
-        window.location.href = url; // Redirect to Stripe Onboarding
+        setLocalSuccess(`Specialist account created! Redirecting you to Stripe Connect...`);
+        setTimeout(() => { window.location.href = url; }, 1500);
         return;
       }
 
@@ -54,8 +55,8 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
         role: role === 'patient' ? 'patient' : 'doctor' 
       });
       
-      alert(`Registration successful for ${form.email}. Please sign in.`);
-      onLogin();
+      setLocalSuccess(`Registration successful for ${form.email}. Please sign in.`);
+      setTimeout(() => { onLogin(); }, 1500);
     } catch (err: any) {
       setLocalError(err.message || 'Registration failed. Please check your details.');
     }
@@ -107,6 +108,13 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
           {(error || localError) && (
             <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: '10px', background: `${C.critical}14`, border: `1px solid ${C.critical}40`, color: C.critical, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>⚠️ {(error || localError)}</span>
+            </div>
+          )}
+
+          {/* Success */}
+          {localSuccess && (
+            <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: '10px', background: `${C.normal}14`, border: `1px solid ${C.normal}40`, color: C.normal, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>✓ {localSuccess}</span>
             </div>
           )}
 

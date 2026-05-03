@@ -20,16 +20,17 @@ export function ReferralModal({ scanId, onClose }: { scanId: string; onClose: ()
   const [selected, setSelected] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
   const handleSubmit = async () => {
     if (!selected) return;
     setLoading(true);
     try {
       await apiClient.post('/referrals', { scanId, targetTenantId: selected, clinicalNote: note });
-      alert('Referral successfully dispatched.');
-      onClose();
+      setStatus({ msg: 'Referral successfully dispatched.', type: 'ok' });
+      setTimeout(() => onClose(), 1500);
     } catch (e) {
-      alert('Referral failed. Institutional firewall may be blocking the transfer.');
+      setStatus({ msg: 'Referral failed. Institutional firewall may be blocking the transfer.', type: 'err' });
     } finally {
       setLoading(false);
     }
@@ -42,6 +43,12 @@ export function ReferralModal({ scanId, onClose }: { scanId: string; onClose: ()
           <h2 style={{ margin:0, fontSize:20, fontWeight:800, color:C.textHi }}>Refer Out Case</h2>
           <button onClick={onClose} style={{ background:'none', border:'none', color:C.textLo, fontSize:20, cursor:'pointer' }}>✕</button>
         </div>
+
+        {status && (
+          <div style={{ padding:'10px 14px', background: status.type==='ok'?`${C.brand}14`:`${C.critical}14`, border:`1px solid ${status.type==='ok'?C.brand:C.critical}40`, borderRadius:10, color: status.type==='ok'?C.brand:C.critical, fontSize:12, marginBottom:20 }}>
+            {status.type === 'ok' ? '✓' : '⚠'} {status.msg}
+          </div>
+        )}
 
         <div style={{ marginBottom:20 }}>
           <label style={{ display:'block', fontSize:11, fontWeight:700, color:C.textLo, marginBottom:8, textTransform:'uppercase' }}>Target Institution</label>

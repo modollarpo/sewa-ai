@@ -1,10 +1,11 @@
 // SEWA AI — PatientPortal.tsx
 // Patient-facing results portal: scan history, AI insights, appointments, billing
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { usePatientData, usePatientAppointments } from '../../hooks/useDashboardData';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { apiClient } from '../../services/apiClient';
+import { AppointmentModal } from './AppointmentModal';
 
 const C = {
   bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',
@@ -29,6 +30,20 @@ export function PatientPortal() {
   const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [isChangingPass, setIsChangingPass] = useState(false);
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+
+  useEffect(() => {
+    if (tab !== 'billing') return;
+    setPaymentsLoading(true);
+    apiClient.get('/payments/history')
+      .then(r => {
+        const list = Array.isArray(r.data.payments) ? r.data.payments : (Array.isArray(r.data) ? r.data : []);
+        setPayments(list);
+      })
+      .catch(() => setPayments([]))
+      .finally(() => setPaymentsLoading(false));
+  }, [tab]);
 
   const handlePasswordChange = async () => {
     if (!passForm.currentPassword || !passForm.newPassword) {
@@ -149,19 +164,42 @@ export function PatientPortal() {
 
       {tab==='billing' && (
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
-           <div style={{padding:20,background:C.bg2,borderRadius:16,border:`1px solid ${C.border}`}}>
-              <h3 style={{color:C.textHi, margin:'0 0 16px'}}>Billing History</h3>
-              {scans.filter((s:any)=>s.status==='complete'||s.status==='validated').length === 0 ? (
-                <div style={{padding:'20px 0',color:C.textLo,fontSize:12,textAlign:'center'}}>No completed scans found for billing.</div>
-              ) : scans.filter((s:any)=>s.status==='complete'||s.status==='validated').map((s:any)=>(
-                <div key={s.id} style={{display:'flex',justifyContent:'space-between',padding:'12px 0',borderTop:`1px solid ${C.border}`}}>
-                  <div style={{color:C.textHi}}>{s.modality} Analysis · {s.bodyPart}</div>
-                  <div style={{color:s.cost ? C.brand : C.textLo,fontWeight:700, fontFamily:C.FM}}>
-                    {s.cost ? `£${Number(s.cost).toFixed(2)}` : '£0.00'}
+          <div style={{padding:20,background:C.bg2,borderRadius:16,border:`1px solid ${C.border}`}}>
+            <h3 style={{color:C.textHi, margin:'0 0 16px'}}>Billing &amp; Payments</h3>
+            {paymentsLoading ? (
+              <Skeleton height={60}/>
+            ) : payments.length === 0 ? (
+              <div style={{padding:'24px 0',color:C.textLo,fontSize:12,textAlign:'center'}}>
+                No payment records found for your account.
+              </div>
+            ) : (
+              <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                {payments.map((p:any, i:number) => (
+                  <div key={p.id ?? i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 0',borderTop:`1px solid ${C.border}`}}>
+                    <div>
+                      <div style={{color:C.textHi,fontWeight:600,fontSize:13}}>{p.planName || 'Subscription'}</div>
+                      <div style={{color:C.textLo,fontSize:11,marginTop:2}}>
+                        {p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-GB') : p.date || '—'}
+                      </div>
+                    </div>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{color:C.brand,fontWeight:700,fontFamily:C.FM,fontSize:14}}>
+                        {p.currency || 'GBP'} {p.amount ? (Number(p.amount)/100).toFixed(2) : p.amountDisplay || '—'}
+                      </div>
+                      <div style={{marginTop:4}}>
+                        <span style={{padding:'2px 8px',borderRadius:20,fontSize:10,fontWeight:700,
+                          background: p.status==='paid'?'#0A1F14':'#2A0A0A',
+                          color: p.status==='paid'?C.normal:C.critical,
+                          border:`1px solid ${p.status==='paid'?'#0D2A1A':'#4A1515'}`}}>
+                          {p.status === 'paid' ? '✓ Paid' : p.status || 'Pending'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
-           </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

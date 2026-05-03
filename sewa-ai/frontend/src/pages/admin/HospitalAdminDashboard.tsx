@@ -355,7 +355,6 @@ export function HospitalAdminDashboard() {
                           link.click();
                           setTimeout(() => window.URL.revokeObjectURL(url), 1000);
                         } catch (e: any) { 
-                        } catch (e: any) { 
                           setStatus({ msg: 'Invoice generation failed. Please try again.', type: 'err' });
                         }
                       }} style={{fontSize:10,color:C.brand,background:'none',border:'none',cursor:'pointer',padding:0,marginTop:4}}>Download PDF ↓</button>

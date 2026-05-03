@@ -246,6 +246,7 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
   const [correcting, setCorrecting] = useState(false);
   const [escalating, setEscalating] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   
   const urgency = patient.urgency || patient.lastScan?.urgency || 'ROUTINE';
   const scanId = patient.scanId || patient.id;
@@ -275,7 +276,7 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
         window.location.reload();
       }
     } catch (err: any) {
-      alert(`Action failed: ${err.message || 'System error'}`);
+      setActionError(err.response?.data?.message || err.message || 'Action failed. Please try again.');
     } finally {
       setBusy(false);
     }
@@ -283,6 +284,12 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
 
   return (
     <div style={{flex:1, display:'flex', flexDirection:'column', overflowY:'auto', background:C.bg1}}>
+      {actionError && (
+        <div style={{ margin:'12px 20px 0', padding:'10px 16px', background:C.critBg, border:`1px solid ${C.critBorder}`, borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center', color:C.critical, fontSize:12, fontWeight:600 }}>
+          <span>⚠ {actionError}</span>
+          <button onClick={() => setActionError(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+        </div>
+      )}
       <div style={{padding:'20px', borderBottom:`1px solid ${C.border}`, background: urgency === 'CRITICAL' ? C.critBg : 'transparent', borderTop:`2px solid ${urgency === 'CRITICAL' ? C.critical : 'transparent'}`}}>
         <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start'}}>
           <div>
