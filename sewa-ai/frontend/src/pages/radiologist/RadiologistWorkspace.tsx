@@ -872,7 +872,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
           </div>
 
           {/* Actual Canvas Viewer */}
-          <div className="flex-1 w-full h-full pt-10">
+          <div className="flex-1 flex flex-col w-full h-full pt-10">
             <DicomViewer scan={selected} showGradcam={showGradcam} />
           </div>
         </main>
