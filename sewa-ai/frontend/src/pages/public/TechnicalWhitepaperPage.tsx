@@ -89,7 +89,8 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
           .whitepaper-modal-overlay { align-items: flex-start !important; padding-top: 20px !important; }
         }
         @media (max-width: 600px) {
-          .whitepaper-modal-content { padding: 32px 24px !important; width: 95% !important; margin: 10px !important; }
+          .whitepaper-modal-overlay { padding: 10px !important; align-items: flex-start !important; }
+          .whitepaper-modal-content { padding: 32px 20px !important; width: 100% !important; margin: 0 !important; border-radius: 16px !important; }
           .hero-btns { flex-direction: column !important; }
           .hero-btns > button { width: 100% !important; }
           .metric-grid { grid-template-columns: 1fr !important; }
@@ -98,33 +99,31 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
         }
       `}</style>
       <PublicNav activePage="whitepaper" onNavigate={onNavigate} />
-
-      {/* Email gate modal */}
       {emailGate && (
-        <div className="whitepaper-modal-overlay" style={{ position:'fixed', inset:0, background:'rgba(5,15,12,0.92)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)', overflowY:'auto', padding:'20px 0' }}>
-          <div className="whitepaper-modal-content" style={{ maxWidth:480, width:'90%', background:C.bg1, border:`1px solid ${C.border}`, borderRadius:20, padding:48, textAlign:'center', position:'relative' }}>
-            <div style={{ fontSize:40, marginBottom:16 }}>📄</div>
-            <h2 style={{ ...h2, textAlign:'center', fontSize:24, marginBottom:12 }}>Technical Whitepaper</h2>
-            <p style={{ ...p, textAlign:'center', marginBottom:8 }}>
-              <strong style={{ color:C.textHi }}>SEWA AI: Autonomous Diagnostic Intelligence & Clinical Workflow Integration</strong>
+        <div className="whitepaper-modal-overlay" style={{ position:'fixed', inset:0, background:'rgba(5,15,12,0.96)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(12px)', overflowY:'auto', padding:'40px 20px' }}>
+          <div className="whitepaper-modal-content" style={{ maxWidth:440, width:'100%', background:C.bg1, border:`1px solid ${C.border}`, borderRadius:24, padding:'48px 40px', textAlign:'center', position:'relative', boxShadow:'0 24px 48px rgba(0,0,0,0.5)' }}>
+            <div style={{ fontSize:48, marginBottom:20 }}>📄</div>
+            <h2 style={{ ...h2, textAlign:'center', fontSize:26, marginBottom:12, letterSpacing:'-0.5px' }}>Technical Whitepaper</h2>
+            <p style={{ ...p, textAlign:'center', marginBottom:8, color:C.textHi, fontWeight:600 }}>
+              Autonomous Diagnostic Intelligence & Clinical Workflow Integration
             </p>
-            <p style={{ ...p, textAlign:'center', fontSize:12, marginBottom:28 }}>Version 1.2 · March 2026 · 6 pages · For hospital IT, clinical safety officers, and investors</p>
+            <p style={{ ...p, textAlign:'center', fontSize:12, marginBottom:32, color:C.textLo }}>Version 1.2 · March 2026 · 6 pages · Institutional Access Only</p>
             {gateSubmitted ? (
-              <div style={{ padding:16, background:`${C.normal}10`, border:`1px solid ${C.normal}30`, borderRadius:10, color:C.normal, fontSize:13, fontWeight:600 }}>
-                ✅ Access granted — loading whitepaper…
+              <div style={{ padding:20, background:`${C.normal}14`, border:`1px solid ${C.normal}30`, borderRadius:12, color:C.normal, fontSize:14, fontWeight:700 }}>
+                ✅ Access granted — loading paper…
               </div>
             ) : (
-              <>
+              <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
                 <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
-                  placeholder="Enter your work email for access"
-                  style={{ ...{ width:'100%', padding:'11px 14px', background:C.bg2, border:`1px solid ${C.border}`, borderRadius:9, color:C.textHi, fontSize:13, fontFamily:C.F, boxSizing:'border-box' as const, outline:'none', marginBottom:12 } }}/>
-                <button onClick={submitGate} style={{ width:'100%', padding:'12px 0', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:10, color:'white', fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:C.F, marginBottom:12 }}>
+                  placeholder="Enter institutional email"
+                  style={{ width:'100%', padding:'14px 16px', background:C.bg2, border:`1px solid ${C.border}`, borderRadius:12, color:C.textHi, fontSize:14, fontFamily:C.F, boxSizing:'border-box', outline:'none' }}/>
+                <button onClick={submitGate} style={{ width:'100%', padding:'14px 0', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:12, color:'white', fontWeight:700, fontSize:15, cursor:'pointer', fontFamily:C.F }}>
                   Access Whitepaper →
                 </button>
-                <p style={{ fontSize:10, color:C.textLo, margin:0 }}>
-                  By accessing this document you agree to treat it as confidential. No spam. We may follow up about your interest in SEWA AI.
+                <p style={{ fontSize:10, color:C.textLo, marginTop:8, lineHeight:1.5 }}>
+                  By accessing this document you agree to our confidentiality terms. SEWA AI is a registered medical device platform.
                 </p>
-              </>
+              </div>
             )}
           </div>
         </div>
