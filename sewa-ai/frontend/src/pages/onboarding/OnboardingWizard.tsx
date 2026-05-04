@@ -109,6 +109,9 @@ export function OnboardingWizard() {
     env:'sandbox', dataResidency:'', tier:'',
     // Benchmark
     benchmarkComplete:false, benchmarkAUC:0, benchmarkLatency:0,
+    // Success
+    launched: false,
+    launchedTenant: null as any,
   });
 
   const [loading, setLoading] = useState(false);
@@ -147,8 +150,8 @@ export function OnboardingWizard() {
         setStatusMsg({ msg: `STK Push sent to your phone. Request ID: ${payment.checkoutRequestId}`, type: 'ok' });
         setTimeout(() => window.location.href = '/login', 2500);
       } else {
-        setStatusMsg({ msg: 'Launch successful! Redirecting to login...', type: 'ok' });
-        setTimeout(() => window.location.href = '/login', 2000);
+        setStatusMsg({ msg: 'Launch successful! Finalizing your deployment...', type: 'ok' });
+        update({ launched: true, launchedTenant: res.data.tenant });
       }
     } catch (err: any) {
       setStatusMsg({ msg: `Launch failed: ${err.response?.data?.message || err.message}`, type: 'err' });
@@ -279,22 +282,24 @@ export function OnboardingWizard() {
         <div style={{ flex:1, overflowY:'auto', padding:40 }}>
           <div style={{ maxWidth:620, margin:'0 auto' }}>
 
-            <div style={{ marginBottom:28 }}>
-              <h1 style={{ margin:0, fontSize:22, fontWeight:800, color:C.textHi }}>
-                {currentStep.icon} {currentStep.label}
-              </h1>
-              <p style={{ margin:'6px 0 0', fontSize:13, color:C.textMd }}>
-                {step===0 && 'Tell us about your institution to set up your SEWA AI account.'}
-                {step===1 && 'Select applicable compliance frameworks for your region.'}
-                {step===2 && 'Connect SEWA AI to your existing PACS, FHIR, and HL7 systems.'}
-                {step===3 && 'Choose deployment environment and data residency preferences.'}
-                {step===4 && 'Run the AI benchmark to verify performance on your infrastructure.'}
-                {step===5 && 'Review your configuration and launch your SEWA AI deployment.'}
-              </p>
-            </div>
+            {!data.launched && (
+              <div style={{ marginBottom:28 }}>
+                <h1 style={{ margin:0, fontSize:22, fontWeight:800, color:C.textHi }}>
+                  {currentStep.icon} {currentStep.label}
+                </h1>
+                <p style={{ margin:'6px 0 0', fontSize:13, color:C.textMd }}>
+                  {step===0 && 'Tell us about your institution to set up your SEWA AI account.'}
+                  {step===1 && 'Select applicable compliance frameworks for your region.'}
+                  {step===2 && 'Connect SEWA AI to your existing PACS, FHIR, and HL7 systems.'}
+                  {step===3 && 'Choose deployment environment and data residency preferences.'}
+                  {step===4 && 'Run the AI benchmark to verify performance on your infrastructure.'}
+                  {step===5 && 'Review your configuration and launch your SEWA AI deployment.'}
+                </p>
+              </div>
+            )}
 
             {/* STEP 0 — Institution Details */}
-            {step === 0 && (
+            {step === 0 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <Input label="Institution Name" value={data.name} onChange={v=>update({name:v})} placeholder="Royal London Hospital" required/>
@@ -341,7 +346,7 @@ export function OnboardingWizard() {
             )}
 
             {/* STEP 1 — Compliance */}
-            {step === 1 && (
+            {step === 1 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
                 <div style={{ padding:14, background:`${C.info}0A`, borderRadius:12, border:`1px solid ${C.info}30`, fontSize:12, color:C.textMd, lineHeight:1.6 }}>
                   ℹ️ SEWA AI supports full compliance across all major healthcare regulations. Select all frameworks that apply to your institution.
@@ -373,7 +378,7 @@ export function OnboardingWizard() {
             )}
 
             {/* STEP 2 — Integrations */}
-            {step === 2 && (
+            {step === 2 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
                 {[
                   {
@@ -438,7 +443,7 @@ export function OnboardingWizard() {
             )}
 
             {/* STEP 3 — Environment */}
-            {step === 3 && (
+            {step === 3 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
                 <div>
                   <label style={{ display:'block', fontSize:11, fontWeight:600, color:C.textMd, marginBottom:10, fontFamily:C.F }}>Deployment Environment</label>
@@ -480,7 +485,7 @@ export function OnboardingWizard() {
             )}
 
             {/* STEP 4 — AI Benchmark */}
-            {step === 4 && (
+            {step === 4 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
                 <div style={{ padding:14, background:`${C.brand}0A`, borderRadius:12, border:`1px solid ${C.brand}30`, fontSize:12, color:C.textMd, lineHeight:1.6 }}>
                   🧠 The AI benchmark runs a set of anonymised test scans through SEWA's full pipeline to verify performance and latency on your infrastructure configuration.
@@ -548,7 +553,7 @@ export function OnboardingWizard() {
             )}
 
             {/* STEP 5 — Go Live */}
-            {step === 5 && (
+            {step === 5 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
                 <div style={{ padding:24, background:C.bg2, borderRadius:14, border:`1px solid ${C.border}` }}>
                   <div style={{ fontSize:14, fontWeight:700, color:C.textHi, marginBottom:16 }}>Configuration Summary</div>
@@ -587,8 +592,89 @@ export function OnboardingWizard() {
               </div>
             )}
 
+            {/* STEP 6 — SUCCESS / DEPLOYMENT DETAILS */}
+            {data.launched && (
+              <div style={{ display:'flex', flexDirection:'column', gap:20, animation:'fadeIn 500ms ease' }}>
+                <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
+                
+                <div style={{ textAlign:'center', marginBottom:10 }}>
+                  <div style={{ width:64, height:64, borderRadius:'50%', background:C.normal, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px', boxShadow:`0 0 30px ${C.normal}40` }}>
+                    <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3}><path d="m5 12 5 5L20 7"/></svg>
+                  </div>
+                  <h1 style={{ fontSize:24, fontWeight:800, color:C.textHi, margin:'0 0 8px' }}>Deployment Initialized!</h1>
+                  <p style={{ fontSize:14, color:C.textMd, margin:0 }}>Your SEWA AI instance for <b>{data.name}</b> is being provisioned.</p>
+                </div>
+
+                <div style={{ background:C.bg2, borderRadius:16, border:`1px solid ${C.border}`, overflow:'hidden' }}>
+                  <div style={{ padding:'12px 16px', background:C.bg3, borderBottom:`1px solid ${C.border}`, fontSize:11, fontWeight:700, color:C.textMd, letterSpacing:'0.05em' }}>
+                    TECHNICAL INTEGRATION PARAMETERS (NHS BLUEPRINT)
+                  </div>
+                  <div style={{ padding:20, display:'flex', flexDirection:'column', gap:16 }}>
+                    
+                    <div>
+                      <div style={{ fontSize:11, color:C.textLo, marginBottom:6, fontWeight:600 }}>1. DICOM / PACS CONFIGURATION</div>
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                        <div style={{ background:C.bg1, padding:12, borderRadius:10, border:`1px solid ${C.border}` }}>
+                          <div style={{ fontSize:9, color:C.textLo, marginBottom:2 }}>TARGET IP (VPN)</div>
+                          <div style={{ fontSize:13, color:C.brand, fontWeight:700, fontFamily:C.FM }}>10.142.0.52</div>
+                        </div>
+                        <div style={{ background:C.bg1, padding:12, borderRadius:10, border:`1px solid ${C.border}` }}>
+                          <div style={{ fontSize:9, color:C.textLo, marginBottom:2 }}>TARGET PORT</div>
+                          <div style={{ fontSize:13, color:C.textHi, fontWeight:700, fontFamily:C.FM }}>11112</div>
+                        </div>
+                        <div style={{ background:C.bg1, padding:12, borderRadius:10, border:`1px solid ${C.border}` }}>
+                          <div style={{ fontSize:9, color:C.textLo, marginBottom:2 }}>TARGET AE TITLE</div>
+                          <div style={{ fontSize:13, color:C.textHi, fontWeight:700, fontFamily:C.FM }}>SEWA_AI_UK</div>
+                        </div>
+                        <div style={{ background:C.bg1, padding:12, borderRadius:10, border:`1px solid ${C.border}` }}>
+                          <div style={{ fontSize:9, color:C.textLo, marginBottom:2 }}>SOURCE AE TITLE</div>
+                          <div style={{ fontSize:13, color:C.textHi, fontWeight:700, fontFamily:C.FM }}>{data.aeTitle || 'ANY'}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ height:1, background:C.border }} />
+
+                    <div>
+                      <div style={{ fontSize:11, color:C.textLo, marginBottom:6, fontWeight:600 }}>2. FHIR R4 WEBHOOK & API</div>
+                      <div style={{ background:C.bg1, padding:12, borderRadius:10, border:`1px solid ${C.border}`, display:'flex', flexDirection:'column', gap:10 }}>
+                        <div>
+                          <div style={{ fontSize:9, color:C.textLo, marginBottom:2 }}>ENDPOINT URL</div>
+                          <div style={{ fontSize:12, color:C.textHi, fontWeight:600, fontFamily:C.FM, wordBreak:'break-all' }}>https://api.sewaxai.health/api/v1/fhir/webhook</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize:9, color:C.textLo, marginBottom:2 }}>X-API-KEY (SECRET)</div>
+                          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                            <div style={{ flex:1, fontSize:12, color:C.critical, fontWeight:700, fontFamily:C.FM, background:C.bg0, padding:6, borderRadius:6, border:`1px solid ${C.critical}40` }}>
+                              {data.launchedTenant?.apiKey || 'sk_live_****************'}
+                            </div>
+                            <button onClick={() => {
+                              navigator.clipboard.writeText(data.launchedTenant?.apiKey || '');
+                              setStatusMsg({ msg: 'API Key copied to clipboard', type: 'ok' });
+                            }} style={{ background:C.bg3, border:`1px solid ${C.border}`, borderRadius:6, padding:'4px 8px', color:C.textHi, fontSize:10, cursor:'pointer' }}>Copy</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div style={{ padding:16, background:`${C.info}0A`, borderRadius:12, border:`1px solid ${C.info}40`, fontSize:12, color:C.textMd, lineHeight:1.6 }}>
+                  <b style={{ color:C.info }}>Next Steps:</b> Share these parameters with your IT/PACS administrators to establish connectivity. Your admin setup link has been sent to <b>{data.adminEmail}</b>.
+                </div>
+
+                <button 
+                  onClick={() => window.location.href = '/login'}
+                  style={{ height:52, borderRadius:14, border:'none', cursor:'pointer', background:C.bg3, border:`1px solid ${C.border}`, color:C.textHi, fontSize:15, fontWeight:700, fontFamily:C.F }}>
+                  Go to Login Dashboard
+                </button>
+              </div>
+            )}
+
             {/* Navigation */}
-            <div style={{ display:'flex', justifyContent:'space-between', marginTop:32, paddingTop:20, borderTop:`1px solid ${C.border}` }}>
+            {!data.launched && (
+              <div style={{ display:'flex', justifyContent:'space-between', marginTop:32, paddingTop:20, borderTop:`1px solid ${C.border}` }}>
               <button onClick={() => setStep(s => Math.max(0, s-1))} disabled={step === 0}
                 style={{ padding:'10px 20px', borderRadius:10, background:'transparent', border:`1px solid ${C.border}`, color:C.textMd, fontSize:13, cursor: step===0?'default':'pointer', fontFamily:C.F, opacity:step===0?0.4:1 }}>
                 ← Back
@@ -600,6 +686,7 @@ export function OnboardingWizard() {
                 </button>
               )}
             </div>
+            )}
           </div>
         </div>
       </div>

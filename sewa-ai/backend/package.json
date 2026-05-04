@@ -15,7 +15,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "ts-node prisma/seed.ts",
-    "db:seed:js": "node prisma/seed.js"
+    "db:seed:js": "node prisma/seed.js",
+    "db:onboard": "ts-node scripts/onboard_tenant.ts"
   },
   "dependencies": {
     "@azure-rest/communication-messages": "^1.0.0-beta.1",

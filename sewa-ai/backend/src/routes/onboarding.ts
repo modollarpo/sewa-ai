@@ -156,6 +156,12 @@ r.post('/launch', authLimiter, async (req, res, next) => {
       res.status(201).json({
         message: 'Onboarding initiated successfully',
         tenantId: result.tenant.id,
+        tenant: {
+          name: result.tenant.name,
+          slug: result.tenant.slug,
+          subdomain: result.tenant.subdomain,
+          apiKey: result.tenant.apiKey,
+        },
         payment: paymentHandshake,
         adminId: result.user.id,
         // Frontend must direct admin to this link to complete account setup
