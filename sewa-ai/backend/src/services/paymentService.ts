@@ -457,7 +457,7 @@ export async function initiateMpesaSTK(tenantId: string, phone: string, amount: 
     PartyA: phone.replace(/^\+/, ''),
     PartyB: shortcode,
     PhoneNumber: phone.replace(/^\+/, ''),
-    CallBackURL: `${config.APP_URL}/api/v1/payments/webhooks/mpesa`,
+    CallBackURL: `${config.APP_URL}/api/v1/payments/webhooks/mpesa?token=${process.env.MPESA_WEBHOOK_TOKEN}`,
     AccountReference: `SEWA-${callbackRef}`,
     TransactionDesc: 'SEWA AI Subscription',
   }, { headers: { Authorization: `Bearer ${accessToken}` } });

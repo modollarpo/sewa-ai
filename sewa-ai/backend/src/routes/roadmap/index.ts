@@ -3,6 +3,7 @@
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { authenticate, authorize }  from '../../middleware/auth';
+import { prisma }               from '../../config/database';
 import { clinicalRulesEngine }       from '../../services/roadmap/clinicalRulesEngine';
 import { strokeCodeService }         from '../../services/roadmap/strokeCodeService';
 import { populationHealthService }   from '../../services/roadmap/populationHealthService';
@@ -29,8 +30,14 @@ router.post('/rules/evaluate',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { scanId, aiResult } = req.body;
+      const { tenantId } = req.user!;
       if (!scanId || !aiResult) throw new AppError('scanId and aiResult required', 400);
-      const result = await clinicalRulesEngine.evaluate(req.user!.tenantId, scanId, aiResult);
+
+      // Security Gap: verify scan belongs to this tenant
+      const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
+      if (!scan) throw new AppError('Scan not found in this institution', 404);
+
+      const result = await clinicalRulesEngine.evaluate(tenantId, scanId, aiResult);
       res.json(result);
     } catch (err) { next(err); }
   }
@@ -41,7 +48,8 @@ router.post('/rules/evaluate',
 router.get('/stroke-codes',
   authenticate, authorize('doctor', 'radiologist', 'admin', 'superadmin'),
   async (req: Request, res: Response) => {
-    const codes = strokeCodeService.getActiveCodes();
+    const { tenantId } = req.user!;
+    const codes = strokeCodeService.getActiveCodes(tenantId);
     res.json({ codes, total: codes.length });
   }
 );
@@ -52,8 +60,9 @@ router.post('/stroke-codes/:codeId/resolve',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { outcome } = req.body;
+      const { tenantId } = req.user!;
       if (!outcome) throw new AppError('outcome required', 400);
-      await strokeCodeService.resolve(req.params.codeId, req.user!.id, outcome);
+      await strokeCodeService.resolve(req.params.codeId, req.user!.id, tenantId, outcome);
       res.json({ message: 'Stroke code resolved', codeId: req.params.codeId, outcome });
     } catch (err) { next(err); }
   }
@@ -120,10 +129,15 @@ router.post('/referrals/search',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { scanId, speciality, reason, priority = 'ROUTINE', allowCrossBorder = true, aiResult } = req.body;
+      const { tenantId, id: userId } = req.user!;
       if (!scanId || !speciality) throw new AppError('scanId and speciality required', 400);
 
+      // Security Gap: verify scan belongs to this tenant
+      const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
+      if (!scan) throw new AppError('Scan not found in this institution', 404);
+
       const matches = await referralNetworkService.findSpecialists(
-        { scanId, speciality, reason, priority, allowCrossBorder, requestingUserId: req.user!.id, tenantId: req.user!.tenantId, aiSummary: aiResult?.primaryFinding ?? '' },
+        { scanId, speciality, reason, priority, allowCrossBorder, requestingUserId: userId, tenantId, aiSummary: aiResult?.primaryFinding ?? '' },
         aiResult ?? {},
       );
       res.json({ matches, total: matches.length });
@@ -137,10 +151,15 @@ router.post('/referrals',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { scanId, specialistId, speciality, reason, priority = 'ROUTINE', allowCrossBorder = true, aiResult } = req.body;
+      const { tenantId, id: userId } = req.user!;
       if (!scanId || !specialistId) throw new AppError('scanId and specialistId required', 400);
 
+      // Security Gap: verify scan belongs to this tenant
+      const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
+      if (!scan) throw new AppError('Scan not found in this institution', 404);
+
       const result = await referralNetworkService.createReferral(
-        { scanId, speciality, reason, priority, allowCrossBorder, requestingUserId: req.user!.id, tenantId: req.user!.tenantId, aiSummary: aiResult?.primaryFinding ?? '' },
+        { scanId, speciality, reason, priority, allowCrossBorder, requestingUserId: userId, tenantId, aiSummary: aiResult?.primaryFinding ?? '' },
         specialistId,
         aiResult ?? {},
       );
@@ -179,10 +198,18 @@ router.post('/continuous-learning/corrections',
   authenticate, authorize('radiologist'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const { scanId } = req.body;
+      const { tenantId, id: userId } = req.user!;
+
+      if (scanId) {
+        const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
+        if (!scan) throw new AppError('Scan not found in this institution', 404);
+      }
+
       const response = await fetch(`${process.env.CL_SERVICE_URL ?? 'http://ai-continuous:8005'}/corrections`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ...req.body, radiologist_id: req.user!.id }),
+        body:    JSON.stringify({ ...req.body, radiologist_id: userId }),
       });
       const data = await response.json();
       res.json(data);

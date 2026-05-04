@@ -107,7 +107,9 @@ export class FHIRSyncWorker {
 
         if (mrn) {
           await prisma.patient.upsert({
-            where: { mrn },
+            where: { 
+              tenantId_mrn: { tenantId, mrn } 
+            },
             update: {
               dateOfBirth: birthDate ? new Date(birthDate) : undefined,
               user: email ? { update: { firstName, lastName, email } } : undefined,

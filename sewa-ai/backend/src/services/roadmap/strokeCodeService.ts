@@ -33,6 +33,7 @@ export type StrokeCodeState = {
   activatedAt:    Date;
   alertsSent:     string[];
   doorToAlert:    number;     // ms from scan received to alert sent
+  tenantId:       string;
   resolvedAt?:    Date;
   resolvedBy?:    string;
   outcome?:       string;
@@ -65,6 +66,7 @@ class StrokeCodeService {
       activatedAt: now,
       alertsSent:  [],
       doorToAlert,
+      tenantId:    event.tenantId,
     };
 
     // Lock for 6 hours
@@ -213,16 +215,24 @@ class StrokeCodeService {
   }
 
   /** Resolve a stroke code after treatment decision */
-  async resolve(codeId: string, userId: string, outcome: string): Promise<void> {
+  async resolve(codeId: string, userId: string, tenantId: string, outcome: string): Promise<void> {
     const state = activeCodes.get(codeId);
     if (!state) throw new Error(`Stroke code ${codeId} not found`);
+
+    // Security Gap: verify code belongs to this tenant
+    // Note: In production,event.tenantId would be saved in state.
+    // Since we don't have event.tenantId in state yet, we'll need to fetch scan
+    const scan = await prisma.scan.findUnique({ where: { id: state.scanId }, select: { tenantId: true } });
+    if (scan?.tenantId !== tenantId) {
+       throw new Error('Unauthorized to resolve this stroke code');
+    }
 
     state.resolvedAt = new Date();
     state.resolvedBy = userId;
     state.outcome    = outcome;
 
     await auditLog({
-      tenantId:     '', // get from state
+      tenantId,
       action:       'STROKE_CODE_RESOLVED',
       entity:       'Scan',
       entityId:     state.scanId,
@@ -234,8 +244,14 @@ class StrokeCodeService {
     logger.info(`Stroke code ${codeId} resolved by ${userId}: ${outcome}`);
   }
 
-  getActiveCodes(): StrokeCodeState[] {
-    return Array.from(activeCodes.values());
+  getActiveCodes(tenantId?: string): StrokeCodeState[] {
+    const all = Array.from(activeCodes.values());
+    if (!tenantId) return all; // For internal system use
+
+    // In production, the state should include tenantId. 
+    // For now, we'd need to filter by scan ownership if tenantId was in state.
+    // Let's assume the state includes tenantId (adding it to StrokeCodeState type below)
+    return all.filter((s: any) => s.tenantId === tenantId);
   }
 }
 

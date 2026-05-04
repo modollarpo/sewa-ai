@@ -94,6 +94,11 @@ r.get('/availability', async (req: Request, res: Response, next: NextFunction) =
     const targetDate  = new Date(date as string);
     const nextDay     = new Date(targetDate); nextDay.setDate(nextDay.getDate() + 1);
     const durMins     = Number(duration);
+    const { tenantId } = req.user!;
+
+    // Security Gap: verify doctor belongs to this tenant
+    const doctor = await prisma.user.findFirst({ where: { id: doctorId as string, tenantId } });
+    if (!doctor) return res.status(404).json({ error: 'Doctor not found in this institution' });
 
     // Fetch existing appointments for that doctor on that date
     const existing = await prisma.appointment.findMany({
@@ -169,6 +174,13 @@ r.post('/', async (req: Request, res: Response, next: NextFunction) => {
     if (!patientId || !doctorId || !scheduledDate || !type) {
       return res.status(400).json({ error: 'patientId, doctorId, scheduledDate, type required' });
     }
+
+    // Security Gap: verify patient and doctor belong to this tenant
+    const [patientCheck, doctorCheck] = await Promise.all([
+      prisma.patient.findFirst({ where: { id: patientId, tenantId: user.tenantId } }),
+      prisma.user.findFirst({ where: { id: doctorId, tenantId: user.tenantId } }),
+    ]);
+    if (!patientCheck || !doctorCheck) return res.status(403).json({ error: 'Patient or Doctor not found in this institution' });
 
     // Clash check
     const slotStart = new Date(scheduledDate);
@@ -292,6 +304,10 @@ r.patch('/:id', async (req: Request, res: Response, next: NextFunction) => {
 // ─────────────────────────────────────────────────────────────
 r.delete('/:id', authorize('admin','superadmin'), async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { tenantId } = req.user!;
+    const appt = await prisma.appointment.findFirst({ where: { id: req.params.id, tenantId } });
+    if (!appt) return res.status(404).json({ error: 'Appointment not found' });
+
     await prisma.appointment.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   } catch (err) { next(err); }
@@ -348,6 +364,10 @@ r.get('/:id/ical', async (req: Request, res: Response, next: NextFunction) => {
 // ─────────────────────────────────────────────────────────────
 r.post('/:id/confirm', authorize('doctor','radiologist','admin'), async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { tenantId } = req.user!;
+    const appt = await prisma.appointment.findFirst({ where: { id: req.params.id, tenantId } });
+    if (!appt) return res.status(404).json({ error: 'Appointment not found' });
+
     const updated = await prisma.appointment.update({
       where: { id: req.params.id },
       data:  { status: 'confirmed' },
@@ -361,6 +381,10 @@ r.post('/:id/confirm', authorize('doctor','radiologist','admin'), async (req: Re
 // ─────────────────────────────────────────────────────────────
 r.post('/:id/complete', authorize('doctor','radiologist','admin'), async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { tenantId } = req.user!;
+    const appt = await prisma.appointment.findFirst({ where: { id: req.params.id, tenantId } });
+    if (!appt) return res.status(404).json({ error: 'Appointment not found' });
+
     const { notes } = req.body;
     const updated   = await prisma.appointment.update({
       where: { id: req.params.id },

@@ -5,7 +5,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/database';
 import { redisClient } from '../config/redis';
-import { uploadToStorage } from '../services/storageService';
+import { uploadToStorage, deleteFromStorage } from '../services/storageService';
 import { triggerAITriage } from '../services/aiService';
 import { createFHIRImagingStudy } from '../services/fhirService';
 import { sendHL7ORM } from '../services/hl7Service';
@@ -236,7 +236,15 @@ export async function deleteScan(req: Request, res: Response, next: NextFunction
     if (!['admin', 'superadmin'].includes(role)) throw new AppError('Forbidden', 403);
 
     const { id } = req.params;
-    await prisma.scan.delete({ where: { id, tenantId } });
+
+    const scan = await prisma.scan.findFirst({ where: { id, tenantId } });
+    if (!scan) throw new AppError('Scan not found', 404);
+
+    if (scan.storageUrl) {
+      await deleteFromStorage(scan.storageUrl);
+    }
+
+    await prisma.scan.delete({ where: { id } });
     await auditLog({ tenantId, userId, action: 'SCAN_DELETED_GDPR', entity: 'Scan', entityId: id });
 
     res.json({ message: 'Scan deleted in compliance with GDPR right to erasure' });

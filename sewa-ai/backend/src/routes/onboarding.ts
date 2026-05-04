@@ -4,6 +4,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { prisma } from '../config/database';
 import { createSubscription } from '../services/paymentService';
+import { authLimiter } from '../middleware/rateLimiter';
 import { logger } from '../utils/logger';
 import { AppError } from '../utils/AppError';
 import bcrypt from 'bcryptjs';
@@ -15,7 +16,7 @@ const r = Router();
  * POST /api/v1/onboarding/lead
  * Captures whitepaper downloads and sales inquiries.
  */
-r.post('/lead', async (req, res, next) => {
+r.post('/lead', authLimiter, async (req, res, next) => {
   try {
     const { name, email, organization, message } = req.body;
     logger.info(`[Lead] New interest from ${name} (${email}) at ${organization}`);
@@ -33,7 +34,7 @@ r.post('/lead', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-r.post('/benchmark', async (req, res, next) => {
+r.post('/benchmark', authLimiter, async (req, res, next) => {
   try {
     const { tenantId, region } = req.body;
     logger.info(`[Benchmark] Starting AI stress test for ${tenantId || 'anonymous'} in ${region}`);
@@ -55,7 +56,7 @@ r.post('/benchmark', async (req, res, next) => {
  * POST /api/v1/onboarding/validate-integration
  * Validates PACS/FHIR/HL7 connectivity
  */
-r.post('/validate-integration', async (req, res, next) => {
+r.post('/validate-integration', authLimiter, async (req, res, next) => {
   try {
     const { type, host, port, aeTitle } = req.body;
     logger.info(`[Onboarding] Testing ${type} connectivity to ${host}:${port}`);
@@ -76,7 +77,7 @@ r.post('/validate-integration', async (req, res, next) => {
  * POST /api/v1/onboarding/launch
  * Final handshake: creates tenant, admin user, and initiates payment.
  */
-r.post('/launch', async (req, res, next) => {
+r.post('/launch', authLimiter, async (req, res, next) => {
   try {
     const { 
       name, region, tier, adminEmail, adminFirst, adminLast,

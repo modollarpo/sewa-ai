@@ -364,6 +364,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
 
     const aiResult = await prisma.aIResult.create({
       data: {
+        tenantId, // Ensure tenantId is persisted for isolation
         ...validatedResult,
         epistemicUncertainty: uncertainty.epistemicUncertainty,
         aleatoricUncertainty: uncertainty.aleatoricUncertainty,

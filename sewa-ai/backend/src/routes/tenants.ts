@@ -10,7 +10,18 @@ r.use(authenticate);
 
 r.get('/me', async (req, res, next) => {
   try {
-    const t = await prisma.tenant.findUnique({ where: { id: req.user!.tenantId } });
+    const t = await prisma.tenant.findUnique({
+      where: { id: req.user!.tenantId },
+      select: {
+        id: true, name: true, slug: true, subdomain: true, region: true,
+        currency: true, language: true, plan: true, status: true,
+        fhirBaseUrl: true, hl7Endpoint: true, pacsEndpoint: true,
+        timezone: true, address: true,
+        scanQuota: true, scansUsedThisMonth: true,
+        trialEndsAt: true, nextBillDate: true,
+        createdAt: true, updatedAt: true,
+      }
+    });
     res.json(t);
   } catch (err) { next(err); }
 });
@@ -76,6 +87,7 @@ r.get('/integrations', authorize('admin', 'superadmin'), async (req, res, next) 
     const { tenantId } = req.user!;
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
+      select: { fhirEndpoint: true, hl7Host: true, hl7Port: true, aeTitle: true },
     });
     res.json({
       fhir:  { status: 'online', endpoint: (tenant as any)?.fhirEndpoint || 'https://fhir.london.nhs.uk/r4' },

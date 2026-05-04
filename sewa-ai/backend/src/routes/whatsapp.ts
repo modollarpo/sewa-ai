@@ -5,6 +5,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { prisma }           from '../config/database';
 import { authenticate }     from '../middleware/auth';
+import { authLimiter }      from '../middleware/rateLimiter';
 import { whatsappService }  from '../services/notifications/whatsappService';
 import { redisClient }      from '../config/redis';
 import { logger }           from '../utils/logger';
@@ -24,7 +25,7 @@ r.get('/status', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // ── POST /whatsapp/register — add / update WhatsApp number ─────
-r.post('/register', async (req: Request, res: Response, next: NextFunction) => {
+r.post('/register', authLimiter, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { number } = req.body;
     if (!number || !/^\+[1-9]\d{7,14}$/.test(number)) {
@@ -69,7 +70,7 @@ r.post('/register', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // ── POST /whatsapp/verify — confirm OTP ───────────────────────
-r.post('/verify', async (req: Request, res: Response, next: NextFunction) => {
+r.post('/verify', authLimiter, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { code } = req.body;
     if (!code) return res.status(400).json({ error: 'code required' });

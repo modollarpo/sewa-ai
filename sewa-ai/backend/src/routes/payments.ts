@@ -51,8 +51,15 @@ r.post('/webhooks/flutterwave', async (req: Request, res: Response, next: NextFu
 });
 
 r.post('/webhooks/mpesa', async (req: Request, res: Response, next: NextFunction) => {
-  try { await handleMpesaWebhook(req.body); res.json({ ResultCode: 0, ResultDesc: 'Success' }); }
-  catch (err) { next(err); }
+  try {
+    const { token } = req.query;
+    if (!token || token !== process.env.MPESA_WEBHOOK_TOKEN) {
+      logger.error('[Billing] M-Pesa webhook called with invalid or missing token');
+      throw new AppError('Unauthorized webhook access', 401);
+    }
+    await handleMpesaWebhook(req.body);
+    res.json({ ResultCode: 0, ResultDesc: 'Success' });
+  } catch (err) { next(err); }
 });
 
 // ── All routes below require authentication ───────────────────

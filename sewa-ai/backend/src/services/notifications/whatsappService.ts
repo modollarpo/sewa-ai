@@ -3,6 +3,7 @@
 // All NHS/GDPR compliant: no PHI in WhatsApp unless user opted in
 
 import MessagesClient from '@azure-rest/communication-messages';
+import crypto from 'crypto';
 import { config } from '../../config/env';
 import { logger } from '../../utils/logger';
 import { prisma } from '../../config/database';
@@ -145,7 +146,7 @@ export const whatsappService = {
 
     if (opts.verify && messageClient) {
       // Send OTP via WhatsApp to verify number ownership
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const code = crypto.randomInt(100000, 1000000).toString();
       try {
         await messageClient.path('/messages/notifications:send').post({
           body: {

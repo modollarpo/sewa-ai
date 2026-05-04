@@ -9,6 +9,12 @@ r.use(authenticate);
 r.post('/', async (req, res, next) => {
   try {
     const { tenantId, id: userId } = req.user!;
+    const { scanId, reportId } = req.body;
+
+    // Security Gap: verify scan belongs to this tenant
+    const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
+    if (!scan) throw new AppError('Scan not found in this institution', 404);
+
     const so = await prisma.secondOpinion.create({ data: { ...req.body, requesterId: userId } });
     await auditLog({ tenantId, userId, action: 'SECOND_OPINION_REQUESTED', entity: 'SecondOpinion', entityId: so.id });
     res.status(201).json(so);
@@ -16,9 +22,14 @@ r.post('/', async (req, res, next) => {
 });
 r.patch('/:id', async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user!;
-    const opinion = await prisma.secondOpinion.findUnique({ where: { id: req.params.id } });
-    if (!opinion) throw new AppError('Second opinion not found', 404);
+    const { id: userId, role, tenantId } = req.user!;
+    const opinion = await prisma.secondOpinion.findUnique({ 
+      where: { id: req.params.id },
+      include: { scan: { select: { tenantId: true } } }
+    });
+    if (!opinion || (opinion.scan as any)?.tenantId !== tenantId) {
+      throw new AppError('Second opinion not found in this institution', 404);
+    }
     // Only the assigned reviewer or an admin can update the opinion
     const isReviewer = opinion.reviewerId === userId;
     const isAdmin = ['admin', 'superadmin'].includes(role);

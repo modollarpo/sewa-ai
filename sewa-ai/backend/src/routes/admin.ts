@@ -56,7 +56,7 @@ r.post('/tenants/:id/rotate-key', async (req, res, next) => {
     const newKey = `sk_edge_${crypto.randomBytes(16).toString('hex')}`;
     await prisma.tenant.update({
       where: { id },
-      data: { edgeApiKey: newKey }
+      data: { apiKey: newKey }
     });
     res.json({ apiKey: newKey });
   } catch (err) { next(err); }
