@@ -252,6 +252,13 @@ export default function App() {
   };
 
   useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/onboarding') setPublicPage('onboarding');
+    else if (path === '/register') setPublicPage('register');
+    else if (path === '/login') setPublicPage('login');
+  }, []);
+
+  useEffect(() => {
     if (!isLoaded) return;
     
     // Robust splash removal helper

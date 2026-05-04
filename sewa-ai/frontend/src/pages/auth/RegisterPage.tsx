@@ -125,21 +125,15 @@ export function RegisterPage({ onLogin, onInstitutionalOnboarding }: { onLogin:(
               <div style={{ fontWeight:700, color:C.textHi }}>Register as Patient</div>
               <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>Track your scans, view reports, and manage clinical consent.</div>
             </button>
-            <button onClick={()=>{setRole('expert'); setStep(2);}} style={{ padding:20, background:C.bg2, border:`1px solid ${role==='expert'?C.brand:C.border}`, borderRadius:16, textAlign:'left', cursor:'pointer' }}>
-              <div style={{ fontSize:24, marginBottom:8 }}>🩻</div>
-              <div style={{ fontWeight:700, color:C.textHi }}>Hospital Practitioner</div>
-              <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>Doctors, Radiologists, and Techs. Requires secondary facility verification.</div>
-            </button>
             <button onClick={()=>{setRole('specialist'); setStep(2);}} style={{ padding:20, background:C.bg2, border:`1px solid ${role==='specialist'?C.info:C.border}`, borderRadius:16, textAlign:'left', cursor:'pointer' }}>
               <div style={{ fontSize:24, marginBottom:8 }}>🌟</div>
               <div style={{ fontWeight:700, color:C.textHi }}>Independent Specialist Network</div>
               <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>Provide second opinions on the SEWA marketplace and earn revenue.</div>
             </button>
-            <button onClick={onInstitutionalOnboarding} style={{ padding:20, background:C.bg2, border:`1px solid ${C.brand}60`, borderRadius:16, textAlign:'left', cursor:'pointer', position:'relative', overflow:'hidden' }}>
-              <div style={{ position:'absolute', top:12, right:12, background:C.brand, color:'white', fontSize:9, padding:'2-1 6px', borderRadius:4, fontWeight:800 }}>INSTITUTIONAL</div>
+            <button onClick={()=>{setRole('expert'); setStep(2);}} style={{ padding:20, background:C.bg2, border:`1px solid ${C.brand}60`, borderRadius:16, textAlign:'left', cursor:'pointer' }}>
               <div style={{ fontSize:24, marginBottom:8 }}>🏥</div>
-              <div style={{ fontWeight:700, color:C.textHi }}>Register your Institution</div>
-              <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>Onboard a new hospital or clinic. Provision a private SEWA AI instance.</div>
+              <div style={{ fontWeight:700, color:C.textHi }}>Hospital & Institutional Access</div>
+              <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>For Doctors, Radiologists, and Hospital Administrators setting up new facilities.</div>
             </button>
             <button onClick={onLogin} style={{ marginTop:12, background:'none', border:'none', color:C.textLo, fontSize:13, cursor:'pointer' }}>Already have an account? Sign In</button>
           </div>
@@ -147,15 +141,34 @@ export function RegisterPage({ onLogin, onInstitutionalOnboarding }: { onLogin:(
 
         {step === 2 && (
           <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:16 }}>
-            <div style={{ display:'flex', gap:12 }}>
-              <div style={{ flex:1 }}><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>FIRST NAME</label><input required value={form.firstName} onChange={e=>setForm({...form, firstName:e.target.value})} style={inputStyle} /></div>
-              <div style={{ flex:1 }}><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>LAST NAME</label><input required value={form.lastName} onChange={e=>setForm({...form, lastName:e.target.value})} style={inputStyle} /></div>
-            </div>
-            <div><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>EMAIL ADDRESS</label><input type="email" required value={form.email} onChange={e=>setForm({...form, email:e.target.value})} style={inputStyle} /></div>
-            
             {role === 'expert' && (
-              <div><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>HOSPITAL FACILITY CODE</label><input placeholder="RLH-UK-001" value={form.hospitalCode} onChange={e=>setForm({...form, hospitalCode:e.target.value})} style={inputStyle} /></div>
+              <div style={{ display:'flex', flexDirection:'column', gap:12, marginBottom:12 }}>
+                <div style={{ fontSize:13, color:C.textMd, fontWeight:600 }}>I AM...</div>
+                <div style={{ display:'flex', gap:8 }}>
+                  <button type="button" onClick={() => setForm({...form, hospitalCode:''})} style={{ flex:1, padding:12, background:!form.hospitalCode?'#1DBF7320':C.bg3, border:`1px solid ${!form.hospitalCode?C.normal:C.border}`, borderRadius:10, color:!form.hospitalCode?C.normal:C.textMd, fontSize:12, fontWeight:700, cursor:'pointer' }}>REGISTERING NEW HOSPITAL</button>
+                  <button type="button" onClick={() => setForm({...form, hospitalCode:'PENDING'})} style={{ flex:1, padding:12, background:form.hospitalCode?'#408D7B20':C.bg3, border:`1px solid ${form.hospitalCode?C.brand:C.border}`, borderRadius:10, color:form.hospitalCode?C.brand:C.textMd, fontSize:12, fontWeight:700, cursor:'pointer' }}>JOINING EXISTING FACILITY</button>
+                </div>
+              </div>
             )}
+
+            {role === 'expert' && form.hospitalCode === '' && (
+              <div style={{ textAlign:'center', padding:'20px 0' }}>
+                <p style={{ fontSize:13, color:C.textMd, marginBottom:16 }}>To register a new institution, you must complete the Clinical Infrastructure Onboarding.</p>
+                <button type="button" onClick={onInstitutionalOnboarding} style={{ width:'100%', height:44, background:C.brand, border:'none', borderRadius:10, color:'white', fontWeight:700, cursor:'pointer' }}>Launch Onboarding Wizard →</button>
+              </div>
+            )}
+
+            {(role !== 'expert' || (role === 'expert' && form.hospitalCode !== '')) && (
+              <>
+                <div style={{ display:'flex', gap:12 }}>
+                  <div style={{ flex:1 }}><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>FIRST NAME</label><input required value={form.firstName} onChange={e=>setForm({...form, firstName:e.target.value})} style={inputStyle} /></div>
+                  <div style={{ flex:1 }}><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>LAST NAME</label><input required value={form.lastName} onChange={e=>setForm({...form, lastName:e.target.value})} style={inputStyle} /></div>
+                </div>
+                <div><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>EMAIL ADDRESS</label><input type="email" required value={form.email} onChange={e=>setForm({...form, email:e.target.value})} style={inputStyle} /></div>
+                
+                {role === 'expert' && (
+                  <div><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>HOSPITAL FACILITY CODE</label><input placeholder="RLH-UK-001" required value={form.hospitalCode === 'PENDING' ? '' : form.hospitalCode} onChange={e=>setForm({...form, hospitalCode:e.target.value})} style={inputStyle} /></div>
+                )}
             {role === 'specialist' && (
               <div style={{ display:'flex', gap:12 }}>
                 <div style={{ flex:1 }}><label style={{ fontSize:11, color:C.textLo, display:'block', marginBottom:6 }}>SPECIALITY</label><input required placeholder="e.g. Neuroradiology" value={form.speciality} onChange={e=>setForm({...form, speciality:e.target.value})} style={inputStyle} /></div>
@@ -168,6 +181,8 @@ export function RegisterPage({ onLogin, onInstitutionalOnboarding }: { onLogin:(
             <button type="submit" disabled={isLoading} style={{ marginTop:12, height:48, background: role === 'specialist' ? `linear-gradient(135deg,${C.info},#1038A0)` : `linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer', fontSize:15 }}>
               {isLoading ? 'Processing...' : role === 'specialist' ? 'Connect Stripe & Join →' : 'Continue Registration →'}
             </button>
+          </>
+        )}
             <button onClick={()=>setStep(1)} type="button" style={{ background:'none', border:'none', color:C.textLo, fontSize:13, cursor:'pointer' }}>Back to role selection</button>
           </form>
         )}
