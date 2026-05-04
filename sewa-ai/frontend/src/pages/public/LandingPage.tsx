@@ -132,13 +132,13 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
       </section>
 
       {/* Compliance Ribbon */}
-      <section className="relative z-20 py-8 bg-[#08160F] border-y border-[#1B3028] overflow-hidden">
-        <div className="flex animate-scroll whitespace-nowrap gap-12 items-center">
-          {[...COMPLIANCE, ...COMPLIANCE].map((c, i) => (
-            <div key={i} className="flex items-center gap-4 px-6 py-2 rounded-2xl bg-[#0C1D17] border border-[#1B3028] text-[11px] font-black text-[#6FA898] uppercase tracking-widest shadow-sm">
-              <span className="text-lg">{c.flag}</span>
-              {c.label}
-              <span className="text-[#3A6055] font-medium">• {c.desc}</span>
+      <section className="relative z-20 py-10 bg-[#08160F] border-y border-[#1B3028] overflow-hidden">
+        <div className="flex animate-scroll whitespace-nowrap gap-12 items-center hover:[animation-play-state:paused] cursor-grab active:cursor-grabbing">
+          {[...COMPLIANCE, ...COMPLIANCE, ...COMPLIANCE].map((c, i) => (
+            <div key={i} className="flex items-center gap-4 px-6 py-2.5 rounded-2xl bg-[#0C1D17] border border-[#1B3028] text-[11px] font-black text-[#6FA898] uppercase tracking-widest shadow-sm hover:border-[#408D7B]/30 transition-colors">
+              <span className="text-xl">{c.flag}</span>
+              <span className="text-[#D0ECE6]">{c.label}</span>
+              <span className="text-[#3A6055] font-bold">• {c.desc}</span>
             </div>
           ))}
         </div>
