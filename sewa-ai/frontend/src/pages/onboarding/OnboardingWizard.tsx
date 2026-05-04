@@ -161,11 +161,16 @@ export function OnboardingWizard() {
   };
 
   const testIntegration = async (type: string) => {
+    const host = type === 'pacs' ? data.pacsHost : type === 'fhir' ? data.fhirEndpoint : data.hl7Host;
+    const port = type === 'pacs' ? data.pacsPort : type === 'hl7' ? data.hl7Port : '443';
+
+    if (!host) {
+      setStatusMsg({ msg: `Please enter the ${type.toUpperCase()} host or endpoint first.`, type: 'err' });
+      return;
+    }
+
     setIntegrationStatus(s => ({ ...s, [type]: 'testing' }));
     try {
-      const host = type === 'pacs' ? data.pacsHost : type === 'fhir' ? data.fhirEndpoint : data.hl7Host;
-      const port = type === 'pacs' ? data.pacsPort : type === 'hl7' ? data.hl7Port : '443';
-      
       await apiClient.post('/onboarding/validate-integration', {
         type,
         host,
@@ -175,7 +180,8 @@ export function OnboardingWizard() {
       setIntegrationStatus(s => ({ ...s, [type]: 'connected' }));
     } catch (err: any) {
       setIntegrationStatus(s => ({ ...s, [type]: 'failed' }));
-      setStatusMsg({ msg: `Integration test failed for ${type.toUpperCase()}. Please check your network and firewall settings.`, type: 'err' });
+      const errorDetail = err.response?.data?.details || 'Check network settings';
+      setStatusMsg({ msg: `Integration failed: ${errorDetail}`, type: 'err' });
     }
   };
 
