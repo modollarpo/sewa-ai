@@ -4,25 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { apiClient } from '../../services/apiClient';
 
-const C = {
-  bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A',
-  brand:'#408D7B', brandLt:'#52B09A', brandDk:'#2E6B5E',
-  critical:'#E03535', normal:'#1DBF73', info:'#2A6EF2',
-  textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
-  border:'#1B3028',
-  F: "'IBM Plex Sans', system-ui, sans-serif",
-};
-
-const S = `
-  @media (max-width: 768px) {
-    .settings-layout { flex-direction: column !important; }
-    .settings-sidebar { width: 100% !important; flex-direction: row !important; overflow-x: auto; padding-bottom: 8px; }
-    .settings-sidebar button { white-space: nowrap; flex: 1; text-align: center !important; }
-    .settings-content { padding: 24px !important; }
-    .form-row { flex-direction: column !important; gap: 0 !important; }
-  }
-`;
-
 export function ProfileSettings() {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'profile'|'security'|'notifications'>('profile');
@@ -38,6 +19,8 @@ export function ProfileSettings() {
     language: user?.language || 'en',
     notifPrefs: (user as any)?.notifPrefs || { push:true, email:true, whatsapp:true, sms:false }
   });
+
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -57,13 +40,6 @@ export function ProfileSettings() {
       notifPrefs: { ...f.notifPrefs, [key]: !(f.notifPrefs as any)[key] }
     }));
   };
-
-  const inputStyle = {
-    width:'100%', padding:'12px 14px', background:C.bg3, border:`1px solid ${C.border}`,
-    borderRadius:10, color:C.textHi, fontSize:14, fontFamily:C.F, outline:'none', marginBottom:16
-  };
-
-  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -107,164 +83,223 @@ export function ProfileSettings() {
     }
   };
 
-
   return (
-    <div style={{ maxWidth: 800, margin: '40px auto', padding: '0 20px', fontFamily: C.F }}>
-      {/* Password Change Modal */}
-      {showPasswordModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex',
-          alignItems: 'center', justifyContent: 'center', padding: 20
-        }}>
-          <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 16, padding: 32, width: '100%', maxWidth: 400 }}>
-            <h3 style={{ color: C.textHi, margin: '0 0 24px', fontSize: 18 }}>Change Password</h3>
-            <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>CURRENT PASSWORD</label>
-            <input type="password" value={passForm.currentPassword} onChange={e=>setPassForm({...passForm, currentPassword:e.target.value})} style={inputStyle} />
-            <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>NEW PASSWORD</label>
-            <input type="password" value={passForm.newPassword} onChange={e=>setPassForm({...passForm, newPassword:e.target.value})} style={inputStyle} />
-            <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>CONFIRM NEW PASSWORD</label>
-            <input type="password" value={passForm.confirmPassword} onChange={e=>setPassForm({...passForm, confirmPassword:e.target.value})} style={inputStyle} />
-            <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-              <button onClick={() => setShowPasswordModal(false)} style={{ flex: 1, padding: '12px', background: C.bg3, color: C.textHi, border: 'none', borderRadius: 10, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={handlePasswordChange} disabled={isChangingPass} style={{
-                flex: 1, padding: '12px', background: C.brand, color: 'white', border: 'none', borderRadius: 10,
-                fontWeight: 700, cursor: 'pointer', opacity: isChangingPass ? 0.6 : 1
-              }}>
-                {isChangingPass ? 'Updating...' : 'Update'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ color: C.textHi, fontSize: 24, fontWeight: 800, margin: '0 0 8px' }}>Account Settings</h1>
-        <p style={{ color: C.textMd, margin: 0, fontSize: 14 }}>Manage your clinical identity and platform preferences.</p>
+    <div className="max-w-4xl mx-auto px-6 py-12 animate-fade-in">
+      
+      {/* Header */}
+      <div className="mb-10">
+        <h1 className="text-3xl font-black text-[#D0ECE6] tracking-tighter">Account Terminal</h1>
+        <p className="text-[#6FA898] mt-2 font-medium">Configure clinical identity, triage routing, and node security.</p>
       </div>
 
       {status && (
-        <div style={{ 
-          padding: 16, borderRadius: 12, marginBottom: 24,
-          background: status.type === 'ok' ? `${C.normal}10` : `${C.critical}10`,
-          border: `1px solid ${status.type === 'ok' ? C.normal : C.critical}30`,
-          color: status.type === 'ok' ? C.normal : C.critical,
-          fontSize: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-        }}>
+        <div className={`mb-8 p-4 rounded-2xl border flex items-center justify-between text-xs font-black uppercase tracking-widest ${
+          status.type === 'ok' ? 'bg-[#1DBF73]/10 border-[#1DBF73]/20 text-[#1DBF73]' : 'bg-[#E03535]/10 border-[#E03535]/20 text-[#E03535]'
+        }`}>
           <span>{status.type === 'ok' ? '✓' : '⚠'} {status.msg}</span>
-          <button onClick={() => setStatus(null)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 18 }}>×</button>
+          <button onClick={() => setStatus(null)} className="opacity-50 hover:opacity-100">✕</button>
         </div>
       )}
 
-      <style>{S}</style>
-      <div className="settings-layout" style={{ display: 'flex', gap: 24 }}>
-        {/* Sidebar */}
-        <div className="settings-sidebar" style={{ width: 220, display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
-          {['profile', 'security', 'notifications'].map((t: any) => (
-            <button key={t} onClick={() => setActiveTab(t)} style={{
-              padding: '12px 16px', textAlign: 'left', borderRadius: 10, border: 'none', cursor: 'pointer',
-              background: activeTab === t ? `${C.brand}20` : 'transparent',
-              color: activeTab === t ? C.brandLt : C.textLo,
-              fontWeight: activeTab === t ? 700 : 400,
-              fontSize: 14, transition: 'all 200ms'
-            }}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
+      <div className="flex flex-col md:flex-row gap-12">
+        
+        {/* Navigation */}
+        <nav className="w-full md:w-64 flex flex-col gap-2">
+          {[
+            { id: 'profile', label: 'Clinical Profile', icon: '👤' },
+            { id: 'security', label: 'Node Security', icon: '🔒' },
+            { id: 'notifications', label: 'Triage Alerts', icon: '🔔' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-3 px-5 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                activeTab === tab.id 
+                  ? 'bg-[#408D7B]/10 text-[#408D7B] border border-[#408D7B]/30' 
+                  : 'text-[#3A6055] hover:text-[#6FA898] border border-transparent'
+              }`}
+            >
+              <span>{tab.icon}</span> {tab.label}
             </button>
           ))}
-        </div>
+        </nav>
 
-        {/* Content */}
-        <div className="settings-content" style={{ flex: 1, background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 16, padding: 32, overflow: 'hidden' }}>
+        {/* Content Area */}
+        <div className="flex-1 bg-[#08160F] border border-[#1B3028] rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#408D7B]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          
           {activeTab === 'profile' && (
-            <div>
-              <h2 style={{ color: C.textHi, fontSize: 18, margin: '0 0 20px' }}>Personal Information</h2>
-              <div className="form-row" style={{ display: 'flex', gap: 16 }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>FIRST NAME</label>
-                  <input value={form.firstName} onChange={e=>setForm({...form, firstName:e.target.value})} style={inputStyle} />
+            <div className="space-y-8 animate-fade-in">
+              <h2 className="text-xl font-black text-[#D0ECE6] tracking-tight border-b border-[#1B3028] pb-4">Personal Metadata</h2>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Given Name</label>
+                  <input 
+                    value={form.firstName} 
+                    onChange={e => setForm({...form, firstName: e.target.value})}
+                    className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all outline-none"
+                  />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>LAST NAME</label>
-                  <input value={form.lastName} onChange={e=>setForm({...form, lastName:e.target.value})} style={inputStyle} />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Family Name</label>
+                  <input 
+                    value={form.lastName} 
+                    onChange={e => setForm({...form, lastName: e.target.value})}
+                    className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all outline-none"
+                  />
                 </div>
               </div>
-              <div>
-                <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>CLINICAL EMAIL</label>
-                <input defaultValue={user?.email} disabled style={{ ...inputStyle, opacity: 0.6 }} />
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Clinical Specialty</label>
+                <input 
+                  value={form.speciality} 
+                  onChange={e => setForm({...form, speciality: e.target.value})}
+                  placeholder="e.g. Neuroradiology"
+                  className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all outline-none"
+                />
               </div>
-              <div>
-                <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 6 }}>CLINICAL ROLE</label>
-                <input defaultValue={user?.role?.toUpperCase()} disabled style={{ ...inputStyle, opacity: 0.6 }} />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-[#1B3028]">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Auth Identifier</span>
+                  <div className="text-xs font-mono text-[#6FA898] bg-[#05100D] p-3 rounded-lg border border-[#1B3028]">{user?.email}</div>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Clinical Permissions</span>
+                  <div className="inline-block px-3 py-1.5 rounded-lg bg-[#408D7B]/10 text-[#408D7B] text-[10px] font-black uppercase tracking-widest border border-[#408D7B]/20">
+                    {user?.role || 'Clinician'} Node
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === 'security' && (
-            <div>
-              <h2 style={{ color: C.textHi, fontSize: 18, margin: '0 0 20px' }}>Security & Authentication</h2>
-              <div style={{ padding: 20, background: C.bg3, border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ color: C.textHi, fontSize: 14, fontWeight: 700 }}>Two-Factor Authentication</div>
-                    <div style={{ color: C.textLo, fontSize: 12 }}>Enabled via Google Authenticator</div>
-                  </div>
-                  <button style={{ padding: '8px 16px', background: C.bg2, border: `1px solid ${C.border}`, color: C.textMd, borderRadius: 8, cursor: 'pointer' }}>Manage</button>
+            <div className="space-y-8 animate-fade-in">
+              <h2 className="text-xl font-black text-[#D0ECE6] tracking-tight border-b border-[#1B3028] pb-4">Encryption & Keys</h2>
+              
+              <div className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="text-center sm:text-left">
+                  <div className="text-sm font-bold text-[#D0ECE6]">Two-Factor Authentication</div>
+                  <div className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest mt-1">Multi-factor node protection is active</div>
                 </div>
+                <button className="px-5 py-2.5 rounded-xl bg-[#408D7B]/10 text-[#408D7B] border border-[#408D7B]/20 text-[10px] font-black uppercase tracking-widest hover:bg-[#408D7B] hover:text-white transition-all">Regenerate Keys</button>
               </div>
-              <button 
-                onClick={() => setShowPasswordModal(true)}
-                style={{ padding: '12px 20px', background: 'transparent', border: `1px solid ${C.border}`, color: C.textHi, borderRadius: 10, cursor: 'pointer', fontSize: 13 }}
-              >
-                Change Password
-              </button>
+
+              <div className="pt-4">
+                <button 
+                  onClick={() => setShowPasswordModal(true)}
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl border border-[#1B3028] text-[#D0ECE6] text-[10px] font-black uppercase tracking-widest hover:bg-[#111F1A] transition-all"
+                >
+                  Rotate Access Password
+                </button>
+              </div>
             </div>
           )}
 
           {activeTab === 'notifications' && (
-            <div>
-              <h2 style={{ color: C.textHi, fontSize: 18, margin: '0 0 20px' }}>Notification Preferences</h2>
-              {[
-                { label: 'STAT Scan Alerts', key: 'push', desc: 'Real-time desktop notifications for critical findings.' },
-                { label: 'Worklist Updates', key: 'email', desc: 'Email digest of daily scan volumes and statuses.' },
-                { label: 'Clinical WhatsApp', key: 'whatsapp', desc: 'Urgent alerts delivered to your registered mobile.' }
-              ].map((n, i) => {
-                const active = (form.notifPrefs as any)[n.key];
-                return (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: i < 2 ? `1px solid ${C.border}` : 'none' }}>
-                    <div>
-                      <div style={{ color: C.textHi, fontSize: 14, fontWeight: 600 }}>{n.label}</div>
-                      <div style={{ color: C.textLo, fontSize: 12 }}>{n.desc}</div>
+            <div className="space-y-8 animate-fade-in">
+              <h2 className="text-xl font-black text-[#D0ECE6] tracking-tight border-b border-[#1B3028] pb-4">Alert Routing</h2>
+              
+              <div className="space-y-4">
+                {[
+                  { id: 'push', label: 'STAT Scan Hooks', desc: 'Critical findings trigger terminal-level push notifications.', icon: '🛰️' },
+                  { id: 'email', label: 'Clinical Dispatch', desc: 'Patient summary and AI findings delivered via secure email.', icon: '📧' },
+                  { id: 'whatsapp', label: 'Mobile Triage', desc: 'Encrypted WhatsApp dispatch for rapid trauma alerts.', icon: '📱' }
+                ].map((n) => {
+                  const active = (form.notifPrefs as any)[n.id];
+                  return (
+                    <div key={n.id} className="p-5 bg-[#0C1D17] border border-[#1B3028] rounded-2xl flex justify-between items-center group hover:border-[#408D7B]/30 transition-all">
+                      <div className="flex gap-4 items-center">
+                        <span className="text-2xl grayscale group-hover:grayscale-0 transition-all">{n.icon}</span>
+                        <div>
+                          <div className="text-sm font-bold text-[#D0ECE6]">{n.label}</div>
+                          <div className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest mt-0.5">{n.desc}</div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => toggleNotif(n.id)}
+                        className={`w-12 h-6 rounded-full relative transition-all ${active ? 'bg-[#408D7B]' : 'bg-[#1B3028]'}`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${active ? 'left-7' : 'left-1'}`} />
+                      </button>
                     </div>
-                    <div 
-                      onClick={() => toggleNotif(n.key)}
-                      style={{ 
-                        width: 40, height: 22, borderRadius: 12, 
-                        background: active ? C.brand : C.bg3, 
-                        border: `1px solid ${active ? C.brand : C.border}`, 
-                        cursor: 'pointer', position: 'relative', transition: 'all 200ms' 
-                      }}>
-                      <div style={{ 
-                        position: 'absolute', top: 2, left: active ? 20 : 2, 
-                        width: 16, height: 16, borderRadius: '50%', background: 'white', 
-                        transition: 'all 200ms', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' 
-                      }} />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
 
-          <div style={{ marginTop: 32, paddingTop: 24, borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={handleSave} disabled={isSaving} style={{
-              padding: '12px 32px', background: C.brand, color: 'white', border: 'none', borderRadius: 10,
-              fontWeight: 700, cursor: 'pointer', fontSize: 14, opacity: isSaving ? 0.6 : 1
-            }}>
-              {isSaving ? 'Saving...' : 'Save Changes'}
+          <div className="mt-12 pt-8 border-t border-[#1B3028] flex justify-end">
+            <button 
+              onClick={handleSave} 
+              disabled={isSaving}
+              className="px-10 py-4 rounded-xl bg-[#408D7B] hover:bg-[#52B09A] disabled:opacity-30 transition-all text-white text-[11px] font-black uppercase tracking-widest shadow-xl shadow-[#408D7B]/20 active:scale-95"
+            >
+              {isSaving ? 'Syncing...' : 'Confirm Metadata Changes'}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#05100D]/90 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-[#08160F] border border-[#1B3028] rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#408D7B]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+            
+            <h3 className="text-2xl font-black text-[#D0ECE6] tracking-tighter mb-8">Rotate Access Password</h3>
+            
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Existing Password</label>
+                <input 
+                  type="password" 
+                  value={passForm.currentPassword} 
+                  onChange={e => setPassForm({...passForm, currentPassword: e.target.value})}
+                  className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all outline-none"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">New Credential</label>
+                <input 
+                  type="password" 
+                  value={passForm.newPassword} 
+                  onChange={e => setPassForm({...passForm, newPassword: e.target.value})}
+                  className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all outline-none"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Confirm Credential</label>
+                <input 
+                  type="password" 
+                  value={passForm.confirmPassword} 
+                  onChange={e => setPassForm({...passForm, confirmPassword: e.target.value})}
+                  className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-10">
+              <button 
+                onClick={() => setShowPasswordModal(false)}
+                className="flex-1 py-4 rounded-xl border border-[#1B3028] text-[#3A6055] text-[10px] font-black uppercase tracking-widest hover:text-[#D0ECE6] transition-all"
+              >
+                Abort
+              </button>
+              <button 
+                onClick={handlePasswordChange}
+                disabled={isChangingPass}
+                className="flex-2 px-8 py-4 rounded-xl bg-[#408D7B] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#52B09A] transition-all shadow-lg active:scale-95"
+              >
+                {isChangingPass ? 'Rotating...' : 'Rotate Password'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

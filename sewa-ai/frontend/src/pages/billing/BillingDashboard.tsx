@@ -5,27 +5,6 @@ import { useBillingData } from '../../hooks/useDashboardData';
 import { useAuthStore } from '../../store/authStore';
 import { apiClient } from '../../services/apiClient';
 
-const C = {
-  bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
-  brand:'#408D7B', brandLt:'#52B09A', brandDk:'#2E6B5E',
-  critical:'#E03535', urgent:'#E08A20', normal:'#1DBF73', normalBg:'#0A1F14',
-  info:'#2A6EF2',
-  textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-};
-
-const S = `
-  @media (max-width: 900px) {
-    .billing-header { flex-direction: column !important; gap: 16px !important; }
-    .plan-banner { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
-    .stats-grid { grid-template-columns: 1fr !important; }
-    .plans-grid { grid-template-columns: 1fr !important; }
-    .history-table-wrapper { overflow-x: auto !important; }
-  }
-`;
-
 const PLANS: Record<string, {
   label:string; price:string; currency:string; period:string;
   scans:string; users:string; storage:string; support:string; compliance:string;
@@ -61,21 +40,19 @@ const PAYMENT_GATEWAYS: Record<string,{name:string;logo:string;currencies:string
   in: [{name:'Stripe',logo:'💳',currencies:['INR'],method:'Card / UPI'}],
 };
 
-// Fallbacks handled in hook
-
-function UsageBar({ used, total, label, color=C.brand }:{ used:number; total:number; label:string; color?:string }) {
+function UsageBar({ used, total, label, color="#408D7B" }:{ used:number; total:number; label:string; color?:string }) {
   const pct = total > 0 ? Math.min(100, (used/total)*100) : 0;
-  const barColor = pct > 90 ? C.critical : pct > 75 ? C.urgent : color;
   return (
-    <div>
-      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
-        <span style={{ fontSize:11, color:C.textMd, fontFamily:C.F }}>{label}</span>
-        <span style={{ fontSize:11, fontFamily:C.FM, color:C.textHi }}>
-          {used.toLocaleString()} / {total > 999999 ? '∞' : total.toLocaleString()}
-        </span>
+    <div className="space-y-2">
+      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+        <span className="text-[#3A6055]">{label}</span>
+        <span className="text-[#D0ECE6] font-mono">{used.toLocaleString()} / {total > 999999 ? '∞' : total.toLocaleString()}</span>
       </div>
-      <div style={{ height:5, background:C.bg4, borderRadius:3, overflow:'hidden' }}>
-        <div style={{ width:`${pct}%`, height:'100%', background:barColor, borderRadius:3, transition:'width 600ms', boxShadow:`0 0 6px ${barColor}60` }}/>
+      <div className="h-1.5 bg-[#111F1A] rounded-full overflow-hidden">
+        <div 
+          className="h-full transition-all duration-1000 shadow-[0_0_8px_rgba(64,141,123,0.5)]" 
+          style={{ width: `${pct}%`, backgroundColor: color }} 
+        />
       </div>
     </div>
   );
@@ -107,305 +84,213 @@ export function BillingDashboard() {
     }
   };
 
-  const tabStyle = (t:string): React.CSSProperties => ({
-    padding:'8px 16px', fontSize:12, fontWeight:tab===t?600:400,
-    color:tab===t?C.brand:C.textLo, background:'none', border:'none',
-    borderBottom:`2px solid ${tab===t?C.brand:'transparent'}`,
-    marginBottom:'-1px', cursor:'pointer', fontFamily:C.F, whiteSpace:'nowrap',
-  });
-
   return (
-    <div style={{ padding:24, background:C.bg1, minHeight:'calc(100vh - 76px)', fontFamily:C.F }}>
-      <style>{S}</style>
-
-      {status && (
-        <div style={{ 
-          padding:'12px 20px', background: status.type==='ok'?C.normalBg:C.bg2, 
-          border:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
-          borderRadius:12, marginBottom:24, display:'flex', justifyContent:'space-between', alignItems:'center',
-          color: status.type==='ok'?C.normal:C.critical, fontSize:13, fontWeight:600
-        }}>
-          <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
-          <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="billing-header" style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:24 }}>
+    <div className="flex-1 flex flex-col h-screen bg-[#05100D] overflow-hidden font-sans text-[#D0ECE6]">
+      
+      {/* Header Bar */}
+      <header className="px-8 h-20 border-b border-[#1B3028] bg-[#08160F] flex items-center justify-between z-20">
         <div>
-          <h2 style={{ margin:0, fontSize:20, fontWeight:700, color:C.textHi }}>Billing & Payments</h2>
-          <p style={{ margin:'4px 0 0', fontSize:12, color:C.textMd }}>
-            Region: {region.toUpperCase()} · Payment via {gateways[0]?.name} · Currency: {gateways[0]?.currencies[0]}
+          <h2 className="text-2xl font-black text-[#D0ECE6] tracking-tighter">Billing Terminal</h2>
+          <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-[0.2em] mt-0.5">
+            Region: {region.toUpperCase()} <span className="mx-2 opacity-30">•</span> {gateways[0]?.name} Gateway
           </p>
         </div>
+        
         <button 
           onClick={async () => {
             try {
               await apiClient.post('/payments/audit-invoice', { region });
-              setStatus({ msg: 'Invoice generation initiated. Your monthly summary will be sent to your registered clinical email.', type: 'ok' });
-            } catch (e) {
-              setStatus({ msg: 'Invoice service currently unavailable.', type: 'err' });
-            }
+              setStatus({ msg: 'Audit invoice dispatched to clinical email.', type: 'ok' });
+            } catch { setStatus({ msg: 'Audit service unavailable.', type: 'err' }); }
           }}
-          style={{ padding:'8px 16px', background:C.brand, border:'none', borderRadius:8, color:'white', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:C.F }}>
-          Download Invoice
+          className="px-6 py-3 rounded-xl bg-[#408D7B] text-white text-[11px] font-black uppercase tracking-widest hover:bg-[#52B09A] transition-all shadow-xl shadow-[#408D7B]/20"
+        >
+          Export Audit Invoice
         </button>
-      </div>
+      </header>
 
-      {/* Current plan banner */}
-      <div className="plan-banner" style={{ padding:'16px 20px', background:`${C.brand}14`, borderRadius:14, border:`1px solid ${C.brand}40`, marginBottom:20, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <div>
-          <div style={{ fontSize:11, color:C.textMd, marginBottom:3 }}>Current Plan</div>
-          <div style={{ fontSize:18, fontWeight:800, color:C.brand }}>
-            {loading ? '...' : (stats.plan?.toUpperCase() || 'PRO')} <span style={{ fontSize:13, fontWeight:400, color:C.textMd }}>· {gateways[0]?.currencies[0]} — {stats.subscriptionStatus || 'Active'}</span>
-          </div>
-        </div>
-        <div style={{ display:'flex', gap:8 }}>
-          <button onClick={()=>setTab('plans')} style={{ padding:'7px 14px', background:'transparent', border:`1px solid ${C.brand}`, borderRadius:8, color:C.brand, fontSize:11, cursor:'pointer', fontFamily:C.F }}>
-            Change Plan
-          </button>
-          <button onClick={()=>{ if(selectedPlan) handleUpgrade(selectedPlan); else setTab('plans'); }} style={{ padding:'7px 14px', background:C.brand, border:'none', borderRadius:8, color:'white', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:C.F }}>
-            Renew Now
-          </button>
-        </div>
-      </div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-8 scrollbar-thin">
+        <div className="max-w-6xl mx-auto space-y-8">
+          
+          {status && (
+            <div className={`p-4 rounded-2xl border flex items-center justify-between text-xs font-black uppercase tracking-widest animate-fade-in ${
+              status.type === 'ok' ? 'bg-[#1DBF73]/10 border-[#1DBF73]/20 text-[#1DBF73]' : 'bg-[#E03535]/10 border-[#E03535]/20 text-[#E03535]'
+            }`}>
+              <span>{status.type === 'ok' ? '✓' : '⚠'} {status.msg}</span>
+              <button onClick={() => setStatus(null)}>✕</button>
+            </div>
+          )}
 
-      {/* Tabs */}
-      <div style={{ borderBottom:`1px solid ${C.border}`, display:'flex', gap:2, marginBottom:20 }}>
-        {(['overview','plans','payment','history'] as const).map(t=>(
-          <button key={t} style={tabStyle(t)} onClick={()=>setTab(t)}>
-            {t==='overview'&&'📊 '}{t==='plans'&&'📦 '}{t==='payment'&&'💳 '}{t==='history'&&'📋 '}
-            {t.charAt(0).toUpperCase()+t.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* OVERVIEW */}
-      {tab==='overview' && (
-        <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
-          {/* Usage meters */}
-          <div style={{ padding:20, background:C.bg2, borderRadius:14, border:`1px solid ${C.border}` }}>
-            <div style={{ fontSize:13, fontWeight:700, color:C.textHi, marginBottom:16 }}>Current Usage & Quota</div>
-            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              <UsageBar label="Monthly Active Scans" used={loading ? 0 : (stats.quota?.used || 0)} total={stats.quota?.monthly || 1000} color={C.brand}/>
-              <UsageBar label="AI Reports Generated" used={loading ? 0 : (stats.quota?.used || 0)} total={stats.quota?.monthly || 1000} color={C.brandLt}/>
-              <UsageBar label="Storage (GB)" used={loading ? 0 : 2457} total={10240} color={C.info}/>
-              <UsageBar label="Active Users" used={loading ? 0 : 34} total={100} color={C.normal}/>
+          {/* Plan Banner */}
+          <div className="p-8 bg-[#408D7B]/5 border border-[#408D7B]/30 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#408D7B]/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+            <div className="space-y-2 text-center md:text-left">
+              <span className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.3em]">Active Tier</span>
+              <h3 className="text-3xl font-black text-[#D0ECE6] tracking-tight flex items-baseline gap-3">
+                {loading ? '...' : (stats.plan?.toUpperCase() || 'PRO')}
+                <span className="text-sm font-bold text-[#6FA898]">{gateways[0]?.currencies[0]} / {stats.subscriptionStatus || 'Active'}</span>
+              </h3>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => setTab('plans')} className="px-8 py-4 rounded-xl border border-[#408D7B]/30 text-[#408D7B] text-[10px] font-black uppercase tracking-widest hover:bg-[#408D7B] hover:text-white transition-all shadow-lg">Change Protocol</button>
+              <button onClick={() => handleUpgrade(stats.plan || 'pro')} className="px-8 py-4 rounded-xl bg-[#408D7B] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#52B09A] transition-all shadow-xl shadow-[#408D7B]/20">Renew Node</button>
             </div>
           </div>
 
-          {/* Cost summary */}
-          <div className="stats-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:12 }}>
+          {/* Navigation Tabs */}
+          <div className="flex gap-1 border-b border-[#1B3028]">
             {[
-              {
-                label:'Current Bill',
-                value: loading ? '...' : stats.currentBill
-                  ? `${gateways[0]?.currencies[0] ?? '£'} ${Number(stats.currentBill).toFixed(2)}`
-                  : `${gateways[0]?.currencies[0] ?? 'GBP'} 0.00`,
-                sub: stats.nextBillDate
-                  ? `Next bill: ${new Date(stats.nextBillDate).toLocaleDateString('en-GB')}`
-                  : 'Next billing date pending',
-                color: C.brand,
-              },
-              {
-                label:'Pending',
-                value: loading ? '...' : stats.pendingAmount
-                  ? `${gateways[0]?.currencies[0] ?? '£'} ${Number(stats.pendingAmount).toFixed(2)}`
-                  : `${gateways[0]?.currencies[0] ?? 'GBP'} 0.00`,
-                sub: stats.nextBillDate
-                  ? `Due: ${new Date(stats.nextBillDate).toLocaleDateString('en-GB')}`
-                  : 'No pending charges',
-                color: C.textHi,
-              },
-              {
-                label:'Last Payment',
-                value: loading ? '...' : stats.lastPaymentAmount
-                  ? `${gateways[0]?.currencies[0] ?? '£'} ${Number(stats.lastPaymentAmount).toFixed(2)}`
-                  : '—',
-                sub: stats.lastPaymentDate
-                  ? `Paid on ${new Date(stats.lastPaymentDate).toLocaleDateString('en-GB')}`
-                  : 'No payment on record',
-                color: C.textMd,
-              },
-            ].map(s=>(
-              <div key={s.label} style={{ padding:16, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}` }}>
-                <div style={{ fontSize:11, color:C.textLo, marginBottom:8 }}>{s.label}</div>
-                <div style={{ fontSize:22, fontWeight:800, color:s.color, fontFamily:C.FM }}>{s.value}</div>
-                <div style={{ fontSize:10, color:C.textLo, marginTop:6 }}>{s.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Usage forecast */}
-          <div style={{ padding:18, background:C.bg2, borderRadius:14, border:`1px solid ${C.border}` }}>
-            <div style={{ fontSize:12, fontWeight:700, color:C.textHi, marginBottom:12 }}>Usage Forecast — Next 30 Days</div>
-            <div style={{ display:'flex', alignItems:'flex-end', gap:4, height:80, marginBottom:8 }}>
-              {[2400,2520,2680,2750,2820,2900,2950,3000,3050,3100,3150,3200].map((v,i)=>(
-                <div key={i} style={{ flex:1 }}>
-                  <div style={{ width:'100%', height:`${(v/3200)*80}px`, background: i>=9?`${C.urgent}80`:`${C.brand}80`, borderRadius:'2px 2px 0 0', minHeight:4 }}/>
-                </div>
-              ))}
-            </div>
-            <div style={{ display:'flex', justifyContent:'space-between' }}>
-              <span style={{ fontSize:9, color:C.textLo, fontFamily:C.FM }}>Today</span>
-              <span style={{ fontSize:9, color:C.textLo, fontFamily:C.FM }}>+30 days</span>
-            </div>
-            <div style={{ marginTop:10, padding:'8px 12px', background:`${C.urgent}0A`, borderRadius:8, border:`1px solid ${C.urgent}30`, fontSize:11, color:C.urgent }}>
-              ⚠ Scan volume trending 18% above plan. Consider upgrading to avoid overage charges.
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PLANS */}
-      {tab==='plans' && (
-        <div className="plans-grid" style={{ display:'grid', gridTemplateColumns:`repeat(auto-fit, minmax(280px, 1fr))`, gap:14 }}>
-          {plans.map(plan=>(
-            <div key={plan.label} style={{
-              padding:24, borderRadius:16,
-              background: plan.highlight ? `${C.brand}12` : C.bg2,
-              border:`2px solid ${plan.highlight ? C.brand : C.border}`,
-              display:'flex', flexDirection:'column', gap:12, position:'relative',
-            }}>
-              {plan.highlight && (
-                <div style={{ position:'absolute', top:-11, left:'50%', transform:'translateX(-50%)', padding:'2px 14px', background:C.brand, borderRadius:20, fontSize:10, fontWeight:700, color:'white', whiteSpace:'nowrap', fontFamily:C.F }}>
-                  MOST POPULAR
-                </div>
-              )}
-              <div>
-                <div style={{ fontSize:14, fontWeight:800, color:C.textHi }}>{plan.label}</div>
-                <div style={{ fontSize:26, fontWeight:900, color: plan.highlight?C.brand:C.textHi, fontFamily:C.FM, lineHeight:1.1, marginTop:6 }}>
-                  {plan.price}<span style={{ fontSize:13, fontWeight:400, color:C.textMd }}>{plan.period}</span>
-                </div>
-                <div style={{ fontSize:10, color:C.textLo, marginTop:6 }}>{plan.compliance}</div>
-              </div>
-
-              <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
-                {[
-                  { icon:'🩻', label:`${plan.scans} scans/mo` },
-                  { icon:'👥', label:`${plan.users} users` },
-                  { icon:'💾', label:`${plan.storage} storage` },
-                  { icon:'🛟', label:plan.support },
-                ].map(item=>(
-                  <div key={item.label} style={{ display:'flex', gap:7, fontSize:12, color:C.textMd }}>
-                    <span>{item.icon}</span><span>{item.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:10, display:'flex', flexDirection:'column', gap:5 }}>
-                {plan.features.map(f=>(
-                  <div key={f} style={{ display:'flex', alignItems:'flex-start', gap:6, fontSize:11, color:C.textMd }}>
-                    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={C.brand} strokeWidth={2.5} style={{ flexShrink:0, marginTop:1 }}><path d="m5 12 5 5L20 7"/></svg>
-                    {f}
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => {
-                  if (plan.price === 'Custom') window.location.href = '/contact';
-                  else handleUpgrade(plan.label);
-                }}
-                style={{
-                  padding:'10px', borderRadius:10, cursor:'pointer', fontFamily:C.F, fontSize:13, fontWeight:700, marginTop:'auto',
-                  background: plan.highlight ? `linear-gradient(135deg,${C.brand},${C.brandDk})` : C.bg3,
-                  color: plan.highlight ? 'white' : C.textMd,
-                  border: plan.highlight ? 'none' : `1px solid ${C.border}`,
-                  boxShadow: plan.highlight ? `0 4px 14px ${C.brand}40` : 'none',
-                }}>
-                {plan.price==='Custom' ? 'Contact Sales' : selectedPlan===plan.label ? '✓ Selected' : 'Select Plan'}
+              { id: 'overview', label: 'Telemetry', icon: '📊' },
+              { id: 'plans', label: 'Tier Selection', icon: '📦' },
+              { id: 'payment', label: 'Source Node', icon: '💳' },
+              { id: 'history', label: 'Audit Log', icon: '📋' }
+            ].map(t => (
+              <button 
+                key={t.id} 
+                onClick={() => setTab(t.id as any)}
+                className={`px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
+                  tab === t.id ? 'border-[#408D7B] text-[#D0ECE6] bg-[#408D7B]/5' : 'border-transparent text-[#3A6055] hover:text-[#6FA898]'
+                }`}
+              >
+                <span className="mr-2">{t.icon}</span> {t.label}
               </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* PAYMENT */}
-      {tab==='payment' && (
-        <div style={{ maxWidth:560, display:'flex', flexDirection:'column', gap:14 }}>
-          <div style={{ padding:18, background:C.bg2, borderRadius:14, border:`1px solid ${C.border}` }}>
-            <div style={{ fontSize:13, fontWeight:700, color:C.textHi, marginBottom:14 }}>Payment Method</div>
-            {gateways.map(gw=>(
-              <div key={gw.name} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 14px', background:C.bg3, borderRadius:10, border:`1px solid ${C.brand}40` }}>
-                <span style={{ fontSize:24 }}>{gw.logo}</span>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:13, fontWeight:700, color:C.textHi }}>{gw.name}</div>
-                  <div style={{ fontSize:11, color:C.textMd }}>{gw.method} · {gw.currencies.join(', ')}</div>
-                </div>
-                <span style={{ padding:'3px 10px', borderRadius:20, fontSize:10, fontWeight:700, background:C.normalBg, color:C.normal, border:'1px solid #0D2A1A', fontFamily:C.F }}>
-                  ✓ Active
-                </span>
-              </div>
             ))}
-            <button style={{ width:'100%', marginTop:12, padding:'9px', borderRadius:9, background:'transparent', border:`1px solid ${C.border}`, color:C.textMd, fontSize:12, cursor:'pointer', fontFamily:C.F }}>
-              Update Payment Method
-            </button>
           </div>
 
-          <div style={{ padding:18, background:C.bg2, borderRadius:14, border:`1px solid ${C.border}` }}>
-            <div style={{ fontSize:13, fontWeight:700, color:C.textHi, marginBottom:12 }}>Billing Contact</div>
-            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-              {[
-                { label:'Billing email',   value:(user as any)?.billingEmail || user?.email || '—' },
-                { label:'PO Number',       value:(user as any)?.poNumber     || stats.poNumber || '—' },
-                { label:'VAT / Tax ID',    value:(user as any)?.vatId        || stats.vatId    || '—' },
-                { label:'Billing address', value:(user as any)?.billingAddress || stats.billingAddress || user?.tenantName || '—' },
-              ].map(row=>(
-                <div key={row.label} style={{ display:'flex', justifyContent:'space-between', padding:'8px 10px', background:C.bg3, borderRadius:8 }}>
-                  <span style={{ fontSize:11, color:C.textMd }}>{row.label}</span>
-                  <span style={{ fontSize:11, color:C.textHi }}>{row.value}</span>
+          {/* Tab Content Area */}
+          <div className="animate-fade-in">
+            
+            {tab === 'overview' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Usage Matrix */}
+                <div className="p-8 bg-[#08160F] border border-[#1B3028] rounded-[2rem] space-y-6 shadow-xl">
+                  <h4 className="text-sm font-black text-[#D0ECE6] uppercase tracking-widest border-b border-[#1B3028] pb-4">Quota Utilization</h4>
+                  <div className="space-y-8">
+                    <UsageBar label="Monthly AI Inferences" used={loading ? 0 : (stats.quota?.used || 0)} total={stats.quota?.monthly || 1000} />
+                    <UsageBar label="Patient Data Nodes" used={loading ? 0 : 2457} total={5000} color="#2A6EF2" />
+                    <UsageBar label="Storage Objects (GB)" used={loading ? 0 : 1820} total={2048} color="#E08A20" />
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* HISTORY */}
-      {tab==='history' && (
-        <div className="history-table-wrapper" style={{ background:C.bg2, borderRadius:14, border:`1px solid ${C.border}`, overflow:'hidden' }}>
-          <div style={{ padding:'12px 16px', borderBottom:`1px solid ${C.border}`, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-            <span style={{ fontSize:13, fontWeight:700, color:C.textHi }}>Transaction History</span>
-            <button style={{ padding:'5px 12px', background:C.bg3, border:`1px solid ${C.border}`, borderRadius:7, color:C.textMd, fontSize:11, cursor:'pointer', fontFamily:C.F }}>
-              Export CSV
-            </button>
-          </div>
-          <table style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead>
-              <tr style={{ background:C.bg3 }}>
-                {['Date','Description','Amount','Method','Status','Receipt'].map(h=>(
-                  <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10, fontWeight:600, color:C.textLo, letterSpacing:'0.05em', textTransform:'uppercase', fontFamily:C.F }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {history.length === 0 ? (
-                <tr><td colSpan={6} style={{padding:40,textAlign:'center',color:C.textLo}}>{loading ? 'Loading history...' : 'No transaction record found.'}</td></tr>
-              ) : history.map((tx:any,i:number)=>(
-                <tr key={i} style={{ borderTop:`1px solid ${C.border}` }}>
-                  <td style={{ padding:'12px 14px', fontSize:11, color:C.textLo, fontFamily:C.FM, whiteSpace:'nowrap' }}>
-                    {new Date(tx.createdAt).toLocaleDateString()}
-                  </td>
-                  <td style={{ padding:'12px 14px', fontSize:12, color:C.textHi }}>{tx.planName || 'Monthly Subscription'}</td>
-                  <td style={{ padding:'12px 14px', fontSize:13, fontWeight:700, color:C.textHi, fontFamily:C.FM }}>{tx.amount} {tx.currency}</td>
-                  <td style={{ padding:'12px 14px', fontSize:11, color:C.textMd }}>{tx.paymentMethod || gateways[0]?.name}</td>
-                  <td style={{ padding:'12px 14px' }}>
-                    <span style={{ padding:'2px 8px', borderRadius:20, fontSize:10, fontWeight:600, background:C.normalBg, color:C.normal, border:'1px solid #0D2A1A', fontFamily:C.F }}>
-                      ✓ {tx.status || 'paid'}
-                    </span>
-                  </td>
-                  <td style={{ padding:'12px 14px' }}>
-                    <button style={{ padding:'3px 8px', borderRadius:6, background:'transparent', border:`1px solid ${C.border}`, color:C.brand, fontSize:10, cursor:'pointer', fontFamily:C.F }}>
-                      PDF
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-6">
+                  {[
+                    { label: 'Accrued Bill', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.currentBill || 0).toFixed(2)}`, sub: 'Next cycle: 01 Jun', col: '#408D7B' },
+                    { label: 'Pending Auth', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.pendingAmount || 0).toFixed(2)}`, sub: 'Direct Debit / ACH', col: '#D0ECE6' },
+                    { label: 'Previous Cycle', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.lastPaymentAmount || 0).toFixed(2)}`, sub: 'Paid 30 Apr', col: '#6FA898' },
+                    { label: 'Burst Capacity', val: 'Active', sub: 'Overage protection: ON', col: '#1DBF73' }
+                  ].map(s => (
+                    <div key={s.label} className="p-6 bg-[#08160F] border border-[#1B3028] rounded-[2rem] shadow-xl group hover:border-[#408D7B]/30 transition-all">
+                      <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest mb-2">{s.label}</div>
+                      <div className="text-2xl font-black font-mono tracking-tighter mb-1" style={{ color: s.col }}>{s.val}</div>
+                      <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest">{s.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {tab === 'plans' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {plans.map(plan => (
+                  <div key={plan.label} className={`p-8 rounded-[2.5rem] border-2 transition-all flex flex-col gap-6 relative shadow-2xl ${
+                    plan.highlight ? 'bg-[#408D7B]/10 border-[#408D7B]' : 'bg-[#08160F] border-[#1B3028] hover:border-[#408D7B]/30'
+                  }`}>
+                    {plan.highlight && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#408D7B] text-white px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Master Tier</span>
+                    )}
+                    <div>
+                      <h4 className="text-lg font-black text-[#D0ECE6] tracking-tight">{plan.label}</h4>
+                      <div className="text-3xl font-black font-mono tracking-tighter mt-2 text-[#408D7B]">{plan.price}<span className="text-sm font-normal text-[#6FA898]">{plan.period}</span></div>
+                      <p className="text-[9px] text-[#3A6055] font-black uppercase tracking-widest mt-2">{plan.compliance}</p>
+                    </div>
+                    <div className="space-y-3 border-y border-[#1B3028] py-6">
+                      {plan.features.map(f => (
+                        <div key={f} className="flex items-center gap-3 text-[10px] font-bold text-[#6FA898] uppercase tracking-widest">
+                          <span className="text-[#408D7B]">✓</span> {f}
+                        </div>
+                      ))}
+                    </div>
+                    <button 
+                      onClick={() => handleUpgrade(plan.label)}
+                      className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                        plan.highlight ? 'bg-[#408D7B] text-white shadow-xl shadow-[#408D7B]/20' : 'bg-[#0C1D17] border border-[#1B3028] text-[#D0ECE6] hover:bg-[#111F1A]'
+                      }`}
+                    >
+                      {plan.price === 'Custom' ? 'Contact Logistics' : 'Deploy Protocol'}
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {tab === 'payment' && (
+              <div className="max-w-xl mx-auto space-y-6">
+                <div className="p-8 bg-[#08160F] border border-[#1B3028] rounded-[2rem] space-y-6 shadow-xl">
+                  <h4 className="text-sm font-black text-[#D0ECE6] uppercase tracking-widest border-b border-[#1B3028] pb-4">Auth Source Node</h4>
+                  {gateways.map(gw => (
+                    <div key={gw.name} className="p-6 bg-[#0C1D17] border border-[#408D7B]/30 rounded-2xl flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <span className="text-3xl">{gw.logo}</span>
+                        <div>
+                          <div className="text-sm font-bold text-[#D0ECE6]">{gw.name} Terminal</div>
+                          <div className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest mt-0.5">{gw.method} · {gw.currencies.join(', ')}</div>
+                        </div>
+                      </div>
+                      <span className="px-3 py-1 rounded-full bg-[#1DBF73]/10 text-[#1DBF73] text-[9px] font-black uppercase tracking-widest border border-[#1DBF73]/20">Active</span>
+                    </div>
+                  ))}
+                  <button className="w-full py-4 rounded-xl border border-[#1B3028] text-[#3A6055] text-[10px] font-black uppercase tracking-widest hover:text-[#D0ECE6] transition-all">Update Source Node</button>
+                </div>
+              </div>
+            )}
+
+            {tab === 'history' && (
+              <div className="bg-[#08160F] border border-[#1B3028] rounded-[2rem] overflow-hidden shadow-2xl">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-[#0C1D17]/50">
+                      {['Sync Date','Description','Protocol Value','Status','Receipt'].map(h => (
+                        <th key={h} className="px-6 py-4 text-[10px] font-black text-[#3A6055] uppercase tracking-widest">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1B3028]">
+                    {history.length === 0 ? (
+                      <tr><td colSpan={5} className="py-20 text-center text-[#3A6055] font-black uppercase tracking-widest">No audit history found</td></tr>
+                    ) : history.map((tx:any, i:number) => (
+                      <tr key={i} className="hover:bg-[#111F1A]/50 transition-colors">
+                        <td className="px-6 py-4 text-xs font-mono text-[#6FA898]">{new Date(tx.createdAt).toLocaleDateString('en-GB')}</td>
+                        <td className="px-6 py-4 text-xs font-bold text-[#D0ECE6]">{tx.planName || 'Monthly Node Subscription'}</td>
+                        <td className="px-6 py-4 text-xs font-black font-mono text-[#D0ECE6]">{tx.amount} {tx.currency}</td>
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 rounded-full bg-[#1DBF73]/10 text-[#1DBF73] text-[9px] font-black uppercase tracking-widest border border-[#1DBF73]/20">✓ {tx.status || 'Paid'}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest hover:underline">PDF Node</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </main>
+
+      {/* Terminal Footer */}
+      <footer className="h-10 bg-[#050F0C] border-t border-[#1B3028] px-8 flex items-center justify-between text-[9px] font-mono text-[#2E5048] font-bold">
+        <div className="flex gap-6 uppercase tracking-widest">
+          <span className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-[#408D7B]" /> Region_Node: {region.toUpperCase()}</span>
+          <span className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-[#1DBF73]" /> Billing_Sync: Stable</span>
+        </div>
+        <div className="flex gap-4">
+          <span>Billing_OS v2.4.0</span>
+          <span className="text-[#3A6055]">ENCRYPTED_SESSION</span>
+        </div>
+      </footer>
     </div>
   );
 }

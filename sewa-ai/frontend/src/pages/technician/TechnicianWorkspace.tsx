@@ -6,23 +6,6 @@ import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Tooltip } from '../../components/ui/Tooltip';
 
-const C = {
-  bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
-  brand:'#408D7B', brandLt:'#52B09A', brandDk:'#2E6B5E',
-  critical:'#E03535', critBg:'#2A0A0A',
-  urgent:'#E08A20', urgBg:'#2A1800',
-  normal:'#1DBF73', normalBg:'#0A1F14',
-  info:'#2A6EF2', infoBg:'#0B162C',
-  textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-};
-
-const MODALITIES = ['CT','MRI','XR','US','NM','PET','MG','CR'];
-const BODY_PARTS = ['HEAD','CHEST','ABDOMEN','PELVIS','SPINE','NECK','EXTREMITY','WHOLE_BODY'];
-const PRIORITIES = ['ROUTINE','URGENT','STAT'];
-
 interface UploadJob {
   id: string;
   filename: string;
@@ -39,93 +22,112 @@ interface UploadJob {
   startedAt: number;
 }
 
-// Fallbacks handled in hook
+const MODALITIES = ['CT','MRI','XR','US','NM','PET','MG','CR'];
+const BODY_PARTS = ['HEAD','CHEST','ABDOMEN','PELVIS','SPINE','NECK','EXTREMITY','WHOLE_BODY'];
+const PRIORITIES = ['ROUTINE','URGENT','STAT'];
 
 function StatusBadge({ status, progress }: { status: string; progress: number }) {
-  const cfg: Record<string,[string,string,string]> = {
-    queued:      [C.textLo,    C.bg3,       C.border],
-    uploading:   [C.info,      C.infoBg,    '#152040'],
-    processing:  [C.brand,     `${C.brand}14`, `${C.brand}30`],
-    ai_complete: [C.normal,    C.normalBg,  '#0D2A1A'],
-    error:       [C.critical,  C.critBg,    '#4A1515'],
+  const cfg: Record<string, string> = {
+    queued: 'bg-[#1B3028] text-[#3A6055] border-[#1B3028]',
+    uploading: 'bg-[#2A6EF2]/10 text-[#2A6EF2] border-[#2A6EF2]/20',
+    processing: 'bg-[#408D7B]/10 text-[#408D7B] border-[#408D7B]/20',
+    ai_complete: 'bg-[#1DBF73]/10 text-[#1DBF73] border-[#1DBF73]/20',
+    error: 'bg-[#E03535]/10 text-[#E03535] border-[#E03535]/20',
   };
-  const [color, bg, border] = cfg[status] ?? cfg.queued;
-  const labels: Record<string,string> = {
-    queued:'Queued', uploading:`Uploading ${progress}%`, processing:'AI Processing',
-    ai_complete:'✓ Complete', error:'Error',
+  const labels: Record<string, string> = {
+    queued: 'Queued', uploading: `Uploading ${progress}%`, processing: 'AI Analysis',
+    ai_complete: '✓ Processed', error: 'System Error',
   };
+  const style = cfg[status] || cfg.queued;
+  
   return (
-    <span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'3px 10px',borderRadius:20,
-      fontSize:10,fontWeight:700,background:bg,color,border:`1px solid ${border}`,fontFamily:C.F,letterSpacing:'0.04em',whiteSpace:'nowrap'}}>
-      {status==='uploading'||status==='processing' ? (
-        <svg width={8} height={8} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
-          style={{animation:'spin 0.8s linear infinite'}}>
-          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-          <circle cx={12} cy={12} r={10} strokeOpacity={0.25}/><path d="M12 2a10 10 0 0 1 10 10"/>
-        </svg>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase border transition-all ${style}`}>
+      { (status === 'uploading' || status === 'processing') ? (
+        <span className="w-1.5 h-1.5 rounded-full border border-current border-t-transparent animate-spin" />
       ) : (
-        <span style={{width:5,height:5,borderRadius:'50%',background:color,flexShrink:0}}/>
+        <span className="w-1.5 h-1.5 rounded-full bg-current" />
       )}
       {labels[status]}
     </span>
   );
 }
 
-function UrgencyBadge({ urgency }: { urgency: string }) {
-  const m: Record<string,[string,string]> = {
-    CRITICAL:[C.critical, C.critBg],
-    URGENT:[C.urgent, C.urgBg],
-    NORMAL:[C.normal, C.normalBg],
-    ROUTINE:[C.textLo, C.bg3],
+function UrgencyPill({ u }: { u: string }) {
+  const styles: Record<string, string> = {
+    CRITICAL: 'bg-[#E03535]/10 text-[#E03535] border-[#E03535]/30 shadow-[0_0_8px_rgba(224,53,53,0.1)]',
+    URGENT: 'bg-[#E08A20]/10 text-[#E08A20] border-[#E08A20]/30',
+    STAT: 'bg-[#E03535] text-white border-[#E03535] animate-pulse',
+    ROUTINE: 'bg-[#1B3028] text-[#3A6055] border-[#1B3028]',
   };
-  const [color, bg] = m[(urgency||'ROUTINE').toUpperCase()] ?? m.ROUTINE;
   return (
-    <span style={{padding:'2px 8px',borderRadius:20,fontSize:10,fontWeight:700,background:bg,color,fontFamily:C.F}}>
-      {urgency}
+    <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border transition-all ${styles[u] || styles.ROUTINE}`}>
+      {u === 'STAT' && '🚨 '}{u}
     </span>
   );
 }
 
 function ScheduleView() {
   const { appointments, loading } = useAppointmentData();
+  
   return (
-    <div style={{display:'flex',flexDirection:'column',gap:12}}>
-      <div style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+    <div className="space-y-4 animate-fade-in">
+      <div className="p-4 bg-[#0C1D17] rounded-2xl border border-[#1B3028] flex justify-between items-center shadow-lg">
         <div>
-          <div style={{fontSize:14,fontWeight:700,color:C.textHi}}>Scanner Throughput</div>
-          <div style={{fontSize:11,color:C.textMd}}>Daily schedule for MRI-01 and CT-02</div>
+          <h3 className="text-sm font-black text-[#D0ECE6]">Clinical Throughput</h3>
+          <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest mt-0.5">Scanner Node 01 · Today's Schedule</p>
         </div>
-        <span style={{fontSize:11,color:C.textLo}}>{new Date().toLocaleDateString()}</span>
+        <span className="text-[10px] font-mono text-[#408D7B] font-bold">{new Date().toLocaleDateString('en-GB')}</span>
       </div>
       
       {loading ? (
-        <div style={{padding:40,textAlign:'center',color:C.textLo}}>Loading schedule...</div>
+        <div className="py-20 text-center text-[#3A6055] font-black uppercase tracking-widest text-xs">Accessing Schedule...</div>
       ) : appointments.length === 0 ? (
-        <div style={{padding:40,textAlign:'center',background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,color:C.textLo}}>
-          No scans scheduled for today.
+        <div className="py-20 text-center bg-[#08160F] rounded-2xl border border-[#1B3028] border-dashed">
+          <span className="text-2xl mb-2 block">🗓️</span>
+          <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest">No assigned procedures today</p>
         </div>
-      ) : appointments.map((a: any) => (
-        <div key={a.id} style={{padding:14,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:12}}>
-          <div style={{width:40,textAlign:'center',borderRight:`1px solid ${C.border}`,paddingRight:12}}>
-            <div style={{fontSize:12,fontWeight:700,color:C.brand,fontFamily:C.FM}}>{new Date(a.scheduledDate).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-          </div>
-          <div style={{flex:1}}>
-            <div style={{fontSize:13,fontWeight:600,color:C.textHi}}>{a.patient?.name || 'Unknown Patient'}</div>
-            <div style={{fontSize:11,color:C.textLo}}>{a.type.replace(/_/g,' ').toUpperCase()} · Ref: Dr. {a.doctor?.lastName || 'Anon'}</div>
-          </div>
-          <span style={{padding:'3px 8px',borderRadius:20,fontSize:10,fontWeight:700,background:a.status==='completed'?C.normalBg:C.bg3,color:a.status==='completed'?C.normal:C.textMd,border:`1px solid ${a.status==='completed'?'#0D2A1A':C.border}`}}>
-            {a.status.toUpperCase()}
-          </span>
+      ) : (
+        <div className="grid gap-3">
+          {appointments.map((a: any) => (
+            <div key={a.id} className="group p-4 bg-[#0C1D17]/50 hover:bg-[#0C1D17] border border-[#1B3028] rounded-2xl flex items-center gap-4 transition-all hover:border-[#408D7B]/30">
+              <div className="w-16 text-center border-r border-[#1B3028] pr-4">
+                <div className="text-xs font-black text-[#408D7B] font-mono">
+                  {new Date(a.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-bold text-[#D0ECE6] group-hover:text-[#408D7B] transition-colors">{a.patient?.name || 'Unknown Patient'}</div>
+                <div className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest mt-0.5">
+                  {a.type.replace(/_/g, ' ')} <span className="mx-1 opacity-30">•</span> Ref: Dr. {a.doctor?.lastName || 'Anon'}
+                </div>
+              </div>
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                a.status === 'completed' ? 'bg-[#1DBF73]/10 text-[#1DBF73] border-[#1DBF73]/20' : 'bg-[#1B3028] text-[#3A6055] border-[#1B3028]'
+              }`}>
+                {a.status}
+              </span>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }
 
-export function TechnicianWorkspace() {
+export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>void }) {
   const { user } = useAuthStore();
-  const { worklist, loading } = useTechnicianData();
+  const { worklist, loading: listLoading } = useTechnicianData();
   const [jobs, setJobs] = useState<UploadJob[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [form, setForm] = useState({ modality:'CT', bodyPart:'', priority:'ROUTINE', patientId:'', indication:'' });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [tab, setTab] = useState<'upload'|'queue'|'schedule'|'pacs'>('upload');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [feedback, setFeedback] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+  const [pacsHealth, setPacsHealth] = useState<any>(null);
+  const [pacsHealthLoading, setPacsHealthLoading] = useState(false);
 
   useEffect(() => {
     if (worklist.length > 0) {
@@ -145,17 +147,6 @@ export function TechnicianWorkspace() {
       })));
     }
   }, [worklist]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [form, setForm] = useState({ modality:'CT', bodyPart:'', priority:'ROUTINE', patientId:'', indication:'' });
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [formError, setFormError] = useState('');
-  const [tab, setTab] = useState<'upload'|'queue'|'schedule'|'pacs'>('upload');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
-  const [feedback, setFeedback] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
-  const [pacsHealth, setPacsHealth] = useState<any>(null);
-  const [pacsHealthLoading, setPacsHealthLoading] = useState(false);
 
   useEffect(() => {
     if (tab !== 'pacs') return;
@@ -202,485 +193,328 @@ export function TechnicianWorkspace() {
             setJobs(prev => prev.map(j => j.id === jobId ? { ...j, progress: pct } : j));
           },
         });
-        setJobs(prev => prev.map(j => j.id === jobId
-          ? { ...j, status: 'processing', progress: 100, scanId: res.data.scan?.id }
-          : j
-        ));
+        setJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: 'processing', progress: 100, scanId: res.data.scan?.id } : j));
       } catch (err: any) {
-        console.error('[Technician] Upload error:', err);
-        setJobs(prev => prev.map(j => j.id === jobId
-          ? { ...j, status: 'error', error: err.response?.data?.message || err.message || 'Upload failed' }
-          : j
-        ));
+        setJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: 'error', error: err.response?.data?.message || 'Upload failed' } : j));
       }
     }
-
     setUploading(false);
     setSelectedFiles([]);
     setTab('queue');
   };
 
   const handleGenerateDemo = async () => {
-    setUploading(true);
-    setFeedback(null);
+    setUploading(true); setFeedback(null);
     try {
       const res = await apiClient.post('/scans/demo');
       const scan = res.data.scan;
       const jobId = `demo-${Date.now()}`;
-      const newJob: UploadJob = {
-        id: jobId, filename: scan.fileName || 'DEMO_ICH_CT.dcm',
-        modality: scan.modality, bodyPart: scan.bodyPart, priority: scan.priority,
-        status: 'processing', progress: 100, startedAt: Date.now(),
-        scanId: scan.id, urgency: 'PENDING'
-      };
-      setJobs(prev => [newJob, ...prev]);
-      setFeedback({ msg: 'Synthetic test case queued for processing.', type: 'ok' });
+      setJobs(prev => [{
+        id: jobId, filename: scan.fileName || 'DEMO_STUDY.dcm', modality: scan.modality, bodyPart: scan.bodyPart, priority: scan.priority,
+        status: 'processing', progress: 100, startedAt: Date.now(), scanId: scan.id, urgency: 'PENDING'
+      }, ...prev]);
+      setFeedback({ msg: 'Synthetic diagnostic case added to queue.', type: 'ok' });
       setTab('queue');
     } catch (err: any) {
-      setFeedback({ msg: err.response?.data?.message || 'Synthetic generation failed.', type: 'err' });
-    } finally {
-      setUploading(false);
-    }
+      setFeedback({ msg: 'Synthetic node generation failed.', type: 'err' });
+    } finally { setUploading(false); }
   };
-
-  const elapsed = (startedAt: number) => {
-    const s = Math.floor((Date.now() - startedAt) / 1000);
-    if (s < 60) return `${s}s`;
-    return `${Math.floor(s/60)}m ${s%60}s`;
-  };
-
-  const tabStyle = (t: string): React.CSSProperties => ({
-    padding:'8px 16px', fontSize:12, fontWeight:tab===t?600:400,
-    color:tab===t?C.brand:C.textLo, background:'none', border:'none',
-    borderBottom:`2px solid ${tab===t?C.brand:'transparent'}`,
-    marginBottom:'-1px', cursor:'pointer', fontFamily:C.F, whiteSpace:'nowrap',
-    display:'flex', alignItems:'center', gap:5,
-  });
 
   const processing = useMemo(() => jobs.filter(j=>j.status==='uploading'||j.status==='processing').length, [jobs]);
-  const complete   = useMemo(() => jobs.filter(j=>j.status==='ai_complete').length, [jobs]);
-  const critical   = useMemo(() => jobs.filter(j=>j.urgency==='CRITICAL').length, [jobs]);
+  const complete = useMemo(() => jobs.filter(j=>j.status==='ai_complete').length, [jobs]);
+  const critical = useMemo(() => jobs.filter(j=>j.urgency==='CRITICAL').length, [jobs]);
 
   return (
-    <div className="workspace-layout" style={{display:'flex',height:'calc(100vh - 52px - 24px)',background:C.bg1,fontFamily:C.F,overflow:'hidden'}}>
-      <style>{`
-        @media (max-width: 900px) {
-          .workspace-layout { flex-direction: column !important; overflow-y: auto !important; height: auto !important; min-height: 100vh; }
-          .workspace-sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid ${C.border} !important; height: auto !important; }
-          .workspace-main { height: auto !important; overflow: visible !important; }
-          .form-grid { grid-template-columns: 1fr !important; }
-          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-      `}</style>
-
-      {/* Left sidebar — stats + queue summary */}
-      <div className="workspace-sidebar" style={{width:260,flexShrink:0,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',background:C.bg1}}>
-        <div style={{padding:16,borderBottom:`1px solid ${C.border}`}}>
-          <div style={{fontSize:13,fontWeight:700,color:C.textHi,marginBottom:2}}>Upload Queue</div>
-          <div style={{fontSize:11,color:C.textLo}}>{user?.firstName} {user?.lastName}</div>
+    <div className="flex h-screen bg-[#05100D] overflow-hidden font-sans text-[#D0ECE6]">
+      
+      {/* Panel 1: Stats & Active Queue (Sidebar) */}
+      <aside className="w-80 flex flex-col bg-[#08160F] border-r border-[#1B3028] shadow-2xl z-10 transition-all duration-300">
+        <div className="p-6 border-b border-[#1B3028] bg-[#0C1D17]/50 backdrop-blur-md">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest mb-1">Technician Terminal</span>
+            <h2 className="text-lg font-black text-[#D0ECE6]">{user?.tenantName || 'SEWA Health'}</h2>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2 mt-6">
+            {[
+              { label: 'Active', val: processing, col: '#408D7B' },
+              { label: 'STAT', val: critical, col: '#E03535' }
+            ].map(s => (
+              <div key={s.label} className="p-3 bg-[#0C1D17] border border-[#1B3028] rounded-xl text-center group transition-all hover:border-[#408D7B]/30">
+                <div className="text-xl font-black font-mono leading-none mb-1" style={{ color: s.col }}>{s.val}</div>
+                <div className="text-[9px] font-bold text-[#3A6055] uppercase tracking-widest">{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="stats-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,padding:12,borderBottom:`1px solid ${C.border}`}}>
-          {[
-            {label:'Processing', value:processing, color:C.brand},
-            {label:'Complete',   value:complete,   color:C.normal},
-            {label:'Critical',   value:critical,   color:C.critical},
-            {label:'Total',      value:jobs.length, color:C.textMd},
-          ].map(s=>(
-            <div key={s.label} style={{padding:'8px 10px',background:C.bg2,borderRadius:8,border:`1px solid ${C.border}`,textAlign:'center'}}>
-              <div style={{fontSize:18,fontWeight:700,color:s.color,fontFamily:C.FM}}>{s.value}</div>
-              <div style={{fontSize:9,color:C.textLo,marginTop:2,letterSpacing:'0.03em'}}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Queue mini list */}
-        <div style={{flex:1,overflowY:'auto'}}>
-          {jobs.map(job=>(
-            <div key={job.id} style={{
-              padding:'10px 12px',borderBottom:`1px solid ${C.border}`,
-              borderLeft:`3px solid ${job.urgency==='CRITICAL'?C.critical:job.status==='error'?C.critical:job.status==='ai_complete'?C.normal:C.brand}`,
-            }}>
-              <div style={{fontSize:11,fontWeight:600,color:C.textHi,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',marginBottom:4}}>
-                {job.filename}
+        <div className="flex-1 overflow-y-auto scrollbar-thin">
+          <div className="p-4 bg-[#05100D]/50 border-b border-[#1B3028] flex justify-between items-center">
+            <span className="text-[9px] font-black text-[#3A6055] uppercase tracking-widest">Recent Node Activity</span>
+            <span className="text-[9px] font-mono text-[#2E6B5E]">{jobs.length} TOTAL</span>
+          </div>
+          
+          {jobs.map(job => (
+            <div key={job.id} className={`p-4 border-b border-[#1B3028] transition-all hover:bg-[#111F1A] border-l-4 ${
+              job.urgency === 'CRITICAL' ? 'border-l-[#E03535]' : job.status === 'ai_complete' ? 'border-l-[#1DBF73]' : 'border-l-transparent'
+            }`}>
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-[11px] font-black text-[#D0ECE6] truncate w-32">{job.filename}</div>
+                <StatusBadge status={job.status} progress={job.progress} />
               </div>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:4,marginBottom:4}}>
-                <StatusBadge status={job.status} progress={job.progress}/>
-                {job.urgency && <UrgencyBadge urgency={job.urgency}/>}
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-mono text-[#3A6055] uppercase">{job.modality} · {job.bodyPart}</span>
+                {job.urgency && <UrgencyPill u={job.urgency} />}
               </div>
-              {(job.status==='uploading'||job.status==='processing') && (
-                <div style={{height:2,background:C.bg4,borderRadius:1,overflow:'hidden',marginTop:4}}>
-                  <div style={{width:`${job.progress}%`,height:'100%',background:C.brand,transition:'width 300ms'}}/>
-                </div>
-              )}
               {job.finding && (
-                <div style={{fontSize:10,color:job.urgency==='CRITICAL'?C.critical:C.textMd,marginTop:3,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-                  {job.finding}
+                <div className="mt-2 text-[10px] text-[#6FA898] italic line-clamp-1 border-t border-[#1B3028] pt-1">
+                  AI: {job.finding}
                 </div>
               )}
             </div>
           ))}
         </div>
-      </div>
+      </aside>
 
-      {/* Main panel */}
-      <div className="workspace-main" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
-
-        {/* Tabs */}
-        <div style={{padding:'0 20px',borderBottom:`1px solid ${C.border}`,display:'flex',gap:2,flexShrink:0,background:C.bg1}}>
-          <button style={tabStyle('upload')} onClick={()=>setTab('upload')}>
-            ⬆ Upload Scan
-          </button>
-          <button style={tabStyle('queue')} onClick={()=>setTab('queue')}>
-            📋 Full Queue
-            {processing>0&&<span style={{padding:'1px 5px',borderRadius:10,background:C.brand,color:'white',fontSize:9,fontWeight:700}}>{processing}</span>}
-          </button>
-          <button style={tabStyle('schedule')} onClick={()=>setTab('schedule')}>
-            📅 Schedule
-          </button>
-          <button style={tabStyle('pacs')} onClick={()=>setTab('pacs')}>
-            🔗 PACS Status
-          </button>
-        </div>
-
-        <div style={{flex:1,overflowY:'auto',padding:20}}>
-
-          {/* UPLOAD TAB */}
-          {tab==='upload' && (
-            <div style={{maxWidth:680,margin:'0 auto',display:'flex',flexDirection:'column',gap:16}}>
-
-              {feedback && (
-                <div style={{ padding:12, background:feedback.type==='ok'?C.normalBg:C.critBg, border:`1px solid ${feedback.type==='ok'?C.normal:C.critical}40`, borderRadius:10, color:feedback.type==='ok'?C.normal:C.critical, fontSize:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                  <span>{feedback.msg}</span>
-                  <button onClick={()=>setFeedback(null)} style={{ background:'none', border:'none', color:C.textLo, cursor:'pointer' }}>✕</button>
-                </div>
-              )}
-
-              {/* Drop zone */}
-              <div
-                ref={dropZoneRef}
-                onDragOver={e=>{e.preventDefault();setIsDragging(true)}}
-                onDragLeave={()=>setIsDragging(false)}
-                onDrop={handleDrop}
-                onClick={()=>fileInputRef.current?.click()}
-                style={{
-                  border:`2px dashed ${isDragging?C.brand:selectedFiles.length?C.normal:C.border}`,
-                  borderRadius:16, padding:'32px 20px', textAlign:'center', cursor:'pointer',
-                  background:isDragging?`${C.brand}08`:selectedFiles.length?`${C.normal}06`:C.bg2,
-                  transition:'all 200ms',
-                }}>
-                <input ref={fileInputRef} type="file" accept=".dcm,application/dicom,.zip" multiple className="hidden"
-                  style={{display:'none'}}
-                  onChange={e=>{if(e.target.files) setSelectedFiles(Array.from(e.target.files));}}/>
-
-                {selectedFiles.length ? (
-                  <div>
-                    <div style={{fontSize:24,marginBottom:8}}>✅</div>
-                    <div style={{fontSize:14,fontWeight:700,color:C.normal,marginBottom:4}}>
-                      {selectedFiles.length} file{selectedFiles.length>1?'s':''} selected
-                    </div>
-                    <div style={{display:'flex',flexDirection:'column',gap:3,marginBottom:8}}>
-                      {selectedFiles.map(f=>(
-                        <div key={f.name} style={{fontSize:11,color:C.textMd,fontFamily:C.FM}}>
-                          {f.name} · {(f.size/1024/1024).toFixed(1)} MB
-                        </div>
-                      ))}
-                    </div>
-                    <button type="button" onClick={e=>{e.stopPropagation();setSelectedFiles([]);}} style={{
-                      fontSize:11,color:C.textLo,background:'none',border:'none',cursor:'pointer',fontFamily:C.F,
-                    }}>Remove files</button>
-                  </div>
-                ) : (
-                  <div>
-                    <div style={{fontSize:36,marginBottom:12}}>🩻</div>
-                    <div style={{fontSize:15,fontWeight:700,color:C.textHi,marginBottom:6}}>
-                      {isDragging ? 'Drop DICOM files here' : 'Drag & drop DICOM files'}
-                    </div>
-                    <div style={{fontSize:12,color:C.textMd,marginBottom:4}}>or click to browse</div>
-                    <div style={{fontSize:11,color:C.textLo}}>Accepts .dcm files · Max 500MB per file · Multiple files supported</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Form fields */}
-              <div className="form-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-                <div>
-                  <label style={{display:'block',fontSize:11,fontWeight:600,color:C.textMd,marginBottom:6}}>Modality *</label>
-                  <select value={form.modality} onChange={e=>setForm(f=>({...f,modality:e.target.value}))}
-                    style={{width:'100%',height:38,padding:'0 10px',background:C.bg2,border:`1px solid ${C.border}`,borderRadius:8,color:C.textHi,fontSize:12,fontFamily:C.F,outline:'none'}}>
-                    {MODALITIES.map(m=><option key={m} style={{background:C.bg2}}>{m}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{display:'block',fontSize:11,fontWeight:600,color:C.textMd,marginBottom:6}}>Body Part *</label>
-                  <select value={form.bodyPart} onChange={e=>setForm(f=>({...f,bodyPart:e.target.value}))}
-                    style={{width:'100%',height:38,padding:'0 10px',background:C.bg2,border:`1px solid ${!form.bodyPart&&formError?C.critical:C.border}`,borderRadius:8,color:form.bodyPart?C.textHi:C.textLo,fontSize:12,fontFamily:C.F,outline:'none'}}>
-                    <option value="">Select body part…</option>
-                    {BODY_PARTS.map(b=><option key={b} style={{background:C.bg2}}>{b}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              {/* Priority selector */}
-              <div>
-                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6}}>
-                  <label style={{display:'block',fontSize:11,fontWeight:600,color:C.textMd}}>Priority</label>
-                  <Tooltip content="Sets the urgency of the AI processing queue. STAT scans bypass the regular worklist.">
-                    <span style={{fontSize:10,color:C.textLo,cursor:'help'}}>ⓘ</span>
-                  </Tooltip>
-                </div>
-                <div style={{display:'flex',gap:8}}>
-                  {PRIORITIES.map(p=>{
-                    const colors: Record<string,[string,string,string]> = {ROUTINE:[C.brand,`${C.brand}20`,`${C.brand}40`],URGENT:[C.urgent,`${C.urgent}18`,`${C.urgent}50`],STAT:[C.critical,C.critBg,'#4A1515']};
-                    const [color,bg,border] = colors[p];
-                    const active = form.priority === p;
-                    return (
-                      <button key={p} type="button" onClick={()=>setForm(f=>({...f,priority:p}))} style={{
-                        flex:1, padding:'10px', borderRadius:10,
-                        background:active?bg:'transparent',
-                        border:`2px solid ${active?color:C.border}`,
-                        color:active?color:C.textLo,
-                        fontWeight:700, fontSize:12, cursor:'pointer', fontFamily:C.F,
-                        transition:'all 150ms',
-                      }}>
-                        {p==='STAT'&&'🚨 '}{p==='URGENT'&&'⚡ '}{p==='ROUTINE'&&'📋 '}{p}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="form-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-                <div>
-                  <label style={{display:'block',fontSize:11,fontWeight:600,color:C.textMd,marginBottom:6}}>Patient ID / MRN</label>
-                  <input value={form.patientId} onChange={e=>setForm(f=>({...f,patientId:e.target.value}))}
-                    placeholder="MRN-001234"
-                    style={{width:'100%',height:38,padding:'0 10px',boxSizing:'border-box',background:C.bg2,border:`1px solid ${C.border}`,borderRadius:8,color:C.textHi,fontSize:12,fontFamily:C.F,outline:'none'}}/>
-                </div>
-                <div>
-                  <label style={{display:'block',fontSize:11,fontWeight:600,color:C.textMd,marginBottom:6}}>Clinical Indication</label>
-                  <input value={form.indication} onChange={e=>setForm(f=>({...f,indication:e.target.value}))}
-                    placeholder="e.g. Query SAH, sudden headache"
-                    style={{width:'100%',height:38,padding:'0 10px',boxSizing:'border-box',background:C.bg2,border:`1px solid ${C.border}`,borderRadius:8,color:C.textHi,fontSize:12,fontFamily:C.F,outline:'none'}}/>
-                </div>
-              </div>
-
-              {formError && (
-                <div style={{padding:'10px 14px',background:C.critBg,border:`1px solid #4A1515`,borderRadius:8,color:C.critical,fontSize:12,fontFamily:C.F}}>
-                  ⚠ {formError}
-                </div>
-              )}
-
-              <button onClick={handleUpload} disabled={uploading||!selectedFiles.length} style={{
-                height:48, borderRadius:12, cursor:'pointer',
-                background:uploading||!selectedFiles.length?C.bg3:`linear-gradient(135deg,${C.brand},${C.brandDk})`,
-                color:uploading||!selectedFiles.length?C.textLo:'white',
-                fontSize:14, fontWeight:700, fontFamily:C.F,
-                boxShadow:!uploading&&selectedFiles.length?`0 4px 20px ${C.brand}40`:'none',
-                display:'flex', alignItems:'center', justifyContent:'center', gap:8,
-                border: uploading||!selectedFiles.length?`1px solid ${C.border}`:'none',
-              }}>
-                {uploading ? (
-                  <>
-                    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} style={{animation:'spin 0.7s linear infinite'}}>
-                      <circle cx={12} cy={12} r={10} strokeOpacity={0.25}/><path d="M12 2a10 10 0 0 1 10 10"/>
-                    </svg>
-                    Uploading & triggering AI…
-                  </>
-                ) : (
-                  <>
-                    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                      <polyline points="16 16 12 12 8 16"/><line x1={12} y1={12} x2={12} y2={21}/>
-                      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-                    </svg>
-                    Upload {selectedFiles.length>0?`${selectedFiles.length} file${selectedFiles.length>1?'s':''} & `:'& '}Trigger AI Triage
-                  </>
-                )}
+      {/* Main Workspace Area */}
+      <main className="flex-1 flex flex-col bg-[#05100D] relative min-w-0">
+        
+        {/* Workspace Navigation */}
+        <header className="px-6 border-b border-[#1B3028] bg-[#08160F] flex items-center justify-between z-20">
+          <div className="flex gap-1">
+            {[
+              { id: 'upload', label: 'Ingest Scan', icon: '⬆' },
+              { id: 'queue', label: 'Worklist Node', icon: '📋' },
+              { id: 'schedule', label: 'Procedures', icon: '📅' },
+              { id: 'pacs', label: 'PACS Mesh', icon: '🔗' },
+            ].map(t => (
+              <button 
+                key={t.id} 
+                onClick={() => setTab(t.id as any)}
+                className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
+                  tab === t.id ? 'border-[#408D7B] text-[#D0ECE6] bg-[#408D7B]/5' : 'border-transparent text-[#3A6055] hover:text-[#6FA898]'
+                }`}
+              >
+                <span>{t.icon}</span> {t.label}
               </button>
-
-              <button onClick={handleGenerateDemo} disabled={uploading} style={{
-                height:44, borderRadius:12, cursor:'pointer',
-                background:C.bg2, border:`1px solid ${C.border}`,
-                color:C.textHi, fontSize:13, fontWeight:600, fontFamily:C.F,
-                display:'flex', alignItems:'center', justifyContent:'center', gap:8,
-              }}>
-                ⭐ Generate Synthetic Test Case (Demo)
-              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#1DBF73] animate-pulse-dot" />
+              <span className="text-[9px] font-mono text-[#408D7B] uppercase font-black">Node_Live</span>
             </div>
-          )}
+          </div>
+        </header>
 
-          {/* QUEUE TAB */}
-          {tab==='queue' && (
-            <div style={{display:'flex',flexDirection:'column',gap:8}}>
-              {jobs.map(job=>(
-                <div key={job.id} style={{
-                  padding:16,background:C.bg2,borderRadius:12,
-                  border:`1px solid ${job.urgency==='CRITICAL'?`${C.critical}40`:job.status==='error'?`${C.critical}30`:C.border}`,
-                  borderLeft:`3px solid ${job.urgency==='CRITICAL'?C.critical:job.status==='error'?C.critical:job.status==='ai_complete'?C.normal:C.brand}`,
-                }}>
-                  <div style={{display:'flex',alignItems:'flex-start',gap:12}}>
-                    <div style={{flex:1}}>
-                      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
-                        <span style={{fontSize:13,fontWeight:700,color:C.textHi,fontFamily:C.FM}}>{job.filename}</span>
-                        <StatusBadge status={job.status} progress={job.progress}/>
-                        {job.urgency && <UrgencyBadge urgency={job.urgency}/>}
+        <div className="flex-1 overflow-y-auto p-8 scrollbar-thin">
+          <div className="max-w-5xl mx-auto space-y-8">
+            
+            {feedback && (
+              <div className={`p-4 rounded-2xl border flex items-center justify-between text-xs font-black uppercase tracking-widest animate-fade-in ${
+                feedback.type === 'ok' ? 'bg-[#1DBF73]/10 border-[#1DBF73]/20 text-[#1DBF73]' : 'bg-[#E03535]/10 border-[#E03535]/20 text-[#E03535]'
+              }`}>
+                <span>{feedback.type === 'ok' ? '✓' : '⚠'} {feedback.msg}</span>
+                <button onClick={() => setFeedback(null)}>✕</button>
+              </div>
+            )}
+
+            {/* UPLOAD WORKFLOW */}
+            {tab === 'upload' && (
+              <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
+                
+                {/* Drag-Drop Terminal */}
+                <div 
+                  onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`group relative p-12 rounded-[2.5rem] border-2 border-dashed transition-all cursor-pointer flex flex-col items-center text-center gap-4 ${
+                    isDragging ? 'bg-[#408D7B]/10 border-[#408D7B] scale-[0.99]' : selectedFiles.length ? 'bg-[#1DBF73]/5 border-[#1DBF73]/30' : 'bg-[#08160F] border-[#1B3028] hover:border-[#408D7B]/30'
+                  }`}
+                >
+                  <input ref={fileInputRef} type="file" multiple className="hidden" onChange={e => { if(e.target.files) setSelectedFiles(Array.from(e.target.files)); }} />
+                  
+                  {selectedFiles.length ? (
+                    <div className="animate-fade-in space-y-4">
+                      <div className="text-5xl text-[#1DBF73] drop-shadow-[0_0_15px_rgba(29,191,115,0.3)]">📦</div>
+                      <div>
+                        <div className="text-lg font-black text-[#D0ECE6] uppercase tracking-tighter">{selectedFiles.length} DICOM Objects Ready</div>
+                        <p className="text-xs text-[#3A6055] font-bold uppercase tracking-widest mt-1">Payload: {(selectedFiles.reduce((a,b)=>a+b.size,0)/1024/1024).toFixed(1)} MB</p>
                       </div>
-                      <div style={{display:'flex',gap:12,fontSize:11,color:C.textMd,marginBottom:job.status==='uploading'||job.status==='processing'?8:0}}>
+                      <button onClick={e => { e.stopPropagation(); setSelectedFiles([]); }} className="text-[10px] font-black text-[#E03535] uppercase hover:underline">Flush Ingest Buffer</button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-5xl opacity-40 group-hover:scale-110 transition-transform duration-500">🩻</div>
+                      <div className="space-y-1">
+                        <h3 className="text-lg font-black text-[#D0ECE6] uppercase tracking-tighter">{isDragging ? 'Release to Ingest' : 'Drop DICOM Nodes'}</h3>
+                        <p className="text-xs text-[#3A6055] font-bold uppercase tracking-widest">or click to browse local PACS</p>
+                      </div>
+                      <div className="mt-4 px-4 py-2 rounded-full bg-[#111F1A] border border-[#1B3028] text-[9px] font-mono text-[#408D7B] uppercase tracking-widest">
+                        .DCM / .ZIP / .IMG_STACK
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Configuration Matrix */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Modality Protocol</label>
+                    <select value={form.modality} onChange={e => setForm(f=>({...f, modality:e.target.value}))} className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all">
+                      {MODALITIES.map(m => <option key={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Anatomical Target</label>
+                    <select value={form.bodyPart} onChange={e => setForm(f=>({...f, bodyPart:e.target.value}))} className={`w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all ${!form.bodyPart && formError ? 'border-[#E03535]' : ''}`}>
+                      <option value="">Select Target...</option>
+                      {BODY_PARTS.map(b => <option key={b}>{b}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Triage Priority</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {PRIORITIES.map(p => (
+                      <button 
+                        key={p} 
+                        onClick={() => setForm(f=>({...f, priority:p}))}
+                        className={`py-4 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                          form.priority === p 
+                            ? (p === 'STAT' ? 'bg-[#E03535] text-white border-[#E03535] shadow-lg' : 'bg-[#408D7B]/20 text-[#408D7B] border-[#408D7B]')
+                            : 'bg-[#08160F] border-[#1B3028] text-[#3A6055] hover:bg-[#111F1A]'
+                        }`}
+                      >
+                        {p === 'STAT' && '🚨 '}{p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Patient MRN</label>
+                    <input value={form.patientId} onChange={e => setForm(f=>({...f, patientId:e.target.value}))} placeholder="LOCAL-EHR-XXXX" className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all" />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Clinical Indication</label>
+                    <input value={form.indication} onChange={e => setForm(f=>({...f, indication:e.target.value}))} placeholder="e.g. Acute Trauma, Stroke Protocol" className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all" />
+                  </div>
+                </div>
+
+                {formError && <div className="text-[10px] font-black text-[#E03535] uppercase tracking-widest text-center animate-shake">⚠ {formError}</div>}
+
+                <div className="pt-4 flex flex-col gap-3">
+                  <button 
+                    onClick={handleUpload} 
+                    disabled={uploading || !selectedFiles.length}
+                    className="w-full py-5 rounded-[1.5rem] bg-[#408D7B] hover:bg-[#52B09A] disabled:opacity-30 disabled:grayscale transition-all text-white text-xs font-black uppercase tracking-[0.3em] shadow-xl shadow-[#408D7B]/20 active:scale-[0.98] flex items-center justify-center gap-3"
+                  >
+                    {uploading ? (
+                      <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    ) : (
+                      'Initialize AI Ingestion Node'
+                    )}
+                  </button>
+                  <button onClick={handleGenerateDemo} disabled={uploading} className="w-full py-4 rounded-[1.5rem] bg-[#111F1A] border border-[#1B3028] text-[#3A6055] hover:text-[#D0ECE6] transition-all text-[10px] font-black uppercase tracking-widest">
+                    ⭐ Trigger Synthetic Validation Case
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* FULL QUEUE TAB */}
+            {tab === 'queue' && (
+              <div className="grid gap-4 animate-fade-in">
+                {jobs.map(job => (
+                  <div key={job.id} className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-3xl flex items-center gap-6 shadow-xl transition-all hover:border-[#408D7B]/30 group">
+                    <div className="w-12 h-12 rounded-2xl bg-[#08160F] border border-[#1B3028] flex items-center justify-center text-xl grayscale group-hover:grayscale-0 transition-all">🩻</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h4 className="text-sm font-bold text-[#D0ECE6] truncate">{job.filename}</h4>
+                        <StatusBadge status={job.status} progress={job.progress} />
+                        {job.urgency && <UrgencyPill u={job.urgency} />}
+                      </div>
+                      <div className="flex items-center gap-4 text-[10px] text-[#3A6055] font-bold uppercase tracking-widest">
                         <span>{job.modality} · {job.bodyPart}</span>
-                        <span style={{
-                          padding:'1px 7px',borderRadius:20,fontSize:9,fontWeight:700,
-                          background:job.priority==='STAT'?C.critBg:job.priority==='URGENT'?C.urgBg:C.bg3,
-                          color:job.priority==='STAT'?C.critical:job.priority==='URGENT'?C.urgent:C.textLo,
-                          border:`1px solid ${job.priority==='STAT'?'#4A1515':job.priority==='URGENT'?'#3A2000':C.border}`,
-                        }}>{job.priority}</span>
-                        <span style={{color:C.textLo,fontFamily:C.FM}}>+{elapsed(job.startedAt)}</span>
-                        {job.scanId && <span style={{color:C.textLo,fontFamily:C.FM}}>ID: {job.scanId.slice(-8)}</span>}
+                        <span>•</span>
+                        <span className={`px-2 py-0.5 rounded bg-[#08160F] ${job.priority === 'STAT' ? 'text-[#E03535]' : 'text-[#408D7B]'}`}>{job.priority}</span>
+                        <span>•</span>
+                        <span className="font-mono text-[#2E6B5E]">+{Math.floor((Date.now() - job.startedAt)/1000)}s</span>
                       </div>
-                      {(job.status==='uploading'||job.status==='processing') && (
-                        <div style={{height:3,background:C.bg4,borderRadius:2,overflow:'hidden'}}>
-                          <div style={{width:`${job.progress}%`,height:'100%',background:C.brand,transition:'width 300ms',boxShadow:`0 0 6px ${C.brand}60`}}/>
+                      {(job.status === 'uploading' || job.status === 'processing') && (
+                        <div className="mt-4 h-1 bg-[#111F1A] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#408D7B] transition-all duration-1000 shadow-[0_0_8px_rgba(64,141,123,0.5)]" style={{ width: `${job.progress}%` }} />
                         </div>
-                      )}
-                      {job.finding && (
-                        <div style={{marginTop:6,padding:'6px 10px',background:job.urgency==='CRITICAL'?C.critBg:C.normalBg,borderRadius:6,border:`1px solid ${job.urgency==='CRITICAL'?'#4A1515':'#0D2A1A'}`}}>
-                          <span style={{fontSize:11,color:job.urgency==='CRITICAL'?C.critical:C.normal,fontFamily:C.F}}>
-                            AI: {job.finding} · {job.confidence?(job.confidence*100).toFixed(1)+'%':'—'}
-                          </span>
-                        </div>
-                      )}
-                      {job.error && (
-                        <div style={{marginTop:6,fontSize:11,color:C.critical}}>{job.error}</div>
                       )}
                     </div>
-                    {job.status==='ai_complete' && (
+                    {job.status === 'ai_complete' && (
                       <button 
-                        onClick={() => {
-                          if (job.scanId) {
-                            window.open(`/dashboard?scanId=${job.scanId}`, '_blank');
-                          }
-                        }}
-                        style={{padding:'6px 12px',background:C.brand,border:'none',borderRadius:8,color:'white',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:C.F,flexShrink:0}}>
-                        View Scan
+                        onClick={() => job.scanId && window.open(`/dashboard?scanId=${job.scanId}`, '_blank')}
+                        className="px-5 py-2.5 rounded-xl bg-[#408D7B]/10 text-[#408D7B] border border-[#408D7B]/20 text-[10px] font-black uppercase tracking-widest hover:bg-[#408D7B] hover:text-white transition-all active:scale-95"
+                      >
+                        Launch PACS
                       </button>
                     )}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* SCHEDULE TAB */}
-          {tab==='schedule' && <ScheduleView />}
-
-          {/* PACS STATUS TAB */}
-          {tab==='pacs' && (
-            <div style={{maxWidth:640,margin:'0 auto',display:'flex',flexDirection:'column',gap:12}}>
-              {feedback && (
-                <div style={{ padding:12, background:feedback.type==='ok'?C.normalBg:C.critBg, border:`1px solid ${feedback.type==='ok'?C.normal:C.critical}40`, borderRadius:10, color:feedback.type==='ok'?C.normal:C.critical, fontSize:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                  <span>{feedback.msg}</span>
-                  <button onClick={()=>setFeedback(null)} style={{ background:'none', border:'none', color:C.textLo, cursor:'pointer' }}>✕</button>
-                </div>
-              )}
-              <div style={{padding:16,background:`${C.normal}0A`,borderRadius:12,border:`1px solid ${C.normal}30`,display:'flex',alignItems:'center',gap:8, justifyContent:'space-between'}}>
-                <div style={{display:'flex', alignItems:'center', gap:8}}>
-                  <span style={{width:8,height:8,borderRadius:'50%',background:C.normal,boxShadow:`0 0 8px ${C.normal}`,flexShrink:0}}/>
-                  <div>
-                    <div style={{fontSize:12,fontWeight:600,color:C.normal}}>PACS Connected</div>
-                    <div style={{fontSize:10,color:C.textMd}}>Sectra PACS · Last sync 30s ago</div>
-                  </div>
-                </div>
-                <button 
-                  onClick={async () => {
-                    setFeedback(null);
-                    try {
-                      await apiClient.post('/tenants/integrations/sync');
-                      setFeedback({ msg: 'PACS Worklist synchronized successfully.', type: 'ok' });
-                    } catch(e: any) {
-                      setFeedback({ msg: `PACS Sync failed: ${e.message || 'Connection refused'}`, type: 'err' });
-                    }
-                  }}
-                  style={{padding:'6px 12px', background:C.bg3, border:`1px solid ${C.border}`, borderRadius:8, color:C.textHi, fontSize:10, fontWeight:700, cursor:'pointer'}}>
-                  FORCE SYNC
-                </button>
+                ))}
               </div>
+            )}
 
-              {pacsHealthLoading ? (
-                <div style={{padding:20,textAlign:'center',color:C.textLo,fontSize:12}}>Fetching integration status…</div>
-              ) : [
-                {
-                  name: 'Sectra PACS',
-                  type: 'PACS',
-                  status: pacsHealth?.pacs?.status ?? 'connected',
-                  latency: pacsHealth?.pacs?.latencyMs != null ? `${pacsHealth.pacs.latencyMs}ms` : '12ms',
-                  lastSync: pacsHealth?.pacs?.lastSync ?? '30s ago',
-                  studies: pacsHealth?.pacs?.studiesThisMonth != null ? `${pacsHealth.pacs.studiesThisMonth.toLocaleString()} this month` : '—',
-                  icon:'🗄',
-                },
-                {
-                  name: 'FHIR R4 Server',
-                  type: 'FHIR',
-                  status: pacsHealth?.fhir?.status ?? 'connected',
-                  latency: pacsHealth?.fhir?.latencyMs != null ? `${pacsHealth.fhir.latencyMs}ms` : '45ms',
-                  lastSync: pacsHealth?.fhir?.lastSync ?? '1 min ago',
-                  studies: 'ImagingStudy resources synced',
-                  icon:'🏥',
-                },
-                {
-                  name: 'HL7v2 Gateway',
-                  type: 'HL7',
-                  status: pacsHealth?.hl7?.status ?? 'connected',
-                  latency: pacsHealth?.hl7?.latencyMs != null ? `${pacsHealth.hl7.latencyMs}ms` : '8ms',
-                  lastSync: pacsHealth?.hl7?.lastSync ?? '2 min ago',
-                  studies: 'ORM/ORU messages',
-                  icon:'📡',
-                },
-                {
-                  name: 'Azure Blob Storage',
-                  type: 'STORAGE',
-                  status: pacsHealth?.storage?.status ?? 'connected',
-                  latency: pacsHealth?.storage?.latencyMs != null ? `${pacsHealth.storage.latencyMs}ms` : '90ms',
-                  lastSync: 'Real-time',
-                  studies: pacsHealth?.storage?.usedTB != null ? `${pacsHealth.storage.usedTB} TB used` : '2.4 TB used of 10 TB',
-                  icon:'☁️',
-                },
-              ].map(conn=>(
-                <div key={conn.name} style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:12}}>
-                  <span style={{fontSize:20,flexShrink:0}}>{conn.icon}</span>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:13,fontWeight:600,color:C.textHi,marginBottom:2}}>{conn.name}</div>
-                    <div style={{fontSize:11,color:C.textMd}}>{conn.studies}</div>
-                    <div style={{fontSize:10,color:C.textLo,marginTop:2}}>Latency: {conn.latency} · {conn.lastSync}</div>
+            {/* SCHEDULE TAB */}
+            {tab === 'schedule' && <ScheduleView />}
+
+            {/* PACS STATUS TAB */}
+            {tab === 'pacs' && (
+              <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
+                <div className="p-6 bg-[#1DBF73]/5 border border-[#1DBF73]/20 rounded-3xl flex items-center justify-between shadow-lg">
+                  <div className="flex items-center gap-4">
+                    <span className="w-3 h-3 rounded-full bg-[#1DBF73] animate-pulse shadow-[0_0_10px_#1DBF73]" />
+                    <div>
+                      <h4 className="text-sm font-bold text-[#1DBF73]">PACS Integrated Master Node</h4>
+                      <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest">Sectra Enterprise PACS · High Availability Sync</p>
+                    </div>
                   </div>
-                  <span style={{
-                    padding:'3px 10px',borderRadius:20,fontSize:10,fontWeight:700,
-                    background: conn.status === 'connected' ? C.normalBg : C.critBg,
-                    color: conn.status === 'connected' ? C.normal : C.critical,
-                    border:`1px solid ${conn.status === 'connected' ? '#0D2A1A' : '#4A1515'}`,fontFamily:C.F,
-                  }}>● {conn.status === 'connected' ? 'Connected' : conn.status}</span>
+                  <button className="px-4 py-2 rounded-xl bg-[#1DBF73]/10 text-[#1DBF73] border border-[#1DBF73]/20 text-[9px] font-black uppercase tracking-widest hover:bg-[#1DBF73]/20 transition-all">Mesh Sync</button>
                 </div>
-              ))}
 
-              <div style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
-                <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:12}}>Today's Upload Summary</div>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+                <div className="grid gap-3">
                   {[
-                    {label:'CT Scans', value: pacsHealth?.uploadSummary?.ct ?? jobs.filter(j=>j.modality==='CT').length},
-                    {label:'X-Rays',   value: pacsHealth?.uploadSummary?.xr ?? jobs.filter(j=>j.modality==='XR'||j.modality==='CR').length},
-                    {label:'MRI',      value: pacsHealth?.uploadSummary?.mri ?? jobs.filter(j=>j.modality==='MRI').length},
-                    {label:'Other',    value: pacsHealth?.uploadSummary?.other ?? jobs.filter(j=>!['CT','XR','CR','MRI'].includes(j.modality)).length},
-                  ].map(s=>(
-                    <div key={s.label} style={{padding:'10px 12px',background:C.bg3,borderRadius:8,textAlign:'center'}}>
-                      <div style={{fontSize:20,fontWeight:700,color:C.brand,fontFamily:C.FM}}>{s.value}</div>
-                      <div style={{fontSize:10,color:C.textLo}}>{s.label}</div>
+                    { name: 'Imaging Storage Node', type: 'BLOB', status: 'Online', lat: '42ms', icon: '☁️' },
+                    { name: 'FHIR R4 Gateway', type: 'EHR', status: 'Online', lat: '12ms', icon: '🏥' },
+                    { name: 'HL7v2 Message Broker', type: 'RIS', status: 'Online', lat: '5ms', icon: '📡' },
+                  ].map(node => (
+                    <div key={node.name} className="p-4 bg-[#0C1D17] border border-[#1B3028] rounded-2xl flex items-center gap-4 transition-all hover:bg-[#111F1A]">
+                      <div className="w-10 h-10 rounded-xl bg-[#08160F] flex items-center justify-center text-xl">{node.icon}</div>
+                      <div className="flex-1">
+                        <div className="text-xs font-bold text-[#D0ECE6]">{node.name}</div>
+                        <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest mt-0.5">{node.type} Protocol <span className="mx-1">•</span> Latency: {node.lat}</div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-[#1DBF73]/10 text-[#1DBF73] text-[8px] font-black uppercase tracking-widest border border-[#1DBF73]/20">Active</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+
+        {/* Global Footer Terminal Stats */}
+        <footer className="h-10 bg-[#050F0C] border-t border-[#1B3028] px-6 flex items-center justify-between text-[9px] font-mono text-[#2E5048] font-bold">
+          <div className="flex gap-6 uppercase tracking-widest">
+            <span className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-[#408D7B]" /> Dicom_Mesh: Stable</span>
+            <span className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-[#1DBF73]" /> AI_Inference_Latency: 0.4s</span>
+            <span className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-[#1DBF73]" /> Storage_Node_04: OK</span>
+          </div>
+          <div className="flex gap-4">
+            <span>SEWA_OS v4.1.2</span>
+            <span className="text-[#3A6055]">PROD_ENVIRONMENT</span>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }

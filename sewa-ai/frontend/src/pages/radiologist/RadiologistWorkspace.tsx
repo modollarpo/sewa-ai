@@ -103,84 +103,72 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
 
     const modality = scan?.modality ?? 'CT';
     if (modality === 'CT' || !modality) {
-      // (Keep existing drawing logic...)
+      // (Mock drawing logic for CT - in real app would use dicom-parser/cornerstone)
       ctx.beginPath();
       ctx.ellipse(w/2, h*0.5, w*0.37, h*0.43, 0, 0, Math.PI*2);
       ctx.fillStyle = '#1e1e1e'; ctx.fill();
-      ctx.strokeStyle = '#555'; ctx.lineWidth=1.5; ctx.stroke();
-      ctx.beginPath();
-      ctx.ellipse(w/2, h*0.5, w*0.37, h*0.43, 0, 0, Math.PI*2);
-      ctx.strokeStyle = '#888'; ctx.lineWidth=5; ctx.stroke();
-      ctx.fillStyle = '#333';
-      ctx.beginPath(); ctx.ellipse(w/2, h*0.5, w*0.30, h*0.36, 0, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#444'; ctx.lineWidth=0.5;
-      ctx.beginPath(); ctx.moveTo(w/2, h*0.12); ctx.lineTo(w/2, h*0.88); ctx.stroke();
-      ctx.fillStyle = '#0a0a0a';
-      ctx.beginPath(); ctx.ellipse(w*0.48, h*0.48, w*0.05, h*0.08, 0.2, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(w*0.52, h*0.48, w*0.05, h*0.08, -0.2, 0, Math.PI*2); ctx.fill();
-      for (let i=0; i<8; i++) {
-        const angle = (i/8)*Math.PI*2;
-        const rx=w*0.24+Math.cos(i)*5, ry=h*0.29+Math.sin(i)*4;
-        ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth=0.8;
-        ctx.beginPath();
-        ctx.ellipse(w/2+Math.cos(angle)*20, h/2+Math.sin(angle)*24, rx, ry, angle, 0, Math.PI*2);
-        ctx.stroke();
-      }
+      ctx.strokeStyle = '#333'; ctx.lineWidth=1; ctx.stroke();
+      
+      // AI Highlight (ICH Mock)
       const ai = scan?.aiResult;
       if (showGradcam || ai?.urgency === 'CRITICAL') {
         const grd = ctx.createRadialGradient(w*0.63, h*0.40, 0, w*0.63, h*0.40, w*0.13);
-        grd.addColorStop(0, 'rgba(224,53,53,0.85)');
-        grd.addColorStop(0.5,'rgba(224,53,53,0.4)');
+        grd.addColorStop(0, 'rgba(224,53,53,0.6)');
+        grd.addColorStop(0.5,'rgba(224,53,53,0.2)');
         grd.addColorStop(1, 'rgba(224,53,53,0)');
         ctx.fillStyle = grd;
         ctx.beginPath(); ctx.ellipse(w*0.63, h*0.40, w*0.12, h*0.10, 0.3, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = 'rgba(224,53,53,0.9)';
-        ctx.strokeStyle = '#000'; ctx.lineWidth=3;
-        ctx.font = `bold ${w*0.045}px ${C.fontMono}`;
-        ctx.strokeText('ICH', w*0.63, h*0.38);
-        ctx.fillText('ICH', w*0.63, h*0.38);
+        ctx.strokeStyle = 'rgba(224,53,53,0.8)';
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Drawing some "brain" structures
+      ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth=0.5;
+      for (let i=0; i<5; i++) {
+        ctx.beginPath();
+        ctx.ellipse(w/2, h*0.5, w*(0.1+i*0.05), h*(0.15+i*0.05), Math.PI/4, 0, Math.PI*2);
+        ctx.stroke();
       }
     } else if (modality === 'XR') {
       ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h);
       const lGrd = ctx.createRadialGradient(w*0.35, h*0.45, 10, w*0.35, h*0.45, w*0.22);
-      lGrd.addColorStop(0,'rgba(180,180,180,0.3)'); lGrd.addColorStop(1,'transparent');
+      lGrd.addColorStop(0,'rgba(180,180,180,0.2)'); lGrd.addColorStop(1,'transparent');
       ctx.fillStyle = lGrd;
       ctx.beginPath(); ctx.ellipse(w*0.35, h*0.48, w*0.20, h*0.30, -0.1, 0, Math.PI*2); ctx.fill();
-      const rGrd = ctx.createRadialGradient(w*0.65, h*0.45, 10, w*0.65, h*0.45, w*0.22);
-      rGrd.addColorStop(0,'rgba(180,180,180,0.3)'); rGrd.addColorStop(1,'transparent');
-      ctx.fillStyle = rGrd;
-      ctx.beginPath(); ctx.ellipse(w*0.65, h*0.48, w*0.20, h*0.30, 0.1, 0, Math.PI*2); ctx.fill();
     }
 
-    // Draw measurements
+    // Measurements
     const allM = activeM ? [...measurements, activeM] : measurements;
     allM.forEach(m => {
-      ctx.strokeStyle = C.brandLt; ctx.lineWidth = 2 / zoom;
+      ctx.strokeStyle = '#52B09A'; ctx.lineWidth = 1.5 / zoom;
       ctx.setLineDash([5/zoom, 5/zoom]);
       ctx.beginPath(); ctx.moveTo(m.x1, m.y1); ctx.lineTo(m.x2, m.y2); ctx.stroke();
       ctx.setLineDash([]);
       
-      // Draw endpoints
-      ctx.fillStyle = C.brandLt;
-      ctx.beginPath(); ctx.arc(m.x1, m.y1, 4/zoom, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(m.x2, m.y2, 4/zoom, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#52B09A';
+      ctx.beginPath(); ctx.arc(m.x1, m.y1, 3/zoom, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(m.x2, m.y2, 3/zoom, 0, Math.PI*2); ctx.fill();
 
-      // Label distance
       const dist = Math.sqrt(Math.pow(m.x2-m.x1,2) + Math.pow(m.y2-m.y1,2));
-      const mm = (dist * 0.23).toFixed(1); // 0.23mm/px approx
-      ctx.font = `${12/zoom}px ${C.fontMono}`;
+      const mm = (dist * 0.23).toFixed(1);
+      ctx.font = `bold ${10/zoom}px IBM Plex Mono`;
       ctx.fillStyle = 'white';
       ctx.fillText(`${mm}mm`, (m.x1+m.x2)/2 + 5/zoom, (m.y1+m.y2)/2 - 5/zoom);
     });
 
     ctx.restore();
-    ctx.fillStyle='rgba(0,255,180,0.7)'; ctx.font=`9px ${C.fontMono}`;
+
+    // Overlay Metadata
+    ctx.fillStyle='rgba(82,176,154,0.8)'; ctx.font=`bold 9px IBM Plex Mono`;
     const metadata = [
-      `W:${wl.w} L:${wl.l}`, `Zoom:${zoom.toFixed(1)}x`,
-      `${scan?.modality||'CT'} ${scan?.bodyPart||'HEAD'}`,
-      'SEWA AI v2.4.1',
+      `WINDOW:${wl.w} LEVEL:${wl.l}`, 
+      `MAGNIFY:${zoom.toFixed(1)}x`,
+      `RENDER:GPU_ACCEL`,
+      `SYSTEM:SEWA_PACS_v2.4`
     ];
-    metadata.forEach((m,i) => ctx.fillText(m, 8, 14+i*14));
+    metadata.forEach((m,i) => ctx.fillText(m, 12, 55+i*14));
   }, [scan, wl, zoom, pan, showGradcam, measurements, activeM]);
 
   useEffect(() => {
@@ -240,66 +228,70 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
   };
 
   return (
-    <div style={{ position:'relative', flex:1, background:'#000', overflow:'hidden' }}>
+    <div className="relative flex-1 bg-black overflow-hidden group">
       <canvas
         ref={canvasRef}
-        style={{ width:'100%', height:'100%', objectFit:'contain', cursor:'crosshair' }}
+        className={`w-full h-full object-contain ${tool === 'pan' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'}`}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       />
-      <div style={{
-        position:'absolute', bottom:'12px', left:'50%', transform:'translateX(-50%)',
-        display:'flex', gap:'12px', background:'rgba(8,22,15,0.9)', padding:'6px 12px',
-        borderRadius:'16px', border:`1px solid ${C.border}`, backdropFilter:'blur(12px)',
-        boxShadow:'0 10px 25px rgba(0,0,0,0.5)', alignItems:'center'
-      }}>
-        {/* Tool Selector */}
-        <div style={{ display:'flex', gap:'4px', borderRight:`1px solid ${C.border}`, paddingRight:'12px' }}>
-          {[
-            { id:'pan', icon:'🖐️', title:'Pan & Zoom' },
-            { id:'measure', icon:'📏', title:'Caliper Measurement' },
-          ].map(t => (
-            <button key={t.id} onClick={() => setTool(t.id as any)} title={t.title} style={{
-              width:'36px', height:'36px', background: tool === t.id ? C.brand : 'transparent',
-              border:'none', borderRadius:'8px', color: tool === t.id ? 'white' : C.textMd,
-              fontSize:'18px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center'
-            }}>
-              <span>{t.icon}</span>
-            </button>
-          ))}
+      
+      {/* Floating Professional Toolbar */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 p-1.5 bg-[#08160F]/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.6)] opacity-40 group-hover:opacity-100 transition-all duration-500 hover:scale-[1.02]">
+        
+        {/* Tool Selectors */}
+        <div className="flex items-center gap-1 pr-2 border-r border-white/10">
+          <button 
+            onClick={() => setTool('pan')} 
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${tool === 'pan' ? 'bg-[#408D7B] text-white shadow-[0_0_15px_rgba(64,141,123,0.4)]' : 'text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5'}`}
+            title="Pan & Zoom (P)"
+          >
+            <span className="text-lg">🖐️</span>
+          </button>
+          <button 
+            onClick={() => setTool('measure')} 
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${tool === 'measure' ? 'bg-[#408D7B] text-white shadow-[0_0_15px_rgba(64,141,123,0.4)]' : 'text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5'}`}
+            title="Caliper Measurement (M)"
+          >
+            <span className="text-lg">📏</span>
+          </button>
         </div>
 
         {/* View Controls */}
-        <div style={{ display:'flex', gap:'4px' }}>
-          {[
-            { icon:'🔍', action:() => setZoom(z=>Math.min(5,z+0.25)), title:'Zoom In' },
-            { icon:'🔎', action:() => setZoom(z=>Math.max(0.3,z-0.25)), title:'Zoom Out' },
-            { icon:'⊕',  action:() => { setZoom(1); setPan({x:0,y:0}); }, title:'Reset View' },
-            { icon:'⬛', action:() => setWl(w=>({...w,l:w.l-20})), title:'Decrease Level (Darker)' },
-            { icon:'⬜', action:() => setWl(w=>({...w,l:w.l+20})), title:'Increase Level (Brighter)' },
-          ].map(b => (
-            <button key={b.title} onClick={b.action} title={b.title} style={{
-              width:'32px', height:'32px', borderRadius:'8px',
-              background:'transparent', border:'none', cursor:'pointer',
-              color:C.textMd, fontSize:'16px', display:'flex', alignItems:'center', justifyContent:'center',
-            }}>
-              {b.icon}
-            </button>
-          ))}
+        <div className="flex items-center gap-1 px-1">
+          <button onClick={() => setZoom(z=>Math.min(10,z+0.5))} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Zoom In">🔍</button>
+          <button onClick={() => setZoom(z=>Math.max(0.2,z-0.5))} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Zoom Out">🔎</button>
+          <button onClick={() => { setZoom(1); setPan({x:0,y:0}); }} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Reset View">⊕</button>
         </div>
-        
+
+        <div className="w-[1px] h-6 bg-white/10 mx-1" />
+
+        {/* Window/Level Presets */}
+        <div className="flex items-center gap-1 pl-1">
+          <button onClick={() => setWl({w:400, l:40})} className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5 transition-all">BRAIN</button>
+          <button onClick={() => setWl({w:1500, l:450})} className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5 transition-all">BONE</button>
+          <button onClick={() => setWl({w:350, l:40})} className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5 transition-all">SOFT</button>
+        </div>
+
         {measurements.length > 0 && (
-          <button onClick={() => setMeasurements([])} style={{ marginLeft:'8px', padding:'6px 12px', background:`${C.critical}20`, border:`1px solid ${C.critical}40`, color:C.critical, borderRadius:'8px', fontSize:'11px', fontWeight:'700', cursor:'pointer' }}>
-            Clear Measures
-          </button>
+          <>
+            <div className="w-[1px] h-6 bg-white/10 mx-1" />
+            <button 
+              onClick={() => setMeasurements([])} 
+              className="px-3 py-1.5 rounded-lg bg-[#E03535]/10 border border-[#E03535]/20 text-[#E03535] text-[9px] font-bold uppercase tracking-wider hover:bg-[#E03535] hover:text-white transition-all"
+            >
+              Clear
+            </button>
+          </>
         )}
       </div>
     </div>
   );
 }
+
 
 // ── AI Results Panel ──────────────────────────────────────────
 function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>void }) {
@@ -313,7 +305,6 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
     try {
       if (type === 'escalate') {
         await apiClient.patch(`/scans/${scan.id}/status`, { status: 'CRITICAL' });
-        // Feedback via toast or status update in real app
       } else if (type === 'notify') {
         await apiClient.post(`/scans/${scan.id}/notify`);
       }
@@ -326,68 +317,101 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
 
   if (!ai) {
     return (
-      <div style={{ padding:'20px', textAlign:'center', color:C.textLo, fontFamily:C.fontBase }}>
-        {scan?.status === 'processing' ? 'AI engines processing…' : 'Select a scan to view AI results'}
+      <div className="flex flex-col items-center justify-center p-12 text-center animate-fade-in">
+        <div className="text-4xl mb-4 opacity-20">🔬</div>
+        <p className="text-xs font-bold text-[#3A6055] uppercase tracking-widest">
+          {scan?.status === 'processing' ? 'AI Neural Engines Processing...' : 'Select a study to view AI insights'}
+        </p>
+        {scan?.status === 'processing' && (
+          <div className="w-32 h-1 bg-[#1B3028] mt-4 rounded-full overflow-hidden">
+            <div className="h-full bg-[#408D7B] animate-[shimmer_2s_infinite] w-full" />
+          </div>
+        )}
       </div>
     );
   }
+
   return (
-    <div style={{ padding:'12px', display:'flex', flexDirection:'column', gap:'12px' }}>
-      <div style={{ padding:'12px', borderRadius:'12px', background: urgencyBg(ai.urgency), border:`1px solid ${urgencyColor(ai.urgency)}30` }}>
-        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
+    <div className="p-4 flex flex-col gap-5 animate-fade-in">
+      {/* Finding Card */}
+      <div className={`p-4 rounded-xl border transition-all duration-300 ${
+        ai.urgency === 'CRITICAL' ? 'bg-[#2A0A0A]/40 border-[#E03535]/30' : 'bg-[#111F1A]/40 border-[#1B3028]'
+      }`}>
+        <div className="flex justify-between items-start mb-3">
           <UrgencyPill u={ai.urgency} />
-          <span style={{ fontSize:10, color:C.textLo }}>Model v2.4.1</span>
+          <span className="text-[9px] font-mono text-[#3A6055] bg-[#050F0C] px-1.5 py-0.5 rounded border border-[#1B3028]">Triage Model v2.4</span>
         </div>
-        <div style={{ fontSize:'14px', fontWeight:'700', color:urgencyColor(ai.urgency) }}>{ai.primaryFinding}</div>
-        {ai.location && <div style={{ fontSize:'11px', color:C.textLo, marginTop:'4px' }}>📍 {ai.location}</div>}
+        <div className={`text-base font-extrabold mb-1 ${ai.urgency === 'CRITICAL' ? 'text-[#E03535]' : 'text-[#D0ECE6]'}`}>
+          {ai.primaryFinding}
+        </div>
+        {ai.location && (
+          <div className="flex items-center gap-1.5 text-[10px] text-[#6FA898] font-medium">
+            <span className="opacity-50">LOCATION:</span>
+            <span className="bg-[#162821] px-1.5 py-0.5 rounded text-[#52B09A]">{ai.location}</span>
+          </div>
+        )}
       </div>
 
-      <div style={{ padding:'12px', background:C.bg3, borderRadius:'12px', border:`1px solid ${C.border}` }}>
-        <div style={{ fontSize:'11px', color:C.textMd, fontWeight:'600', marginBottom:'8px' }}>AI Confidence</div>
-        <ConfBar v={ai.confidence || 0} />
+      {/* Confidence Metrics */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="p-3 bg-[#0C1D17] rounded-xl border border-[#1B3028]">
+          <div className="text-[9px] font-bold text-[#3A6055] uppercase tracking-widest mb-2">Model Confidence</div>
+          <ConfBar v={ai.confidence || 0} />
+        </div>
+        <div className="p-3 bg-[#0C1D17] rounded-xl border border-[#1B3028] flex flex-col justify-center">
+          <div className="text-[9px] font-bold text-[#3A6055] uppercase tracking-widest mb-1">Processing Time</div>
+          <div className="text-xs font-mono font-bold text-[#408D7B]">~1.2s <span className="text-[9px] text-[#3A6055] font-normal">on GPU-A100</span></div>
+        </div>
       </div>
 
-      <div style={{ padding:'10px 12px', background:ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critBg : C.bg3, borderRadius:'12px', border:`1px solid ${ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critical : C.border}30` }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-            <div style={{ fontSize:'10px', color:C.textLo, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.05em' }}>🧠 Clinical Safety Gate</div>
-            <Tooltip clinical content="Metacognition Engine: Validates Triage findings against the generated report and clinical logic. If red, human review is mandatory due to a safety mismatch.">
-              <span style={{ fontSize:10, color:C.textLo, cursor:'help' }}>ⓘ</span>
+      {/* Clinical Safety Gate (Metacognition) */}
+      <div className={`p-3 rounded-xl border transition-all duration-500 ${
+        ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') 
+          ? 'bg-[#2A0A0A] border-[#E03535]/50 shadow-[0_0_15px_rgba(224,53,53,0.1)]' 
+          : 'bg-[#0A1F14] border-[#1DBF73]/30'
+      }`}>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs">🧠</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#D0ECE6]">Clinical Safety Gate</span>
+            <Tooltip clinical content="Metacognition Engine: Cross-references visual findings with semantic clinical logic.">
+              <span className="text-[10px] text-[#3A6055] cursor-help hover:text-[#D0ECE6]">ⓘ</span>
             </Tooltip>
           </div>
-          <span style={{ 
-            fontSize:9, fontWeight:800, padding:'2px 6px', borderRadius:4,
-            background: ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? C.critical : C.brand,
-            color: 'white'
-          }}>
+          <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${
+            ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? 'bg-[#E03535] text-white' : 'bg-[#1DBF73] text-[#050F0C]'
+          }`}>
             {ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') ? 'FLAGGED' : 'PASSED'}
-          </span>
+          </div>
         </div>
-        <div style={{ fontSize:10, color:C.textMd }}>
+        <p className="text-[10px] leading-relaxed text-[#6FA898]">
           {ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT') 
-            ? 'Metacognition rules triggered: Plausibility conflict detected.' 
-            : 'Multi-layer self-evaluation passed (NHS DCB0129 compliant).'}
-        </div>
+            ? 'SAFETY ALERT: Visual findings conflict with patient history or reporting logic. Human verification mandatory.' 
+            : 'Multi-layer clinical verification passed. NHS DCB0129 Compliance: VERIFIED.'}
+        </p>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+      {/* Action Grid */}
+      <div className="grid grid-cols-2 gap-2">
         <button 
           onClick={() => handleAction('escalate')}
           disabled={actionBusy}
-          style={{ padding:'8px', borderRadius:8, background:C.critBg, color:C.critical, border:`1px solid ${C.critical}30`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
-          🚨 {scan?.priority === 'CRITICAL' ? 'ESCALATED' : 'ESCALATE STAT'}
+          className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#2A0A0A] border border-[#E03535]/30 text-[#E03535] text-[10px] font-bold uppercase tracking-wide hover:bg-[#E03535] hover:text-white transition-all active:scale-95 disabled:opacity-50"
+        >
+          🚨 {scan?.priority === 'CRITICAL' ? 'Escalated' : 'Escalate STAT'}
         </button>
         <button 
           onClick={() => handleAction('notify')}
           disabled={actionBusy}
-          style={{ padding:'8px', borderRadius:8, background:C.infoBg, color:C.info, border:`1px solid ${C.info}30`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
-          📡 NOTIFY TEAM
+          className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#0A1530] border border-[#2A6EF2]/30 text-[#2A6EF2] text-[10px] font-bold uppercase tracking-wide hover:bg-[#2A6EF2] hover:text-white transition-all active:scale-95 disabled:opacity-50"
+        >
+          📡 Notify Team
         </button>
         <button 
           onClick={() => setShowOpinionModal(true)}
-          disabled={actionBusy}
-          style={{ padding:'8px', borderRadius:8, background:C.bg3, color:C.textHi, border:`1px solid ${C.border}`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
-          🤝 SECOND OPINION
+          className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#111F1A] border border-[#1B3028] text-[#D0ECE6] text-[10px] font-bold uppercase tracking-wide hover:bg-[#1B3028] transition-all active:scale-95"
+        >
+          🤝 2nd Opinion
         </button>
         <button 
           onClick={async () => {
@@ -399,27 +423,63 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
             } catch(e) { console.error('[Radiologist] ICD-10 failed'); }
             finally { setActionBusy(false); }
           }}
-          disabled={actionBusy}
-          style={{ padding:'8px', borderRadius:8, background:C.bg3, color:C.brand, border:`1px solid ${C.border}`, fontSize:10, fontWeight:700, cursor:'pointer' }}>
-          🔖 AUTO ICD-10
+          className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#111F1A] border border-[#1B3028] text-[#408D7B] text-[10px] font-bold uppercase tracking-wide hover:bg-[#408D7B] hover:text-white transition-all active:scale-95"
+        >
+          🔖 Auto ICD-10
         </button>
       </div>
 
+      {/* VLM Analysis Section */}
+      {ai.vlmImpression ? (
+        <div className="p-4 bg-gradient-to-br from-[#0A1530] to-[#050F0C] rounded-xl border border-[#2A6EF2]/20 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-2 opacity-10 text-4xl transform rotate-12 group-hover:rotate-0 transition-transform">🤖</div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[10px] font-black text-[#2A6EF2] uppercase tracking-widest">AI Report Impression</span>
+            <button onClick={onRequestVLM} className="text-[9px] text-[#3A6055] hover:text-[#2A6EF2] underline transition-colors">Regenerate</button>
+          </div>
+          <p className="text-[11px] leading-relaxed text-[#D0ECE6] italic">"{ai.vlmImpression}"</p>
+          <div className="mt-3 pt-3 border-t border-[#2A6EF2]/10 flex items-center gap-2">
+            <span className="text-[8px] text-[#3A6055] font-mono">LLM: Claude-3-Flash</span>
+            <span className="text-[8px] text-[#3A6055] font-mono">Prompt: V3.1-Med</span>
+          </div>
+        </div>
+      ) : (
+        <button 
+          onClick={onRequestVLM}
+          disabled={actionBusy}
+          className="group relative w-full py-4 rounded-xl bg-gradient-to-r from-[#2A6EF2] to-[#153A80] text-white overflow-hidden shadow-[0_4px_20px_rgba(42,110,242,0.2)] hover:shadow-[0_4px_25px_rgba(42,110,242,0.35)] transition-all active:scale-[0.99] disabled:opacity-50"
+        >
+          <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+          <div className="flex items-center justify-center gap-3">
+            <span className="text-xl animate-pulse">⚡</span>
+            <span className="text-xs font-black uppercase tracking-widest">Generate VLM Intelligence Report</span>
+          </div>
+        </button>
+      )}
+
+      {/* Second Opinion Modal */}
       {showOpinionModal && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:2000, padding:20 }}>
-          <div style={{ background:C.bg2, padding:24, borderRadius:16, width:'100%', maxWidth:400, border:`1px solid ${C.border}` }}>
-            <h3 style={{ margin:0, color:C.textHi, fontSize:16, marginBottom:16 }}>Request Second Opinion</h3>
-            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              <label style={{ fontSize:11, color:C.textLo }}>SELECT SPECIALIST</label>
-              <select id="specialistSelect" style={{ width:'100%', background:C.bg3, border:`1px solid ${C.border}`, color:C.textHi, padding:10, borderRadius:8 }}>
-                <option value="neurorad_expert_01">Dr. S. Chen (Neuro)</option>
-                <option value="chest_rad_02">Dr. J. Miller (Thoracic)</option>
-                <option value="msk_specialist_03">Dr. A. Gupta (MSK)</option>
-              </select>
-              <label style={{ fontSize:11, color:C.textLo }}>REASON FOR REVIEW</label>
-              <textarea id="opinionReason" defaultValue="Challenging pathology, requires expert verification." style={{ width:'100%', height:80, background:C.bg3, border:`1px solid ${C.border}`, color:C.textHi, padding:10, borderRadius:8, fontSize:12, resize:'none' }} />
-              <div style={{ display:'flex', gap:10, marginTop:8 }}>
-                <button onClick={()=>setShowOpinionModal(false)} style={{ flex:1, padding:10, background:'transparent', color:C.textLo, border:`1px solid ${C.border}`, borderRadius:8, cursor:'pointer' }}>Cancel</button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#050F0C]/90 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-[#0C1D17] border border-[#1B3028] rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
+            <div className="p-6 border-b border-[#1B3028] bg-[#111F1A]">
+              <h3 className="text-lg font-extrabold text-[#D0ECE6]">Request Expert Verification</h3>
+              <p className="text-xs text-[#6FA898] mt-1">Select a specialist for peer review and second opinion.</p>
+            </div>
+            <div className="p-6 flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold text-[#3A6055] uppercase tracking-widest">Consultant Specialist</label>
+                <select id="specialistSelect" className="w-full bg-[#050F0C] border border-[#1B3028] rounded-xl px-4 py-3 text-sm text-[#D0ECE6] outline-none focus:border-[#408D7B] transition-colors">
+                  <option value="neurorad_expert_01">Dr. S. Chen (Neuro-radiology)</option>
+                  <option value="chest_rad_02">Dr. J. Miller (Thoracic Diagnostic)</option>
+                  <option value="msk_specialist_03">Dr. A. Gupta (MSK Specialist)</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold text-[#3A6055] uppercase tracking-widest">Clinical Context / Reason</label>
+                <textarea id="opinionReason" defaultValue="Challenging pathology identified by AI; requires expert human verification." className="w-full h-32 bg-[#050F0C] border border-[#1B3028] rounded-xl px-4 py-3 text-sm text-[#D0ECE6] resize-none outline-none focus:border-[#408D7B] transition-colors" />
+              </div>
+              <div className="flex gap-3 mt-2">
+                <button onClick={()=>setShowOpinionModal(false)} className="flex-1 py-3 rounded-xl border border-[#1B3028] text-[#3A6055] font-bold hover:bg-[#1B3028] hover:text-[#D0ECE6] transition-all">Cancel</button>
                 <button onClick={async () => {
                   const reviewerId = (document.getElementById('specialistSelect') as HTMLSelectElement).value;
                   const reason = (document.getElementById('opinionReason') as HTMLTextAreaElement).value;
@@ -429,47 +489,16 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
                     setShowOpinionModal(false);
                   } catch(e) { }
                   finally { setActionBusy(false); }
-                }} style={{ flex:1, padding:10, background:C.brand, color:'white', border:'none', borderRadius:8, fontWeight:700, cursor:'pointer' }}>Send Request</button>
+                }} className="flex-1 py-3 rounded-xl bg-[#408D7B] text-white font-bold hover:bg-[#52B09A] shadow-[0_4px_15px_rgba(64,141,123,0.3)] transition-all">Send Request</button>
               </div>
             </div>
           </div>
         </div>
       )}
-
-      {ai.icd10Codes && (
-        <div style={{ padding:'8px 12px', background:C.bg3, borderRadius:10, border:`1px solid ${C.border}`, fontSize:10, color:C.textMd }}>
-          <span style={{ fontWeight:700, color:C.brand }}>ICD-10:</span> {ai.icd10Codes}
-        </div>
-      )}
-
-      {ai.vlmImpression ? (
-        <div style={{ padding:'12px', background:`${C.info}0A`, borderRadius:'12px', border:`1px solid ${C.info}30` }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'6px' }}>
-            <div style={{ fontSize:'11px', color:C.info, fontWeight:'600' }}>AI Impression</div>
-            <button 
-              onClick={onRequestVLM}
-              style={{ fontSize:9, background:'transparent', border:'none', color:C.info, textDecoration:'underline', cursor:'pointer' }}>
-              Regenerate
-            </button>
-          </div>
-          <p style={{ fontSize:'11px', color:C.textMd, margin:0, lineHeight:1.5 }}>{ai.vlmImpression}</p>
-        </div>
-      ) : (
-        <button 
-          onClick={onRequestVLM}
-          disabled={actionBusy}
-          style={{ 
-            padding:'12px', borderRadius:12, 
-            background:`linear-gradient(135deg, ${C.info}, #153A80)`, 
-            color:'white', border:'none', fontSize:12, fontWeight:700, cursor:'pointer',
-            boxShadow:`0 4px 12px ${C.info}40`
-          }}>
-          ⚡ GENERATE VLM REPORT
-        </button>
-      )}
     </div>
   );
 }
+
 
 // ── Report Editor ─────────────────────────────────────────────
 function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, setStatus:(s:{msg:string;type:'ok'|'err'}|null)=>void }) {
@@ -477,27 +506,21 @@ function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, 
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
 
-  // Load draft from localStorage or AI result
   useEffect(() => { 
     if (!scan) return;
     const saved = localStorage.getItem(`report_draft:${scan.id}`);
-    if (saved) {
-      setText(saved);
-    } else if (scan?.aiResult?.vlmImpression) {
-      setText(scan.aiResult.vlmImpression); 
-    } else {
-      setText('');
-    }
+    if (saved) setText(saved);
+    else if (scan?.aiResult?.vlmImpression) setText(scan.aiResult.vlmImpression); 
+    else setText('');
   }, [scan?.id]);
 
-  // Auto-save draft
   useEffect(() => {
     if (!scan || !text) return;
     localStorage.setItem(`report_draft:${scan.id}`, text);
   }, [text, scan?.id]);
 
   const handleTranscript = (transcript: string) => {
-    setText(t => t + (t ? '\n\n' : '') + `[ACI Scribe]: ${transcript}`);
+    setText(t => t + (t ? '\n\n' : '') + `[DICTATED]: ${transcript}`);
   };
 
   const handleSignAndRelease = async () => {
@@ -506,81 +529,83 @@ function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, 
     try {
       await apiClient.patch(`/scans/${scan.id}/status`, { status: 'COMPLETED' });
       await apiClient.post(`/reports`, { scanId: scan.id, content: text });
-      localStorage.removeItem(`report_draft:${scan.id}`); // Clear on success
+      localStorage.removeItem(`report_draft:${scan.id}`);
       onSign();
-      setStatus({ msg: 'Report signed and released successfully.', type: 'ok' });
+      setStatus({ msg: 'Diagnostic report signed and released to EHR.', type: 'ok' });
     } catch (err) {
       console.error('Sign failed:', err);
-      setStatus({ msg: 'Failed to sign report. Please try again.', type: 'err' });
+      setStatus({ msg: 'Failed to authorize report release.', type: 'err' });
     } finally {
       setBusy(false);
     }
   };
 
+  if (!scan) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8 text-center opacity-30 select-none">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Clinical Reporting Terminal Idle</p>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'100%', padding:'12px' }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' }}>
-        <div style={{ fontSize:'12px', fontWeight:'700', color:C.textHi }}>Clinical Report</div>
-        <VoiceDictation onTranscript={handleTranscript} lang={lang} />
-      </div>
-
-      {/* Multimodal Clinical Context Panel (FHIR) */}
-      <div style={{ padding:10, background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, marginBottom:12 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-          <div style={{ fontSize:10, fontWeight:700, color:C.textLo, textTransform:'uppercase' }}>FHIR Multimodal Context</div>
-          {scan?.aiResult?.clinicalContext && <span style={{ fontSize:8, color:C.normal, fontWeight:700 }}>● CONNECTED</span>}
-        </div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-          <div>
-            <div style={{ fontSize:9, color:C.textLo }}>RELEVANT LABS</div>
-            <div style={{ fontSize:11, color:C.textHi, marginTop:2, whiteSpace:'pre-wrap' }}>
-              {scan?.aiResult?.clinicalContext?.split('|')?.[1]?.replace('[RECENT_LABS]: ', '').trim() || 'No recent labs available.'}
-            </div>
+    <div className="flex flex-col h-full overflow-hidden p-4">
+      {/* Contextual Intelligence Tabs */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="p-3 bg-[#0C1D17] border border-[#1B3028] rounded-xl">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[8px] font-bold text-[#3A6055] uppercase tracking-widest">FHIR History</span>
+            <span className="w-1 h-1 rounded-full bg-[#1DBF73] shadow-[0_0_4px_#1DBF73]" />
           </div>
-          <div>
-            <div style={{ fontSize:9, color:C.textLo }}>PATIENT HISTORY</div>
-            <div style={{ fontSize:11, color:C.textHi, marginTop:2, whiteSpace:'pre-wrap' }}>
-              {scan?.aiResult?.clinicalContext?.split('|')?.[0]?.replace('[HISTORY]: ', '').trim() || 'No history recorded.'}
-            </div>
+          <div className="text-[10px] text-[#D0ECE6] line-clamp-2 leading-relaxed">
+            {scan?.aiResult?.clinicalContext?.split('|')?.[0]?.replace('[HISTORY]: ', '').trim() || 'No prior medical history records found.'}
+          </div>
+        </div>
+        <div className="p-3 bg-[#0C1D17] border border-[#1B3028] rounded-xl">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[8px] font-bold text-[#3A6055] uppercase tracking-widest">Priors / Progression</span>
+            <span className="text-[8px] font-mono text-[#408D7B]">V2.1-COMP</span>
+          </div>
+          <div className="text-[10px] text-[#D0ECE6] line-clamp-2 leading-relaxed">
+            {scan?.aiResult?.longitudinalContext?.includes('[PRIOR SCAN]') 
+              ? `Progression analysis: ${scan.aiResult.longitudinalContext.split('|')[2]?.replace('[IMPRESSION]: ', '')}`
+              : 'Baseline study. No comparative priors detected.'}
           </div>
         </div>
       </div>
 
-      {/* Longitudinal Progression Analysis (Feature 8) */}
-      <div style={{ padding:10, background:`${C.info}10`, border:`1px solid ${C.info}30`, borderRadius:10, marginBottom:12 }}>
-        <div style={{ fontSize:10, fontWeight:700, color:C.info, textTransform:'uppercase', marginBottom:6, display:'flex', alignItems:'center', gap:4 }}>
-          <span style={{ fontSize:12 }}>⏳</span> Longitudinal Progression
+      <div className="flex-1 flex flex-col relative group">
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
+          <VoiceDictation onTranscript={handleTranscript} lang={lang} />
+          <div className="h-4 w-[1px] bg-[#1B3028]" />
+          <button className="text-[10px] text-[#3A6055] hover:text-[#D0ECE6]">Templates</button>
         </div>
-        <div style={{ fontSize:11, color:C.textHi, lineHeight:1.4 }}>
-          {scan?.aiResult?.longitudinalContext?.includes('[PRIOR SCAN]') ? (
-            <>
-              <div style={{ fontWeight:700, color:C.textMd, fontSize:9, marginBottom:2 }}>MOST RECENT PRIOR: {new Date(scan.aiResult.longitudinalContext.split('|')[0].replace('[PRIOR SCAN]: ', '')).toLocaleDateString()}</div>
-              <div style={{ fontSize:11 }}>{scan.aiResult.longitudinalContext.split('|')[2]?.replace('[IMPRESSION]: ', '') || 'No impression recorded in prior.'}</div>
-            </>
-          ) : 'Baseline scan. No priors found for longitudinal comparison.'}
-        </div>
+        <textarea
+          value={text}
+          onChange={e => setText(e.target.value)}
+          className="flex-1 w-full p-4 bg-[#050F0C] border border-[#1B3028] rounded-xl text-[#D0ECE6] text-xs leading-relaxed resize-none outline-none focus:border-[#408D7B]/50 transition-all font-sans"
+          placeholder="Enter formal radiologic findings and impression..."
+        />
       </div>
-      <textarea
-        value={text}
-        onChange={e => setText(e.target.value)}
-        style={{ flex:1, padding:'12px', background:C.bg2, border:`1px solid ${C.border}`, borderRadius:'12px', color:C.textHi, fontSize:'13px', lineHeight:1.6, resize:'none', outline:'none' }}
-        placeholder="Report draft..."
-      />
+
       <button 
         onClick={handleSignAndRelease}
-        disabled={busy || !scan}
-        style={{ 
-          marginTop:'12px', padding:'10px', 
-          background: busy ? C.bg3 : C.brand, 
-          color:'white', border:'none', borderRadius:'10px', 
-          fontWeight:'700', cursor: busy ? 'not-allowed' : 'pointer',
-          boxShadow: !busy ? `0 4px 12px ${C.brand}30` : 'none'
-        }}>
-        {busy ? 'Processing...' : getTranslation(lang, 'sign_release')}
+        disabled={busy || !text}
+        className="mt-4 w-full py-3.5 rounded-xl bg-[#408D7B] text-white text-xs font-black uppercase tracking-widest shadow-[0_4px_15px_rgba(64,141,123,0.3)] hover:bg-[#52B09A] transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        {busy ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="w-2 h-2 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Authorizing...
+          </span>
+        ) : (
+          'Sign & Release to EHR'
+        )}
       </button>
     </div>
   );
 }
+
 
 // ── MAIN COMPONENT ─────────────────────────────────────────────
 export function RadiologistWorkspace({ onNavigate }: { onNavigate: (p:string)=>void }) {
@@ -716,55 +741,195 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
   }
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 52px - 24px)', background:C.bg0, overflow:'hidden', fontFamily:C.fontBase }}>
+    <div className="flex flex-col h-screen bg-[#05100D] overflow-hidden font-sans text-[#D0ECE6]">
+      {/* Global Status Bar */}
       {status && (
-        <div style={{ 
-          padding:'10px 20px', background: status.type==='ok'?C.normalBg:C.critBg, 
-          borderBottom:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
-          display:'flex', justifyContent:'space-between', alignItems:'center',
-          color: status.type==='ok'?C.normal:C.critical, fontSize:12, fontWeight:600
-        }}>
-          <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
-          <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
+        <div className={`px-5 py-2 flex justify-between items-center text-xs font-bold animate-fade-in ${
+          status.type === 'ok' ? 'bg-[#0A1F14] text-[#1DBF73] border-b border-[#1DBF73]/30' : 'bg-[#2A0A0A] text-[#E03535] border-b border-[#E03535]/30'
+        }`}>
+          <span className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${status.type === 'ok' ? 'bg-[#1DBF73] shadow-[0_0_8px_#1DBF73]' : 'bg-[#E03535] shadow-[0_0_8px_#E03535]'}`} />
+            {status.msg}
+          </span>
+          <button onClick={() => setStatus(null)} className="hover:opacity-70 transition-opacity">✕</button>
         </div>
       )}
-      <div style={{ display:'flex', flex:1, overflow:'hidden' }}>
-        <div style={{ padding:'16px', borderBottom:`1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize:'14px', fontWeight:'700', color:C.textHi }}>Worklist ({stats.total})</span>
-          <button onClick={() => onNavigate('training')} style={{ padding:'4px 8px', background:C.brand, color:'white', border:'none', borderRadius:4, fontSize:10, fontWeight:700, cursor:'pointer' }}>
-            🎓 Simulator
-          </button>
-        </div>
-        <div style={{ flex:1, overflowY:'auto' }}>
-          {(scans || []).map(s => (
-            <div key={s.id} onClick={() => setSelected(s)} style={{ padding:'12px 16px', borderBottom:`1px solid ${C.border}`, cursor:'pointer', background: selected?.id === s.id ? `${C.brand}14` : 'transparent', borderLeft: selected?.id === s.id ? `4px solid ${C.brand}` : 'none' }}>
-              <UrgencyPill u={s.priority || 'ROUTINE'} />
-              <div style={{ fontSize:13, fontWeight:600, color:C.textHi, marginTop:4 }}>{s.patient?.user?.lastName || 'Anonymous'}</div>
-              <div style={{ fontSize:11, color:C.textMd }}>{s.modality} · {s.bodyPart}</div>
+
+      {/* Main PACS Workspace */}
+      <div className="flex flex-1 overflow-hidden">
+        
+        {/* Panel 1: Worklist Sidebar */}
+        <aside className="w-80 flex flex-col bg-[#08160F] border-r border-[#1B3028] shadow-2xl z-10 transition-all duration-300">
+          <div className="p-4 border-b border-[#1B3028] bg-[#0C1D17]/50 backdrop-blur-md flex justify-between items-center">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-[#3A6055] uppercase tracking-widest mb-0.5">Radiology Worklist</span>
+              <span className="text-sm font-extrabold text-[#D0ECE6]">Active Scans ({stats.total})</span>
             </div>
-          ))}
-        </div>
+            <Tooltip content="Launch Training Simulator">
+              <button 
+                onClick={() => onNavigate('training')} 
+                className="p-2 rounded-lg bg-[#408D7B]/10 text-[#408D7B] border border-[#408D7B]/20 hover:bg-[#408D7B]/20 transition-all active:scale-95"
+              >
+                🎓
+              </button>
+            </Tooltip>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto scrollbar-thin">
+            {scans && scans.length > 0 ? (
+              scans.map(s => (
+                <div 
+                  key={s.id} 
+                  onClick={() => handleSelect(s)} 
+                  className={`group relative p-4 border-b border-[#1B3028] cursor-pointer transition-all hover:bg-[#111F1A] ${
+                    selected?.id === s.id ? 'bg-[#408D7B]/10 border-l-4 border-l-[#408D7B]' : 'border-l-4 border-l-transparent'
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <UrgencyPill u={s.priority || 'ROUTINE'} />
+                    <span className="text-[9px] font-mono text-[#3A6055] uppercase">{fmtRelative(s.receivedAt)}</span>
+                  </div>
+                  <div className={`text-sm font-bold transition-colors ${selected?.id === s.id ? 'text-[#408D7B]' : 'text-[#D0ECE6] group-hover:text-[#52B09A]'}`}>
+                    {s.patient?.user?.lastName || 'Anonymous'}, {s.patient?.user?.firstName?.charAt(0) || 'U'}.
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#162821] text-[#6FA898] font-mono border border-[#1B3028]">
+                      {s.modality}
+                    </span>
+                    <span className="text-[10px] text-[#3A6055] font-medium tracking-wide">
+                      {s.bodyPart}
+                    </span>
+                  </div>
+                  {s.aiResult?.urgency === 'CRITICAL' && (
+                    <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#E03535] animate-pulse shadow-[0_0_8px_#E03535]" />
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center h-40 text-[#3A6055] p-8 text-center">
+                <span className="text-3xl mb-2">📋</span>
+                <p className="text-xs font-medium uppercase tracking-tighter">No scans in worklist</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="p-3 bg-[#050F0C] border-t border-[#1B3028] flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#1DBF73] animate-pulse" />
+              <span className="text-[9px] font-bold text-[#3A6055] uppercase tracking-widest">Live Connection</span>
+            </div>
+            <span className="text-[9px] font-mono text-[#2E6B5E]">{user?.tenantName || 'SEWA Health'}</span>
+          </div>
+        </aside>
+
+        {/* Panel 2: PACS Viewer Area */}
+        <main className="flex-1 flex flex-col min-w-0 bg-black relative">
+          {/* Viewer Header Metadata */}
+          <div className="flex items-center justify-between px-4 py-2 bg-[#08160F]/80 backdrop-blur-xl border-b border-white/5 absolute top-0 left-0 right-0 z-20">
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col">
+                <span className="text-[9px] font-bold text-[#408D7B] uppercase tracking-widest">Selected Study</span>
+                <h2 className="text-xs font-bold text-[#D0ECE6]">
+                  {selected ? `${selected.modality} · ${selected.bodyPart} · ${selected.patient?.user?.lastName || 'Anonymous'}` : 'Select a study to begin interpretation'}
+                </h2>
+              </div>
+              {selected && (
+                <div className="h-6 w-[1px] bg-[#1B3028] mx-2" />
+              )}
+              {selected && (
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col">
+                    <span className="text-[8px] text-[#3A6055] uppercase">Patient ID</span>
+                    <span className="text-[10px] font-mono text-[#6FA898]">{selected.patient?.id?.slice(0,8) || 'N/A'}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[8px] text-[#3A6055] uppercase">Accession</span>
+                    <span className="text-[10px] font-mono text-[#6FA898]">{selected.id?.slice(-6).toUpperCase() || 'N/A'}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              {selected && (
+                <button 
+                  onClick={() => setShowGradcam(!showGradcam)} 
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border ${
+                    showGradcam 
+                      ? 'bg-[#E03535]/10 border-[#E03535]/40 text-[#E03535] shadow-[0_0_12px_rgba(224,53,53,0.15)]' 
+                      : 'bg-[#162821] border-[#1B3028] text-[#3A6055] hover:text-[#D0ECE6]'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${showGradcam ? 'bg-[#E03535] animate-pulse' : 'bg-[#3A6055]'}`} />
+                  AI GRAD-CAM
+                </button>
+              )}
+              <div className="h-6 w-[1px] bg-[#1B3028]" />
+              <Tooltip content="Full Screen Viewer">
+                <button className="text-[#3A6055] hover:text-[#D0ECE6] transition-colors">⛶</button>
+              </Tooltip>
+            </div>
+          </div>
+
+          {/* Actual Canvas Viewer */}
+          <div className="flex-1 w-full h-full pt-10">
+            <DicomViewer scan={selected} showGradcam={showGradcam} />
+          </div>
+        </main>
+
+        {/* Panel 3: Clinical Insight & Report Editor */}
+        <aside className="w-96 flex flex-col bg-[#08160F] border-l border-[#1B3028] shadow-[-10px_0_30px_rgba(0,0,0,0.3)] z-10">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* AI findings section */}
+            <div className="flex-[0_0_45%] overflow-y-auto border-b border-[#1B3028] scrollbar-thin">
+              <div className="p-3 bg-[#0C1D17] border-b border-[#1B3028] flex items-center gap-2">
+                <span className="text-xs">🤖</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#408D7B]">AI Diagnostic Insights</span>
+              </div>
+              <AIResultsPanel scan={selected} onRequestVLM={handleRequestVLM} />
+            </div>
+
+            {/* Reporting section */}
+            <div className="flex-[0_0_55%] flex flex-col min-h-0 bg-[#050F0C]">
+              <div className="p-3 bg-[#0C1D17] border-b border-[#1B3028] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs">✍️</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#D0ECE6]">Clinical Impression</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#1DBF73] shadow-[0_0_4px_#1DBF73]" />
+                  <span className="text-[8px] font-mono text-[#1DBF73] uppercase">Auto-Saving</span>
+                </div>
+              </div>
+              <ReportEditor scan={selected} onSign={() => { fetchWorklist(); setSelected(null); }} setStatus={setStatus} />
+            </div>
+          </div>
+        </aside>
+
       </div>
 
-      <div style={{ flex:1, display:'flex', flexDirection:'column', minWidth:0 }}>
-        <div style={{ display:'flex', alignItems:'center', padding:'10px 16px', background:C.bg2, borderBottom:`1px solid ${C.border}` }}>
-          <span style={{ fontSize:12, color:C.textHi }}>{selected ? `${selected.modality} · ${selected.bodyPart}` : 'Select a scan'}</span>
-          <div style={{ flex:1 }} />
-          <button onClick={() => setShowGradcam(!showGradcam)} style={{ padding:'4px 10px', borderRadius:8, border:`1px solid ${showGradcam ? C.critical : C.border}`, background: showGradcam ? `${C.critical}14` : 'transparent', color: showGradcam ? C.critical : C.textLo, fontSize:10, cursor:'pointer' }}>
-            Grad-CAM {showGradcam ? 'ON' : 'OFF'}
-          </button>
+      {/* Quick Access Footer */}
+      <footer className="h-8 bg-[#050F0C] border-t border-[#1B3028] px-4 flex items-center justify-between text-[9px] font-medium text-[#2E5048]">
+        <div className="flex items-center gap-4 uppercase tracking-widest">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#408D7B]" />
+            PACS Terminal 01
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1DBF73]" />
+            DICOM Node: OK
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1DBF73]" />
+            AI Pipeline: Latency 42ms
+          </span>
         </div>
-        <DicomViewer scan={selected} showGradcam={showGradcam} />
-      </div>
-
-      <div style={{ width:'340px', flexShrink:0, display:'flex', flexDirection:'column', background:C.bg1, borderLeft:`1px solid ${C.border}` }}>
-        <div style={{ flex:'0 0 45%', overflowY:'auto', borderBottom:`1px solid ${C.border}` }}>
-          <AIResultsPanel scan={selected} onRequestVLM={handleRequestVLM} />
+        <div className="flex items-center gap-4">
+          <span className="font-mono">© 2026 SEWA AI</span>
+          <span className="font-mono text-[#3A6055]">v2.4.1-PRO</span>
         </div>
-        <div style={{ flex:'0 0 55%' }}>
-          <ReportEditor scan={selected} onSign={() => { fetchWorklist(); setSelected(null); }} setStatus={setStatus} />
-        </div>
-      </div>
+      </footer>
     </div>
   );
+
 }

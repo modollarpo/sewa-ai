@@ -58,72 +58,159 @@ export function RadiologySimulator({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:2000, background:'rgba(5,15,12,0.98)', backdropFilter:'blur(20px)', display:'flex', alignItems:'center', justifyContent:'center', padding:20, fontFamily:C.F }}>
-      <div style={{ width:'100%', maxWidth:600, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:24, overflow:'hidden', boxShadow:'0 30px 60px rgba(0,0,0,0.6)' }}>
+    <div className="fixed inset-0 z-[2000] bg-[#05100D]/98 backdrop-blur-[40px] flex items-center justify-center p-6 font-sans text-[#D0ECE6] animate-fade-in">
+      
+      {/* Background Lighting */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#408D7B]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#E03535]/5 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="relative w-full max-w-2xl bg-[#08160F] border border-[#1B3028] rounded-[2.5rem] overflow-hidden shadow-[0_32px_128px_rgba(0,0,0,0.8)] animate-slide-up">
         
         {/* Header */}
-        <div style={{ padding:'20px 24px', borderBottom:`1px solid ${C.border}`, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <div>
-            <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase' }}>SEWA Sim v1.0</div>
-            <div style={{ fontSize:16, fontWeight:800, color:C.textHi }}>Radiology Triage Training</div>
+        <header className="px-8 py-6 border-b border-[#1B3028] flex justify-between items-center bg-[#0C1D17]/50 backdrop-blur-md">
+          <div className="space-y-1">
+            <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.3em]">SEWA_SIMULATION_NODE_V1.0</div>
+            <h1 className="text-lg font-black tracking-tight text-[#D0ECE6]">Clinical Triage Training</h1>
           </div>
-          <button onClick={onClose} style={{ background:'none', border:'none', color:C.textLo, fontSize:20, cursor:'pointer' }}>✕</button>
-        </div>
+          <button 
+            onClick={onClose} 
+            className="w-10 h-10 rounded-xl bg-[#111F1A] border border-[#1B3028] flex items-center justify-center text-[#3A6055] hover:text-[#D0ECE6] transition-colors"
+          >
+            ✕
+          </button>
+        </header>
 
         {gameState === 'playing' ? (
-          <div style={{ padding:32 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:24, fontSize:12, color:C.textLo, fontFamily:C.FM }}>
-              <span>CASE {currentIdx + 1} OF {cases.length}</span>
-              <span>SCORE: {score}</span>
+          <div className="p-8 lg:p-10 space-y-8">
+            
+            {/* Status Bar */}
+            <div className="flex justify-between items-center text-[10px] font-black text-[#3A6055] uppercase tracking-[0.2em] font-mono">
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-[#408D7B] animate-pulse"></span>
+                PHASE {currentIdx + 1} OF {cases.length}
+              </div>
+              <div className="px-3 py-1 rounded-full bg-[#111F1A] border border-[#1B3028] text-[#408D7B]">
+                ACCURACY_SCORE: {score}
+              </div>
             </div>
 
-            {/* Simulated DICOM Viewport */}
-            <div style={{ width:'100%', aspectRatio:'4/3', background:'#000', borderRadius:16, border:`2px solid ${C.border}`, position:'relative', marginBottom:24, display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
-               <div style={{ color:'#222', fontSize:64 }}>🩻</div>
-               <div style={{ position:'absolute', top:12, left:12, fontSize:10, color:'#444', fontFamily:C.FM }}>
-                 {currentCase.type}<br/>WW: 80 / WL: 40
-               </div>
-               <div style={{ position:'absolute', inset:0, background:'radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%)' }}/>
-               
-               {answered && (
-                 <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.7)', backdropFilter:'blur(4px)' }}>
-                   <div style={{ textAlign:'center' }}>
-                     <div style={{ fontSize:48, marginBottom:12 }}>{lastResult.correct ? '✅' : '❌'}</div>
-                     <div style={{ fontSize:18, fontWeight:700, color:lastResult.correct ? C.normal : C.critical }}>{lastResult.correct ? 'CORRECT' : 'INCORRECT'}</div>
-                     <div style={{ fontSize:13, color:C.textHi, marginTop:8 }}>Diagnosis: {lastResult.diagnosis}</div>
-                     <button onClick={nextCase} style={{ marginTop:24, padding:'10px 24px', background:C.brand, border:'none', borderRadius:8, color:'white', fontWeight:700, cursor:'pointer' }}>Next Case →</button>
-                   </div>
-                 </div>
-               )}
+            {/* Immersive Viewport */}
+            <div className="relative group">
+              <div className="w-full aspect-[4/3] bg-black rounded-3xl border-2 border-[#1B3028] overflow-hidden relative shadow-inner ring-1 ring-[#408D7B]/10">
+                
+                {/* Simulated Scan Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-8xl opacity-10 grayscale brightness-50">🩻</span>
+                </div>
+
+                {/* Scan Metadata */}
+                <div className="absolute top-6 left-6 font-mono text-[9px] text-[#3A6055] leading-relaxed uppercase">
+                  NODE: {currentCase.type}<br/>
+                  DYNAMIC: WW_80 / WL_40<br/>
+                  RESOLUTION: 512x512
+                </div>
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+
+                {answered && (
+                  <div className="absolute inset-0 bg-[#05100D]/90 backdrop-blur-xl flex items-center justify-center animate-fade-in">
+                    <div className="text-center space-y-6 max-w-sm px-8">
+                      <div className={`text-6xl animate-bounce-short ${lastResult.correct ? 'drop-shadow-[0_0_20px_#1DBF73]' : 'drop-shadow-[0_0_20px_#E03535]'}`}>
+                        {lastResult.correct ? '✅' : '❌'}
+                      </div>
+                      <div className="space-y-2">
+                        <div className={`text-xl font-black uppercase tracking-tight ${lastResult.correct ? 'text-[#1DBF73]' : 'text-[#E03535]'}`}>
+                          {lastResult.correct ? 'POSITIVE_VALIDATION' : 'VALIDATION_ERROR'}
+                        </div>
+                        <div className="text-xs font-medium text-[#6FA898]">
+                          Confirmed Diagnosis: <span className="text-[#D0ECE6] font-bold">{lastResult.diagnosis}</span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={nextCase} 
+                        className="w-full py-4 rounded-2xl bg-[#408D7B] hover:bg-[#52B09A] text-white text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-[#408D7B]/20 active:scale-95"
+                      >
+                        Proceed to Next Phase →
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div style={{ background:C.bg2, padding:20, borderRadius:16, border:`1px solid ${C.border}`, marginBottom:24 }}>
-              <div style={{ fontSize:11, fontWeight:700, color:C.textLo, marginBottom:8, textTransform:'uppercase' }}>Clinical Information</div>
-              <div style={{ fontSize:14, color:C.textHi, lineHeight:1.5 }}>{currentCase.clinicalInfo}</div>
+            {/* Clinical Intake Card */}
+            <div className="bg-[#0C1D17] border border-[#1B3028] rounded-[2rem] p-6 space-y-4 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 text-4xl">📄</div>
+              <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-[0.2em]">Clinical Intake Node</div>
+              <p className="text-sm font-medium text-[#D0ECE6] leading-relaxed italic">
+                "{currentCase.clinicalInfo}"
+              </p>
             </div>
 
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-              <button onClick={() => handleAnswer('normal')} disabled={answered} style={{ padding:'16px', borderRadius:12, border:`1px solid ${C.border}`, background:C.bg2, color:C.textHi, fontWeight:700, cursor:'pointer' }}>NORMAL</button>
-              <button onClick={() => handleAnswer('critical')} disabled={answered} style={{ padding:'16px', borderRadius:12, border:`1px solid ${C.critical}40`, background:`${C.critical}10`, color:C.critical, fontWeight:700, cursor:'pointer' }}>STAT / CRITICAL</button>
+            {/* Action Matrix */}
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={() => handleAnswer('normal')} 
+                disabled={answered}
+                className="group flex flex-col items-center gap-2 p-6 rounded-2xl bg-[#111F1A] border border-[#1B3028] hover:border-[#408D7B] disabled:opacity-20 transition-all text-center"
+              >
+                <div className="text-[10px] font-black text-[#3A6055] group-hover:text-[#408D7B] uppercase tracking-widest">Action_01</div>
+                <div className="text-sm font-black text-[#D0ECE6] uppercase tracking-tighter">ROUTINE_NORMAL</div>
+              </button>
+              <button 
+                onClick={() => handleAnswer('critical')} 
+                disabled={answered}
+                className="group flex flex-col items-center gap-2 p-6 rounded-2xl bg-[#2A0A0A] border border-[#E03535]/30 hover:border-[#E03535] disabled:opacity-20 transition-all text-center shadow-lg shadow-[#E03535]/5"
+              >
+                <div className="text-[10px] font-black text-[#E03535]/60 group-hover:text-[#E03535] uppercase tracking-widest">Action_02</div>
+                <div className="text-sm font-black text-[#E03535] uppercase tracking-tighter">STAT / CRITICAL</div>
+              </button>
             </div>
           </div>
         ) : (
-          <div style={{ padding:48, textAlign:'center' }}>
-            <div style={{ fontSize:64, marginBottom:24 }}>🎓</div>
-            <h2 style={{ fontSize:28, fontWeight:900, color:C.textHi, margin:'0 0 12px' }}>Training Complete</h2>
-            <div style={{ fontSize:48, fontWeight:900, color:C.brand, fontFamily:C.FM, marginBottom:8 }}>{Math.round((score/cases.length)*100)}%</div>
-            <p style={{ fontSize:14, color:C.textMd, marginBottom:32 }}>
-              You identified {score} out of {cases.length} critical findings correctly.<br/>
-              SEWA AI's baseline for this dataset is 97.4%.
+          <div className="p-16 text-center space-y-10 animate-fade-in">
+            <div className="relative inline-block">
+              <div className="text-7xl">🎓</div>
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-[#408D7B] rounded-full border-4 border-[#08160F] flex items-center justify-center text-xs font-black">100</div>
+            </div>
+            
+            <div className="space-y-2">
+              <h2 className="text-3xl font-black text-[#D0ECE6] tracking-tight uppercase">Simulation Concluded</h2>
+              <p className="text-[#6FA898] font-medium">Diagnostic proficiency assessment finalized.</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+              <div className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-2xl">
+                <div className="text-3xl font-black text-[#408D7B] font-mono">{Math.round((score/cases.length)*100)}%</div>
+                <div className="text-[9px] font-black text-[#3A6055] uppercase tracking-widest mt-2">Accuracy</div>
+              </div>
+              <div className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-2xl">
+                <div className="text-3xl font-black text-[#D0ECE6] font-mono">{score}/{cases.length}</div>
+                <div className="text-[9px] font-black text-[#3A6055] uppercase tracking-widest mt-2">Identified</div>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#3A6055] max-w-xs mx-auto leading-relaxed">
+              SEWA AI's algorithmic baseline for this dataset is 97.4%. Your results have been logged to the clinical registry.
             </p>
-            <button onClick={onClose} style={{ padding:'14px 40px', background:C.brand, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer' }}>Return to Portal</button>
+
+            <button 
+              onClick={onClose} 
+              className="px-10 py-4 rounded-2xl bg-[#408D7B] text-white text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-[#408D7B]/20 active:scale-95 transition-all"
+            >
+              Terminate Session
+            </button>
           </div>
         )}
 
-        {/* Footer info */}
-        <div style={{ padding:'16px 24px', background:C.bg3, borderTop:`1px solid ${C.border}`, fontSize:10, color:C.textLo, textAlign:'center', letterSpacing:'0.05em' }}>
-          NHS CERTIFIED TRAINING DATASET · CLINICAL USE PROHIBITED
-        </div>
+        {/* Footer */}
+        <footer className="px-8 py-4 bg-[#05100D] border-t border-[#1B3028] text-center">
+          <p className="text-[9px] font-black text-[#1B3028] uppercase tracking-[0.4em]">
+            NHS_CERTIFIED_TRAINING_MODULE // CLINICAL_USE_PROHIBITED
+          </p>
+        </footer>
       </div>
     </div>
   );
