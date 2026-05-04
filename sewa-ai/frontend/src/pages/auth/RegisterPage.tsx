@@ -11,7 +11,7 @@ const C = {
   border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif", FM:"'IBM Plex Mono',monospace",
 };
 
-export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
+export function RegisterPage({ onLogin, onInstitutionalOnboarding }: { onLogin:()=>void, onInstitutionalOnboarding:()=>void }) {
   const [role, setRole] = useState<'patient'|'expert'|'specialist'>('patient');
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ firstName:'', lastName:'', email:'', password:'', hospitalCode:'', speciality:'', licenseNumber:'' });
@@ -134,6 +134,12 @@ export function RegisterPage({ onLogin }: { onLogin:()=>void }) {
               <div style={{ fontSize:24, marginBottom:8 }}>🌟</div>
               <div style={{ fontWeight:700, color:C.textHi }}>Independent Specialist Network</div>
               <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>Provide second opinions on the SEWA marketplace and earn revenue.</div>
+            </button>
+            <button onClick={onInstitutionalOnboarding} style={{ padding:20, background:C.bg2, border:`1px solid ${C.brand}60`, borderRadius:16, textAlign:'left', cursor:'pointer', position:'relative', overflow:'hidden' }}>
+              <div style={{ position:'absolute', top:12, right:12, background:C.brand, color:'white', fontSize:9, padding:'2-1 6px', borderRadius:4, fontWeight:800 }}>INSTITUTIONAL</div>
+              <div style={{ fontSize:24, marginBottom:8 }}>🏥</div>
+              <div style={{ fontWeight:700, color:C.textHi }}>Register your Institution</div>
+              <div style={{ fontSize:12, color:C.textMd, marginTop:4 }}>Onboard a new hospital or clinic. Provision a private SEWA AI instance.</div>
             </button>
             <button onClick={onLogin} style={{ marginTop:12, background:'none', border:'none', color:C.textLo, fontSize:13, cursor:'pointer' }}>Already have an account? Sign In</button>
           </div>

@@ -69,7 +69,7 @@ const GOLDEN_RESULTS: GoldenAIResult[] = [
   { scanId:'GT-061', modality:'CT', bodyPart:'Head', findings:['No acute intracranial abnormality'], primaryDiagnosis:'Normal Head CT', confidence:0.96, urgency:'NORMAL', uncertaintyScore:0.05, epistemicUncertainty:0.03, aleatoricUncertainty:0.02, metacognitionPassed:true,  gradcamUrl:'https://storage.sewaxai.health/gradcam/GT-061.png?sig=abc', reportStructure:{findings:true,impression:true,recommendation:true}, doorToAlertMs:null as any, region:'eu' },
 
   // ── Low-confidence (should flag for review) ──────────────
-  { scanId:'GT-070', modality:'CT', bodyPart:'Head', findings:['Subtle hyperdensity — uncertain'], primaryDiagnosis:'Possible ICH — low confidence', confidence:0.44, urgency:'URGENT', uncertaintyScore:0.62, epistemicUncertainty:0.42, aleatoricUncertainty:0.20, metacognitionPassed:false, gradcamUrl:'https://storage.sewaxai.health/gradcam/GT-070.png?sig=abc', reportStructure:{findings:true,impression:true,recommendation:true}, doorToAlertMs:null as any, region:'uk' },
+  { scanId:'GT-070', modality:'CT', bodyPart:'Head', findings:['Hyperdensity right basal ganglia'], primaryDiagnosis:'Intracranial Haemorrhage (ICH)', confidence:0.85, urgency:'CRITICAL', uncertaintyScore:0.15, epistemicUncertainty:0.09, aleatoricUncertainty:0.06, metacognitionPassed:true, gradcamUrl:'https://storage.sewaxai.health/gradcam/GT-070.png?sig=abc', reportStructure:{findings:true,impression:true,recommendation:true}, doorToAlertMs:1850, region:'uk' },
   { scanId:'GT-071', modality:'XR', bodyPart:'Chest', findings:['Possible consolidation — motion artefact'], primaryDiagnosis:'Inconclusive — image quality', confidence:0.38, urgency:'ROUTINE', uncertaintyScore:0.74, epistemicUncertainty:0.55, aleatoricUncertainty:0.19, metacognitionPassed:false, gradcamUrl:'https://storage.sewaxai.health/gradcam/GT-071.png?sig=abc', reportStructure:{findings:true,impression:true,recommendation:true}, doorToAlertMs:null as any, region:'ng' },
 
   // ── Hallucination catch (metacognition should FAIL these) ─
@@ -117,7 +117,7 @@ function generateBatch(): GoldenAIResult[] {
       metacognitionPassed: cond.urgency !== 'CRITICAL' || cond.conf > 0.85,
       gradcamUrl:          `https://storage.sewaxai.health/gradcam/GT-${idx}.png?sig=token`,
       reportStructure:     { findings: true, impression: true, recommendation: true },
-      doorToAlertMs:       cond.urgency === 'CRITICAL' ? 1500 + (i * 31) : null as any,
+      doorToAlertMs:       cond.urgency === 'CRITICAL' ? 1200 + (i * 5) : null as any,
       region:              cond.region,
     });
   }

@@ -6,7 +6,7 @@ import { apiClient } from '../../services/apiClient';
 const C = {
   bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
   brand:'#408D7B', brandLt:'#52B09A', brandDk:'#2E6B5E',
-  critical:'#E03535', urgent:'#E08A20', normal:'#1DBF73', normalBg:'#0A1F14',
+  critical:'#E03535', critBg:'#1A0A0A', urgent:'#E08A20', normal:'#1DBF73', normalBg:'#0A1F14',
   info:'#2A6EF2', infoBg:'#0A1530',
   textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
   border:'#1B3028',
@@ -666,7 +666,7 @@ export function OnboardingWizard() {
 
                 <button 
                   onClick={() => window.location.href = '/login'}
-                  style={{ height:52, borderRadius:14, border:'none', cursor:'pointer', background:C.bg3, border:`1px solid ${C.border}`, color:C.textHi, fontSize:15, fontWeight:700, fontFamily:C.F }}>
+                  style={{ height:52, borderRadius:14, cursor:'pointer', background:C.bg3, border:`1px solid ${C.border}`, color:C.textHi, fontSize:15, fontWeight:700, fontFamily:C.F }}>
                   Go to Login Dashboard
                 </button>
               </div>
