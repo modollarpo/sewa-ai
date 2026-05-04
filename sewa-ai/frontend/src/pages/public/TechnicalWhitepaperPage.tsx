@@ -72,24 +72,36 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
   return (
     <div style={{ background:C.bg0, minHeight:'100vh', fontFamily:C.F }}>
       <style>{`
+        @media (max-width: 1024px) {
+          .whitepaper-grid { grid-template-columns: 200px 1fr !important; gap: 32px !important; }
+        }
         @media (max-width: 900px) {
           .whitepaper-grid { grid-template-columns: 1fr !important; }
           .whitepaper-sidebar { display: none !important; }
         }
+        @media (max-width: 768px) {
+          .metric-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .infrastructure-grid { grid-template-columns: 1fr !important; }
+          .regulatory-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .deployment-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-height: 600px) {
+          .whitepaper-modal-overlay { align-items: flex-start !important; padding-top: 20px !important; }
+        }
         @media (max-width: 600px) {
-          .whitepaper-modal-content { padding: 32px 20px !important; margin: 20px !important; }
+          .whitepaper-modal-content { padding: 32px 24px !important; width: 95% !important; margin: 10px !important; }
           .hero-btns { flex-direction: column !important; }
           .hero-btns > button { width: 100% !important; }
-          .metric-grid { grid-template-columns: 1fr 1fr !important; }
+          .metric-grid { grid-template-columns: 1fr !important; }
           .regulatory-grid { grid-template-columns: 1fr !important; }
-          .deployment-grid { grid-template-columns: 1fr !important; }
+          .deployment-summary-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
       <PublicNav activePage="whitepaper" onNavigate={onNavigate} />
 
       {/* Email gate modal */}
       {emailGate && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(5,15,12,0.92)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)', overflowY:'auto', padding:'20px 0' }}>
+        <div className="whitepaper-modal-overlay" style={{ position:'fixed', inset:0, background:'rgba(5,15,12,0.92)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)', overflowY:'auto', padding:'20px 0' }}>
           <div className="whitepaper-modal-content" style={{ maxWidth:480, width:'90%', background:C.bg1, border:`1px solid ${C.border}`, borderRadius:20, padding:48, textAlign:'center', position:'relative' }}>
             <div style={{ fontSize:40, marginBottom:16 }}>📄</div>
             <h2 style={{ ...h2, textAlign:'center', fontSize:24, marginBottom:12 }}>Technical Whitepaper</h2>
@@ -182,7 +194,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             <h2 style={h2}>The Problem: Global Radiologist Crisis</h2>
             <p style={p}>The global healthcare system faces a critical shortfall in diagnostic radiology capacity. The NHS has a 29% radiologist vacancy rate, resulting in over 1.5 million imaging reports backlogged annually. In sub-Saharan Africa, the radiologist-to-population ratio is 0.2 per million (WHO recommended: 20 per million) — a 100-fold deficit.</p>
             <p style={p}>The consequences are measurable and fatal: stroke patients experiencing diagnostic delays beyond the 4.5-hour tPA window suffer permanent disability or death. Pulmonary embolisms misclassified as routine chest pain lead to preventable mortality.</p>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:16 }}>
+            <div className="deployment-summary-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:16 }}>
               {[
                 { stat:'29%', desc:'NHS radiologist vacancy rate (2025)', color:C.critical },
                 { stat:'1.5M+', desc:'UK imaging reports backlogged annually', color:C.amber },
@@ -241,7 +253,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 5</div>
             <h2 style={h2}>Infrastructure & Integration</h2>
             <p style={p}>SEWA AI deploys on Azure (primary), AWS, and GCP simultaneously. Each region maintains its own Kubernetes cluster, PostgreSQL database, Redis cache, and object storage — ensuring data residency compliance and sub-100ms response times globally.</p>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+            <div className="infrastructure-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
               {[
                 { title:'Clinical Integration', items:['FHIR R4 bi-directional','HL7 v2.x ORM/ORU','DICOM C-STORE (DIMSE)','WADO-RS image retrieval','NHS Spine / PDS / ODS','Epic/Cerner SMART on FHIR'] },
                 { title:'Infrastructure', items:['Kubernetes (AKS/EKS/GKE)','Multi-cloud storage (Azure/S3/GCS)','Go DICOM ingestion (<20MB RAM)','Redis pub/sub real-time queue','Prometheus + Grafana monitoring','Blockchain audit log (Merkle tree)'] },
