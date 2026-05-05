@@ -215,10 +215,34 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
   };
 
   const handleMouseUp = () => {
-    if (tool === 'pan') dragging.current = false;
-    else if (tool === 'measure' && activeM) {
-      setMeasurements([...measurements, activeM]);
+    dragging.current = false;
+    if (activeM) {
+      setMeasurements(m => [...m, activeM]);
       setActiveM(null);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (tool === 'pan') {
+      dragging.current = true;
+      lastPos.current = { x:t.clientX, y:t.clientY };
+    } else if (tool === 'measure') {
+      const pos = screenToCanvas(t.clientX, t.clientY);
+      setActiveM({ x1:pos.x, y1:pos.y, x2:pos.x, y2:pos.y });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (tool === 'pan' && dragging.current) {
+      const dx = t.clientX - lastPos.current.x;
+      const dy = t.clientY - lastPos.current.y;
+      lastPos.current = { x:t.clientX, y:t.clientY };
+      setPan(p => ({ x:p.x+dx, y:p.y+dy }));
+    } else if (tool === 'measure' && activeM) {
+      const pos = screenToCanvas(t.clientX, t.clientY);
+      setActiveM(m => m ? { ...m, x2:pos.x, y2:pos.y } : null);
     }
   };
 
@@ -237,6 +261,9 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
       />
       
       {/* Floating Professional Toolbar */}

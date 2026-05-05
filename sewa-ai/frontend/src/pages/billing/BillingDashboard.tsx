@@ -65,6 +65,13 @@ export function BillingDashboard() {
   const [tab, setTab] = useState<'overview'|'plans'|'payment'|'history'>('overview');
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string|null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const plans = PLANS[region] ?? PLANS.uk;
   const gateways = PAYMENT_GATEWAYS[region] ?? PAYMENT_GATEWAYS.uk;
 
@@ -88,9 +95,9 @@ export function BillingDashboard() {
     <div className="flex-1 flex flex-col h-screen bg-[#05100D] overflow-hidden font-sans text-[#D0ECE6]">
       
       {/* Header Bar */}
-      <header className="px-8 h-20 border-b border-[#1B3028] bg-[#08160F] flex items-center justify-between z-20">
+      <header className={`px-6 lg:px-8 ${isMobile ? 'h-auto py-5 flex-col items-start gap-4' : 'h-20 flex-row items-center justify-between'} border-b border-[#1B3028] bg-[#08160F] z-20`}>
         <div>
-          <h2 className="text-2xl font-black text-[#D0ECE6] tracking-tighter">Billing Terminal</h2>
+          <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-black text-[#D0ECE6] tracking-tighter`}>Billing Terminal</h2>
           <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-[0.2em] mt-0.5">
             Region: {region.toUpperCase()} <span className="mx-2 opacity-30">•</span> {gateways[0]?.name} Gateway
           </p>
@@ -103,7 +110,7 @@ export function BillingDashboard() {
               setStatus({ msg: 'Audit invoice dispatched to clinical email.', type: 'ok' });
             } catch { setStatus({ msg: 'Audit service unavailable.', type: 'err' }); }
           }}
-          className="px-6 py-3 rounded-xl bg-[#408D7B] text-white text-[11px] font-black uppercase tracking-widest hover:bg-[#52B09A] transition-all shadow-xl shadow-[#408D7B]/20"
+          className={`${isMobile ? 'w-full' : ''} px-6 py-3 rounded-xl bg-[#408D7B] text-white text-[11px] font-black uppercase tracking-widest hover:bg-[#52B09A] transition-all shadow-xl shadow-[#408D7B]/20`}
         >
           Export Audit Invoice
         </button>
@@ -123,33 +130,33 @@ export function BillingDashboard() {
           )}
 
           {/* Plan Banner */}
-          <div className="p-8 bg-[#408D7B]/5 border border-[#408D7B]/30 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden shadow-2xl">
+          <div className={`${isMobile ? 'p-6' : 'p-8'} bg-[#408D7B]/5 border border-[#408D7B]/30 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden shadow-2xl`}>
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#408D7B]/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
             <div className="space-y-2 text-center md:text-left">
               <span className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.3em]">Active Tier</span>
-              <h3 className="text-3xl font-black text-[#D0ECE6] tracking-tight flex items-baseline gap-3">
+              <h3 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-black text-[#D0ECE6] tracking-tight flex items-baseline justify-center md:justify-start gap-3`}>
                 {loading ? '...' : (stats.plan?.toUpperCase() || 'PRO')}
-                <span className="text-sm font-bold text-[#6FA898]">{gateways[0]?.currencies[0]} / {stats.subscriptionStatus || 'Active'}</span>
+                <span className="text-xs font-bold text-[#6FA898]">{gateways[0]?.currencies[0]} / {stats.subscriptionStatus || 'Active'}</span>
               </h3>
             </div>
-            <div className="flex gap-4">
-              <button onClick={() => setTab('plans')} className="px-8 py-4 rounded-xl border border-[#408D7B]/30 text-[#408D7B] text-[10px] font-black uppercase tracking-widest hover:bg-[#408D7B] hover:text-white transition-all shadow-lg">Change Protocol</button>
-              <button onClick={() => handleUpgrade(stats.plan || 'pro')} className="px-8 py-4 rounded-xl bg-[#408D7B] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#52B09A] transition-all shadow-xl shadow-[#408D7B]/20">Renew Node</button>
+            <div className={`flex gap-3 ${isMobile ? 'flex-col w-full' : ''}`}>
+              <button onClick={() => setTab('plans')} className="flex-1 px-6 py-3.5 rounded-xl border border-[#408D7B]/30 text-[#408D7B] text-[10px] font-black uppercase tracking-widest hover:bg-[#408D7B] hover:text-white transition-all shadow-lg">Change Protocol</button>
+              <button onClick={() => handleUpgrade(stats.plan || 'pro')} className="flex-1 px-6 py-3.5 rounded-xl bg-[#408D7B] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#52B09A] transition-all shadow-xl shadow-[#408D7B]/20">Renew Node</button>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex gap-1 border-b border-[#1B3028]">
+          <div className="flex gap-1 border-b border-[#1B3028] overflow-x-auto scrollbar-none">
             {[
               { id: 'overview', label: 'Telemetry', icon: '📊' },
-              { id: 'plans', label: 'Tier Selection', icon: '📦' },
-              { id: 'payment', label: 'Source Node', icon: '💳' },
-              { id: 'history', label: 'Audit Log', icon: '📋' }
+              { id: 'plans', label: 'Tiers', icon: '📦' },
+              { id: 'payment', label: 'Node', icon: '💳' },
+              { id: 'history', label: 'Audit', icon: '📋' }
             ].map(t => (
               <button 
                 key={t.id} 
                 onClick={() => setTab(t.id as any)}
-                className={`px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
+                className={`px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 whitespace-nowrap ${
                   tab === t.id ? 'border-[#408D7B] text-[#D0ECE6] bg-[#408D7B]/5' : 'border-transparent text-[#3A6055] hover:text-[#6FA898]'
                 }`}
               >
@@ -247,33 +254,55 @@ export function BillingDashboard() {
             )}
 
             {tab === 'history' && (
-              <div className="bg-[#08160F] border border-[#1B3028] rounded-[2rem] overflow-hidden shadow-2xl">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-[#0C1D17]/50">
-                      {['Sync Date','Description','Protocol Value','Status','Receipt'].map(h => (
-                        <th key={h} className="px-6 py-4 text-[10px] font-black text-[#3A6055] uppercase tracking-widest">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#1B3028]">
-                    {history.length === 0 ? (
-                      <tr><td colSpan={5} className="py-20 text-center text-[#3A6055] font-black uppercase tracking-widest">No audit history found</td></tr>
-                    ) : history.map((tx:any, i:number) => (
-                      <tr key={i} className="hover:bg-[#111F1A]/50 transition-colors">
-                        <td className="px-6 py-4 text-xs font-mono text-[#6FA898]">{new Date(tx.createdAt).toLocaleDateString('en-GB')}</td>
-                        <td className="px-6 py-4 text-xs font-bold text-[#D0ECE6]">{tx.planName || 'Monthly Node Subscription'}</td>
-                        <td className="px-6 py-4 text-xs font-black font-mono text-[#D0ECE6]">{tx.amount} {tx.currency}</td>
-                        <td className="px-6 py-4">
-                          <span className="px-2 py-1 rounded-full bg-[#1DBF73]/10 text-[#1DBF73] text-[9px] font-black uppercase tracking-widest border border-[#1DBF73]/20">✓ {tx.status || 'Paid'}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <button className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest hover:underline">PDF Node</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-4">
+                {isMobile ? (
+                  history.length === 0 ? (
+                    <div className="py-20 text-center text-[#3A6055] font-black uppercase tracking-widest bg-[#08160F] border border-[#1B3028] rounded-[2rem]">No audit history found</div>
+                  ) : history.map((tx:any, i:number) => (
+                    <div key={i} className="p-6 bg-[#08160F] border border-[#1B3028] rounded-2xl shadow-lg">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <div className="text-[10px] font-mono text-[#6FA898] mb-1">{new Date(tx.createdAt).toLocaleDateString('en-GB')}</div>
+                          <div className="text-xs font-bold text-[#D0ECE6]">{tx.planName || 'Monthly Node Subscription'}</div>
+                        </div>
+                        <span className="px-2 py-1 rounded-full bg-[#1DBF73]/10 text-[#1DBF73] text-[9px] font-black uppercase tracking-widest border border-[#1DBF73]/20">✓ Paid</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-4 border-t border-[#1B3028]">
+                        <div className="text-sm font-black font-mono text-[#D0ECE6]">{tx.amount} {tx.currency}</div>
+                        <button className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest">PDF Node</button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="bg-[#08160F] border border-[#1B3028] rounded-[2rem] overflow-hidden shadow-2xl">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-[#0C1D17]/50">
+                          {['Sync Date','Description','Protocol Value','Status','Receipt'].map(h => (
+                            <th key={h} className="px-6 py-4 text-[10px] font-black text-[#3A6055] uppercase tracking-widest">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#1B3028]">
+                        {history.length === 0 ? (
+                          <tr><td colSpan={5} className="py-20 text-center text-[#3A6055] font-black uppercase tracking-widest">No audit history found</td></tr>
+                        ) : history.map((tx:any, i:number) => (
+                          <tr key={i} className="hover:bg-[#111F1A]/50 transition-colors">
+                            <td className="px-6 py-4 text-xs font-mono text-[#6FA898]">{new Date(tx.createdAt).toLocaleDateString('en-GB')}</td>
+                            <td className="px-6 py-4 text-xs font-bold text-[#D0ECE6]">{tx.planName || 'Monthly Node Subscription'}</td>
+                            <td className="px-6 py-4 text-xs font-black font-mono text-[#D0ECE6]">{tx.amount} {tx.currency}</td>
+                            <td className="px-6 py-4">
+                              <span className="px-2 py-1 rounded-full bg-[#1DBF73]/10 text-[#1DBF73] text-[9px] font-black uppercase tracking-widest border border-[#1DBF73]/20">✓ {tx.status || 'Paid'}</span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <button className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest hover:underline">PDF Node</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>

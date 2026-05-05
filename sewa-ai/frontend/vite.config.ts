@@ -15,17 +15,17 @@ export default defineConfig({
         navigateFallback: '/index.html',
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.sewa\.health\/v1\/scans/,
+            urlPattern: /^https:\/\/api\.sewaxai\.health\/api\/v1\/scans/,
             handler: 'NetworkFirst',
             options: { cacheName: 'sewa-scans-cache', expiration: { maxAgeSeconds: 300, maxEntries: 50 } },
           },
           {
-            urlPattern: /^https:\/\/api\.sewa\.health\/v1\/reports/,
+            urlPattern: /^https:\/\/api\.sewaxai\.health\/api\/v1\/reports/,
             handler: 'NetworkFirst',
             options: { cacheName: 'sewa-reports-cache', expiration: { maxAgeSeconds: 3600, maxEntries: 20 } },
           },
           {
-            urlPattern: /^https:\/\/api\.sewa\.health\/v1\/users\/me/,
+            urlPattern: /^https:\/\/api\.sewaxai\.health\/api\/v1\/users\/me/,
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'sewa-user-cache' },
           },

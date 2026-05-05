@@ -473,13 +473,13 @@ export default function App() {
         />
         <div style={{ flex:1, overflowY:'auto' }}>
           {adminPage === 'overview'          && <ErrorBoundary name="Hospital Admin Dashboard"><HospitalAdminDashboard /></ErrorBoundary>}
-          {adminPage === 'ai-performance'    && <AIPerformanceDashboard />}
-          {adminPage === 'population-health' && <PopulationHealthDashboard />}
-          {adminPage === 'appointments'      && <AppointmentsPage />}
-          {adminPage === 'compliance'        && <ComplianceDashboard />}
-          {adminPage === 'billing'           && <BillingDashboard />}
-          {adminPage === 'onboarding'        && <OnboardingWizard />}
-          {adminPage === 'roadmap'           && <RoadmapPage />}
+          {adminPage === 'ai-performance'    && <ErrorBoundary name="AI Performance"><AIPerformanceDashboard /></ErrorBoundary>}
+          {adminPage === 'population-health' && <ErrorBoundary name="Population Health"><PopulationHealthDashboard /></ErrorBoundary>}
+          {adminPage === 'appointments'      && <ErrorBoundary name="Appointments"><AppointmentsPage /></ErrorBoundary>}
+          {adminPage === 'compliance'        && <ErrorBoundary name="Compliance"><ComplianceDashboard /></ErrorBoundary>}
+          {adminPage === 'billing'           && <ErrorBoundary name="Billing"><BillingDashboard /></ErrorBoundary>}
+          {adminPage === 'onboarding'        && <ErrorBoundary name="Onboarding"><OnboardingWizard /></ErrorBoundary>}
+          {adminPage === 'roadmap'           && <ErrorBoundary name="Roadmap"><RoadmapPage /></ErrorBoundary>}
         </div>
       </div>
     );
@@ -494,13 +494,11 @@ export default function App() {
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
         <div style={{ flex:1, overflowY:'auto' }}>
-          <ErrorBoundary name="SuperAdmin Dashboard">
-            {superPage === 'platform'       && <SuperAdminDashboard />}
-            {superPage === 'ai-performance' && <AIPerformanceDashboard />}
-            {superPage === 'compliance'     && <ComplianceDashboard />}
-            {superPage === 'billing'        && <BillingDashboard />}
-            {superPage === 'roadmap'        && <RoadmapPage />}
-          </ErrorBoundary>
+          {superPage === 'platform'       && <ErrorBoundary name="Platform Stats"><SuperAdminDashboard /></ErrorBoundary>}
+          {superPage === 'ai-performance' && <ErrorBoundary name="AI Performance"><AIPerformanceDashboard /></ErrorBoundary>}
+          {superPage === 'compliance'     && <ErrorBoundary name="Compliance"><ComplianceDashboard /></ErrorBoundary>}
+          {superPage === 'billing'        && <ErrorBoundary name="Billing"><BillingDashboard /></ErrorBoundary>}
+          {superPage === 'roadmap'        && <ErrorBoundary name="Roadmap"><RoadmapPage /></ErrorBoundary>}
         </div>
       </div>
     );

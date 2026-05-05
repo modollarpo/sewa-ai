@@ -93,23 +93,23 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
         </div>
 
         {/* CTAs */}
-        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 mt-12 animate-slide-up [animation-delay:400ms]">
+        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 mt-12 w-full sm:w-auto px-4 sm:px-0 animate-slide-up [animation-delay:400ms]">
           <button 
             onClick={onLogin}
-            className="group px-10 py-5 rounded-2xl bg-[#408D7B] hover:bg-[#52B09A] text-white text-sm font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-[#408D7B]/20 active:scale-95 flex items-center gap-3"
+            className="group w-full sm:w-auto px-10 py-5 rounded-2xl bg-[#408D7B] hover:bg-[#52B09A] text-white text-sm font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-[#408D7B]/20 active:scale-95 flex items-center justify-center gap-3"
           >
             Enter Platform
             <span className="transition-transform group-hover:translate-x-1">→</span>
           </button>
           <button 
             onClick={() => onNavigate('register')}
-            className="px-10 py-5 rounded-2xl bg-[#0C1D17] border border-[#1B3028] hover:border-[#408D7B] text-[#D0ECE6] text-sm font-black uppercase tracking-[0.2em] transition-all active:scale-95"
+            className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-[#0C1D17] border border-[#1B3028] hover:border-[#408D7B] text-[#D0ECE6] text-sm font-black uppercase tracking-[0.2em] transition-all active:scale-95"
           >
             Join Network
           </button>
           <button 
             onClick={() => setShowDemo(true)}
-            className="flex items-center gap-3 px-6 py-4 text-[#3A6055] hover:text-[#D0ECE6] transition-colors text-xs font-black uppercase tracking-widest"
+            className="flex items-center justify-center gap-3 px-6 py-4 text-[#3A6055] hover:text-[#D0ECE6] transition-colors text-xs font-black uppercase tracking-widest w-full sm:w-auto"
           >
             <span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#111F1A] border border-[#1B3028]">▶</span>
             Watch Clinical Demo

@@ -113,26 +113,28 @@ export function HospitalAdminDashboard() {
       )}
 
       {/* Hero Header Section */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+      <header className={`${isMobile ? 'flex-col items-start gap-4' : 'flex-row items-center justify-between'} flex gap-6 mb-10`}>
         <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#408D7B] to-[#2E6B5E] flex items-center justify-center text-3xl shadow-xl shadow-[#408D7B]/20 ring-4 ring-[#408D7B]/10">
+          <div className={`${isMobile ? 'w-12 h-12 text-2xl' : 'w-16 h-16 text-3xl'} rounded-2xl bg-gradient-to-br from-[#408D7B] to-[#2E6B5E] flex items-center justify-center shadow-xl shadow-[#408D7B]/20 ring-4 ring-[#408D7B]/10`}>
             🏥
           </div>
           <div>
-            <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-[#D0ECE6]">Clinical Operations</h1>
-            <p className="text-sm text-[#3A6055] font-medium tracking-wide uppercase mt-1">
-              {user?.tenantName || 'Royal London Hospital'} <span className="mx-2 opacity-30">|</span> <span className="text-[#408D7B]">{user?.region?.toUpperCase() || 'UK'} Central Node</span>
+            <h1 className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} font-black tracking-tight text-[#D0ECE6]`}>Clinical Operations</h1>
+            <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-wide mt-1">
+              {user?.tenantName || 'Royal London Hospital'} <span className="mx-1 opacity-30">|</span> <span className="text-[#408D7B]">{user?.region?.toUpperCase() || 'UK'} Central Node</span>
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="hidden lg:flex flex-col text-right mr-4">
-            <span className="text-[10px] font-bold text-[#3A6055] uppercase tracking-widest">Server Uptime</span>
-            <span className="text-xs font-mono text-[#1DBF73]">99.998% • Active</span>
-          </div>
+        <div className={`flex items-center gap-3 ${isMobile ? 'w-full' : ''}`}>
+          {!isMobile && (
+            <div className="flex flex-col text-right mr-4">
+              <span className="text-[10px] font-bold text-[#3A6055] uppercase tracking-widest">Server Uptime</span>
+              <span className="text-xs font-mono text-[#1DBF73]">99.998% • Active</span>
+            </div>
+          )}
           <button 
             onClick={() => { setActionType('invite'); setShowAddUser(true); }}
-            className="px-6 py-3 rounded-xl bg-[#408D7B] hover:bg-[#52B09A] text-white text-sm font-black tracking-widest uppercase shadow-lg shadow-[#408D7B]/20 transition-all active:scale-[0.98] flex items-center gap-3"
+            className={`px-6 py-3 rounded-xl bg-[#408D7B] hover:bg-[#52B09A] text-white text-[11px] font-black tracking-widest uppercase shadow-lg shadow-[#408D7B]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 ${isMobile ? 'flex-1' : ''}`}
           >
             <span>+</span> Invite Clinician
           </button>
@@ -175,32 +177,32 @@ export function HospitalAdminDashboard() {
             </div>
             
             {/* Visual Analytics Placeholder */}
-            <div className="p-8 bg-[#0C1D17] rounded-3xl border border-[#1B3028] shadow-2xl overflow-hidden relative group">
+            <div className={`${isMobile ? 'p-5' : 'p-8'} bg-[#0C1D17] rounded-3xl border border-[#1B3028] shadow-2xl overflow-hidden relative group`}>
               <div className="absolute top-0 right-0 p-8 opacity-5 text-9xl">📉</div>
-              <div className="flex justify-between items-end mb-8">
+              <div className={`${isMobile ? 'flex-col gap-4' : 'flex-row justify-between items-end'} flex mb-8`}>
                 <div>
                   <h3 className="text-lg font-bold text-[#D0ECE6]">Clinical Throughput</h3>
-                  <p className="text-xs text-[#3A6055]">Real-time scanner volume distributed by urgency across the 24h cycle.</p>
+                  <p className="text-xs text-[#3A6055]">Real-time scanner volume across the 24h cycle.</p>
                 </div>
                 <div className="flex gap-4">
                   {[{color:C.critical,label:'STAT'},{color:C.urgent,label:'URGENT'},{color:C.brand,label:'ROUTINE'}].map(l=>(
                     <div key={l.label} className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{background:l.color}}/>
-                      <span className="text-[10px] font-bold text-[#3A6055] uppercase tracking-wider">{l.label}</span>
+                      <div className="w-2 h-2 rounded-full" style={{background:l.color}}/>
+                      <span className="text-[9px] font-bold text-[#3A6055] uppercase tracking-wider">{l.label}</span>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="h-48 flex items-end gap-3 px-2">
+              <div className={`h-40 flex items-end gap-1.5 ${isMobile ? 'overflow-x-auto scrollbar-none pb-2' : 'px-2'}`}>
                 {[{h:[60,30,80]},{h:[40,20,60]},{h:[30,15,90]},{h:[80,40,70]},{h:[50,25,85]},{h:[70,35,60]},{h:[45,20,75]},{h:[90,45,55]},{h:[60,30,80]},{h:[35,18,65]},{h:[55,28,70]},{h:[75,37,85]}].map((bar,i)=>(
-                  <div key={i} className="flex-1 flex flex-col gap-1 items-center group/bar cursor-help">
+                  <div key={i} className={`${isMobile ? 'w-8 flex-shrink-0' : 'flex-1'} flex flex-col gap-1 items-center group/bar cursor-help`}>
                     <div className="w-full bg-[#1B3028] rounded-t-sm transition-all duration-500 group-hover/bar:bg-[#408D7B]" style={{height:`${bar.h[0]*0.4}%`}} />
                     <div className="w-full bg-[#408D7B]/40 rounded-sm" style={{height:`${bar.h[1]*0.4}%`}} />
                     <div className="w-full bg-[#408D7B] rounded-sm" style={{height:`${bar.h[2]*0.4}%`}} />
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between mt-4 px-2">
+              <div className={`flex justify-between mt-4 ${isMobile ? 'hidden' : 'px-2'}`}>
                 {['06:00','09:00','12:00','15:00','18:00','21:00','00:00','03:00'].map(t=>(
                   <span key={t} className="text-[9px] font-mono text-[#3A6055]">{t}</span>
                 ))}
@@ -226,40 +228,6 @@ export function HospitalAdminDashboard() {
               </div>
             </div>
             
-            <div className="bg-[#0C1D17] border border-[#1B3028] rounded-3xl overflow-hidden shadow-2xl transition-all">
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-left">
-                  <thead>
-                    <tr className="bg-[#111F1A]">
-                      {['Staff Identity','Specialization','Status','Authorization','Operations'].map(h=>(
-                        <th key={h} className="p-5 text-[10px] font-black text-[#3A6055] uppercase tracking-widest">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#1B3028]">
-                    {loading ? (
-                      Array(5).fill(0).map((_,i)=>(
-                        <tr key={i}><td colSpan={5} className="p-5"><Skeleton width="100%" height={24} /></td></tr>
-                      ))
-                    ) : filteredStaff.map((s:any)=>(
-                      <tr key={s.id} className="hover:bg-[#111F1A]/50 transition-colors group">
-                        <td className="p-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-[#162821] border border-[#1B3028] flex items-center justify-center text-xs font-bold text-[#408D7B]">
-                              {s.firstName?.charAt(0)}{s.lastName?.charAt(0)}
-                            </div>
-                            <div>
-                              <div className="text-sm font-bold text-[#D0ECE6]">{s.firstName} {s.lastName}</div>
-                              <div className="text-[10px] text-[#3A6055] font-mono">{s.id?.slice(0,12)}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-5"><RoleBadge role={s.role}/></td>
-                        <td className="p-5">
-                          <div className="flex items-center gap-2.5">
-                            <StatusDot status={s.status}/>
-                            <span className="text-xs font-medium capitalize text-[#6FA898]">{s.status}</span>
-                          </div>
                         </td>
                         <td className="p-5">
                           <span className="text-[10px] font-mono text-[#3A6055] bg-[#050F0C] px-2 py-1 rounded border border-[#1B3028]">
