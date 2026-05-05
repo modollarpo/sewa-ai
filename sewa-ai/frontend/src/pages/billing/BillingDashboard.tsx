@@ -117,7 +117,7 @@ export function BillingDashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-8 scrollbar-thin">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin">
         <div className="max-w-6xl mx-auto space-y-8">
           
           {status && (

@@ -79,7 +79,7 @@ export function PatientPortal() {
   });
 
   return (
-    <div className="min-h-screen bg-[#05100D] p-6 lg:p-12 font-sans text-[#D0ECE6] animate-fade-in">
+    <div className="min-h-screen bg-[#05100D] font-sans text-[#D0ECE6] p-4 lg:p-10 relative overflow-hidden">
       
       {/* Portal Header */}
       <header className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
@@ -105,7 +105,7 @@ export function PatientPortal() {
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="max-w-5xl mx-auto flex items-center gap-1 p-1.5 bg-[#08160F] rounded-2xl border border-[#1B3028] mb-10 w-fit overflow-x-auto scrollbar-none">
+      <nav className="max-w-5xl mx-auto flex items-center gap-1 p-1.5 bg-[#08160F] rounded-2xl border border-[#1B3028] mb-10 w-full md:w-fit overflow-x-auto scrollbar-none">
         {['scans','appointments','progression','billing','account'].map(t => (
           <button 
             key={t} 

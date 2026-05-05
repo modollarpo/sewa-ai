@@ -99,7 +99,7 @@ export function HospitalAdminDashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-[#05100D] p-6 lg:p-10 font-sans text-[#D0ECE6] animate-fade-in">
+    <div className="min-h-screen bg-[#05100D] p-4 lg:p-10 font-sans text-[#D0ECE6] animate-fade-in">
       
       {/* Global Toast Notification */}
       {status && (
@@ -142,7 +142,7 @@ export function HospitalAdminDashboard() {
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="flex items-center gap-1 p-1 bg-[#08160F] rounded-2xl border border-[#1B3028] mb-8 w-fit overflow-x-auto scrollbar-none">
+      <nav className="flex items-center gap-1 p-1 bg-[#08160F] rounded-2xl border border-[#1B3028] mb-8 w-full md:w-fit overflow-x-auto scrollbar-none">
         {(['overview','staff','integrations','billing','audit'] as const).map(t => (
           <button 
             key={t} 
@@ -222,7 +222,7 @@ export function HospitalAdminDashboard() {
                     value={search} 
                     onChange={e=>setSearch(e.target.value)} 
                     placeholder="Search name, role, or ID..." 
-                    className="pl-10 pr-4 py-2.5 bg-[#08160F] border border-[#1B3028] rounded-xl text-xs text-[#D0ECE6] w-64 focus:border-[#408D7B] outline-none transition-all"
+                    className="pl-10 pr-4 py-2.5 bg-[#08160F] border border-[#1B3028] rounded-xl text-xs text-[#D0ECE6] w-full md:w-64 focus:border-[#408D7B] outline-none transition-all"
                   />
                 </div>
               </div>
