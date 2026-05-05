@@ -118,6 +118,8 @@ export function OnboardingWizard() {
   const [integrationStatus, setIntegrationStatus] = useState<Record<string,string>>({});
   const [benchmarkRunning, setBenchmarkRunning] = useState(false);
   const [benchmarkProgress, setBenchmarkProgress] = useState(0);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{msg:string, type:'ok'|'err'} | null>(null);
 
   const update = (fields: Partial<typeof data>) => setData(d => ({ ...d, ...fields }));
@@ -208,9 +210,12 @@ export function OnboardingWizard() {
 
   const currentStep = STEPS[step];
   const isLast = step === STEPS.length - 1;
+
   const canProceed = () => {
     if (step === 0) return data.name && data.type && data.region && data.adminEmail;
-    if (step === 1) return data.dpo || data.complianceOfficer;
+    if (step === 1) return (data as any).gdpr || (data as any).hipaa || (data as any).nhs || (data as any).iso13485 || data.dpo || data.complianceOfficer;
+    if (step === 2) return integrationStatus['pacs'] === 'connected';
+    if (step === 4) return data.benchmarkComplete;
     return true;
   };
 
@@ -218,13 +223,19 @@ export function OnboardingWizard() {
     <div style={{ minHeight:'100vh', background:C.bg0, display:'flex', flexDirection:'column', fontFamily:C.F }}>
 
       {/* Top bar */}
-      <div style={{ padding:'0 32px', height:52, display:'flex', alignItems:'center', justifyContent:'space-between', borderBottom:`1px solid ${C.border}`, background:C.bg1 }}>
+      <div style={{ padding:'0 24px', height:52, display:'flex', alignItems:'center', justifyContent:'space-between', borderBottom:`1px solid ${C.border}`, background:C.bg1, position:'sticky', top:0, zIndex:1000 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <div style={{ width:28, height:28, borderRadius:8, background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="mobile-menu-toggle"
+            style={{ display:'none', background:'none', border:'none', color:C.textHi, cursor:'pointer', padding:4, marginRight:8 }}>
+            <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </button>
+          <div style={{ width:28, height:28, borderRadius:8, background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           </div>
-          <span style={{ fontSize:14, fontWeight:700, color:C.textHi }}>SEWA AI</span>
-          <span style={{ fontSize:12, color:C.textLo }}>/ Onboarding</span>
+          <span style={{ fontSize:14, fontWeight:700, color:C.textHi, whiteSpace:'nowrap' }}>SEWA AI</span>
+          <span style={{ fontSize:12, color:C.textLo, display: 'inline-block' }} className="nav-breadcrumb">/ Onboarding</span>
         </div>
         <span style={{ fontSize:11, color:C.textLo }}>Step {step+1} of {STEPS.length}</span>
       </div>
@@ -238,21 +249,85 @@ export function OnboardingWizard() {
         </div>
       )}
 
-      <div style={{ flex:1, display:'flex' }}>
+      <div style={{ flex:1, display:'flex', position:'relative', overflow:'hidden' }}>
+        <style>{`
+          @media (max-width: 768px) {
+            .nav-breadcrumb { display: none !important; }
+            .mobile-menu-toggle { display: block !important; }
+            .sidebar-overlay { 
+              display: block !important;
+              position: fixed; top: 52px; left: 0; right: 0; bottom: 0;
+              background: rgba(0,0,0,0.5); z-index: 900;
+              opacity: 0; pointer-events: none; transition: opacity 200ms;
+            }
+            .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+            .sidebar {
+              position: fixed !important; top: 52px; bottom: 0; left: -240px;
+              z-index: 1000 !important; width: 240px !important;
+              transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+              background: ${C.bg1} !important;
+            }
+            .sidebar.open { transform: translateX(240px); }
+            .main-content { padding: 24px 16px !important; }
+            .form-grid-2 { grid-template-columns: 1fr !important; }
+            .form-grid-3 { grid-template-columns: 1fr !important; }
+            .form-grid-4 { grid-template-columns: 1fr 1fr !important; }
+            .responsive-p { font-size: 12px !important; }
+            .responsive-h1 { font-size: 18px !important; }
+            .step-sidebar-footer { display: none !important; }
+            .desktop-collapse-btn { display: none !important; }
+          }
+          @media (min-width: 769px) {
+            .sidebar-overlay { display: none !important; }
+          }
+        `}</style>
+
+        <div 
+          className={`sidebar-overlay ${mobileMenuOpen ? 'open' : ''}`}
+          onClick={() => setMobileMenuOpen(false)}
+        />
 
         {/* Step sidebar */}
-        <div style={{ width:220, flexShrink:0, borderRight:`1px solid ${C.border}`, background:C.bg1, padding:24 }}>
-          <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+        <div className={`sidebar ${mobileMenuOpen ? 'open' : ''}`} style={{ 
+          width: sidebarCollapsed ? 64 : 220, 
+          flexShrink:0, 
+          borderRight:`1px solid ${C.border}`, 
+          background:C.bg1, 
+          padding: sidebarCollapsed ? '16px 8px' : '24px 16px',
+          transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1), padding 300ms',
+          display:'flex',
+          flexDirection:'column',
+          position:'relative'
+        }}>
+          {/* Collapse toggle (Desktop only) */}
+          <button 
+            className="desktop-collapse-btn"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            style={{ 
+              position:'absolute', right:-12, top:24, width:24, height:24, borderRadius:'50%', 
+              background:C.bg3, border:`1px solid ${C.border}`, color:C.textMd,
+              display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', zIndex:10,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+            }}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} style={{ transform: sidebarCollapsed ? 'rotate(180deg)' : 'none', transition:'transform 300ms' }}><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+
+          <div style={{ display:'flex', flexDirection:'column', gap:4, flex:1 }}>
             {STEPS.map((s, i) => {
               const done = i < step;
               const active = i === step;
               return (
-                <div key={s.id} style={{
-                  display:'flex', alignItems:'center', gap:10, padding:'9px 12px', borderRadius:10,
+                <div key={s.id} title={sidebarCollapsed ? s.label : ''} style={{
+                  display:'flex', alignItems:'center', gap: sidebarCollapsed ? 0 : 10, padding: sidebarCollapsed ? '9px 0' : '9px 12px', borderRadius:10,
                   background: active ? `${C.brand}14` : 'transparent',
                   border: `1px solid ${active ? `${C.brand}40` : 'transparent'}`,
                   cursor: done ? 'pointer' : 'default',
-                }} onClick={() => done && setStep(i)}>
+                  justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                  transition: 'padding 300ms, gap 300ms',
+                }} onClick={() => {
+                  if (done) setStep(i);
+                  if (window.innerWidth <= 768) setMobileMenuOpen(false);
+                }}>
                   <div style={{
                     width:24, height:24, borderRadius:'50%', flexShrink:0,
                     background: done ? C.brand : active ? `${C.brand}20` : C.bg3,
@@ -265,27 +340,29 @@ export function OnboardingWizard() {
                       : <span style={{ fontSize:11 }}>{s.icon}</span>
                     }
                   </div>
-                  <div>
-                    <div style={{ fontSize:12, fontWeight: active ? 600 : 400, color: active ? C.brand : done ? C.textMd : C.textLo }}>
+                  {!sidebarCollapsed && (
+                    <div style={{ fontSize:12, fontWeight: active ? 600 : 400, color: active ? C.brand : done ? C.textMd : C.textLo, overflow:'hidden', whiteSpace:'nowrap' }}>
                       {s.label}
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             })}
           </div>
 
-          <div style={{ marginTop:32, padding:14, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}` }}>
-            <div style={{ fontSize:11, fontWeight:700, color:C.textHi, marginBottom:6 }}>Need help?</div>
-            <div style={{ fontSize:11, color:C.textMd, lineHeight:1.5, marginBottom:10 }}>Our onboarding team is available 24/7 to assist.</div>
-            <a href="mailto:onboarding@sewaxai.health" style={{ fontSize:11, color:C.brand, textDecoration:'none', fontFamily:C.F }}>
-              onboarding@sewaxai.health
-            </a>
-          </div>
+          {!sidebarCollapsed && (
+            <div className="step-sidebar-footer" style={{ marginTop:32, padding:14, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}` }}>
+              <div style={{ fontSize:11, fontWeight:700, color:C.textHi, marginBottom:6 }}>Need help?</div>
+              <div style={{ fontSize:11, color:C.textMd, lineHeight:1.5, marginBottom:10 }}>Our onboarding team is available 24/7 to assist.</div>
+              <a href="mailto:onboarding@sewaxai.health" style={{ fontSize:11, color:C.brand, textDecoration:'none', fontFamily:C.F }}>
+                onboarding@sewaxai.health
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Main content */}
-        <div style={{ flex:1, overflowY:'auto', padding:40 }}>
+        <div className="main-content" style={{ flex:1, overflowY:'auto', padding:40, background:C.bg0 }}>
           <div style={{ maxWidth:620, margin:'0 auto' }}>
 
             {!data.launched && (
@@ -307,7 +384,7 @@ export function OnboardingWizard() {
             {/* STEP 0 — Institution Details */}
             {step === 0 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <Input label="Institution Name" value={data.name} onChange={v=>update({name:v})} placeholder="Royal London Hospital" required/>
                   <Select label="Institution Type" value={data.type} onChange={v=>update({type:v})} required
                     options={[{value:'nhs',label:'NHS Trust'},{value:'private',label:'Private Hospital'},{value:'clinic',label:'Imaging Clinic'},{value:'academic',label:'Academic Medical Centre'},{value:'community',label:'Community Health Centre'}]}/>
@@ -317,7 +394,7 @@ export function OnboardingWizard() {
                   <label style={{ display:'block', fontSize:11, fontWeight:600, color:C.textMd, marginBottom:10, fontFamily:C.F }}>
                     Region / Data Residency <span style={{color:C.critical}}>*</span>
                   </label>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
+                  <div className="form-grid-4" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
                     {REGIONS.map(r => (
                       <div key={r.key} onClick={() => update({ region:r.key })}
                         style={{
@@ -334,16 +411,16 @@ export function OnboardingWizard() {
                   </div>
                 </div>
 
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <Input label="City" value={data.city} onChange={v=>update({city:v})} placeholder="London"/>
                   <Input label="Hospital Domain" value={data.domain} onChange={v=>update({domain:v})} placeholder="royallondon.nhs.uk"/>
                 </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <Input label="Admin First Name" value={data.adminFirst} onChange={v=>update({adminFirst:v})} required/>
                   <Input label="Admin Last Name" value={data.adminLast} onChange={v=>update({adminLast:v})} required/>
                 </div>
                 <Input label="Admin Email" value={data.adminEmail} onChange={v=>update({adminEmail:v})} placeholder="admin@royallondon.nhs.uk" required type="email"/>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+                <div className="form-grid-3" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
                   <Input label="Total Beds" value={data.totalBeds} onChange={v=>update({totalBeds:v})} placeholder="500"/>
                   <Input label="Radiology Rooms" value={data.radBeds} onChange={v=>update({radBeds:v})} placeholder="12"/>
                   <Input label="Daily Scans (est.)" value={data.dailyScans} onChange={v=>update({dailyScans:v})} placeholder="150"/>
@@ -376,7 +453,7 @@ export function OnboardingWizard() {
                   ))}
                 </div>
 
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <Input label="Data Protection Officer (DPO)" value={data.dpo} onChange={v=>update({dpo:v})} placeholder="dpo@hospital.nhs.uk"/>
                   <Input label="Compliance Officer" value={data.complianceOfficer} onChange={v=>update({complianceOfficer:v})} placeholder="compliance@hospital.nhs.uk"/>
                 </div>
@@ -414,7 +491,7 @@ export function OnboardingWizard() {
                   {
                     id:'hl7', label:'HL7v2 Gateway', icon:'📡', required:false,
                     fields: (
-                      <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:10 }}>
+                      <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:10 }}>
                         <Input label="HL7 Gateway Host" value={data.hl7Host} onChange={v=>update({hl7Host:v})} placeholder="hl7.hospital.nhs.uk"/>
                         <Input label="MLLP Port" value={data.hl7Port} onChange={v=>update({hl7Port:v})} placeholder="2575"/>
                       </div>
@@ -426,8 +503,8 @@ export function OnboardingWizard() {
                       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                         <span style={{ fontSize:18 }}>{intg.icon}</span>
                         <div>
-                          <div style={{ fontSize:13, fontWeight:700, color:C.textHi }}>{intg.label}</div>
-                          <div style={{ fontSize:10, color:C.textLo }}>{intg.required ? 'Required' : 'Optional'}</div>
+                           <div style={{ fontSize:13, fontWeight:700, color:C.textHi }}>{intg.label}</div>
+                           <div style={{ fontSize:10, color:C.textLo }}>{intg.required ? 'Required' : 'Optional'}</div>
                         </div>
                       </div>
                       <div style={{ display:'flex', gap:8, alignItems:'center' }}>
@@ -453,7 +530,7 @@ export function OnboardingWizard() {
               <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
                 <div>
                   <label style={{ display:'block', fontSize:11, fontWeight:600, color:C.textMd, marginBottom:10, fontFamily:C.F }}>Deployment Environment</label>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                  <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
                     {[
                       { key:'sandbox', label:'Sandbox', desc:'Safe testing environment. Synthetic data only. Free.', icon:'🧪' },
                       { key:'production', label:'Production', desc:'Live clinical environment. Real patient data. GDPR-compliant.', icon:'🏥' },
@@ -681,17 +758,17 @@ export function OnboardingWizard() {
             {/* Navigation */}
             {!data.launched && (
               <div style={{ display:'flex', justifyContent:'space-between', marginTop:32, paddingTop:20, borderTop:`1px solid ${C.border}` }}>
-              <button onClick={() => setStep(s => Math.max(0, s-1))} disabled={step === 0}
-                style={{ padding:'10px 20px', borderRadius:10, background:'transparent', border:`1px solid ${C.border}`, color:C.textMd, fontSize:13, cursor: step===0?'default':'pointer', fontFamily:C.F, opacity:step===0?0.4:1 }}>
-                ← Back
-              </button>
-              {!isLast && (
-                <button onClick={() => setStep(s => s+1)} disabled={!canProceed()}
-                  style={{ padding:'10px 24px', borderRadius:10, border:'none', cursor: canProceed()?'pointer':'not-allowed', background:canProceed()?`linear-gradient(135deg,${C.brand},${C.brandDk})`:`${C.bg3}`, color:canProceed()?'white':C.textLo, fontSize:13, fontWeight:700, fontFamily:C.F, boxShadow:canProceed()?`0 4px 14px ${C.brand}40`:'none', opacity:canProceed()?1:0.6 }}>
-                  Continue →
+                <button onClick={() => setStep(s => Math.max(0, s-1))} disabled={step === 0}
+                  style={{ padding:'10px 20px', borderRadius:10, background:'transparent', border:`1px solid ${C.border}`, color:C.textMd, fontSize:13, cursor: step===0?'default':'pointer', fontFamily:C.F, opacity:step===0?0.4:1 }}>
+                  ← Back
                 </button>
-              )}
-            </div>
+                {!isLast && (
+                  <button onClick={() => setStep(s => s+1)} disabled={!canProceed()}
+                    style={{ padding:'10px 24px', borderRadius:10, border:'none', cursor: canProceed()?'pointer':'not-allowed', background:canProceed()?`linear-gradient(135deg,${C.brand},${C.brandDk})`:`${C.bg3}`, color:canProceed()?'white':C.textLo, fontSize:13, fontWeight:700, fontFamily:C.F, boxShadow:canProceed()?`0 4px 14px ${C.brand}40`:'none', opacity:canProceed()?1:0.6 }}>
+                    Continue →
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>

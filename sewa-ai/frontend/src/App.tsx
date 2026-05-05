@@ -121,43 +121,96 @@ function SubNav({ items, active, onChange, collapsed, onToggle }: {
   onToggle: () => void;
 }) {
   const { t } = useTranslation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const r = () => {
+      const m = window.innerWidth < 1024;
+      setIsMobile(m);
+      if (!m) setIsOpen(false);
+    };
+    window.addEventListener('resize', r);
+    return () => window.removeEventListener('resize', r);
+  }, []);
+
   return (
-    <div style={{
-      width: collapsed ? 64 : 200, flexShrink:0, background:C.bg1,
-      borderRight:`1px solid ${C.border}`,
-      padding:'10px 8px', display:'flex', flexDirection:'column', gap:2,
-      overflowY:'auto', transition:'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      position: 'relative'
-    }}>
-      <button onClick={onToggle} style={{
-        position: 'absolute', top: 12, right: collapsed ? 20 : 8,
-        background: C.bg3, border: `1px solid ${C.border}`, color: C.textMd,
-        width: 24, height: 24, borderRadius: 6, cursor: 'pointer',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
-      }}>
-        {collapsed ? <ChevronRight size={14}/> : <ChevronLeft size={14}/>}
-      </button>
+    <>
+      <style>{`
+        @media (max-width: 1023px) {
+          .subnav-container {
+            position: fixed !important; top: 0; left: -200px; bottom: 0;
+            z-index: 1000 !important; width: 200px !important;
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+          }
+          .subnav-container.mobile-open { transform: translateX(200px); }
+          .subnav-overlay { 
+            display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 900; 
+            opacity: 0; pointer-events: none; transition: opacity 300ms;
+          }
+          .subnav-overlay.open { opacity: 1; pointer-events: auto; }
+          .mobile-trigger {
+            display: flex !important; position: fixed; left: 16px; bottom: 40px; 
+            width: 44px; height: 44px; background: ${C.brand}; border-radius: 50%;
+            z-index: 800; align-items: center; justify-content: center; color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: none; cursor: pointer;
+          }
+        }
+      `}</style>
 
-      <div style={{ height: 40 }} /> {/* Spacer for toggle */}
-
-      {items.map(item => (
-        <button key={item.id} onClick={() => onChange(item.id)} title={collapsed ? t(item.labelKey) : undefined} style={{
-          display:'flex', alignItems:'center', gap:8,
-          padding:'8px 12px', borderRadius:9, cursor:'pointer',
-          border:`1px solid ${active===item.id ? `${C.brand}30` : 'transparent'}`,
-          background: active===item.id ? `${C.brand}14` : 'transparent',
-          color: active===item.id ? C.brand : C.textLo,
-          fontFamily:C.F, fontSize:12,
-          fontWeight: active===item.id ? 600 : 400,
-          textAlign:'left', transition:'all 120ms',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          overflow: 'hidden'
-        }}>
-          <span style={{ fontSize:13, flexShrink:0 }}>{item.icon}</span>
-          {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{t(item.labelKey)}</span>}
+      {isMobile && <div className={`subnav-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)} />}
+      {isMobile && (
+        <button className="mobile-trigger" onClick={() => setIsOpen(true)} style={{ display: 'none' }}>
+          <LayoutDashboard size={20} />
         </button>
-      ))}
-    </div>
+      )}
+
+      <div className={`subnav-container ${isOpen ? 'mobile-open' : ''}`} style={{
+        width: collapsed ? 64 : 200, flexShrink:0, background:C.bg1,
+        borderRight:`1px solid ${C.border}`,
+        padding:'10px 8px', display:'flex', flexDirection:'column', gap:2,
+        overflowY:'auto', transition:'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        position: 'relative'
+      }}>
+        {!isMobile && (
+          <button onClick={onToggle} style={{
+            position: 'absolute', top: 12, right: collapsed ? 20 : 8,
+            background: C.bg3, border: `1px solid ${C.border}`, color: C.textMd,
+            width: 24, height: 24, borderRadius: 6, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
+          }}>
+            {collapsed ? <ChevronRight size={14}/> : <ChevronLeft size={14}/>}
+          </button>
+        )}
+
+        {isMobile && (
+          <div style={{ padding: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <span style={{ fontSize: 10, fontWeight: 900, color: C.brand }}>NAVIGATE</span>
+             <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: C.textLo }}>✕</button>
+          </div>
+        )}
+
+        <div style={{ height: isMobile ? 10 : 40 }} /> {/* Spacer for toggle */}
+
+        {items.map(item => (
+          <button key={item.id} onClick={() => { onChange(item.id); if (isMobile) setIsOpen(false); }} title={collapsed ? t(item.labelKey) : undefined} style={{
+            display:'flex', alignItems:'center', gap:8,
+            padding:'8px 12px', borderRadius:9, cursor:'pointer',
+            border:`1px solid ${active===item.id ? `${C.brand}30` : 'transparent'}`,
+            background: active===item.id ? `${C.brand}14` : 'transparent',
+            color: active===item.id ? C.brand : C.textLo,
+            fontFamily:C.F, fontSize:12,
+            fontWeight: active===item.id ? 600 : 400,
+            textAlign:'left', transition:'all 120ms',
+            justifyContent: (collapsed && !isMobile) ? 'center' : 'flex-start',
+            overflow: 'hidden'
+          }}>
+            <span style={{ fontSize:13, flexShrink:0 }}>{item.icon}</span>
+            {(!collapsed || isMobile) && <span style={{ whiteSpace: 'nowrap' }}>{t(item.labelKey)}</span>}
+          </button>
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -208,7 +261,7 @@ function StatusBar({ region, role }: { region:string; role:string }) {
 import { useTenant } from './hooks/useTenant';
 
 export default function App() {
-  const { user, token, isAuthenticated }  = useAuthStore();
+  const { user, token, isAuthenticated, logout }  = useAuthStore();
   const { criticalAlerts, fetchWorklist } = useScanStore();
   const { notifications, markRead }       = useNotificationStore();
   const { lang, region, setLang, setRegion } = useSettingsStore();
@@ -405,7 +458,7 @@ export default function App() {
     }
 
     if (role === 'radiologist') return <ErrorBoundary name="Radiologist Workspace"><RadiologistWorkspace onNavigate={navigate} /></ErrorBoundary>;
-    if (role === 'doctor')      return <ErrorBoundary name="Doctor Dashboard"><DoctorDashboard /></ErrorBoundary>;
+    if (role === 'doctor')      return <ErrorBoundary name="Doctor Dashboard"><DoctorDashboard onLogout={logout} /></ErrorBoundary>;
     if (role === 'patient')     return <ErrorBoundary name="Patient Portal"><PatientPortal /></ErrorBoundary>;
     if (role === 'technician')  return <ErrorBoundary name="Technician Workspace"><TechnicianWorkspace /></ErrorBoundary>;
 

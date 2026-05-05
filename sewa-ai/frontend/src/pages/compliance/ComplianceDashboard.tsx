@@ -2,7 +2,7 @@
 // Regulatory compliance centre: GDPR, HIPAA, NHS DSPT, EU MDR IIb,
 // FDA 510(k), EU AI Act High-Risk — evidence tracker, consent metrics, audit log
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useComplianceData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 
@@ -201,6 +201,19 @@ export function ComplianceDashboard() {
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
   const evidenceInputRef = useRef<HTMLInputElement>(null);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) setMobileMenuOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Merge static framework details with dynamic status/records from DB
   const frameworks = FRAMEWORKS.map(f => {
     const db = dbFrameworks.find((d: any) => d.standard === f.id || d.standard === f.id.toUpperCase());
@@ -242,21 +255,44 @@ export function ComplianceDashboard() {
   const compliantCount = frameworks.filter(f => f.status === 'compliant').length;
 
   return (
-    <div style={{ display:'flex', height:'calc(100vh - 76px)', fontFamily:C.F, background:C.bg1, overflow:'hidden' }}>
+    <div style={{ display:'flex', height:'calc(100vh - 76px)', fontFamily:C.F, background:C.bg1, overflow:'hidden', position: 'relative' }}>
+      
+      <style>{`
+        @media (max-width: 1023px) {
+          .compliance-sidebar {
+            position: absolute !important; top: 0; bottom: 0; left: -260px;
+            z-index: 1000 !important; width: 260px !important;
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+            background: ${C.bg1} !important;
+          }
+          .compliance-sidebar.open { transform: translateX(260px); }
+          .sidebar-overlay {
+            display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); z-index: 900; opacity: 0; pointer-events: none; transition: opacity 300ms;
+          }
+          .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+          .grid-stats { grid-template-columns: 1fr 1fr !important; }
+        }
+      `}</style>
+
+      <div className={`sidebar-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)} />
 
       {/* Framework selector sidebar */}
-      <div style={{ width:240, flexShrink:0, borderRight:`1px solid ${C.border}`, overflowY:'auto', padding:'12px 8px' }}>
-        <div style={{ padding:'6px 10px', marginBottom:8 }}>
-          <div style={{ fontSize:12, fontWeight:700, color:C.textHi, marginBottom:2 }}>Compliance Status</div>
-          <div style={{ fontSize:10, color:C.textLo }}>
-            {compliantCount}/{frameworks.length} frameworks compliant
+      <div className={`compliance-sidebar ${mobileMenuOpen ? 'open' : ''}`} style={{ width:240, flexShrink:0, borderRight:`1px solid ${C.border}`, overflowY:'auto', padding:'12px 8px' }}>
+        <div style={{ padding:'6px 10px', marginBottom:8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize:12, fontWeight:700, color:C.textHi, marginBottom:2 }}>Compliance Status</div>
+            <div style={{ fontSize:10, color:C.textLo }}>
+              {compliantCount}/{frameworks.length} frameworks compliant
+            </div>
           </div>
+          {isMobile && <button onClick={() => setMobileMenuOpen(false)} style={{ background:'none', border:'none', color:C.textLo, fontSize:16 }}>✕</button>}
         </div>
 
         {frameworks.map(f => {
           const cfg = STATUS_CFG[f.status];
           return (
-            <button key={f.id} onClick={() => setSelected(f.id)} style={{
+            <button key={f.id} onClick={() => { setSelected(f.id); if (isMobile) setMobileMenuOpen(false); }} style={{
               width:'100%', display:'flex', alignItems:'center', gap:10, padding:'10px 10px',
               borderRadius:10, border:`1px solid ${selected===f.id?`${C.brand}40`:C.border}`,
               background: selected===f.id ? `${C.brand}12` : 'transparent',
@@ -300,19 +336,24 @@ export function ComplianceDashboard() {
         )}
 
         {/* Framework header */}
-        <div style={{ padding:'16px 20px', borderBottom:`1px solid ${C.border}`, flexShrink:0 }}>
-          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
+        <div style={{ padding: isMobile ? '16px' : '16px 20px', borderBottom:`1px solid ${C.border}`, flexShrink:0 }}>
+          <div style={{ display:'flex', alignItems: isMobile ? 'stretch' : 'flex-start', justifyContent:'space-between', flexDirection: isMobile ? 'column' : 'row', gap: 16 }}>
             <div>
               <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:4 }}>
-                <span style={{ fontSize:24 }}>{fw.flag}</span>
-                <h2 style={{ margin:0, fontSize:17, fontWeight:700, color:C.textHi }}>{fw.name}</h2>
+                {isMobile && <button onClick={() => setMobileMenuOpen(true)} style={{ background:'none', border:'none', color:C.brand, fontSize:20, marginRight: 8 }}>☰</button>}
+                <span style={{ fontSize: isMobile ? 20 : 24 }}>{fw.flag}</span>
+                <h2 style={{ margin:0, fontSize: isMobile ? 15 : 17, fontWeight:700, color:C.textHi }}>{fw.name}</h2>
                 <StatusBadge status={fw.status}/>
               </div>
-              <div style={{ display:'flex', gap:16, fontSize:11, color:C.textMd }}>
+              <div style={{ display:'flex', gap: isMobile ? 8 : 16, fontSize:10, color:C.textMd, flexWrap: 'wrap' }}>
                 <span>Region: {fw.region}</span>
                 <span>Controls: {fw.passed}/{fw.controls} passed</span>
-                <span>Last audit: {fw.lastAudit}</span>
-                <span>Next review: {fw.nextReview}</span>
+                {!isMobile && (
+                  <>
+                    <span>Last audit: {fw.lastAudit}</span>
+                    <span>Next review: {fw.nextReview}</span>
+                  </>
+                )}
               </div>
             </div>
             <div style={{ display:'flex', gap:8 }}>
@@ -385,16 +426,16 @@ export function ComplianceDashboard() {
           {tab === 'overview' && (
             <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
               {/* Score breakdown */}
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>
+              <div className="grid-stats" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>
                 {[
                   { label:'Overall Score',    value:`${fw.score}%`,   color: fw.score>=90?C.normal:fw.score>=70?C.urgent:C.critical },
                   { label:'Controls Passed',  value:`${fw.passed}/${fw.controls}`, color:C.textHi },
                   { label:'Evidence Items',   value:fw.evidence.length, color:C.textHi },
                   { label:'Open Gaps',        value:fw.gaps.length,   color:fw.gaps.length>0?C.urgent:C.normal },
                 ].map(m => (
-                  <div key={m.label} style={{ padding:'14px 16px', background:C.bg2, borderRadius:12, border:`1px solid ${C.border}` }}>
+                  <div key={m.label} style={{ padding: isMobile ? '10px' : '14px 16px', background:C.bg2, borderRadius:12, border:`1px solid ${C.border}` }}>
                     <div style={{ fontSize:9, color:C.textLo, marginBottom:6, letterSpacing:'0.04em' }}>{m.label}</div>
-                    <div style={{ fontSize:22, fontWeight:700, color:m.color, fontFamily:C.FM }}>{m.value}</div>
+                    <div style={{ fontSize: isMobile ? 18 : 22, fontWeight:700, color:m.color, fontFamily:C.FM }}>{m.value}</div>
                   </div>
                 ))}
               </div>

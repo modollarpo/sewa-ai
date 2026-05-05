@@ -108,6 +108,13 @@ export function SuperAdminDashboard() {
     }).finally(() => setDiagLoading(false));
   }, [tab]);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'8px 14px',fontSize:12,fontWeight:tab===t?600:400,
     color:tab===t?C.brand:C.textLo,background:'none',border:'none',
@@ -122,11 +129,11 @@ export function SuperAdminDashboard() {
   const [showTrainingConfirm, setShowTrainingConfirm] = useState(false);
 
   return (
-    <div style={{minHeight:'calc(100vh - 76px)',background:C.bg0,fontFamily:C.F,padding:24}}>
+    <div style={{minHeight:'calc(100vh - 76px)', background:C.bg0, fontFamily:C.F, padding: isMobile ? '16px' : '24px'}}>
       {/* Admin Action Feed */}
       {adminStatus && (
         <div style={{ 
-          position:'fixed', top:80, right:24, zIndex:3000, padding:'12px 20px', 
+          position:'fixed', top:80, right: isMobile ? 16 : 24, left: isMobile ? 16 : 'auto', zIndex:3000, padding:'12px 20px', 
           background: adminStatus.type === 'ok' ? C.normalBg : C.critBg,
           border: `1px solid ${adminStatus.type === 'ok' ? C.normal : C.critical}40`,
           borderRadius:10, color: adminStatus.type === 'ok' ? C.normal : C.critical,
@@ -134,12 +141,12 @@ export function SuperAdminDashboard() {
           boxShadow: '0 10px 30px rgba(0,0,0,0.5)', animation: 'slideIn 300ms ease'
         }}>
           <style>{`@keyframes slideIn{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}`}</style>
-          <span>{adminStatus.type === 'ok' ? '✓' : '⚠'} {adminStatus.msg}</span>
+          <span style={{ flex: 1 }}>{adminStatus.type === 'ok' ? '✓' : '⚠'} {adminStatus.msg}</span>
           <button onClick={() => setAdminStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
         </div>
       )}
 
-      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:20}}>
+      <div style={{display:'flex', alignItems: isMobile ? 'stretch' : 'flex-start', justifyContent:'space-between', flexDirection: isMobile ? 'column' : 'row', gap: 16, marginBottom:24}}>
         <div>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
             <span style={{padding:'3px 10px',borderRadius:20,fontSize:10,fontWeight:700,background:`${C.critical}14`,color:C.critical,border:`1px solid ${C.critical}30`,letterSpacing:'0.06em'}}>
@@ -149,15 +156,15 @@ export function SuperAdminDashboard() {
               {new Date().toISOString().split('T')[0]} · SEWA AI v2.4.1
             </span>
           </div>
-          <h1 style={{margin:0,fontSize:22,fontWeight:700,color:C.textHi}}>Platform Command Centre</h1>
+          <h1 style={{margin:0,fontSize: isMobile ? 20 : 22, fontWeight:700, color:C.textHi}}>Platform Command Centre</h1>
           <p style={{margin:'4px 0 0',fontSize:12,color:C.textMd}}>Global infrastructure management</p>
         </div>
         <div style={{display:'flex',gap:8}}>
-          <button onClick={() => setShowProvision(true)} style={{padding:'7px 14px',borderRadius:8,background:C.brand,color:'white',border:'none',fontSize:11,fontWeight:600,cursor:'pointer'}}>Provision Tenant</button>
+          <button onClick={() => setShowProvision(true)} style={{flex: isMobile ? 1 : 'none', padding:'8px 20px',borderRadius:10,background:C.brand,color:'white',border:'none',fontSize:11,fontWeight:700,cursor:'pointer', textTransform: 'uppercase', tracking: '0.05em'}}>+ Provision Tenant</button>
         </div>
       </div>
 
-      <div style={{borderBottom:`1px solid ${C.border}`,display:'flex',gap:2,marginBottom:20,overflowX:'auto'}}>
+      <div style={{borderBottom:`1px solid ${C.border}`, display:'flex', gap:2, marginBottom:24, overflowX:'auto', scrollbarWidth: 'none'}}>
         {(['overview','tenants','aimodels','deployments','diagnostics','federated','billing'] as const).map(t=>(
           <button key={t} style={tabStyle(t)} onClick={()=>setTab(t)}>
             {t==='overview'&&'🌐 '}{t==='tenants'&&'🏥 '}{t==='aimodels'&&'🤖 '}{t==='deployments'&&'⚡ '}{t==='diagnostics'&&'🔧 '}{t==='federated'&&'🤝 '}{t==='billing'&&'💰 '}
@@ -408,7 +415,7 @@ export function SuperAdminDashboard() {
               <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:4}}>ADMIN EMAIL</label>
                 <input name="adminEmail" type="email" required style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'10px',color:C.textHi,fontSize:13,boxSizing:'border-box'}}/>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+              <div style={{display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12}}>
                 <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:4}}>REGION</label>
                   <select name="region" style={{width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:8,padding:'10px',color:C.textHi,fontSize:13}}>
                     <option value="uk">🇬🇧 United Kingdom</option>

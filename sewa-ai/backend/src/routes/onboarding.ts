@@ -66,12 +66,33 @@ r.post('/validate-integration', authLimiter, async (req, res, next) => {
     logger.info(`[Onboarding] Real-time connectivity test: ${type} → ${host}:${port}`);
 
     if (type === 'fhir') {
-      // Perform HTTP probe for FHIR server
+      // Perform HTTP probe for FHIR server (check /metadata or base capability statement)
       try {
-        await axios.get(host, { timeout: 3000 });
-        return res.json({ status: 'connected', details: 'FHIR R4 handshake successful.' });
+        const fhirUrl = host.endsWith('/') ? host : `${host}/`;
+        const response = await axios.get(`${fhirUrl}metadata`, { 
+          timeout: 5000,
+          headers: { 'Accept': 'application/fhir+json' }
+        });
+        
+        if (response.data?.resourceType === 'CapabilityStatement') {
+          return res.json({ 
+            status: 'connected', 
+            details: `FHIR R4 handshake successful. FHIR Version: ${response.data.fhirVersion || 'R4'}` 
+          });
+        }
+        
+        return res.json({ 
+          status: 'connected', 
+          details: 'FHIR endpoint reachable (Metadata check skipped).' 
+        });
       } catch (err: any) {
-        return res.status(400).json({ status: 'failed', details: `FHIR Error: ${err.message}` });
+        // Fallback to simple GET if /metadata fails
+        try {
+          await axios.get(host, { timeout: 3000 });
+          return res.json({ status: 'connected', details: 'FHIR reachable (simple probe).' });
+        } catch (probeErr: any) {
+          return res.status(400).json({ status: 'failed', details: `FHIR Error: ${err.message}` });
+        }
       }
     }
 
@@ -136,6 +157,18 @@ r.post('/launch', authLimiter, async (req, res, next) => {
         uk: 'GBP', us: 'USD', eu: 'EUR', ng: 'NGN', ke: 'KES', za: 'ZAR', gh: 'GHS', in: 'INR'
       };
       const currency = currencyMap[region] || 'USD';
+      
+      const baseSlug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      let slug = baseSlug;
+      let subdomain = baseSlug;
+      
+      // Ensure slug/subdomain uniqueness
+      const collision = await tx.tenant.findFirst({ where: { OR: [{ slug }, { subdomain }] } });
+      if (collision) {
+        const suffix = crypto.randomBytes(3).toString('hex');
+        slug = `${baseSlug}-${suffix}`;
+        subdomain = `${baseSlug}-${suffix}`;
+      }
 
       // Create Tenant
       const tenant = await tx.tenant.create({
@@ -147,9 +180,9 @@ r.post('/launch', authLimiter, async (req, res, next) => {
           status: 'onboarding',
           pacsEndpoint: pacsHost,
           fhirBaseUrl: fhirEndpoint,
-          // slug is name-based
-          slug: name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-          subdomain: name.toLowerCase().replace(/[^a-z0-9]/g, '-'), // required field
+          slug,
+          subdomain,
+          apiKey: `sk_live_${crypto.randomBytes(24).toString('hex')}`
         }
       });
 

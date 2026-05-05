@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import readline from 'readline';
+declare var require: any;
+declare var process: any;
+const readline = require('readline');
 
 const prisma = new PrismaClient();
 const rl = readline.createInterface({

@@ -26,6 +26,13 @@ const POSTCODES = [
 export function PopulationHealthDashboard() {
   const { stats, conditions, geography, trends, referrals = [], loading } = usePopulationHealthData();
   const [tab, setTab] = useState<'burden'|'geography'|'trends'|'referrals'>('burden');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const tabStyle = (t:string):React.CSSProperties => ({
     padding:'7px 13px',fontSize:11,fontWeight:tab===t?600:400,
     color:tab===t?C.brand:C.textLo,background:'none',border:'none',
@@ -34,38 +41,43 @@ export function PopulationHealthDashboard() {
   });
 
   return (
-    <div style={{padding:24,background:C.bg1,minHeight:'calc(100vh - 76px)',fontFamily:C.F}}>
-      <div style={{marginBottom:20}}>
-        <h2 style={{margin:0,fontSize:20,fontWeight:700,color:C.textHi}}>Population Health Analytics</h2>
+    <div style={{padding: isMobile ? 16 : 24, background:C.bg1, minHeight:'calc(100vh - 76px)', fontFamily:C.F}}>
+      <div style={{marginBottom:24}}>
+        <h2 style={{margin:0, fontSize: isMobile ? 18 : 20, fontWeight:700, color:C.textHi}}>Population Health Analytics</h2>
         <p style={{margin:'4px 0 0',fontSize:12,color:C.textMd}}>
-          Aggregate, anonymised disease surveillance · Powered by SEWA AI triage data
+          Aggregate, anonymised disease surveillance · Powered by SEWA AI
         </p>
       </div>
 
       {/* Key headline stats */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}}>
+      <div style={{
+        display:'grid',
+        gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap:12,
+        marginBottom:24
+      }}>
         {[
-          {label:'Total Scans (30d)',value:loading ? '...' : stats.totalScans.toLocaleString(),sub:'Catchment area',icon:'🩻'},
-          {label:'Positive Findings',value:loading ? '...' : stats.positives.toLocaleString(),sub:`Detection rate: ${stats.totalScans ? ((stats.positives/stats.totalScans)*100).toFixed(1) : 0}%`,icon:'🔍'},
-          {label:'Critical Cases',value:loading ? '...' : stats.criticals.toLocaleString(),sub:'Urgency-1 triggers',icon:'🚨'},
-          {label:'Lives Impacted',value:loading ? '...' : stats.impact.toLocaleString(),sub:'AI-assisted triage',icon:'❤️'},
+          {label:'Total Scans',value:loading ? '...' : stats.totalScans.toLocaleString(),sub:'Catchment area',icon:'🩻'},
+          {label:'Positives',value:loading ? '...' : stats.positives.toLocaleString(),sub:`Detection rate: ${stats.totalScans ? ((stats.positives/stats.totalScans)*100).toFixed(1) : 0}%`,icon:'🔍'},
+          {label:'Criticals',value:loading ? '...' : stats.criticals.toLocaleString(),sub:'Urgency-1',icon:'🚨'},
+          {label:'Impact',value:loading ? '...' : stats.impact.toLocaleString(),sub:'AI-assisted',icon:'❤️'},
         ].map(s=>(
-          <div key={s.label} style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
+          <div key={s.label} style={{padding: isMobile ? 12 : 16, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`}}>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}>
-              <span style={{fontSize:11,color:C.textMd}}>{s.label}</span>
-              <span style={{fontSize:18}}>{s.icon}</span>
+              <span style={{fontSize:9,color:C.textMd, textTransform: 'uppercase', tracking: '0.05em'}}>{s.label}</span>
+              <span style={{fontSize:16}}>{s.icon}</span>
             </div>
-            <div style={{fontSize:24,fontWeight:700,color:C.textHi,fontFamily:C.FM,lineHeight:1}}>{s.value}</div>
-            <div style={{fontSize:10,color:C.textLo,marginTop:6}}>{s.sub}</div>
+            <div style={{fontSize: isMobile ? 20 : 24, fontWeight:700, color:C.textHi, fontFamily:C.FM, lineHeight:1}}>{s.value}</div>
+            <div style={{fontSize:9,color:C.textLo,marginTop:6}}>{s.sub}</div>
           </div>
         ))}
       </div>
 
-      <div style={{borderBottom:`1px solid ${C.border}`,display:'flex',gap:2,marginBottom:16}}>
+      <div style={{borderBottom:`1px solid ${C.border}`, display:'flex', gap:2, marginBottom:20, overflowX: 'auto', scrollbarWidth: 'none'}}>
         {['burden','geography','trends','referrals'].map(t=>(
           <button key={t} style={tabStyle(t)} onClick={()=>setTab(t as any)}>
-            {t==='burden'&&'📊 Disease Burden'}{t==='geography'&&'🗺 Geography'}
-            {t==='trends'&&'📈 Trends'}{t==='referrals'&&'🔗 Referral Network'}
+            {t==='burden'&&'📊 Burden'}{t==='geography'&&'🗺 Geography'}
+            {t==='trends'&&'📈 Trends'}{t==='referrals'&&'🔗 Referrals'}
           </button>
         ))}
       </div>
@@ -75,30 +87,39 @@ export function PopulationHealthDashboard() {
           {conditions.length === 0 ? (
             <div style={{padding:40,textAlign:'center',color:C.textLo}}>{loading?'Aggregating disease burden...':'No epidemiological data found.'}</div>
           ) : conditions.map((d:any,i:number)=>(
-            <div key={d.condition} style={{padding:14,background:i%2===0?C.bg2:'transparent',borderRadius:10,border:`1px solid ${C.border}`,display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr 1fr',gap:12,alignItems:'center'}}>
+            <div key={d.condition} style={{
+              padding:14, background:i%2===0?C.bg2:'transparent', borderRadius:10, border:`1px solid ${C.border}`,
+              display:'grid',
+              gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr 1fr',
+              gap: isMobile ? 16 : 12, alignItems:'center'
+            }}>
               <div>
                 <div style={{fontSize:13,fontWeight:600,color:C.textHi}}>{d.condition}</div>
                 <div style={{fontSize:10,color:C.textLo,marginTop:2}}>Median age: {d.ageMedian}</div>
               </div>
-              <div>
+              <div style={{ textAlign: isMobile ? 'right' : 'left' }}>
                 <div style={{fontSize:16,fontWeight:700,color:C.textHi,fontFamily:C.FM}}>{d.count}</div>
                 <div style={{fontSize:9,color:C.textLo}}>Cases detected</div>
               </div>
-              <div>
-                <span style={{fontSize:12,fontWeight:700,color:d.trend>0?C.critical:C.normal,fontFamily:C.FM}}>
-                  {d.trend>0?'↑':'↓'} {Math.abs(d.trend)}%
-                </span>
-                <div style={{fontSize:9,color:C.textLo}}>Trend (Rel)</div>
-              </div>
-              <div>
-                <div style={{fontSize:12,fontWeight:600,color:C.textHi}}>{d.mortality}</div>
-                <div style={{fontSize:9,color:C.textLo}}>Mortality</div>
-              </div>
-              <div style={{flex:1}}>
-                <div style={{height:4,background:C.bg4,borderRadius:2,overflow:'hidden'}}>
-                  <div style={{width:`${Math.min(100, (d.count/50)*100)}%`,height:'100%',background:d.count>40?C.critical:d.count>20?C.urgent:C.brand}}/>
-                </div>
-              </div>
+              {!isMobile && (
+                <>
+                  <div>
+                    <span style={{fontSize:12,fontWeight:700,color:d.trend>0?C.critical:C.normal,fontFamily:C.FM}}>
+                      {d.trend>0?'↑':'↓'} {Math.abs(d.trend)}%
+                    </span>
+                    <div style={{fontSize:9,color:C.textLo}}>Trend (Rel)</div>
+                  </div>
+                  <div>
+                    <div style={{fontSize:12,fontWeight:600,color:C.textHi}}>{d.mortality}</div>
+                    <div style={{fontSize:9,color:C.textLo}}>Mortality</div>
+                  </div>
+                  <div style={{flex:1}}>
+                    <div style={{height:4,background:C.bg4,borderRadius:2,overflow:'hidden'}}>
+                      <div style={{width:`${Math.min(100, (d.count/50)*100)}%`,height:'100%',background:d.count>40?C.critical:d.count>20?C.urgent:C.brand}}/>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>

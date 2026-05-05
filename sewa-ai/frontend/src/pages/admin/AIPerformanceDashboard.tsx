@@ -66,6 +66,13 @@ export function AIPerformanceDashboard() {
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [secsAgo, setSecsAgo]         = useState(0);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const fetchLatency = useCallback(async () => {
     setLatencyLoading(true);
     try {
@@ -109,31 +116,40 @@ export function AIPerformanceDashboard() {
   const displayPercentiles = percentiles ?? { p50:'1.3s', p95:'1.8s', p99:'2.4s' };
 
   return (
-    <div style={{padding:'24px',background:C.bg1,minHeight:'calc(100vh - 76px)',fontFamily:C.F}}>
+    <div style={{padding: isMobile ? '16px' : '24px', background:C.bg1, minHeight:'calc(100vh - 76px)', fontFamily:C.F}}>
       <div style={{marginBottom:20}}>
-        <h2 style={{margin:0,fontSize:20,fontWeight:700,color:C.textHi}}>AI Performance Monitoring</h2>
-        <p style={{margin:'4px 0 0',fontSize:12,color:C.textMd}}>
-          Real-time metrics · Model v2.4.1 ·{' '}
-          <span style={{color:secsAgo > 60 ? C.urgent : C.textMd}}>
-            {secsAgo < 5 ? 'Just updated' : `Updated ${secsAgo}s ago`}
-          </span>
+        <h2 style={{margin:0, fontSize: isMobile ? 18 : 20, fontWeight:700, color:C.textHi}}>AI Performance Monitoring</h2>
+        <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap: 10, flexWrap: 'wrap'}}>
+          <p style={{margin:'4px 0 0',fontSize:12,color:C.textMd}}>
+            Real-time metrics · Model v2.4.1 ·{' '}
+            <span style={{color:secsAgo > 60 ? C.urgent : C.textMd}}>
+              {secsAgo < 5 ? 'Just updated' : `Updated ${secsAgo}s ago`}
+            </span>
+          </p>
           <button onClick={fetchLatency} style={{
-            marginLeft:8,padding:'2px 8px',background:'none',border:`1px solid ${C.border}`,
-            borderRadius:5,fontSize:10,color:C.brand,cursor:'pointer',fontFamily:C.F
-          }}>↻ Refresh</button>
-        </p>
+            padding:'4px 12px', background:C.bg2, border:`1px solid ${C.border}`,
+            borderRadius:8, fontSize:10, color:C.brand, cursor:'pointer', fontFamily:C.F, fontWeight: 700
+          }}>↻ REFRESH_NODE</button>
+        </div>
       </div>
 
-      {/* Top metrics — real values from aggregates */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:20}}>
+      {/* Top metrics — responsive grid */}
+      <div style={{
+        display:'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(160px, 1fr))',
+        gap:10,
+        marginBottom:20
+      }}>
         <Metric label="OVERALL AUC"      value={loading ? '...' : overallAUC}          color={C.normal} sub="Weighted avg"/>
         <Metric label="SENSITIVITY"      value={loading ? '...' : overallSens}         color={C.brand}  sub="True positive rate"/>
         <Metric label="SPECIFICITY"      value={loading ? '...' : overallSpec}         color={C.brand}  sub="True negative rate"/>
         <Metric label="AVG INFERENCE"    value={loading ? '...' : avgInference}        color={C.info}   sub="Triage engine"/>
-        <Metric label="INFERENCES TOTAL" value={loading ? '...' : totalInferences.toLocaleString()} color={C.textHi} sub="All conditions"/>
+        <div style={{ gridColumn: isMobile ? 'span 2' : 'auto' }}>
+          <Metric label="INFERENCES TOTAL" value={loading ? '...' : totalInferences.toLocaleString()} color={C.textHi} sub="All conditions"/>
+        </div>
       </div>
 
-      <div style={{borderBottom:`1px solid ${C.border}`,display:'flex',gap:2,marginBottom:16}}>
+      <div style={{borderBottom:`1px solid ${C.border}`, display:'flex', gap:2, marginBottom:16, overflowX: 'auto', scrollbarWidth: 'none'}}>
         {(['accuracy','latency','abtests','drift','bias'] as const).map(t=>(
           <button key={t} style={tabStyle(t)} onClick={()=>setTab(t)}>
             {t==='accuracy'&&'🎯 '}{t==='latency'&&'⚡ '}{t==='abtests'&&'🔬 '}{t==='drift'&&'📉 '}{t==='bias'&&'⚖ '}
@@ -144,24 +160,45 @@ export function AIPerformanceDashboard() {
 
       {tab==='accuracy' && (
         <div style={{display:'flex',flexDirection:'column',gap:8}}>
-          <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr',gap:8,padding:'8px 12px',background:C.bg3,borderRadius:'8px 8px 0 0',border:`1px solid ${C.border}`}}>
-            {['Condition','AUC-ROC','Sensitivity','Cases'].map(h=>(
-              <span key={h} style={{fontSize:10,fontWeight:600,color:C.textLo,letterSpacing:'0.05em',textTransform:'uppercase',fontFamily:C.F}}>{h}</span>
-            ))}
+          <div style={{
+            display:'grid',
+            gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr',
+            gap:8, padding:'8px 12px', background:C.bg3, borderRadius:'8px 8px 0 0', border:`1px solid ${C.border}`
+          }}>
+            {isMobile ? (
+              <>
+                <span style={{fontSize:10,fontWeight:600,color:C.textLo,letterSpacing:'0.05em',textTransform:'uppercase',fontFamily:C.F}}>Condition</span>
+                <span style={{fontSize:10,fontWeight:600,color:C.textLo,letterSpacing:'0.05em',textTransform:'uppercase',fontFamily:C.F, textAlign:'right'}}>AUC-ROC</span>
+              </>
+            ) : (
+              ['Condition','AUC-ROC','Sensitivity','Cases'].map(h=>(
+                <span key={h} style={{fontSize:10,fontWeight:600,color:C.textLo,letterSpacing:'0.05em',textTransform:'uppercase',fontFamily:C.F}}>{h}</span>
+              ))
+            )}
           </div>
           {conditionStats.length === 0 ? (
             <div style={{padding:40,textAlign:'center',color:C.textLo}}>{loading?'Measuring performance...':'No condition stats found.'}</div>
           ) : conditionStats.map((cond:any,i:number)=>(
-            <div key={cond.name} style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr',gap:8,padding:'12px',background:i%2===0?C.bg2:'transparent',borderRadius:8,border:`1px solid ${C.border}`,alignItems:'center'}}>
+            <div key={cond.name} style={{
+              display:'grid',
+              gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr',
+              gap:8, padding:'12px', background:i%2===0?C.bg2:'transparent', borderRadius:8, border:`1px solid ${C.border}`, alignItems:'center'
+            }}>
               <span style={{fontSize:12,fontWeight:600,color:C.textHi,fontFamily:C.F}}>{cond.name}</span>
-              <div style={{display:'flex',alignItems:'center',gap:6}}>
-                <div style={{flex:1,height:4,background:C.bg4,borderRadius:2,overflow:'hidden'}}>
-                  <div style={{width:`${cond.auc*100}%`,height:'100%',background:cond.auc>=0.95?C.normal:cond.auc>=0.9?C.brand:C.urgent}}/>
-                </div>
-                <span style={{fontSize:10,fontFamily:C.FM,fontWeight:700,color:cond.auc>=0.95?C.normal:C.brand,minWidth:32}}>{cond.auc.toFixed(3)}</span>
+              <div style={{display:'flex',alignItems:'center',gap:6, justifyContent: isMobile ? 'flex-end' : 'flex-start'}}>
+                {!isMobile && (
+                  <div style={{flex:1,height:4,background:C.bg4,borderRadius:2,overflow:'hidden'}}>
+                    <div style={{width:`${cond.auc*100}%`,height:'100%',background:cond.auc>=0.95?C.normal:cond.auc>=0.9?C.brand:C.urgent}}/>
+                  </div>
+                )}
+                <span style={{fontSize:10,fontFamily:C.FM,fontWeight:700,color:cond.auc>=0.95?C.normal:C.brand,minWidth:32, textAlign: isMobile ? 'right' : 'left'}}>{cond.auc.toFixed(3)}</span>
               </div>
-              <span style={{fontSize:11,fontFamily:C.FM,color:C.textHi}}>{(cond.sensitivity*100).toFixed(1)}%</span>
-              <span style={{fontSize:11,fontFamily:C.FM,color:C.textMd}}>{cond.cases.toLocaleString()}</span>
+              {!isMobile && (
+                <>
+                  <span style={{fontSize:11,fontFamily:C.FM,color:C.textHi}}>{(cond.sensitivity*100).toFixed(1)}%</span>
+                  <span style={{fontSize:11,fontFamily:C.FM,color:C.textMd}}>{cond.cases.toLocaleString()}</span>
+                </>
+              )}
             </div>
           ))}
         </div>

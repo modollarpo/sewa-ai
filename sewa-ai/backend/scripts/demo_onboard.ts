@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
+declare var process: any;
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -17,10 +19,10 @@ async function main() {
   const adminEmail = 'it.director@stthomas.nhs.uk.demo';
   const adminFirstName = 'Sarah';
   const adminLastName = 'Connor';
-  const adminPassword = 'SecurePassword123!';
+  const adminPassword = process.env.DEMO_ADMIN_PASSWORD || 'SewaDemo2024!'; // Allow override via env
 
-  const passwordHash = await bcrypt.hash(adminPassword, 10);
-  const apiKey = `sk_live_${uuidv4().replace(/-/g, '')}`;
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
+  const apiKey = `sk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`; // Longer, more secure key
   const subdomain = `${slug}.sewaxai.health`;
 
   try {
@@ -51,7 +53,7 @@ async function main() {
       }
     });
 
-    console.log('\n✅ Successfully onboarded demo hospital!');
+    console.log('\n✅ Successfully onboarded demo hospital (Hardened Flow)');
     console.log('---------------------------------------');
     console.log(`Tenant ID:    ${tenant.id}`);
     console.log(`Name:         ${tenant.name}`);

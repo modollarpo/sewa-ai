@@ -220,20 +220,52 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
     } finally { setUploading(false); }
   };
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) setMobileMenuOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const processing = useMemo(() => jobs.filter(j=>j.status==='uploading'||j.status==='processing').length, [jobs]);
   const complete = useMemo(() => jobs.filter(j=>j.status==='ai_complete').length, [jobs]);
   const critical = useMemo(() => jobs.filter(j=>j.urgency==='CRITICAL').length, [jobs]);
 
   return (
     <div className="flex h-screen bg-[#05100D] overflow-hidden font-sans text-[#D0ECE6]">
+      <style>{`
+        @media (max-width: 1023px) {
+          .sidebar-overlay { 
+            display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); z-index: 900; opacity: 0; pointer-events: none; transition: opacity 300ms;
+          }
+          .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+          .sidebar {
+            position: fixed !important; top: 0; bottom: 0; left: -320px;
+            z-index: 1000 !important; width: 320px !important;
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+          }
+          .sidebar.open { transform: translateX(320px); }
+          .main-content { padding: 20px !important; }
+        }
+      `}</style>
+
+      <div className={`sidebar-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)} />
       
       {/* Panel 1: Stats & Active Queue (Sidebar) */}
-      <aside className="w-80 flex flex-col bg-[#08160F] border-r border-[#1B3028] shadow-2xl z-10 transition-all duration-300">
+      <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''} w-80 flex flex-col bg-[#08160F] border-r border-[#1B3028] shadow-2xl z-10 transition-all duration-300`}>
         <div className="p-6 border-b border-[#1B3028] bg-[#0C1D17]/50 backdrop-blur-md">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest mb-1">Technician Terminal</span>
-            <h2 className="text-lg font-black text-[#D0ECE6]">{user?.tenantName || 'SEWA Health'}</h2>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest">Technician Terminal</span>
+            {isMobile && <button onClick={() => setMobileMenuOpen(false)} className="text-[#3A6055] hover:text-white">✕</button>}
           </div>
+          <h2 className="text-lg font-black text-[#D0ECE6]">{user?.tenantName || 'SEWA Health'}</h2>
           
           <div className="grid grid-cols-2 gap-2 mt-6">
             {[
@@ -277,34 +309,41 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
       </aside>
 
       {/* Main Workspace Area */}
-      <main className="flex-1 flex flex-col bg-[#05100D] relative min-w-0">
+      <main className="flex-1 flex flex-col bg-[#05100D] relative min-w-0 main-content">
         
         {/* Workspace Navigation */}
-        <header className="px-6 border-b border-[#1B3028] bg-[#08160F] flex items-center justify-between z-20">
+        <header className="px-6 border-b border-[#1B3028] bg-[#08160F] flex items-center justify-between z-20 overflow-x-auto scrollbar-none">
           <div className="flex gap-1">
+            {isMobile && (
+              <button onClick={() => setMobileMenuOpen(true)} className="px-4 text-[#408D7B]">
+                ☰
+              </button>
+            )}
             {[
-              { id: 'upload', label: 'Ingest Scan', icon: '⬆' },
-              { id: 'queue', label: 'Worklist Node', icon: '📋' },
+              { id: 'upload', label: 'Ingest', icon: '⬆' },
+              { id: 'queue', label: 'Worklist', icon: '📋' },
               { id: 'schedule', label: 'Procedures', icon: '📅' },
-              { id: 'pacs', label: 'PACS Mesh', icon: '🔗' },
+              { id: 'pacs', label: 'PACS', icon: '🔗' },
             ].map(t => (
               <button 
                 key={t.id} 
                 onClick={() => setTab(t.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
+                className={`flex items-center gap-2 px-4 lg:px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 whitespace-nowrap ${
                   tab === t.id ? 'border-[#408D7B] text-[#D0ECE6] bg-[#408D7B]/5' : 'border-transparent text-[#3A6055] hover:text-[#6FA898]'
                 }`}
               >
-                <span>{t.icon}</span> {t.label}
+                <span>{t.icon}</span> {!isMobile && t.label}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#1DBF73] animate-pulse-dot" />
-              <span className="text-[9px] font-mono text-[#408D7B] uppercase font-black">Node_Live</span>
+          {!isMobile && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1DBF73] animate-pulse-dot" />
+                <span className="text-[9px] font-mono text-[#408D7B] uppercase font-black">Node_Live</span>
+              </div>
             </div>
-          </div>
+          )}
         </header>
 
         <div className="flex-1 overflow-y-auto p-8 scrollbar-thin">
