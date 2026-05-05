@@ -11,6 +11,26 @@ const C = {
   border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif", FM:"'IBM Plex Mono',monospace",
 };
 
+// Animated background brain-scan lines
+function BackgroundGrid() {
+  return (
+    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.06 }} viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#408D7B" strokeWidth="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+      {/* ECG-style waveform */}
+      <polyline points="0,300 80,300 100,260 120,340 140,260 160,320 180,300 260,300 280,240 300,360 310,220 320,380 330,300 420,300 440,270 460,330 480,300 800,300"
+        fill="none" stroke="#408D7B" strokeWidth="1.5" opacity="0.8"/>
+      <circle cx="310" cy="220" r="3" fill="#E03535" opacity="0.6">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  );
+}
+
 export function RegisterPage({ onLogin, onInstitutionalOnboarding }: { onLogin:()=>void, onInstitutionalOnboarding:()=>void }) {
   const [role, setRole] = useState<'patient'|'expert'|'specialist'>('patient');
   const [step, setStep] = useState(1);
@@ -68,8 +88,16 @@ export function RegisterPage({ onLogin, onInstitutionalOnboarding }: { onLogin:(
   };
 
   return (
-    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:C.bg0, fontFamily:C.F, padding:20 }}>
-      <div style={{ width:'100%', maxWidth:440, padding: '16px' }}>
+    <div className="min-h-screen flex items-center justify-center bg-[#05100D] relative overflow-hidden font-sans text-[#D0ECE6]">
+      <BackgroundGrid />
+      
+      {/* Background Glows */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[#408D7B]/5 rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#408D7B]/5 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg p-6 animate-fade-in" style={{ padding: '16px' }}>
         
         {/* Logo card */}
         <div style={{
