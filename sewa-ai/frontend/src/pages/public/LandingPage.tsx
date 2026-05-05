@@ -26,10 +26,7 @@ const COMPLIANCE = [
   { label:'GDPR', flag:'🇪🇺', desc:'EU Privacy' },
   { label:'HIPAA', flag:'🇺🇸', desc:'US Health' },
   { label:'MDR IIb', flag:'🔬', desc:'EU Medical' },
-  { label:'EU AI Act', flag:'🤖', desc:'High-Risk AI' },
-  { label:'FDA 510(k)', flag:'💊', desc:'US Device' },
-  { label:'ISO 13485', flag:'🏭', desc:'Quality Mgmt' },
-  { label:'NDPR', flag:'🇳🇬', desc:'Nigeria' },
+  { label:'EU AI Act', flag:'🤖', desc:'High-Risk' },
 ];
 
 export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavigate:(p:string)=>void }) {
@@ -143,16 +140,19 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
       </section>
 
       {/* Compliance Ribbon */}
-      <section className="relative z-20 py-10 bg-[#08160F] border-y border-[#1B3028] overflow-hidden">
-        <div className="flex animate-scroll whitespace-nowrap gap-12 items-center hover:[animation-play-state:paused] cursor-grab active:cursor-grabbing">
-          {[...COMPLIANCE, ...COMPLIANCE, ...COMPLIANCE].map((c, i) => (
-            <div key={i} className="flex items-center gap-4 px-6 py-2.5 rounded-2xl bg-[#0C1D17] border border-[#1B3028] text-[11px] font-black text-[#6FA898] uppercase tracking-widest shadow-sm hover:border-[#408D7B]/30 transition-colors">
-              <span className="text-xl">{c.flag}</span>
+      <section className="relative z-20 py-12 bg-[#08160F] border-y border-[#1B3028] overflow-hidden group/compliance">
+        <div className="flex animate-scroll whitespace-nowrap gap-12 items-center hover:[animation-play-state:paused] cursor-grab active:cursor-grabbing w-max">
+          {[...COMPLIANCE, ...COMPLIANCE, ...COMPLIANCE, ...COMPLIANCE].map((c, i) => (
+            <div key={i} className="flex items-center gap-4 px-8 py-3 rounded-2xl bg-[#0C1D17] border border-[#1B3028] text-[12px] font-black text-[#6FA898] uppercase tracking-widest shadow-sm hover:border-[#408D7B]/40 transition-all hover:scale-105">
+              <span className="text-2xl">{c.flag}</span>
               <span className="text-[#D0ECE6]">{c.label}</span>
-              <span className="text-[#3A6055] font-bold">• {c.desc}</span>
+              <span className="text-[#3A6055] font-bold"> • {c.desc}</span>
             </div>
           ))}
         </div>
+        {/* Soft edge masking for smooth transition */}
+        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#08160F] to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#08160F] to-transparent z-10 pointer-events-none" />
       </section>
 
       {/* Feature Grid */}

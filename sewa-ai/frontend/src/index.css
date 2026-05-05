@@ -125,9 +125,15 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   100% { background-position:  200% 0; }
 }
 
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.33%); }
+}
+
 .animate-fade-in       { animation: fade-in 0.3s ease forwards; }
 .animate-slide-right   { animation: slide-in-right 0.25s ease forwards; }
 .animate-pulse-dot     { animation: pulse-dot 1.2s ease-in-out infinite; }
+.animate-scroll        { animation: scroll 30s linear infinite; }
 
 /* Loading skeleton */
 .skeleton {
