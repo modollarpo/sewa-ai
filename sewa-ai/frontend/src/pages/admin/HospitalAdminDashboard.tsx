@@ -5,6 +5,7 @@ import { useHospitalAdminData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Skeleton, StatSkeleton } from '../../components/ui/Skeleton';
+import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
 
 const C = {
   bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
@@ -71,6 +72,7 @@ export function HospitalAdminDashboard() {
     s.role?.toLowerCase().includes(search.toLowerCase())
   ), [staff, search]);
   const [showAddUser, setShowAddUser] = useState(false);
+  const [showPlatformTour, setShowPlatformTour] = useState(false);
   const [invoices, setInvoices]       = useState<any[]>([]);
   const [pacsStatus, setPacsStatus]   = useState<'idle'|'loading'|'ok'|'fail'>('idle');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -138,7 +140,22 @@ export function HospitalAdminDashboard() {
           >
             <span>+</span> Invite Clinician
           </button>
+          <button 
+            onClick={() => setShowPlatformTour(true)}
+            className={`px-4 py-3 rounded-xl bg-[#08160F] border border-[#1B3028] hover:border-[#408D7B] text-[#3A6055] hover:text-[#D0ECE6] text-[11px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${isMobile ? 'flex-1' : ''}`}
+          >
+            <span className="text-xs">▶</span> Platform Tour
+          </button>
         </div>
+
+        {showPlatformTour && (
+          <RemotionPlayerModal
+            isOpen={showPlatformTour}
+            onClose={() => setShowPlatformTour(false)}
+            composition="PlatformIntro"
+            title="SEWA AI Platform Overview"
+          />
+        )}
       </header>
 
       {/* Navigation Tabs */}

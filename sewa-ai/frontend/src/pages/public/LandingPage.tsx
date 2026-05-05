@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ClinicalDemoModal } from '../../components/public/ClinicalDemoModal';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
+import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
 
 const FEATURES = [
   { id:'triage-ai',          icon:'⚡', title:'Triage in Seconds', desc:'EfficientNet-B4 deep learning detects ICH, PE, pneumothorax, TB and stroke with AUC > 0.95 in under 2 seconds.', tag:'Triage Engine' },
@@ -35,6 +36,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
   const [demoEmail, setDemoEmail] = useState('');
   const [counter, setCounter] = useState(0);
   const [showDemo, setShowDemo] = useState(false);
+  const [showPlatformTour, setShowPlatformTour] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -108,13 +110,22 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             Join Network
           </button>
           <button 
-            onClick={() => setShowDemo(true)}
+            onClick={() => setShowPlatformTour(true)}
             className="flex items-center justify-center gap-3 px-6 py-4 text-[#3A6055] hover:text-[#D0ECE6] transition-colors text-xs font-black uppercase tracking-widest w-full sm:w-auto"
           >
             <span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#111F1A] border border-[#1B3028]">▶</span>
             Watch Clinical Demo
           </button>
         </div>
+
+        {showPlatformTour && (
+          <RemotionPlayerModal
+            isOpen={showPlatformTour}
+            onClose={() => setShowPlatformTour(false)}
+            composition="PlatformIntro"
+            title="SEWA AI Platform Overview"
+          />
+        )}
 
         {/* Hero Stats */}
         <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-20 mt-24 animate-fade-in [animation-delay:600ms]">

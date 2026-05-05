@@ -9,6 +9,7 @@ import { apiClient } from '../../services/apiClient';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { VoiceDictation } from '../../components/ui/VoiceDictation';
+import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -323,6 +324,7 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
 // ── AI Results Panel ──────────────────────────────────────────
 function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>void }) {
   const [actionBusy, setActionBusy] = useState(false);
+  const [showReel, setShowReel] = useState(false);
   const [showOpinionModal, setShowOpinionModal] = useState(false);
   const ai = scan?.aiResult;
   
@@ -368,14 +370,43 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
           <UrgencyPill u={ai.urgency} />
           <span className="text-[9px] font-mono text-[#3A6055] bg-[#050F0C] px-1.5 py-0.5 rounded border border-[#1B3028]">Triage Model v2.4</span>
         </div>
-        <div className={`text-base font-extrabold mb-1 ${ai.urgency === 'CRITICAL' ? 'text-[#E03535]' : 'text-[#D0ECE6]'}`}>
+        <div className={`text-base font-extrabold mb-3 ${ai.urgency === 'CRITICAL' ? 'text-[#E03535]' : 'text-[#D0ECE6]'}`}>
           {ai.primaryFinding}
         </div>
-        {ai.location && (
-          <div className="flex items-center gap-1.5 text-[10px] text-[#6FA898] font-medium">
-            <span className="opacity-50">LOCATION:</span>
-            <span className="bg-[#162821] px-1.5 py-0.5 rounded text-[#52B09A]">{ai.location}</span>
-          </div>
+        
+        <div className="flex items-center justify-between">
+          {ai.location && (
+            <div className="flex items-center gap-1.5 text-[10px] text-[#6FA898] font-medium">
+              <span className="opacity-50">LOCATION:</span>
+              <span className="bg-[#162821] px-1.5 py-0.5 rounded text-[#52B09A]">{ai.location}</span>
+            </div>
+          )}
+          
+          <button 
+            onClick={() => setShowReel(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#408D7B]/10 border border-[#408D7B]/30 text-[#408D7B] text-[9px] font-black uppercase tracking-widest hover:bg-[#408D7B] hover:text-white transition-all shadow-lg"
+          >
+            <span className="text-xs">▶</span> Clinical Reel
+          </button>
+        </div>
+
+        {showReel && (
+          <RemotionPlayerModal
+            isOpen={showReel}
+            onClose={() => setShowReel(false)}
+            composition="AIResultExplainer"
+            title="Clinical Intelligence Reel"
+            inputProps={{
+              scanId: scan.id,
+              modality: scan.modality,
+              bodyPart: scan.bodyPart,
+              diagnosis: ai.primaryFinding,
+              confidence: ai.confidence,
+              urgency: ai.urgency,
+              gradcamUrl: ai.heatmapUrl,
+              hospital: 'Royal London Hospital'
+            }}
+          />
         )}
       </div>
 
