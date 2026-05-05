@@ -228,40 +228,105 @@ export function HospitalAdminDashboard() {
               </div>
             </div>
             
-                        </td>
-                        <td className="p-5">
-                          <span className="text-[10px] font-mono text-[#3A6055] bg-[#050F0C] px-2 py-1 rounded border border-[#1B3028]">
-                            SEC-LEVEL-{s.role === 'admin' ? 'A1' : 'B2'}
-                          </span>
-                        </td>
-                        <td className="p-5">
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button 
-                              onClick={() => { setSelectedStaff(s); setActionType('edit'); setShowAddUser(true); }}
-                              className="p-2 rounded-lg bg-[#111F1A] border border-[#1B3028] text-[#D0ECE6] hover:bg-[#408D7B] hover:border-[#408D7B] transition-all"
-                              title="Edit Credentials"
-                            >
-                              ✎
-                            </button>
-                            <button 
-                              onClick={() => { setSelectedStaff(s); setActionType('suspend'); setShowAddUser(true); }}
-                              className={`p-2 rounded-lg border transition-all ${
-                                s.status === 'suspended' 
-                                  ? 'bg-[#0A1F14] border-[#1DBF73]/30 text-[#1DBF73] hover:bg-[#1DBF73] hover:text-white' 
-                                  : 'bg-[#2A0A0A] border-[#E03535]/30 text-[#E03535] hover:bg-[#E03535] hover:text-white'
-                              }`}
-                              title={s.status === 'suspended' ? 'Reactivate Access' : 'Revoke Access'}
-                            >
-                              {s.status === 'suspended' ? '✓' : '⊘'}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {isMobile ? (
+              <div className="flex flex-col gap-4">
+                {filteredStaff.map((s:any) => (
+                  <div key={s.id} className="p-5 bg-[#0C1D17] border border-[#1B3028] rounded-2xl shadow-lg">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#162821] border border-[#1B3028] flex items-center justify-center text-xs font-bold text-[#408D7B]">
+                          {s.firstName?.charAt(0)}{s.lastName?.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-[#D0ECE6]">{s.firstName} {s.lastName}</div>
+                          <div className="text-[10px] text-[#3A6055] font-black uppercase tracking-widest">{s.role}</div>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                        s.status === 'active' ? 'bg-[#1DBF73]/10 text-[#1DBF73] border-[#1DBF73]/20' : 'bg-[#E03535]/10 text-[#E03535] border-[#E03535]/20'
+                      }`}>
+                        {s.status || 'Active'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-4 border-t border-[#1B3028]">
+                      <div className="text-[10px] text-[#3A6055] font-bold uppercase tracking-wider">{s.email}</div>
+                      <div className="flex gap-2">
+                        <button onClick={() => { setSelectedStaff(s); setActionType('edit'); setShowAddUser(true); }} className="p-2 text-[#408D7B] hover:bg-[#408D7B]/10 rounded-lg transition-colors">✎</button>
+                        <button onClick={() => { setSelectedStaff(s); setActionType('suspend'); setShowAddUser(true); }} className="p-2 text-[#E03535] hover:bg-[#E03535]/10 rounded-lg transition-colors">⊘</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="bg-[#0C1D17] border border-[#1B3028] rounded-3xl overflow-hidden shadow-2xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="bg-[#111F1A]">
+                        {['Staff Identity','Specialization','Status','Authorization','Operations'].map(h=>(
+                          <th key={h} className="p-5 text-[10px] font-black text-[#3A6055] uppercase tracking-widest">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#1B3028]">
+                      {filteredStaff.map((s:any)=>(
+                        <tr key={s.id} className="hover:bg-[#111F1A]/50 transition-colors group">
+                          <td className="p-5">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-full bg-[#162821] border border-[#1B3028] flex items-center justify-center text-xs font-bold text-[#408D7B]">
+                                {s.firstName?.charAt(0)}{s.lastName?.charAt(0)}
+                              </div>
+                              <div>
+                                <div className="text-sm font-bold text-[#D0ECE6]">{s.firstName} {s.lastName}</div>
+                                <div className="text-[10px] text-[#3A6055] font-mono lowercase opacity-50">{s.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-5">
+                            <RoleBadge role={s.role}/>
+                          </td>
+                          <td className="p-5">
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                              s.status === 'active' ? 'bg-[#1DBF73]/10 text-[#1DBF73] border-[#1DBF73]/20' : 'bg-[#E03535]/10 text-[#E03535] border-[#E03535]/20'
+                            }`}>
+                              {s.status || 'Active'}
+                            </span>
+                          </td>
+                          <td className="p-5">
+                            <span className="text-[10px] font-mono text-[#3A6055] bg-[#050F0C] px-2 py-1 rounded border border-[#1B3028]">
+                              SEC-LEVEL-{s.role === 'admin' ? 'A1' : 'B2'}
+                            </span>
+                          </td>
+                          <td className="p-5">
+                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={() => { setSelectedStaff(s); setActionType('edit'); setShowAddUser(true); }}
+                                className="p-2 rounded-lg bg-[#111F1A] border border-[#1B3028] text-[#D0ECE6] hover:bg-[#408D7B] hover:border-[#408D7B] transition-all"
+                                title="Edit Credentials"
+                              >
+                                ✎
+                              </button>
+                              <button 
+                                onClick={() => { setSelectedStaff(s); setActionType('suspend'); setShowAddUser(true); }}
+                                className={`p-2 rounded-lg border transition-all ${
+                                  s.status === 'suspended' 
+                                    ? 'bg-[#0A1F14] border-[#1DBF73]/30 text-[#1DBF73] hover:bg-[#1DBF73] hover:text-white' 
+                                    : 'bg-[#2A0A0A] border-[#E03535]/30 text-[#E03535] hover:bg-[#E03535] hover:text-white'
+                                }`}
+                                title={s.status === 'suspended' ? 'Reactivate Access' : 'Revoke Access'}
+                              >
+                                {s.status === 'suspended' ? '✓' : '⊘'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
