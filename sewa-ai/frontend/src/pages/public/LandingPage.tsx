@@ -142,7 +142,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
       {/* Compliance Ribbon */}
       <section className="relative z-20 py-12 bg-[#08160F] border-y border-[#1B3028] overflow-hidden group/compliance">
         <div className="flex animate-scroll whitespace-nowrap gap-12 items-center hover:[animation-play-state:paused] cursor-grab active:cursor-grabbing w-max">
-          {[...COMPLIANCE, ...COMPLIANCE, ...COMPLIANCE, ...COMPLIANCE].map((c, i) => (
+          {[...COMPLIANCE, ...COMPLIANCE].map((c, i) => (
             <div key={i} className="flex items-center gap-4 px-8 py-3 rounded-2xl bg-[#0C1D17] border border-[#1B3028] text-[12px] font-black text-[#6FA898] uppercase tracking-widest shadow-sm hover:border-[#408D7B]/40 transition-all hover:scale-105">
               <span className="text-2xl">{c.flag}</span>
               <span className="text-[#D0ECE6]">{c.label}</span>

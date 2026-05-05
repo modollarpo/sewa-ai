@@ -127,7 +127,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @keyframes scroll {
   from { transform: translateX(0); }
-  to   { transform: translateX(-33.33%); }
+  to   { transform: translateX(-50%); }
 }
 
 .animate-fade-in       { animation: fade-in 0.3s ease forwards; }

@@ -28,10 +28,35 @@ export function RemotionPlayerModal({ isOpen, onClose, composition, inputProps, 
 
   return (
     <div 
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/95 backdrop-blur-2xl animate-fade-in p-2 md:p-10"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 10000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        backdropFilter: 'blur(24px)',
+        padding: '20px',
+      }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-6xl aspect-video bg-[#050F0C] rounded-2xl md:rounded-[2rem] border border-[#1B3028] shadow-[0_0_100px_rgba(64,141,123,0.3)] overflow-hidden flex flex-col max-h-[95vh]">
+      <div 
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '1200px',
+          aspectRatio: '16/9',
+          backgroundColor: '#050F0C',
+          borderRadius: '24px',
+          border: '1px solid #1B3028',
+          boxShadow: '0 0 100px rgba(64, 141, 123, 0.3)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '90vh',
+        }}
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-[#1B3028] bg-[#08160F]/80 backdrop-blur-md">

@@ -227,6 +227,15 @@ export const AIResultExplainer: React.FC<AIResultExplainerProps> = ({
                 <FadeIn>
                   <div style={{ width: 360, height: 280, background: B.bg1, borderRadius: 16, border: `2px solid ${urgencyColor}40`, overflow: 'hidden', position: 'relative', boxShadow: `0 10px 30px rgba(0,0,0,0.5)` }}>
                     <img src={gradcamUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {/* Diagnostic Scan Line */}
+                    <div style={{
+                      position: 'absolute',
+                      top: 0, left: 0, right: 0, height: 4,
+                      background: urgencyColor,
+                      boxShadow: `0 0 20px ${urgencyColor}`,
+                      transform: `translateY(${interpolate(frame % 60, [0, 60], [0, 280])}px)`,
+                      opacity: 0.8
+                    }} />
                     <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(0,0,0,0.8)', borderRadius: 8, padding: '6px 12px', border: `1px solid ${urgencyColor}40` }}>
                       <span style={{ fontSize: 12, color: B.textMd, fontWeight: 700 }}>Grad-CAM Attribution</span>
                     </div>
@@ -438,6 +447,14 @@ export const PlatformIntro: React.FC = (): any => {
       <AbsoluteFill style={{ background: B.bg0, fontFamily: B.F, color: B.textHi, overflow: 'hidden' }}>
         <Grid />
         <Glow color={B.brand} size={800} opacity={0.15} />
+        
+        {/* Digital Pulse Background */}
+        <AbsoluteFill style={{ opacity: 0.1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="1200" height="400" viewBox="0 0 1200 400" fill="none" stroke={B.brand} strokeWidth="2">
+            <path d={`M0 200 L400 200 L420 150 L440 250 L460 100 L480 300 L500 200 L1200 200`} 
+              style={{ strokeDasharray: 2000, strokeDashoffset: interpolate(frame, [0, 300], [2000, 0]) }} />
+          </svg>
+        </AbsoluteFill>
 
       {/* Opening — logo + tagline */}
       <Sequence from={0} durationInFrames={90}>
@@ -497,7 +514,7 @@ export const PlatformIntro: React.FC = (): any => {
             {engines.map((e, i) => (
               <Sequence key={i} from={i * 10}>
                 <SlideUp delay={0}>
-                  <div style={{ display: 'flex', items: 'center', gap: 24, padding: '32px 40px', background: B.bg2, border: `2px solid ${e.color}30`, borderRadius: 24 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '32px 40px', background: B.bg2, border: `2px solid ${e.color}30`, borderRadius: 24 }}>
                     <div style={{ fontSize: 64 }}>{e.icon}</div>
                     <div>
                       <div style={{ fontSize: 24, fontWeight: 900, color: e.color, marginBottom: 8 }}>{e.label}</div>
