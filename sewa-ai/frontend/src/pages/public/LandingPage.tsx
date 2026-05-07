@@ -107,7 +107,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             Join Network
           </button>
           <button 
-            onClick={() => setShowPlatformTour(true)}
+            onClick={() => setShowDemo(true)}
             className="flex items-center justify-center gap-3 px-6 py-4 text-[#3A6055] hover:text-[#D0ECE6] transition-colors text-xs font-black uppercase tracking-widest w-full sm:w-auto"
           >
             <span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#111F1A] border border-[#1B3028]">▶</span>
