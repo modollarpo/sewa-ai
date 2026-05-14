@@ -1,9 +1,14 @@
 import { EmailClient } from '@azure/communication-email';
+import sgMail from '@sendgrid/mail';
 import { config } from '../config/env';
 import { logger } from '../utils/logger';
 
 const connectionString = config.AZURE_COMMUNICATION_CONNECTION_STRING || '';
 const emailClient = connectionString ? new EmailClient(connectionString) : null;
+
+if (config.SENDGRID_API_KEY) {
+  sgMail.setApiKey(config.SENDGRID_API_KEY);
+}
 
 const FROM_EMAIL = config.EMAIL_FROM || 'info@sewaxai.health';
 const FROM_NAME  = 'SEWA AI Clinical';
@@ -103,11 +108,30 @@ export async function sendEmail({ to, name, subject, template, html, data }: Ema
   };
 
   try {
-    const poller = await emailClient.beginSend(message);
-    await poller.pollUntilDone();
-    logger.info(`[Email] Sent '${subject}' to ${to}`);
+    if (emailClient) {
+      const poller = await emailClient.beginSend(message);
+      await poller.pollUntilDone();
+      logger.info(`[Email] Sent '${subject}' to ${to} via ACS`);
+      return;
+    }
   } catch (error: any) {
-    // BG4: Log failure but do NOT rethrow — email is non-fatal for most flows
-    logger.error(`[Email] Failed to send '${subject}' to ${to}: ${error.message}`);
+    logger.warn(`[Email] ACS failed to send to ${to}: ${error.message} — attempting SendGrid fallback`);
+  }
+
+  // ── SendGrid Fallback ──────────────────────────────────────────
+  if (config.SENDGRID_API_KEY) {
+    try {
+      await sgMail.send({
+        to,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        subject,
+        html: emailHtml,
+      });
+      logger.info(`[Email] Sent '${subject}' to ${to} via SendGrid fallback`);
+    } catch (sgError: any) {
+      logger.error(`[Email] All providers failed for ${to}. SG Error: ${sgError.message}`);
+    }
+  } else {
+    logger.error(`[Email] ACS failed and no SendGrid fallback configured for ${to}`);
   }
 }

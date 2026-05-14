@@ -324,7 +324,7 @@ r.get('/invoices/:id/pdf',
       doc.moveTo(50, 235).lineTo(545, 235).stroke('#E0E0E0');
 
       const currency = payment.tenant?.currency ?? 'GBP';
-      const amount   = ((payment as any).amount ?? 0) / 100; // assuming pence
+      const amount   = Number(payment.amount || 0);
       doc.font('Helvetica').fillColor('#333')
          .text(`SEWA AI Platform — ${payment.tenant?.plan ?? 'Pro'} Plan`, 50, 248)
          .text(`${currency} ${amount.toFixed(2)}`, 450, 248, { align: 'right' });

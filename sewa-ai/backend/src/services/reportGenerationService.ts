@@ -69,10 +69,10 @@ export async function generateClinicalPDF(reportId: string): Promise<string | nu
       reportNumber: `REP-${report.id.slice(0, 8).toUpperCase()}`,
       signedAt: report.signedAt || new Date(),
       patient: {
-        name: `${patient.user.firstName} ${patient.user.lastName}`,
-        mrn: patient.mrn || 'N/A',
-        dob: patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'N/A',
-        gender: patient.gender || 'N/A',
+        name: patient ? `${patient.user.firstName} ${patient.user.lastName}` : 'Anonymous',
+        mrn: patient?.mrn || 'N/A',
+        dob: patient?.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'N/A',
+        gender: (patient as any)?.sex || 'N/A',
       },
       hospital: {
         name: tenant.name,
@@ -82,7 +82,7 @@ export async function generateClinicalPDF(reportId: string): Promise<string | nu
       scan: {
         modality: scan.modality,
         bodyPart: scan.bodyPart,
-        accessionNumber: scan.accessionNumber || scan.id.slice(0, 10),
+        accessionNumber: (scan as any).accessionNumber || scan.id.slice(0, 10),
         receivedAt: scan.receivedAt,
       },
       findings: report.findings || 'No specific findings recorded.',

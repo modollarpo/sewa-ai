@@ -21,8 +21,8 @@ const C = {
   FM:"'IBM Plex Mono',monospace",
 };
 
-// Clinically-vetted fallback latencies (24-hour profile, used only when API unavailable)
-const LATENCY_FALLBACK = [1.4,1.3,1.5,1.2,1.6,1.4,1.3,1.5,1.4,1.2,1.3,1.4,1.5,1.3,1.2,1.4,1.6,1.3,1.4,1.2,1.5,1.4,1.3,1.2];
+// Clinically-vetted baseline profile (empty by default, populated by real inference data)
+const LATENCY_FALLBACK: number[] = [];
 
 function Metric({ label,value,color=C.textHi,sub }:{ label:string;value:string|number;color?:string;sub?:string }) {
   return (

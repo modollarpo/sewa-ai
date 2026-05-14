@@ -30,7 +30,7 @@
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "outDir": "./dist"
   },
   "include": [

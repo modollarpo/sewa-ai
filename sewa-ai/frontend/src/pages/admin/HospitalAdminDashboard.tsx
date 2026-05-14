@@ -348,6 +348,153 @@ export function HospitalAdminDashboard() {
         )}
 
         {/* Similar updates for audit, billing, integrations tabs would follow the same pattern */}
+        {tab==='integrations' && (
+          <div className="flex flex-col gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="p-8 bg-[#0C1D17] border border-[#1B3028] rounded-[2rem] shadow-xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-5 text-8xl">🔗</div>
+                <h3 className="text-lg font-bold text-[#D0ECE6] mb-2">PACS Integration</h3>
+                <p className="text-xs text-[#3A6055] mb-8 font-medium">Authoritative DICOM C-MOVE/C-ECHO connectivity node.</p>
+                
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center p-5 bg-[#08160F] border border-[#1B3028] rounded-2xl">
+                    <div>
+                      <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest mb-1">C-ECHO Node</div>
+                      <div className="text-sm font-mono text-[#D0ECE6]">pacs.sewa.nhs.uk:11112</div>
+                    </div>
+                    <StatusDot status={pacsStatus === 'ok' ? 'connected' : pacsStatus === 'fail' ? 'error' : 'offline'} />
+                  </div>
+                  
+                  <button 
+                    disabled={pacsStatus === 'loading'}
+                    onClick={async () => {
+                      setPacsStatus('loading');
+                      try {
+                        const r = await apiClient.post('/admin/integrations/pacs/echo');
+                        setPacsStatus('ok');
+                        setStatus({ msg: r.data.message || 'PACS handshake successful.', type: 'ok' });
+                      } catch (err: any) {
+                        setPacsStatus('fail');
+                        setStatus({ msg: err.response?.data?.message || 'PACS unreachable.', type: 'err' });
+                      }
+                    }}
+                    className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-3 ${
+                      pacsStatus === 'loading' ? 'bg-[#111F1A] text-[#3A6055] cursor-not-allowed' : 'bg-[#162821] border border-[#1B3028] text-[#D0ECE6] hover:border-[#408D7B]'
+                    }`}
+                  >
+                    {pacsStatus === 'loading' ? '📡 Probing Node...' : '⚡ Test Connection'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-8 bg-[#0C1D17] border border-[#1B3028] rounded-[2rem] shadow-xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-5 text-8xl">☁️</div>
+                <h3 className="text-lg font-bold text-[#D0ECE6] mb-2">FHIR & HL7 Gateway</h3>
+                <p className="text-xs text-[#3A6055] mb-8 font-medium">Clinical data interoperability via FHIR R4 API.</p>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 bg-[#08160F] border border-[#1B3028] rounded-xl">
+                    <span className="text-xl">🧬</span>
+                    <div className="flex-1">
+                      <div className="text-[9px] font-black text-[#408D7B] uppercase tracking-widest">FHIR Base URL</div>
+                      <div className="text-[10px] font-mono text-[#D0ECE6] truncate">https://fhir.sewa.ai/v1/tenant-id</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 p-4 bg-[#08160F] border border-[#1B3028] rounded-xl">
+                    <span className="text-xl">📫</span>
+                    <div className="flex-1">
+                      <div className="text-[9px] font-black text-[#408D7B] uppercase tracking-widest">HL7 ADT Listener</div>
+                      <div className="text-[10px] font-mono text-[#D0ECE6]">mllp://hl7.sewa.nhs.uk:2575</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tab==='billing' && (
+          <div className="flex flex-col gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 bg-gradient-to-br from-[#408D7B] to-[#2E6B5E] rounded-3xl text-white shadow-2xl">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] mb-8 opacity-70">Current Subscribed Tier</div>
+                <div className="text-3xl font-black mb-2 uppercase tracking-tight">Institutional Pro</div>
+                <p className="text-[10px] opacity-70 font-bold uppercase tracking-widest">Next Cycle: June 1, 2026</p>
+                <button className="mt-8 w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20 transition-all">
+                  Manage Plan
+                </button>
+              </div>
+              
+              <div className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-3xl">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#3A6055] mb-8">Scan Quota Usage</div>
+                <div className="text-3xl font-black text-[#D0ECE6] mb-4">4,832 <span className="text-sm font-bold text-[#3A6055] uppercase">/ 10,000</span></div>
+                <div className="w-full h-2 bg-[#08160F] rounded-full overflow-hidden mb-2">
+                  <div className="h-full bg-[#408D7B] rounded-full" style={{width:'48.3%'}}/>
+                </div>
+                <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest">48.3% of monthly limit used</div>
+              </div>
+
+              <div className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-3xl">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#3A6055] mb-8">Estimated Overages</div>
+                <div className="text-3xl font-black text-[#D0ECE6] mb-4">£0.00 <span className="text-sm font-bold text-[#3A6055] uppercase">GBP</span></div>
+                <p className="text-[10px] text-[#3A6055] font-medium leading-relaxed">No overages detected for current period. Standard per-scan rate of £1.99 applies after 10K.</p>
+              </div>
+            </div>
+
+            <div className="bg-[#0C1D17] border border-[#1B3028] rounded-3xl overflow-hidden shadow-2xl">
+              <div className="p-6 border-b border-[#1B3028] flex justify-between items-center bg-[#111F1A]">
+                <h3 className="text-xs font-black uppercase tracking-widest text-[#D0ECE6]">Financial Ledger</h3>
+                <button 
+                  onClick={async () => {
+                    try {
+                      await apiClient.post('/payments/audit-invoice', { region: user?.region });
+                      setStatus({ msg: 'Historical audit invoice requested. Sent to registry email.', type: 'ok' });
+                    } catch(e) { setStatus({ msg: 'Request failed.', type: 'err' }); }
+                  }}
+                  className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest hover:underline transition-all"
+                >
+                  Request Data Audit →
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-[#05100D]/50 text-[10px] font-black text-[#3A6055] uppercase tracking-widest">
+                    <tr>
+                      <th className="p-5">Billing Period</th>
+                      <th className="p-5">Auth Reference</th>
+                      <th className="p-5">Currency</th>
+                      <th className="p-5">Gross Amount</th>
+                      <th className="p-5">Invoicing</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1B3028]">
+                    {invoices.length === 0 ? (
+                      <tr><td colSpan={5} className="p-12 text-center text-[#3A6055] italic">No historical invoices found.</td></tr>
+                    ) : invoices.map((inv:any) => (
+                      <tr key={inv.id} className="hover:bg-white/5 transition-colors">
+                        <td className="p-5 text-[11px] font-bold text-[#D0ECE6]">{new Date(inv.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</td>
+                        <td className="p-5 text-[10px] font-mono text-[#3A6055]">{inv.id.slice(0,16)}...</td>
+                        <td className="p-5 text-[10px] font-bold text-[#D0ECE6]">{inv.currency}</td>
+                        <td className="p-5 text-[11px] font-black text-[#408D7B]">{inv.currency} {(inv.amount).toFixed(2)}</td>
+                        <td className="p-5">
+                          <a 
+                            href={`${apiClient.defaults.baseURL}/payments/invoices/${inv.id}/pdf`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1.5 bg-[#162821] border border-[#1B3028] rounded-lg text-[9px] font-black uppercase tracking-widest text-[#D0ECE6] hover:border-[#408D7B] transition-all"
+                          >
+                            Download PDF
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
         {tab==='audit' && (
           <div className="bg-[#0C1D17] border border-[#1B3028] rounded-3xl overflow-hidden shadow-2xl">
             <div className="p-5 border-b border-[#1B3028] flex justify-between items-center bg-[#111F1A]">

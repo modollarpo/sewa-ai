@@ -32,6 +32,7 @@ import { SuperAdminDashboard }       from './pages/admin/SuperAdminDashboard';
 import { ComplianceDashboard }       from './pages/compliance/ComplianceDashboard';
 import { BillingDashboard }          from './pages/billing/BillingDashboard';
 import { OnboardingWizard }          from './pages/onboarding/OnboardingWizard';
+import { SpecialistOnboarding }     from './pages/onboarding/SpecialistOnboarding';
 import { RoadmapPage }               from './pages/roadmap/RoadmapPage';
 import { AppointmentsPage }          from './pages/appointments/AppointmentsPage';
 import { ProfileSettings }         from './pages/settings/ProfileSettings';
@@ -294,7 +295,7 @@ export default function App() {
     const path = window.location.pathname;
     return (path === '/verify-email' || path.includes('verify-email')) ? p.get('token') : null;
   })();
-  const [publicPage,  setPublicPage]  = useState<'landing'|'login'|'register'|'onboarding'|'solutions'|'research'|'regulatory'|'clinical-validation'|'pricing'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'>('landing');
+  const [publicPage,  setPublicPage]  = useState<'landing'|'login'|'register'|'onboarding'|'onboarding-specialist'|'solutions'|'research'|'regulatory'|'clinical-validation'|'pricing'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'>('landing');
 
   // Universal navigation handler for public site
   const navigate = (page: string) => {
@@ -307,6 +308,7 @@ export default function App() {
   useEffect(() => {
     const path = window.location.pathname;
     if (path === '/onboarding') setPublicPage('onboarding');
+    else if (path === '/onboarding/specialist') setPublicPage('onboarding-specialist');
     else if (path === '/register') setPublicPage('register');
     else if (path === '/login') setPublicPage('login');
   }, []);
@@ -390,6 +392,12 @@ export default function App() {
         <CookieBanner onNavigate={navigate} />
       </>
     );
+    if (publicPage === 'onboarding-specialist') return (
+      <>
+        <SpecialistOnboarding />
+        <CookieBanner onNavigate={navigate} />
+      </>
+    );
     if (publicPage === 'onboarding') return (
       <>
         <OnboardingWizard />
@@ -431,7 +439,7 @@ export default function App() {
         {publicPage === 'api-docs'           && <ApiDocsPage {...navProps} />}
         {publicPage === 'developers'         && <DevelopersPage {...navProps} />}
         {/* Fallback for unmapped routes */}
-        {!['landing','login','register','onboarding','pricing','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','regulatory','api-docs','developers'].includes(publicPage) && (
+        {!['landing','login','register','onboarding','onboarding-specialist','pricing','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','regulatory','api-docs','developers'].includes(publicPage) && (
           <LandingPage onLogin={() => navigate('login')} onNavigate={navigate} />
         )}
         <CookieBanner onNavigate={navigate} />

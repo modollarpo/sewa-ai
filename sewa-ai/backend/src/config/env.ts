@@ -153,6 +153,7 @@ export const config = {
   AZURE_COMMUNICATION_SMS_NUMBER:        optional('AZURE_COMMUNICATION_SMS_NUMBER'),
   AZURE_COMMUNICATION_WHATSAPP_CHANNEL_ID: optional('AZURE_COMMUNICATION_WHATSAPP_CHANNEL_ID'),
   EMAIL_FROM: optional('EMAIL_FROM', 'info@sewaxai.health'),
+  SENDGRID_API_KEY: optional('SENDGRID_API_KEY'),
 
   // ── Multi-cloud Storage ───────────────────────────────────────
   STORAGE_PROVIDER: optional('STORAGE_PROVIDER', 'azure'), // azure | aws | gcp | multi

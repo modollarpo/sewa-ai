@@ -101,7 +101,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             <span className="transition-transform group-hover:translate-x-1">→</span>
           </button>
           <button 
-            onClick={() => onNavigate('register')}
+            onClick={() => onNavigate('onboarding-specialist')}
             className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-[#0C1D17] border border-[#1B3028] hover:border-[#408D7B] text-[#D0ECE6] text-sm font-black uppercase tracking-[0.2em] transition-all active:scale-95"
           >
             Join Network

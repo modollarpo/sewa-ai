@@ -89,11 +89,11 @@ export async function splitReferralFee(scanId: string, opinionId: string) {
   try {
     const opinion = await prisma.secondOpinion.findUnique({
       where: { id: opinionId },
-      include: { reviewer: true, scan: { include: { tenant: true } } }
+      include: { assignedTo: true, scan: { include: { tenant: true } } }
     });
 
-    if (!opinion || !opinion.reviewerId || !opinion.reviewer?.stripeAccountId) {
-      logger.warn(`[Payment] Cannot split fee for opinion ${opinionId}: No reviewer or Stripe Account ID`);
+    if (!opinion || !opinion.assignedToId || !opinion.assignedTo?.stripeAccountId) {
+      logger.warn(`[Payment] Cannot split fee for opinion ${opinionId}: No assigned specialist or Stripe Account ID`);
       return;
     }
 
@@ -111,12 +111,12 @@ export async function splitReferralFee(scanId: string, opinionId: string) {
     const transfer = await stripe.transfers.create({
       amount: specialistAmountCents,
       currency: 'usd',
-      destination: opinion.reviewer.stripeAccountId,
+      destination: opinion.assignedTo.stripeAccountId,
       transfer_group: `referral_${scanId}`,
       metadata: {
         scanId,
         opinionId,
-        specialistId: opinion.reviewerId
+        specialistId: opinion.assignedToId
       }
     });
 
@@ -128,7 +128,7 @@ export async function splitReferralFee(scanId: string, opinionId: string) {
         currency: 'USD',
         status: 'completed',
         provider: 'stripe',
-        providerId: transfer.id,
+        externalId: transfer.id,
         type: 'referral_split',
         metadata: {
           specialistAmount: specialistAmountCents / 100,

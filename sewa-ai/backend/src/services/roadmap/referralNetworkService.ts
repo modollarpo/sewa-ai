@@ -73,6 +73,7 @@ class ReferralNetworkService {
     const specialistMetrics: Record<string, { completedCount: number; avgResponseMs: number }> = {};
     for (const op of completedOpinions) {
       const id = op.assignedToId;
+      if (!id) continue;
       if (!specialistMetrics[id]) specialistMetrics[id] = { completedCount: 0, avgResponseMs: 0 };
       specialistMetrics[id].completedCount++;
       specialistMetrics[id].avgResponseMs += (op.updatedAt.getTime() - op.createdAt.getTime());
@@ -124,7 +125,7 @@ class ReferralNetworkService {
     const referral = await prisma.secondOpinion.create({
       data: {
         scanId:          request.scanId,
-        requestedById:   request.requestingUserId,
+        requesterId:     request.requestingUserId,
         assignedToId:    specialistId,
         status:          'pending',
         reason:          request.reason,
@@ -214,7 +215,7 @@ export async function escalateOverdueReferrals(): Promise<void> {
 
     await notifyUsers({
       tenantId,
-      userIds: [referral.requestedById],
+      userIds: [referral.requesterId],
       type:    'referral_sla_breach',
       title:   `⚠️ Referral SLA Breached — ${priority}`,
       body:    `Referral ${referral.id} breached SLA by ${breachMins} minutes. Specialist has not responded.`,

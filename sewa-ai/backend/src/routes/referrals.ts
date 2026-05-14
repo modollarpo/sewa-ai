@@ -21,21 +21,17 @@ r.post('/', async (req, res, next) => {
 
     logger.info(`[Referral] Case ${scanId} referred from ${tenantId} to ${targetTenantId}`);
 
-    // In a real system, we'd create a Referral record and notify the target tenant
-    // For now, we update the scan status and log the event
-    const referral = await (prisma as any).referral?.create({
+    // Feature 13: Clinical Referral (Second Opinion)
+    const secondOpinion = await prisma.secondOpinion.create({
       data: {
         scanId,
-        fromTenantId: tenantId,
-        toTenantId: targetTenantId,
-        referredById: userId,
-        priority,
+        requesterId: userId,
         notes,
-        status: 'PENDING'
+        status: 'pending'
       }
-    }) || { id: 'ref_'+Math.random().toString(36).substring(7), status: 'PENDING' };
+    });
 
-    res.status(201).json(referral);
+    res.status(201).json(secondOpinion);
   } catch (err) { next(err); }
 });
 
@@ -43,10 +39,22 @@ r.post('/', async (req, res, next) => {
 r.get('/incoming', async (req, res, next) => {
   try {
     const { tenantId } = req.user as { tenantId: string };
-    const incoming = await (prisma as any).referral?.findMany({
-      where: { toTenantId: tenantId, status: 'PENDING' },
-      include: { scan: true }
-    }) || [];
+    
+    // Incoming referrals are cases where the scan belongs to another tenant 
+    // but a specialist in this tenant is assigned or it's a global pool.
+    // For this implementation, we return pending opinions that need assignment.
+    const incoming = await prisma.secondOpinion.findMany({
+      where: { status: 'pending' },
+      include: { 
+        scan: { 
+          include: { 
+            patient: { select: { mrn: true } },
+            tenant: { select: { name: true } }
+          } 
+        },
+        requester: { select: { firstName: true, lastName: true } }
+      }
+    });
     res.json(incoming);
   } catch (err) { next(err); }
 });

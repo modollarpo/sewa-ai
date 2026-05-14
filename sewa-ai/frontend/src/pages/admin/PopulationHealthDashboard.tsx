@@ -1,6 +1,6 @@
 // SEWA AI — PopulationHealthDashboard.tsx
 // Population health analytics: disease burden, geography, cohort trends, referrals
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePopulationHealthData } from '../../hooks/useDashboardData';
 
 const C = {
@@ -13,15 +13,7 @@ const C = {
 
 // Fallbacks handled in hook
 
-const POSTCODES = [
-  {code:'E1',label:'Whitechapel',cases:84,color:'#E03535',r:18},
-  {code:'EC1',label:'Barbican',cases:42,color:'#E08A20',r:13},
-  {code:'N1',label:'Islington',cases:28,color:'#E08A20',r:11},
-  {code:'E2',label:'Bethnal Green',cases:67,color:'#E03535',r:16},
-  {code:'E8',label:'Hackney',cases:55,color:'#D44000',r:15},
-  {code:'SE1',label:'Southwark',cases:31,color:'#408D7B',r:11},
-  {code:'WC1',label:'Holborn',cases:19,color:'#408D7B',r:9},
-];
+// Geography fallbacks are now handled via dynamic API enrichment in analytics.ts
 
 export function PopulationHealthDashboard() {
   const { stats, conditions, geography, trends, referrals = [], loading } = usePopulationHealthData();
@@ -64,7 +56,7 @@ export function PopulationHealthDashboard() {
         ].map(s=>(
           <div key={s.label} style={{padding: isMobile ? 12 : 16, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`}}>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}>
-              <span style={{fontSize:9,color:C.textMd, textTransform: 'uppercase', tracking: '0.05em'}}>{s.label}</span>
+              <span style={{fontSize:9,color:C.textMd, textTransform: 'uppercase', letterSpacing: '0.05em'}}>{s.label}</span>
               <span style={{fontSize:16}}>{s.icon}</span>
             </div>
             <div style={{fontSize: isMobile ? 20 : 24, fontWeight:700, color:C.textHi, fontFamily:C.FM, lineHeight:1}}>{s.value}</div>
@@ -137,7 +129,7 @@ export function PopulationHealthDashboard() {
             <div style={{position:'absolute',inset:0,opacity:0.05,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',fontSize:200,fontFamily:'sans-serif'}}>🌍</div>
 
             {/* Dynamic Geography Markers */}
-            {(geography && geography.length > 0 ? geography : POSTCODES).map((loc:any, i:number)=>{
+            {(geography && geography.length > 0 ? geography : []).map((loc:any, i:number)=>{
               // Dynamic global projection if lat/lng exists, else fallback to grid distribution
               let x = 10 + (i%4)*22;
               let y = 15 + Math.floor(i/4)*40;

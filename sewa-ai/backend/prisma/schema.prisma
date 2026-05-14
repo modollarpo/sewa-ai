@@ -110,7 +110,7 @@ model User {
   notifications       Notification[]
   auditLogs           AuditLog[]
   secondRequester     SecondOpinion[] @relation("Requester")
-  secondReviewer      SecondOpinion[] @relation("Reviewer")
+  secondAssigned      SecondOpinion[] @relation("AssignedSpecialist")
   clinicalValidations ClinicalValidation[]
   notificationLogs    NotificationLog[]
   patientRecord       Patient?
@@ -178,6 +178,7 @@ model Scan {
   priority     String // STAT | URGENT | ROUTINE
   status       String  @default("pending") // pending | processing | ai_complete | reported | approved | rejected | failed
   errorMessage String? // populated when status = 'failed' — DICOM corrupt, AI service down, etc.
+  accessionNumber String? @unique // Hospital-provided identifier for the scan
 
   // DICOM
   dicomInstanceUid String?
@@ -329,6 +330,8 @@ model Report {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  pdfUrl    String? // URL to the generated clinical PDF/HTML report
 
   secondOpinions SecondOpinion[]
 
@@ -381,17 +384,27 @@ model SecondOpinion {
   report       Report?  @relation(fields: [reportId], references: [id])
   requesterId  String
   requester    User     @relation("Requester", fields: [requesterId], references: [id])
-  reviewerId   String?
-  reviewer     User?    @relation("Reviewer", fields: [reviewerId], references: [id])
-  status       String   @default("pending") // pending | assigned | completed | disagreement
-  notes        String?
-  reviewNotes  String?
+  assignedToId String?
+  assignedTo   User?    @relation("AssignedSpecialist", fields: [assignedToId], references: [id])
+  status       String   @default("pending") // pending | assigned | completed | disagreement | cancelled
+  priority     String   @default("ROUTINE") // STAT | URGENT | ROUTINE
+  reason       String?  @db.Text
+  notes        String?  @db.Text
+  reviewNotes  String?  @db.Text
   agreedWithAI Boolean?
+  
+  // SLA & Workflow
+  slaDeadline  DateTime?
+  escalatedAt  DateTime?
+  
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@index([scanId])
   @@index([status])
+  @@index([priority])
+  @@index([requesterId])
+  @@index([assignedToId])
 }
 
 // ── NOTIFICATIONS (Feature 6) ─────────────────────────────────
