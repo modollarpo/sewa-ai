@@ -52,18 +52,18 @@ r.get('/metrics', async (req, res, next) => {
   try {
     const [last200, stats, statsByCondition] = await Promise.all([
       // Get last 200 inference results
-      prisma.aiResult.findMany({
+      prisma.aIResult.findMany({
         take: 200,
         orderBy: { createdAt: 'desc' },
         include: { scan: { select: { modality: true, bodyPart: true, tenantId: true } } }
       }),
       // Aggregate confidence and latency
-      prisma.aiResult.aggregate({
+      prisma.aIResult.aggregate({
         _avg: { confidence: true, inferenceMs: true },
         _count: { id: true }
       }),
       // Aggregate accuracy by condition (Feature 7)
-      prisma.aiResult.groupBy({
+      prisma.aIResult.groupBy({
         by: ['primaryFinding'],
         _avg: { confidence: true, inferenceMs: true },
         _count: { id: true },
@@ -185,7 +185,7 @@ r.get('/latency', async (req, res, next) => {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     // Pull last 24h inference ms values
-    const results = await prisma.aiResult.findMany({
+    const results = await prisma.aIResult.findMany({
       where: { createdAt: { gte: oneDayAgo } },
       select: { createdAt: true, inferenceMs: true },
       orderBy: { createdAt: 'asc' },

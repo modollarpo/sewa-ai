@@ -117,6 +117,7 @@ export class FHIRSyncWorker {
             create: {
               tenantId,
               mrn,
+              sex: data.gender || 'unknown',
               dateOfBirth: birthDate ? new Date(birthDate) : new Date(),
               user: {
                 create: {

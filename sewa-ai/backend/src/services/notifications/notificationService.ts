@@ -142,6 +142,7 @@ export async function dispatch(opts: DispatchOptions): Promise<void> {
       userId:  u.id,
       type,
       title,
+      message: body,
       body,
       data:    { ...data, type },
       read:    false,

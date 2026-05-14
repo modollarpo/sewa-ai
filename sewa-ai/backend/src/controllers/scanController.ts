@@ -275,7 +275,7 @@ export async function generateDemoScan(req: Request, res: Response, next: NextFu
     // Trigger AI Triage with a delayed mock result
     setTimeout(async () => {
       try {
-        await prisma.aiResult.create({
+        await prisma.aIResult.create({
           data: {
             scanId: scan.id,
             tenantId,
@@ -339,7 +339,7 @@ export async function syncOfflineBatch(req: Request, res: Response, next: NextFu
 
       // 2. Attach the local AI result
       if (s.aiResult) {
-        await prisma.aiResult.create({
+        await prisma.aIResult.create({
           data: {
             scanId: scan.id,
             tenantId,

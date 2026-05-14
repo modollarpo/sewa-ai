@@ -185,9 +185,9 @@ class PopulationHealthService {
 
     const [totalScans, criticalFindings, tenantCount, topFindings] = await Promise.all([
       prisma.scan.count(),
-      prisma.aiResult.count({ where: { urgency: 'CRITICAL' } }),
+      prisma.aIResult.count({ where: { urgency: 'CRITICAL' } }),
       prisma.tenant.count({ where: { status: 'active' } }),
-      prisma.aiResult.groupBy({
+      prisma.aIResult.groupBy({
         by: ['primaryFinding'],
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },

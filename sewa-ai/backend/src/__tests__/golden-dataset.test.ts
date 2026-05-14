@@ -17,7 +17,7 @@
 //   - Soft delete: deletedAt field presence
 //   - Scan failure: errorMessage propagation
 
-// ── Types (mirrors Prisma AIResult shape) ─────────────────────
+// ── Types (mirrors prisma.aIResult shape) ─────────────────────
 interface GoldenAIResult {
   scanId:              string;
   modality:            'CT' | 'MRI' | 'XR' | 'US';
