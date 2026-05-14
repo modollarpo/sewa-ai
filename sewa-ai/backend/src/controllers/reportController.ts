@@ -107,10 +107,10 @@ export async function signReport(req: Request, res: Response, next: NextFunction
     io.to(`tenant:${tenantId}`).emit('report:signed', { reportId: id, scanId: report.scanId });
 
     // Send WhatsApp/SMS alert (only if patient and user exist)
-    if (report.scan.patient?.user?.phoneNumber) {
+    if (report.scan.patient?.user?.phone) {
       const { sendNotification } = await import('../services/notificationService');
       await sendNotification({
-        to: report.scan.patient.user.phoneNumber,
+        to: report.scan.patient.user.phone,
         priority: 'urgent',
         subject: 'Your SEWA AI Report is Ready',
         body: `Hello ${report.scan.patient.user.firstName}, your clinical report from ${report.scan.tenant.name} is now available in your patient portal. View it here: ${config.FRONTEND_URL}/portal/scans/${report.scanId}`
@@ -153,7 +153,7 @@ export async function getReport(req: Request, res: Response, next: NextFunction)
         scan: { include: { aiResult: true, patient: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true, status: true } } } }, annotations: true } },
         author: { select: { firstName: true, lastName: true, speciality: true, licenseNumber: true } },
         template: true,
-        secondOpinions: { include: { reviewer: { select: { firstName: true, lastName: true } } } },
+        secondOpinions: { include: { assignedTo: { select: { firstName: true, lastName: true } } } },
       },
     });
     if (!report) throw new AppError('Report not found', 404);

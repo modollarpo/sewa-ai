@@ -42,7 +42,7 @@ r.get('/r4/Patient/:id', async (req, res, next) => {
 r.get('/r4/ImagingStudy/:id', async (req, res, next) => {
   try {
     const { tenantId } = req.user!;
-    const s = await prisma.scan.findFirst({ where: { fhirStudyId: req.params.id, tenantId } });
+    const s = await prisma.scan.findFirst({ where: { fhirImagingStudyId: req.params.id, tenantId } });
     if (!s) throw new AppError('ImagingStudy not found in this institution', 404);
     res.json(await getFHIRImagingStudy(req.params.id));
   } catch (e) { next(e); }
@@ -51,7 +51,7 @@ r.get('/r4/ImagingStudy/:id', async (req, res, next) => {
 r.get('/r4/DiagnosticReport/:id', async (req, res, next) => {
   try {
     const { tenantId } = req.user!;
-    const r = await prisma.report.findFirst({ where: { fhirReportId: req.params.id, tenantId } });
+    const r = await prisma.report.findFirst({ where: { fhirId: req.params.id, tenantId } });
     if (!r) throw new AppError('DiagnosticReport not found in this institution', 404);
     res.json(await getFHIRDiagnosticReport(req.params.id));
   } catch (e) { next(e); }

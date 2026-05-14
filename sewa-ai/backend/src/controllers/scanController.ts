@@ -202,7 +202,7 @@ export async function getScan(req: Request, res: Response, next: NextFunction) {
         aiResult: true,
         report: { include: { author: { select: { firstName: true, lastName: true } }, template: true } },
         annotations: true,
-        secondOpinions: { include: { reviewer: { select: { firstName: true, lastName: true, speciality: true } } } },
+        secondOpinions: { include: { assignedTo: { select: { firstName: true, lastName: true, speciality: true } } } },
         referringDoctor: { select: { firstName: true, lastName: true, speciality: true } },
       },
     });
