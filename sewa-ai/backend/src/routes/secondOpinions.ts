@@ -6,6 +6,7 @@ import { auditLog } from '../utils/audit';
 import { AppError } from '../utils/AppError';
 const r = Router();
 r.use(authenticate);
+
 r.post('/', async (req, res, next) => {
   try {
     const { tenantId, id: userId } = req.user!;
@@ -20,6 +21,7 @@ r.post('/', async (req, res, next) => {
     res.status(201).json(so);
   } catch (err) { next(err); }
 });
+
 r.patch('/:id', async (req, res, next) => {
   try {
     const { id: userId, role, tenantId } = req.user!;
@@ -31,17 +33,19 @@ r.patch('/:id', async (req, res, next) => {
       throw new AppError('Second opinion not found in this institution', 404);
     }
     // Only the assigned reviewer or an admin can update the opinion
-    const isReviewer = opinion.reviewerId === userId;
+    const isReviewer = opinion.assignedToId === userId;
     const isAdmin = ['admin', 'superadmin'].includes(role);
     if (!isReviewer && !isAdmin) throw new AppError('Only the assigned reviewer can submit this opinion', 403);
     const so = await prisma.secondOpinion.update({ where: { id: req.params.id }, data: req.body });
     res.json(so);
   } catch (err) { next(err); }
 });
+
 r.get('/pending', async (req, res, next) => {
   try {
-    const items = await prisma.secondOpinion.findMany({ where: { reviewerId: req.user!.id, status: 'pending' }, include: { scan: { include: { aiResult: true } } } });
+    const items = await prisma.secondOpinion.findMany({ where: { assignedToId: req.user!.id, status: 'pending' }, include: { scan: { include: { aiResult: true } } } });
     res.json(items);
   } catch (err) { next(err); }
 });
+
 export default r;

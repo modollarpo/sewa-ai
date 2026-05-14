@@ -87,12 +87,12 @@ r.get('/integrations', authorize('admin', 'superadmin'), async (req, res, next) 
     const { tenantId } = req.user!;
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { fhirEndpoint: true, hl7Host: true, hl7Port: true, aeTitle: true },
+      select: { fhirBaseUrl: true, hl7Endpoint: true, pacsEndpoint: true },
     });
     res.json({
-      fhir:  { status: 'online', endpoint: (tenant as any)?.fhirEndpoint || 'https://fhir.london.nhs.uk/r4' },
-      hl7:   { status: 'online', host: (tenant as any)?.hl7Host || '10.5.22.41', port: (tenant as any)?.hl7Port || 2575 },
-      pacs:  { status: 'connected', aeTitle: (tenant as any)?.aeTitle || 'SEWA_AI' },
+      fhir:  { status: 'online', endpoint: tenant?.fhirBaseUrl || 'https://fhir.london.nhs.uk/r4' },
+      hl7:   { status: 'online', host: tenant?.hl7Endpoint || '10.5.22.41' },
+      pacs:  { status: 'connected', aeTitle: 'SEWA_AI' },
     });
   } catch (err) { next(err); }
 });

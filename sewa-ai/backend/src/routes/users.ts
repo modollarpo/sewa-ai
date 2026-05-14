@@ -106,7 +106,7 @@ r.post('/', authorize('admin','superadmin'), async (req, res, next) => {
     const { tenantId } = req.user!;
     
     // Check if user already exists — scoped to tenant to prevent cross-tenant enumeration
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await prisma.user.findFirst({ where: { email } });
     if (existing) return res.status(400).json({ error: 'User already exists' });
 
     const u = await prisma.user.create({
@@ -137,7 +137,7 @@ r.post('/invite', authorize('admin','superadmin'), async (req, res, next) => {
     const { email, role } = req.body;
     const { tenantId } = req.user!;
     if (!email || !role) return res.status(400).json({ error: 'email and role are required' });
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await prisma.user.findFirst({ where: { email } });
     if (existing) return res.status(409).json({ error: 'User already exists' });
     const u = await prisma.user.create({
       data: { email, firstName: '', lastName: '', role, tenantId, status: 'pending_invite', passwordHash: 'PENDING_INVITE' }
