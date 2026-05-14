@@ -335,7 +335,7 @@ describe('Golden Dataset — Complete (102 ground truth cases)', () => {
       );
       expect(criticals.length).toBeGreaterThan(0);
       criticals.forEach(r => {
-        expect(r.doorToAlertMs).toBeLessThan(30_000); // 30 seconds
+        expect(r.doorToAlertMs || 0).toBeLessThan(30_000); // 30 seconds
       });
     });
 
@@ -344,7 +344,7 @@ describe('Golden Dataset — Complete (102 ground truth cases)', () => {
         r.urgency === 'CRITICAL' && r.doorToAlertMs != null && r.doorToAlertMs > 0
       );
       // At least 80% should be under 2 seconds
-      const under2s = criticals.filter(r => r.doorToAlertMs < 2000);
+      const under2s = criticals.filter(r => (r.doorToAlertMs || 0) < 2000);
       expect(under2s.length / criticals.length).toBeGreaterThan(0.80);
     });
   });
