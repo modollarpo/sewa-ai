@@ -147,13 +147,15 @@ model Patient {
   bloodType         String?
   allergies         String[]
   conditions        String[]
+  nhsNumber         String? // National Health Service Number (UK specific)
   fhirId            String? // FHIR Patient resource ID
   consentAI         Boolean   @default(true)
   consentResearch   Boolean   @default(false)
   consentThirdParty Boolean   @default(false)
   deletedAt         DateTime? // soft delete — never hard-delete patient records (clinical record continuity)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   scans       Scan[]
   messages    Message[]
@@ -186,6 +188,7 @@ model Scan {
   dicomSeriesUid   String?
   pacsUrl          String?
   storageUrl       String? // Azure Blob / S3 URL
+  fileName         String? // original filename
   fileSize         Int? // bytes
 
   // Clinical
@@ -230,6 +233,7 @@ model AIResult {
   id     String @id @default(uuid())
   scanId String @unique
   scan   Scan   @relation(fields: [scanId], references: [id])
+  tenantId String
 
   // Triage Engine
   primaryFinding String
@@ -238,6 +242,7 @@ model AIResult {
   location       String?
   size           String?
   midlineShift   String?
+  summary        String?
 
   // Uncertainty Engine (Feature 3)
   uncertaintyScore     Float?
@@ -258,6 +263,7 @@ model AIResult {
   metacognitionLayers Json? // Full 9-layer results as JSON
   hallucinationRisk   Float?
   selfEvalNotes       String?
+  icd10Codes          String? // Feature 17: Billing/Coding integration
 
   // Raw Output & Metadata
   rawJson      Json?    // Full inference payload from AI provider
@@ -308,6 +314,8 @@ model Report {
   impression     String
   recommendation String?
   fullText       String? // full structured report
+  content        String? // legacy content field
+  summary        String? // legacy summary field
 
   // Status
   status   String    @default("draft") // draft | pending_review | approved | rejected | signed
@@ -414,10 +422,15 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id])
   type      String // critical_finding | report_ready | second_opinion | payment | system
   title     String
+  message   String
   body      String
   data      Json?
   read      Boolean  @default(false)
   fcmSent   Boolean  @default(false)
+  tenantId  String
+  scanId    String?
+  aiResultId String?
+  channels  String[] @default([])
   createdAt DateTime @default(now())
 
   @@index([userId, read])

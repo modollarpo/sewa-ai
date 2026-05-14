@@ -362,10 +362,11 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       ],
     });
 
-    const aiResult = await prisma.aIResult.create({
+    const aiResult = await prisma.aiResult.create({
       data: {
         tenantId, // Ensure tenantId is persisted for isolation
         ...validatedResult,
+        summary: triage.primaryFinding, // populate summary
         epistemicUncertainty: uncertainty.epistemicUncertainty,
         aleatoricUncertainty: uncertainty.aleatoricUncertainty,
         rawJson: {
@@ -389,6 +390,10 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       data: {
         scanId, tenantId,
         authorId: 'SYSTEM',
+        findings: vlm.findings,
+        impression: vlm.impression,
+        technique: vlm.technique,
+        recommendation: vlm.recommendation,
         content: `TECHNIQUE: ${vlm.technique}\n\nFINDINGS: ${vlm.findings}\n\nIMPRESSION: ${vlm.impression}\n\nRECOMMENDATION: ${vlm.recommendation}`,
         summary: vlm.impression,
         status: 'draft',

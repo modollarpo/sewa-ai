@@ -92,6 +92,7 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
         modality, bodyPart, priority, clinicalIndication, technique,
         dicomStudyUid, dicomSeriesUid, dicomInstanceUid,
         storageUrl, status: 'processing',
+        fileName: file?.originalname,
         fileSize: file?.size,
       },
       include: { patient: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } } }, tenant: true },
@@ -341,6 +342,7 @@ export async function syncOfflineBatch(req: Request, res: Response, next: NextFu
         await prisma.aiResult.create({
           data: {
             scanId: scan.id,
+            tenantId,
             primaryFinding: s.aiResult.finding,
             urgency: s.aiResult.urgency || 'NORMAL',
             confidence: s.aiResult.confidence || 1.0,

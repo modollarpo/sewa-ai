@@ -28,9 +28,10 @@ interface ClinicalUser {
   id: string;
   email: string | null;
   role: string;
-  fcmToken?: string | null;
+  fcmTokens: string[];
   phone?: string | null;
-  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
 }
 
 interface AlertPayload {
@@ -68,12 +69,12 @@ class AlertService {
     const [tenant, users, scan] = await Promise.all([
       prisma.tenant.findUnique({ where: { id: tenantId } }),
       prisma.user.findMany({
-        where: { tenantId, role: { in: ['radiologist', 'doctor', 'admin'] }, isActive: true },
-        select: { id: true, email: true, role: true, fcmToken: true, phone: true, name: true },
+        where: { tenantId, role: { in: ['radiologist', 'doctor', 'admin'] }, status: 'active' },
+        select: { id: true, email: true, role: true, fcmTokens: true, phone: true, firstName: true, lastName: true },
       }),
       prisma.scan.findUnique({
         where: { id: scanId },
-        include: { patient: { select: { nhsNumber: true, dateOfBirth: true, sex: true } } },
+        include: { patient: { select: { mrn: true, dateOfBirth: true, sex: true } } },
       }),
     ]);
 
@@ -97,7 +98,7 @@ class AlertService {
     const parallelTasks: Promise<void>[] = [];
 
     // FCM Push Notifications
-    const fcmTargets = [...radiologists, ...doctors].filter(u => u.fcmToken);
+    const fcmTargets = [...radiologists, ...doctors].filter(u => u.fcmTokens.length > 0);
     if (fcmTargets.length > 0) {
       parallelTasks.push(
         this.sendFCM(fcmTargets, payload, channels),
@@ -150,10 +151,11 @@ class AlertService {
 
     // ── Save alert record ────────────────────────────────────────────────
     await prisma.notification.createMany({
-      data: (users as unknown as ClinicalUser[]).map(u => ({
+      data: (users as any[]).map(u => ({
         userId: u.id, tenantId, type: urgency === 'CRITICAL' ? 'CRITICAL_ALERT' : 'URGENT_ALERT',
         title: `${urgency}: ${primaryFinding}`,
         message: `Confidence ${(confidence * 100).toFixed(0)}% · Door-to-alert ${doorToAlertMs}ms`,
+        body: `Confidence ${(confidence * 100).toFixed(0)}% · Door-to-alert ${doorToAlertMs}ms`,
         scanId, aiResultId: payload.aiResultId,
         channels: channels.map(c => c.channel),
         read: false,
@@ -174,14 +176,20 @@ class AlertService {
   private async sendFCM(users: ClinicalUser[], payload: AlertPayload, channels: AlertChannel[]): Promise<void> {
     const start = Date.now();
     try {
-      await Promise.all(users.map(u =>
-        sendFCMPush({
-          token: u.fcmToken || '',
-          title: `🚨 ${payload.urgency}: ${payload.primaryFinding}`,
-          body: `Confidence ${(payload.confidence * 100).toFixed(0)}% · Tap to review scan`,
-          data: { scanId: payload.scanId, urgency: payload.urgency, type: 'CRITICAL_ALERT' },
-        })
-      ));
+      const tasks: Promise<void>[] = [];
+      for (const u of users) {
+        for (const token of u.fcmTokens) {
+          tasks.push(
+            sendFCMPush({
+              token,
+              title: `🚨 ${payload.urgency}: ${payload.primaryFinding}`,
+              body: `Confidence ${(payload.confidence * 100).toFixed(0)}% · Tap to review scan`,
+              data: { scanId: payload.scanId, urgency: payload.urgency, type: 'CRITICAL_ALERT' },
+            })
+          );
+        }
+      }
+      await Promise.all(tasks);
       channels.push({ channel: 'fcm_push', status: 'delivered', ms: Date.now() - start });
     } catch (e: any) {
       channels.push({ channel: 'fcm_push', status: 'failed', error: e.message });
@@ -194,10 +202,10 @@ class AlertService {
     try {
       await Promise.all(users.map(u =>
         sendEmail({
-          to: u.email || '', name: u.name || '',
+          to: u.email || '', name: `${u.firstName} ${u.lastName}`.trim(),
           subject: `🚨 ${payload.urgency} Alert — ${payload.primaryFinding}`,
           template: 'critical-alert',
-          data: { ...payload, recipientName: u.name },
+          data: { ...payload, recipientName: u.firstName },
         })
       ));
       channels.push({ channel: 'email', status: 'delivered', ms: Date.now() - start });

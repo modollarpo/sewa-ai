@@ -125,6 +125,7 @@ export class FHIRSyncWorker {
                   firstName: firstName || 'FHIR',
                   lastName: lastName || 'IMPORT',
                   role: 'patient',
+                  passwordHash: 'FHIR_IMPORTED_USER_NO_PASSWORD', // placeholder for SSO/FHIR users
                 }
               }
             }

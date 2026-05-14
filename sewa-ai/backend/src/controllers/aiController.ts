@@ -100,7 +100,7 @@ export const getICD10 = async (req: Request, res: Response, next: NextFunction) 
 export const getAIResult = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { tenantId } = req.user!;
-    const result = await prisma.aIResult.findFirst({ 
+    const result = await prisma.aiResult.findFirst({ 
       where: { 
         scanId: req.params.scanId,
         tenantId 
@@ -120,7 +120,7 @@ export const getAIModels = async (req: Request, res: Response, next: NextFunctio
 
 export const getABTestMetrics = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const results = await prisma.aIResult.groupBy({
+    const results = await prisma.aiResult.groupBy({
       by: ['abTestGroup', 'modelVersion'],
       _count: { id: true },
       _avg: { confidence: true, inferenceMs: true },
@@ -135,12 +135,12 @@ export const validateResult = async (req: Request, res: Response, next: NextFunc
     const { scanId } = req.params;
     const { status, correctedFinding, comments } = req.body;
 
-    const result = await prisma.aIResult.findFirst({ 
+    const result = await prisma.aiResult.findFirst({ 
       where: { scanId, tenantId } 
     });
     if (!result) throw new AppError('AI result not found or access denied', 404);
 
-    const updated = await prisma.aIResult.update({
+    const updated = await prisma.aiResult.update({
       where: { scanId },
       data: {
         validationStatus: status,
@@ -216,7 +216,7 @@ export const getExplanation = async (req: Request, res: Response, next: NextFunc
     const { scanId } = req.params;
     const { tenantId } = req.user!;
 
-    const result = await prisma.aIResult.findFirst({
+    const result = await prisma.aiResult.findFirst({
       where: { scanId, scan: { tenantId } },
       include: { scan: { select: { modality: true, bodyPart: true, tenantId: true } } }
     });

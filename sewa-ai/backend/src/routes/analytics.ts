@@ -15,7 +15,7 @@ r.get('/', async (req, res, next) => {
       prisma.report.count({ where: { tenantId, status: 'approved' } }),
       prisma.patient.count({ where: { tenantId } }),
     ]);
-    const avgConfidence = await prisma.aIResult.aggregate({
+    const avgConfidence = await prisma.aiResult.aggregate({
       where: { scan: { tenantId } }, _avg: { confidence: true, inferenceMs: true },
     });
 
@@ -68,12 +68,12 @@ r.get('/population-health', async (req, res, next) => {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
     const [thisMonthStats, lastMonthStats] = await Promise.all([
-      prisma.aIResult.groupBy({
+      prisma.aiResult.groupBy({
         by: ['primaryFinding', 'urgency'],
         where: isSuper ? { createdAt: { gte: startOfThisMonth } } : { scan: { tenantId }, createdAt: { gte: startOfThisMonth } },
         _count: { id: true },
       }),
-      prisma.aIResult.groupBy({
+      prisma.aiResult.groupBy({
         by: ['primaryFinding'],
         where: isSuper ? { createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } : { scan: { tenantId }, createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } },
         _count: { id: true },

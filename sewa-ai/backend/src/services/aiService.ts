@@ -17,13 +17,13 @@ export async function generateVLMReport(scanId: string, tenantId: string) {
   } catch (err: any) {
     logger.warn(`[VLM] Engine saturated or unreachable for scan ${scanId}. Falling back to secondary node/mock.`);
     // Fallback functional mock so the dashboard works end-to-end
-    const aiRes = await prisma.aIResult.findUnique({ where: { scanId } });
+    const aiRes = await prisma.aiResult.findUnique({ where: { scanId } });
     const finding = aiRes?.primaryFinding || 'abnormality';
     impressionText = `VLM Secondary Analysis: High confidence of ${finding}. The lesion demonstrates irregular margins typical of acute presentation. Recommend immediate clinical correlation and potential follow-up imaging in 4-6 weeks to assess progression. AI confidence remains stable at ${(aiRes?.confidence || 0.9) * 100}%.`;
   }
 
   // Persist the generated impression to the database so the frontend can read it
-  const updatedResult = await prisma.aIResult.update({
+  const updatedResult = await prisma.aiResult.update({
     where: { scanId },
     data: { vlmImpression: impressionText }
   });
@@ -37,7 +37,7 @@ export async function generateVLMReport(scanId: string, tenantId: string) {
   };
 }
 export async function generateICDCodes(scanId: string) {
-  const result = await prisma.aIResult.findUnique({ where: { scanId } });
+  const result = await prisma.aiResult.findUnique({ where: { scanId } });
   const finding = (result?.primaryFinding || '').toLowerCase();
   
   let codes = ['R93.8']; // Abnormal findings on diagnostic imaging of other body structures
@@ -45,7 +45,7 @@ export async function generateICDCodes(scanId: string) {
   if (finding.includes('fracture')) codes = ['S02.91'];
   if (finding.includes('tumor') || finding.includes('mass')) codes = ['D49.2'];
   
-  await prisma.aIResult.update({
+  await prisma.aiResult.update({
     where: { scanId },
     data: { icd10Codes: codes.join(', ') }
   });
