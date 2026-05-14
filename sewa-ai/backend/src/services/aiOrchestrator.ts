@@ -397,7 +397,6 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         content: `TECHNIQUE: ${vlm.technique}\n\nFINDINGS: ${vlm.findings}\n\nIMPRESSION: ${vlm.impression}\n\nRECOMMENDATION: ${vlm.recommendation}`,
         summary: vlm.impression,
         status: 'draft',
-        version: 1,
       },
     });
 

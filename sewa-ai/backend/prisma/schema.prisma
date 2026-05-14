@@ -46,6 +46,9 @@ model Tenant {
   // ── Billing & Quota ─────────────────────────────────────────
   subscriptionId      String? // Stripe subscription ID / Paystack subscription code
   subscriptionStatus  String?   @default("trial") // trial | active | past_due | cancelled | suspended
+  whatsappEnabled     Boolean   @default(false)
+  smsEnabled          Boolean   @default(false)
+  primaryContactEmail String?
   scanQuota           Int? // monthly scan limit (null = unlimited for enterprise)
   scansUsedThisMonth  Int       @default(0)
   billingCycleResetAt DateTime? // when monthly quota resets

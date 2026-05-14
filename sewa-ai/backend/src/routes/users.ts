@@ -70,7 +70,7 @@ r.post('/fcm-token', async (req, res, next) => {
     // Store FCM token for push notifications (Feature 14)
     const { token } = req.body;
     if (!token || typeof token !== 'string') return res.status(400).json({ error: 'Valid FCM token required' });
-    await prisma.user.update({ where: { id: req.user!.id }, data: { fcmToken: token } });
+    await prisma.user.update({ where: { id: req.user!.id }, data: { fcmTokens: { push: token } } });
     res.json({ success: true });
   } catch (err) { next(err); }
 });
@@ -110,7 +110,7 @@ r.post('/', authorize('admin','superadmin'), async (req, res, next) => {
     if (existing) return res.status(400).json({ error: 'User already exists' });
 
     const u = await prisma.user.create({
-      data: { email, firstName, lastName, role, tenantId, status: 'pending_invite' },
+      data: { email, firstName, lastName, role, tenantId, status: 'pending_invite', passwordHash: 'PENDING_INVITE' },
       select: { id: true, email: true, firstName: true, lastName: true, role: true, status: true },
     });
 
@@ -140,7 +140,7 @@ r.post('/invite', authorize('admin','superadmin'), async (req, res, next) => {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return res.status(409).json({ error: 'User already exists' });
     const u = await prisma.user.create({
-      data: { email, firstName: '', lastName: '', role, tenantId, status: 'pending_invite' }
+      data: { email, firstName: '', lastName: '', role, tenantId, status: 'pending_invite', passwordHash: 'PENDING_INVITE' }
     });
 
     // C5/BG4: Send invitation email
