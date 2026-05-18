@@ -236,7 +236,7 @@ model AIResult {
   id     String @id @default(uuid())
   scanId String @unique
   scan   Scan   @relation(fields: [scanId], references: [id])
-  tenantId String
+  tenantId String?
 
   // Triage Engine
   primaryFinding String
