@@ -26,7 +26,7 @@ COPY src ./src/
 RUN npm run build
 
 # Prune devDeps for production image
-RUN npm prune --production
+RUN npm prune --production --legacy-peer-deps
 
 # ── Stage 2: Lean production image ────────────────────────────
 FROM node:20-slim AS runner

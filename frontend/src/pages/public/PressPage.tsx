@@ -4,10 +4,10 @@ import React from 'react';
 import { PublicLayout } from '../../components/public/PublicLayout';
 const C = { bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', brand:'#408D7B', brandLight:'#52B09A', textHigh:'#D0ECE6', textMed:'#6FA898', textLow:'#3A6055', border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif" };
 const RELEASES = [
-  { date:'March 2026', headline:'SEWA AI Opens £1.5M Seed Round to Accelerate AI-Assisted Radiology Across NHS and Africa', body:'Storegrill Inc Ltd today announced the opening of its seed round as SEWA AI expands to 47 hospital deployments across 7 countries.' },
-  { date:'February 2026', headline:'SEWA AI Completes Proof of Concept at Royal London Hospital, Reducing ICH Alert Time from Hours to Seconds', body:'SEWA AI successfully completed a 3,400-case pilot at Royal London Hospital, achieving a median door-to-alert time of 1.84 seconds with zero adverse events.' },
-  { date:'January 2026', headline:'SEWA AI Accepted into NHS Innovation Accelerator Programme 2026 Cohort', body:'NHS England announced SEWA AI as one of 24 innovations selected for the NHS Innovation Accelerator 2026 cohort.' },
-  { date:'December 2025', headline:'SEWA AI Deploys at LUTH Nigeria and Kenyatta National Hospital', body:"SEWA AI\'s offline-first edge deployment is now operational at LUTH Nigeria and Kenyatta National Hospital, Kenya, providing AI-assisted radiology to hospitals with limited connectivity." },
+  { date:'March 2026', headline:'SEWA AI Opens £1.5M Seed Round to Accelerate AI-Assisted Radiology Across NHS and Africa', body:`Storegrill Inc Ltd today announced the opening of its seed round as SEWA AI expands to 47 hospital deployments across 7 countries.` },
+  { date:'February 2026', headline:'SEWA AI Completes Proof of Concept at Royal London Hospital, Reducing ICH Alert Time from Hours to Seconds', body:`SEWA AI successfully completed a 3,400-case pilot at Royal London Hospital, achieving a median door-to-alert time of 1.84 seconds with zero adverse events.` },
+  { date:'January 2026', headline:'SEWA AI Accepted into NHS Innovation Accelerator Programme 2026 Cohort', body:`NHS England announced SEWA AI as one of 24 innovations selected for the NHS Innovation Accelerator 2026 cohort.` },
+  { date:'December 2025', headline:'SEWA AI Deploys at LUTH Nigeria and Kenyatta National Hospital', body:`SEWA AI's offline-first edge deployment is now operational at LUTH Nigeria and Kenyatta National Hospital, Kenya, providing AI-assisted radiology to hospitals with limited connectivity.` },
 ];
 const COVERAGE = [
   { outlet:'Health Tech World', headline:'The clinical AI tackling the NHS radiology crisis', date:'Feb 2026' },
