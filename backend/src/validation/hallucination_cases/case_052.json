@@ -1,0 +1,12 @@
+{
+  "scan_id": "HALLUC-11",
+  "modality": "CT",
+  "body_part": "Head",
+  "triageFinding": "Pulmonary Embolism",
+  "primary_condition": "Pulmonary Embolism (PE)",
+  "confidence": 0.88,
+  "uncertainty": 0.15,
+  "vlmImpression": "Evidence of pulmonary embolism in the right main artery.",
+  "expected": "FAIL",
+  "reason": "Modality/Anatomy mismatch (Head CT -> PE)"
+}

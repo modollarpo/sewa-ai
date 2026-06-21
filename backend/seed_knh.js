@@ -6,7 +6,9 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding KNH tenant and user...');
 
-  const HASH = await bcrypt.hash('SewaAI2024!', 12);
+  const DEMO_PW = process.env.ADMIN_PASSWORD;
+  if (!DEMO_PW) throw new Error("ADMIN_PASSWORD environment variable is required");
+  const HASH = await bcrypt.hash(DEMO_PW, 12);
 
   // 1. Create the KNH tenant
   const knhTenant = await prisma.tenant.upsert({

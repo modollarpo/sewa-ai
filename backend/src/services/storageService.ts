@@ -17,8 +17,7 @@ interface UploadParams {
 export async function uploadToStorage(params: UploadParams): Promise<string> {
   const { tenantId, file, fileName, contentType, folder } = params;
   if (!AZURE_CONN) {
-    console.warn('[Storage] No Azure connection string — mock URL returned');
-    return `https://mock-storage.sewaxai.health/${folder}/${Date.now()}-${fileName}`;
+    throw new Error('[Storage] Azure connection string missing. Cannot upload file.');
   }
   const client = BlobServiceClient.fromConnectionString(AZURE_CONN);
   const containerClient = client.getContainerClient(CONTAINER);
@@ -33,7 +32,7 @@ export async function uploadToStorage(params: UploadParams): Promise<string> {
 }
 
 export async function deleteFromStorage(url: string): Promise<void> {
-  if (!AZURE_CONN || url.includes('mock-storage')) return;
+  if (!AZURE_CONN) return;
   const client = BlobServiceClient.fromConnectionString(AZURE_CONN);
   const containerClient = client.getContainerClient(CONTAINER);
   const blobName = url.split(CONTAINER + '/')[1];

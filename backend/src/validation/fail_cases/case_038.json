@@ -1,0 +1,12 @@
+{
+  "scan_id": "FAIL-17",
+  "modality": "CT",
+  "body_part": "Head",
+  "triageFinding": "ICH",
+  "primary_condition": "Intracranial Haemorrhage (ICH)",
+  "confidence": 0.9529487925981569,
+  "uncertainty": 0.9410752806324338,
+  "vlmImpression": "Acute intracranial haemorrhage",
+  "expected": "FAIL",
+  "reason": "Overconfident + highly uncertain"
+}

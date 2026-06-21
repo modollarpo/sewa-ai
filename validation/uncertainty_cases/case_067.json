@@ -1,0 +1,7 @@
+{
+  "triageFinding": "ICH",
+  "confidence": 0.98,
+  "uncertainty": 0.8567609056379244,
+  "vlmImpression": "Acute intracranial haemorrhage",
+  "expected": "FAIL"
+}

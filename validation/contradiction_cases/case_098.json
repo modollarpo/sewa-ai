@@ -1,0 +1,7 @@
+{
+  "triageFinding": "Subdural Haematoma",
+  "confidence": 0.99,
+  "uncertainty": 0.02,
+  "vlmImpression": "No subdural haematoma observed. Likely subarachnoid haemorrhage.",
+  "expected": "FAIL"
+}

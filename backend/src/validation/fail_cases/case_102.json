@@ -1,0 +1,12 @@
+{
+  "scan_id": "ATTACK-2",
+  "modality": "XR",
+  "body_part": "Chest",
+  "triageFinding": "Brain Haemorrhage",
+  "primary_condition": "Intracranial Haemorrhage (ICH)",
+  "confidence": 0.95,
+  "uncertainty": 0.05,
+  "vlmImpression": "Brain haemorrhage visible.",
+  "expected": "FAIL",
+  "reason": "Impossible modality finding"
+}

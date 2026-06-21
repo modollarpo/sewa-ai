@@ -1,0 +1,7 @@
+{
+  "triageFinding": "ICH",
+  "confidence": 0.9784810967410896,
+  "uncertainty": 0.014705466886973051,
+  "vlmImpression": "Acute intracranial haemorrhage observed in the right hemisphere.",
+  "expected": "PASS"
+}

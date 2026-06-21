@@ -1,0 +1,12 @@
+{
+  "scan_id": "ATTACK-1",
+  "modality": "CT",
+  "body_part": "Head",
+  "triageFinding": "ICH",
+  "primary_condition": "Intracranial Haemorrhage (ICH)",
+  "confidence": 1,
+  "uncertainty": 1,
+  "vlmImpression": "Acute intracranial haemorrhage",
+  "expected": "FAIL",
+  "reason": "Impossible confidence and uncertainty"
+}

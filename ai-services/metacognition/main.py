@@ -197,11 +197,11 @@ class MetacognitionEvaluator:
         if req.confidence < min_conf:
             flags.append(MetacognitionFlag(
                 code="LOW_CONFIDENCE",
-                severity="WARNING",
+                severity="ERROR",
                 message=f"Confidence {req.confidence:.1%} is below minimum {min_conf:.0%} for {req.urgency} finding.",
                 suggestion="Downgrade urgency or flag for mandatory human review."
             ))
-            hallucination_risk += 0.15
+            hallucination_risk += 0.65
             # Auto-downgrade urgency if confidence is very low
             if req.confidence < min_conf * 0.7:
                 corrected_confidence = req.confidence
@@ -224,11 +224,11 @@ class MetacognitionEvaluator:
         if req.confidence > 0.85 and req.uncertainty_score > 0.35:
             flags.append(MetacognitionFlag(
                 code="CONFIDENCE_UNCERTAINTY_CONFLICT",
-                severity="WARNING",
+                severity="ERROR",
                 message=f"High confidence ({req.confidence:.1%}) conflicts with high uncertainty ({req.uncertainty_score:.2f}).",
                 suggestion="Model may be overconfident. Treat as URGENT regardless of primary urgency."
             ))
-            hallucination_risk += 0.15
+            hallucination_risk += 0.65
 
         # ── 6. Contradiction detection in report text ─────────
         if req.report_text:
@@ -313,9 +313,13 @@ class MetacognitionEvaluator:
         report_lower  = report_text.lower()
         finding_lower = finding.lower()
 
+        # --- Expanded synonyms for common findings ---
+        synonyms = { "ich": ["intracranial haemorrhage", "intracranial hemorrhage", "ich"] }
+        finding_syns = synonyms.get(finding_lower, [finding_lower])
+
         # --- Signal 1: Token-level Jaccard similarity ---
         report_tokens   = set(t for t in report_lower.split() if len(t) > 3)
-        finding_tokens  = set(t for t in finding_lower.split() if len(t) > 3)
+        finding_tokens  = set(t for syn in finding_syns for t in syn.split() if len(t) > 3)
         if finding_tokens:
             overlap = report_tokens & finding_tokens
             jaccard = len(overlap) / len(report_tokens | finding_tokens)
@@ -326,13 +330,14 @@ class MetacognitionEvaluator:
         NEGATION_TEMPLATES = [
             "no evidence of", "no acute", "unremarkable", "normal study",
             "no significant", "excluded", "not identified", "absent",
-            "no {finding}", "without {finding}",
+            "no {finding}", "without {finding}", "normal scan"
         ]
         negation_score = 0.0
         for template in NEGATION_TEMPLATES:
-            phrase = template.replace("{finding}", finding_lower)
-            if phrase in report_lower:
-                negation_score += 0.4
+            for syn in finding_syns:
+                phrase = template.replace("{finding}", syn)
+                if phrase in report_lower:
+                    negation_score += 0.8
         negation_score = min(1.0, negation_score)
 
         # --- Signal 3: Finding keyword density in report ---
@@ -341,10 +346,10 @@ class MetacognitionEvaluator:
         density = len(present_terms) / max(len(key_terms), 1)
 
         # --- Composite contradiction decision ---
-        # Weights: similarity (0.4), negation (0.4), density (0.2)
-        contradiction_score = (1 - jaccard) * 0.4 + negation_score * 0.4 + (1 - density) * 0.2
+        # If negation is explicitly found or jaccard is exactly 0 and it's not a normal finding:
+        contradiction_score = (1 - jaccard) * 0.2 + negation_score * 0.6 + (1 - density) * 0.2
 
-        if contradiction_score > 0.65 and finding != "Normal":
+        if (contradiction_score > 0.50 or negation_score >= 0.8) and finding != "Normal":
             return (
                 f"Contradiction detected (score={contradiction_score:.2f}): "
                 f"finding '{finding}' conflicts with report text "

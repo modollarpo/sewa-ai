@@ -1,0 +1,7 @@
+{
+  "triageFinding": "ICH",
+  "confidence": 0.98,
+  "uncertainty": 0.01,
+  "vlmImpression": "Normal scan. No evidence of acute intracranial haemorrhage or mass effect.",
+  "expected": "FAIL"
+}

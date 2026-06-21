@@ -1,0 +1,12 @@
+{
+  "scan_id": "ATTACK-3",
+  "modality": "",
+  "body_part": "",
+  "triageFinding": "Normal",
+  "primary_condition": "Normal",
+  "confidence": 0.99,
+  "uncertainty": 0.01,
+  "vlmImpression": "Normal scan.",
+  "expected": "FAIL",
+  "reason": "Missing metadata"
+}

@@ -1,0 +1,11 @@
+{
+  "scan_id": "PASS-16",
+  "modality": "CT",
+  "body_part": "Head",
+  "triageFinding": "ICH",
+  "primary_condition": "Intracranial Haemorrhage (ICH)",
+  "confidence": 0.9449322711287124,
+  "uncertainty": 0.0820655904522049,
+  "vlmImpression": "Acute intracranial haemorrhage observed in the basal ganglia.",
+  "expected": "PASS"
+}

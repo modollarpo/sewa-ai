@@ -4,7 +4,8 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function createKNH() {
-  const DEMO_PW = 'SewaAI2024!';
+  const DEMO_PW = process.env.ADMIN_PASSWORD;
+  if (!DEMO_PW) throw new Error("ADMIN_PASSWORD environment variable is required");
   const hash = await bcrypt.hash(DEMO_PW, 12);
 
   // Ensure kenyatta-nh tenant exists
@@ -41,7 +42,7 @@ async function createKNH() {
     },
   });
   console.log('Technician created/updated:', tech.email, '| role:', tech.role);
-  console.log('Password set to: SewaAI2024!');
+  console.log('Password set via ADMIN_PASSWORD env variable');
   await prisma.$disconnect();
 }
 

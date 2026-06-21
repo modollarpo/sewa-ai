@@ -17,6 +17,23 @@ env:
 
 jobs:
 # ─────────────────────────────────────────────
+# 0. SECURITY SCAN
+# ─────────────────────────────────────────────
+  security-scan:
+    name: Secret & Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+# ─────────────────────────────────────────────
 # 1. BACKEND TESTS
 # ─────────────────────────────────────────────
   test-backend:
@@ -113,12 +130,48 @@ jobs:
           scan-type: fs
           scan-ref: .
           severity: CRITICAL,HIGH
-          exit-code: 0          # warn only — don't fail on first run
+          exit-code: 1          # Strictly fail on CRITICAL/HIGH
           format: table
       - name: Dependency audit — backend
-        run: cd backend && npm audit --audit-level=high || true
+        run: cd backend && npm audit --audit-level=high
       - name: Dependency audit — frontend
-        run: cd frontend && npm audit --audit-level=high || true
+        run: cd frontend && npm audit --audit-level=high
+
+# ─────────────────────────────────────────────
+# 4.5. SAFETY VALIDATION GATE
+# ─────────────────────────────────────────────
+  safety-gate:
+    name: Safety Validation Gate
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-ai-services]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: npm, cache-dependency-path: backend/package-lock.json }
+      - uses: actions/setup-python@v5
+        with: { python-version: '${{ env.PYTHON_VERSION }}', cache: pip }
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../ai-services/metacognition && pip install -r requirements.txt --break-system-packages
+      - name: Run Metacognition Service and Safety Benchmarks
+        run: |
+          # Start service in the background
+          cd ai-services/metacognition
+          uvicorn main:app --host 0.0.0.0 --port 8003 &
+          PID=$!
+          
+          # Wait for it to be ready
+          echo "Waiting for Metacognition service to start..."
+          timeout 30 bash -c 'until curl -s http://localhost:8003/health > /dev/null; do sleep 2; done' || (echo "Service failed to start" && kill $PID && exit 1)
+          
+          # Run the benchmarks
+          cd ../../backend
+          npm run metacognition-benchmark
+          npm run safety-validation
+          
+          # Cleanup
+          kill $PID
 
 # ─────────────────────────────────────────────
 # 5. BUILD & PUSH DOCKER IMAGES (main branch only)
@@ -126,7 +179,7 @@ jobs:
   build-images:
     name: Build & Push Images
     runs-on: ubuntu-latest
-    needs: [test-backend, build-frontend, test-ai-services]
+    needs: [test-backend, build-frontend, test-ai-services, safety-gate]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
     strategy:
       matrix:

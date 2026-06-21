@@ -1,0 +1,12 @@
+{
+  "scan_id": "UNC-5",
+  "modality": "CT",
+  "body_part": "Chest",
+  "triageFinding": "Pneumonia",
+  "primary_condition": "Community Acquired Pneumonia",
+  "confidence": 0.6606987914900098,
+  "uncertainty": 0.6786024170199805,
+  "vlmImpression": "Consolidation suggestive of pneumonia.",
+  "expected_error": false,
+  "expected": "FAIL"
+}

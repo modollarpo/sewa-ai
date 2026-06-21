@@ -1,0 +1,12 @@
+{
+  "scan_id": "CONTR-13",
+  "modality": "CT",
+  "body_part": "Head",
+  "triageFinding": "Stroke",
+  "primary_condition": "Large Vessel Occlusion (LVO)",
+  "confidence": 0.92,
+  "uncertainty": 0.1,
+  "vlmImpression": "Normal study. No acute intracranial abnormality.",
+  "expected": "FAIL",
+  "reason": "Contradiction (Triage says Stroke, VLM says Normal)"
+}
