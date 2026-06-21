@@ -15,7 +15,7 @@ import {
   handleMpesaWebhook,
   PLANS,
 } from '../services/paymentService';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { AppError } from '../utils/AppError';
 import { logger } from '../utils/logger';
 

@@ -1,7 +1,7 @@
 // SEWA AI — backend/src/routes/templates.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 const r = Router();
 r.use(authenticate);
 r.get('/', async (req, res, next) => {

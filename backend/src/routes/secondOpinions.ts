@@ -1,7 +1,7 @@
 // SEWA AI — backend/src/routes/secondOpinions.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { auditLog } from '../utils/audit';
 import { AppError } from '../utils/AppError';
 const r = Router();

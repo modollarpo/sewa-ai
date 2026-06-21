@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import { authenticate, authorize } from '../middleware/auth';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 import { dlq } from '../services/dlqService';
 

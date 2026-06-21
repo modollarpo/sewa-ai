@@ -1,7 +1,7 @@
 // SEWA AI — backend/src/routes/notifications.ts
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { AppError } from '../utils/AppError';
 const r = Router();
 r.use(authenticate);

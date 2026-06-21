@@ -1,7 +1,7 @@
 // SEWA AI — backend/src/routes/audit.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { verifyChain } from '../utils/audit';
 const r = Router();
 r.use(authenticate, authorize('admin','superadmin'));

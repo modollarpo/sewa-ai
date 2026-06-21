@@ -2,7 +2,7 @@
 // Anonymized training cases for radiologists and students
 
 import { Router } from 'express';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { authenticate, authorize } from '../middleware/auth';
 
 const r = Router();

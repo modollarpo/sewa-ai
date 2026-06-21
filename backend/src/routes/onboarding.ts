@@ -2,7 +2,7 @@
 // Secure institution onboarding & subscription handshake.
 import { Router } from 'express';
 import crypto from 'crypto';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { createSubscription } from '../services/paymentService';
 import { authLimiter } from '../middleware/rateLimiter';
 import { logger } from '../utils/logger';
@@ -41,14 +41,15 @@ r.post('/benchmark', authLimiter, async (req, res, next) => {
     const { tenantId, region } = req.body;
     logger.info(`[Benchmark] Starting AI stress test for ${tenantId || 'anonymous'} in ${region}`);
     
-    // Simulate high-performance compute allocation
-    await new Promise(r => setTimeout(r, 2000));
+    const start = performance.now();
+    const scanCount = await prisma.scan.count();
+    const end = performance.now();
     
     res.json({
       status: 'complete',
-      auc: 0.94 + (Math.random() * 0.04), // 0.94 - 0.98
-      latency: 1.2 + (Math.random() * 0.5), // 1.2s - 1.7s
-      scansProcessed: 50,
+      auc: null, // Metrics will be populated post real evaluation phase
+      latency: (end - start) / 1000, // Real DB query latency in seconds
+      scansProcessed: scanCount,
       verified: true
     });
   } catch (err) { next(err); }
@@ -118,10 +119,12 @@ r.post('/validate-integration', authLimiter, async (req, res, next) => {
     });
 
     try {
+      const start = performance.now();
       await check;
+      const end = performance.now();
       res.json({
         status: 'connected',
-        latency: Math.floor(Math.random() * 200) + 50,
+        latency: Math.floor(end - start),
         details: `${type.toUpperCase()} TCP handshake successful.`
       });
     } catch (err: any) {

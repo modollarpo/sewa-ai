@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { authenticate } from '../middleware/auth';
 import { authLimiter } from '../middleware/rateLimiter';
 import * as ctrl from '../controllers/authController';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 
 const r = Router();

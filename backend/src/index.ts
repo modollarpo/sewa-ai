@@ -235,6 +235,9 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-bootstrap();
+if (process.env.NODE_ENV !== 'test') {
+  bootstrap();
+}
 
+export default app;
 export { io };

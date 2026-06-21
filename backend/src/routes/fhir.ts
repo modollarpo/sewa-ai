@@ -1,7 +1,7 @@
 // SEWA AI — backend/src/routes/fhir.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { AppError } from '../utils/AppError';
 import { 
   getFHIRPatient, getFHIRImagingStudy, getFHIRDiagnosticReport, 

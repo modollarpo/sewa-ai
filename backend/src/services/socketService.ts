@@ -3,7 +3,7 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { config } from '../config/env';
 
 const JWT_SECRET = config.JWT_SECRET;

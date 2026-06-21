@@ -6,11 +6,10 @@ import MessagesClient from '@azure-rest/communication-messages';
 import crypto from 'crypto';
 import { config } from '../../config/env';
 import { logger } from '../../utils/logger';
-import { prisma } from '../../config/database';
+import { prisma } from '../../utils/prismaClient';
 
 const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING || '';
 const channelRegistrationId = process.env.AZURE_COMMUNICATION_WHATSAPP_CHANNEL_ID || '';
-// @ts-ignore - ACS beta library type mismatch
 const messageClient = connectionString ? (MessagesClient as any)(connectionString) : null;
 
 // ── WhatsApp message templates ─────────────────────────────────

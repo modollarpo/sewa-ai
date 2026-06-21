@@ -2,7 +2,7 @@
 // PDF invoice generation and delivery per billing cycle.
 // Generates structured invoice HTML → stores in Azure Blob → emails via SendGrid.
 // © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { sendEmail } from './emailService';
 import { uploadToStorage } from './storageService';
 import { logger } from '../utils/logger';

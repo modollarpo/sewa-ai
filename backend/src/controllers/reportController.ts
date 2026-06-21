@@ -1,6 +1,6 @@
 // SEWA AI — backend/src/controllers/reportController.ts
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { generateVLMReport } from '../services/aiService';
 import { createFHIRDiagnosticReport, createFHIRObservation } from '../services/fhirService';
 import { sendHL7ORU } from '../services/hl7Service';

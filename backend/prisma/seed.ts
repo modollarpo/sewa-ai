@@ -3,10 +3,13 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 12;
-const DEMO_PW = 'SewaAI2024!';
 
 async function main() {
-  const hash = await bcrypt.hash(DEMO_PW, SALT_ROUNDS);
+  const seedPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!seedPassword) {
+    throw new Error('SEED_ADMIN_PASSWORD environment variable is required to run the seed script');
+  }
+  const hash = await bcrypt.hash(seedPassword, SALT_ROUNDS);
 
   // 1. Create Demo Tenants
   const tenants = [

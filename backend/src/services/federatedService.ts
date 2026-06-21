@@ -2,7 +2,7 @@
 // Orchestrates privacy-preserving Federated Learning across Edge Nodes
 // © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 import { auditLog } from '../utils/audit';
 
@@ -18,12 +18,12 @@ class FederatedService {
   private activeRounds: Map<string, FLRound> = new Map();
 
   async startRound(modelId: string): Promise<FLRound> {
-    const roundNumber = Math.floor(Math.random() * 1000);
+    const roundNumber = Date.now(); // Replace Math.random mock
     const round: FLRound = {
       modelId,
       roundNumber,
       status: 'distributing',
-      nodeParticipation: ['NODE-UK-01', 'NODE-NG-04', 'NODE-KE-02'],
+      nodeParticipation: ['NODE-UK-01', 'NODE-NG-04', 'NODE-KE-02'], // Assuming these are fetched from actual node registries
     };
 
     this.activeRounds.set(modelId, round);
@@ -35,7 +35,6 @@ class FederatedService {
       metadata: { roundNumber, nodes: round.nodeParticipation },
     });
 
-    logger.info(`[Federated] Started round ${roundNumber} for model ${modelId}`);
     return round;
   }
 
@@ -43,23 +42,17 @@ class FederatedService {
     const round = this.activeRounds.get(modelId);
     if (!round) return;
 
+    // The backend moves this to a pending state until edge nodes report back.
+    // No mock delays or fake accuracy metrics should be returned here.
     round.status = 'aggregating';
-    logger.info(`[Federated] Aggregating weights for round ${round.roundNumber}...`);
-
-    // Simulate Secure Aggregation / Differential Privacy logic
-    setTimeout(async () => {
-      round.status = 'completed';
-      round.metrics = { accuracyImprovement: '+1.4%', eceReduction: '0.005' };
-      
-      await auditLog({
-        action: 'FEDERATED_LEARNING_ROUND_COMPLETED',
-        entity: 'AIModel',
-        entityId: modelId,
-        metadata: { roundNumber: round.roundNumber, metrics: round.metrics },
-      });
-      
-      logger.info(`[Federated] Round ${round.roundNumber} completed successfully.`);
-    }, 5000);
+    logger.info(`[Federated] Round ${round.roundNumber} entered aggregation state.`);
+    
+    await auditLog({
+      action: 'FEDERATED_LEARNING_AGGREGATION_PENDING',
+      entity: 'AIModel',
+      entityId: modelId,
+      metadata: { roundNumber: round.roundNumber },
+    });
   }
 
   getRounds() {

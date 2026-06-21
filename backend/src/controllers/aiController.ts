@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
 import { triggerAITriage, generateVLMReport, generateICDCodes } from '../services/aiService';
@@ -67,7 +67,7 @@ export const streamVLMReport = async (req: Request, res: Response, next: NextFun
     if (isStreaming) {
       const sentences = result.impression.match(/[^.!?]+[.!?]+/g) || [result.impression];
       for (const sentence of sentences) {
-        await new Promise(resolve => setTimeout(resolve, 200)); 
+        // Deliver chunks as fast as possible since true streaming from VLM engine is not yet implemented
         sendEvent({ status: 'processing', chunk: sentence });
       }
       sendEvent({ status: 'completed', fullText: result.fullText, updatedResult: result.updatedResult });

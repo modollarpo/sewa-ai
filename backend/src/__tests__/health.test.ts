@@ -7,12 +7,11 @@ import request from 'supertest';
 // Set test env before importing app
 process.env.DEPLOY_TARGET      = 'local';
 process.env.NODE_ENV           = 'test';
-process.env.DATABASE_URL       = process.env.DATABASE_URL || 'postgresql://sewa:test_password@localhost:5432/sewa_test';
-process.env.REDIS_URL          = process.env.REDIS_URL    || 'redis://localhost:6379/0';
-process.env.JWT_SECRET         = 'test_jwt_secret_32_chars_long!!';
-process.env.JWT_REFRESH_SECRET = 'test_refresh_secret_32_chars!!!';
-process.env.ENCRYPTION_KEY     = 'test_encryption_key_32_chars!!!';
-process.env.PORT               = '3001';
+if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL must be provided for tests');
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET must be provided for tests');
+if (!process.env.JWT_REFRESH_SECRET) throw new Error('JWT_REFRESH_SECRET must be provided for tests');
+if (!process.env.ENCRYPTION_KEY) throw new Error('ENCRYPTION_KEY must be provided for tests');
+process.env.PORT = '3001';
 
 // Lazy import after env is set
 let app: any;
@@ -21,8 +20,6 @@ beforeAll(async () => {
   // Dynamically import to pick up env vars
   const mod = await import('../index');
   app = mod;
-  // Give server time to connect
-  await new Promise(r => setTimeout(r, 2000));
 }, 15_000);
 
 afterAll(async () => {

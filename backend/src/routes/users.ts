@@ -3,7 +3,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { authenticate, authorize } from '../middleware/auth';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { sendEmail } from '../services/emailService';
 import { config } from '../config/env';
 import { logger } from '../utils/logger';

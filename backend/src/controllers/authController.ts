@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';  // explicit import for Node 18 compat
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { authenticator } from 'otplib';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { redisClient } from '../config/redis';
 import { config } from '../config/env';
 import { logger } from '../utils/logger';

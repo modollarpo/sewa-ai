@@ -2,7 +2,7 @@
 // Clinical Diagnostic Report Generation (High-Fidelity HTML)
 // © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 import { uploadToStorage } from './storageService';
 

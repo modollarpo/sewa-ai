@@ -1,4 +1,4 @@
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 import { auditLog } from '../utils/audit';
 import { createFHIRImagingStudy, createFHIRDiagnosticReport } from './fhirService';

@@ -3,7 +3,7 @@ import Paystack from 'paystack';
 import Flutterwave from 'flutterwave-node-v3';
 import axios from 'axios';
 import crypto from 'crypto';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { config } from '../config/env';
 import { logger } from '../utils/logger';
 import { generateInvoice } from './invoiceService';

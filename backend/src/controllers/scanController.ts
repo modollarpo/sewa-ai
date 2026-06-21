@@ -3,10 +3,10 @@
 // POST /api/v1/scans/upload | GET /api/v1/scans | GET /api/v1/scans/:id
 
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { redisClient } from '../config/redis';
 import { uploadToStorage, deleteFromStorage } from '../services/storageService';
-import { triggerAITriage } from '../services/aiService';
+import { triggerAITriage, runAIPipeline } from '../services/aiService';
 import { createFHIRImagingStudy } from '../services/fhirService';
 import { sendHL7ORM } from '../services/hl7Service';
 import { notifyUsers } from '../services/notifications/notificationService';
@@ -272,26 +272,10 @@ export async function generateDemoScan(req: Request, res: Response, next: NextFu
       },
     });
 
-    // Trigger AI Triage with a delayed mock result
-    setTimeout(async () => {
-      try {
-        await prisma.aIResult.create({
-          data: {
-            scanId: scan.id,
-            tenantId,
-            urgency: 'CRITICAL',
-            primaryFinding: 'Acute Intracranial Hemorrhage Detected',
-            confidence: 0.984,
-            summary: 'Large hyperdense area in left basal ganglia compatible with acute ICH. Significant midline shift (4mm).',
-            uncertaintyScore: 0.021,
-          },
-        });
-        await prisma.scan.update({ where: { id: scan.id }, data: { status: 'COMPLETED' } });
-        io.to(`tenant:${tenantId}`).emit('scan:updated', { scanId: scan.id, status: 'COMPLETED' });
-      } catch (err) {
-        logger.error('[Demo] AI result generation failed:', err);
-      }
-    }, 5000);
+    // Run real AI pipeline asynchronously instead of mocking
+    runAIPipeline(scan.id, tenantId).catch(err => {
+      logger.error(`[AI] Async pipeline failed for synthetic scan ${scan.id}:`, err);
+    });
 
     res.status(201).json({ scan, message: 'Synthetic demo scan generated. AI processing in progress.' });
   } catch (err) { next(err); }

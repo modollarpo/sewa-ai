@@ -20,7 +20,7 @@
 
 import axios from 'axios';
 import { config } from '../config/env';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 
 // ── Guard: if no FHIR server configured, all functions no-op ────────────

@@ -1,7 +1,7 @@
 // SEWA AI — backend/src/routes/tenants.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { validate }  from '../middleware/validate';
 import { TenantOnboardSchema } from '../utils/validators';
 

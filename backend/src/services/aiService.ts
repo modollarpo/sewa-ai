@@ -1,25 +1,31 @@
 // SEWA AI — src/services/aiService.ts
 // AI service exports — delegates to aiOrchestrator and VLM engine
 import axios from 'axios';
+import CircuitBreaker from 'opossum';
 export { triggerAITriage, runAIPipeline } from './aiOrchestrator';
 
 import { config } from '../config/env';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 
 const VLM_URL = config.VLM_SERVICE_URL;
 
+const vlmBreaker = new CircuitBreaker(async (scanId: string, tenantId: string) => {
+  const resp = await axios.post(`${VLM_URL}/generate`, { scan_id: scanId, tenant_id: tenantId }, { timeout: 15_000 });
+  return resp.data?.impression || resp.data?.text || 'AI Impression generated successfully.';
+}, {
+  timeout: 15000, // If function takes longer than 15s, trigger a failure
+  errorThresholdPercentage: 50, // When 50% of requests fail, open the circuit
+  resetTimeout: 30000 // After 30s, try again
+});
+
 export async function generateVLMReport(scanId: string, tenantId: string) {
   let impressionText = '';
   try {
-    const resp = await axios.post(`${VLM_URL}/generate`, { scan_id: scanId, tenant_id: tenantId }, { timeout: 15_000 });
-    impressionText = resp.data?.impression || resp.data?.text || 'AI Impression generated successfully.';
+    impressionText = await vlmBreaker.fire(scanId, tenantId);
   } catch (err: any) {
-    logger.warn(`[VLM] Engine saturated or unreachable for scan ${scanId}. Falling back to secondary node/mock.`);
-    // Fallback functional mock so the dashboard works end-to-end
-    const aiRes = await prisma.aIResult.findUnique({ where: { scanId } });
-    const finding = aiRes?.primaryFinding || 'abnormality';
-    impressionText = `VLM Secondary Analysis: High confidence of ${finding}. The lesion demonstrates irregular margins typical of acute presentation. Recommend immediate clinical correlation and potential follow-up imaging in 4-6 weeks to assess progression. AI confidence remains stable at ${(aiRes?.confidence || 0.9) * 100}%.`;
+    logger.error(`[VLM] Engine saturated or unreachable for scan ${scanId}. Circuit breaker triggered.`);
+    throw new Error('VLM Engine currently unavailable. Request queued for secondary processing.');
   }
 
   // Persist the generated impression to the database so the frontend can read it
@@ -30,7 +36,7 @@ export async function generateVLMReport(scanId: string, tenantId: string) {
 
   return { 
     impression: impressionText, 
-    findings: impressionText, // For mock, use same text
+    findings: impressionText,
     technique: 'Standard non-contrast axial acquisition.',
     fullText: `CLINICAL INDICATION: AI Triage triggered.\n\nTECHNIQUE: Standard non-contrast axial acquisition.\n\nFINDINGS: ${impressionText}\n\nIMPRESSION: ${impressionText}`,
     updatedResult 

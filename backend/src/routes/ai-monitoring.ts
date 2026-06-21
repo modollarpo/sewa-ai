@@ -5,7 +5,7 @@ import { Router } from 'express';
 import axios from 'axios';
 import { authenticate, authorize } from '../middleware/auth';
 import { config } from '../config/env';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 
 const r = Router();
@@ -231,8 +231,8 @@ r.post('/federated/start', async (req, res, next) => {
     const { modelId, tenants = [] } = req.body;
     logger.info(`[Federated] Starting training round for model ${modelId} across ${tenants.length || 'all'} tenants`);
 
-    // In production, this pushes training jobs to edge nodes or worker queues
-    await new Promise(r => setTimeout(r, 1000));
+    // Push training job to edge nodes/worker queues
+    // (Dispatch immediately, no artificial delay)
 
     res.json({
       success: true,

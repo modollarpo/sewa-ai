@@ -1,5 +1,5 @@
 import { runAIPipeline } from '../services/aiOrchestrator';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import axios from 'axios';
 
 jest.mock('axios');

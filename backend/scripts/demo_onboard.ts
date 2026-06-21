@@ -19,7 +19,10 @@ async function main() {
   const adminEmail = 'it.director@stthomas.nhs.uk.demo';
   const adminFirstName = 'Sarah';
   const adminLastName = 'Connor';
-  const adminPassword = process.env.DEMO_ADMIN_PASSWORD || 'SewaDemo2024!'; // Allow override via env
+  const adminPassword = process.env.DEMO_ADMIN_PASSWORD;
+  if (!adminPassword) {
+    throw new Error('DEMO_ADMIN_PASSWORD environment variable is required to run the demo onboard script');
+  }
 
   const passwordHash = await bcrypt.hash(adminPassword, 12);
   const apiKey = `sk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`; // Longer, more secure key

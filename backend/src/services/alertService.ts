@@ -4,7 +4,7 @@
 // © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import axios from 'axios';
-import { prisma } from '../config/database';
+import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 import { auditLog } from '../utils/audit';
 import { sendHL7ORU, sendHL7ADT, sendHL7ORM } from './hl7Service';

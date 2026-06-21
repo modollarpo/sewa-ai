@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env';
 import { AppError } from '../utils/AppError';
+import { tenantStorage } from '../utils/prismaClient';
 
 interface JWTPayload { sub: string; tenantId: string; role: string; }
 
@@ -21,7 +22,10 @@ export function authenticate(req: Request, _res: Response, next: NextFunction) {
   try {
     const payload = jwt.verify(token, config.JWT_SECRET) as JWTPayload;
     req.user = { id: payload.sub, tenantId: payload.tenantId, role: payload.role };
-    next();
+    // Run the rest of the request within the tenant context
+    tenantStorage.run(payload.tenantId, () => {
+      next();
+    });
   } catch {
     next(new AppError('Token invalid or expired', 401));
   }
