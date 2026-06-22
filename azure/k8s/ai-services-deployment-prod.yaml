@@ -1,5 +1,13 @@
 # SEWA AI — AI Services Deployment (GPU Node Pool)
 # © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    azure.workload.identity/client-id: "${AI_WORKLOAD_IDENTITY_CLIENT_ID}"  # Replace with Terraform output
+  name: sewa-ai-sa
+  namespace: sewa-ai
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,6 +25,7 @@ spec:
       labels:
         app: sewa-triage
     spec:
+      serviceAccountName: sewa-ai-sa
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -31,11 +40,30 @@ spec:
           requests:
             memory: "2Gi"
             cpu: "1000m"
-        envFrom:
-        - secretRef:
-            name: sewa-secrets
-        - configMapRef:
-            name: sewa-config
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets"
+          readOnly: true
+        env:
+        - name: KEY_VAULT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: KEY_VAULT_URI
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-storage-connection-string
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
         livenessProbe:
           httpGet:
             path: /health

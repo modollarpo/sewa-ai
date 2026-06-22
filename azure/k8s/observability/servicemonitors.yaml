@@ -1,0 +1,80 @@
+# Prometheus ServiceMonitors for SEWA AI Services
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-backend-monitor
+  namespace: sewa-ai
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: sewa-backend
+  endpoints:
+  - port: http  # Assuming service port name is "http"
+    path: /metrics
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-ai-triage-monitor
+  namespace: sewa-ai
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: sewa-triage
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-ai-vlm-monitor
+  namespace: sewa-ai
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: sewa-vlm-report
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-ai-uncertainty-monitor
+  namespace: sewa-ai
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: sewa-uncertainty
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-ai-metacognition-monitor
+  namespace: sewa-ai
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: sewa-metacognition
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s

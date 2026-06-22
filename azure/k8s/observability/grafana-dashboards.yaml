@@ -1,0 +1,43 @@
+# SEWA AI Grafana Dashboards (ConfigMaps)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sewa-grafana-dashboards
+  namespace: sewa-ai
+  labels:
+    grafana_dashboard: "1"
+data:
+  sewa-platform-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "SEWA AI Platform Overview",
+        "panels": [
+          {
+            "title": "Request Rate",
+            "type": "graph",
+            "targets": [{"expr": "sum(rate(http_requests_total[5m]))"}],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "title": "Error Rate",
+            "type": "graph",
+            "targets": [{"expr": "sum(rate(http_requests_total{status=~'5..'}[5m]))"}],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          }
+        ]
+      }
+    }
+  sewa-ai-inference-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "SEWA AI Inference Metrics",
+        "panels": [
+          {
+            "title": "Inference Latency (P95)",
+            "type": "graph",
+            "targets": [{"expr": "histogram_quantile(0.95, sum(rate(inference_duration_seconds_bucket[5m])) by (le))"}],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0}
+          }
+        ]
+      }
+    }

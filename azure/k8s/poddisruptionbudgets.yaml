@@ -1,0 +1,44 @@
+# PodDisruptionBudgets for Critical Deployments
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-backend-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: sewa-backend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-triage-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-triage
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-vlm-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-vlm-report
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-postgres-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: postgresql
