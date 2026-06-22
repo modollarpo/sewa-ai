@@ -2,7 +2,7 @@
 // Physician workflow: patient list, AI alerts, critical findings, quick actions
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDoctorData } from '../../hooks/useDashboardData';
-import { apiClient } from '../../services/apiClient';
+import { apiClient, downloadReport } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { Tooltip } from '../../components/ui/Tooltip';
@@ -341,6 +341,7 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
                 { label: 'Explain', icon: '🤖', action: () => handleAction('explain'), color: '#8B5CF6', loading: explaining },
                 { label: 'Correct', icon: '✎', action: () => setCorrecting(true), color: '#E08A20' },
                 { label: 'Viewer', icon: '🩻', action: () => window.open(`/dashboard?scanId=${scanId}`, '_blank'), color: '#408D7B' },
+                { label: 'Download', icon: '📥', action: () => patient.reportId ? downloadReport(patient.reportId) : alert('No report available yet'), color: '#408D7B' },
                 { label: 'STAT', icon: '🚨', action: () => setEscalating(true), color: '#E03535' }
               ].map(btn => (
                 <button 

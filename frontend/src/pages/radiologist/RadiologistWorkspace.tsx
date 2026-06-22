@@ -5,7 +5,7 @@ import { useScanStore } from '../../store/scanStore';
 import { useAuthStore } from '../../store/authStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { getTranslation } from '../../services/i18n';
-import { apiClient } from '../../services/apiClient';
+import { apiClient, downloadReport } from '../../services/apiClient';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { VoiceDictation } from '../../components/ui/VoiceDictation';
@@ -645,6 +645,15 @@ function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, 
           placeholder="Enter formal radiologic findings and impression..."
         />
       </div>
+
+      {scan?.reportId && (
+        <button 
+          onClick={() => downloadReport(scan.reportId)}
+          className="mt-4 w-full py-3.5 rounded-xl bg-[#111F1A] border border-[#408D7B]/30 text-[#408D7B] text-xs font-black uppercase tracking-widest hover:bg-[#408D7B]/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          📥 Download Report
+        </button>
+      )}
 
       <button 
         onClick={handleSignAndRelease}

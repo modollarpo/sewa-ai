@@ -160,3 +160,26 @@ export async function getReport(req: Request, res: Response, next: NextFunction)
     res.json(report);
   } catch (err) { next(err); }
 }
+
+// GET /api/v1/reports/:id/download
+export async function downloadReport(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const { tenantId } = req.user!;
+    const report = await prisma.report.findUnique({
+      where: { id },
+      include: { scan: { include: { tenant: true } } }
+    });
+    if (!report || report.tenantId !== tenantId) {
+      throw new AppError('Report not found', 404);
+    }
+    if (!report.pdfUrl) {
+      const url = await generateClinicalPDF(id);
+      if (!url) throw new AppError('Failed to generate report', 500);
+      return res.redirect(url);
+    }
+    res.redirect(report.pdfUrl);
+  } catch (err) {
+    next(err);
+  }
+}

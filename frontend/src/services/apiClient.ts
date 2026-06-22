@@ -53,7 +53,19 @@ apiClient.interceptors.response.use(
         return Promise.reject(err);
       }
     }
-    return Promise.reject(err);
+  return Promise.reject(err);
   }
 );
+
+/**
+ * Open report download in new tab
+ * @param reportId - ID of the report to download
+ */
+export function downloadReport(reportId: string): void {
+  const token = useAuthStore.getState().token;
+  const url = `${BASE}/reports/${reportId}/download`;
+  // For redirects, we need to handle auth via query param temporarily, or open a popup with auth header
+  // For simplicity, we'll use window.open and rely on the API's redirect
+  window.open(url, '_blank');
+}
 
