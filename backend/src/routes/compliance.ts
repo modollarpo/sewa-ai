@@ -4,6 +4,7 @@
 import { Router } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { authenticate, authorize } from '../middleware/auth';
+import { generateComplianceReport } from '../services/compliance-evidence';
 
 const r = Router();
 
@@ -45,6 +46,19 @@ r.get('/consent-metrics', async (req, res, next) => {
       optOuts,
       timestamp: new Date().toISOString()
     });
+  } catch (err) { next(err); }
+});
+
+/**
+ * GET /api/v1/compliance/report
+ * Generate compliance evidence report for a framework (NHS DSPT, HIPAA, GDPR)
+ */
+r.get('/report', async (req, res, next) => {
+  try {
+    const tenantId = (req as any).user.tenantId;
+    const framework = (req.query.framework as string) || 'NHS DSPT';
+    const report = await generateComplianceReport(tenantId, framework);
+    res.json(report);
   } catch (err) { next(err); }
 });
 

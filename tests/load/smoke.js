@@ -6,8 +6,8 @@ import { check, sleep } from 'k6';
 import { Trend, Rate, Counter } from 'k6/metrics';
 
 const API_URL = __ENV.API_URL || 'https://api.sewaxai.health';
-const TEST_EMAIL = __ENV.TEST_EMAIL || 'superadmin@sewaxai.health';
-const TEST_PASS  = __ENV.TEST_PASS  || 'SewaAI2024!';
+const TEST_EMAIL = __ENV.TEST_EMAIL || '';
+const TEST_PASS  = __ENV.TEST_PASS  || '';
 
 // Custom metrics
 const doorToAlert  = new Trend('door_to_alert_ms', true);

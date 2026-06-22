@@ -16,12 +16,7 @@ const C = {
   FM: "'IBM Plex Mono', monospace",
 };
 
-const DEMO_CREDENTIALS = [
-  { role: 'Radiologist', email: 'sarah.chen@royallondon.nhs.uk', hint: 'Full PACS workspace' },
-  { role: 'Physician', email: 'james.okafor@royallondon.nhs.uk', hint: 'Clinical alerts & patient list' },
-  { role: 'Patient', email: 'patient.smith@example.com', hint: 'Patient portal & consent' },
-  { role: 'Technician', email: 'tech@knh.go.ke', hint: 'Upload & worklist' },
-];
+// No demo credentials in production builds
 
 const COMPLIANCE_BADGES = [
   { label: 'NHS DSPT', flag: '🇬🇧' },
@@ -285,36 +280,7 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
                 <button type="button" onClick={() => onNavigate('register')} className="text-[10px] font-black text-[#408D7B] uppercase tracking-widest hover:text-[#52B09A] ml-2">Request Onboarding</button>
               </div>
 
-              {/* Demo Section */}
-              <div className="pt-8 border-t border-[#1B3028]">
-                <button 
-                  type="button" 
-                  onClick={() => setShowDemoPanel(!showDemoPanel)}
-                  className="w-full py-3 rounded-xl bg-[#0C1D17] border border-[#1B3028] text-[9px] font-black text-[#3A6055] uppercase tracking-[0.3em] hover:text-[#D0ECE6] transition-all"
-                >
-                  {showDemoPanel ? 'DESTROY_DEMO_PANEL' : 'ACCESS_DEVELOPER_DEMO_KEYS'}
-                </button>
-
-                {showDemoPanel && (
-                  <div className="mt-4 grid grid-cols-1 gap-2 animate-slide-up">
-                    <p className="text-[9px] font-mono text-[#3A6055] mb-2">SECRET: <span className="text-[#408D7B]">SewaAI2024!</span></p>
-                    {DEMO_CREDENTIALS.map(cred => (
-                      <button 
-                        key={cred.email} 
-                        type="button"
-                        onClick={() => { setEmail(cred.email); setPassword('SewaAI2024!'); setShowDemoPanel(false); }}
-                        className="flex items-center justify-between p-4 bg-[#05100D] border border-[#1B3028] rounded-xl hover:border-[#408D7B]/40 transition-all text-left group"
-                      >
-                        <div className="space-y-1">
-                          <div className="text-[11px] font-black text-[#D0ECE6] uppercase group-hover:text-[#408D7B]">{cred.role}</div>
-                          <div className="text-[9px] font-mono text-[#3A6055]">{cred.email}</div>
-                        </div>
-                        <span className="text-[9px] font-black text-[#3A6055] uppercase tracking-widest">{cred.hint}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/* No demo panel in production builds */}
             </form>
           )}
 

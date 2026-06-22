@@ -114,53 +114,7 @@ async function safePOST<T>(
   throw new Error(`safePOST: exhausted retries for ${url}`);
 }
 
-// ── Fallbacks ────────────────────────────────────────────────────────────
-function triageFallback(scanId: string): TriageResult {
-  logger.warn(`[Triage] ${scanId}: Using emergency fallback — service unreachable`);
-  return {
-    primaryFinding: 'Service Unavailable — Radiologist Review Required',
-    primaryCondition: 'UNKNOWN',
-    confidence: 0.5,
-    urgency: 'ROUTINE',
-    allFindings: [],
-    inferenceMs: 0,
-    backend: 'fallback',
-  };
-}
-
-function uncertaintyFallback(): UncertaintyResult {
-  // Conservative fallback: max uncertainty → mandatory human review
-  return {
-    epistemicUncertainty: 1.0,
-    aleatoricUncertainty: 1.0,
-    compositeScore: 1.0,
-    highUncertaintyFlag: true,   // forces human review
-    inferenceMs: 0,
-  };
-}
-
-function vlmFallback(scan: any): VLMResult {
-  return {
-    technique: scan.technique || 'Standard imaging protocol',
-    findings: 'Automated report generation temporarily unavailable.',
-    impression: 'Unable to generate automated impression. Radiologist review required.',
-    recommendation: 'Urgent radiologist review required. AI report generation will retry.',
-    language: 'en',
-    inferenceMs: 0,
-  };
-}
-
-function metacogFallback(): MetacognitionResult {
-  return {
-    layer1_modality_plausibility: 'FAIL', layer2_urgency_consistency: 'FLAG',
-    layer3_confidence_floor: 'FAIL',      layer4_shap_coherence: 'FLAG',
-    layer5_uncertainty_conflict: 'FLAG',  layer6_report_concordance: 'FLAG',
-    layer7_demographic_plausibility: 'FLAG',
-    layer8_hallucination_risk: 1.0,
-    layer9_safe_to_alert: false,          // safe default: never alert without metacog
-    inferenceMs: 0,
-  };
-}
+// No mock/fallback logic in production builds — failures route to DLQ for retries
 
 // ── Main pipeline ─────────────────────────────────────────────────────────
 export async function runAIPipeline(scanId: string, tenantId: string): Promise<void> {
@@ -249,10 +203,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           clinical_context: clinicalContext,
         },
         SVC_TIMEOUT,
-      ).catch((e: Error) => {
-        logger.error(`[Triage] ${scanId} FAILED: ${e.message}`);
-        return triageFallback(scanId);
-      }),
+      ),
 
       // Engine 2: Uncertainty — 10-pass ONNX MC-Dropout (parallel, not blocked by triage)
       safePOST<UncertaintyResult>(
@@ -267,10 +218,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           confidence: 0.5,             // neutral prior while running in parallel
         },
         SVC_TIMEOUT,
-      ).catch((e: Error) => {
-        logger.error(`[Uncertainty] ${scanId} FAILED: ${e.message}`);
-        return uncertaintyFallback();
-      }),
+      ),
 
     ]);
 
@@ -283,64 +231,52 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     // ──────────────────────────────────────────────────────────────────────
     // STAGE 2: VLM Report — template-based on CPU, ~30ms
     // ──────────────────────────────────────────────────────────────────────
-    let vlm: VLMResult;
-    try {
-      vlm = await safePOST<VLMResult>(
-        `${VLM_URL}/vlm/generate-report`,
-        {
-          scan_id:              scanId,
-          storage_url:          scan.storageUrl,
-          modality:             scan.modality,
-          body_part:            scan.bodyPart,
-          patient_age:          patientAge,
-          patient_sex:          patientSex,
-          clinical_indication:  scan.clinicalIndication,
-          ai_finding:           triage.primaryFinding,
-          urgency:              triage.urgency,
-          confidence:           triage.confidence,
-          location:             (triage as any).location,
-          shap_values:          triage.shapValues,
-          clinical_context:     clinicalContext,
-          longitudinal_context: longitudinalContext,
-          region:               scan.tenant?.region ?? 'uk',
-          language:             (scan.tenant as any)?.reportLanguage ?? 'en',
-        },
-        VLM_TIMEOUT,
-      );
-    } catch (e: any) {
-      logger.error(`[VLM] ${scanId} FAILED: ${e.message}`);
-      vlm = vlmFallback(scan);
-    }
+    const vlm = await safePOST<VLMResult>(
+      `${VLM_URL}/vlm/generate-report`,
+      {
+        scan_id:              scanId,
+        storage_url:          scan.storageUrl,
+        modality:             scan.modality,
+        body_part:            scan.bodyPart,
+        patient_age:          patientAge,
+        patient_sex:          patientSex,
+        clinical_indication:  scan.clinicalIndication,
+        ai_finding:           triage.primaryFinding,
+        urgency:              triage.urgency,
+        confidence:           triage.confidence,
+        location:             (triage as any).location,
+        shap_values:          triage.shapValues,
+        clinical_context:     clinicalContext,
+        longitudinal_context: longitudinalContext,
+        region:               scan.tenant?.region ?? 'uk',
+        language:             (scan.tenant as any)?.reportLanguage ?? 'en',
+      },
+      VLM_TIMEOUT,
+    );
     logger.info(`[VLM] ${scanId}: report in ${vlm.inferenceMs}ms`);
 
     // ──────────────────────────────────────────────────────────────────────
     // STAGE 3: Metacognition — rule-based, ~50ms on CPU (pure Python, no model)
     // ──────────────────────────────────────────────────────────────────────
-    let metacog: MetacognitionResult;
-    try {
-      metacog = await safePOST<MetacognitionResult>(
-        `${METACOGNITION_URL}/metacognition/evaluate`,
-        {
-          scan_id:          scanId,
-          primary_finding:  triage.primaryFinding,
-          primary_condition: triage.primaryCondition,
-          urgency:          triage.urgency,
-          confidence:       triage.confidence,
-          uncertainty_score: uncertainty.compositeScore,
-          shap_values:      triage.shapValues || {},
-          modality:         scan.modality,
-          body_part:        scan.bodyPart,
-          patient_age:      patientAge,
-          patient_sex:      patientSex,
-          all_findings:     triage.allFindings,
-          report_text:      vlm.findings,
-        },
-        SVC_TIMEOUT,
-      );
-    } catch (e: any) {
-      logger.error(`[Metacognition] ${scanId} FAILED: ${e.message}`);
-      metacog = metacogFallback();
-    }
+    const metacog = await safePOST<MetacognitionResult>(
+      `${METACOGNITION_URL}/metacognition/evaluate`,
+      {
+        scan_id:          scanId,
+        primary_finding:  triage.primaryFinding,
+        primary_condition: triage.primaryCondition,
+        urgency:          triage.urgency,
+        confidence:       triage.confidence,
+        uncertainty_score: uncertainty.compositeScore,
+        shap_values:      triage.shapValues || {},
+        modality:         scan.modality,
+        body_part:        scan.bodyPart,
+        patient_age:      patientAge,
+        patient_sex:      patientSex,
+        all_findings:     triage.allFindings,
+        report_text:      vlm.findings,
+      },
+      SVC_TIMEOUT,
+    );
     logger.info(
       `[Metacognition] ${scanId}: safe_to_alert=${metacog.layer9_safe_to_alert} ` +
       `hallucination_risk=${metacog.layer8_hallucination_risk.toFixed(3)} ms=${metacog.inferenceMs}`
@@ -358,7 +294,6 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       metacognitionFlags: [
         ...(metacog.layer9_safe_to_alert  ? []                    : ['UNSAFE_TO_ALERT']),
         ...(uncertainty.highUncertaintyFlag ? ['HIGH_UNCERTAINTY'] : []),
-        ...(triage.backend === 'fallback' ? ['TRIAGE_FALLBACK']   : []),
       ],
     });
 

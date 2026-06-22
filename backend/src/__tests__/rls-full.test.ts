@@ -1,13 +1,14 @@
 import { prisma, tenantStorage } from '../utils/prismaClient';
 import bcrypt from 'bcryptjs';
 
-describe('Enterprise Full Tenant Isolation (RLS) - All Models', () => {
+describe('Enterprise Full Tenant Isolation (RLS) — All Models', () => {
   let tenantA: any;
   let tenantB: any;
   let userA: any;
   let userB: any;
   let scanA: any;
   let patientA: any;
+  let reportA: any;
 
   beforeAll(async () => {
     // Create test tenants
@@ -35,14 +36,14 @@ describe('Enterprise Full Tenant Isolation (RLS) - All Models', () => {
     });
 
     // Create users with hashed passwords
-    const HASH = await bcrypt.hash('testpassword', 12);
+    const hash = await bcrypt.hash('testpassword', 12);
     userA = await prisma.user.create({
       data: {
         tenantId: tenantA.id,
         email: 'test@tenanta.com',
         firstName: 'Test',
         lastName: 'User',
-        passwordHash: HASH,
+        passwordHash: hash,
         role: 'radiologist'
       }
     });
@@ -52,7 +53,7 @@ describe('Enterprise Full Tenant Isolation (RLS) - All Models', () => {
         email: 'test@tenantb.com',
         firstName: 'Test',
         lastName: 'User',
-        passwordHash: HASH,
+        passwordHash: hash,
         role: 'doctor'
       }
     });
@@ -79,7 +80,7 @@ describe('Enterprise Full Tenant Isolation (RLS) - All Models', () => {
       });
     });
     await tenantStorage.run(tenantA.id, async () => {
-      await prisma.report.create({
+      reportA = await prisma.report.create({
         data: {
           id: 'report-a-full',
           tenantId: tenantA.id,
