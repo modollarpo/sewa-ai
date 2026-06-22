@@ -26,6 +26,7 @@ import { auditMiddleware } from './middleware/audit';
 import { setupSocketIO } from './services/socketService';
 import { authenticate, authorize } from './middleware/auth';
 import { scanQueue, startScanWorker } from './services/scanQueue';
+import { startScanQueueBridge } from './services/scanQueueBridge';
 import { ExpressAdapter } from '@bull-board/express';
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
@@ -284,6 +285,12 @@ async function bootstrap() {
     // Start scan AI pipeline worker
     const workerConcurrency = parseInt(process.env.SCAN_WORKER_CONCURRENCY || '10', 10);
     startScanWorker(workerConcurrency);
+
+    // Start queue bridge (Go Redis List → BullMQ)
+    startScanQueueBridge().catch(err => {
+      logger.error('Scan queue bridge failed to start', err);
+      process.exit(1);
+    });
   } catch (err) {
     logger.error('Bootstrap error:', err);
     process.exit(1);
