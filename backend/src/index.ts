@@ -10,6 +10,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import { config } from './config/env';
 import { logger } from './utils/logger';
 import { prisma } from './config/database';
@@ -19,6 +21,40 @@ import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 import { auditMiddleware } from './middleware/audit';
 import { setupSocketIO } from './services/socketService';
+
+// Swagger/OpenAPI configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'SEWA AI API',
+      version: '2.4.1',
+      description: 'Enterprise-grade clinical diagnostic AI platform API',
+    },
+    servers: [
+      {
+        url: config.app_url || 'http://localhost:3000',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
+  },
+  apis: ['./src/routes/*.ts', './src/controllers/*.ts'],
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
 // Routes
 import authRoutes       from './routes/auth';
@@ -121,6 +157,9 @@ app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }
 app.use(requestId);
 app.use(rateLimiter);
 app.use(auditMiddleware);
+
+// ── API Documentation (Swagger/OpenAPI) ───────────────────────
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // ── Health ─────────────────────────────────────────────────────
 app.get('/health', async (_req, res) => {

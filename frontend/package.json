@@ -12,6 +12,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "i18next": "^23.10.0",
+    "react-i18next": "^14.1.0",
     "@hookform/resolvers": "^3.3.4",
     "@remotion/player": "^4.0.0",
     "@remotion/renderer": "^4.0.0",

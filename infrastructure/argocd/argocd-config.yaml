@@ -1,0 +1,18 @@
+# ArgoCD Project Configuration
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+spec:
+  description: Default project for SEWA AI
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: sewa-ai
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  orphanedResources:
+    warn: true

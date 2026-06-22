@@ -1,0 +1,14 @@
+{
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "loginSuccess": "Login successful!",
+    "loginError": "Invalid email or password"
+  }
+}

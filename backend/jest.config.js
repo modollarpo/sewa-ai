@@ -5,7 +5,9 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   collectCoverage: true,
   collectCoverageFrom: [
-    'src/services/aiService.ts'
+    'src/**/*.ts',
+    '!src/**/*.d.ts',
+    '!src/__tests__/**/*.ts'
   ],
   coverageDirectory: 'coverage',
   coverageThreshold: {

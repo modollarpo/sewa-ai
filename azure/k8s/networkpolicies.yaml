@@ -1,0 +1,213 @@
+# SEWA AI Kubernetes Network Policies
+# Enforces least-privilege network isolation for all services
+# Compliance: HIPAA, GDPR, NHS DSPT (network segmentation)
+
+---
+# Deny all ingress/egress by default (foundation for zero trust)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+  namespace: sewa-ai
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+
+---
+# Allow DNS resolution (required for all pods)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: sewa-ai
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+# Backend API network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-backend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-frontend
+    ports:
+    - protocol: TCP
+      port: 3000
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-triage
+    ports:
+    - protocol: TCP
+      port: 8000
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-vlm-report
+    ports:
+    - protocol: TCP
+      port: 8001
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-uncertainty
+    ports:
+    - protocol: TCP
+      port: 8002
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-metacognition
+    ports:
+    - protocol: TCP
+      port: 8003
+  - to:
+    ports:
+    - protocol: TCP
+      port: 443  # Azure services (Key Vault, Storage, etc.)
+
+---
+# Frontend network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-frontend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 80
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - protocol: TCP
+      port: 3000
+  - to:
+    ports:
+    - protocol: TCP
+      port: 443  # CDNs, external assets
+
+---
+# AI Triage service network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: triage-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-triage
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - protocol: TCP
+      port: 8000
+  egress:
+  - to:
+    ports:
+    - protocol: TCP
+      port: 443  # Azure Storage, model downloads
+
+---
+# VLM Report service network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vlm-report-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-vlm-report
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - protocol: TCP
+      port: 8001
+  egress:
+  - to:
+    ports:
+    - protocol: TCP
+      port: 443
+
+---
+# Uncertainty service network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: uncertainty-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-uncertainty
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - protocol: TCP
+      port: 8002

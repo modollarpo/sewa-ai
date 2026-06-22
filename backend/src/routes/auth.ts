@@ -8,6 +8,41 @@ import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 
 const r = Router();
+
+/**
+ * @openapi
+ * /api/v1/auth/login:
+ *   post:
+ *     summary: Authenticate a user and return JWT tokens
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *             required: [email, password]
+ *     responses:
+ *       200:
+ *         description: Successful authentication successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ */
 r.post('/login',            authLimiter, ctrl.login);
 r.post('/mfa/verify',       authLimiter, ctrl.verifyMFA);
 r.post('/mfa/setup',        authenticate, ctrl.setupMFA);

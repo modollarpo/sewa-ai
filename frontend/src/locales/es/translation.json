@@ -1,0 +1,14 @@
+{
+  "common": {
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "auth": {
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "loginSuccess": "¡Inicio de sesión exitoso!",
+    "loginError": "Correo electrónico o contraseña inválidos"
+  }
+}
