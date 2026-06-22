@@ -2,6 +2,9 @@
 // Node.js 18+ | Express.js | TypeScript | Socket.IO
 // README.pdf tech stack: Runtime Node.js 18+, Framework Express.js
 
+// Initialize telemetry FIRST before importing anything else!
+import './telemetry';
+
 import express from 'express';
 import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';

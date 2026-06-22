@@ -1,0 +1,63 @@
+# SEWA AI Workload Identity & Secrets Store CSI Driver Setup
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    azure.workload.identity/client-id: "${BACKEND_WORKLOAD_IDENTITY_CLIENT_ID}"  # Replace with Terraform output
+  name: sewa-backend-sa
+  namespace: sewa-ai
+---
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: sewa-azure-kv
+  namespace: sewa-ai
+spec:
+  provider: azure
+  secretObjects:
+  - data:
+    - key: sewa-database-url
+      objectName: sewa-database-url
+    - key: sewa-redis-url
+      objectName: sewa-redis-url
+    - key: sewa-jwt-secret
+      objectName: sewa-jwt-secret
+    - key: sewa-jwt-refresh-secret
+      objectName: sewa-jwt-refresh-secret
+    - key: sewa-encryption-key
+      objectName: sewa-encryption-key
+    - key: sewa-storage-connection-string
+      objectName: sewa-storage-connection-string
+    - key: sewa-fhir-tenant-id
+      objectName: sewa-fhir-tenant-id
+    secretName: sewa-secrets-store
+    type: Opaque
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "false"
+    clientID: "${BACKEND_WORKLOAD_IDENTITY_CLIENT_ID}"  # Replace with Terraform output
+    keyvaultName: "${KEY_VAULT_NAME}"  # Replace with Terraform output
+    tenantId: "${AZURE_TENANT_ID}"  # Replace with Terraform output
+    objects: |
+      array:
+        - |
+          objectName: sewa-database-url
+          objectType: secret
+        - |
+          objectName: sewa-redis-url
+          objectType: secret
+        - |
+          objectName: sewa-jwt-secret
+          objectType: secret
+        - |
+          objectName: sewa-jwt-refresh-secret
+          objectType: secret
+        - |
+          objectName: sewa-encryption-key
+          objectType: secret
+        - |
+          objectName: sewa-storage-connection-string
+          objectType: secret
+        - |
+          objectName: sewa-fhir-tenant-id
+          objectType: secret
