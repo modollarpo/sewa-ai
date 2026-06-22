@@ -6,7 +6,8 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { redisClient } from '../config/redis';
 import { uploadToStorage, deleteFromStorage } from '../services/storageService';
-import { triggerAITriage, runAIPipeline } from '../services/aiService';
+import { runAIPipeline } from '../services/aiService';
+import { enqueueScanProcessing } from '../services/scanQueue';
 import { createFHIRImagingStudy } from '../services/fhirService';
 import { sendHL7ORM } from '../services/hl7Service';
 import { notifyUsers } from '../services/notifications/notificationService';
@@ -118,9 +119,9 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
       await prisma.scan.update({ where: { id: scan.id }, data: { hl7OrderId } });
     }
 
-    // Trigger AI Triage Engine asynchronously (Feature 3)
-    triggerAITriage(scan.id, tenantId).catch(err => {
-      logger.error(`[Scan] AI Triage trigger failed: ${err.message}`);
+    // Enqueue AI Triage Engine job (Feature 3)
+    enqueueScanProcessing(scan.id, tenantId, priority.toLowerCase() as any).catch(err => {
+      logger.error(`[Scan] AI Triage enqueue failed: ${err.message}`);
     });
 
     // Increment monthly quota counter (and charge overage if applicable)
@@ -272,9 +273,9 @@ export async function generateDemoScan(req: Request, res: Response, next: NextFu
       },
     });
 
-    // Run real AI pipeline asynchronously instead of mocking
-    runAIPipeline(scan.id, tenantId).catch(err => {
-      logger.error(`[AI] Async pipeline failed for synthetic scan ${scan.id}:`, err);
+    // Enqueue real AI pipeline job instead of mocking
+    enqueueScanProcessing(scan.id, tenantId, 'critical').catch(err => {
+      logger.error(`[AI] Enqueue failed for synthetic scan ${scan.id}:`, err);
     });
 
     res.status(201).json({ scan, message: 'Synthetic demo scan generated. AI processing in progress.' });

@@ -8,9 +8,9 @@ export async function generateComplianceReport(tenantId: string, framework: stri
   const [userCount, scanCount, auditLogCount, consentRate, aiModelCount] = await Promise.all([
     prisma.user.count({ where: { tenantId } }),
     prisma.scan.count({ where: { tenantId } }),
-    prisma.auditLog.count({ where: { tenantId } }),
+    prisma.auditLog.count({ where: { tenantId: { equals: tenantId } } }),
     calculateConsentRate(tenantId),
-    prisma.aiModel.count({ where: { tenantId } }),
+    prisma.tenantAIModel.count({ where: { tenantId } }),
   ]);
 
   const report = {

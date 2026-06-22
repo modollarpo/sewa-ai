@@ -24,6 +24,11 @@ import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 import { auditMiddleware } from './middleware/audit';
 import { setupSocketIO } from './services/socketService';
+import { authenticate, authorize } from './middleware/auth';
+import { scanQueue, startScanWorker } from './services/scanQueue';
+import { ExpressAdapter } from '@bull-board/express';
+import { createBullBoard } from '@bull-board/api';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 
 // Swagger/OpenAPI configuration
 const swaggerOptions = {
@@ -36,7 +41,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: config.app_url || 'http://localhost:3000',
+        url: config.APP_URL || 'http://localhost:3000',
       },
     ],
     components: {
@@ -87,6 +92,14 @@ import referralRoutes   from './routes/referrals';
 import { sendAppointmentReminders } from './routes/appointments/index';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 import { dlq } from './services/dlqService';
+
+// Set up Bull Board for queue monitoring
+const serverAdapter = new ExpressAdapter();
+serverAdapter.setBasePath('/admin/queues');
+createBullBoard({
+  queues: [new BullMQAdapter(scanQueue)],
+  serverAdapter,
+});
 
 const app = express();
 app.set('trust proxy', 1);
@@ -160,6 +173,9 @@ app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }
 app.use(requestId);
 app.use(rateLimiter);
 app.use(auditMiddleware);
+
+// ── Bull Board Queue UI (Admin Only) ──────────────────────────
+app.use('/admin/queues', authenticate, authorize('admin', 'superadmin'), serverAdapter.getRouter());
 
 // ── API Documentation (Swagger/OpenAPI) ───────────────────────
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
@@ -264,6 +280,10 @@ async function bootstrap() {
       } catch (e: any) { logger.error('[DLQ] Cron error:', e.message); }
     }, 5 * 60 * 1000);
     logger.info('[Cron] DLQ processor started (every 5 min)');
+
+    // Start scan AI pipeline worker
+    const workerConcurrency = parseInt(process.env.SCAN_WORKER_CONCURRENCY || '10', 10);
+    startScanWorker(workerConcurrency);
   } catch (err) {
     logger.error('Bootstrap error:', err);
     process.exit(1);

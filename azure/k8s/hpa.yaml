@@ -13,7 +13,7 @@ spec:
     kind: Deployment
     name: sewa-backend
   minReplicas: 3
-  maxReplicas: 20
+  maxReplicas: 100
   metrics:
   - type: Resource
     resource:
@@ -38,8 +38,8 @@ spec:
       stabilizationWindowSeconds: 30
       policies:
       - type: Pods
-        value: 3
-        periodSeconds: 60
+        value: 10
+        periodSeconds: 30
 ---
 # ── Triage Engine (GPU) ───────────────────────────────────────
 apiVersion: autoscaling/v2
@@ -53,7 +53,7 @@ spec:
     kind: Deployment
     name: sewa-triage
   minReplicas: 2
-  maxReplicas: 8
+  maxReplicas: 50
   metrics:
   - type: Resource
     resource:
@@ -66,7 +66,7 @@ spec:
       stabilizationWindowSeconds: 15    # fast scale-up for clinical urgency
       policies:
       - type: Pods
-        value: 2
+        value: 5
         periodSeconds: 30
 ---
 # ── VLM Report Generator ──────────────────────────────────────
@@ -81,7 +81,7 @@ spec:
     kind: Deployment
     name: sewa-vlm-report
   minReplicas: 2
-  maxReplicas: 6
+  maxReplicas: 30
   metrics:
   - type: Resource
     resource:
@@ -102,7 +102,7 @@ spec:
     kind: Deployment
     name: sewa-uncertainty
   minReplicas: 2
-  maxReplicas: 6
+  maxReplicas: 30
   metrics:
   - type: Resource
     resource:
@@ -123,7 +123,7 @@ spec:
     kind: Deployment
     name: sewa-metacognition
   minReplicas: 2
-  maxReplicas: 6
+  maxReplicas: 20
   metrics:
   - type: Resource
     resource:
