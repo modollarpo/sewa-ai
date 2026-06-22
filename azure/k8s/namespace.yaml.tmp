@@ -1,0 +1,10 @@
+﻿# SEWA AI â€” Kubernetes Namespace
+# Â© 2026 SEWA AI â€” a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sewa-ai
+  labels:
+    app: sewa-ai
+    environment: production
+
