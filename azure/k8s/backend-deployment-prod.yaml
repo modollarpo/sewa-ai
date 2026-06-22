@@ -22,7 +22,10 @@ spec:
     metadata:
       labels:
         app: sewa-backend
+      annotations:
+        azure.workload.identity/inject-proxy-sidecar: "true"  # For network isolation
     spec:
+      serviceAccountName: sewa-backend-sa  # Workload Identity service account
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -31,14 +34,81 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
-        envFrom:
-        - secretRef:
-            name: sewa-secrets
-        - configMapRef:
-            name: sewa-config
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets"
+          readOnly: true
         env:
         - name: NODE_ENV
           value: "production"
+        - name: PORT
+          value: "3000"
+        - name: KEY_VAULT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: KEY_VAULT_URI
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-database-url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-redis-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-jwt-secret
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-jwt-refresh-secret
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-encryption-key
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-storage-connection-string
+        - name: TRIAGE_URL
+          value: "http://sewa-triage:8000"
+        - name: VLM_URL
+          value: "http://sewa-vlm-report:8001"
+        - name: UNCERTAINTY_URL
+          value: "http://sewa-uncertainty:8002"
+        - name: METACOGNITION_URL
+          value: "http://sewa-metacognition:8003"
+        - name: FL_SERVICE_URL
+          value: "http://sewa-federated:8004"
+        - name: CL_SERVICE_URL
+          value: "http://sewa-continuous:8005"
+        - name: AZURE_STORAGE_CONTAINER
+          value: "scans"
+        - name: FHIR_TENANT_ID
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-fhir-tenant-id
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
+        env:
+        - name: NODE_ENV
+          value: "{{ENV}}"
         - name: PORT
           value: "3000"
         - name: TRIAGE_URL
@@ -55,6 +125,16 @@ spec:
           value: "http://sewa-continuous:8005"
         - name: AZURE_STORAGE_CONTAINER
           value: "scans"
+        - name: FHIR_TENANT_ID
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets
+              key: FHIR_TENANT_ID
+        - name: FHIR_TENANT_ID
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets
+              key: FHIR_TENANT_ID
         resources:
           requests:
             cpu: "500m"
@@ -101,10 +181,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - api.production.sewaxai.health
-    secretName: sewa-tls-production
+    - api.{{ENV}}.sewaxai.health
+    secretName: sewa-tls-{{ENV}}
   rules:
-  - host: api.production.sewaxai.health
+  - host: api.{{ENV}}.sewaxai.health
     http:
       paths:
       - path: /
