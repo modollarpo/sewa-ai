@@ -30,7 +30,7 @@ spec:
       - name: acr-secret
       containers:
       - name: triage
-        image: "{{CONTAINER_REGISTRY}}/sewa-triage:{{IMAGE_TAG}}"
+        image: "${CONTAINER_REGISTRY}/sewa-triage:${IMAGE_TAG}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -61,6 +61,12 @@ spec:
             port: 8000
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 15
       volumes:
       - name: secrets-store
         csi:
@@ -103,7 +109,7 @@ spec:
       - name: acr-secret
       containers:
       - name: vlm-report
-        image: "{{CONTAINER_REGISTRY}}/sewa-vlm-report:{{IMAGE_TAG}}"
+        image: "${CONTAINER_REGISTRY}/sewa-vlm-report:${IMAGE_TAG}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8001
@@ -128,6 +134,18 @@ spec:
             secretKeyRef:
               name: sewa-secrets-store
               key: sewa-storage-connection-string
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 15
       volumes:
       - name: secrets-store
         csi:
@@ -170,7 +188,7 @@ spec:
       - name: acr-secret
       containers:
       - name: uncertainty
-        image: "{{CONTAINER_REGISTRY}}/sewa-uncertainty:{{IMAGE_TAG}}"
+        image: "${CONTAINER_REGISTRY}/sewa-uncertainty:${IMAGE_TAG}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8002
@@ -194,6 +212,18 @@ spec:
             secretKeyRef:
               name: sewa-secrets-store
               key: sewa-storage-connection-string
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 30
+          periodSeconds: 15
       volumes:
       - name: secrets-store
         csi:
@@ -236,7 +266,7 @@ spec:
       - name: acr-secret
       containers:
       - name: metacognition
-        image: "{{CONTAINER_REGISTRY}}/sewa-metacognition:{{IMAGE_TAG}}"
+        image: "${CONTAINER_REGISTRY}/sewa-metacognition:${IMAGE_TAG}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8003
@@ -261,6 +291,18 @@ spec:
             secretKeyRef:
               name: sewa-secrets-store
               key: sewa-storage-connection-string
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8003
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8003
+          initialDelaySeconds: 30
+          periodSeconds: 15
       volumes:
       - name: secrets-store
         csi:
@@ -304,7 +346,7 @@ spec:
       - name: acr-secret
       containers:
       - name: federated
-        image: "{{CONTAINER_REGISTRY}}/sewa-federated:{{IMAGE_TAG}}"
+        image: "${CONTAINER_REGISTRY}/sewa-federated:${IMAGE_TAG}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8004
@@ -335,6 +377,12 @@ spec:
             port: 8004
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 30
+          periodSeconds: 15
       volumes:
       - name: secrets-store
         csi:
@@ -378,7 +426,7 @@ spec:
       - name: acr-secret
       containers:
       - name: continuous
-        image: "{{CONTAINER_REGISTRY}}/sewa-continuous:{{IMAGE_TAG}}"
+        image: "${CONTAINER_REGISTRY}/sewa-continuous:${IMAGE_TAG}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8005
@@ -409,6 +457,12 @@ spec:
             port: 8005
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8005
+          initialDelaySeconds: 30
+          periodSeconds: 15
       volumes:
       - name: secrets-store
         csi:

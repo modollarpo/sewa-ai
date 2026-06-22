@@ -97,39 +97,6 @@ spec:
             secretKeyRef:
               name: sewa-secrets-store
               key: sewa-fhir-tenant-id
-      volumes:
-      - name: secrets-store
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: "sewa-azure-kv"
-          nodePublishSecretRef:
-            name: secrets-store-creds
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: PORT
-          value: "3000"
-        - name: TRIAGE_URL
-          value: "http://sewa-triage:8000"
-        - name: VLM_URL
-          value: "http://sewa-vlm-report:8001"
-        - name: UNCERTAINTY_URL
-          value: "http://sewa-uncertainty:8002"
-        - name: METACOGNITION_URL
-          value: "http://sewa-metacognition:8003"
-        - name: FL_SERVICE_URL
-          value: "http://sewa-federated:8004"
-        - name: CL_SERVICE_URL
-          value: "http://sewa-continuous:8005"
-        - name: AZURE_STORAGE_CONTAINER
-          value: "scans"
-        - name: FHIR_TENANT_ID
-          valueFrom:
-            secretKeyRef:
-              name: sewa-secrets
-              key: FHIR_TENANT_ID
         resources:
           requests:
             cpu: "500m"
@@ -149,6 +116,15 @@ spec:
             port: 3000
           initialDelaySeconds: 10
           periodSeconds: 5
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
 ---
 apiVersion: v1
 kind: Service
