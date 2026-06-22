@@ -14,7 +14,7 @@
 //
 // © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { prisma } from '../utils/prismaClient';
 import { redisClient } from '../config/redis';
 import { logger } from '../utils/logger';
@@ -26,6 +26,9 @@ import { config } from '../config/env';
 import * as fhirService from './fhirService';
 import * as longitudinalService from './longitudinalService';
 import { dlq } from './dlqService';
+import { createAxiosInstance } from '../utils/axiosInstance';
+
+const axios = createAxiosInstance();
 
 // ── Service URLs — CPU-only endpoints (same pods, just no GPU flag needed) ──
 const TRIAGE_URL        = config.AI_SERVICE_URL;

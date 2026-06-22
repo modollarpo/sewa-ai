@@ -1,12 +1,14 @@
 // SEWA AI — src/services/aiService.ts
 // AI service exports — delegates to aiOrchestrator and VLM engine
-import axios from 'axios';
 import CircuitBreaker from 'opossum';
 export { triggerAITriage, runAIPipeline } from './aiOrchestrator';
 
 import { config } from '../config/env';
 import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
+import { createAxiosInstance } from '../utils/axiosInstance';
+
+const axios = createAxiosInstance();
 
 const VLM_URL = config.VLM_SERVICE_URL;
 

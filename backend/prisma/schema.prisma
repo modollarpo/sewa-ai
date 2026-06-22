@@ -71,6 +71,7 @@ model Tenant {
   notificationLogs NotificationLog[]
   dicomNodes       DicomNode[]
   complianceRecords ComplianceRecord[]
+  dunningLogs      DunningLog[]
 
   @@index([region])
   @@index([status])
@@ -682,4 +683,17 @@ model ComplianceRecord {
   createdAt    DateTime @default(now())
 
   @@index([tenantId, standard])
+}
+
+// ── DUNNING LOG (Failed Payment Recovery) ─────────────────────
+model DunningLog {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  step      Int      // 1, 2, 3 — which dunning step this is
+  sentAt    DateTime
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([step])
 }

@@ -93,6 +93,7 @@ import referralRoutes   from './routes/referrals';
 import { sendAppointmentReminders } from './routes/appointments/index';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 import { dlq } from './services/dlqService';
+import { processDunning } from './services/dunningService';
 
 // Set up Bull Board for queue monitoring
 const serverAdapter = new ExpressAdapter();
@@ -281,6 +282,14 @@ async function bootstrap() {
       } catch (e: any) { logger.error('[DLQ] Cron error:', e.message); }
     }, 5 * 60 * 1000);
     logger.info('[Cron] DLQ processor started (every 5 min)');
+
+    // ── Dunning process cron — every hour ───────────────────────
+    setInterval(async () => {
+      try {
+        await processDunning();
+      } catch (e: any) { logger.error('[Cron] Dunning process failed:', e.message); }
+    }, 60 * 60 * 1000);
+    logger.info('[Cron] Dunning process started (hourly)');
 
     // Start scan AI pipeline worker
     const workerConcurrency = parseInt(process.env.SCAN_WORKER_CONCURRENCY || '10', 10);

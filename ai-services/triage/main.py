@@ -30,11 +30,13 @@ import numpy as np
 import cv2
 from PIL import Image
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import httpx
 import uvicorn
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from pythonjsonlogger import jsonlogger
 
 # Shared CPU inference engine — sys.path manipulation at runtime;
 # ignored by type checkers (Pyrefly resolves via pyrefly.toml search_path)
@@ -45,8 +47,26 @@ from utils.dicom_loader import load_dicom_from_url   # type: ignore[import-untyp
 from utils.preprocessing import preprocess_scan       # type: ignore[import-untyped]
 from utils.conditions import CONDITION_MAP             # type: ignore[import-untyped]
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
+# Setup structured JSON logging
 logger = logging.getLogger("sewa-triage")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+formatter = jsonlogger.JsonFormatter(
+    "%(asctime)s %(name)s %(levelname)s %(message)s %(module)s %(funcName)s %(lineno)d"
+)
+handler.setFormatter(formatter)
+if not logger.handlers:
+    logger.addHandler(handler)
+
+# Prometheus metrics
+REQUESTS_TOTAL = Counter(
+    "triage_requests_total", "Total number of triage requests", ["status", "urgency"]
+)
+INFERENCE_DURATION = Histogram(
+    "triage_inference_duration_seconds", "Inference duration", ["modality", "body_part"]
+)
+MODEL_LOADED = Gauge("triage_model_loaded", "1 if model is loaded, 0 otherwise")
+QUEUE_SIZE = Gauge("triage_queue_size", "Current microbatch queue size")
 
 # ── Configuration ──────────────────────────────────────────────
 MODEL_CACHE   = Path(os.getenv("MODEL_CACHE", "/models"))
@@ -76,6 +96,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"[Triage] Loading ONNX model: {model_path}")
     registry.load(MODEL_ID, str(model_path))
     registry.warmup(MODEL_ID, INPUT_SHAPE, n=5)  # 5 warmup passes to prime CPU cache
+    MODEL_LOADED.set(1)
 
     _batch_queue = MicroBatchQueue(
         model_id=MODEL_ID,
@@ -88,6 +109,7 @@ async def lifespan(app: FastAPI):
     # Shutdown
     if _batch_queue:
         await _batch_queue.stop()
+    MODEL_LOADED.set(0)
     logger.info("[Triage] Shutdown complete")
 
 
@@ -215,6 +237,8 @@ class TriagePredictResponse(BaseModel):
 @app.post("/triage/predict", response_model=TriagePredictResponse)
 async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
     start = time.perf_counter()
+    status = "error"
+    urgency = "UNKNOWN"
 
     try:
         # 1. Load image
@@ -226,6 +250,7 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
 
         # 3. ONNX INT8 inference via micro-batch queue
         if _batch_queue is not None:
+            QUEUE_SIZE.set(_batch_queue._queue.qsize())
             logits = await _batch_queue.infer(input_arr[0])  # queue takes (C,H,W)
         else:
             input_name = registry._sessions[MODEL_ID].get_inputs()[0].name
@@ -248,7 +273,22 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
         urgency    = _classify_urgency(finding, confidence)
 
         inference_ms = int((time.perf_counter() - start) * 1000)
-        logger.info(f"[Triage] {req.scan_id}: {finding} {urgency} {confidence:.3f} {inference_ms}ms")
+        logger.info(
+            f"[Triage] {req.scan_id}: {finding} {urgency} {confidence:.3f} {inference_ms}ms",
+            extra={
+                "scan_id": req.scan_id,
+                "modality": req.modality,
+                "body_part": req.body_part,
+                "finding": finding,
+                "urgency": urgency,
+                "confidence": confidence,
+                "inference_ms": inference_ms
+            }
+        )
+
+        # Record metrics
+        INFERENCE_DURATION.labels(modality=req.modality, body_part=req.body_part).observe(inference_ms / 1000)
+        status = "success"
 
         return TriagePredictResponse(
             scan_id=req.scan_id,
@@ -266,8 +306,14 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
         )
 
     except Exception as e:
-        logger.error(f"[Triage] Prediction failed for {req.scan_id}: {e}", exc_info=True)
+        logger.error(
+            f"[Triage] Prediction failed for {req.scan_id}: {e}",
+            exc_info=True,
+            extra={"scan_id": req.scan_id, "modality": req.modality, "body_part": req.body_part}
+        )
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        REQUESTS_TOTAL.labels(status=status, urgency=urgency).inc()
 
 
 async def _load_image(req: TriagePredictRequest) -> np.ndarray:
@@ -382,17 +428,14 @@ async def health() -> Dict[str, Any]:
 
 
 @app.get("/metrics")
-async def metrics() -> Dict[str, Any]:
-    """Prometheus-style metrics endpoint for Grafana scraping."""
+async def metrics(request: Request):
+    """Prometheus metrics endpoint for scraping."""
+    from fastapi.responses import Response
+
     stats = registry.get_latency_stats(MODEL_ID) if MODEL_ID in registry.loaded_models else {}
-    return {
-        "triage_inference_p50_ms": stats.get("p50", 0),
-        "triage_inference_p95_ms": stats.get("p95", 0),
-        "triage_inference_p99_ms": stats.get("p99", 0),
-        "triage_requests_total":   stats.get("count", 0),
-        "backend": "onnx-int8-cpu",
-        "vcpu_count": os.cpu_count() or 0,
-    }
+    # Update custom metrics from registry
+    # (In real usage, we'd track these with Prometheus directly, but this keeps compatibility)
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":
