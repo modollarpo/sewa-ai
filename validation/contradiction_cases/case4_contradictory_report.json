@@ -1,0 +1,8 @@
+{
+  "modality": "CT Head",
+  "triageFinding": "Stroke",
+  "confidence": 0.95,
+  "uncertainty": 0.08,
+  "vlmImpression": "Normal study. No acute abnormality.",
+  "expected": "FAIL"
+}

@@ -1,0 +1,8 @@
+{
+  "modality": "CT Head",
+  "triageFinding": "ICH",
+  "confidence": 0.98,
+  "uncertainty": 0.05,
+  "vlmImpression": "Acute intracranial haemorrhage. No midline shift.",
+  "expected": "PASS"
+}

@@ -1,0 +1,8 @@
+{
+  "modality": "CT Head",
+  "triageFinding": "Pulmonary Embolism",
+  "confidence": 0.85,
+  "uncertainty": 0.10,
+  "vlmImpression": "No acute pulmonary embolism.",
+  "expected": "FAIL"
+}

@@ -1,0 +1,8 @@
+{
+  "modality": "CT Head",
+  "triageFinding": "ICH",
+  "confidence": 0.98,
+  "uncertainty": 0.90,
+  "vlmImpression": "Acute intracranial haemorrhage.",
+  "expected": "FAIL"
+}
