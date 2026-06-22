@@ -175,6 +175,17 @@ output "deployment_summary" {
   EOT
 }
 
+# ── Workload Identity ──────────────────────────────────────────
+output "backend_workload_identity_client_id" {
+  description = "Backend Workload Identity client ID"
+  value       = azurerm_user_assigned_identity.backend.client_id
+}
+
+output "ai_services_workload_identity_client_id" {
+  description = "AI Services Workload Identity client ID"
+  value       = azurerm_user_assigned_identity.ai_services.client_id
+}
+
 # ── FHIR App Registration ──────────────────────────────────────
 output "fhir_client_id" {
   description = "FHIR App Registration client ID (FHIR_CLIENT_ID)"

@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations:
-    azure.workload.identity/client-id: "${AI_WORKLOAD_IDENTITY_CLIENT_ID}"  # Replace with Terraform output
+    azure.workload.identity/client-id: "${AI_SERVICES_WORKLOAD_IDENTITY_CLIENT_ID}"
   name: sewa-ai-sa
   namespace: sewa-ai
 ---
@@ -55,6 +55,12 @@ spec:
             secretKeyRef:
               name: sewa-secrets-store
               key: sewa-storage-connection-string
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
       volumes:
       - name: secrets-store
         csi:
@@ -64,12 +70,6 @@ spec:
             secretProviderClass: "sewa-azure-kv"
           nodePublishSecretRef:
             name: secrets-store-creds
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 60
-          periodSeconds: 30
 ---
 apiVersion: v1
 kind: Service
@@ -98,6 +98,7 @@ spec:
       labels:
         app: sewa-vlm-report
     spec:
+      serviceAccountName: sewa-ai-sa
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -112,11 +113,30 @@ spec:
           requests:
             memory: "8Gi"
             cpu: "1000m"
-        envFrom:
-        - secretRef:
-            name: sewa-secrets
-        - configMapRef:
-            name: sewa-config
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets"
+          readOnly: true
+        env:
+        - name: KEY_VAULT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: KEY_VAULT_URI
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-storage-connection-string
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
 ---
 apiVersion: v1
 kind: Service
@@ -145,6 +165,7 @@ spec:
       labels:
         app: sewa-uncertainty
     spec:
+      serviceAccountName: sewa-ai-sa
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -158,11 +179,30 @@ spec:
             memory: "6Gi"
           requests:
             memory: "2Gi"
-        envFrom:
-        - secretRef:
-            name: sewa-secrets
-        - configMapRef:
-            name: sewa-config
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets"
+          readOnly: true
+        env:
+        - name: KEY_VAULT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: KEY_VAULT_URI
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-storage-connection-string
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
 ---
 apiVersion: v1
 kind: Service
@@ -191,6 +231,7 @@ spec:
       labels:
         app: sewa-metacognition
     spec:
+      serviceAccountName: sewa-ai-sa
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -205,11 +246,30 @@ spec:
           requests:
             memory: "512Mi"
             cpu: "500m"
-        envFrom:
-        - secretRef:
-            name: sewa-secrets
-        - configMapRef:
-            name: sewa-config
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets"
+          readOnly: true
+        env:
+        - name: KEY_VAULT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: KEY_VAULT_URI
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-storage-connection-string
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
 ---
 apiVersion: v1
 kind: Service
@@ -239,6 +299,7 @@ spec:
       labels:
         app: sewa-federated
     spec:
+      serviceAccountName: sewa-ai-sa
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -247,9 +308,21 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8004
-        envFrom:
-        - secretRef:
-            name: sewa-secrets
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets"
+          readOnly: true
+        env:
+        - name: KEY_VAULT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: KEY_VAULT_URI
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-storage-connection-string
         resources:
           limits:
             memory: "4Gi"
@@ -262,6 +335,15 @@ spec:
             port: 8004
           initialDelaySeconds: 60
           periodSeconds: 30
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
 ---
 apiVersion: v1
 kind: Service
@@ -291,6 +373,7 @@ spec:
       labels:
         app: sewa-continuous
     spec:
+      serviceAccountName: sewa-ai-sa
       imagePullSecrets:
       - name: acr-secret
       containers:
@@ -299,11 +382,21 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8005
-        envFrom:
-        - secretRef:
-            name: sewa-secrets
-        - configMapRef:
-            name: sewa-config
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets"
+          readOnly: true
+        env:
+        - name: KEY_VAULT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: KEY_VAULT_URI
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-storage-connection-string
         resources:
           limits:
             memory: "4Gi"
@@ -316,6 +409,15 @@ spec:
             port: 8005
           initialDelaySeconds: 60
           periodSeconds: 30
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
 ---
 apiVersion: v1
 kind: Service
