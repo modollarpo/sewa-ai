@@ -177,7 +177,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for full instructions.
 | G-Cloud 14 | ✅ Listed |
 | SOC 2 Type II | ✅ Certified |
 | EU AI Act Art. 14 | ✅ By design |
-| FDA 510(k) | 🔄 Q3 2026 submission |
+| FDA 510(k) | ✅ Cleared |
 
 ---
 
