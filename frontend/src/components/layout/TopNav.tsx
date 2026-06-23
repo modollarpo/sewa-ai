@@ -5,11 +5,13 @@ import { useSettingsStore } from '../../store/settingsStore';
 import { useTranslation } from '../../i18n/I18nContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../services/apiClient';
+import { FeedbackModal } from '../shared/FeedbackModal';
 
 const C = {
   bg:       '#08160F', border: '#1B3028', brand: '#408D7B', brandLt: '#52B09A',
   textHi:   '#D0ECE6', textMd: '#6FA898', textLo: '#3A6055',
   critical: '#E03535', urgent: '#E08A20', bg2: '#0C1D17', bg3: '#111F1A',
+  F:"'IBM Plex Sans', system-ui, sans-serif",
 };
 
 const REGIONS = [
@@ -47,6 +49,7 @@ interface Props {
   unreadCount: number;
   onNotifClick(): void;
   onProfileClick(): void;
+  onNavigate?: (p: string) => void;
 }
 
 function Dropdown({ trigger, children }: { trigger: React.ReactNode; children: React.ReactNode }) {
@@ -76,7 +79,8 @@ function Dropdown({ trigger, children }: { trigger: React.ReactNode; children: R
   );
 }
 
-export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit<Props, 'region'|'lang'|'onRegionChange'|'onLangChange'>) {
+export function TopNav({ user, unreadCount, onNotifClick, onProfileClick, onNavigate }: Props) {
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { logout } = useAuthStore();
   const { lang, region, setLang, setRegion } = useSettingsStore();
   const { t } = useTranslation();
@@ -256,10 +260,55 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit
               </div>
             </div>
           </Dropdown>
+
+          <Dropdown trigger={
+            <button style={{...navBtn, marginRight: '8px'}}>
+              <span style={{ fontSize:'13px' }}>?</span>
+              Help
+            </button>
+          }>
+            <div style={{ padding:'8px' }}>
+              <div style={{ fontSize:'10px', color:C.textLo, padding:'4px 8px', letterSpacing:'0.06em', fontFamily:C.F }}>HELP & SUPPORT</div>
+              {[
+                { icon:'📖', label:'Knowledge Base', action: () => onNavigate?.('public/docs') },
+                { icon:'📝', label:'Changelog', action: () => onNavigate?.('changelog') },
+                { icon:'🎫', label:'Support Tickets', action: () => onNavigate?.('support') },
+              ].map(item => (
+                <button key={item.label} onClick={item.action} style={{
+                  width:'100%', textAlign:'left', padding:'7px 12px',
+                  background:'transparent', border:'none', borderRadius:'8px',
+                  cursor:'pointer', display:'flex', alignItems:'center', gap:'8px',
+                  color:C.textMd, fontSize:'12px', fontFamily:C.F,
+                }}>
+                  <span>{item.icon}</span>{item.label}
+                </button>
+              ))}
+            </div>
+          </Dropdown>
+
+          <button onClick={() => setShowFeedbackModal(true)} style={{
+            ...navBtn,
+            border: `1px solid ${C.brand}40`,
+            background: `${C.brand}12`,
+            color: C.brandLt,
+          }}>
+            💬 Feedback
+          </button>
         </>
       )}
 
       {isMobile && <div style={{ flex:1 }} />}
+
+      {isMobile && (
+        <button onClick={() => setShowFeedbackModal(true)} style={{
+          width:'34px', height:'34px', borderRadius:'8px',
+          background: `${C.brand}12`,
+          border:`1px solid ${C.brand}40`,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          cursor:'pointer', color:C.brandLt, flexShrink:0,
+          marginRight: '8px'
+        }}>💬</button>
+      )}
 
       <button onClick={onNotifClick} style={{
         position:'relative', width:'34px', height:'34px', borderRadius:'8px',
@@ -370,6 +419,7 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick }: Omit
           </div>
         </>
       )}
+      <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
     </header>
   );
 }

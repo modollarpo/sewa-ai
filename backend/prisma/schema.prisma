@@ -723,3 +723,87 @@ model SupportTicket {
   @@index([category])
   @@index([createdAt])
 }
+
+// ── MODEL PERFORMANCE MONITORING (Post-Market Surveillance) ────────────
+model AIModelVersion {
+  id          String   @id @default(uuid())
+  modelType   String   // triage | uncertainty | vlm | metacognition
+  version     String   // e.g., "2.4.1"
+  description String?  // release notes/what changed
+  region      String?  // uk | eu | us | africa | india
+  active      Boolean  @default(true)
+  deployedAt  DateTime @default(now())
+  metadata    Json?    // model weights hash, hyperparams, etc.
+
+  @@index([modelType])
+  @@index([region])
+  @@index([active])
+}
+
+model ModelPerformanceMetric {
+  id            String    @id @default(uuid())
+  modelVersionId String
+  modelVersion  AIModelVersion @relation(fields: [modelVersionId], references: [id])
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  scanId        String?
+  scan          Scan?     @relation(fields: [scanId], references: [id])
+  modality      String
+  condition     String?
+  metricType    String    // accuracy | precision | recall | specificity | f1 | auroc | kappa | psi // psi=population stability index (drift)
+  value         Decimal
+  sampleSize    Int?
+  windowStart   DateTime?
+  windowEnd     DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([modelVersionId])
+  @@index([tenantId])
+  @@index([modality])
+  @@index([createdAt])
+}
+
+model AIDriftEvent {
+  id            String    @id @default(uuid())
+  modelVersionId String
+  modelVersion  AIModelVersion @relation(fields: [modelVersionId], references: [id])
+  tenantId      String?
+  tenant        Tenant?   @relation(fields: [tenantId], references: [id])
+  driftType     String    // data | concept | prediction
+  severity      String    // low | medium | high | critical
+  description   String
+  detectedAt    DateTime  @default(now())
+  resolvedAt    DateTime?
+  status        String    @default("detected") // detected | investigating | mitigated | resolved
+  metadata      Json?
+
+  @@index([modelVersionId])
+  @@index([tenantId])
+  @@index([status])
+}
+
+// ── CUSTOMER FEEDBACK LOOP ───────────────────────────────────────────
+model CustomerFeedback {
+  id          String    @id @default(uuid())
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  feedbackType String   // feature_request | bug_report | satisfaction | usability | general
+  score       Int?      // 1-5 for satisfaction ratings
+  subject     String?
+  description String
+  category    String?   // e.g., "radiologist_ui", "ai_accuracy", "mobile_app"
+  metadata    Json?     // associated scanId, reportId, etc.
+  status      String    @default("new") // new | reviewed | in_progress | actioned | closed
+  prioritized Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([feedbackType])
+  @@index([status])
+  @@index([createdAt])
+  @@unique([tenantId, id], name: "tenantId_id")
+}

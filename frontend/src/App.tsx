@@ -36,6 +36,7 @@ import { SpecialistOnboarding }     from './pages/onboarding/SpecialistOnboardin
 import { RoadmapPage }               from './pages/roadmap/RoadmapPage';
 import { AppointmentsPage }          from './pages/appointments/AppointmentsPage';
 import { ProfileSettings }         from './pages/settings/ProfileSettings';
+import { SupportTicketsPage }   from './pages/user/SupportTicketsPage';
 
 // Public pages
 import { LandingPage }               from './pages/public/LandingPage';
@@ -271,6 +272,7 @@ export default function App() {
 
   const [notifOpen,   setNotifOpen]   = useState(false);
   const [settingsPage, setSettingsPage] = useState(false);
+  const [supportPage, setSupportPage] = useState(false);
   const [adminPage,   setAdminPage]   = useState<AdminPage>('overview');
   const [superPage,   setSuperPage]   = useState<SuperPage>('platform');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -528,6 +530,11 @@ export default function App() {
         unreadCount={unreadCount}
         onNotifClick={() => setNotifOpen(o => !o)}
         onProfileClick={() => setSettingsPage(true)}
+        onNavigate={(p:string)=> { 
+          if (p === 'support') setSupportPage(true); 
+          else if (p.startsWith('public/')) navigate(p.replace('public/', ''));
+          else navigate(p); 
+        }}
       />
 
       {/* Slide-out notification drawer */}
@@ -545,6 +552,11 @@ export default function App() {
           <div>
             <button onClick={()=>setSettingsPage(false)} style={{ margin:'20px', padding:'8px 16px', background:C.bg3, border:`1px solid ${C.border}`, color:C.textMd, borderRadius:8, cursor:'pointer' }}>← Back to Dashboard</button>
             <ProfileSettings />
+          </div>
+        ) : supportPage ? (
+          <div>
+            <button onClick={()=>setSupportPage(false)} style={{ margin:'20px', padding:'8px 16px', background:C.bg3, border:`1px solid ${C.border}`, color:C.textMd, borderRadius:8, cursor:'pointer' }}>← Back to Dashboard</button>
+            <SupportTicketsPage />
           </div>
         ) : renderContent()}
       </main>

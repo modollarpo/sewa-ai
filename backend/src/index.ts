@@ -91,6 +91,7 @@ import complianceRoutes from './routes/compliance';
 import trainingRoutes   from './routes/training';
 import referralRoutes   from './routes/referrals';
 import supportRoutes    from './routes/support';
+import feedbackRoutes   from './routes/feedback';
 import { sendAppointmentReminders } from './routes/appointments/index';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 import { dlq } from './services/dlqService';
@@ -230,6 +231,7 @@ app.use(`${v1}/audit`,          auditRoutes);
 app.use(`${v1}/ai-monitoring`,  aiMonitoringRoutes);
 app.use(`${v1}/appointments`,   appointmentRoutes);
 app.use(`${v1}/support`,        supportRoutes);
+app.use(`${v1}/feedback`,       feedbackRoutes);
 app.use(`${v1}`,                roadmapRoutes);
 
 app.use(errorHandler);

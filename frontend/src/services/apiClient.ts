@@ -69,3 +69,33 @@ export function downloadReport(reportId: string): void {
   window.open(url, '_blank');
 }
 
+export async function getFeedback(params?: { status?: string; category?: string }) {
+  const searchParams = new URLSearchParams();
+  if (params?.status) searchParams.set('status', params.status);
+  if (params?.category) searchParams.set('category', params.category);
+  const res = await apiClient.get(`/feedback?${searchParams.toString()}`);
+  return res.data;
+}
+
+export async function getFeedbackById(id: string) {
+  const res = await apiClient.get(`/feedback/${id}`);
+  return res.data;
+}
+
+export async function createFeedback(data: {
+  feedbackType: string;
+  score?: number;
+  subject?: string;
+  description: string;
+  category?: string;
+  metadata?: any;
+}) {
+  const res = await apiClient.post('/feedback', data);
+  return res.data;
+}
+
+export async function updateFeedback(id: string, data: { status?: string; prioritized?: boolean }) {
+  const res = await apiClient.patch(`/feedback/${id}`, data);
+  return res.data;
+}
+
