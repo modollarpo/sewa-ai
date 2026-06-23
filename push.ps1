@@ -84,7 +84,12 @@ foreach ($m in $manifests) {
     kubectl apply -f $tmpPath
     Remove-Item $tmpPath
 }
-Out-Success "AKS manifests applied."
+# IMPORTANT: Always re-apply backend-policy last and unconditionally.
+# This NetworkPolicy contains egress rules for Postgres (5432), Redis (6379/6380),
+# and DNS (53) that are not present in the base deployment manifests.
+# Without this, backend pods enter CrashLoopBackOff after every push.
+kubectl apply -f azure/k8s/backend-policy-patch.yaml
+Out-Success "AKS manifests applied (incl. backend NetworkPolicy)."
 
 # 5. Frontend - Azure Static Web Apps
 Write-Host "[5/6] Deploying Frontend to SWA..." -ForegroundColor Yellow
@@ -103,7 +108,7 @@ Write-Host "[6/6] Finalizing Deployment..." -ForegroundColor Yellow
 $POD = kubectl get pods -n $NS -l app=sewa-backend -o name | Select-Object -First 1
 if ($POD) {
     Write-Host " -> Seeding database via pod $POD..." -ForegroundColor Cyan
-    kubectl exec -n $NS $POD -- npm run db:seed:js
+    kubectl exec -n $NS $POD -c backend -- npm run db:seed:js
 }
 
 Write-Host "=== POD STATUS ===" -ForegroundColor Cyan
