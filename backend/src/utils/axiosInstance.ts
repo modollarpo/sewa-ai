@@ -1,6 +1,13 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
 import { logger } from './logger';
 
+// Augment Axios types to include metadata
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    metadata?: { retries: number };
+  }
+}
+
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 

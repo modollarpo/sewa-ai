@@ -93,6 +93,13 @@ export const config = {
   FHIR_TENANT_ID:     optional('FHIR_TENANT_ID'),
   FHIR_CLIENT_ID:     optional('FHIR_CLIENT_ID'),
   FHIR_CLIENT_SECRET: optional('FHIR_CLIENT_SECRET'),
+  FHIR_VALIDATOR_URL: optional('FHIR_VALIDATOR_URL', IS_LOCAL ? 'http://fhir-validator:8080' : ''),
+  // ── NHS Terminology Service ──────────────────────────────────
+  NHS_TERMINOLOGY_URL: optional('NHS_TERMINOLOGY_URL', 'https://termcodes.nhs.uk/api'),
+  NHS_TERMINOLOGY_API_KEY: optional('NHS_TERMINOLOGY_API_KEY', ''),
+  // ── NHS PDS (Patient Demographic Service) ─────────────────
+  NHS_PDS_URL: optional('NHS_PDS_URL', 'https://sandbox.api.service.nhs.uk/personal-demographics/FHIR/R4'),
+  NHS_PDS_API_KEY: optional('NHS_PDS_API_KEY', ''),
 
   // ── HL7v2 ────────────────────────────────────────────────────
   HL7_HOST:     optional('HL7_HOST', 'localhost'),

@@ -246,6 +246,22 @@ services:
     depends_on:
       - postgres
 
+  # ── FHIR Validator (HAPI FHIR Validator — local dev only) ─────
+  # Access: http://localhost:8081  |  Validate: POST http://localhost:8081/validate
+  fhir-validator:
+    image: hapiproject/hapi-fhir-validator-cli:latest
+    restart: unless-stopped
+    networks: [sewa-net]
+    ports:
+      - "8081:8080"
+    command: ["-p", "8080"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
   # ── Observability ────────────────────────────────────────────
 
   prometheus:
