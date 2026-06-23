@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: metacognition-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-metacognition
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - protocol: TCP
+      port: 8003
+  egress:
+  - to:
+    ports:
+    - protocol: TCP
+      port: 443
