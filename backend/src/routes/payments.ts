@@ -242,7 +242,7 @@ r.get('/usage', async (req: Request, res: Response, next: NextFunction) => {
     const quota = tenant.scanQuota;
     const overage = quota ? Math.max(0, used - quota) : 0;
     
-    const OVERAGE_RATES: Record<string, number> = { starter: 2.50, pro: 1.99, enterprise: 0.99 };
+    const OVERAGE_RATES: Record<string, number> = { starter: 2.50, hospital: 1.99, enterprise: 0.99 };
     const overageRate = OVERAGE_RATES[tenant.plan?.toLowerCase() || 'starter'] || 1.99;
     
     const estimatedOverageCharge = overage * overageRate;

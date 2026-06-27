@@ -38,15 +38,21 @@ const PROVIDER_MAP: Record<string, string[]> = {
 
 // Subscription plans (Feature 5)
 export const PLANS = {
-  starter: {
-    priceUSD: 499, scans: 500,
-    stripeProductId: 'prod_sewa_starter',
-    stripePriceId: { uk: 'price_gbp_starter', eu: 'price_eur_starter', us: 'price_usd_starter' },
+  starter: { // Clinic Plan
+    priceUSD: 599, scans: 500,
+    stripeProductId: 'prod_sewa_clinic',
+    stripePriceId: { 
+      uk: 'price_gbp_clinic', eu: 'price_eur_clinic', us: 'price_usd_clinic',
+      ng: 'price_ngn_clinic', ke: 'price_kes_clinic', za: 'price_zar_clinic', gh: 'price_ghs_clinic', in: 'price_inr_clinic'
+    },
   },
-  pro: {
-    priceUSD: 1299, scans: 2500,
-    stripeProductId: 'prod_sewa_pro',
-    stripePriceId: { uk: 'price_gbp_pro', eu: 'price_eur_pro', us: 'price_usd_pro' },
+  hospital: { // Hospital Plan (formerly Pro)
+    priceUSD: 2299, scans: 5000,
+    stripeProductId: 'prod_sewa_hospital',
+    stripePriceId: { 
+      uk: 'price_gbp_hospital', eu: 'price_eur_hospital', us: 'price_usd_hospital',
+      ng: 'price_ngn_hospital', ke: 'price_kes_hospital', za: 'price_zar_hospital', gh: 'price_ghs_hospital', in: 'price_inr_hospital'
+    },
   },
   enterprise: { priceUSD: null as number | null, scans: null as number | null },
 };
