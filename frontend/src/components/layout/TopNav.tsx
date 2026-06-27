@@ -271,7 +271,7 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick, onNavi
               <div style={{ fontSize:'10px', color:C.textLo, padding:'4px 8px', letterSpacing:'0.06em', fontFamily:C.F }}>HELP & SUPPORT</div>
               {[
                 { icon:'📖', label:'Knowledge Base', action: () => onNavigate?.('public/docs') },
-                { icon:'📝', label:'Changelog', action: () => onNavigate?.('changelog') },
+                {icon:'📝', label:'Changelog', action: () => onNavigate?.('public/changelog') },
                 { icon:'🎫', label:'Support Tickets', action: () => onNavigate?.('support') },
               ].map(item => (
                 <button key={item.label} onClick={item.action} style={{

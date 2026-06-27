@@ -4,10 +4,45 @@ import React from 'react';
 import { PublicLayout } from '../../components/public/PublicLayout';
 const C = { bg0:'#050F0C', bg1:'#08160F', brand:'#408D7B', brandLight:'#52B09A', textHigh:'#D0ECE6', textMed:'#6FA898', textLow:'#3A6055', border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif" };
 const SECTIONS = [
-  { title:'Product', links:[['landing','Home'],['solutions','Solutions'],['pricing','Pricing'],['downloads','Downloads']].map(([p,l])=>({page:p,label:l})) },
-  { title:'Clinical', links:[['clinical-validation','Clinical Validation'],['whitepaper','Technical Whitepaper'],['security','Security']].map(([p,l])=>({page:p,label:l})) },
-  { title:'Company', links:[['about','About'],['careers','Careers'],['press','Press'],['contact','Contact']].map(([p,l])=>({page:p,label:l})) },
-  { title:'Legal', links:[['privacy-policy','Privacy Policy'],['terms','Terms'],['cookie-policy','Cookie Policy'],['accessibility','Accessibility']].map(([p,l])=>({page:p,label:l})) },
+  { title:'Product', links:[
+    ['landing','Home'],
+    ['solutions','Solutions'],
+    ['pricing','Pricing'],
+    ['downloads','Downloads'],
+    ['triage-ai','Triage AI'],
+    ['uncertainty-ai','Uncertainty AI'],
+    ['vision-language-ai','Vision Language AI'],
+    ['metacognition-ai','Metacognition AI'],
+    ['explainable-ai','Explainable AI'],
+  ].map(([p,l])=>({page:p,label:l})) },
+  { title:'Clinical & Regulatory', links:[
+    ['clinical-validation','Clinical Validation'],
+    ['whitepaper','Technical Whitepaper'],
+    ['security','Security'],
+    ['regulatory','Regulatory'],
+    ['research','Research Portal'],
+  ].map(([p,l])=>({page:p,label:l})) },
+  { title:'Resources', links:[
+    ['docs','Knowledge Base'],
+    ['changelog','Changelog'],
+    ['status','Status'],
+    ['api-docs','API Docs'],
+    ['developers','Developers'],
+    ['blog','Blog'],
+    ['partner-portal','Partner Portal'],
+  ].map(([p,l])=>({page:p,label:l})) },
+  { title:'Company', links:[
+    ['about','About'],
+    ['careers','Careers'],
+    ['press','Press'],
+    ['contact','Contact'],
+  ].map(([p,l])=>({page:p,label:l})) },
+  { title:'Legal', links:[
+    ['privacy-policy','Privacy Policy'],
+    ['terms','Terms'],
+    ['cookie-policy','Cookie Policy'],
+    ['accessibility','Accessibility'],
+  ].map(([p,l])=>({page:p,label:l})) },
 ];
 export function SitemapPage({ onNavigate }:{ onNavigate:(p:string)=>void }) {
   return (
