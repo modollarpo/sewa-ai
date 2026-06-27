@@ -107,6 +107,8 @@ Out-Success "Frontend deployed."
 Write-Host "[6/6] Finalizing Deployment..." -ForegroundColor Yellow
 $POD = kubectl get pods -n $NS -l app=sewa-backend -o name | Select-Object -First 1
 if ($POD) {
+    Write-Host " -> Running Prisma migrations via pod $POD..." -ForegroundColor Cyan
+    kubectl exec -n $NS $POD -c backend -- npm run db:migrate
     Write-Host " -> Seeding database via pod $POD..." -ForegroundColor Cyan
     kubectl exec -n $NS $POD -c backend -- npm run db:seed:js
 }
