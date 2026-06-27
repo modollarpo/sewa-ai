@@ -41,7 +41,7 @@ model Tenant {
   timezone           String  @default("UTC")
   address            String?
   providerMetadata   Json? // { mpesa: { shortcode, passkey }, flutterwave: { publicKey }, region-specific config }
-  apiKey             String?   @unique @default(uuid())
+  apiKey             String? @unique @default(uuid())
 
   // ── Billing & Quota ─────────────────────────────────────────
   subscriptionId      String? // Stripe subscription ID / Paystack subscription code
@@ -59,19 +59,23 @@ model Tenant {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  users            User[]
-  scans            Scan[]
-  reports          Report[]
-  payments         Payment[]
-  auditLogs        AuditLog[]
-  aiModels         TenantAIModel[]
-  templates        ReportTemplate[]
-  appointments     Appointment[]
-  whatsappRegs     WhatsAppRegistration[]
-  notificationLogs NotificationLog[]
-  dicomNodes       DicomNode[]
-  complianceRecords ComplianceRecord[]
-  dunningLogs      DunningLog[]
+  users                   User[]
+  scans                   Scan[]
+  reports                 Report[]
+  payments                Payment[]
+  auditLogs               AuditLog[]
+  aiModels                TenantAIModel[]
+  templates               ReportTemplate[]
+  appointments            Appointment[]
+  whatsappRegs            WhatsAppRegistration[]
+  notificationLogs        NotificationLog[]
+  dicomNodes              DicomNode[]
+  complianceRecords       ComplianceRecord[]
+  dunningLogs             DunningLog[]
+  supportTickets          SupportTicket[]
+  modelPerformanceMetrics ModelPerformanceMetric[]
+  aiDriftEvents           AIDriftEvent[]
+  customerFeedbacks       CustomerFeedback[]
 
   @@index([region])
   @@index([status])
@@ -96,6 +100,7 @@ model User {
   mfaSecret        String?
   biometricKey     String?
   status           String    @default("active")
+  inviteToken      String?   @unique
   lastLoginAt      DateTime?
   // Stripe Connect for Specialists (90/10 revenue split)
   stripeAccountId  String?
@@ -109,15 +114,17 @@ model User {
   updatedAt        DateTime  @updatedAt
 
   sessions            Session[]
-  scansReferred       Scan[]          @relation("ReferringDoctor")
+  scansReferred       Scan[]               @relation("ReferringDoctor")
   reports             Report[]
   notifications       Notification[]
   auditLogs           AuditLog[]
-  secondRequester     SecondOpinion[] @relation("Requester")
-  secondAssigned      SecondOpinion[] @relation("AssignedSpecialist")
+  secondRequester     SecondOpinion[]      @relation("Requester")
+  secondAssigned      SecondOpinion[]      @relation("AssignedSpecialist")
   clinicalValidations ClinicalValidation[]
   notificationLogs    NotificationLog[]
   patientRecord       Patient?
+  supportTickets      SupportTicket[]
+  customerFeedbacks   CustomerFeedback[]
 
   @@unique([tenantId, email])
   @@index([role])
@@ -157,9 +164,9 @@ model Patient {
   consentResearch   Boolean   @default(false)
   consentThirdParty Boolean   @default(false)
   deletedAt         DateTime? // soft delete — never hard-delete patient records (clinical record continuity)
-  isActive         Boolean   @default(true)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   scans       Scan[]
   messages    Message[]
@@ -179,11 +186,11 @@ model Scan {
   referringDoctorId String?
   referringDoctor   User?    @relation("ReferringDoctor", fields: [referringDoctorId], references: [id])
 
-  modality     String // CT | MRI | XR | US | PET | PETCT
-  bodyPart     String // Head | Chest | Abdomen | Pelvis | Spine | etc
-  priority     String // STAT | URGENT | ROUTINE
-  status       String  @default("pending") // pending | processing | ai_complete | reported | approved | rejected | failed
-  errorMessage String? // populated when status = 'failed' — DICOM corrupt, AI service down, etc.
+  modality        String // CT | MRI | XR | US | PET | PETCT
+  bodyPart        String // Head | Chest | Abdomen | Pelvis | Spine | etc
+  priority        String // STAT | URGENT | ROUTINE
+  status          String  @default("pending") // pending | processing | ai_complete | reported | approved | rejected | failed
+  errorMessage    String? // populated when status = 'failed' — DICOM corrupt, AI service down, etc.
   accessionNumber String? @unique // Hospital-provided identifier for the scan
 
   // DICOM
@@ -218,11 +225,12 @@ model Scan {
   requiresHumanReview Boolean @default(false)
   humanReviewReason   String? // METACOGNITION_FAIL | HIGH_UNCERTAINTY | MANUAL
 
-  aiResult       AIResult?
-  report         Report?
-  annotations    Annotation[]
-  secondOpinions SecondOpinion[]
-  clinicalValidation ClinicalValidation?
+  aiResult                AIResult?
+  report                  Report?
+  annotations             Annotation[]
+  secondOpinions          SecondOpinion[]
+  clinicalValidation      ClinicalValidation?
+  modelPerformanceMetrics ModelPerformanceMetric[]
 
   @@index([tenantId])
   @@index([status])
@@ -234,9 +242,9 @@ model Scan {
 
 // ── AI RESULTS (Triage Engine output) ────────────────────────
 model AIResult {
-  id     String @id @default(uuid())
-  scanId String @unique
-  scan   Scan   @relation(fields: [scanId], references: [id])
+  id       String  @id @default(uuid())
+  scanId   String  @unique
+  scan     Scan    @relation(fields: [scanId], references: [id])
   tenantId String?
 
   // Triage Engine
@@ -270,18 +278,18 @@ model AIResult {
   icd10Codes          String? // Feature 17: Billing/Coding integration
 
   // Raw Output & Metadata
-  rawJson      Json?    // Full inference payload from AI provider
-  modelId      String?
-  modelVersion String?
-  inferenceMs  Int? // latency
-  clinicalContext String? // FHIR context used for multimodal inference
+  rawJson             Json? // Full inference payload from AI provider
+  modelId             String?
+  modelVersion        String?
+  inferenceMs         Int? // latency
+  clinicalContext     String? // FHIR context used for multimodal inference
   longitudinalContext String? // Prior scan comparison context
-  
+
   // Validation (Feature 3/4)
-  validationStatus      String?   // CONFIRMED | REJECTED | AMBIGUOUS
-  humanCorrectedFinding String?   // Correction from a human specialist
-  validationComments    String?   // Notes from the validator
-  validatedBy           String?   // User ID of the validator
+  validationStatus      String? // CONFIRMED | REJECTED | AMBIGUOUS
+  humanCorrectedFinding String? // Correction from a human specialist
+  validationComments    String? // Notes from the validator
+  validatedBy           String? // User ID of the validator
   validatedAt           DateTime? // When it was validated
 
   // A/B test tracking (Feature 7)
@@ -342,8 +350,8 @@ model Report {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  pdfUrl    String? // URL to the generated clinical PDF/HTML report
+
+  pdfUrl String? // URL to the generated clinical PDF/HTML report
 
   secondOpinions SecondOpinion[]
 
@@ -404,13 +412,13 @@ model SecondOpinion {
   notes        String?  @db.Text
   reviewNotes  String?  @db.Text
   agreedWithAI Boolean?
-  
+
   // SLA & Workflow
-  slaDeadline  DateTime?
-  escalatedAt  DateTime?
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  slaDeadline DateTime?
+  escalatedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([scanId])
   @@index([status])
@@ -421,21 +429,21 @@ model SecondOpinion {
 
 // ── NOTIFICATIONS (Feature 6) ─────────────────────────────────
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  type      String // critical_finding | report_ready | second_opinion | payment | system
-  title     String
-  message   String
-  body      String
-  data      Json?
-  read      Boolean  @default(false)
-  fcmSent   Boolean  @default(false)
-  tenantId  String
-  scanId    String?
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  type       String // critical_finding | report_ready | second_opinion | payment | system
+  title      String
+  message    String
+  body       String
+  data       Json?
+  read       Boolean  @default(false)
+  fcmSent    Boolean  @default(false)
+  tenantId   String
+  scanId     String?
   aiResultId String?
-  channels  String[] @default([])
-  createdAt DateTime @default(now())
+  channels   String[] @default([])
+  createdAt  DateTime @default(now())
 
   @@index([userId, read])
 }
@@ -623,9 +631,9 @@ model WhatsAppRegistration {
 model NotificationLog {
   id        String   @id @default(uuid())
   tenantId  String
-  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   type      String
   channel   String // push | email | whatsapp | socket
   status    String // sent | failed | bounced | delivered
@@ -639,16 +647,16 @@ model NotificationLog {
 
 // ── CLINICAL VALIDATION (Feature 13) ──────────────────────────
 model ClinicalValidation {
-  id           String   @id @default(uuid())
-  scanId       String   @unique
-  scan         Scan     @relation(fields: [scanId], references: [id])
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  status       String   @default("pending") // pending | agreed | disagreed | uncertain
-  aiConfidence Float
-  humanNotes   String?
+  id            String   @id @default(uuid())
+  scanId        String   @unique
+  scan          Scan     @relation(fields: [scanId], references: [id])
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  status        String   @default("pending") // pending | agreed | disagreed | uncertain
+  aiConfidence  Float
+  humanNotes    String?
   findingsMatch Boolean?
-  createdAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
 
   @@index([scanId])
   @@index([status])
@@ -675,8 +683,8 @@ model ComplianceRecord {
   id           String   @id @default(uuid())
   tenantId     String
   tenant       Tenant   @relation(fields: [tenantId], references: [id])
-  standard     String   // GDPR | HIPAA | NHS_DSPT | CE_MARK | FDA_510K
-  status       String   // compliant | gap_detected | in_remediation
+  standard     String // GDPR | HIPAA | NHS_DSPT | CE_MARK | FDA_510K
+  status       String // compliant | gap_detected | in_remediation
   evidenceUrls String[]
   lastAuditAt  DateTime @default(now())
   nextAuditAt  DateTime
@@ -690,7 +698,7 @@ model DunningLog {
   id        String   @id @default(uuid())
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  step      Int      // 1, 2, 3 — which dunning step this is
+  step      Int // 1, 2, 3 — which dunning step this is
   sentAt    DateTime
   createdAt DateTime @default(now())
 
@@ -707,11 +715,11 @@ model SupportTicket {
   user        User     @relation(fields: [userId], references: [id])
   subject     String
   description String
-  category    String   // billing | technical | clinical | general | feature_request
-  priority    String   // low | medium | high | urgent
+  category    String // billing | technical | clinical | general | feature_request
+  priority    String // low | medium | high | urgent
   status      String   @default("open") // open | in_progress | waiting_on_customer | resolved | closed
-  zendeskId   String?  // External ticket ID if using Zendesk
-  assignedTo  String?  // User ID of support agent assigned
+  zendeskId   String? // External ticket ID if using Zendesk
+  assignedTo  String? // User ID of support agent assigned
   tags        String[]
   metadata    Json?
   createdAt   DateTime @default(now())
@@ -726,14 +734,16 @@ model SupportTicket {
 
 // ── MODEL PERFORMANCE MONITORING (Post-Market Surveillance) ────────────
 model AIModelVersion {
-  id          String   @id @default(uuid())
-  modelType   String   // triage | uncertainty | vlm | metacognition
-  version     String   // e.g., "2.4.1"
-  description String?  // release notes/what changed
-  region      String?  // uk | eu | us | africa | india
-  active      Boolean  @default(true)
-  deployedAt  DateTime @default(now())
-  metadata    Json?    // model weights hash, hyperparams, etc.
+  id                      String                   @id @default(uuid())
+  modelType               String // triage | uncertainty | vlm | metacognition
+  version                 String // e.g., "2.4.1"
+  description             String? // release notes/what changed
+  region                  String? // uk | eu | us | africa | india
+  active                  Boolean                  @default(true)
+  deployedAt              DateTime                 @default(now())
+  metadata                Json? // model weights hash, hyperparams, etc.
+  modelPerformanceMetrics ModelPerformanceMetric[]
+  aiDriftEvents           AIDriftEvent[]
 
   @@index([modelType])
   @@index([region])
@@ -741,21 +751,21 @@ model AIModelVersion {
 }
 
 model ModelPerformanceMetric {
-  id            String    @id @default(uuid())
+  id             String         @id @default(uuid())
   modelVersionId String
-  modelVersion  AIModelVersion @relation(fields: [modelVersionId], references: [id])
-  tenantId      String
-  tenant        Tenant    @relation(fields: [tenantId], references: [id])
-  scanId        String?
-  scan          Scan?     @relation(fields: [scanId], references: [id])
-  modality      String
-  condition     String?
-  metricType    String    // accuracy | precision | recall | specificity | f1 | auroc | kappa | psi // psi=population stability index (drift)
-  value         Decimal
-  sampleSize    Int?
-  windowStart   DateTime?
-  windowEnd     DateTime?
-  createdAt     DateTime  @default(now())
+  modelVersion   AIModelVersion @relation(fields: [modelVersionId], references: [id])
+  tenantId       String
+  tenant         Tenant         @relation(fields: [tenantId], references: [id])
+  scanId         String?
+  scan           Scan?          @relation(fields: [scanId], references: [id])
+  modality       String
+  condition      String?
+  metricType     String // accuracy | precision | recall | specificity | f1 | auroc | kappa | psi // psi=population stability index (drift)
+  value          Decimal
+  sampleSize     Int?
+  windowStart    DateTime?
+  windowEnd      DateTime?
+  createdAt      DateTime       @default(now())
 
   @@index([modelVersionId])
   @@index([tenantId])
@@ -764,18 +774,18 @@ model ModelPerformanceMetric {
 }
 
 model AIDriftEvent {
-  id            String    @id @default(uuid())
+  id             String         @id @default(uuid())
   modelVersionId String
-  modelVersion  AIModelVersion @relation(fields: [modelVersionId], references: [id])
-  tenantId      String?
-  tenant        Tenant?   @relation(fields: [tenantId], references: [id])
-  driftType     String    // data | concept | prediction
-  severity      String    // low | medium | high | critical
-  description   String
-  detectedAt    DateTime  @default(now())
-  resolvedAt    DateTime?
-  status        String    @default("detected") // detected | investigating | mitigated | resolved
-  metadata      Json?
+  modelVersion   AIModelVersion @relation(fields: [modelVersionId], references: [id])
+  tenantId       String?
+  tenant         Tenant?        @relation(fields: [tenantId], references: [id])
+  driftType      String // data | concept | prediction
+  severity       String // low | medium | high | critical
+  description    String
+  detectedAt     DateTime       @default(now())
+  resolvedAt     DateTime?
+  status         String         @default("detected") // detected | investigating | mitigated | resolved
+  metadata       Json?
 
   @@index([modelVersionId])
   @@index([tenantId])
@@ -784,26 +794,26 @@ model AIDriftEvent {
 
 // ── CUSTOMER FEEDBACK LOOP ───────────────────────────────────────────
 model CustomerFeedback {
-  id          String    @id @default(uuid())
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  feedbackType String   // feature_request | bug_report | satisfaction | usability | general
-  score       Int?      // 1-5 for satisfaction ratings
-  subject     String?
-  description String
-  category    String?   // e.g., "radiologist_ui", "ai_accuracy", "mobile_app"
-  metadata    Json?     // associated scanId, reportId, etc.
-  status      String    @default("new") // new | reviewed | in_progress | actioned | closed
-  prioritized Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String   @id @default(uuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  feedbackType String // feature_request | bug_report | satisfaction | usability | general
+  score        Int? // 1-5 for satisfaction ratings
+  subject      String?
+  description  String
+  category     String? // e.g., "radiologist_ui", "ai_accuracy", "mobile_app"
+  metadata     Json? // associated scanId, reportId, etc.
+  status       String   @default("new") // new | reviewed | in_progress | actioned | closed
+  prioritized  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
+  @@unique([tenantId, id], name: "tenantId_id")
   @@index([tenantId])
   @@index([userId])
   @@index([feedbackType])
   @@index([status])
   @@index([createdAt])
-  @@unique([tenantId, id], name: "tenantId_id")
 }
