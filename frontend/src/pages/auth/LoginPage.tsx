@@ -1,4 +1,4 @@
-// SEWA AI — LoginPage.tsx
+// SEWA XAI — LoginPage.tsx
 // Enterprise clinical login: credentials → MFA → session
 // Dark clinical aesthetic, region-aware, HIPAA/GDPR/NHS-compliant messaging
 
@@ -203,7 +203,7 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
             </svg>
           </div>
           <div className="animate-slide-up [animation-delay:100ms]">
-            <h1 className="text-3xl font-black tracking-tighter uppercase">SEWA AI</h1>
+            <h1 className="text-3xl font-black tracking-tighter uppercase">SEWA XAI</h1>
             <p className="text-[10px] font-black tracking-[0.4em] text-[#3A6055] mt-1">Smart Early Warning Assistant</p>
           </div>
         </header>
@@ -377,7 +377,7 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
             ))}
           </div>
           <div className="text-center space-y-2">
-            <p className="text-[9px] font-black text-[#1B3028] uppercase tracking-[0.5em]">SEWA AI V2.4.1 — ZERO_KNOWLEDGE_ARCHITECTURE</p>
+            <p className="text-[9px] font-black text-[#1B3028] uppercase tracking-[0.5em]">SEWA XAI V2.4.1 — ZERO_KNOWLEDGE_ARCHITECTURE</p>
             <p className="text-[9px] text-[#3A6055] font-medium leading-relaxed">End-to-end encrypted clinical node. Audited for HIPAA, GDPR, and NHS DSPT compliance.</p>
           </div>
         </footer>

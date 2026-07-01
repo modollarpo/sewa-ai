@@ -1,4 +1,4 @@
-// SEWA AI — ExplainableAI.tsx
+// SEWA XAI — ExplainableAI.tsx
 // Dedicated landing page for Explainability (XAI) features
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../../components/public/PublicLayout';
@@ -37,7 +37,7 @@ export function ExplainableAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
             <span style={{ color:C.normal }}>See what the AI sees.</span>
           </h1>
           <p style={{ fontSize:'clamp(15px, 2.5vw, 18px)', color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
-            Trust is built on transparency. SEWA AI provides pixel-level heatmaps and feature attribution for every diagnosis, ensuring clinicians can verify exactly which anatomical regions drove the AI's conclusion.
+            Trust is built on transparency. SEWA XAI provides pixel-level heatmaps and feature attribution for every diagnosis, ensuring clinicians can verify exactly which anatomical regions drove the AI's conclusion.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:10, justifyContent:'center' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'14px 32px', background:C.normal, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer' }}>Adopt Explainable AI →</button>

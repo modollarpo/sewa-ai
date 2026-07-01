@@ -1,4 +1,4 @@
-# SEWA AI — Pod Disruption Budgets
+# SEWA XAI — Pod Disruption Budgets
 # Ensures rolling updates and node drain never takes all replicas offline.
 # Clinical SLA: at least 1 AI inference pod MUST remain running at all times.
 ---

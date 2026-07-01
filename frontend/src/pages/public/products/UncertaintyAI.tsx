@@ -1,4 +1,4 @@
-// SEWA AI — UncertaintyAI.tsx
+// SEWA XAI — UncertaintyAI.tsx
 // Dedicated landing page for the Uncertainty Engine (Port 8002)
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../../components/public/PublicLayout';
@@ -38,7 +38,7 @@ export function UncertaintyAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
             <span style={{ color:C.amber }}>No more black boxes.</span>
           </h1>
           <p style={{ fontSize:'clamp(15px, 2.5vw, 18px)', color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
-            Most AI clinical systems output a prediction with 100% confidence even when wrong. SEWA AI uses Monte Carlo Dropout to quantify uncertainty, flagging borderline cases for human oversight before they reach the report.
+            Most AI clinical systems output a prediction with 100% confidence even when wrong. SEWA XAI uses Monte Carlo Dropout to quantify uncertainty, flagging borderline cases for human oversight before they reach the report.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:10, justifyContent:'center' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'14px 32px', background:C.urgent, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer' }}>Integrate Uncertainty Safety →</button>

@@ -1,4 +1,4 @@
-// SEWA AI — RadiologistWorkspace.tsx
+// SEWA XAI — RadiologistWorkspace.tsx
 // Enterprise 3-panel PACS layout: Worklist | DICOM Viewer + AI | Report Editor
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useScanStore } from '../../store/scanStore';
@@ -103,30 +103,39 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
 
     const modality = scan?.modality ?? 'CT';
-    if (modality === 'CT' || !modality) {
-      // (Mock drawing logic for CT - in real app would use dicom-parser/cornerstone)
+    if (modality === 'CT' || modality === 'MRI' || !modality) {
+      // Mock drawing logic for CT/MRI
       ctx.beginPath();
-      ctx.ellipse(w/2, h*0.5, w*0.37, h*0.43, 0, 0, Math.PI*2);
-      ctx.fillStyle = '#1e1e1e'; ctx.fill();
-      ctx.strokeStyle = '#333'; ctx.lineWidth=1; ctx.stroke();
+      // Draw head/brain base
+      if (modality === 'MRI') {
+        ctx.ellipse(w/2, h*0.5, w*0.35, h*0.48, 0, 0, Math.PI*2);
+        ctx.fillStyle = '#0a0a0a'; ctx.fill();
+        ctx.strokeStyle = '#444'; ctx.lineWidth=2; ctx.stroke();
+      } else {
+        ctx.ellipse(w/2, h*0.5, w*0.37, h*0.43, 0, 0, Math.PI*2);
+        ctx.fillStyle = '#1e1e1e'; ctx.fill();
+        ctx.strokeStyle = '#333'; ctx.lineWidth=1; ctx.stroke();
+      }
       
-      // AI Highlight (ICH Mock)
+      // AI Highlight (ICH Mock for CT, MS Lesion for MRI)
       const ai = scan?.aiResult;
       if (showGradcam || ai?.urgency === 'CRITICAL') {
         const grd = ctx.createRadialGradient(w*0.63, h*0.40, 0, w*0.63, h*0.40, w*0.13);
-        grd.addColorStop(0, 'rgba(224,53,53,0.6)');
-        grd.addColorStop(0.5,'rgba(224,53,53,0.2)');
-        grd.addColorStop(1, 'rgba(224,53,53,0)');
+        const color = modality === 'MRI' ? '180,100,250' : '224,53,53'; // Purple for MRI
+        grd.addColorStop(0, `rgba(${color},0.6)`);
+        grd.addColorStop(0.5,`rgba(${color},0.2)`);
+        grd.addColorStop(1, `rgba(${color},0)`);
         ctx.fillStyle = grd;
         ctx.beginPath(); ctx.ellipse(w*0.63, h*0.40, w*0.12, h*0.10, 0.3, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = 'rgba(224,53,53,0.8)';
+        ctx.strokeStyle = `rgba(${color},0.8)`;
         ctx.setLineDash([4, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
       // Drawing some "brain" structures
-      ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth=0.5;
+      ctx.strokeStyle = modality === 'MRI' ? '#333' : '#2a2a2a'; 
+      ctx.lineWidth=0.5;
       for (let i=0; i<5; i++) {
         ctx.beginPath();
         ctx.ellipse(w/2, h*0.5, w*(0.1+i*0.05), h*(0.15+i*0.05), Math.PI/4, 0, Math.PI*2);
@@ -138,6 +147,94 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
       lGrd.addColorStop(0,'rgba(180,180,180,0.2)'); lGrd.addColorStop(1,'transparent');
       ctx.fillStyle = lGrd;
       ctx.beginPath(); ctx.ellipse(w*0.35, h*0.48, w*0.20, h*0.30, -0.1, 0, Math.PI*2); ctx.fill();
+    } else if (modality === 'ECG') {
+      ctx.fillStyle = '#f8f9fa'; ctx.fillRect(0,0,w,h); // Paper background
+      ctx.strokeStyle = '#ffcccc'; ctx.lineWidth = 1; // Grid lines
+      for (let i=0; i<w; i+=10) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
+      for (let i=0; i<h; i+=10) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
+      
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; // ECG wave
+      ctx.beginPath();
+      for (let x=0; x<w; x+=2) {
+        let y = h*0.5;
+        // Mock QRS complex
+        if (x % 200 > 180 && x % 200 < 190) y -= 50 * Math.sin((x%200-180)*Math.PI/10); 
+        ctx.lineTo(x, y + Math.random()*2);
+      }
+      ctx.stroke();
+
+      if (showGradcam || scan?.aiResult?.urgency === 'CRITICAL') {
+        ctx.fillStyle = 'rgba(224,53,53,0.2)';
+        ctx.fillRect(180, h*0.3, 20, h*0.4); // Highlight arrhythmia segment
+        ctx.strokeStyle = '#E03535'; ctx.strokeRect(180, h*0.3, 20, h*0.4);
+      }
+    } else if (modality === 'US') {
+      ctx.fillStyle = '#050505'; ctx.fillRect(0,0,w,h);
+      const usGrd = ctx.createConicGradient(Math.PI, w/2, -h*0.2);
+      usGrd.addColorStop(0, '#000');
+      usGrd.addColorStop(0.4, '#1a1a1a');
+      usGrd.addColorStop(0.5, '#444');
+      usGrd.addColorStop(0.6, '#1a1a1a');
+      usGrd.addColorStop(1, '#000');
+      ctx.fillStyle = usGrd;
+      ctx.beginPath(); ctx.moveTo(w/2, -h*0.2); ctx.arc(w/2, -h*0.2, h*1.2, Math.PI*0.7, Math.PI*0.3, true); ctx.fill();
+
+      if (showGradcam || scan?.aiResult?.urgency === 'CRITICAL') {
+        ctx.strokeStyle = '#E08A20'; ctx.lineWidth = 2; ctx.setLineDash([4,4]);
+        ctx.strokeRect(w*0.4, h*0.4, w*0.2, h*0.3); // Highlight fetal structure or thoracic fluid
+        ctx.setLineDash([]);
+      }
+    } else if (modality === 'PATH') {
+      // Draw high-resolution simulated H&E pathology slide section
+      ctx.fillStyle = '#fce4ec'; ctx.fillRect(0,0,w,h); // Eosin pink tissue background
+      
+      // Draw simulated stromal fiber flows
+      ctx.strokeStyle = '#f8bbd0'; ctx.lineWidth = 4;
+      for (let i = 0; i < h; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.bezierCurveTo(w/3, i + 30, 2*w/3, i - 30, w, i + 10);
+        ctx.stroke();
+      }
+      
+      // Draw violet/purple hematoxylin-stained cellular nuclei clusters
+      ctx.fillStyle = '#4a148c'; // Dark purple hematoxylin nuclei
+      const nucleiSeeds = [
+        {x: 0.2, y: 0.3, r: 8}, {x: 0.22, y: 0.32, r: 9}, {x: 0.25, y: 0.28, r: 7},
+        {x: 0.5, y: 0.5, r: 12}, {x: 0.53, y: 0.48, r: 10}, {x: 0.55, y: 0.53, r: 14},
+        {x: 0.51, y: 0.55, r: 11}, {x: 0.48, y: 0.52, r: 9},
+        {x: 0.75, y: 0.7, r: 8}, {x: 0.78, y: 0.73, r: 7}, {x: 0.72, y: 0.75, r: 8}
+      ];
+      nucleiSeeds.forEach(ns => {
+        ctx.beginPath();
+        // Add random cell-level micro-variation
+        const rx = w * ns.x;
+        const ry = h * ns.y;
+        ctx.arc(rx, ry, ns.r, 0, Math.PI * 2);
+        ctx.fill();
+        // Inner nucleolus
+        ctx.fillStyle = '#12005e';
+        ctx.beginPath();
+        ctx.arc(rx + 2, ry - 2, ns.r / 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#4a148c'; // restore
+      });
+
+      // Highlight hyper-cellular tumor proliferation zone
+      if (showGradcam || scan?.aiResult?.urgency === 'CRITICAL') {
+        ctx.strokeStyle = '#E03535'; ctx.lineWidth = 2.5; ctx.setLineDash([6, 3]);
+        // Bounding box for the main center tumor cluster
+        ctx.strokeRect(w*0.42, h*0.42, w*0.2, h*0.2);
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = 'rgba(224,53,53,0.1)';
+        ctx.fillRect(w*0.42, h*0.42, w*0.2, h*0.2);
+
+        // Text label for tumor classification
+        ctx.fillStyle = '#E03535';
+        ctx.font = 'bold 9px IBM Plex Mono';
+        ctx.fillText('PATH_AI: INVASIVE CARCINOMA CLUSTER (96%)', w*0.42, h*0.41);
+      }
     }
 
     // Measurements
@@ -304,6 +401,49 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
           <button onClick={() => setWl({w:350, l:40})} className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5 transition-all">SOFT</button>
         </div>
 
+        {/* Modality Specific Controls */}
+        {scan?.modality === 'MRI' && (
+          <>
+            <div className="w-[1px] h-6 bg-white/10 mx-1" />
+            <div className="flex items-center gap-1 pl-1">
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">SAGITTAL</button>
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">CORONAL</button>
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] bg-[#408D7B]/10 border border-[#408D7B]/30 hover:bg-[#408D7B]/20 transition-all">NEURAL_ENHANCE</button>
+            </div>
+          </>
+        )}
+
+        {scan?.modality === 'US' && (
+          <>
+            <div className="w-[1px] h-6 bg-white/10 mx-1" />
+            <div className="flex items-center gap-1 pl-1">
+              <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Play Video">▶️</button>
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">DOPPLER</button>
+            </div>
+          </>
+        )}
+
+        {scan?.modality === 'ECG' && (
+          <>
+            <div className="w-[1px] h-6 bg-white/10 mx-1" />
+            <div className="flex items-center gap-1 pl-1">
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">FILTER_NOISE</button>
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">CALIBRATE_GRID</button>
+            </div>
+          </>
+        )}
+
+        {scan?.modality === 'PATH' && (
+          <>
+            <div className="w-[1px] h-6 bg-white/10 mx-1" />
+            <div className="flex items-center gap-1 pl-1">
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-white bg-[#408D7B]/20 border border-[#408D7B]/30 hover:bg-[#408D7B]/40 transition-all">STAIN_H_E</button>
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">TILE_ZOOM</button>
+              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">SEGMENT_CELLS</button>
+            </div>
+          </>
+        )}
+
         {measurements.length > 0 && (
           <>
             <div className="w-[1px] h-6 bg-white/10 mx-1" />
@@ -368,7 +508,27 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
       }`}>
         <div className="flex justify-between items-start mb-3">
           <UrgencyPill u={ai.urgency} />
-          <span className="text-[9px] font-mono text-[#3A6055] bg-[#050F0C] px-1.5 py-0.5 rounded border border-[#1B3028]">Triage Model v2.4</span>
+          <div className="flex items-center gap-2">
+            {/* Metacognition Confidence Score badge */}
+            {typeof ai.confidence === 'number' && (() => {
+              const pct = Math.round(ai.confidence * 100);
+              const safe = !ai.metacognitionFlags?.includes('UNSAFE_TO_ALERT');
+              const bg   = safe ? (pct >= 85 ? '#0A1F14' : '#2A1800') : '#2A0A0A';
+              const fg   = safe ? (pct >= 85 ? '#1DBF73' : '#E08A20') : '#E03535';
+              const label = safe ? 'META-SAFE' : 'META-FLAG';
+              return (
+                <span title="Metacognition Composite Score" style={{
+                  display:'inline-flex', alignItems:'center', gap:4,
+                  padding:'2px 8px', borderRadius:20, fontSize:10, fontWeight:800,
+                  letterSpacing:'0.06em', fontFamily:'IBM Plex Mono,monospace',
+                  background: bg, color: fg, border:`1px solid ${fg}30`,
+                }}>
+                  🧠 {label} · {pct}%
+                </span>
+              );
+            })()}
+            <span className="text-[9px] font-mono text-[#3A6055] bg-[#050F0C] px-1.5 py-0.5 rounded border border-[#1B3028]">Triage Model v2.4</span>
+          </div>
         </div>
         <div className={`text-base font-extrabold mb-3 ${ai.urgency === 'CRITICAL' ? 'text-[#E03535]' : 'text-[#D0ECE6]'}`}>
           {ai.primaryFinding}
@@ -992,7 +1152,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="font-mono">© 2026 SEWA AI</span>
+          <span className="font-mono">© 2026 SEWA XAI</span>
           <span className="font-mono text-[#3A6055]">v2.4.1-PRO</span>
         </div>
       </footer>

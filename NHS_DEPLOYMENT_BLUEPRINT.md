@@ -1,11 +1,11 @@
-# SEWA AI — NHS Deployment & Integration Blueprint
+# SEWA XAI — NHS Deployment & Integration Blueprint
 
-This document outlines the technical architecture, security requirements, and integration specifications required to deploy the SEWA AI Clinical Intelligence Platform within an NHS Trust. It is intended for NHS IT Directors, Information Governance (IG) Leads, and PACS Administrators.
+This document outlines the technical architecture, security requirements, and integration specifications required to deploy the SEWA XAI Clinical Intelligence Platform within an NHS Trust. It is intended for NHS IT Directors, Information Governance (IG) Leads, and PACS Administrators.
 
 ---
 
 ## 1. Infrastructure & Data Residency
-SEWA AI operates a zero-trust, multi-tenant architecture designed explicitly for statutory compliance with the **NHS Data Security and Protection Toolkit (DSPT)** and the **UK General Data Protection Regulation (UK GDPR)**.
+SEWA XAI operates a zero-trust, multi-tenant architecture designed explicitly for statutory compliance with the **NHS Data Security and Protection Toolkit (DSPT)** and the **UK General Data Protection Regulation (UK GDPR)**.
 
 * **Primary Hosting Environment**: Microsoft Azure `UK South` (London)
 * **Disaster Recovery / Failover**: Microsoft Azure `UK West` (Cardiff)
@@ -29,7 +29,7 @@ For a production deployment, NHS Trusts may choose one of two secure connectivit
 ---
 
 ## 3. PACS / DICOM Integration
-SEWA AI ingests imaging studies via standard DICOM C-STORE protocols. The SEWA DICOM Receiver node operates as a highly available service within the Azure Kubernetes Service (AKS) cluster.
+SEWA XAI ingests imaging studies via standard DICOM C-STORE protocols. The SEWA DICOM Receiver node operates as a highly available service within the Azure Kubernetes Service (AKS) cluster.
 
 ### DICOM Configuration Specifications
 To route anonymised or live studies to SEWA, the local PACS administrator must configure a new DICOM destination node with the following parameters:
@@ -59,10 +59,10 @@ The NHS Trust’s integration engine (e.g., Rhapsody, Mirth Connect, Ensembles) 
 ---
 
 ## 5. Regulatory Status (MHRA)
-SEWA AI incorporates advanced Deep Learning for triage, uncertainty quantification, and Vision-Language Model (VLM) reporting.
+SEWA XAI incorporates advanced Deep Learning for triage, uncertainty quantification, and Vision-Language Model (VLM) reporting.
 
 * **Classification**: Software as a Medical Device (SaMD) Class IIa/IIb (Pending MHRA / UKCA Mark).
-* **Current Operational Mode**: Until formal clinical certification is complete, SEWA AI is deployed in **"Clinical Audit / Research Mode"**. 
+* **Current Operational Mode**: Until formal clinical certification is complete, SEWA XAI is deployed in **"Clinical Audit / Research Mode"**. 
 * **Implication**: AI outputs are strictly separated from front-line clinical decision-making. The platform runs passively on historical data to build localized validation cohorts, allowing the Trust to evaluate accuracy and workflow impact safely.
 
 ---

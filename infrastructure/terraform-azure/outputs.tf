@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/terraform-azure/outputs.tf
+# SEWA XAI — infrastructure/terraform-azure/outputs.tf
 # These outputs are consumed by scripts/generate-env-azure.sh
 # to automatically produce a ready-to-use backend/.env file.
 
@@ -158,7 +158,7 @@ output "deployment_summary" {
   description = "Human-readable deployment summary"
   value = <<-EOT
     ╔══════════════════════════════════════════════════════════════╗
-    ║           SEWA AI — Azure Deployment Complete                ║
+    ║           SEWA XAI — Azure Deployment Complete                ║
     ╠══════════════════════════════════════════════════════════════╣
     ║  Environment  : ${var.environment}
     ║  Region       : ${var.azure_region} (${var.region_code})

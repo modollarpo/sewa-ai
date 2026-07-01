@@ -1,4 +1,4 @@
-// SEWA AI — src/utils/prismaClient.ts
+// SEWA XAI — src/utils/prismaClient.ts
 // Enterprise Multi-Tenancy: Prisma Client Extension for Tenant Isolation
 
 import { PrismaClient } from '@prisma/client';

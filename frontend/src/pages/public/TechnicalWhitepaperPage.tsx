@@ -1,6 +1,6 @@
-// SEWA AI — TechnicalWhitepaperPage.tsx
+// SEWA XAI — TechnicalWhitepaperPage.tsx
 // Technical whitepaper for hospital CIOs, Clinical Safety Officers, and investors.
-// Per advisor: "Proves SEWA AI isn't a black box. Gets past hospital IT review."
+// Per advisor: "Proves SEWA XAI isn't a black box. Gets past hospital IT review."
 
 import React, { useState } from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
@@ -122,7 +122,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
                   Access Whitepaper →
                 </button>
                 <p style={{ fontSize:10, color:C.textLo, marginTop:12, lineHeight:1.6 }}>
-                  By accessing this document you agree to our confidentiality terms. SEWA AI is a registered medical device platform.
+                  By accessing this document you agree to our confidentiality terms. SEWA XAI is a registered medical device platform.
                 </p>
               </div>
             )}
@@ -141,10 +141,10 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             <Tag label="HIPAA · GDPR · NHS DSPT · EU AI Act" color={C.normal} />
           </div>
           <h1 style={{ fontSize:'clamp(32px, 8vw, 44px)', fontWeight:900, color:C.textHi, margin:'0 0 16px', letterSpacing:'-2px', lineHeight:1.1 }}>
-            SEWA AI: Autonomous Diagnostic Intelligence<br/>& Clinical Workflow Integration
+            SEWA XAI: Autonomous Diagnostic Intelligence<br/>& Clinical Workflow Integration
           </h1>
           <p style={{ ...p, fontSize:16, marginBottom:28 }}>
-            A technical deep-dive for hospital CIOs, Clinical Safety Officers, and healthcare investors. This whitepaper explains SEWA AI\'s 4-Engine Safety Architecture, infrastructure design, regulatory compliance, and validated clinical performance.
+            A technical deep-dive for hospital CIOs, Clinical Safety Officers, and healthcare investors. This whitepaper explains SEWA XAI\'s 4-Engine Safety Architecture, infrastructure design, regulatory compliance, and validated clinical performance.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'10px 20px', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:9, color:'white', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:C.F }}>
@@ -178,8 +178,8 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
           <section id="exec" style={{ marginBottom:56, scrollMarginTop:80 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 1</div>
             <h2 style={h2}>Executive Summary</h2>
-            <p style={p}>SEWA AI is an enterprise-grade diagnostic platform designed to alleviate radiologist shortages — currently 29% in the NHS — by providing sub-2-second triage for life-threatening conditions. Unlike point-solution AI, SEWA utilises a 4-Engine Safety Architecture to ensure clinical-grade reliability, explainability, and seamless integration into existing PACS/RIS workflows.</p>
-            <p style={p}>Deployed across 47 hospitals in 7 countries, SEWA AI has processed over 2.1 million scans, achieving AUC-ROC &gt;0.95 across 14 pathology classes with an average door-to-alert time under 2 seconds for critical findings.</p>
+            <p style={p}>SEWA XAI is an enterprise-grade diagnostic platform designed to alleviate radiologist shortages — currently 29% in the NHS — by providing sub-2-second triage for life-threatening conditions. Unlike point-solution AI, SEWA utilises a 4-Engine Safety Architecture to ensure clinical-grade reliability, explainability, and seamless integration into existing PACS/RIS workflows.</p>
+            <p style={p}>Deployed across 47 hospitals in 7 countries, SEWA XAI has processed over 2.1 million scans, achieving AUC-ROC &gt;0.95 across 14 pathology classes with an average door-to-alert time under 2 seconds for critical findings.</p>
             <div className="metric-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginTop:20 }}>
               <MetricCard value=">0.97" label="AUC-ROC (ICH)" color={C.critical}/>
               <MetricCard value="<2s"   label="Triage time"   color={C.amber}/>
@@ -213,7 +213,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
           <section id="architecture" style={{ marginBottom:56, scrollMarginTop:80 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 3</div>
             <h2 style={h2}>4-Engine Safety Architecture</h2>
-            <p style={p}>SEWA AI\'s core innovation is the layered 4-Engine pipeline. Each engine independently validates the previous engine's output before delivery to a clinician. This architecture is specifically designed to meet EU AI Act Article 14 (human oversight of high-risk AI) and FDA 510(k) requirements for clinical decision support.</p>
+            <p style={p}>SEWA XAI\'s core innovation is the layered 4-Engine pipeline. Each engine independently validates the previous engine's output before delivery to a clinician. This architecture is specifically designed to meet EU AI Act Article 14 (human oversight of high-risk AI) and FDA 510(k) requirements for clinical decision support.</p>
 
             {[
               { n:1, label:'Triage Engine', color:C.critical, detail:'EfficientNet-B4 · 14 pathology classes · AUC >0.95 · <2s inference', sub:'Scan Processing → Pathological Assessment → Priority classification → Worklist sorting' },
@@ -240,11 +240,11 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
           <section id="safety" style={{ marginBottom:56, scrollMarginTop:80 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 4</div>
             <h2 style={h2}>Safety & Explainability</h2>
-            <p style={p}>Every SEWA AI result is explainable. Radiologists see a Grad-CAM heatmap overlaid on the DICOM image and SHAP feature attribution values — allowing inspection of exactly which image regions drove the classification.</p>
+            <p style={p}>Every SEWA XAI result is explainable. Radiologists see a Grad-CAM heatmap overlaid on the DICOM image and SHAP feature attribution values — allowing inspection of exactly which image regions drove the classification.</p>
             <p style={p}>The Uncertainty Engine flags cases where the AI is less certain (uncertaintyScore &gt;0.30) for mandatory human review — a design feature that actually increases diagnostic safety compared to overconfident black-box AI.</p>
             <div style={{ padding:16, background:`${C.info}08`, border:`1px solid ${C.info}20`, borderRadius:12, marginTop:16 }}>
               <div style={{ fontSize:12, fontWeight:700, color:C.info, marginBottom:8 }}>EU AI Act Compliance</div>
-              <p style={{ ...p, margin:0, fontSize:12 }}>SEWA AI is classified as a High-Risk AI system under EU AI Act Annex III (Medical Device AI). Our architecture satisfies Article 14 (human oversight), Article 13 (transparency), Article 9 (risk management), and Article 10 (data governance). The Metacognition Engine serves as our Article 14(4) "fail-safe" mechanism.</p>
+              <p style={{ ...p, margin:0, fontSize:12 }}>SEWA XAI is classified as a High-Risk AI system under EU AI Act Annex III (Medical Device AI). Our architecture satisfies Article 14 (human oversight), Article 13 (transparency), Article 9 (risk management), and Article 10 (data governance). The Metacognition Engine serves as our Article 14(4) "fail-safe" mechanism.</p>
             </div>
           </section>
 
@@ -252,7 +252,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
           <section id="infrastructure" style={{ marginBottom:56, scrollMarginTop:80 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 5</div>
             <h2 style={h2}>Infrastructure & Integration</h2>
-            <p style={p}>SEWA AI deploys on Azure (primary), AWS, and GCP simultaneously. Each region maintains its own Kubernetes cluster, PostgreSQL database, Redis cache, and object storage — ensuring data residency compliance and sub-100ms response times globally.</p>
+            <p style={p}>SEWA XAI deploys on Azure (primary), AWS, and GCP simultaneously. Each region maintains its own Kubernetes cluster, PostgreSQL database, Redis cache, and object storage — ensuring data residency compliance and sub-100ms response times globally.</p>
             <div className="infrastructure-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
               {[
                 { title:'Clinical Integration', items:['FHIR R4 bi-directional','HL7 v2.x ORM/ORU','DICOM C-STORE (DIMSE)','WADO-RS image retrieval','NHS Spine / PDS / ODS','Epic/Cerner SMART on FHIR'] },
@@ -297,7 +297,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
           <section id="evidence" style={{ marginBottom:56, scrollMarginTop:80 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 7</div>
             <h2 style={h2}>Clinical Evidence</h2>
-            <p style={p}>All SEWA AI performance metrics are independently validated and peer-reviewed. We do not make unsubstantiated clinical claims.</p>
+            <p style={p}>All SEWA XAI performance metrics are independently validated and peer-reviewed. We do not make unsubstantiated clinical claims.</p>
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
                 <thead>
@@ -346,7 +346,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             </div>
 
             <div style={{ marginTop:32, padding:28, background:`${C.brand}08`, border:`1px solid ${C.brand}20`, borderRadius:16, textAlign:'center' }}>
-              <h3 style={{ fontSize:20, fontWeight:800, color:C.textHi, margin:'0 0 10px', fontFamily:C.F }}>Ready to evaluate SEWA AI for your hospital?</h3>
+              <h3 style={{ fontSize:20, fontWeight:800, color:C.textHi, margin:'0 0 10px', fontFamily:C.F }}>Ready to evaluate SEWA XAI for your hospital?</h3>
               <p style={{ ...p, textAlign:'center', margin:'0 0 20px' }}>Our clinical team will design a 30-day proof-of-concept against your specific radiology workflow.</p>
               <div style={{ display:'flex', gap:12, justifyContent:'center', flexWrap:'wrap' }}>
                 <button onClick={() => onNavigate('contact')} style={{ padding:'11px 24px', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:10, color:'white', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:C.F }}>Request a Pilot →</button>

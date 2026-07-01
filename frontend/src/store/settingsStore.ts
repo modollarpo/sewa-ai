@@ -1,4 +1,4 @@
-// SEWA AI — settingsStore.ts
+// SEWA XAI — settingsStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

@@ -1,4 +1,4 @@
-// SEWA AI — SpecialistOnboarding.tsx
+// SEWA XAI — SpecialistOnboarding.tsx
 // Onboarding for independent clinical specialists to join the referral marketplace
 import React, { useState } from 'react';
 import { apiClient } from '../../services/apiClient';
@@ -98,8 +98,9 @@ export function SpecialistOnboarding() {
                 <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Specialization</label>
                 <select value={data.speciality} onChange={e=>update({speciality:e.target.value})} className={inputClass}>
                   <option value="">Select Domain...</option>
-                  <option value="radiology">Neuroradiology</option>
-                  <option value="cardiology">Cardiology</option>
+                  <option value="radiology">Neuroradiology / MRI</option>
+                  <option value="cardiology">Cardiology / ECG</option>
+                  <option value="ultrasound">POCUS / Sonography</option>
                   <option value="oncology">Oncology</option>
                   <option value="general">Internal Medicine</option>
                 </select>
@@ -118,7 +119,7 @@ export function SpecialistOnboarding() {
             <label className="flex gap-4 p-4 rounded-2xl bg-[#05100D] border border-[#1B3028] cursor-pointer group transition-all hover:border-[#408D7B]/30">
               <input type="checkbox" checked={data.agreedToTerms} onChange={e=>update({agreedToTerms:e.target.checked})} className="mt-1 w-4 h-4 rounded border-[#1B3028] bg-[#111F1A] text-[#408D7B] focus:ring-[#408D7B]" />
               <span className="text-[10px] text-[#6FA898] font-medium leading-relaxed uppercase tracking-wider">
-                I agree to the SEWA AI Specialist Agreement, including the 90/10 revenue model and clinical validation protocols.
+                I agree to the SEWA XAI Specialist Agreement, including the 90/10 revenue model and clinical validation protocols.
               </span>
             </label>
 
@@ -147,6 +148,18 @@ export function SpecialistOnboarding() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.911 8.01c-1.018-.468-2.316-.71-3.32-.71-2.18 0-3.6 1.053-3.6 3.018 0 3.018 4.14 2.527 4.14 3.82 0 .526-.456.818-1.391.818-1.229 0-2.614-.526-3.702-1.076l-.631 2.91c1.192.573 2.754.912 4.07 1.1h1.106c2.316 0 3.737-1.123 3.737-3.141 0-3.263-4.14-2.667-4.14-3.924 0-.468.421-.737 1.229-.737.982 0 2.21.351 3.105.818l.795-3.09z"/></svg>
                 Stripe Connect Setup
               </a>
+              
+              <div className="pt-4 border-t border-[#1B3028]">
+                <p className="text-[10px] text-[#3A6055] font-black uppercase tracking-[0.2em] mb-4">African Regional Payouts</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => alert("Paystack Integration Coming Soon. Please use Stripe Connect for now.")} className="py-3 rounded-xl bg-[#0BA4DB]/10 border border-[#0BA4DB]/30 hover:bg-[#0BA4DB]/20 text-[#0BA4DB] text-[10px] font-black uppercase tracking-wider transition-all">
+                    Paystack
+                  </button>
+                  <button onClick={() => alert("Flutterwave Integration Coming Soon. Please use Stripe Connect for now.")} className="py-3 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/30 hover:bg-[#F5A623]/20 text-[#F5A623] text-[10px] font-black uppercase tracking-wider transition-all">
+                    Flutterwave
+                  </button>
+                </div>
+              </div>
               
               <button 
                 onClick={() => window.location.href='/login'} 

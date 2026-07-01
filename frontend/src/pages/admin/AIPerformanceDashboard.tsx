@@ -1,4 +1,4 @@
-// SEWA AI — AIPerformanceDashboard.tsx
+// SEWA XAI — AIPerformanceDashboard.tsx
 // AI monitoring: inference latency, accuracy by condition, A/B tests, drift detection, bias
 // P1 fix: latency chart now comes from /ai-monitoring/latency API
 // P2 fix: P50/P95/P99 from real backend percentile data

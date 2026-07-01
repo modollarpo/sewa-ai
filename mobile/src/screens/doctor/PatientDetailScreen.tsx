@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/doctor/PatientDetailScreen.tsx
+// SEWA XAI — mobile/src/screens/doctor/PatientDetailScreen.tsx
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useQuery } from '@tanstack/react-query';

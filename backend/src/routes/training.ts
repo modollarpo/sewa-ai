@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/training.ts
+// SEWA XAI — backend/src/routes/training.ts
 // Anonymized training cases for radiologists and students
 
 import { Router } from 'express';

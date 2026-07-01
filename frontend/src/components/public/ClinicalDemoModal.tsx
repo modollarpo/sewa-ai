@@ -1,7 +1,7 @@
-// SEWA AI — frontend/src/components/public/ClinicalDemoModal.tsx
+// SEWA XAI — frontend/src/components/public/ClinicalDemoModal.tsx
 // Interactive in-browser clinical demo: animates the full scan-to-alert pipeline
 // Shows triage → uncertainty → VLM → metacognition → stroke code alert
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
@@ -193,7 +193,7 @@ export function ClinicalDemoModal({ onClose }: Props) {
     <div
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'env(safe-area-inset-top) 16px env(safe-area-inset-bottom)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      role="dialog" aria-modal="true" aria-label="SEWA AI Clinical Demo"
+      role="dialog" aria-modal="true" aria-label="SEWA XAI Clinical Demo"
     >
       <style>{`
         @media (max-width: 768px) {
@@ -402,7 +402,7 @@ export function ClinicalDemoModal({ onClose }: Props) {
                   <AlertChip icon="📋" label="HL7 ORM (CTA order)"   delay={650}  fired={alertsFired} />
                 </div>
                 <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(0,0,0,0.20)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                  <span style={{ fontSize: 12, color: C.textMd, fontFamily: C.F }}>NHS baseline: 4–8 hours · SEWA AI: <strong style={{ color: '#FF8080' }}>1.84 seconds</strong></span>
+                  <span style={{ fontSize: 12, color: C.textMd, fontFamily: C.F }}>NHS baseline: 4–8 hours · SEWA XAI: <strong style={{ color: '#FF8080' }}>1.84 seconds</strong></span>
                   <span style={{ fontSize: 12, color: C.textMd, fontFamily: C.FM }}>~17,000× faster</span>
                 </div>
               </div>
@@ -413,14 +413,14 @@ export function ClinicalDemoModal({ onClose }: Props) {
 
         {/* ── Footer ── */}
         <div className="demo-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', borderTop: `1px solid ${C.border}`, background: C.bg0, flexShrink: 0, flexWrap: 'wrap', gap: 10 }}>
-          <span style={{ fontSize: 11, color: C.textLo, fontFamily: C.F }}>Synthetic demo data only — no patient information. © 2026 SEWA AI.</span>
+          <span style={{ fontSize: 11, color: C.textLo, fontFamily: C.F }}>Synthetic demo data only — no patient information. © 2026 SEWA XAI.</span>
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={runDemo} disabled={running}
               style={{ padding: '8px 20px', background: running ? C.bg2 : C.brandDim, border: `1px solid ${running ? C.border : C.brand}`, borderRadius: 10, color: running ? C.textLo : C.brandLt, fontSize: 13, fontWeight: 600, cursor: running ? 'not-allowed' : 'pointer', fontFamily: C.F }}>
               {running ? 'Running…' : '▶ Run Again'}
             </button>
             <button
-              onClick={() => window.open('mailto:info@sewaxai.health?subject=SEWA AI Demo Request', '_blank')}
+              onClick={() => window.open('mailto:info@sewaxai.health?subject=SEWA XAI Demo Request', '_blank')}
               style={{ padding: '8px 20px', background: `linear-gradient(135deg,${C.brand},${C.brandDk})`, border: 'none', borderRadius: 10, color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: C.F }}>
               Request Live Demo →
             </button>

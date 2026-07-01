@@ -1,4 +1,4 @@
-# Prometheus ServiceMonitors for SEWA AI Services
+# Prometheus ServiceMonitors for SEWA XAI Services
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

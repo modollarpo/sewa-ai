@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/reports.ts
+// SEWA XAI — backend/src/routes/reports.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import * as ctrl from '../controllers/reportController';

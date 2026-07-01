@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/middleware/audit.ts
+// SEWA XAI — backend/src/middleware/audit.ts
 import { Request, Response, NextFunction } from 'express';
 import { auditLog } from '../utils/audit';
 

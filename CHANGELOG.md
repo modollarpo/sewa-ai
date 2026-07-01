@@ -1,4 +1,4 @@
-# SEWA AI Changelog
+# SEWA XAI Changelog
 
 ## v2.4.2 (Upcoming)
 ### Added

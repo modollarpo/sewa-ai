@@ -1,6 +1,6 @@
-// SEWA AI — backend/src/routes/payments.ts
+// SEWA XAI — backend/src/routes/payments.ts
 // Full billing API: subscriptions, webhooks, usage, upgrade, cancel
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import { Router, Request, Response, NextFunction } from 'express';
 import express from 'express';
@@ -297,7 +297,7 @@ r.get('/invoices/:id/pdf',
       doc.pipe(res);
 
       // Header
-      doc.fontSize(24).font('Helvetica-Bold').text('SEWA AI', 50, 50);
+      doc.fontSize(24).font('Helvetica-Bold').text('SEWA XAI', 50, 50);
       doc.fontSize(10).font('Helvetica').fillColor('#666')
          .text('a Storegrill Inc Ltd company', 50, 80)
          .text('Registered in England & Wales (14581073)', 50, 92);
@@ -326,7 +326,7 @@ r.get('/invoices/:id/pdf',
       const currency = payment.tenant?.currency ?? 'GBP';
       const amount   = Number(payment.amount || 0);
       doc.font('Helvetica').fillColor('#333')
-         .text(`SEWA AI Platform — ${payment.tenant?.plan ?? 'Pro'} Plan`, 50, 248)
+         .text(`SEWA XAI Platform — ${payment.tenant?.plan ?? 'Pro'} Plan`, 50, 248)
          .text(`${currency} ${amount.toFixed(2)}`, 450, 248, { align: 'right' });
 
       doc.moveTo(50, 270).lineTo(545, 270).stroke('#E0E0E0');
@@ -345,7 +345,7 @@ r.get('/invoices/:id/pdf',
       // Footer
       doc.fontSize(8).font('Helvetica').fillColor('#999')
          .text('This is a computer-generated invoice and does not require a signature.', 50, 750, { align: 'center' })
-         .text('SEWA AI · support@sewa.ai · www.sewa.ai', 50, 762, { align: 'center' });
+         .text('SEWA XAI · support@sewa.ai · www.sewa.ai', 50, 762, { align: 'center' });
 
       doc.end();
     } catch (err) { next(err); }

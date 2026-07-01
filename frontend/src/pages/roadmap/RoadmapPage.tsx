@@ -1,4 +1,4 @@
-// SEWA AI — RoadmapPage.tsx
+// SEWA XAI — RoadmapPage.tsx
 // Public-facing internal product roadmap: Q1-Q4 2026, feature voting, release notes
 
 import React, { useState } from 'react';
@@ -67,7 +67,7 @@ const ROADMAP: RoadmapItem[] = [
   // Q3 2026
   { id:'r13', title:'Retinal fundus AI (DR screening)', desc:'Diabetic retinopathy grading from fundus photographs — DR/ARMD/glaucoma detection.', status:'planned', category:'ai', votes:512, quarter:'Q3 2026', impact:'high' },
   { id:'r14', title:'Pathology slide analysis (WSI)', desc:'Whole Slide Image analysis for histopathology — cancer grading, Ki-67, HER2.', status:'researching', category:'ai', votes:389, quarter:'Q3 2026', impact:'high' },
-  { id:'r15', title:'FDA 510(k) De Novo submission', desc:'Submit De Novo classification request for SEWA AI as SaMD for triage of CT/MRI/XR findings.', status:'planned', category:'compliance', votes:134, quarter:'Q3 2026', impact:'high' },
+  { id:'r15', title:'FDA 510(k) De Novo submission', desc:'Submit De Novo classification request for SEWA XAI as SaMD for triage of CT/MRI/XR findings.', status:'planned', category:'compliance', votes:134, quarter:'Q3 2026', impact:'high' },
   { id:'r16', title:'Natural language query for imaging', desc:'Ask questions about scan findings in plain English: "Show me all PE cases in the last 30 days".', status:'researching', category:'clinical', votes:445, quarter:'Q3 2026', impact:'medium' },
   { id:'r17', title:'Epic & Cerner EHR deep integration', desc:'Bi-directional Epic FHIR and Cerner Millennium integration with AI result push.', status:'planned', category:'integrations', votes:312, quarter:'Q3 2026', impact:'high' },
 
@@ -171,7 +171,7 @@ export function RoadmapPage() {
           <div>
             <h2 style={{ margin:0, fontSize:22, fontWeight:800, color:C.textHi, letterSpacing:'-0.02em' }}>Product Roadmap</h2>
             <p style={{ margin:'4px 0 0', fontSize:13, color:C.textMd }}>
-              SEWA AI 2026 — {items.filter(i=>i.status==='shipped').length} shipped · {items.filter(i=>i.status==='in_progress').length} in progress · {items.filter(i=>i.status==='planned').length} planned · {items.filter(i=>i.status==='researching').length} researching
+              SEWA XAI 2026 — {items.filter(i=>i.status==='shipped').length} shipped · {items.filter(i=>i.status==='in_progress').length} in progress · {items.filter(i=>i.status==='planned').length} planned · {items.filter(i=>i.status==='researching').length} researching
             </p>
           </div>
           <div style={{ display:'flex', gap:6 }}>

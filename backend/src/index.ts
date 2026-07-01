@@ -1,4 +1,4 @@
-// SEWA AI Backend — src/index.ts
+// SEWA XAI Backend — src/index.ts
 // Node.js 18+ | Express.js | TypeScript | Socket.IO
 // README.pdf tech stack: Runtime Node.js 18+, Framework Express.js
 
@@ -36,7 +36,7 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'SEWA AI API',
+      title: 'SEWA XAI API',
       version: '2.4.1',
       description: 'Enterprise-grade clinical diagnostic AI platform API',
     },
@@ -243,7 +243,7 @@ async function bootstrap() {
     logger.info('PostgreSQL connected');
 
     httpServer.listen(config.PORT, () => {
-      logger.info(`SEWA AI Backend running on port ${config.PORT}`);
+      logger.info(`SEWA XAI Backend running on port ${config.PORT}`);
       logger.info(`Environment: ${config.NODE_ENV}`);
       logger.info(`Region: ${config.REGION}`);
     });

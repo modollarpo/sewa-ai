@@ -1,4 +1,4 @@
-# SEWA AI — AI Services Production Deployment (Fixed YAML)
+# SEWA XAI — AI Services Production Deployment (Fixed YAML)
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,6 +1,6 @@
-// SEWA AI — StatusBadge.tsx
+// SEWA XAI — StatusBadge.tsx
 // Urgency, status, and state badges used across dashboards.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React from 'react';
 
 type UrgencyLevel = 'CRITICAL' | 'URGENT' | 'NORMAL' | 'ROUTINE';

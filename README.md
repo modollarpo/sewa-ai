@@ -1,15 +1,15 @@
-# SEWA AI — Clinical Intelligence Platform
+# SEWA XAI — Clinical Intelligence Platform
 ## Smart Early Warning Assistant for Doctors
 ### *from hours, to seconds*
 
-> © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+> © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 > **Contact:** info@sewaxai.health · www.sewaxai.health
 
 ---
 
-## What is SEWA AI?
+## What is SEWA XAI?
 
-SEWA AI is an enterprise-grade clinical diagnostic AI platform that reduces the time from medical scan acquisition to clinician alert from **4–8 hours to 1.84 seconds**.
+SEWA XAI is an enterprise-grade clinical diagnostic AI platform that reduces the time from medical scan acquisition to clinician alert from **4–8 hours to 1.84 seconds**.
 
 Built for NHS hospitals and African clinics — the same platform, the same AI, adapted to any environment from Azure GPU clusters to offline ARM devices with no internet.
 
@@ -191,9 +191,9 @@ Clinical Safety Officer under DCB0129 v3.0.
 
 ## Inventor
 
-The SEWA AI multi-engine architecture, metacognition safety layer, federated learning subsystem, and sovereign deployment architecture are the sole invention of **Dolapo Ariyo**, protected by UK Provisional Patent Application (UKIPO, March 2026).
+The SEWA XAI multi-engine architecture, metacognition safety layer, federated learning subsystem, and sovereign deployment architecture are the sole invention of **Dolapo Ariyo**, protected by UK Provisional Patent Application (UKIPO, March 2026).
 
 ---
 
-*SEWA AI — from hours, to seconds*  
-*© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.*
+*SEWA XAI — from hours, to seconds*  
+*© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.*

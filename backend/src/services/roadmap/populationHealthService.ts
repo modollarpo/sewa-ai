@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/roadmap/populationHealthService.ts
+// SEWA XAI — backend/src/services/roadmap/populationHealthService.ts
 // Roadmap Feature 10: Population Health & Epidemiology Dashboard
 // Aggregated anonymised disease surveillance across regions
 

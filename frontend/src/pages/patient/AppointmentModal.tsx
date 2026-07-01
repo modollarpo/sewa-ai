@@ -1,4 +1,4 @@
-// SEWA AI — AppointmentModal.tsx
+// SEWA XAI — AppointmentModal.tsx
 import React, { useState } from 'react';
 import { apiClient } from '../../services/apiClient';
 

@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/config/database.ts
+// SEWA XAI — backend/src/config/database.ts
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
 

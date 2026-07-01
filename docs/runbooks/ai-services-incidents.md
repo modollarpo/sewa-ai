@@ -1,7 +1,7 @@
 # AI Services Incident Runbook
 ---
 ## 1. Overview
-This runbook covers incidents with SEWA AI's microservices:
+This runbook covers incidents with SEWA XAI's microservices:
 - Triage (port 8000)
 - VLM Report Generator (port 8001)
 - Uncertainty Engine (port 8002)

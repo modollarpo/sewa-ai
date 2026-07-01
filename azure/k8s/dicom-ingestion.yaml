@@ -1,4 +1,4 @@
-# SEWA AI — DICOM Ingestion Service (Go) — Kubernetes Manifest v2
+# SEWA XAI — DICOM Ingestion Service (Go) — Kubernetes Manifest v2
 # Security hardened: internal LB + NetworkPolicy — DICOM never exposed to internet
 # Port 11112: DICOM C-STORE (Azure VNet internal only)
 # Port 8090:  HTTP health / metrics / /ingest REST endpoint

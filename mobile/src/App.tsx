@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/App.tsx
+// SEWA XAI — mobile/src/App.tsx
 // React Native 0.73+ | TypeScript | TanStack Query | Zustand | FCM | Biometric
 // Full clinician & patient portal with offline support, voice dictation, annotations
 
@@ -243,7 +243,7 @@ async function setupFCM() {
 
     // Show local notification via Notifee
     await notifee.displayNotification({
-      title: remoteMessage.notification?.title ?? 'SEWA AI Alert',
+      title: remoteMessage.notification?.title ?? 'SEWA XAI Alert',
       body: remoteMessage.notification?.body ?? '',
       android: {
         channelId: urgency === 'CRITICAL' || urgency === 'URGENT' ? 'critical' : 'general',
@@ -302,7 +302,7 @@ export async function attemptBiometricAuth(): Promise<boolean> {
                 biometryType === BiometryTypes.TouchID ? 'Touch ID' : 'Fingerprint';
 
   const { success } = await rnBiometrics.simplePrompt({
-    promptMessage: `Sign in to SEWA AI with ${label}`,
+    promptMessage: `Sign in to SEWA XAI with ${label}`,
     cancelButtonText: 'Use Password',
     fallbackPromptMessage: 'Use your password instead',
   });

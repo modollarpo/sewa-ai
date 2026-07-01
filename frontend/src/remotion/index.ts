@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/remotion/index.ts
+// SEWA XAI — frontend/src/remotion/index.ts
 // Remotion root — registers all compositions for:
 //   - npx remotion render (server-side MP4/WebM export)
 //   - npx remotion still  (thumbnail/frame export)

@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/store/authStore.ts
+// SEWA XAI — frontend/src/store/authStore.ts
 // Zustand state management — JWT + refresh token lifecycle
 
 import { create } from 'zustand';

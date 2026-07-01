@@ -1,4 +1,4 @@
-// SEWA AI — src/services/aiOrchestrator.ts  (CPU-OPTIMISED EDITION)
+// SEWA XAI — src/services/aiOrchestrator.ts  (CPU-OPTIMISED EDITION)
 // Core AI Pipeline Orchestrator: Triage ‖ Uncertainty → VLM → Metacognition
 //
 // KEY CPU OPTIMISATION: Triage + Uncertainty now run in PARALLEL (Promise.all).
@@ -12,7 +12,7 @@
 //   Overhead             : ~100ms
 //   p50 total            : ~700ms–1.1s ✅ well within 2-4s SLA
 //
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import { AxiosError } from 'axios';
 import { prisma } from '../utils/prismaClient';
@@ -27,6 +27,7 @@ import * as fhirService from './fhirService';
 import * as longitudinalService from './longitudinalService';
 import { dlq } from './dlqService';
 import { createAxiosInstance } from '../utils/axiosInstance';
+import { buildVLMSystemPrompt, translateUrgency, type SupportedLanguage } from './vlmLanguageService';
 
 const axios = createAxiosInstance();
 
@@ -35,6 +36,7 @@ const TRIAGE_URL        = config.AI_SERVICE_URL;
 const UNCERTAINTY_URL   = config.UNCERTAINTY_SERVICE_URL;
 const VLM_URL           = config.VLM_SERVICE_URL;
 const METACOGNITION_URL = config.METACOGNITION_SERVICE_URL;
+const PATHOLOGY_URL     = config.PATHOLOGY_SERVICE_URL;   // Digital Pathology WSI service
 
 // CPU services are slower — generous timeouts, but within 2-4s SLA budget
 const SVC_TIMEOUT  = { timeout: 8_000  };   // per AI service call (8s generous ceiling)
@@ -82,6 +84,22 @@ export interface MetacognitionResult {
   layer8_hallucination_risk:      number;
   layer9_safe_to_alert:           boolean;
   inferenceMs: number;
+}
+
+export interface PathologyResult {
+  scan_id:         string;
+  primary_finding: string;
+  snomed_code:     string;
+  urgency:         'URGENT' | 'NORMAL' | 'CRITICAL';
+  confidence:      number;
+  tissue_type:     string;
+  gleason_grade:   string | null;
+  ki67_estimate:   number | null;
+  all_findings:    Array<{ condition: string; probability: number }>;
+  inference_ms:    number;
+  model_version:   string;
+  backend:         string;
+  recommendation:  string;
 }
 
 // ── Safe HTTP wrapper ────────────────────────────────────────────────────
@@ -185,6 +203,114 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     }
 
     // ──────────────────────────────────────────────────────────────────────
+    // PATH MODALITY FAST-TRACK: Digital Pathology slides bypass imaging triage
+    // and are processed directly by the dedicated WSI classification service.
+    // ──────────────────────────────────────────────────────────────────────
+    if (scan.modality === 'PATH') {
+      logger.info(`[AI Pipeline] PATH modality detected — routing to pathology engine: ${scanId}`);
+      const pathResult = await safePOST<PathologyResult>(
+        `${PATHOLOGY_URL}/pathology/predict`,
+        {
+          scan_id:      scanId,
+          storage_url:  scan.storageUrl,
+          tissue_type:  scan.bodyPart,
+          model_version: 'v1.0.0',
+        },
+        { timeout: 15_000 },  // WSI tiling can take up to 10s
+      );
+      logger.info(`[Pathology] ${scanId}: ${pathResult.primary_finding} | urgency=${pathResult.urgency} | ${pathResult.inference_ms}ms`);
+
+      // Persist pathology AI result
+      const pathAIResult = await prisma.aIResult.create({
+        data: {
+          tenantId,
+          scanId,
+          primaryFinding:      pathResult.primary_finding,
+          urgency:             pathResult.urgency === 'CRITICAL' ? 'CRITICAL' : pathResult.urgency === 'URGENT' ? 'URGENT' : 'NORMAL',
+          confidence:          pathResult.confidence,
+          uncertaintyScore:    0,   // Pathology engine uses ensemble voting, not MC-Dropout
+          metacognitionFlags:  [],
+          summary:             pathResult.primary_finding,
+          epistemicUncertainty: 0,
+          aleatoricUncertainty: 0,
+          rawJson: {
+            pathology: pathResult,
+            pipeline:  { service: 'sewa-pathology', backend: pathResult.backend },
+          } as any,
+          modelId:             `sewa-path-onnx-int8-${pathResult.model_version}`,
+          clinicalContext,
+          longitudinalContext,
+          vlmFindings:         pathResult.recommendation,
+          vlmImpression:       `${pathResult.primary_finding} (${(pathResult.confidence * 100).toFixed(0)}% confidence)` +
+                                (pathResult.gleason_grade ? `. ${pathResult.gleason_grade}.` : '') +
+                                (pathResult.ki67_estimate != null ? ` Ki67 index: ${(pathResult.ki67_estimate * 100).toFixed(0)}%.` : ''),
+        },
+      });
+
+      // Generate pathology-specific report
+      await prisma.report.create({
+        data: {
+          scanId, tenantId,
+          authorId:       'SYSTEM',
+          findings:       pathResult.recommendation,
+          impression:     pathAIResult.vlmImpression ?? pathResult.primary_finding,
+          technique:      `Digital pathology tile classification — ${pathResult.tissue_type} tissue. H&E stain normalisation (Macenko SVD). ONNX INT8 patch-level inference.`,
+          recommendation: pathResult.recommendation,
+          content:        [
+            `TECHNIQUE: Digital pathology. H&E stain. Tissue: ${pathResult.tissue_type}.`,
+            `FINDINGS: ${pathResult.primary_finding} (confidence: ${(pathResult.confidence * 100).toFixed(0)}%).`,
+            pathResult.gleason_grade ? `GRADING: ${pathResult.gleason_grade}.` : '',
+            pathResult.ki67_estimate != null ? `PROLIFERATION INDEX (Ki67 estimate): ${(pathResult.ki67_estimate * 100).toFixed(0)}%.` : '',
+            `SNOMED: ${pathResult.snomed_code}.`,
+            `\nRECOMMENDATION: ${pathResult.recommendation}`,
+          ].filter(Boolean).join('\n'),
+          summary:        pathAIResult.vlmImpression ?? pathResult.primary_finding,
+          status:         'draft',
+        },
+      });
+
+      // Update scan status
+      await prisma.scan.update({
+        where: { id: scanId },
+        data: {
+          status:              'ai_complete',
+          urgency:             pathResult.urgency,
+          requiresHumanReview: pathResult.urgency !== 'NORMAL',
+          humanReviewReason:   pathResult.urgency !== 'NORMAL' ? 'PATHOLOGY_MDT_ESCALATION' : null,
+        },
+      });
+
+      await auditLog({
+        tenantId, userId: 'SYSTEM', action: 'AI_RESULT_CREATED',
+        entity: 'AIResult', entityId: pathAIResult.id,
+        metadata: { scanId, modality: 'PATH', finding: pathResult.primary_finding, urgency: pathResult.urgency },
+      });
+
+      // Real-time alert if urgent
+      if (pathResult.urgency === 'URGENT' || pathResult.urgency === 'CRITICAL') {
+        await alertService.dispatch({
+          tenantId,
+          scanId,
+          aiResultId:     pathAIResult.id,
+          urgency:        pathResult.urgency as 'URGENT' | 'CRITICAL',
+          primaryFinding: pathResult.primary_finding,
+          confidence:     pathResult.confidence,
+          doorToAlertMs:  Date.now() - pipelineStart,
+        }).catch(err => logger.error(`[Pathology] Alert dispatch failed: ${err.message}`));
+      }
+
+      io.to(`tenant:${tenantId}`).emit('scan:ai_complete', {
+        scanId, urgency: pathResult.urgency,
+        finding: pathResult.primary_finding,
+        confidence: pathResult.confidence,
+        modality: 'PATH',
+      });
+
+      logger.info(`[AI Pipeline] ✓ PATH pipeline complete: ${scanId} | ${Date.now() - pipelineStart}ms total`);
+      return;  // PATH pipeline exits here — does not continue to imaging triage stages
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
     // STAGE 1: Triage ‖ Uncertainty (PARALLEL)
     //
     // Both engines read the same DICOM from blob storage independently.
@@ -234,6 +360,10 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     // ──────────────────────────────────────────────────────────────────────
     // STAGE 2: VLM Report — template-based on CPU, ~30ms
     // ──────────────────────────────────────────────────────────────────────
+    const reportLanguage = ((scan.tenant as any)?.reportLanguage ?? 'en') as SupportedLanguage;
+    const vlmSystemPrompt = buildVLMSystemPrompt(reportLanguage);
+    const localizedUrgency = translateUrgency(triage.urgency, reportLanguage);
+
     const vlm = await safePOST<VLMResult>(
       `${VLM_URL}/vlm/generate-report`,
       {
@@ -245,14 +375,15 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         patient_sex:          patientSex,
         clinical_indication:  scan.clinicalIndication,
         ai_finding:           triage.primaryFinding,
-        urgency:              triage.urgency,
+        urgency:              localizedUrgency,
         confidence:           triage.confidence,
         location:             (triage as any).location,
         shap_values:          triage.shapValues,
         clinical_context:     clinicalContext,
         longitudinal_context: longitudinalContext,
         region:               scan.tenant?.region ?? 'uk',
-        language:             (scan.tenant as any)?.reportLanguage ?? 'en',
+        language:             reportLanguage,
+        system_prompt:        vlmSystemPrompt,
       },
       VLM_TIMEOUT,
     );

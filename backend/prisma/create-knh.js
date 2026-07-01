@@ -1,4 +1,4 @@
-// SEWA AI — create missing kenyatta-nh tenant + technician user
+// SEWA XAI — create missing kenyatta-nh tenant + technician user
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();

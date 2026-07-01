@@ -1,4 +1,4 @@
-# SEWA AI Incident Response Runbook
+# SEWA XAI Incident Response Runbook
 
 ## Severity Levels
 - **SEV 1**: Total platform outage, critical AI failures, patient safety risk

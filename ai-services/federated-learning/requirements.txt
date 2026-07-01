@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/federated-learning/requirements.txt
+# SEWA XAI — ai-services/federated-learning/requirements.txt
 # CPU-only production build
 # flwr (no [simulation] extra — avoids ray/tensorflow pull)
 # torch CPU wheel from PyTorch CDN (via --extra-index-url in Dockerfile)

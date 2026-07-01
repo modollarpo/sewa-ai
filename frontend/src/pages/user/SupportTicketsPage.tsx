@@ -1,4 +1,4 @@
-// SEWA AI — Support & Feedback Page
+// SEWA XAI — Support & Feedback Page
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { apiClient, getFeedback } from '../../services/apiClient';

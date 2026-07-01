@@ -1,6 +1,6 @@
-# SEWA AI — backend/Dockerfile
+# SEWA XAI — backend/Dockerfile
 # Multi-stage build: compile TypeScript → lean production image
-# © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 # ── Stage 1: Install ALL deps + build ─────────────────────────
 FROM node:20 AS builder

@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/i18n/translations.ts
+// SEWA XAI — frontend/src/i18n/translations.ts
 // Comprehensive multi-language support for global health deployment.
 // Languages: English, French, Yoruba (Nigeria), Swahili (East Africa), Arabic, Hindi.
 

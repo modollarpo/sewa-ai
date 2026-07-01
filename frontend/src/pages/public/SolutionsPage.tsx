@@ -1,4 +1,4 @@
-// SEWA AI — SolutionsPage.tsx
+// SEWA XAI — SolutionsPage.tsx
 import React, { useState } from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
@@ -27,7 +27,7 @@ const ENGINES = [
   {
     id:'uncertainty', icon:'🎯', label:'Uncertainty Engine', color:C.amber,
     headline:'Know when to trust the AI — and when not to',
-    description:'SEWA AI is the only clinical AI platform that quantifies its own uncertainty. Using stochastic Monte Carlo dropout with multi-pass uncertainty quantification, we compute both epistemic (model) and aleatoric (data) uncertainty — flagging borderline cases for mandatory human review.',
+    description:'SEWA XAI is the only clinical AI platform that quantifies its own uncertainty. Using stochastic Monte Carlo dropout with multi-pass uncertainty quantification, we compute both epistemic (model) and aleatoric (data) uncertainty — flagging borderline cases for mandatory human review.',
     conditions:['Low-quality DICOM inputs (motion artefact, noise)','Rare or out-of-distribution pathologies','Multi-pathology overlapping findings','Paediatric anatomy (OOD vs adult training)','Post-surgical anatomy','Contrast vs non-contrast ambiguity'],
     metrics:[
       { label:'Uncertainty method', value:'Stochastic MC Dropout' },
@@ -66,7 +66,7 @@ const ENGINES = [
   {
     id:'xai', icon:'🔍', label:'Explainability (XAI)', color:C.normal,
     headline:'See exactly what the AI saw — pixel by pixel',
-    description:'Every SEWA AI result comes with a Grad-CAM heatmap overlaid on the DICOM image and SHAP feature attribution values. Clinicians can inspect precisely which regions drove the diagnosis — building trust and enabling faster, more confident decisions.',
+    description:'Every SEWA XAI result comes with a Grad-CAM heatmap overlaid on the DICOM image and SHAP feature attribution values. Clinicians can inspect precisely which regions drove the diagnosis — building trust and enabling faster, more confident decisions.',
     conditions:['Grad-CAM activation maps (pixel-level attribution)','SHAP feature importance (per clinical variable)','Attention rollout for transformer layers','Contrastive explanations (why NOT another class)','Interactive threshold adjustment','PDF export for audit and legal records'],
     metrics:[
       { label:'Localisation accuracy', value:'91.4%' },
@@ -129,7 +129,7 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             Five AI engines.<br/>One clinical platform.
           </h1>
           <p style={{ fontSize:15, color:C.textMd, lineHeight:1.8, margin:'0 0 36px' }}>
-            SEWA AI is not a single model — it is a layered clinical intelligence pipeline. Each engine is independently validated, explainable, and designed to improve patient outcomes at every step of the diagnostic workflow.
+            SEWA XAI is not a single model — it is a layered clinical intelligence pipeline. Each engine is independently validated, explainable, and designed to improve patient outcomes at every step of the diagnostic workflow.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:8, justifyContent:'center', flexWrap:'wrap' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'12px 28px', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:10, color:'white', fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:C.F }}>Request Demo →</button>
@@ -225,7 +225,7 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         <div style={{ marginBottom:80 }}>
           <div style={{ textAlign:'center', marginBottom:48 }}>
             <h2 style={{ fontSize:34, fontWeight:800, color:C.textHi, margin:'0 0 12px', letterSpacing:'-1px', fontFamily:C.F }}>Built for every role in the care pathway</h2>
-            <p style={{ fontSize:14, color:C.textMd, margin:0 }}>SEWA AI adapts its interface, alerts, and workflow to each clinical role.</p>
+            <p style={{ fontSize:14, color:C.textMd, margin:0 }}>SEWA XAI adapts its interface, alerts, and workflow to each clinical role.</p>
           </div>
           <div className="roles-grid" style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:20 }}>
             {ROLES.map(r => (
@@ -248,7 +248,7 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         <div style={{ padding:40, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:20 }}>
           <div style={{ textAlign:'center', marginBottom:32 }}>
             <h2 style={{ fontSize:26, fontWeight:800, color:C.textHi, margin:'0 0 10px', fontFamily:C.F }}>Integrates with your existing stack</h2>
-            <p style={{ fontSize:13, color:C.textMd }}>SEWA AI connects to any PACS, EHR, or hospital system via standard clinical protocols.</p>
+            <p style={{ fontSize:13, color:C.textMd }}>SEWA XAI connects to any PACS, EHR, or hospital system via standard clinical protocols.</p>
           </div>
           <div className="integrations-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
             {[

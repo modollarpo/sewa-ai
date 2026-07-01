@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SEWA AI — scripts/bootstrap-tfstate.sh
+# SEWA XAI — scripts/bootstrap-tfstate.sh
 # ─────────────────────────────────────────────────────────────────
 # Run ONCE before your first `terraform init`.
 # Creates the Azure Storage Account that holds Terraform remote state.
@@ -30,7 +30,7 @@ done
 
 echo ""
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║     SEWA AI — Bootstrap Terraform Remote State       ║"
+echo "║     SEWA XAI — Bootstrap Terraform Remote State       ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo ""
 echo "  Location   : $LOCATION"

@@ -1,6 +1,6 @@
-// SEWA AI — backend/src/middleware/requestId.ts
+// SEWA XAI — backend/src/middleware/requestId.ts
 // Attaches a unique X-Request-ID to every request for distributed tracing.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 

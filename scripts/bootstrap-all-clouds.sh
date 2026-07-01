@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SEWA AI — scripts/bootstrap-all-clouds.sh
+# SEWA XAI — scripts/bootstrap-all-clouds.sh
 # Creates Terraform remote state backends for Azure, AWS, and GCP
 # Run ONCE before first terraform apply on each cloud
 

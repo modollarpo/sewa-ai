@@ -1,4 +1,4 @@
-// SEWA AI — SuperAdminDashboard.tsx
+// SEWA XAI — SuperAdminDashboard.tsx
 // Global platform management: tenants, AI, deployments, compliance, billing, logs
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSuperAdminData } from '../../hooks/useDashboardData';
@@ -153,7 +153,7 @@ export function SuperAdminDashboard() {
               ⚡ SUPER ADMIN
             </span>
             <span style={{fontSize:10,color:C.textLo,fontFamily:C.FM}}>
-              {new Date().toISOString().split('T')[0]} · SEWA AI v2.4.1
+              {new Date().toISOString().split('T')[0]} · SEWA XAI v2.4.1
             </span>
           </div>
           <h1 style={{margin:0,fontSize: isMobile ? 20 : 22, fontWeight:700, color:C.textHi}}>Platform Command Centre</h1>
@@ -211,14 +211,14 @@ export function SuperAdminDashboard() {
             <table style={{width:'100%',borderCollapse:'collapse'}}>
               <thead>
                 <tr style={{background:C.bg3}}>
-                  {['Institution','Region','Plan','Status'].map(h=>(
+                  {['Institution','Region','Plan','Status','Modalities'].map(h=>(
                     <th key={h} style={{padding:'10px 12px',textAlign:'left',fontSize:10,fontWeight:600,color:C.textLo}}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filteredTenants.length === 0 ? (
-                  <tr><td colSpan={4} style={{padding:32,textAlign:'center',color:C.textLo,fontSize:12}}>
+                  <tr><td colSpan={5} style={{padding:32,textAlign:'center',color:C.textLo,fontSize:12}}>
                     {tenantSearch ? `No tenants matching "${tenantSearch}"` : 'No tenants provisioned yet.'}
                   </td></tr>
                 ) : filteredTenants.map((t,i)=>(
@@ -227,6 +227,43 @@ export function SuperAdminDashboard() {
                     <td style={{padding:'12px 12px',fontSize:10,color:C.textMd}}>{t.region}</td>
                     <td style={{padding:'12px 12px',fontSize:10,color:C.textMd}}>{t.plan}</td>
                     <td style={{padding:'12px 12px',fontSize:10,color:C.normal}}>{t.status}</td>
+                    <td style={{padding:'12px 12px'}}>
+                      {/* Supported Modalities Toggles */}
+                      <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                        {['CT','MRI','US','XRAY','PET','ECG','DERM'].map(mod => {
+                          const active = (t.supportedModalities || ['CT','XRAY']).includes(mod);
+                          return (
+                            <button
+                              key={mod}
+                              title={`Toggle ${mod} for ${t.name}`}
+                              onClick={async () => {
+                                const current: string[] = t.supportedModalities || ['CT','XRAY'];
+                                const next = active
+                                  ? current.filter((m:string) => m !== mod)
+                                  : [...current, mod];
+                                try {
+                                  await apiClient.patch(`/tenants/${t.id}`, { supportedModalities: next });
+                                  setAdminStatus({ msg: `Updated ${t.name} modalities.`, type:'ok' });
+                                  t.supportedModalities = next; // optimistic
+                                } catch {
+                                  setAdminStatus({ msg: 'Modality update failed.', type:'err' });
+                                }
+                              }}
+                              style={{
+                                padding:'2px 8px', borderRadius:20, fontSize:9, fontWeight:800,
+                                letterSpacing:'0.05em', cursor:'pointer', border:'1px solid',
+                                transition:'all 150ms',
+                                background: active ? `${C.brand}20` : C.bg3,
+                                color: active ? C.brand : C.textLo,
+                                borderColor: active ? `${C.brand}50` : C.border,
+                              }}
+                            >
+                              {mod}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/services/localDatabase.ts
+// SEWA XAI — mobile/src/services/localDatabase.ts
 // Offline-first SQLite database for scans and findings in low-bandwidth areas
 import SQLite from 'react-native-sqlite-storage';
 

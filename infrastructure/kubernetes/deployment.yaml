@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/kubernetes/deployment.yaml
+# SEWA XAI — infrastructure/kubernetes/deployment.yaml
 # Complete Kubernetes manifests for Azure AKS deployment
 #
 # Covers all 8 services:

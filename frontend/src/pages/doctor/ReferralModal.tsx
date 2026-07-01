@@ -1,4 +1,4 @@
-// SEWA AI — ReferralModal.tsx
+// SEWA XAI — ReferralModal.tsx
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../services/apiClient';
 

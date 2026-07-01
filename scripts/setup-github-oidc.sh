@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SEWA AI — scripts/setup-github-oidc.sh
+# SEWA XAI — scripts/setup-github-oidc.sh
 # ─────────────────────────────────────────────────────────────────
 # ONE-TIME SETUP: Connects GitHub Actions to Azure using OIDC
 # Federated Identity — no passwords, no stored credentials.
@@ -49,7 +49,7 @@ fi
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║   SEWA AI — GitHub Actions OIDC Setup                   ║"
+echo "║   SEWA XAI — GitHub Actions OIDC Setup                   ║"
 echo "╠══════════════════════════════════════════════════════════╣"
 echo "║  GitHub Repo  : ${GITHUB_ORG}/${GITHUB_REPO}"
 echo "║  Environment  : ${ENV_NAME}"

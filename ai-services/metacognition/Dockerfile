@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/metacognition/Dockerfile (CPU Edition)
+# SEWA XAI — ai-services/metacognition/Dockerfile (CPU Edition)
 # Pure Python rule engine — no GPU, no ML model, no OpenCV.
 # Final image: ~150MB (vs ~3.5GB GPU original)
 FROM python:3.11-slim AS builder

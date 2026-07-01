@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/model.py
+# SEWA XAI — ai-services/triage/model.py
 # SEWATriageModel — EfficientNet-B4 backbone + custom clinical head
 # Supports multi-label classification across 8 condition categories per modality
 

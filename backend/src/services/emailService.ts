@@ -11,7 +11,7 @@ if (config.SENDGRID_API_KEY) {
 }
 
 const FROM_EMAIL = config.EMAIL_FROM || 'info@sewaxai.health';
-const FROM_NAME  = 'SEWA AI Clinical';
+const FROM_NAME  = 'SEWA XAI Clinical';
 
 interface EmailPayload {
   to: string; name?: string; subject: string;
@@ -33,7 +33,7 @@ const TEMPLATES: Record<string, (d: any) => string> = {
     </div>`,
   'forgot_password': (d) => `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px;background:#f9fafb;border-radius:12px">
-      <h2>Reset your SEWA AI password</h2>
+      <h2>Reset your SEWA XAI password</h2>
       <p>Hello ${d.firstName || 'there'},</p>
       <p>We received a request to reset your password. Click the button below to choose a new one. This link expires in 1 hour.</p>
       <a href="${d.resetLink}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Reset Password →</a>
@@ -43,26 +43,26 @@ const TEMPLATES: Record<string, (d: any) => string> = {
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px;background:#f9fafb;border-radius:12px">
       <h2>Verify your clinical account</h2>
       <p>Hello ${d.firstName || 'there'},</p>
-      <p>Please verify your email address to activate your SEWA AI clinical dashboard access.</p>
+      <p>Please verify your email address to activate your SEWA XAI clinical dashboard access.</p>
       <a href="${d.verifyLink}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Verify Email →</a>
     </div>`,
   'report-ready': (d) => `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
-      <h2>Your SEWA AI Report is Ready</h2>
+      <h2>Your SEWA XAI Report is Ready</h2>
       <p>Dear ${d.patientName},</p>
       <p>Your ${d.modality} ${d.bodyPart} scan report has been reviewed and signed by a qualified radiologist.</p>
       <a href="${config.FRONTEND_URL}/portal/scans" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none">View Report →</a>
     </div>`,
   'welcome': (d) => `
     <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;padding:40px;background:#f9fafb;border-radius:12px">
-      <h2 style="color:#0C1D17">Welcome to SEWA AI, ${d.firstName || d.name || 'there'}!</h2>
-      <p>Your clinical account at <strong>${d.tenantName || 'SEWA AI'}</strong> has been created and is ready to use.</p>
-      <a href="${d.loginUrl || d.inviteLink || '#'}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Sign in to SEWA AI →</a>
+      <h2 style="color:#0C1D17">Welcome to SEWA XAI, ${d.firstName || d.name || 'there'}!</h2>
+      <p>Your clinical account at <strong>${d.tenantName || 'SEWA XAI'}</strong> has been created and is ready to use.</p>
+      <a href="${d.loginUrl || d.inviteLink || '#'}" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Sign in to SEWA XAI →</a>
       <p style="font-size:12px;color:#666;margin-top:24px">If you did not register for this account, please contact support@sewa.ai immediately.</p>
     </div>`,
   'appointment-reminder': (d) => `
     <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;padding:40px;background:#f9fafb;border-radius:12px">
-      <h2 style="color:#0C1D17">Appointment Reminder — SEWA AI</h2>
+      <h2 style="color:#0C1D17">Appointment Reminder — SEWA XAI</h2>
       <p>Dear ${d.patientName || 'Patient'},</p>
       <p>This is a reminder that you have a <strong>${d.appointmentType || 'medical'}</strong> appointment scheduled for:</p>
       <div style="background:#0C1D17;color:#D0ECE6;padding:16px 20px;border-radius:8px;margin:16px 0">
@@ -75,17 +75,54 @@ const TEMPLATES: Record<string, (d: any) => string> = {
   'staff-invite': (d) => `
     <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;background:#0C1D17;color:#D0ECE6;border-radius:16px;overflow:hidden">
       <div style="background:linear-gradient(135deg,#408D7B,#2E6B5E);padding:28px 32px">
-        <div style="font-size:11px;color:#A8D8CC;letter-spacing:0.08em;margin-bottom:8px">SEWA AI · NHS Clinical Platform</div>
+        <div style="font-size:11px;color:#A8D8CC;letter-spacing:0.08em;margin-bottom:8px">SEWA XAI · NHS Clinical Platform</div>
         <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700">You've been invited to join ${d.tenantName || 'your NHS trust'}</h1>
       </div>
       <div style="padding:32px">
-        <p style="margin-top:0">You have been invited as a <strong>${d.role}</strong> on the SEWA AI platform by your hospital administrator.</p>
+        <p style="margin-top:0">You have been invited as a <strong>${d.role}</strong> on the SEWA XAI platform by your hospital administrator.</p>
         <p>Click the button below to create your account and set your password. This invitation expires in <strong>72 hours</strong>.</p>
         <a href="${d.inviteLink}" style="display:inline-block;background:#408D7B;color:#fff;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;margin-top:8px">Accept Invitation &amp; Set Password →</a>
         <hr style="border:none;border-top:1px solid #1B3028;margin:28px 0"/>
         <p style="font-size:12px;color:#6FA898;margin:0">If you did not expect this invitation, please ignore this email or contact <a href="mailto:support@sewa.ai" style="color:#52B09A">support@sewa.ai</a>.</p>
-        <p style="font-size:11px;color:#3A6055;margin:8px 0 0">SEWA AI · a Storegrill Inc Ltd company · Registered in England &amp; Wales (14581073)</p>
+        <p style="font-size:11px;color:#3A6055;margin:8px 0 0">SEWA XAI · a Storegrill Inc Ltd company · Registered in England &amp; Wales (14581073)</p>
       </div>
+    </div>`,
+  'dunning-1': (d) => `
+    <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:40px;border-radius:12px;border:1px solid #e5e7eb">
+      <h2 style="color:#0C1D17;margin-top:0">Invoice Payment Reminder</h2>
+      <p>Dear Administrator,</p>
+      <p>This is a reminder that the subscription payment for your SEWA XAI account under <strong>${d.tenantName}</strong> is currently past due.</p>
+      <div style="background:#f3f4f6;padding:16px;border-radius:8px;margin:20px 0;font-size:14px">
+        <strong>Plan:</strong> ${d.plan.toUpperCase()}<br/>
+        <strong>Days past due:</strong> ${d.daysPastDue}
+      </div>
+      <p>Please update your billing details or process the invoice in your billing portal to ensure uninterrupted service.</p>
+      <a href="${config.FRONTEND_URL}/settings/billing" style="display:inline-block;background:#408D7B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Update Billing Details →</a>
+      <p style="font-size:12px;color:#666;margin-top:24px">If you have already processed this payment, please disregard this reminder.</p>
+    </div>`,
+  'dunning-2': (d) => `
+    <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:40px;border-radius:12px;border:1px solid #fcd34d">
+      <h2 style="color:#b45309;margin-top:0">Second Notice: Payment Action Required</h2>
+      <p>Dear Administrator,</p>
+      <p>We have still not received payment for your SEWA XAI subscription for <strong>${d.tenantName}</strong> (now ${d.daysPastDue} days past due).</p>
+      <p>To avoid potential disruption to scan processing, please update your default payment method immediately.</p>
+      <a href="${config.FRONTEND_URL}/settings/billing" style="display:inline-block;background:#b45309;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Resolve Outstanding Payment →</a>
+    </div>`,
+  'dunning-3': (d) => `
+    <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;background:#fff5f5;padding:40px;border-radius:12px;border:1px solid #feb2b2">
+      <h2 style="color:#c53030;margin-top:0">Final Notice: Impending Suspension</h2>
+      <p>Dear Administrator,</p>
+      <p><strong>CRITICAL:</strong> Your SEWA XAI account under <strong>${d.tenantName}</strong> is ${d.daysPastDue} days past due and will be **suspended in 48 hours** if outstanding payments are not resolved.</p>
+      <p>Suspension will disable PACS scan analysis and portal access for all clinicians.</p>
+      <a href="${config.FRONTEND_URL}/settings/billing" style="display:inline-block;background:#c53030;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Pay Outstanding Balance →</a>
+    </div>`,
+  'suspension': (d) => `
+    <div style="font-family:'IBM Plex Sans',sans-serif;max-width:600px;margin:0 auto;background:#1a0505;color:#fecaca;padding:40px;border-radius:16px;border:2px solid #ef4444">
+      <h1 style="color:#ef4444;margin-top:0;font-size:24px">⚠️ Account Suspended</h1>
+      <p>Dear Administrator,</p>
+      <p>The SEWA XAI subscription for <strong>${d.tenantName}</strong> has been suspended due to unresolved non-payment.</p>
+      <p>Clinical scan integrations (PACS, FHIR) and clinician dashboards have been deactivated. To restore service, please update your card/billing credentials.</p>
+      <a href="${config.FRONTEND_URL}/settings/billing" style="display:inline-block;background:#ef4444;color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:700;margin-top:10px">Reactivate Account →</a>
     </div>`,
 };
 

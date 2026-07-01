@@ -1,4 +1,4 @@
-// SEWA AI — PatientPortal.tsx
+// SEWA XAI — PatientPortal.tsx
 // Patient-facing results portal: scan history, AI insights, appointments, billing
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';

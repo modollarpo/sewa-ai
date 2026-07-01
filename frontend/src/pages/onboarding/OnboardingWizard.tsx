@@ -1,4 +1,4 @@
-// SEWA AI — OnboardingWizard.tsx
+// SEWA XAI — OnboardingWizard.tsx
 // Multi-step hospital onboarding: institution → compliance → integrations → go-live
 import React, { useState } from 'react';
 import { apiClient } from '../../services/apiClient';
@@ -140,11 +140,14 @@ export function OnboardingWizard() {
       if (payment.authorizationUrl) {
         // Paystack handshake
         window.location.href = payment.authorizationUrl;
+      } else if (payment.provider === 'stripe' && payment.paymentLink) {
+        // Stripe hosted checkout redirect
+        window.location.href = payment.paymentLink;
       } else if (payment.paymentLink) {
         // Flutterwave handshake
         window.location.href = payment.paymentLink;
       } else if (payment.clientSecret) {
-        // Stripe handshake (ideally would use Stripe Elements here, but for now we confirm creation)
+        // Stripe fallback (legacy)
         setStatusMsg({ msg: 'Institution created. Please check your email to complete Stripe payment setup.', type: 'ok' });
         setTimeout(() => window.location.href = '/login', 2500);
       } else if (payment.checkoutRequestId) {
@@ -234,7 +237,7 @@ export function OnboardingWizard() {
           <div style={{ width:28, height:28, borderRadius:8, background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           </div>
-          <span style={{ fontSize:14, fontWeight:700, color:C.textHi, whiteSpace:'nowrap' }}>SEWA AI</span>
+          <span style={{ fontSize:14, fontWeight:700, color:C.textHi, whiteSpace:'nowrap' }}>SEWA XAI</span>
           <span style={{ fontSize:12, color:C.textLo, display: 'inline-block' }} className="nav-breadcrumb">/ Onboarding</span>
         </div>
         <span style={{ fontSize:11, color:C.textLo }}>Step {step+1} of {STEPS.length}</span>
@@ -371,12 +374,12 @@ export function OnboardingWizard() {
                   {currentStep.icon} {currentStep.label}
                 </h1>
                 <p style={{ margin:'6px 0 0', fontSize:13, color:C.textMd }}>
-                  {step===0 && 'Tell us about your institution to set up your SEWA AI account.'}
+                  {step===0 && 'Tell us about your institution to set up your SEWA XAI account.'}
                   {step===1 && 'Select applicable compliance frameworks for your region.'}
-                  {step===2 && 'Connect SEWA AI to your existing PACS, FHIR, and HL7 systems.'}
+                  {step===2 && 'Connect SEWA XAI to your existing PACS, FHIR, and HL7 systems.'}
                   {step===3 && 'Choose deployment environment and data residency preferences.'}
                   {step===4 && 'Run the AI benchmark to verify performance on your infrastructure.'}
-                  {step===5 && 'Review your configuration and launch your SEWA AI deployment.'}
+                  {step===5 && 'Review your configuration and launch your SEWA XAI deployment.'}
                 </p>
               </div>
             )}
@@ -432,7 +435,7 @@ export function OnboardingWizard() {
             {step === 1 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
                 <div style={{ padding:14, background:`${C.info}0A`, borderRadius:12, border:`1px solid ${C.info}30`, fontSize:12, color:C.textMd, lineHeight:1.6 }}>
-                  ℹ️ SEWA AI supports full compliance across all major healthcare regulations. Select all frameworks that apply to your institution.
+                  ℹ️ SEWA XAI supports full compliance across all major healthcare regulations. Select all frameworks that apply to your institution.
                 </div>
 
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
@@ -662,7 +665,7 @@ export function OnboardingWizard() {
                 <div style={{ padding:16, background:`${C.normal}0A`, borderRadius:12, border:'1px solid #0D2A1A' }}>
                   <div style={{ fontSize:12, fontWeight:700, color:C.normal, marginBottom:8 }}>Ready to launch</div>
                   <div style={{ fontSize:12, color:C.textMd, lineHeight:1.6 }}>
-                    Your SEWA AI instance will be provisioned on Azure {REGIONS.find(r=>r.key===data.region)?.label} infrastructure with full {REGIONS.find(r=>r.key===data.region)?.compliance} compliance. Provisioning takes approximately 5 minutes.
+                    Your SEWA XAI instance will be provisioned on Azure {REGIONS.find(r=>r.key===data.region)?.label} infrastructure with full {REGIONS.find(r=>r.key===data.region)?.compliance} compliance. Provisioning takes approximately 5 minutes.
                   </div>
                 </div>
 
@@ -670,7 +673,7 @@ export function OnboardingWizard() {
                   onClick={handleLaunch}
                   disabled={loading}
                   style={{ height:52, borderRadius:14, border:'none', cursor:loading?'not-allowed':'pointer', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, color:'white', fontSize:15, fontWeight:800, fontFamily:C.F, boxShadow:loading?'none':`0 6px 24px ${C.brand}50`, letterSpacing:'0.02em', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
-                  {loading ? 'Provisioning...' : '🚀 Launch SEWA AI Deployment'}
+                  {loading ? 'Provisioning...' : '🚀 Launch SEWA XAI Deployment'}
                 </button>
               </div>
             )}
@@ -685,7 +688,7 @@ export function OnboardingWizard() {
                     <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3}><path d="m5 12 5 5L20 7"/></svg>
                   </div>
                   <h1 style={{ fontSize:24, fontWeight:800, color:C.textHi, margin:'0 0 8px' }}>Deployment Initialized!</h1>
-                  <p style={{ fontSize:14, color:C.textMd, margin:0 }}>Your SEWA AI instance for <b>{data.name}</b> is being provisioned.</p>
+                  <p style={{ fontSize:14, color:C.textMd, margin:0 }}>Your SEWA XAI instance for <b>{data.name}</b> is being provisioned.</p>
                 </div>
 
                 <div style={{ background:C.bg2, borderRadius:16, border:`1px solid ${C.border}`, overflow:'hidden' }}>

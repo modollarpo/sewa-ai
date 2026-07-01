@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/config/env.ts
+// SEWA XAI — backend/src/config/env.ts
 // ─────────────────────────────────────────────────────────────────
 // Single source of truth for all environment configuration.
 //
@@ -87,6 +87,7 @@ export const config = {
   METACOGNITION_SERVICE_URL: optional('METACOGNITION_SERVICE_URL', optional('METACOGNITION_URL', IS_AZURE ? 'http://sewa-metacognition:8003' : 'http://localhost:8003')),
   FL_SERVICE_URL:            optional('FL_SERVICE_URL',            IS_AZURE ? 'http://sewa-federated-learning:8004' : 'http://localhost:8004'),
   CL_SERVICE_URL:            optional('CL_SERVICE_URL',            IS_AZURE ? 'http://sewa-continuous-learning:8005' : 'http://localhost:8005'),
+  PATHOLOGY_SERVICE_URL:     optional('PATHOLOGY_SERVICE_URL',     IS_AZURE ? 'http://sewa-pathology:8002'          : 'http://localhost:8006'),
 
   // ── FHIR R4 ──────────────────────────────────────────────────
   FHIR_BASE_URL:      optional('FHIR_BASE_URL'),
@@ -184,8 +185,11 @@ export const config = {
   DAILY_API_KEY:     optional('DAILY_API_KEY'),
   DAILY_DOMAIN:      optional('DAILY_DOMAIN'),
 
-  // ── Monitoring ────────────────────────────────────────────────
-  SENTRY_DSN: optional('SENTRY_DSN'),
+  // ── Monitoring ─────────────────────────────────────────────
+  // Azure Application Insights — free, workspace-based, linked to sewa-ai-production-law
+  // Provisioned: 2026-06-30 | Resource: sewa-ai-production-appinsights (uksouth)
+  APPLICATIONINSIGHTS_CONNECTION_STRING: optional('APPLICATIONINSIGHTS_CONNECTION_STRING', optional('AZURE_APPINSIGHTS_CONNECTION_STRING')),
+  SENTRY_DSN: optional('SENTRY_DSN'), // retained as secondary fallback
 
 } as const;
 

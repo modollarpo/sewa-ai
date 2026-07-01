@@ -1,4 +1,4 @@
-// SEWA AI — PopulationHealthDashboard.tsx
+// SEWA XAI — PopulationHealthDashboard.tsx
 // Population health analytics: disease burden, geography, cohort trends, referrals
 import React, { useState, useEffect } from 'react';
 import { usePopulationHealthData } from '../../hooks/useDashboardData';
@@ -37,7 +37,7 @@ export function PopulationHealthDashboard() {
       <div style={{marginBottom:24}}>
         <h2 style={{margin:0, fontSize: isMobile ? 18 : 20, fontWeight:700, color:C.textHi}}>Population Health Analytics</h2>
         <p style={{margin:'4px 0 0',fontSize:12,color:C.textMd}}>
-          Aggregate, anonymised disease surveillance · Powered by SEWA AI
+          Aggregate, anonymised disease surveillance · Powered by SEWA XAI
         </p>
       </div>
 

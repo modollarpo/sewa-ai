@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/pyrefly.toml
+# SEWA XAI — ai-services/pyrefly.toml
 # Pyrefly static analyser configuration for AI microservices.
 # Packages (onnxruntime, torch, fastapi, etc.) are container-only deps —
 # they are NOT installed in the local dev venv, so import warnings are expected.

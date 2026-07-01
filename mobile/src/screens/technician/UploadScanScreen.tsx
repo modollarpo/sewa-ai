@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/technician/UploadScanScreen.tsx
+// SEWA XAI — mobile/src/screens/technician/UploadScanScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';

@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/clinician/ScanDetailScreen.tsx
+// SEWA XAI — mobile/src/screens/clinician/ScanDetailScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';

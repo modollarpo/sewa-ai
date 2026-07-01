@@ -1,4 +1,4 @@
-// SEWA AI — CriticalAlertBanner.tsx
+// SEWA XAI — CriticalAlertBanner.tsx
 // Sticky top banner for STAT/CRITICAL AI findings — animated, dismissible, multi-alert
 import React, { useState, useEffect } from 'react';
 import { useScanStore } from '../../store/scanStore';

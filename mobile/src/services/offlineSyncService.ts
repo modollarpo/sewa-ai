@@ -1,6 +1,6 @@
-// SEWA AI — mobile/src/services/offlineSyncService.ts
+// SEWA XAI — mobile/src/services/offlineSyncService.ts
 // Replay queued mutations when connectivity is restored
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import { apiClient } from './apiClient';
 import { useOfflineStore, PendingOp } from '../store/offlineStore';
 import { getUnsyncedScans, markScanAsSynced } from './localDatabase';

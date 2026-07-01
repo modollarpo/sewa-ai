@@ -15,7 +15,7 @@ describe('AI Orchestration Pipeline — Integration', () => {
     await prisma.tenant.upsert({
       where: { id: mockTenantId },
       update: {},
-      create: { id: mockTenantId, name: 'Test Clinic', slug: 'test-clinic', subdomain: 'test-clinic', region: 'uk', currency: 'GBP', plan: 'pro' }
+      create: { id: mockTenantId, name: 'Test Clinic', slug: 'test-clinic', subdomain: 'test-clinic', region: 'uk', currency: 'GBP', plan: 'hospital' }
     });
 
     await prisma.scan.upsert({

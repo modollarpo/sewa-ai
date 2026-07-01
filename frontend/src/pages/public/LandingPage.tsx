@@ -1,4 +1,4 @@
-// SEWA AI — LandingPage.tsx
+// SEWA XAI — LandingPage.tsx
 // Clinical, enterprise public landing page — NHS-ready, global healthcare AI platform
 import React, { useState, useEffect } from 'react';
 import { ClinicalDemoModal } from '../../components/public/ClinicalDemoModal';
@@ -120,7 +120,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             isOpen={showPlatformTour}
             onClose={() => setShowPlatformTour(false)}
             composition="PlatformIntro"
-            title="SEWA AI Platform Overview"
+            title="SEWA XAI Platform Overview"
           />
         )}
 
@@ -193,7 +193,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             <div className="lg:w-1/3 space-y-6">
               <h2 className="text-4xl font-black text-[#D0ECE6] tracking-tight">Global Reach,<br/><span className="text-[#408D7B]">Local Residency.</span></h2>
               <p className="text-[#6FA898] font-medium leading-relaxed">
-                SEWA AI deploys across 7+ sovereign cloud regions, ensuring 100% adherence to local health data regulations including NHS, HIPAA, and GDPR.
+                SEWA XAI deploys across 7+ sovereign cloud regions, ensuring 100% adherence to local health data regulations including NHS, HIPAA, and GDPR.
               </p>
               <div className="space-y-4 pt-6">
                 <div className="flex items-center gap-4">

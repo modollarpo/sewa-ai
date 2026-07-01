@@ -1,4 +1,4 @@
-// SEWA AI — frontend/public/sw.js
+// SEWA XAI — frontend/public/sw.js
 // PWA Service Worker: offline cache, background sync, push notifications
 // Feature: PWA Capabilities
 
@@ -128,7 +128,7 @@ self.addEventListener('push', (event) => {
   const urgency = data.urgency || 'NORMAL';
 
   const options = {
-    body:    data.body  || 'New SEWA AI notification',
+    body:    data.body  || 'New SEWA XAI notification',
     icon:    '/icons/icon-192.png',
     badge:   '/icons/badge-72.png',
     vibrate: urgency === 'CRITICAL' ? [500, 250, 500, 250, 500] : [200],
@@ -142,7 +142,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'SEWA AI', options)
+    self.registration.showNotification(data.title || 'SEWA XAI', options)
   );
 });
 

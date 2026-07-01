@@ -1,7 +1,7 @@
-// SEWA AI — PWAInstallPrompt.tsx
+// SEWA XAI — PWAInstallPrompt.tsx
 // Shows an install-to-home-screen prompt for clinical staff on mobile.
 // Handles Chrome/Edge beforeinstallprompt and iOS detection.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React, { useState, useEffect } from 'react';
 
 const C = {
@@ -62,7 +62,7 @@ export function PWAInstallPrompt() {
       <div style={{ fontSize:28, flexShrink:0 }}>📲</div>
       <div style={{ flex:1 }}>
         <div style={{ fontSize:14, fontWeight:700, color:C.textHi, fontFamily:C.F, marginBottom:2 }}>
-          Install SEWA AI
+          Install SEWA XAI
         </div>
         <div style={{ fontSize:12, color:C.textMd, fontFamily:C.F, lineHeight:1.5 }}>
           {isIOS

@@ -1,5 +1,5 @@
-// SEWA AI — BlogPage.tsx
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+// SEWA XAI — BlogPage.tsx
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 import React, { useState } from 'react';
 import { PublicLayout } from '../../components/public/PublicLayout';
 import { colors, typography } from '../../design-system/tokens';
@@ -7,18 +7,18 @@ const C = colors; const T = typography;
 const POSTS = [
   { id:1, date:'March 2026', tag:'Engineering', author:'Dolapo Ariyo', readTime:'8 min',
     title:`Why 96.2% sensitivity isn't enough — the case for uncertainty quantification in medical AI`,
-    excerpt:`Most clinical AI platforms report accuracy metrics. None tell you when they're uncertain. Here's why that matters for patient safety, and how SEWA AI\'s Uncertainty Engine changes the equation.` },
+    excerpt:`Most clinical AI platforms report accuracy metrics. None tell you when they're uncertain. Here's why that matters for patient safety, and how SEWA XAI\'s Uncertainty Engine changes the equation.` },
   { id:2, date:'February 2026', tag:'NHS', author:'Dr. Adesewa Dairo', readTime:'6 min',
     title:`G-Cloud 14 for clinical AI: what every NHS procurement team needs to know`,
-    excerpt:`NHS Trusts can deploy SEWA AI in under 5 business days without competitive tender. Here's exactly how G-Cloud 14 procurement works for medical AI platforms.` },
+    excerpt:`NHS Trusts can deploy SEWA XAI in under 5 business days without competitive tender. Here's exactly how G-Cloud 14 procurement works for medical AI platforms.` },
   { id:3, date:'February 2026', tag:'Regulatory', author:'Dolapo Ariyo', readTime:'10 min',
     title:`EU AI Act Article 14: the human oversight requirement that will reshape clinical AI in 2026`,
-    excerpt:`EU AI Act enforcement begins August 2026. Article 14 requires human oversight for High-Risk AI — and most clinical AI vendors aren't compliant. SEWA AI was built for it.` },
+    excerpt:`EU AI Act enforcement begins August 2026. Article 14 requires human oversight for High-Risk AI — and most clinical AI vendors aren't compliant. SEWA XAI was built for it.` },
   { id:4, date:'January 2026', tag:'Africa', author:'Dolapo Ariyo', readTime:'7 min',
-    title:`Building clinical AI for no internet: the engineering behind SEWA AI\'s edge deployment`,
+    title:`Building clinical AI for no internet: the engineering behind SEWA XAI\'s edge deployment`,
     excerpt:`70% of African hospitals can't rely on consistent internet. Our Go DICOM service runs on under 20MB RAM, works completely offline, and syncs to the cloud when connectivity resumes.` },
   { id:5, date:'December 2025', tag:'Engineering', author:'Dolapo Ariyo', readTime:'5 min',
-    title:`What is metacognition in AI? How SEWA AI catches its own hallucinations`,
+    title:`What is metacognition in AI? How SEWA XAI catches its own hallucinations`,
     excerpt:`Large language models hallucinate. Clinical AI hallucinations can harm patients. The Metacognition Engine catches 96.3% of hallucinations before they reach clinicians.` },
   { id:6, date:'November 2025', tag:'Africa', author:'Dr. Adesewa Dairo', readTime:'9 min',
     title:`1 radiologist per 275,000 people: the African radiology crisis that AI can actually solve`,
@@ -35,7 +35,7 @@ export function BlogPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
       <section style={{ background:`linear-gradient(135deg,${C.bg1},${C.bg2})`, borderBottom:`1px solid ${C.bgBorder}`, padding:'52px clamp(16px,5vw,80px) 44px' }}>
         <div style={{ maxWidth:760, margin:'0 auto' }}>
           <h1 style={{ fontSize:'clamp(26px,4vw,40px)', fontWeight:900, color:C.textHigh, fontFamily:T.fontBase, margin:'0 0 12px' }}>Clinical AI Insights</h1>
-          <p style={{ fontSize:15, color:C.textMed, lineHeight:1.75, margin:0 }}>Research, engineering deep-dives, NHS policy, and clinical AI perspectives from the SEWA AI team.</p>
+          <p style={{ fontSize:15, color:C.textMed, lineHeight:1.75, margin:0 }}>Research, engineering deep-dives, NHS policy, and clinical AI perspectives from the SEWA XAI team.</p>
         </div>
       </section>
       <div style={{ maxWidth:1100, margin:'0 auto', padding:'40px clamp(16px,5vw,48px) 80px' }}>
@@ -60,7 +60,7 @@ export function BlogPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             </article>
           ))}
         </div>
-        <div style={{ marginTop:40, textAlign:'center', fontSize:11, color:C.textLow, fontFamily:T.fontBase }}>© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</div>
+        <div style={{ marginTop:40, textAlign:'center', fontSize:11, color:C.textLow, fontFamily:T.fontBase }}>© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</div>
       </div>
     </PublicLayout>
   );

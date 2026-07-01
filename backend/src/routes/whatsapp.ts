@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/whatsapp.ts
+// SEWA XAI — backend/src/routes/whatsapp.ts
 // WhatsApp number registration, OTP verification, opt-in/out management
 
 import { Router, Request, Response, NextFunction } from 'express';
@@ -51,7 +51,7 @@ r.post('/register', authLimiter, async (req: Request, res: Response, next: NextF
       to: number,
       type: 'otp_verify',
       data: {
-        title: `🔐 SEWA AI — WhatsApp Verification\n\nYour code: *${code}*\n\nExpires in 10 minutes. Do not share this code.`,
+        title: `🔐 SEWA XAI — WhatsApp Verification\n\nYour code: *${code}*\n\nExpires in 10 minutes. Do not share this code.`,
         body: '',
       },
     });
@@ -97,7 +97,7 @@ r.post('/verify', authLimiter, async (req: Request, res: Response, next: NextFun
     await whatsappService.send({
       to: reg.number,
       type: 'default',
-      data: { title: '✅ *SEWA AI — WhatsApp Verified*\n\nYou will now receive clinical alerts and appointment notifications via WhatsApp.', body: '' },
+      data: { title: '✅ *SEWA XAI — WhatsApp Verified*\n\nYou will now receive clinical alerts and appointment notifications via WhatsApp.', body: '' },
     }).catch(() => {});
 
     res.json({ success: true, message: 'WhatsApp number verified successfully' });

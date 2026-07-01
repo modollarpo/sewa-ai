@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-SEWA AI is an enterprise clinical platform serving multiple hospitals and clinics. We need strong tenant isolation to comply with HIPAA, GDPR, and NHS DSPT.
+SEWA XAI is an enterprise clinical platform serving multiple hospitals and clinics. We need strong tenant isolation to comply with HIPAA, GDPR, and NHS DSPT.
 
 ## Decision
 Use a single PostgreSQL database with:

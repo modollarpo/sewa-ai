@@ -1,4 +1,4 @@
-// SEWA AI — Scan Queue (BullMQ)
+// SEWA XAI — Scan Queue (BullMQ)
 // Manages AI pipeline job queuing for 1000+ concurrent scan support
 import { Queue, Worker, Job } from 'bullmq';
 import { redisClient } from '../config/redis';

@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/clinician/WorklistScreen.tsx
+// SEWA XAI — mobile/src/screens/clinician/WorklistScreen.tsx
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,

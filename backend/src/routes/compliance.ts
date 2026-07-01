@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/compliance.ts
+// SEWA XAI — backend/src/routes/compliance.ts
 // Regulatory compliance & consent metrics
 
 import { Router } from 'express';

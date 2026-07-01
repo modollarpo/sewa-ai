@@ -1,6 +1,6 @@
-// SEWA AI — mobile/src/store/offlineStore.ts
+// SEWA XAI — mobile/src/store/offlineStore.ts
 // Offline-first mutation queue — persisted to AsyncStorage
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';

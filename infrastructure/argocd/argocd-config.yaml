@@ -5,7 +5,7 @@ metadata:
   name: default
   namespace: argocd
 spec:
-  description: Default project for SEWA AI
+  description: Default project for SEWA XAI
   sourceRepos:
   - '*'
   destinations:

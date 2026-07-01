@@ -1,4 +1,4 @@
-// SEWA AI — components/public/CookieBanner.tsx
+// SEWA XAI — components/public/CookieBanner.tsx
 // GDPR/PECR compliant cookie consent banner
 // Shows on first visit, remembers choices, links to full Cookie Policy
 
@@ -80,7 +80,7 @@ export function CookieBanner({ onNavigate }: { onNavigate: (page: string) => voi
           <div style={{ fontSize:22, flexShrink:0, marginTop:2 }}>🍪</div>
           <div style={{ flex:1, minWidth:260 }}>
             <div style={{ fontSize:14, fontWeight:700, color:C.textHi, marginBottom:6, fontFamily:C.F }}>
-              SEWA AI uses cookies
+              SEWA XAI uses cookies
             </div>
             <p style={{ fontSize:12, color:C.textLo, margin:0, lineHeight:1.7, fontFamily:C.F }}>
               We use strictly necessary cookies to run the clinical platform, plus optional cookies for analytics and functionality improvements.

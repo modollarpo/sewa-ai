@@ -1,4 +1,4 @@
-// SEWA AI — MetacognitionAI.tsx
+// SEWA XAI — MetacognitionAI.tsx
 // Dedicated landing page for the Metacognition Engine
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../../components/public/PublicLayout';

@@ -1,0 +1,93 @@
+# SEWA XAI — edge/docker-compose.yml
+# One-command deployment for rural/offline hospital sites
+# Run: docker compose up -d
+# Requirements: Docker 24+, 4 CPU cores, 4GB RAM, 64GB disk
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+
+services:
+  sewa-edge:
+    image: sewaregistry.azurecr.io/sewa-edge:latest
+    # For local development, build from source instead:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    container_name: sewa-edge
+    restart: unless-stopped
+    ports:
+      - "8080:8080"    # Triage API (used by ward tablets, mobile apps)
+      - "9090:9090"    # Prometheus metrics (for Grafana dashboard)
+    environment:
+      # ── Tenant configuration ───────────────────────────────────────────
+      TENANT_ID:          "${TENANT_ID}"
+      EDGE_API_KEY:       "${EDGE_API_KEY}"
+      EDGE_NODE_ID:       "${EDGE_NODE_ID:-edge-01}"
+
+      # ── Cloud sync ─────────────────────────────────────────────────────
+      CLOUD_API_URL:      "${CLOUD_API_URL:-https://api.sewaxai.health}"
+      SYNC_INTERVAL_SECS: "${SYNC_INTERVAL_SECS:-300}"   # sync every 5 min
+
+      # ── Runtime ────────────────────────────────────────────────────────
+      EDGE_MODE:          "offline"
+      ORT_THREADS:        "4"
+      PYTHONUNBUFFERED:   "1"
+
+      # ── Data paths ─────────────────────────────────────────────────────
+      EDGE_DATA_DIR:      "/app/data"
+      MODEL_DIR:          "/app/models"
+
+    volumes:
+      # Persistent data survives container restarts
+      - edge-data:/app/data
+      # Model volume: place your triage_int8.onnx here
+      # If empty, service starts in mock/demo mode automatically
+      - edge-models:/app/models
+      # Logs for debugging and audit export
+      - edge-logs:/app/logs
+
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    # Low resource limits — designed to run on a $300 mini-PC
+    deploy:
+      resources:
+        limits:
+          cpus:   "3.5"
+          memory: "3G"
+        reservations:
+          cpus:   "1.0"
+          memory: "512M"
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+    labels:
+      com.sewaxai.service:     "sewa-edge"
+      com.sewaxai.version:     "2.4.1"
+      com.sewaxai.description: "Offline-first AI inference node for clinical edge deployments"
+
+volumes:
+  edge-data:
+    driver: local
+    driver_opts:
+      type:   none
+      device: "${EDGE_DATA_PATH:-./data}"
+      o:      bind
+  edge-models:
+    driver: local
+    driver_opts:
+      type:   none
+      device: "${EDGE_MODELS_PATH:-./models}"
+      o:      bind
+  edge-logs:
+    driver: local
+    driver_opts:
+      type:   none
+      device: "${EDGE_LOGS_PATH:-./logs}"
+      o:      bind

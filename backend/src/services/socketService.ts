@@ -1,4 +1,4 @@
-// SEWA AI — src/services/socketService.ts
+// SEWA XAI — src/services/socketService.ts
 // Socket.IO server setup with tenant room management
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';

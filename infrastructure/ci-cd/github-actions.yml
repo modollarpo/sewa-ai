@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/ci-cd/github-actions.yml
+# SEWA XAI — infrastructure/ci-cd/github-actions.yml
 # ─────────────────────────────────────────────────────────────────
 # Pipeline: lint → test → security scan → build → push ACR → deploy AKS
 #
@@ -23,7 +23,7 @@
 #   Pull request     → lint + test + security scan only (no deploy)
 # ─────────────────────────────────────────────────────────────────
 
-name: SEWA AI — CI/CD Pipeline
+name: SEWA XAI — CI/CD Pipeline
 
 on:
   push:
@@ -392,7 +392,7 @@ jobs:
       - name: Deployment summary
         if: success()
         run: |
-          echo "## ✅ SEWA AI Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ SEWA XAI Deployed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| | |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY

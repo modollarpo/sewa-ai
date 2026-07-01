@@ -1,14 +1,14 @@
-// SEWA AI — CareersPage.tsx
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+// SEWA XAI — CareersPage.tsx
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 import React, { useState } from 'react';
 import { PublicLayout } from '../../components/public/PublicLayout';
 const C = { bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', brand:'#408D7B', brandLight:'#52B09A', textHigh:'#D0ECE6', textMed:'#6FA898', textLow:'#3A6055', border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif" };
 const ROLES = [
-  { id:1, title:'Senior ML Engineer — Triage Models', dept:'Engineering', location:'Remote · UK/EU', type:'Full-time', priority:true, salary:'£85–110K', desc:`Lead development of SEWA AI's EfficientNet-B4 triage engine. PyTorch, medical imaging, production ML systems.` },
+  { id:1, title:'Senior ML Engineer — Triage Models', dept:'Engineering', location:'Remote · UK/EU', type:'Full-time', priority:true, salary:'£85–110K', desc:`Lead development of SEWA XAI's EfficientNet-B4 triage engine. PyTorch, medical imaging, production ML systems.` },
   { id:2, title:'VP Clinical Affairs', dept:'Regulatory', location:'London · Hybrid', type:'Full-time', priority:true, salary:'£90–120K', desc:`Lead clinical validation strategy, regulatory submissions (FDA, NICE HTA, EU MDR), and NHS Trust relationships.` },
   { id:3, title:'Clinical Sales Manager — NHS', dept:'Commercial', location:'London · Field', type:'Full-time', priority:true, salary:'£70–90K + OTE', desc:`Own NHS Trust pipeline. G-Cloud 14 procurement expertise. Radiologist clinical champion development.` },
   { id:4, title:'ML Engineer — VLM / NLP', dept:'Engineering', location:'Remote · UK/EU', type:'Full-time', priority:false, salary:'£75–100K', desc:`Build and improve the VLM report generator. Fine-tune Llama-3 with clinical LoRA adaptors.` },
-  { id:5, title:'Africa Programme Lead', dept:'Operations', location:'Lagos or Nairobi', type:'Full-time', priority:true, salary:'Competitive', desc:`Lead SEWA AI's Africa deployment programme. LUTH Nigeria and KNH Kenya anchor sites. Edge deployment.` },
+  { id:5, title:'Africa Programme Lead', dept:'Operations', location:'Lagos or Nairobi', type:'Full-time', priority:true, salary:'Competitive', desc:`Lead SEWA XAI's Africa deployment programme. LUTH Nigeria and KNH Kenya anchor sites. Edge deployment.` },
   { id:6, title:'Backend Engineer — FHIR/HL7', dept:'Engineering', location:'Remote', type:'Full-time', priority:false, salary:'£75–95K', desc:'Build and maintain FHIR R4, HL7v2, and DICOM integration layer. TypeScript, Node.js, Prisma.' },
 ];
 const DEPTS = ['All',...[...new Set(ROLES.map(r=>r.dept))]];
@@ -18,7 +18,7 @@ export function CareersPage({ onNavigate }:{ onNavigate:(p:string)=>void }) {
   return (
     <PublicLayout activePage="careers" onNavigate={onNavigate}>
       <section style={{ background:`linear-gradient(135deg,${C.bg0},${C.bg1})`, padding:'52px clamp(16px,5vw,80px) 44px', borderBottom:`1px solid ${C.border}` }}>
-        <h1 style={{ fontSize:'clamp(26px,4vw,40px)', fontWeight:900, color:C.textHigh, fontFamily:C.F, margin:'0 0 12px' }}>Join SEWA AI</h1>
+        <h1 style={{ fontSize:'clamp(26px,4vw,40px)', fontWeight:900, color:C.textHigh, fontFamily:C.F, margin:'0 0 12px' }}>Join SEWA XAI</h1>
         <p style={{ fontSize:15, color:C.textMed, maxWidth:560, lineHeight:1.75, margin:0 }}>Build the AI that saves lives in NHS hospitals and African clinics. Remote-first, mission-driven, equity for everyone.</p>
       </section>
       <div style={{ maxWidth:1100, margin:'0 auto', padding:'40px clamp(16px,5vw,48px) 80px' }}>
@@ -46,7 +46,7 @@ export function CareersPage({ onNavigate }:{ onNavigate:(p:string)=>void }) {
             </div>
           ))}
         </div>
-        <p style={{ fontSize:11, color:C.textLow, marginTop:40, textAlign:'center' }}>© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</p>
+        <p style={{ fontSize:11, color:C.textLow, marginTop:40, textAlign:'center' }}>© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</p>
       </div>
     </PublicLayout>
   );

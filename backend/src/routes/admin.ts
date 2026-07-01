@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/admin.ts
+// SEWA XAI — backend/src/routes/admin.ts
 import { Router } from 'express';
 import crypto from 'crypto';
 import { authenticate, authorize } from '../middleware/auth';

@@ -1,4 +1,4 @@
-// SEWA AI — Customer Feedback Routes
+// SEWA XAI — Customer Feedback Routes
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
 import {

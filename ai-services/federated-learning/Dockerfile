@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/federated-learning/Dockerfile (CPU Edition)
+# SEWA XAI — ai-services/federated-learning/Dockerfile (CPU Edition)
 # Multi-stage: builder installs torch+cpu wheel, runtime image stays lean
 
 # ── Stage 1: Builder ────────────────────────────────────────────────

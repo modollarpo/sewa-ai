@@ -1,4 +1,4 @@
-# SEWA AI - Production Deployment Script
+# SEWA XAI - Production Deployment Script
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $TIMESTAMP = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -14,7 +14,7 @@ function Out-Success {
     Write-Host "  OK: $msg" -ForegroundColor Green
 }
 
-Write-Host "SEWA AI - Production Push Pipeline ($TIMESTAMP)" -ForegroundColor Cyan
+Write-Host "SEWA XAI - Production Push Pipeline ($TIMESTAMP)" -ForegroundColor Cyan
 
 # 1. Commit changes
 Write-Host "[1/6] Committing local changes..." -ForegroundColor Yellow
@@ -33,7 +33,7 @@ Out-Success "Backend build complete."
 
 # 3. Build & Push AI Services
 Write-Host "[3/6] Building AI Services via ACR Tasks..." -ForegroundColor Yellow
-$AI_SERVICES = @{ "triage"="triage"; "uncertainty"="uncertainty"; "vlm-report"="vlm-report"; "metacognition"="metacognition"; "federated"="federated-learning"; "continuous"="continuous-learning" }
+$AI_SERVICES = @{ "triage"="triage"; "uncertainty"="uncertainty"; "vlm-report"="vlm-report"; "metacognition"="metacognition"; "federated"="federated-learning"; "continuous"="continuous-learning"; "pathology"="pathology" }
 foreach ($svc in $AI_SERVICES.Keys) {
     $dir = $AI_SERVICES[$svc]
     Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan

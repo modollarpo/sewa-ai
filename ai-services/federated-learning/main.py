@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/federated-learning/main.py
+# SEWA XAI — ai-services/federated-learning/main.py
 # Roadmap Feature 1: Federated Learning Engine
 # Privacy-preserving distributed training across hospital networks
 # Framework: Flower (flwr) + PyTorch + Differential Privacy
@@ -46,7 +46,7 @@ MIN_FIT_CLIENTS   = int(os.getenv("MIN_FIT_CLIENTS",    "3"))  # Minimum hospita
 MIN_EVAL_CLIENTS  = int(os.getenv("MIN_EVAL_CLIENTS",   "2"))
 NUM_ROUNDS        = int(os.getenv("NUM_ROUNDS",          "10"))
 
-app = FastAPI(title="SEWA AI — Federated Learning Coordinator", version="1.0.0")
+app = FastAPI(title="SEWA XAI — Federated Learning Coordinator", version="1.0.0")
 
 # Restrict CORS — internal AKS service, only backend should call this
 _FL_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://sewa-backend:5000").split(",")

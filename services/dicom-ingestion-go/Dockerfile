@@ -1,4 +1,4 @@
-# SEWA AI — Go DICOM Ingestion Service Dockerfile
+# SEWA XAI — Go DICOM Ingestion Service Dockerfile
 # Multi-stage build: builder → minimal distroless runtime
 # Final image: ~10MB (vs ~200MB for Node.js equivalent)
 

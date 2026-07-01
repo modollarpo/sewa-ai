@@ -1,5 +1,5 @@
-// SEWA AI — mobile/src/screens/patient/PatientProfileScreen.tsx
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+// SEWA XAI — mobile/src/screens/patient/PatientProfileScreen.tsx
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Alert, Switch } from 'react-native';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -57,7 +57,7 @@ export default function PatientProfileScreen() {
         <TouchableOpacity onPress={handleSignOut} style={{ marginTop:32, backgroundColor:'rgba(201,68,68,0.10)', borderRadius:12, padding:14, alignItems:'center', borderWidth:1, borderColor:T.red+'40' }}>
           <Text style={{ color:T.red, fontSize:14, fontWeight:'700' }}>Sign Out</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize:10, color:T.textLo+'80', textAlign:'center', marginTop:20, lineHeight:15 }}>© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</Text>
+        <Text style={{ fontSize:10, color:T.textLo+'80', textAlign:'center', marginTop:20, lineHeight:15 }}>© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</Text>
       </View>
     </ScrollView>
   );

@@ -1,7 +1,7 @@
-// SEWA AI — src/services/alertService.ts
+// SEWA XAI — src/services/alertService.ts
 // Multi-channel clinical alert dispatch: FCM, WebSocket, Email, HL7 ORU^R01
 // Stroke Code: + HL7 ADT^A02 + HL7 ORM^O01
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import axios from 'axios';
 import { prisma } from '../utils/prismaClient';
@@ -232,7 +232,7 @@ class AlertService {
   private async sendWhatsApp(users: ClinicalUser[], payload: AlertPayload, channels: AlertChannel[]): Promise<void> {
     const start = Date.now();
     try {
-      const msg = `🚨 SEWA AI CRITICAL ALERT\n*${payload.primaryFinding}*\nConfidence: ${(payload.confidence * 100).toFixed(0)}%\nScan: ${payload.scanId}\nOpen SEWA AI to review.`;
+      const msg = `🚨 SEWA XAI CRITICAL ALERT\n*${payload.primaryFinding}*\nConfidence: ${(payload.confidence * 100).toFixed(0)}%\nScan: ${payload.scanId}\nOpen SEWA XAI to review.`;
       await Promise.all(users.map(u =>
         axios.post(
           `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
@@ -250,7 +250,7 @@ class AlertService {
   private async sendSMS(users: ClinicalUser[], payload: AlertPayload, channels: AlertChannel[]): Promise<void> {
     const start = Date.now();
     try {
-      const msg = `SEWA AI CRITICAL: ${payload.primaryFinding} (${(payload.confidence * 100).toFixed(0)}%). Scan ${payload.scanId.slice(-8)}. Open app now.`;
+      const msg = `SEWA XAI CRITICAL: ${payload.primaryFinding} (${(payload.confidence * 100).toFixed(0)}%). Scan ${payload.scanId.slice(-8)}. Open app now.`;
       await Promise.all(users.map(u =>
         smsService.send(u.phone || '', msg)
       ));

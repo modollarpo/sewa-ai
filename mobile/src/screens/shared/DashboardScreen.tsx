@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/shared/DashboardScreen.tsx
+// SEWA XAI — mobile/src/screens/shared/DashboardScreen.tsx
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useQuery } from '@tanstack/react-query';

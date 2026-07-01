@@ -3,7 +3,7 @@ import { logger } from '../utils/logger';
 import { sendEmail } from './emailService';
 
 const DUNNING_STEPS = [
-  { day: 1, subject: 'Reminder: Your SEWA AI Payment is Due', template: 'dunning-1' },
+  { day: 1, subject: 'Reminder: Your SEWA XAI Payment is Due', template: 'dunning-1' },
   { day: 3, subject: 'Second Notice: Please Update Your Payment Method', template: 'dunning-2' },
   { day: 7, subject: 'Final Notice: Your Account Will Be Suspended Soon', template: 'dunning-3' }
 ];
@@ -72,19 +72,22 @@ export async function processDunning() {
       }
 
       // If 14+ days past due, suspend the account
+      // NOTE: BOTH status AND subscriptionStatus must be set — scanQuota.ts
+      // enforceQuota() checks `tenant.status`, while other parts of the system
+      // check `tenant.subscriptionStatus`. Writing only one field leaves the gate open.
       if (daysPastDue >= 14 && tenant.subscriptionStatus !== 'suspended') {
         await prisma.tenant.update({
           where: { id: tenant.id },
-          data: { subscriptionStatus: 'suspended' }
+          data: { status: 'suspended', subscriptionStatus: 'suspended' }
         });
-        logger.warn(`[Dunning] Suspended tenant ${tenant.id} due to non-payment`);
+        logger.warn(`[Dunning] Suspended tenant ${tenant.id} due to non-payment (both status fields set)`);
 
         // Send suspension email
         if (tenant.users[0]?.email) {
           try {
             await sendEmail({
               to: tenant.users[0].email,
-              subject: 'Your SEWA AI Account Has Been Suspended',
+              subject: 'Your SEWA XAI Account Has Been Suspended',
               template: 'suspension',
               data: {
                 tenantName: tenant.name

@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/notifications/whatsappService.ts
+// SEWA XAI — backend/src/services/notifications/whatsappService.ts
 // Azure Communication Services (ACS) Advanced Messaging — clinical notifications
 // All NHS/GDPR compliant: no PHI in WhatsApp unless user opted in
 
@@ -18,23 +18,23 @@ const messageClient = connectionString ? (MessagesClient as any)(connectionStrin
 
 const TEMPLATES: Record<string, (data: any) => string> = {
   critical_finding: (d) =>
-    `🚨 *SEWA AI — CRITICAL ALERT*\n\n` +
+    `🚨 *SEWA XAI — CRITICAL ALERT*\n\n` +
     `*Finding:* ${d.title?.replace('🚨 CRITICAL: ', '') ?? d.finding}\n` +
     `*Scan:* ${d.scanId ?? '—'}\n` +
     `*Confidence:* ${d.confidence ? `${(d.confidence*100).toFixed(1)}%` : '—'}\n\n` +
     `Log in to review: https://app.sewaxai.health\n\n` +
-    `_SEWA AI — ${new Date().toLocaleTimeString('en-GB')}_`,
+    `_SEWA XAI — ${new Date().toLocaleTimeString('en-GB')}_`,
 
   stroke_code: (d) =>
     `⚡ *STROKE CODE — IMMEDIATE ACTION*\n\n` +
     `*${d.finding ?? 'Stroke/LVO detected'}*\n` +
     `Location: ${d.location ?? '—'}\n` +
     `Confidence: ${d.confidence ? `${(d.confidence*100).toFixed(1)}%` : '—'}\n\n` +
-    `Please attend immediately and log in to SEWA AI.\nhttps://app.sewaxai.health\n\n` +
+    `Please attend immediately and log in to SEWA XAI.\nhttps://app.sewaxai.health\n\n` +
     `_${new Date().toISOString()}_`,
 
   appointment_booked: (d) =>
-    `✅ *Appointment Confirmed — SEWA AI*\n\n` +
+    `✅ *Appointment Confirmed — SEWA XAI*\n\n` +
     `Hi ${d.firstName},\n\n` +
     `Your appointment has been confirmed:\n` +
     `📅 *Date:* ${d.date}\n` +
@@ -42,48 +42,48 @@ const TEMPLATES: Record<string, (data: any) => string> = {
     `🏥 *Type:* ${d.type}\n` +
     `👨‍⚕️ *With:* ${d.doctorName ?? d.patientName ?? '—'}\n\n` +
     `To reschedule: https://app.sewaxai.health/appointments\n\n` +
-    `_SEWA AI Patient Portal_`,
+    `_SEWA XAI Patient Portal_`,
 
   appointment_reminder: (d) =>
-    `⏰ *Appointment Reminder — SEWA AI*\n\n` +
+    `⏰ *Appointment Reminder — SEWA XAI*\n\n` +
     `Hi ${d.firstName},\n\n` +
     `You have an appointment *tomorrow*:\n` +
     `📅 ${d.date} at ${d.time}\n` +
     `Type: ${d.type}\n\n` +
     `To confirm or cancel: https://app.sewaxai.health/appointments\n\n` +
-    `_SEWA AI_`,
+    `_SEWA XAI_`,
 
   appointment_cancelled: (d) =>
-    `❌ *Appointment Cancelled — SEWA AI*\n\n` +
+    `❌ *Appointment Cancelled — SEWA XAI*\n\n` +
     `Hi ${d.firstName},\n\n` +
     `Your appointment on ${d.date} at ${d.time} has been cancelled.\n\n` +
     `To rebook: https://app.sewaxai.health/appointments\n\n` +
-    `_SEWA AI_`,
+    `_SEWA XAI_`,
 
   report_ready: (d) =>
-    `📋 *Your Radiology Report is Ready — SEWA AI*\n\n` +
+    `📋 *Your Radiology Report is Ready — SEWA XAI*\n\n` +
     `Hi ${d.firstName},\n\n` +
     `Your radiology report has been signed and is now available to view.\n\n` +
     `View report: https://app.sewaxai.health/reports/${d.reportId ?? ''}\n\n` +
-    `_SEWA AI Patient Portal_`,
+    `_SEWA XAI Patient Portal_`,
 
   service_down: (d) =>
-    `🔴 *SEWA AI — Service Alert*\n\n` +
+    `🔴 *SEWA XAI — Service Alert*\n\n` +
     `Service: *${d.service ?? 'Unknown'}*\n` +
     `Status: DOWN\n` +
     `Time: ${new Date().toISOString()}\n\n` +
     `Dashboard: https://app.sewaxai.health/admin\n\n` +
-    `_SEWA AI Ops_`,
+    `_SEWA XAI Ops_`,
 
   deployment_failed: (d) =>
-    `🚨 *SEWA AI — Deployment Failed*\n\n` +
+    `🚨 *SEWA XAI — Deployment Failed*\n\n` +
     `Environment: ${d.environment ?? 'production'}\n` +
     `Commit: ${d.commit ?? '—'}\n` +
     `Error: ${d.error ?? 'See CI/CD logs'}\n\n` +
-    `_SEWA AI DevOps_`,
+    `_SEWA XAI DevOps_`,
 
   default: (d) =>
-    `🔔 *SEWA AI Notification*\n\n${d.title ?? ''}\n${d.body ?? ''}\n\nhttps://app.sewaxai.health`,
+    `🔔 *SEWA XAI Notification*\n\n${d.title ?? ''}\n${d.body ?? ''}\n\nhttps://app.sewaxai.health`,
 };
 
 // ── Interfaces ─────────────────────────────────────────────────
@@ -152,7 +152,7 @@ export const whatsappService = {
             channelRegistrationId,
             to: [opts.number],
             kind: 'text',
-            content: `🔐 *SEWA AI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
+            content: `🔐 *SEWA XAI — WhatsApp Verification*\n\nYour verification code: *${code}*\n\nThis code expires in 10 minutes.\n\n_Do not share this code._`,
           },
         });
         logger.info(`[WhatsApp] Verification sent to ${opts.number}`);

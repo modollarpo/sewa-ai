@@ -1,5 +1,5 @@
-// SEWA AI — ChangelogPage.tsx
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// SEWA XAI — ChangelogPage.tsx
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React from 'react';
 import { PublicLayout } from '../../components/public/PublicLayout';
 const C = { bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', brand:'#408D7B', brandLt:'#52B09A', textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055', border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif", FM:"'IBM Plex Mono',monospace" };
@@ -51,7 +51,7 @@ export function ChangelogPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
     <PublicLayout activePage="changelog" onNavigate={onNavigate}>
       <section style={{ background:`linear-gradient(135deg,${C.bg0},${C.bg1})`, padding:'52px clamp(16px,5vw,80px) 44px', borderBottom:`1px solid ${C.border}` }}>
         <h1 style={{ fontSize:'clamp(26px,4vw,40px)', fontWeight:900, color:C.textHi, fontFamily:C.F, margin:'0 0 12px' }}>Changelog</h1>
-        <p style={{ fontSize:15, color:C.textMd, margin:0 }}>Every change to SEWA AI — clinical-grade transparency.</p>
+        <p style={{ fontSize:15, color:C.textMd, margin:0 }}>Every change to SEWA XAI — clinical-grade transparency.</p>
       </section>
       <div style={{ maxWidth:800, margin:'0 auto', padding:'40px clamp(16px,5vw,48px) 80px' }}>
         {RELEASES.map((r, ri) => (
@@ -80,7 +80,7 @@ export function ChangelogPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
           </div>
         ))}
         <p style={{ fontSize:11, color:C.textLo, textAlign:'center', marginTop:32 }}>
-          © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+          © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
         </p>
       </div>
     </PublicLayout>

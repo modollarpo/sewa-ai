@@ -1,4 +1,4 @@
-// SEWA AI — i18n.ts
+// SEWA XAI — i18n.ts
 // Precision medical translations & regional formatting
 export const TRANSLATIONS: Record<string, any> = {
   en: {

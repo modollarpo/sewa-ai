@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-// SEWA AI — frontend/src/services/apiClient.ts
+// SEWA XAI — frontend/src/services/apiClient.ts
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 

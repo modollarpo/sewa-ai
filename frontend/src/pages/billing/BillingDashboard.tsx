@@ -1,4 +1,4 @@
-// SEWA AI — BillingDashboard.tsx
+// SEWA XAI — BillingDashboard.tsx
 // Region-aware billing: Stripe (UK/EU/US), Paystack (NG/ZA/GH), M-Pesa (KE), Flutterwave (GH)
 import React, { useState } from 'react';
 import { useBillingData } from '../../hooks/useDashboardData';
@@ -169,34 +169,98 @@ export function BillingDashboard() {
           <div className="animate-fade-in">
             
             {tab === 'overview' && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Usage Matrix */}
-                <div className="p-8 bg-[#08160F] border border-[#1B3028] rounded-[2rem] space-y-6 shadow-xl">
-                  <h4 className="text-sm font-black text-[#D0ECE6] uppercase tracking-widest border-b border-[#1B3028] pb-4">Quota Utilization</h4>
-                  <div className="space-y-8">
-                    <UsageBar label="Monthly AI Inferences" used={loading ? 0 : (stats.quota?.used || 0)} total={stats.quota?.monthly || 1000} />
-                    <UsageBar label="Patient Data Nodes" used={loading ? 0 : 2457} total={5000} color="#2A6EF2" />
-                    <UsageBar label="Storage Objects (GB)" used={loading ? 0 : 1820} total={2048} color="#E08A20" />
-                  </div>
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-6">
-                  {[
-                    { label: 'Accrued Bill', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.currentBill || 0).toFixed(2)}`, sub: 'Next cycle: 01 Jun', col: '#408D7B' },
-                    { label: 'Pending Auth', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.pendingAmount || 0).toFixed(2)}`, sub: 'Direct Debit / ACH', col: '#D0ECE6' },
-                    { label: 'Previous Cycle', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.lastPaymentAmount || 0).toFixed(2)}`, sub: 'Paid 30 Apr', col: '#6FA898' },
-                    { label: 'Burst Capacity', val: 'Active', sub: 'Overage protection: ON', col: '#1DBF73' }
-                  ].map(s => (
-                    <div key={s.label} className="p-6 bg-[#08160F] border border-[#1B3028] rounded-[2rem] shadow-xl group hover:border-[#408D7B]/30 transition-all">
-                      <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest mb-2">{s.label}</div>
-                      <div className="text-2xl font-black font-mono tracking-tighter mb-1" style={{ color: s.col }}>{s.val}</div>
-                      <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest">{s.sub}</div>
+              <div className="space-y-8">
+                {/* Monthly Scan Quota — Headline Card */}
+                {(() => {
+                  const used  = loading ? 0 : (stats.quota?.used  || 0);
+                  const total = loading ? 1 : (stats.quota?.monthly || 1000);
+                  const pct   = Math.min(100, Math.round((used / total) * 100));
+                  const remaining = Math.max(0, total - used);
+                  const color = pct >= 90 ? '#E03535' : pct >= 75 ? '#E08A20' : '#1DBF73';
+                  const r = 54; const circ = 2 * Math.PI * r;
+                  const resetDate = new Date(); resetDate.setDate(1); resetDate.setMonth(resetDate.getMonth() + 1);
+                  const daysLeft  = Math.ceil((resetDate.getTime() - Date.now()) / 86400000);
+                  return (
+                    <div className="p-8 bg-[#08160F] border border-[#1B3028] rounded-[2rem] shadow-2xl">
+                      <div className="flex flex-col md:flex-row items-center gap-8">
+                        {/* Circular ring */}
+                        <div className="relative flex-shrink-0">
+                          <svg width={130} height={130} viewBox="0 0 130 130">
+                            <circle cx={65} cy={65} r={r} fill="none" stroke="#1B3028" strokeWidth={10} />
+                            <circle cx={65} cy={65} r={r} fill="none" stroke={color}
+                              strokeWidth={10} strokeLinecap="round"
+                              strokeDasharray={`${circ}`}
+                              strokeDashoffset={`${circ * (1 - pct / 100)}`}
+                              transform="rotate(-90 65 65)"
+                              style={{ transition: 'stroke-dashoffset 1s ease, stroke 0.5s ease', filter: `drop-shadow(0 0 6px ${color}60)` }}
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-3xl font-black font-mono" style={{ color }}>{pct}%</span>
+                            <span className="text-[9px] text-[#3A6055] font-black uppercase tracking-widest">used</span>
+                          </div>
+                        </div>
+                        {/* Stats */}
+                        <div className="flex-1 space-y-4 w-full">
+                          <div>
+                            <h4 className="text-sm font-black text-[#D0ECE6] uppercase tracking-widest">Monthly Scan Quota</h4>
+                            <p className="text-[10px] text-[#3A6055] font-bold mt-1">Resets in {daysLeft} day{daysLeft !== 1 ? 's' : ''} · {new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short'}).format(resetDate)}</p>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4">
+                            {[
+                              { label:'Scans Used',      val: used.toLocaleString(),       col: color },
+                              { label:'Remaining',       val: remaining.toLocaleString(),  col: '#D0ECE6' },
+                              { label:'Monthly Limit',   val: total > 999999 ? '∞' : total.toLocaleString(), col: '#6FA898' },
+                            ].map(s => (
+                              <div key={s.label} className="p-3 bg-[#0C1D17] rounded-xl border border-[#1B3028] text-center">
+                                <div className="text-lg font-black font-mono" style={{ color: s.col }}>{s.val}</div>
+                                <div className="text-[9px] text-[#3A6055] font-black uppercase tracking-widest mt-1">{s.label}</div>
+                              </div>
+                            ))}
+                          </div>
+                          {pct >= 80 && (
+                            <div className={`p-3 rounded-xl border text-[10px] font-bold flex items-center gap-2 ${
+                              pct >= 90 ? 'bg-[#2A0A0A] border-[#E03535]/30 text-[#E03535]' : 'bg-[#2A1800] border-[#E08A20]/30 text-[#E08A20]'
+                            }`}>
+                              {pct >= 90 ? '🚨 Critical:' : '⚠️ Warning:'} {pct >= 90 ? 'Quota nearly exhausted. Upgrade your plan to prevent scan processing interruption.' : 'Approaching scan quota limit. Consider upgrading your plan.'}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  ))}
+                  );
+                })()}
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Usage Matrix */}
+                  <div className="p-8 bg-[#08160F] border border-[#1B3028] rounded-[2rem] space-y-6 shadow-xl">
+                    <h4 className="text-sm font-black text-[#D0ECE6] uppercase tracking-widest border-b border-[#1B3028] pb-4">Quota Utilization</h4>
+                    <div className="space-y-8">
+                      <UsageBar label="Monthly AI Inferences" used={loading ? 0 : (stats.quota?.used || 0)} total={stats.quota?.monthly || 1000} />
+                      <UsageBar label="Patient Data Nodes" used={loading ? 0 : 2457} total={5000} color="#2A6EF2" />
+                      <UsageBar label="Storage Objects (GB)" used={loading ? 0 : 1820} total={2048} color="#E08A20" />
+                    </div>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-6">
+                    {[
+                      { label: 'Accrued Bill', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.currentBill || 0).toFixed(2)}`, sub: 'Next cycle: 01 Jun', col: '#408D7B' },
+                      { label: 'Pending Auth', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.pendingAmount || 0).toFixed(2)}`, sub: 'Direct Debit / ACH', col: '#D0ECE6' },
+                      { label: 'Previous Cycle', val: loading ? '...' : `${gateways[0]?.currencies[0]} ${Number(stats.lastPaymentAmount || 0).toFixed(2)}`, sub: 'Paid 30 Apr', col: '#6FA898' },
+                      { label: 'Burst Capacity', val: 'Active', sub: 'Overage protection: ON', col: '#1DBF73' }
+                    ].map(s => (
+                      <div key={s.label} className="p-6 bg-[#08160F] border border-[#1B3028] rounded-[2rem] shadow-xl group hover:border-[#408D7B]/30 transition-all">
+                        <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest mb-2">{s.label}</div>
+                        <div className="text-2xl font-black font-mono tracking-tighter mb-1" style={{ color: s.col }}>{s.val}</div>
+                        <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest">{s.sub}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
+
 
             {tab === 'plans' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

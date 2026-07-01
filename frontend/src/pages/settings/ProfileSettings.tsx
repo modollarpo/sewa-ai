@@ -1,4 +1,4 @@
-// SEWA AI — ProfileSettings.tsx
+// SEWA XAI — ProfileSettings.tsx
 // Management of Clinical Persona, Notification Rules, and Security
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
@@ -6,11 +6,31 @@ import { apiClient } from '../../services/apiClient';
 
 export function ProfileSettings() {
   const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'profile'|'security'|'notifications'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile'|'security'|'notifications'|'ai-language'>('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [isChangingPass, setIsChangingPass] = useState(false);
+  const [reportLanguage, setReportLanguage] = useState('en');
+  const [isSavingLanguage, setIsSavingLanguage] = useState(false);
+
+  const LANGUAGES = [
+    { code: 'en', native: 'English',    market: 'UK, US, Global',                    rtl: false },
+    { code: 'ha', native: 'Hausa',      market: 'N. Nigeria, Niger, Chad',           rtl: false },
+    { code: 'yo', native: 'Yorùbá',     market: 'SW Nigeria, Benin, Togo',           rtl: false },
+    { code: 'ig', native: 'Igbo',       market: 'SE Nigeria',                        rtl: false },
+    { code: 'sw', native: 'Kiswahili',  market: 'Kenya, Tanzania, Uganda, DRC',      rtl: false },
+    { code: 'fr', native: 'Français',   market: 'West Africa (Côte d\'Ivoire), EU',  rtl: false },
+    { code: 'pt', native: 'Português',  market: 'Mozambique, Angola, Brazil',        rtl: false },
+    { code: 'ar', native: 'العربية',    market: 'Egypt, Sudan, N. Africa',           rtl: true  },
+  ];
+
+  useEffect(() => {
+    // Fetch tenant settings to load current report language
+    apiClient.get('/tenants/me').then((res: any) => {
+      if (res.data?.reportLanguage) setReportLanguage(res.data.reportLanguage);
+    }).catch(() => {});
+  }, []);
 
   const [form, setForm] = useState({
     firstName: user?.firstName || '',
@@ -33,6 +53,19 @@ export function ProfileSettings() {
       });
     }
   }, [user]);
+
+  const handleSaveLanguage = async () => {
+    setIsSavingLanguage(true);
+    setStatus(null);
+    try {
+      await apiClient.patch('/tenants/me', { reportLanguage });
+      setStatus({ msg: `AI report language updated to '${LANGUAGES.find(l => l.code === reportLanguage)?.native || reportLanguage}'. All new VLM reports will use this language.`, type: 'ok' });
+    } catch (err: any) {
+      setStatus({ msg: err.response?.data?.message || 'Language update failed.', type: 'err' });
+    } finally {
+      setIsSavingLanguage(false);
+    }
+  };
 
   const toggleNotif = (key: string) => {
     setForm(f => ({
@@ -108,7 +141,8 @@ export function ProfileSettings() {
           {[
             { id: 'profile', label: 'Clinical Profile', icon: '👤' },
             { id: 'security', label: 'Node Security', icon: '🔒' },
-            { id: 'notifications', label: 'Triage Alerts', icon: '🔔' }
+            { id: 'notifications', label: 'Triage Alerts', icon: '🔔' },
+            { id: 'ai-language', label: 'AI Report Language', icon: '🌍' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -232,6 +266,64 @@ export function ProfileSettings() {
             </div>
           )}
 
+          {activeTab === 'ai-language' && (
+            <div className="space-y-8 animate-fade-in">
+              <div>
+                <h2 className="text-xl font-black text-[#D0ECE6] tracking-tight border-b border-[#1B3028] pb-4">AI Report Language</h2>
+                <p className="text-[11px] text-[#6FA898] font-medium mt-3 leading-relaxed">
+                  Select the language for AI-generated clinical reports. SEWA XAI is the <span className="text-[#408D7B] font-bold">only clinical AI platform</span> that generates reports in African languages. All new scan reports will be generated in this language automatically.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {LANGUAGES.map(lang => (
+                  <button
+                    key={lang.code}
+                    id={`lang-${lang.code}`}
+                    onClick={() => setReportLanguage(lang.code)}
+                    className={`p-4 rounded-2xl border text-left transition-all group ${
+                      reportLanguage === lang.code
+                        ? 'bg-[#408D7B]/10 border-[#408D7B]/50 shadow-[0_0_20px_rgba(64,141,123,0.15)]'
+                        : 'bg-[#0C1D17] border-[#1B3028] hover:border-[#408D7B]/30'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-sm font-black tracking-tight ${
+                        reportLanguage === lang.code ? 'text-[#52B09A]' : 'text-[#D0ECE6]'
+                      } ${lang.rtl ? 'dir-rtl text-right w-full' : ''}`}>
+                        {lang.native}
+                      </span>
+                      {reportLanguage === lang.code && (
+                        <span className="text-[#408D7B] text-lg">✓</span>
+                      )}
+                      {lang.rtl && (
+                        <span className="text-[9px] text-[#E08A20] bg-[#2A1800] px-1.5 py-0.5 rounded font-bold">RTL</span>
+                      )}
+                    </div>
+                    <div className="text-[9px] font-bold text-[#3A6055] uppercase tracking-widest">{lang.market}</div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="p-4 bg-[#0A1F14] border border-[#1DBF73]/20 rounded-2xl text-[11px] text-[#6FA898] leading-relaxed">
+                <span className="text-[#1DBF73] font-black uppercase tracking-widest">MOAT INSIGHT · </span>
+                No competitor (Qure.ai, Aidoc, Viz.ai, Nuance) supports Hausa, Yoruba, Igbo or Swahili. This is an exclusive SEWA XAI capability covering 400M+ potential clinical users across Sub-Saharan Africa.
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSaveLanguage}
+                  disabled={isSavingLanguage}
+                  id="save-report-language"
+                  className="px-10 py-4 rounded-xl bg-[#408D7B] hover:bg-[#52B09A] disabled:opacity-30 transition-all text-white text-[11px] font-black uppercase tracking-widest shadow-xl shadow-[#408D7B]/20 active:scale-95"
+                >
+                  {isSavingLanguage ? 'Saving...' : 'Apply Language Setting'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab !== 'ai-language' && (
           <div className="mt-12 pt-8 border-t border-[#1B3028] flex justify-end">
             <button 
               onClick={handleSave} 
@@ -241,8 +333,10 @@ export function ProfileSettings() {
               {isSaving ? 'Syncing...' : 'Confirm Metadata Changes'}
             </button>
           </div>
+          )}
         </div>
       </div>
+
 
       {/* Password Modal */}
       {showPasswordModal && (

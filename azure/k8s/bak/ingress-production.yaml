@@ -1,7 +1,7 @@
-# SEWA AI — Production Ingress
+# SEWA XAI — Production Ingress
 # Requires: nginx ingress controller + cert-manager with letsencrypt-prod ClusterIssuer
 # Applied by deploy-azure-acr.sh
-# © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

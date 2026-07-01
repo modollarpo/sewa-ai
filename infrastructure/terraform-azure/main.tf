@@ -1,5 +1,5 @@
-# SEWA AI — infrastructure/terraform-azure/main.tf
-# Complete Azure infrastructure for SEWA AI Clinical Intelligence Platform
+# SEWA XAI — infrastructure/terraform-azure/main.tf
+# Complete Azure infrastructure for SEWA XAI Clinical Intelligence Platform
 #
 # Resources provisioned:
 #   - Resource Group

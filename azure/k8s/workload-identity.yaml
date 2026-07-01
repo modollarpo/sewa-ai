@@ -1,4 +1,4 @@
-# SEWA AI Workload Identity & Secrets Store CSI Driver Setup
+# SEWA XAI Workload Identity & Secrets Store CSI Driver Setup
 apiVersion: v1
 kind: ServiceAccount
 metadata:

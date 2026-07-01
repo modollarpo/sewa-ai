@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/model.py  (CPU Edition)
+# SEWA XAI — ai-services/triage/model.py  (CPU Edition)
 # SEWATriageModel definition for PyTorch → ONNX export ONLY.
 # At inference time this file is NOT imported — the ONNX model is used directly.
 #

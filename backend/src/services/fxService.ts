@@ -1,7 +1,7 @@
-// SEWA AI — backend/src/services/fxService.ts
+// SEWA XAI — backend/src/services/fxService.ts
 // Live foreign exchange rates with Redis caching + hardcoded fallback.
 // Refreshes every 4 hours from Open Exchange Rates (free tier) or ECB.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import axios from 'axios';
 import { redisClient } from '../config/redis';
 import { logger } from '../utils/logger';

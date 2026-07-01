@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/__tests__/ai.test.ts
+// SEWA XAI — backend/src/__tests__/ai.test.ts
 // Unit tests for AI pipeline logic — no external services needed
 
 // ── Clinical Rules Engine unit tests ────────────────────────

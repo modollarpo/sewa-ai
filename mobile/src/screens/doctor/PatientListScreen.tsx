@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/doctor/PatientListScreen.tsx
+// SEWA XAI — mobile/src/screens/doctor/PatientListScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';

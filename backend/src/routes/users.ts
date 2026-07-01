@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/users.ts
+// SEWA XAI — backend/src/routes/users.ts
 import { Router } from 'express';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
@@ -122,7 +122,7 @@ r.post('/', authorize('admin','superadmin'), async (req, res, next) => {
     sendEmail({
       to: email,
       name: `${firstName} ${lastName}`.trim() || email,
-      subject: `You've been invited to SEWA AI — ${tenant?.name ?? 'NHS Trust'}`,
+      subject: `You've been invited to SEWA XAI — ${tenant?.name ?? 'NHS Trust'}`,
       template: 'staff-invite',
       data: { role, tenantName: tenant?.name, inviteLink },
     }).catch((e: any) => logger.warn(`[Users] Invite email failed for ${email}: ${e.message}`));
@@ -150,7 +150,7 @@ r.post('/invite', authorize('admin','superadmin'), async (req, res, next) => {
     const inviteLink = `${config.FRONTEND_URL}/auth/accept-invite?token=${inviteToken}`;
     sendEmail({
       to: email,
-      subject: `You've been invited to SEWA AI — ${tenant?.name ?? 'NHS Trust'}`,
+      subject: `You've been invited to SEWA XAI — ${tenant?.name ?? 'NHS Trust'}`,
       template: 'staff-invite',
       data: { role, tenantName: tenant?.name, inviteLink },
     }).catch((e: any) => logger.warn(`[Invite] Email failed for ${email}: ${e.message}`));

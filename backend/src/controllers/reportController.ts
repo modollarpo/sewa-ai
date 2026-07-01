@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/controllers/reportController.ts
+// SEWA XAI — backend/src/controllers/reportController.ts
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { generateVLMReport } from '../services/aiService';
@@ -112,7 +112,7 @@ export async function signReport(req: Request, res: Response, next: NextFunction
       await sendNotification({
         to: report.scan.patient.user.phone,
         priority: 'urgent',
-        subject: 'Your SEWA AI Report is Ready',
+        subject: 'Your SEWA XAI Report is Ready',
         body: `Hello ${report.scan.patient.user.firstName}, your clinical report from ${report.scan.tenant.name} is now available in your patient portal. View it here: ${config.FRONTEND_URL}/portal/scans/${report.scanId}`
       }).catch(e => logger.warn(`[Notify] Patient alert failed: ${e.message}`));
     }

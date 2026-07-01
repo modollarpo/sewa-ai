@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/tenants.ts
+// SEWA XAI — backend/src/routes/tenants.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { prisma } from '../utils/prismaClient';
@@ -14,7 +14,7 @@ r.get('/me', async (req, res, next) => {
       where: { id: req.user!.tenantId },
       select: {
         id: true, name: true, slug: true, subdomain: true, region: true,
-        currency: true, language: true, plan: true, status: true,
+        currency: true, language: true, reportLanguage: true, plan: true, status: true,
         fhirBaseUrl: true, hl7Endpoint: true, pacsEndpoint: true,
         timezone: true, address: true,
         scanQuota: true, scansUsedThisMonth: true,
@@ -23,6 +23,42 @@ r.get('/me', async (req, res, next) => {
       }
     });
     res.json(t);
+  } catch (err) { next(err); }
+});
+
+/**
+ * PATCH /api/v1/tenants/me
+ * Allows tenant admins to update their institution's settings.
+ * Supported fields: reportLanguage (multilingual VLM), timezone, address.
+ */
+const SUPPORTED_REPORT_LANGUAGES = new Set([
+  'en', 'ha', 'yo', 'ig', 'sw', 'fr', 'pt', 'ar'
+]);
+
+r.patch('/me', authorize('admin', 'superadmin'), async (req, res, next) => {
+  try {
+    const { tenantId } = req.user!;
+    const { reportLanguage, timezone, address } = req.body;
+
+    // Validate language code if provided
+    if (reportLanguage && !SUPPORTED_REPORT_LANGUAGES.has(reportLanguage)) {
+      return res.status(400).json({
+        message: `Unsupported reportLanguage '${reportLanguage}'. Supported: ${[...SUPPORTED_REPORT_LANGUAGES].join(', ')}`
+      });
+    }
+
+    const updateData: Record<string, unknown> = {};
+    if (reportLanguage) updateData.reportLanguage = reportLanguage;
+    if (timezone)       updateData.timezone = timezone;
+    if (address)        updateData.address = address;
+
+    const updated = await prisma.tenant.update({
+      where: { id: tenantId },
+      data: updateData,
+      select: { id: true, name: true, reportLanguage: true, timezone: true, address: true },
+    });
+
+    return res.json({ message: 'Tenant settings updated.', tenant: updated });
   } catch (err) { next(err); }
 });
 

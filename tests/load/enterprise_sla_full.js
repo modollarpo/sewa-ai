@@ -1,4 +1,4 @@
-// SEWA AI — Enterprise SLA Load Test (Full)
+// SEWA XAI — Enterprise SLA Load Test (Full)
 // Validates high-concurrency scan ingestion and triage triggering
 import http from 'k6/http';
 import { check, sleep } from 'k6';

@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/terraform-azure/networking.tf
+# SEWA XAI — infrastructure/terraform-azure/networking.tf
 # VNet, Subnets, NSGs, Private DNS Zones, Private Endpoints
 
 # ── Virtual Network ────────────────────────────────────────────

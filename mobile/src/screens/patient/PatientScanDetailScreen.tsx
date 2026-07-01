@@ -1,5 +1,5 @@
-// SEWA AI — mobile/src/screens/patient/PatientScanDetailScreen.tsx
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+// SEWA XAI — mobile/src/screens/patient/PatientScanDetailScreen.tsx
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';

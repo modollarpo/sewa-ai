@@ -1,4 +1,4 @@
-// SEWA AI — pages/public/DownloadsPage.tsx
+// SEWA XAI — pages/public/DownloadsPage.tsx
 // Mobile apps (iOS + Android) + PWA installation guide
 // Enterprise-grade, clinical context, real store links and system requirements
 
@@ -155,7 +155,7 @@ export function DownloadsPage({ onNavigate }: { onNavigate: (page: string) => vo
             <span style={{ fontSize:11, fontWeight:700, color:C.brand, letterSpacing:'0.08em', textTransform:'uppercase' }}>Available on all platforms</span>
           </div>
           <h1 style={{ fontSize:'clamp(32px, 8vw, 52px)', fontWeight:800, color:C.textHi, margin:'0 0 20px', lineHeight:1.1, letterSpacing:'-2px', fontFamily:C.F }}>
-            SEWA AI — Everywhere<br/>You Practice
+            SEWA XAI — Everywhere<br/>You Practice
           </h1>
           <p style={{ ...p, fontSize:16, maxWidth:520, margin:'0 auto 40px' }}>
             Native iOS and Android apps, a full-featured Progressive Web App, and the clinical web platform — all synced in real time.
@@ -322,7 +322,7 @@ export function DownloadsPage({ onNavigate }: { onNavigate: (page: string) => vo
             <div style={{ padding:20, background:C.bg2, borderRadius:14, border:`1px solid ${C.border}` }}>
               <div style={{ fontSize:13, fontWeight:700, color:C.textHi, marginBottom:12 }}>MDM & Enterprise Control</div>
               <p style={{ fontSize:12, color:C.textLo, lineHeight:1.6 }}>
-                Deploy SEWA AI through your MDM solution (InTune, MobileIron, Jamf). 
+                Deploy SEWA XAI through your MDM solution (InTune, MobileIron, Jamf). 
                 Pre-configure FHIR endpoints, DICOM gateway settings, and compliance policies across your entire fleet.
               </p>
             </div>

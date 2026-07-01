@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# SEWA AI — deploy-azure-acr.sh
+# SEWA XAI — deploy-azure-acr.sh
 # Full Production Deployment to Azure — NO Docker Desktop required
 #
 # Uses ACR Tasks (cloud-native build + push) instead of local Docker.
@@ -21,7 +21,7 @@
 #   node >= 20        (for frontend build + EAS)
 #   jq
 #
-# © 2026 SEWA AI — a Storegrill Inc Ltd company.
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company.
 # Registered in England & Wales (14581073). All rights reserved.
 # ============================================================
 set -euo pipefail
@@ -92,7 +92,7 @@ cd "$ROOT_DIR"
 # ══════════════════════════════════════════════════════════════
 echo -e "${BOLD}"
 echo "  ╔══════════════════════════════════════════════════════════╗"
-echo "  ║     SEWA AI — Azure ACR Production Deployment           ║"
+echo "  ║     SEWA XAI — Azure ACR Production Deployment           ║"
 echo "  ║     No Docker Desktop required · ACR Tasks builds       ║"
 echo "  ║     from hours, to seconds                              ║"
 echo "  ╚══════════════════════════════════════════════════════════╝"
@@ -776,7 +776,7 @@ echo "${DEPLOY_JSON}" | az storage blob upload \
 # ══════════════════════════════════════════════════════════════
 echo ""
 echo -e "${BOLD}${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}${GREEN}║   SEWA AI Deployment Complete ✓                          ║${NC}"
+echo -e "${BOLD}${GREEN}║   SEWA XAI Deployment Complete ✓                          ║${NC}"
 echo -e "${BOLD}${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${GREEN}Environment${NC}  : ${ENV}"
@@ -801,7 +801,7 @@ echo    "    bash scripts/setup-azure-fhir.sh --env ${ENV}   # Re-provision FHIR
 echo    "    bash scripts/generate-env-azure.sh --env ${ENV} # Refresh .env.azure"
 echo    "    bash scripts/deploy-azure-acr.sh --skip-tf --skip-frontend  # Code-only redeploy"
 echo ""
-echo -e "  ${CYAN}© 2026 SEWA AI — a Storegrill Inc Ltd company.${NC}"
+echo -e "  ${CYAN}© 2026 SEWA XAI — a Storegrill Inc Ltd company.${NC}"
 echo -e "  ${CYAN}Registered in England & Wales (14581073). All rights reserved.${NC}"
 echo -e "  ${CYAN}from hours, to seconds${NC}"
 echo ""

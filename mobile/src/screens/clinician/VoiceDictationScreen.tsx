@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/clinician/VoiceDictationScreen.tsx
+// SEWA XAI — mobile/src/screens/clinician/VoiceDictationScreen.tsx
 // Feature 10: Voice Dictation — Google Cloud Speech-to-Text / AWS Transcribe Medical
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated, Alert } from 'react-native';

@@ -7,7 +7,7 @@ declare var process: any;
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🏥 SEWA AI — Automated Demo Hospital Onboarding');
+  console.log('🏥 SEWA XAI — Automated Demo Hospital Onboarding');
   console.log('---------------------------------------');
 
   const name = 'St. Thomas NHS Trust (Demo)';

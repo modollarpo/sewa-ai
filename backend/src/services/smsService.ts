@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/smsService.ts
+// SEWA XAI — backend/src/services/smsService.ts
 // Azure Communication Services (ACS) SMS dispatcher
 import { SmsClient } from '@azure/communication-sms';
 import { logger } from '../utils/logger';

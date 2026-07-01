@@ -1,4 +1,4 @@
-// SEWA AI — src/controllers/authController.ts
+// SEWA XAI — src/controllers/authController.ts
 // Feature 2: JWT + OAuth2, MFA (TOTP/SMS/Email), Biometric auth, HIPAA audit logging
 
 import { Request, Response, NextFunction } from 'express';
@@ -118,7 +118,7 @@ export async function setupMFA(req: Request, res: Response, next: NextFunction) 
     const userId = req.user!.id;
     const secret = authenticator.generateSecret();
     const user   = await prisma.user.findUnique({ where: { id: userId } });
-    const otpauth = authenticator.keyuri(user!.email, 'SEWA AI', secret);
+    const otpauth = authenticator.keyuri(user!.email, 'SEWA XAI', secret);
 
     await redisClient.setex(`mfa_setup:${userId}`, 600, secret);
     res.json({ secret, otpauthUrl: otpauth });
@@ -200,7 +200,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
     // Send email verification (non-fatal)
     sendEmail({
       to: email,
-      subject: 'Verify your SEWA AI clinical account',
+      subject: 'Verify your SEWA XAI clinical account',
       template: 'verify_email',
       data: { firstName, verifyLink },
     }).catch((e: any) => logger.warn(`[Auth] Verification email failed for ${email}: ${e.message}`));
@@ -247,7 +247,7 @@ export async function registerSpecialist(req: Request, res: Response, next: Next
     const verifyLink = `${config.FRONTEND_URL}/verify-email?token=${verifyToken}`;
     sendEmail({
       to: email,
-      subject: 'Verify your SEWA AI Specialist account',
+      subject: 'Verify your SEWA XAI Specialist account',
       template: 'verify_email',
       data: { firstName, verifyLink },
     }).catch((e: any) => logger.warn(`[Auth] Specialist verification email failed: ${e.message}`));
@@ -277,7 +277,7 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
 
     await sendEmail({
       to: email,
-      subject: 'Reset your SEWA AI password',
+      subject: 'Reset your SEWA XAI password',
       template: 'forgot_password',
       data: { firstName: user.firstName, resetLink: `${config.FRONTEND_URL}/reset-password?token=${token}&tenant=${tenantSlug}` }
     });

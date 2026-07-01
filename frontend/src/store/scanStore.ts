@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/store/scanStore.ts
+// SEWA XAI — frontend/src/store/scanStore.ts
 import { create } from 'zustand';
 import { apiClient } from '../services/apiClient';
 

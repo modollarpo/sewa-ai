@@ -1,6 +1,6 @@
-// SEWA AI — mobile/src/store/notificationStore.ts
+// SEWA XAI — mobile/src/store/notificationStore.ts
 // In-memory notification store with unread count
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import { create } from 'zustand';
 
 export interface AppNotification {

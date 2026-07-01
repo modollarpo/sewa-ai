@@ -1,4 +1,4 @@
-// SEWA AI — components/public/PublicLayout.tsx
+// SEWA XAI — components/public/PublicLayout.tsx
 // Enterprise public site shell: sticky nav, mega-footer, cookie banner wiring
 // Used by: Landing, Pricing, Solutions, About, Contact, Downloads, Cookies, Privacy, Terms
 
@@ -104,7 +104,7 @@ export function PublicNav({ activePage, onNavigate }: { activePage: string; onNa
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
             </svg>
           </div>
-          <span style={{ fontSize:17, fontWeight:800, color:C.textHi, letterSpacing:'-0.5px' }}>SEWA AI</span>
+          <span style={{ fontSize:17, fontWeight:800, color:C.textHi, letterSpacing:'-0.5px' }}>SEWA XAI</span>
         </div>
 
         {/* Mobile Spacer (pushes hamburger to right) */}
@@ -209,7 +209,7 @@ export function PublicFooter({ onNavigate }: { onNavigate: (page: string) => voi
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                 </svg>
               </div>
-              <span style={{ fontSize:18, fontWeight:800, color:C.textHi, letterSpacing:'-0.5px' }}>SEWA AI</span>
+              <span style={{ fontSize:18, fontWeight:800, color:C.textHi, letterSpacing:'-0.5px' }}>SEWA XAI</span>
             </div>
             <p style={pStyle}>
               Empowering clinicians with diagnostic intelligence. Deployed worldwide to detect life-threatening conditions in seconds with peer-reviewed accuracy and military-grade security.
@@ -263,7 +263,7 @@ export function PublicFooter({ onNavigate }: { onNavigate: (page: string) => voi
         {/* Copy bar */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:24 }}>
           <div style={{ fontSize:12, color:C.textLo }}>
-            © {new Date().getFullYear()} SEWA AI — a Storegrill Inc Ltd company. No. 14581073.
+            © {new Date().getFullYear()} SEWA XAI — a Storegrill Inc Ltd company. No. 14581073.
             <div style={{ marginTop:4, fontSize:10, color:C.textLo, opacity:0.8 }}>UK Patent Pending: GB2609706.3 — Storegrill Inc Ltd (Company No. 14581073)</div>
           </div>
           <div style={{ display:'flex', gap:24 }}>

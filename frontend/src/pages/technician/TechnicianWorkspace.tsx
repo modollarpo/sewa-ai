@@ -1,4 +1,4 @@
-// SEWA AI — TechnicianWorkspace.tsx
+// SEWA XAI — TechnicianWorkspace.tsx
 // DICOM upload (drag-drop), live worklist, PACS sync status, queue management
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useTechnicianData, useAppointmentData } from '../../hooks/useDashboardData';
@@ -22,8 +22,8 @@ interface UploadJob {
   startedAt: number;
 }
 
-const MODALITIES = ['CT','MRI','XR','US','NM','PET','MG','CR'];
-const BODY_PARTS = ['HEAD','CHEST','ABDOMEN','PELVIS','SPINE','NECK','EXTREMITY','WHOLE_BODY'];
+const MODALITIES = ['CT','MRI','XR','US','NM','PET','MG','CR','ECG','PATH'];
+const BODY_PARTS = ['HEAD','CHEST','ABDOMEN','PELVIS','SPINE','NECK','EXTREMITY','WHOLE_BODY','HEART','TISSUE'];
 const PRIORITIES = ['ROUTINE','URGENT','STAT'];
 
 function StatusBadge({ status, progress }: { status: string; progress: number }) {

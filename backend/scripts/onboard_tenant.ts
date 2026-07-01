@@ -14,7 +14,7 @@ const rl = readline.createInterface({
 const question = (query: string): Promise<string> => new Promise((resolve) => rl.question(query, resolve));
 
 async function main() {
-  console.log('🏥 SEWA AI — Hospital Onboarding Script');
+  console.log('🏥 SEWA XAI — Hospital Onboarding Script');
   console.log('---------------------------------------');
 
   const name = await question('Hospital Name (e.g., St. Thomas Hospital): ');

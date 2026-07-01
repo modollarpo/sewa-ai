@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/metacognition/main.py  (CPU Edition)
+# SEWA XAI — ai-services/metacognition/main.py  (CPU Edition)
 # Clinical safety gate — pure rule-based Python, zero ML model.
 # Checks: plausibility, urgency consistency, confidence calibration,
 # SHAP coherence, uncertainty conflict, demographic flags.
@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="SEWA AI — Metacognition Engine (CPU Edition)",
+    title="SEWA XAI — Metacognition Engine (CPU Edition)",
     version="2.0.0",
     description=(
         "CPU-native clinical safety gate. Rule-based multi-layer self-evaluation. "
@@ -400,7 +400,7 @@ class MetacognitionEvaluator:
             lines.append("No flags raised. All checks passed.")
         lines += [
             "",
-            f"Evaluated by: SEWA AI Metacognition Engine v2.0.0",
+            f"Evaluated by: SEWA XAI Metacognition Engine v2.0.0",
             f"Timestamp: {datetime.now(timezone.utc).isoformat()}",
         ]
         return "\n".join(lines)

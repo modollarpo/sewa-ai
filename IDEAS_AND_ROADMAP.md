@@ -1,6 +1,6 @@
-# SEWA AI — Innovation Roadmap & Feature Ideas
+# SEWA XAI — Innovation Roadmap & Feature Ideas
 
-## What Would I Add to SEWA AI?
+## What Would I Add to SEWA XAI?
 
 ---
 
@@ -232,4 +232,4 @@
 ---
 
 *"From Hours to Seconds: Autonomous AI-Powered Diagnostic Intelligence for Global Healthcare."*
-*SEWA AI — Built for the world, not just the wealthy.*
+*SEWA XAI — Built for the world, not just the wealthy.*

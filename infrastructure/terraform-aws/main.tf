@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/terraform-aws/main.tf
+# SEWA XAI — infrastructure/terraform-aws/main.tf
 # AWS EKS deployment for North America region
 # Mirrors Azure architecture with AWS equivalents
 
@@ -179,7 +179,7 @@ resource "aws_elasticache_subnet_group" "sewa" {
 
 resource "aws_elasticache_replication_group" "sewa" {
   replication_group_id       = "sewa-ai-redis"
-  description                = "SEWA AI Redis — session + AI queue"
+  description                = "SEWA XAI Redis — session + AI queue"
   node_type                  = "cache.r7g.large"
   num_cache_clusters         = 2   # Primary + replica
   port                       = 6379
@@ -249,7 +249,7 @@ resource "aws_healthlake_fhir_datastore" "sewa" {
 
 # ── KMS Key for encryption at rest ────────────────────────────
 resource "aws_kms_key" "sewa" {
-  description             = "SEWA AI encryption key"
+  description             = "SEWA XAI encryption key"
   deletion_window_in_days = 30
   enable_key_rotation     = true
   policy = jsonencode({

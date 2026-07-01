@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/remotion/Root.tsx
+// SEWA XAI — frontend/src/remotion/Root.tsx
 // Registers all video compositions for Remotion Studio and CLI rendering
 
 import React from 'react';

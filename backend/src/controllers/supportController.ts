@@ -1,4 +1,4 @@
-// SEWA AI — src/controllers/supportController.ts
+// SEWA XAI — src/controllers/supportController.ts
 // Customer Support Ticket Management (Zendesk Integration)
 
 import { Request, Response, NextFunction } from 'express';

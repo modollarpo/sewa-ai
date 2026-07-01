@@ -1,6 +1,6 @@
-# SEWA AI — Recommended Features & Roadmap
+# SEWA XAI — Recommended Features & Roadmap
 
-> © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+> © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 
 ---
 
@@ -101,5 +101,5 @@
 
 ---
 
-*© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.*
+*© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.*
 *info@sewaxai.health · sewaxai.health · from hours, to seconds*

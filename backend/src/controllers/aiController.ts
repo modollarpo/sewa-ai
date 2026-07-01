@@ -239,7 +239,7 @@ export const getExplanation = async (req: Request, res: Response, next: NextFunc
     const confidenceText = conf ? ` The AI system assessed this finding with ${conf}% confidence.` : '';
     const vlmText = vlm ? ` Additional detail: ${vlm}` : '';
 
-    const explanation = `Your ${modality} scan of the ${bodyPart.toLowerCase()} has been analysed by the SEWA AI system. `
+    const explanation = `Your ${modality} scan of the ${bodyPart.toLowerCase()} has been analysed by the SEWA XAI system. `
       + `The main finding identified is: ${finding}.`
       + confidenceText
       + ` ${urgencyText}`

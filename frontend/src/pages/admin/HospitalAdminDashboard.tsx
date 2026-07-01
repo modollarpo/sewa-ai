@@ -1,4 +1,4 @@
-// SEWA AI — HospitalAdminDashboard.tsx
+// SEWA XAI — HospitalAdminDashboard.tsx
 // Hospital administration: staff mgmt, RBAC, integration health, billing, audit
 import React, { useState, useEffect, useMemo } from 'react';
 import { useHospitalAdminData } from '../../hooks/useDashboardData';
@@ -153,7 +153,7 @@ export function HospitalAdminDashboard() {
             isOpen={showPlatformTour}
             onClose={() => setShowPlatformTour(false)}
             composition="PlatformIntro"
-            title="SEWA AI Platform Overview"
+            title="SEWA XAI Platform Overview"
           />
         )}
       </header>

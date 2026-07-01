@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SEWA AI — scripts/generate-env-aws.sh
+# SEWA XAI — scripts/generate-env-aws.sh
 # Reads Terraform AWS outputs and generates backend/.env.aws
 
 set -euo pipefail
@@ -25,7 +25,7 @@ ACCOUNT=$(aws sts get-caller-identity --query Account --output text 2>/dev/null 
 cd - >/dev/null
 
 cat > "$OUT" << EOF
-# SEWA AI — backend/.env.aws (auto-generated $(date -u +"%Y-%m-%dT%H:%M:%SZ"))
+# SEWA XAI — backend/.env.aws (auto-generated $(date -u +"%Y-%m-%dT%H:%M:%SZ"))
 
 DEPLOY_TARGET=aws
 NODE_ENV=production

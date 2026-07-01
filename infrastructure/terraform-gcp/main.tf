@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/terraform-gcp/main.tf
+# SEWA XAI — infrastructure/terraform-gcp/main.tf
 # GCP deployment: GKE Autopilot, Cloud SQL, Memorystore, Artifact Registry
 # Region: europe-west2 (London) — for EU/UK data residency
 
@@ -117,7 +117,7 @@ resource "google_service_networking_connection" "private" {
 resource "google_artifact_registry_repository" "sewa" {
   location      = var.region
   repository_id = "sewa"
-  description   = "SEWA AI container images"
+  description   = "SEWA XAI container images"
   format        = "DOCKER"
   labels        = local.common_labels
   depends_on    = [google_project_service.apis]
@@ -246,7 +246,7 @@ resource "google_container_cluster" "sewa" {
 # ── Service Accounts ───────────────────────────────────────────
 resource "google_service_account" "gke_nodes" {
   account_id   = "sewa-ai-gke-nodes"
-  display_name = "SEWA AI GKE Nodes"
+  display_name = "SEWA XAI GKE Nodes"
 }
 
 resource "google_project_iam_member" "gke_node_roles" {
@@ -266,7 +266,7 @@ resource "google_project_iam_member" "gke_node_roles" {
 # GitHub Actions Workload Identity
 resource "google_service_account" "github_actions" {
   account_id   = "sewa-ai-github-actions"
-  display_name = "SEWA AI GitHub Actions"
+  display_name = "SEWA XAI GitHub Actions"
 }
 
 resource "google_project_iam_member" "github_actions_roles" {
@@ -361,7 +361,7 @@ resource "google_redis_instance" "sewa" {
   connect_mode       = "PRIVATE_SERVICE_ACCESS"
 
   redis_version      = "REDIS_7_0"
-  display_name       = "SEWA AI Redis"
+  display_name       = "SEWA XAI Redis"
   reserved_ip_range  = "10.2.0.0/29"
 
   auth_enabled = true

@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/shared/SettingsScreen.tsx
+// SEWA XAI — mobile/src/screens/shared/SettingsScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Switch, Alert } from 'react-native';
 import { useAuthStore } from '../../store/authStore';

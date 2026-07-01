@@ -1,6 +1,6 @@
-// SEWA AI — k6 Smoke Test
+// SEWA XAI — k6 Smoke Test
 // Validates the critical path: auth → upload → AI pipeline → report
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Trend, Rate, Counter } from 'k6/metrics';

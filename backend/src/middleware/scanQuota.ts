@@ -1,7 +1,7 @@
-// SEWA AI — backend/src/middleware/scanQuota.ts
+// SEWA XAI — backend/src/middleware/scanQuota.ts
 // Enforces monthly scan quota per tenant plan before processing any scan.
 // Called by scanController before triggerAITriage.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import { Request, Response, NextFunction } from 'express';
 import { prisma }      from '../config/database';
@@ -13,7 +13,7 @@ import { AppError }    from '../utils/AppError';
 const PLAN_QUOTAS: Record<string, number | null> = {
   trial:      50,
   starter:    500,
-  pro:        2000,
+  hospital:   5000,   // Hospital plan (formerly 'pro')
   enterprise: null,   // unlimited
   impact:     null,   // Africa unlimited plan
   'impact+':  null,
@@ -22,9 +22,9 @@ const PLAN_QUOTAS: Record<string, number | null> = {
 // Overage rates in USD per scan above quota
 export const OVERAGE_RATES: Record<string, number> = {
   starter:    2.99,
-  pro:        1.99,
+  hospital:   1.99,   // Hospital plan (formerly 'pro')
   enterprise: 0.99,
-  trial:      0,     // trial never charges overage — just blocks
+  trial:      0,      // trial never charges overage — just blocks
   impact:     0,
   'impact+':  0,
 };

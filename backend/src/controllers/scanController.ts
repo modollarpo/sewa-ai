@@ -1,4 +1,4 @@
-// SEWA AI — src/controllers/scanController.ts
+// SEWA XAI — src/controllers/scanController.ts
 // Feature 3: AI Triage Engine | Feature 4: FHIR R4, HL7v2, DICOM/PACS
 // POST /api/v1/scans/upload | GET /api/v1/scans | GET /api/v1/scans/:id
 
@@ -17,9 +17,11 @@ import { incrementQuota } from '../middleware/scanQuota';
 import { logger } from '../utils/logger';
 import { io } from '../index';
 
-// Valid DICOM modality codes (DICOM PS 3.3 Table C.7-5a)
+// Valid DICOM modality codes + New Expansions
 const VALID_MODALITIES = new Set([
-  'CT','MRI','XR','US','PET','PETCT','NM','MG','DX','CR','RF','DSA','FLU','OT'
+  'CT','MRI','XR','US','PET','PETCT','NM','MG','DX','CR','RF','DSA','FLU','OT',
+  'ECG', // Added for 12-Lead ECG Expansion
+  'PATH' // Added for Digital Pathology Whole Slide Image Expansion
 ]);
 
 // POST /api/v1/scans/upload
@@ -44,7 +46,7 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
     }
     // C3: Guard against missing bodyPart — pipeline cannot route without it
     if (!bodyPart || bodyPart.trim() === '') {
-      throw new AppError('bodyPart is required (e.g. HEAD, CHEST, ABDOMEN)', 400);
+      throw new AppError('bodyPart is required (e.g. HEAD, CHEST, ABDOMEN, HEART, TISSUE)', 400);
     }
 
     // C5: Validate file MIME type — only DICOM, NIfTI, and medical imaging formats accepted
@@ -52,15 +54,18 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
       const ALLOWED_MIMES = new Set([
         'application/dicom',
         'application/octet-stream', // DICOM is often sent as octet-stream
-        'image/jpeg', 'image/png',  // Plain radiographs (DX, CR)
-        'image/tiff',               // High-res scans
+        'image/jpeg', 'image/png',  // Plain radiographs (DX, CR) + ECG Photos
+        'application/pdf',          // 12-Lead ECG PDFs
+        'video/mp4', 'video/avi',   // POCUS Videos
+        'image/tiff',               // High-res scans + Path Slides
         'application/zip',          // DICOM zip archives
+        'image/x-tiff',             // TIF variant
       ]);
       const ext = (file.originalname || '').split('.').pop()?.toLowerCase();
-      const ALLOWED_EXTS = new Set(['dcm', 'dicom', 'jpg', 'jpeg', 'png', 'tiff', 'tif', 'nii', 'nii.gz', 'zip']);
+      const ALLOWED_EXTS = new Set(['dcm', 'dicom', 'jpg', 'jpeg', 'png', 'pdf', 'mp4', 'avi', 'tiff', 'tif', 'svs', 'nii', 'nii.gz', 'zip']);
       if (!ALLOWED_MIMES.has(file.mimetype) && !ALLOWED_EXTS.has(ext || '')) {
         throw new AppError(
-          `File type '${file.mimetype}' (${ext}) is not accepted. Upload DICOM (.dcm), NIfTI (.nii), or medical imaging files only.`,
+          `File type '${file.mimetype}' (${ext}) is not accepted. Upload DICOM, MP4, PDF, SVS, or medical imaging files only.`,
           415
         );
       }

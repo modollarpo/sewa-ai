@@ -1,4 +1,4 @@
-// SEWA AI — RegisterPage.tsx
+// SEWA XAI — RegisterPage.tsx
 // Onboarding for Patients and Practitioners
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
@@ -119,7 +119,7 @@ export function RegisterPage({ onLogin, onInstitutionalOnboarding }: { onLogin:(
             </svg>
           </div>
           <div style={{ fontSize: '26px', fontWeight: '800', color: C.textHi, letterSpacing: '-0.03em', lineHeight: 1 }}>
-            SEWA AI
+            SEWA XAI
           </div>
           <div style={{ fontSize: '12px', color: C.textMd, marginTop: '6px', letterSpacing: '0.04em' }}>
             Smart Early Warning Assistant

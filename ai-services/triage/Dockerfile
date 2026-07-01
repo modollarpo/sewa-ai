@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/Dockerfile (CPU Edition)
+# SEWA XAI — ai-services/triage/Dockerfile (CPU Edition)
 # Multi-stage build — runtime image ~400MB vs ~3.5GB GPU build
 #
 # Stage 1: Builder — installs all deps including torch (for potential export)

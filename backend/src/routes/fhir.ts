@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/fhir.ts
+// SEWA XAI — backend/src/routes/fhir.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { prisma } from '../utils/prismaClient';
@@ -12,7 +12,7 @@ import { fhirSyncWorker } from '../services/fhirSyncWorker';
 const r = Router();
 r.get('/health', (_req, res) => res.json({ status: 'operational', service: 'FHIR R4 Interface' }));
 
-// Inbound Webhook (EHR -> SEWA AI)
+// Inbound Webhook (EHR -> SEWA XAI)
 // EHRs typically use API Key or Basic Auth. We verify the X-API-Key header.
 r.post('/webhook', async (req, res, next) => {
   try {

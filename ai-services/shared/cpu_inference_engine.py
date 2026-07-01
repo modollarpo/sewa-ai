@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/shared/cpu_inference_engine.py
+# SEWA XAI — ai-services/shared/cpu_inference_engine.py
 # GPU-Free CPU Inference Engine — ONNX Runtime + INT8 Quantization
 #
 # Design goals:

@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/utils/preprocessing.py
+# SEWA XAI — ai-services/triage/utils/preprocessing.py
 import numpy as np
 import torch
 import torchvision.transforms as T

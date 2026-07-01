@@ -1,4 +1,4 @@
-// SEWA AI — Customer Feedback Controller
+// SEWA XAI — Customer Feedback Controller
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { auditLog } from '../utils/audit';

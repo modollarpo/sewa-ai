@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/__tests__/health.test.ts
+// SEWA XAI — backend/src/__tests__/health.test.ts
 // Jest integration tests — run by CI/CD pipeline (npm test)
 // Uses test PostgreSQL + Redis spun up by GitHub Actions services
 

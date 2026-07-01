@@ -9,6 +9,7 @@ import { logger } from '../utils/logger';
 import { generateInvoice } from './invoiceService';
 import { AppError } from '../utils/AppError';
 import { convertFromGBP } from './fxService';
+import { createHubSpotCompany, createHubSpotDeal } from './crmService';
 
 const stripe      = new Stripe(config.STRIPE_SECRET_KEY || 'dummy_key', { apiVersion: '2023-10-16' });
 const paystack    = config.PAYSTACK_SECRET_KEY ? Paystack(config.PAYSTACK_SECRET_KEY) : null;
@@ -36,22 +37,26 @@ const PROVIDER_MAP: Record<string, string[]> = {
   et: ['flutterwave'],
 };
 
-// Subscription plans (Feature 5)
+// Subscription plans — Stripe products/prices created 2026-06-30 via Stripe API to match Frontend pricing exactly
 export const PLANS = {
   starter: { // Clinic Plan
-    priceUSD: 599, scans: 500,
-    stripeProductId: 'prod_sewa_clinic',
-    stripePriceId: { 
-      uk: 'price_gbp_clinic', eu: 'price_eur_clinic', us: 'price_usd_clinic',
-      ng: 'price_ngn_clinic', ke: 'price_kes_clinic', za: 'price_zar_clinic', gh: 'price_ghs_clinic', in: 'price_inr_clinic'
+    priceUSD: 590, scans: 500,
+    stripeProductId: 'prod_UnZDNgZEiq7oD6',
+    stripePriceId: {
+      uk: 'price_1Tny52E18kkIjUPtWIpoiznd',      // £490
+      eu: 'price_1Tny52E18kkIjUPtBU3NYCER',      // €550
+      us: 'price_1Tny53E18kkIjUPtgJwlEdsE',      // $590
+      africa: 'price_1Tny53E18kkIjUPtDqz9VTVI',  // $149
     },
   },
   hospital: { // Hospital Plan (formerly Pro)
-    priceUSD: 2299, scans: 5000,
-    stripeProductId: 'prod_sewa_hospital',
-    stripePriceId: { 
-      uk: 'price_gbp_hospital', eu: 'price_eur_hospital', us: 'price_usd_hospital',
-      ng: 'price_ngn_hospital', ke: 'price_kes_hospital', za: 'price_zar_hospital', gh: 'price_ghs_hospital', in: 'price_inr_hospital'
+    priceUSD: 2290, scans: 5000,
+    stripeProductId: 'prod_UnZDNCQZsKcRaL',
+    stripePriceId: {
+      uk: 'price_1Tny54E18kkIjUPtrcqj92Gw',      // £1890
+      eu: 'price_1Tny54E18kkIjUPtLs4ugMAD',      // €2100
+      us: 'price_1Tny55E18kkIjUPt1PCVRIl2',      // $2290
+      africa: 'price_1Tny55E18kkIjUPtGZg19o1l',  // $490
     },
   },
   enterprise: { priceUSD: null as number | null, scans: null as number | null },
@@ -164,21 +169,37 @@ async function createStripeSubscription(tenant: any, plan: string, currency: str
   }
 
   const amountInCents = (await convertFromUSD(planConfig.priceUSD, currency)) * 100;
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountInCents, currency: currency.toLowerCase(),
+  
+  // Use Stripe Checkout Session to collect payment method details automatically
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    mode: 'payment',
     customer: customerId,
+    line_items: [{
+      price_data: {
+        currency: currency.toLowerCase(),
+        product_data: {
+          name: `SEWA XAI ${plan.toUpperCase()} Plan Subscription`,
+          description: `Monthly billing cycle fee for ${plan.toUpperCase()} tier`,
+        },
+        unit_amount: amountInCents,
+      },
+      quantity: 1,
+    }],
+    success_url: `${config.APP_URL}/login?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${config.APP_URL}/onboarding`,
     metadata: { tenantId: tenant.id, plan },
   });
 
   await prisma.payment.create({
     data: {
       tenantId: tenant.id, type: 'subscription', provider: 'stripe',
-      externalId: paymentIntent.id, amount: planConfig.priceUSD,
-      currency, status: 'pending', metadata: { plan, clientSecret: paymentIntent.client_secret },
+      externalId: session.id, amount: planConfig.priceUSD,
+      currency, status: 'pending', metadata: { plan, paymentLink: session.url },
     },
   });
 
-  return { provider: 'stripe', clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id };
+  return { provider: 'stripe', paymentLink: session.url, clientSecret: session.client_secret || '' };
 }
 
 async function createPaystackSubscription(tenant: any, plan: string, currency: string) {
@@ -223,7 +244,7 @@ async function createFlutterwaveSubscription(tenant: any, plan: string, currency
     redirect_url: `${config.APP_URL}/api/v1/payments/flutterwave/callback`,
     customer: { email: `billing@${tenant.slug}.sewaxai.health`, name: tenant.name },
     meta: { tenantId: tenant.id, plan },
-    customizations: { title: 'SEWA AI Subscription', logo: 'https://sewaxai.health/logo.png' },
+    customizations: { title: 'SEWA XAI Subscription', logo: 'https://sewaxai.health/logo.png' },
   };
 
   if (!flutterwave) throw new AppError('Flutterwave is not configured', 500);
@@ -246,7 +267,7 @@ export async function chargePerScan(tenantId: string, scanCount: number = 1) {
   const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
   if (!tenant) throw new AppError('Tenant not found', 404);
 
-  const perScanUSD = tenant.plan === 'starter' ? 2.99 : tenant.plan === 'pro' ? 1.99 : 0.99;
+  const perScanUSD = tenant.plan === 'starter' ? 2.99 : tenant.plan === 'hospital' ? 1.99 : 0.99;
   const currency = tenant.currency;
   const amount = await convertFromUSD(perScanUSD * scanCount, currency);
 
@@ -304,36 +325,77 @@ export async function handleStripeWebhook(payload: Buffer, signature: string) {
     throw new AppError('Webhook Signature Invalid', 400);
   }
 
-  if (event.type === 'payment_intent.succeeded') {
-    const pi = event.data.object as Stripe.PaymentIntent;
-    const payment = await prisma.payment.findFirst({ where: { externalId: pi.id } });
-    await prisma.payment.updateMany({ where: { externalId: pi.id }, data: { status: 'succeeded' } });
+  // Handle both direct PaymentIntent success and hosted Checkout Session success
+  if (event.type === 'payment_intent.succeeded' || event.type === 'checkout.session.completed') {
+    const obj = event.data.object as any;
+    const isSession = event.type === 'checkout.session.completed';
+    const externalId = isSession ? obj.id : obj.payment_intent || obj.id;
 
-    // ── Activate tenant subscription on successful payment ──
-    if (payment?.tenantId && payment.metadata) {
-      const meta = payment.metadata as any;
-      const plan = meta.plan as string;
-      const quota = PLANS[plan as keyof typeof PLANS]?.scans ?? 500;
-      const now = new Date();
-      const resetAt = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      await prisma.tenant.update({
-        where: { id: payment.tenantId },
-        data: {
-          plan,
-          subscriptionStatus: 'active',
-          subscriptionId: pi.id,
-          scanQuota: quota,
-          scansUsedThisMonth: 0,
-          billingCycleResetAt: resetAt,
-          nextBillDate: new Date(now.setMonth(now.getMonth() + 1)),
-        },
-      });
-      logger.info(`[Billing] Tenant ${payment.tenantId} activated on plan "${plan}" (${quota} scans/month)`);
-      // Generate and email invoice asynchronously
-      generateInvoice(payment.id).catch(e => logger.warn(`[Invoice] ${e.message}`));
+    const payment = await prisma.payment.findFirst({
+      where: {
+        OR: [
+          { externalId: obj.id },
+          { externalId: obj.payment_intent || '' }
+        ]
+      }
+    });
+
+    if (payment) {
+      await prisma.payment.updateMany({ where: { id: payment.id }, data: { status: 'succeeded' } });
+      
+      // ── Activate tenant subscription on successful payment ──
+      if (payment.tenantId && payment.metadata) {
+        const meta = payment.metadata as any;
+        const plan = meta.plan as string;
+        const quota = PLANS[plan as keyof typeof PLANS]?.scans ?? 500;
+        const now = new Date();
+        const resetAt = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        
+        const tenant = await prisma.tenant.update({
+          where: { id: payment.tenantId },
+          data: {
+            plan,
+            subscriptionStatus: 'active',
+            subscriptionId: externalId,
+            scanQuota: quota,
+            scansUsedThisMonth: 0,
+            billingCycleResetAt: resetAt,
+            nextBillDate: new Date(now.setMonth(now.getMonth() + 1)),
+          },
+        });
+        logger.info(`[Billing] Tenant ${payment.tenantId} activated on plan "${plan}" (${quota} scans/month)`);
+        
+        // Mirror onboarding events to HubSpot CRM asynchronously
+        (async () => {
+          try {
+            const domain = tenant.slug ? `${tenant.slug}.sewaxai.health` : undefined;
+            const companyId = await createHubSpotCompany({
+              name: tenant.name,
+              region: tenant.region || 'uk',
+              plan: plan,
+              domain
+            });
+
+            const planConfig = PLANS[plan as keyof typeof PLANS];
+            const amountUSD = planConfig?.priceUSD || 0;
+
+            await createHubSpotDeal({
+              tenantName: tenant.name,
+              plan,
+              amountUSD,
+              currency: 'USD',
+              hubspotCompanyId: companyId
+            });
+          } catch (crmErr: any) {
+            logger.error(`[CRM] Webhook post-processing failed: ${crmErr.message}`);
+          }
+        })();
+
+        // Generate and email invoice asynchronously
+        generateInvoice(payment.id).catch(e => logger.warn(`[Invoice] ${e.message}`));
+      }
+      logger.info(`Stripe payment succeeded: ${externalId}`);
     }
-    logger.info(`Stripe payment succeeded: ${pi.id}`);
-
   } else if (event.type === 'payment_intent.payment_failed') {
     const pi = event.data.object as Stripe.PaymentIntent;
     await prisma.payment.updateMany({ where: { externalId: pi.id }, data: { status: 'failed' } });
@@ -465,7 +527,7 @@ export async function initiateMpesaSTK(tenantId: string, phone: string, amount: 
     PhoneNumber: phone.replace(/^\+/, ''),
     CallBackURL: `${config.APP_URL}/api/v1/payments/webhooks/mpesa?token=${process.env.MPESA_WEBHOOK_TOKEN}`,
     AccountReference: `SEWA-${callbackRef}`,
-    TransactionDesc: 'SEWA AI Subscription',
+    TransactionDesc: 'SEWA XAI Subscription',
   }, { headers: { Authorization: `Bearer ${accessToken}` } });
 
   await prisma.payment.create({

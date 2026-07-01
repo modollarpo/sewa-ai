@@ -1,4 +1,4 @@
-// SEWA AI — pages/public/CookiePolicyPage.tsx
+// SEWA XAI — pages/public/CookiePolicyPage.tsx
 // GDPR Article 13 compliant cookie policy with interactive consent manager
 // Covers: strictly necessary, functional, analytics, marketing cookies
 
@@ -21,7 +21,7 @@ const COOKIE_CATEGORIES = [
     icon: '🔒',
     required: true,
     enabled: true,
-    description: 'These cookies are essential for the SEWA AI platform to function. They enable core features like authentication, session management, and security. They cannot be disabled.',
+    description: 'These cookies are essential for the SEWA XAI platform to function. They enable core features like authentication, session management, and security. They cannot be disabled.',
     lawfulBasis: 'Legitimate interest / contractual necessity',
     cookies: [
       { name:'sewa_session',     domain:'app.sewaxai.health',  duration:'24 hours',    purpose:'User authentication session token (JWT)' },
@@ -56,7 +56,7 @@ const COOKIE_CATEGORIES = [
     icon: '📊',
     required: false,
     enabled: false,
-    description: 'These cookies help us understand how clinicians and administrators use SEWA AI so we can improve the platform. All data is anonymised and aggregated.',
+    description: 'These cookies help us understand how clinicians and administrators use SEWA XAI so we can improve the platform. All data is anonymised and aggregated.',
     lawfulBasis: 'Consent (GDPR Art. 6(1)(a))',
     cookies: [
       { name:'_ga',              domain:'.sewaxai.health',     duration:'2 years',     purpose:'Google Analytics — distinguishes unique users (anonymised IP)' },
@@ -162,7 +162,7 @@ export function CookiePolicyPage({ onNavigate }: { onNavigate: (page: string) =>
             Cookie Policy
           </h1>
           <p style={{ ...pStyle, fontSize:15, margin:0 }}>
-            SEWA AI uses cookies and similar technologies to provide, protect, and improve our clinical platform. This policy explains what cookies we use, why, and how you can control them.
+            SEWA XAI uses cookies and similar technologies to provide, protect, and improve our clinical platform. This policy explains what cookies we use, why, and how you can control them.
           </p>
           <div className="meta-grid" style={{ display:'flex', gap:16, marginTop:24, flexWrap:'wrap' }}>
             {[
@@ -234,7 +234,7 @@ export function CookiePolicyPage({ onNavigate }: { onNavigate: (page: string) =>
           <h2 style={h2Style}>4. How to Control Cookies</h2>
           <div className="control-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
             {[
-              { title:'In SEWA AI', desc:'Use the preference panel at the top of this page.' },
+              { title:'In SEWA XAI', desc:'Use the preference panel at the top of this page.' },
               { title:'Browser Settings', desc:'Most browsers allow you to block or delete cookies.' },
               { title:'Google Analytics', desc:'Install the Google Analytics Opt-out Browser Add-on.' },
               { title:'Industry Tools', desc:'Use the ICO, Your Online Choices, or DAA portals.' },
@@ -267,7 +267,7 @@ export function CookiePolicyPage({ onNavigate }: { onNavigate: (page: string) =>
             </div>
             <div>
               <div style={{ fontSize:10, color:C.textLo, fontWeight:700, textTransform:'uppercase' }}>Postal</div>
-              <div style={{ fontSize:13, color:C.textHi }}>SEWA AI — a Storegrill Inc Ltd company, London</div>
+              <div style={{ fontSize:13, color:C.textHi }}>SEWA XAI — a Storegrill Inc Ltd company, London</div>
             </div>
           </div>
         </section>

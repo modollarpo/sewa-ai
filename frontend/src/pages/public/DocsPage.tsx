@@ -17,7 +17,7 @@ const C = {
 const DOCS_DATA = [
   {
     title: "Getting Started",
-    content: "SEWA AI is a cloud-native medical imaging platform. To begin, ensure you have an active tenant account and sufficient GPU credits."
+    content: "SEWA XAI is a cloud-native medical imaging platform. To begin, ensure you have an active tenant account and sufficient GPU credits."
   },
   {
     title: "API Integration",
@@ -25,7 +25,7 @@ const DOCS_DATA = [
   },
   {
     title: "Security & Compliance",
-    content: "SEWA AI is built with a security-first mindset, adhering to HIPAA, GDPR, and ISO 27001 standards."
+    content: "SEWA XAI is built with a security-first mindset, adhering to HIPAA, GDPR, and ISO 27001 standards."
   }
 ];
 

@@ -1,4 +1,4 @@
-// SEWA AI — src/utils/logger.ts
+// SEWA XAI — src/utils/logger.ts
 import winston from 'winston';
 export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',

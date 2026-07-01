@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/uncertainty/Dockerfile (CPU Edition)
+# SEWA XAI — ai-services/uncertainty/Dockerfile (CPU Edition)
 FROM python:3.11-slim AS builder
 WORKDIR /build
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1

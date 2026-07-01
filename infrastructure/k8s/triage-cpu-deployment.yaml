@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/k8s/triage-cpu-deployment.yaml
+# SEWA XAI — infrastructure/k8s/triage-cpu-deployment.yaml
 # AKS deployment for CPU-only triage engine
 #
 # Node selector targets CPU-optimised Azure VMs:

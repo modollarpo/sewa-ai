@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/patient/MessagingScreen.tsx
+// SEWA XAI — mobile/src/screens/patient/MessagingScreen.tsx
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 

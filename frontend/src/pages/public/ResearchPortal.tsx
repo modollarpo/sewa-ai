@@ -1,4 +1,4 @@
-// SEWA AI — ResearchPortal.tsx
+// SEWA XAI — ResearchPortal.tsx
 // Confidential Clinical Evidence & AI Validation Portal
 // Principle Investigator: Dolapo Ariyo
 
@@ -100,7 +100,7 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
             Clinical Research & <br/> <span style={{ color: C.brand }}>AI Validation Portal</span>
           </h1>
           <p style={{ fontSize: 18, color: C.textMd, lineHeight: 1.6, maxWidth: 700, margin: '0 auto 0 0' }} className="hero-content">
-            Led by <strong style={{ color: C.textHi }}>Dolapo Ariyo</strong>, SEWA AI's research division focuses on deterministic AI safety, 
+            Led by <strong style={{ color: C.textHi }}>Dolapo Ariyo</strong>, SEWA XAI's research division focuses on deterministic AI safety, 
             VLM-driven clinical documentation, and the global democratization of emergency diagnostics.
           </p>
         </div>
@@ -128,7 +128,7 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
             <p style={{ margin: '0 0 12px', color: C.brand, fontWeight: 600, fontSize: 14 }}>Principle Investigator & Lead Researcher</p>
             <p style={{ margin: 0, color: C.textMd, fontSize: 14, lineHeight: 1.6 }}>
               Specialising in medical image analysis and generative AI in clinical workflows. 
-              Dolapo leads SEWA AI's validation efforts across tertiary hospitals in Europe and Sub-Saharan Africa.
+              Dolapo leads SEWA XAI's validation efforts across tertiary hospitals in Europe and Sub-Saharan Africa.
             </p>
           </div>
         </div>
@@ -215,7 +215,7 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
           <h2 style={{ fontSize: 28, color: C.textHi, margin: '0 0 12px' }}>SEWA Sim: Radiology Training Suite</h2>
           <p style={{ fontSize: 16, color: C.textMd, maxWidth: 600, margin: '0 auto 24px', lineHeight: 1.6 }}>
             Gamified diagnostic simulation for medical students. Practice STAT triage on 5,000+ anonymised cases 
-            and compare your accuracy against board-certified consensus and SEWA AI's baseline.
+            and compare your accuracy against board-certified consensus and SEWA XAI's baseline.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button 

@@ -1,4 +1,4 @@
-# SEWA AI Grafana Dashboards (ConfigMaps)
+# SEWA XAI Grafana Dashboards (ConfigMaps)
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,7 +10,7 @@ data:
   sewa-platform-dashboard.json: |
     {
       "dashboard": {
-        "title": "SEWA AI Platform Overview",
+        "title": "SEWA XAI Platform Overview",
         "panels": [
           {
             "title": "Request Rate",
@@ -30,7 +30,7 @@ data:
   sewa-ai-inference-dashboard.json: |
     {
       "dashboard": {
-        "title": "SEWA AI Inference Metrics",
+        "title": "SEWA XAI Inference Metrics",
         "panels": [
           {
             "title": "Inference Latency (P95)",

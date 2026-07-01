@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/__tests__/golden-dataset.test.ts
+// SEWA XAI — backend/src/__tests__/golden-dataset.test.ts
 // "Golden Dataset" — ground truth fixtures for all 14 AI conditions.
 // These tests MUST pass on every CI push. A failure here means clinical accuracy
 // has regressed and deployment must be BLOCKED.

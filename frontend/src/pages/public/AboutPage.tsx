@@ -1,4 +1,4 @@
-// SEWA AI — AboutPage.tsx
+// SEWA XAI — AboutPage.tsx
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
@@ -29,7 +29,7 @@ const TEAM = [
 ];
 
 const TIMELINE = [
-  { year:'2019', title:'Founded', desc:'SEWA AI founded in London by Dr. Adesewa Dairo and Dolapo Ariyo with £500K seed funding from NHS Innovation.' },
+  { year:'2019', title:'Founded', desc:'SEWA XAI founded in London by Dr. Adesewa Dairo and Dolapo Ariyo with £500K seed funding from NHS Innovation.' },
   { year:'2020', title:'First NHS deployment', desc:'Deployed at Royal London Hospital for ICH triage during COVID-19 surge. Processed 12,000 emergency head CTs.' },
   { year:'2021', title:'Series A · £4.2M', desc:'Raised £4.2M from Longitude Capital and Wellcome Trust. Expanded to 8 NHS Trusts. Launched Africa programme.' },
   { year:'2022', title:'CE Mark (MDR IIb)', desc:'Achieved CE marking under EU MDR 2017/745 as a Class IIb medical device. UKCA marking for UK. Deployed in Kenya and Nigeria.' },
@@ -83,7 +83,7 @@ export function AboutPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             We started in an<br/>NHS emergency room
           </h1>
           <p style={{ fontSize:'clamp(15px, 2.5vw, 17px)', color:C.textMd, lineHeight:1.8, margin:'0 0 32px' }}>
-            SEWA AI was born from a problem Dr. Adesewa Dairo saw every day as an NHS radiologist: critical conditions were being delayed by overloaded worklists and radiologist shortages.
+            SEWA XAI was born from a problem Dr. Adesewa Dairo saw every day as an NHS radiologist: critical conditions were being delayed by overloaded worklists and radiologist shortages.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'12px 28px', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:10, color:'white', fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:C.F }}>Join the Mission →</button>
@@ -147,7 +147,7 @@ export function AboutPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         <div style={{ marginBottom:80, padding:'clamp(20px, 5vw, 40px)', background:`${C.brand}08`, border:`1px solid ${C.brand}30`, borderRadius:20, textAlign:'center' }}>
           <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:16 }}>Intellectual Property</div>
           <p style={{ fontSize:'clamp(13px, 2.5vw, 15px)', color:C.textHi, fontWeight:600, lineHeight:1.8, margin:'0 auto', maxWidth:700 }}>
-            The SEWA AI 4-Engine Safety Architecture, metacognition layer, and sovereign deployment models are protected by <strong style={{ color:C.brand }}>UK Patent Pending: GB2609706.3</strong> — Storegrill Inc Ltd (Company No. 14581073).
+            The SEWA XAI 4-Engine Safety Architecture, metacognition layer, and sovereign deployment models are protected by <strong style={{ color:C.brand }}>UK Patent Pending: GB2609706.3</strong> — Storegrill Inc Ltd (Company No. 14581073).
           </p>
         </div>
 

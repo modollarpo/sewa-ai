@@ -1,6 +1,6 @@
-// SEWA AI — LoadingSpinner.tsx
+// SEWA XAI — LoadingSpinner.tsx
 // Consistent loading states across the platform.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React from 'react';
 
 interface SpinnerProps {

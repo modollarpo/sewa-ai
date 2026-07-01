@@ -1,4 +1,4 @@
-// SEWA AI — ClinicalValidationPage.tsx
+// SEWA XAI — ClinicalValidationPage.tsx
 import React, { useState } from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
@@ -75,7 +75,7 @@ export function ClinicalValidationPage({ onNavigate }: { onNavigate:(p:string)=>
             Clinical evidence,<br/>not marketing claims
           </h1>
           <p style={{ fontSize:15, color:C.textMd, lineHeight:1.8, maxWidth:540, margin:'0 auto' }}>
-            Every SEWA AI performance metric is independently validated, peer-reviewed, and published. We do not make clinical claims we cannot substantiate with data.
+            Every SEWA XAI performance metric is independently validated, peer-reviewed, and published. We do not make clinical claims we cannot substantiate with data.
           </p>
         </div>
       </div>
@@ -180,7 +180,7 @@ export function ClinicalValidationPage({ onNavigate }: { onNavigate:(p:string)=>
         {tab === 'datasets' && (
           <div>
             <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, marginBottom:28 }}>
-              SEWA AI models were trained and validated on publicly available and proprietary datasets. All proprietary datasets were processed under appropriate data processing agreements and ethics approvals.
+              SEWA XAI models were trained and validated on publicly available and proprietary datasets. All proprietary datasets were processed under appropriate data processing agreements and ethics approvals.
             </p>
             <div className="datasets-table-wrapper" style={{ overflowX:'auto' }}>
               <table style={{ width:'100%', borderCollapse:'collapse' }}>

@@ -1,6 +1,6 @@
 {
-  "name": "SEWA AI — Clinical Intelligence Platform",
-  "short_name": "SEWA AI",
+  "name": "SEWA XAI — Clinical Intelligence Platform",
+  "short_name": "SEWA XAI",
   "description": "AI-powered medical imaging triage and reporting for hospitals worldwide",
   "start_url": "/",
   "display": "standalone",

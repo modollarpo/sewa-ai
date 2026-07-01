@@ -1,5 +1,5 @@
-// SEWA AI — k6 Soak Test (30 min sustained)
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// SEWA XAI — k6 Soak Test (30 min sustained)
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Trend, Rate } from 'k6/metrics';

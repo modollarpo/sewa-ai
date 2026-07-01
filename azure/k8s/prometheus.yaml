@@ -1,6 +1,6 @@
-# SEWA AI — Prometheus Monitoring Stack
+# SEWA XAI — Prometheus Monitoring Stack
 # Deploys: kube-prometheus-stack (Prometheus + Grafana + Alertmanager)
-# ServiceMonitors for all SEWA AI services
+# ServiceMonitors for all SEWA XAI services
 # PrometheusRules for clinical SLA alerting
 ---
 # Monitoring namespace

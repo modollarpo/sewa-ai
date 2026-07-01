@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# SEWA AI — scripts/setup-azure-fhir.sh
+# SEWA XAI — scripts/setup-azure-fhir.sh
 # Provision Azure Health Data Services (FHIR R4) end-to-end:
 #   1. Healthcare workspace + FHIR service (idempotent)
 #   2. Azure AD App Registration (service principal)
@@ -20,7 +20,7 @@
 #   Contributor + User Access Administrator on the subscription
 #   jq installed
 #
-# © 2026 SEWA AI — a Storegrill Inc Ltd company.
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company.
 # Registered in England & Wales (14581073). All rights reserved.
 # ============================================================
 set -euo pipefail
@@ -66,7 +66,7 @@ FHIR_ENDPOINT="https://${WORKSPACE_NAME}-${FHIR_SERVICE_NAME}.fhir.azurehealthca
 # ── Banner ────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}${CYAN}║   SEWA AI — Azure Health Data Services (FHIR R4) Setup   ║${NC}"
+echo -e "${BOLD}${CYAN}║   SEWA XAI — Azure Health Data Services (FHIR R4) Setup   ║${NC}"
 echo -e "${BOLD}${CYAN}║   from hours, to seconds                                 ║${NC}"
 echo -e "${BOLD}${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
@@ -411,7 +411,7 @@ fi
 # ── Summary ───────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}${GREEN}║   SEWA AI FHIR Setup Complete ✓                          ║${NC}"
+echo -e "${BOLD}${GREEN}║   SEWA XAI FHIR Setup Complete ✓                          ║${NC}"
 echo -e "${BOLD}${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${CYAN}FHIR_BASE_URL${NC}    = ${FHIR_ENDPOINT}"
@@ -437,6 +437,6 @@ echo "         --name ${FHIR_SERVICE_NAME} \\"
 echo "         --workspace-name ${WORKSPACE_NAME} \\"
 echo "         --resource-group ${RG_NAME}"
 echo ""
-echo -e "  ${CYAN}© 2026 SEWA AI — a Storegrill Inc Ltd company.${NC}"
+echo -e "  ${CYAN}© 2026 SEWA XAI — a Storegrill Inc Ltd company.${NC}"
 echo -e "  ${CYAN}Registered in England & Wales (14581073). All rights reserved.${NC}"
 echo ""

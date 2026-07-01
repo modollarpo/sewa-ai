@@ -1,6 +1,6 @@
-// SEWA AI — ErrorBoundary.tsx
+// SEWA XAI — ErrorBoundary.tsx
 // React error boundary — prevents white screen of death in clinical environments.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 const C = {
@@ -63,7 +63,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Reload Page
             </button>
             <a
-              href="mailto:support@sewaxai.health?subject=SEWA AI Error Report"
+              href="mailto:support@sewaxai.health?subject=SEWA XAI Error Report"
               style={{ padding:'9px 20px', background:'transparent', border:`1px solid ${C.border}`, borderRadius:10, color:C.textMd, fontSize:13, textDecoration:'none', display:'inline-flex', alignItems:'center', fontFamily:C.F }}
             >
               Report to Support

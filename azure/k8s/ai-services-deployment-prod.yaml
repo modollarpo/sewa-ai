@@ -1,5 +1,5 @@
-# SEWA AI — AI Services Deployment (GPU Node Pool)
-# © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+# SEWA XAI — AI Services Deployment (GPU Node Pool)
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -363,3 +363,79 @@ spec:
   - port: 8005
     targetPort: 8005
       serviceAccountName: sewa-ai-sa
+---
+# ── Digital Pathology Service ────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-pathology
+  namespace: sewa-ai
+  labels:
+    app: sewa-pathology
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-pathology
+  template:
+    metadata:
+      labels:
+        app: sewa-pathology
+    spec:
+      serviceAccountName: sewa-ai-sa
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: pathology
+        image: "{{CONTAINER_REGISTRY}}/sewa-pathology:{{IMAGE_TAG}}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8002
+        resources:
+          limits:
+            memory: "8Gi"
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets"
+          readOnly: true
+        env:
+        - name: KEY_VAULT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: KEY_VAULT_URI
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-storage-connection-string
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "sewa-azure-kv"
+          nodePublishSecretRef:
+            name: secrets-store-creds
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-pathology
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-pathology
+  ports:
+  - port: 8002
+    targetPort: 8002

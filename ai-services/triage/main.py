@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/main.py  (CPU-ONLY EDITION)
+# SEWA XAI — ai-services/triage/main.py  (CPU-ONLY EDITION)
 # GPU-Free Triage Engine — ONNX Runtime INT8 + Parallel Pipeline
 #
 # Latency budget (Standard_F8s_v2, 8 vCPU):
@@ -187,7 +187,7 @@ def _create_demo_onnx_model() -> Path:
 
 # ── FastAPI app ────────────────────────────────────────────────
 app = FastAPI(
-    title="SEWA AI — Triage Engine (CPU Edition)",
+    title="SEWA XAI — Triage Engine (CPU Edition)",
     version="2.4.1",
     description=(
         "Critical findings detection for CT, MRI, X-Ray. "
@@ -207,9 +207,12 @@ app.add_middleware(
 
 # ── Schemas ────────────────────────────────────────────────────
 class Modality(str, Enum):
-    CT = "CT"
-    MRI = "MRI"
-    XR = "XR"
+    CT   = "CT"
+    MRI  = "MRI"
+    XR   = "XR"
+    US   = "US"
+    ECG  = "ECG"
+    PATH = "PATH"   # Digital Pathology — Whole Slide Image tiles
 
 class TriagePredictRequest(BaseModel):
     scan_id: str = Field(..., pattern=r"^[A-Z0-9\-_]{4,64}$")
@@ -357,23 +360,51 @@ def _softmax(x: np.ndarray) -> np.ndarray:
     return e / e.sum()
 
 def _get_snomed_code(finding: str) -> str:
-    # Basic mapping for UK GDPR / FHIR alignment
+    """Map clinical findings to SNOMED CT codes (UK NHS / FHIR R4 aligned)."""
     snomed_map = {
+        # Neuro/Head — CT
         "ICH": "116288000",
         "Ischemic Stroke": "422504002",
         "Hemorrhagic Stroke": "230690007",
+        "Subdural Hematoma": "95453001",
+        "Epidural Hematoma": "85828009",
+        # Chest — CT/XR
         "Pulmonary Embolism": "59282003",
         "Pneumothorax": "36118008",
         "Tension Pneumothorax": "70083008",
         "Bowel Perforation": "315481005",
-        "Aortic Dissection": "28169009"
+        "Aortic Dissection": "28169009",
+        "Pneumonia": "233604007",
+        "TB": "56717001",
+        # ECG
+        "Atrial Fibrillation": "49436004",
+        "ST-Elevation MI": "401303003",
+        "Bundle Branch Block": "6374002",
+        "QTc Prolongation": "111975006",
+        "Ventricular Tachycardia": "25569003",
+        "Arrhythmia": "698247007",
+        # Pathology (PATH) — WSI tissue classification
+        "Invasive Carcinoma": "413448000",
+        "Adenocarcinoma": "35917007",
+        "High-Grade Dysplasia": "55452001",
+        "Tuberculosis Granuloma": "56717001",
+        "Malignancy": "363346000",
+        "Inflammatory Infiltrate": "23583003",
     }
-    return snomed_map.get(finding, "27313000") # default undetermined finding
+    return snomed_map.get(finding, "27313000")  # default: undetermined finding
 
 
 def _classify_urgency(finding: str, confidence: float) -> str:
-    CRITICAL = {"ICH", "Ischemic Stroke", "Hemorrhagic Stroke", "Tension Pneumothorax", "Saddle PE"}
-    URGENT   = {"Pulmonary Embolism", "Pneumothorax", "Bowel Perforation", "Acute PE", "Aortic Dissection"}
+    """Classify urgency. High-confidence carcinoma is treated as URGENT for rapid MDT escalation."""
+    CRITICAL = {
+        "ICH", "Ischemic Stroke", "Hemorrhagic Stroke", "Tension Pneumothorax", "Saddle PE",
+        "ST-Elevation MI", "Ventricular Tachycardia",      # ECG critical arrhythmias
+    }
+    URGENT = {
+        "Pulmonary Embolism", "Pneumothorax", "Bowel Perforation", "Acute PE", "Aortic Dissection",
+        "Atrial Fibrillation", "QTc Prolongation",         # ECG urgent
+        "Invasive Carcinoma", "Adenocarcinoma", "Malignancy", "High-Grade Dysplasia",  # PATH urgent
+    }
     if finding in CRITICAL:
         return "CRITICAL"
     if finding in URGENT or confidence > 0.75:

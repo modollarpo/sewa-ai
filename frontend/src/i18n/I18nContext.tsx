@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/i18n/I18nContext.tsx
+// SEWA XAI — frontend/src/i18n/I18nContext.tsx
 import React, { createContext, useContext, useEffect } from 'react';
 import { translations, Language, TranslationKey } from './translations';
 import { useAuthStore } from '../store/authStore';

@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/continuous-learning/Dockerfile
+# SEWA XAI — ai-services/continuous-learning/Dockerfile
 FROM python:3.11-slim AS base
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1

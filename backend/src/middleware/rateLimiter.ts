@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/middleware/rateLimiter.ts
+// SEWA XAI — backend/src/middleware/rateLimiter.ts
 //
 // Redis-backed rate limiter — critical for multi-pod AKS deployments.
 //

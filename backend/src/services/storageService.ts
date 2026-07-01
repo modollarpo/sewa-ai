@@ -1,4 +1,4 @@
-// SEWA AI — src/services/storageService.ts
+// SEWA XAI — src/services/storageService.ts
 // Azure Blob Storage primary, AWS S3 secondary
 import { BlobServiceClient, StorageSharedKeyCredential } from '@azure/storage-blob';
 

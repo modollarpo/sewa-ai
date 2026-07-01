@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/notifications/emailService.ts
+// SEWA XAI — backend/src/services/notifications/emailService.ts
 // Full production email service: 18 HTML templates, multi-language stub,
 // Azure Communication Services (ACS) integration
 import { EmailClient } from '@azure/communication-email';
@@ -14,7 +14,7 @@ const FROM_EMAIL = config.EMAIL_FROM || 'info@sewaxai.health';
 const BASE = (content: string, preheader = '') => `<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>SEWA AI</title>
+<title>SEWA XAI</title>
 <style>
   body { margin:0; padding:0; background:#050F0C; font-family:'Helvetica Neue',Arial,sans-serif; color:#D0ECE6; }
   .wrapper { max-width:600px; margin:0 auto; background:#08160F; border:1px solid #1B3028; border-radius:16px; overflow:hidden; }
@@ -53,7 +53,7 @@ const BASE = (content: string, preheader = '') => `<!DOCTYPE html>
         </svg>
       </div>
       <div>
-        <div class="logo-text">SEWA AI</div>
+        <div class="logo-text">SEWA XAI</div>
         <div class="logo-sub">Smart Early Warning Assistant</div>
       </div>
     </div>
@@ -61,12 +61,12 @@ const BASE = (content: string, preheader = '') => `<!DOCTYPE html>
   <div class="body">${content}</div>
   <div class="footer">
     <p style="font-size:11px;color:#3A6055;margin:0;">
-      SEWA AI · Clinical Intelligence Platform ·
+      SEWA XAI · Clinical Intelligence Platform ·
       <a href="{{unsubscribeUrl}}" style="color:#408D7B;">Manage notifications</a> ·
       <a href="https://app.sewaxai.health/privacy" style="color:#408D7B;">Privacy Policy</a>
     </p>
     <p style="font-size:10px;color:#3A6055;margin:4px 0 0;">
-      This email was sent to {{recipientEmail}} as part of your SEWA AI account.
+      This email was sent to {{recipientEmail}} as part of your SEWA XAI account.
       GDPR lawful basis: legitimate interest / contractual obligation.
     </p>
   </div>
@@ -79,47 +79,47 @@ export const EMAIL_TEMPLATES: Record<string, (d: any) => { subject: string; html
 
   // ── Auth ────────────────────────────────────────────────────
   welcome: (d) => ({
-    subject: `Welcome to SEWA AI — ${d.tenantName}`,
+    subject: `Welcome to SEWA XAI — ${d.tenantName}`,
     html: BASE(`
-      <h2>Welcome to SEWA AI, ${d.firstName}! 👋</h2>
+      <h2>Welcome to SEWA XAI, ${d.firstName}! 👋</h2>
       <p>Your account at <strong style="color:#D0ECE6;">${d.tenantName}</strong> has been created successfully.</p>
       <div class="card">
         <p style="margin:0;"><strong style="color:#D0ECE6;">Role:</strong> ${d.role}<br/>
         <strong style="color:#D0ECE6;">Email:</strong> ${d.email}<br/>
         <strong style="color:#D0ECE6;">Region:</strong> ${d.region?.toUpperCase() ?? '—'}</p>
       </div>
-      <p>SEWA AI gives you AI-powered triage, explainable diagnostic reports, and real-time clinical alerts.</p>
+      <p>SEWA XAI gives you AI-powered triage, explainable diagnostic reports, and real-time clinical alerts.</p>
       <center style="margin:24px 0;">
-        <a href="https://app.sewaxai.health/login" class="btn">Access SEWA AI →</a>
+        <a href="https://app.sewaxai.health/login" class="btn">Access SEWA XAI →</a>
       </center>
       <p style="font-size:12px;">Your temporary password was provided by your administrator. You will be prompted to set a new password on first login.</p>
-    `, `Welcome to SEWA AI at ${d.tenantName}`),
+    `, `Welcome to SEWA XAI at ${d.tenantName}`),
   }),
 
   mfa_code: (d) => ({
-    subject: 'SEWA AI — Your verification code',
+    subject: 'SEWA XAI — Your verification code',
     html: BASE(`
       <h2>Two-factor verification code</h2>
-      <p>Use the code below to complete your SEWA AI login. It expires in <strong style="color:#D0ECE6;">5 minutes</strong>.</p>
+      <p>Use the code below to complete your SEWA XAI login. It expires in <strong style="color:#D0ECE6;">5 minutes</strong>.</p>
       <center style="margin:28px 0;">
         <div style="background:#0C1D17;border:2px solid #408D7B;border-radius:14px;padding:24px 40px;display:inline-block;">
           <div style="font-size:42px;font-weight:800;letter-spacing:12px;color:#1DBF73;font-family:monospace;">${d.code}</div>
         </div>
       </center>
       <p>If you did not request this code, please <a href="https://app.sewaxai.health/security" style="color:#E03535;">secure your account immediately</a>.</p>
-    `, `Your SEWA AI code: ${d.code}`),
+    `, `Your SEWA XAI code: ${d.code}`),
   }),
 
   password_reset: (d) => ({
-    subject: 'SEWA AI — Reset your password',
+    subject: 'SEWA XAI — Reset your password',
     html: BASE(`
-      <h2>Reset your SEWA AI password</h2>
+      <h2>Reset your SEWA XAI password</h2>
       <p>Hi ${d.firstName}, we received a request to reset your password. Click the button below to set a new one.</p>
       <center style="margin:24px 0;">
         <a href="${d.resetUrl}" class="btn">Reset Password →</a>
       </center>
       <p style="font-size:12px;color:#3A6055;">This link expires in 30 minutes. If you did not request a password reset, you can ignore this email.</p>
-    `, 'Reset your SEWA AI password'),
+    `, 'Reset your SEWA XAI password'),
   }),
 
   // ── Clinical ────────────────────────────────────────────────
@@ -142,7 +142,7 @@ export const EMAIL_TEMPLATES: Record<string, (d: any) => { subject: string; html
       <center style="margin:20px 0;">
         <a href="https://app.sewaxai.health/scans/${d.scanId}" class="btn btn-critical">Review Scan Immediately →</a>
       </center>
-      <p style="font-size:12px;color:#3A6055;">This is an automated AI-generated alert. Clinical judgment is required. The SEWA AI result has passed metacognition validation.</p>
+      <p style="font-size:12px;color:#3A6055;">This is an automated AI-generated alert. Clinical judgment is required. The SEWA XAI result has passed metacognition validation.</p>
     `, `CRITICAL: ${d.finding} — Scan ${d.scanId}`),
   }),
 
@@ -171,7 +171,7 @@ export const EMAIL_TEMPLATES: Record<string, (d: any) => { subject: string; html
         <p style="margin:0;"><strong style="color:#D0ECE6;">Report signed by:</strong> ${d.radiologistName}<br/>
         <strong style="color:#D0ECE6;">Date:</strong> ${new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })}</p>
       </div>
-      <p>You can view your report, download a PDF copy, or share it with your GP through the SEWA AI patient portal.</p>
+      <p>You can view your report, download a PDF copy, or share it with your GP through the SEWA XAI patient portal.</p>
       <center style="margin:24px 0;">
         <a href="https://app.sewaxai.health/patient/reports/${d.reportId}" class="btn">View My Report →</a>
       </center>
@@ -250,7 +250,7 @@ export const EMAIL_TEMPLATES: Record<string, (d: any) => { subject: string; html
     subject: `⚠️ Payment Failed — Action Required`,
     html: BASE(`
       <h2>Payment Failed ⚠️</h2>
-      <p>Hi ${d.firstName}, a payment for your SEWA AI subscription could not be processed.</p>
+      <p>Hi ${d.firstName}, a payment for your SEWA XAI subscription could not be processed.</p>
       <div class="card" style="border-color:#3A2000;background:#2A1800;">
         <p style="margin:0;color:#E08A20;"><strong>Amount due:</strong> ${d.amount}<br/>
         <strong>Plan:</strong> ${d.plan}<br/>
@@ -296,11 +296,11 @@ export const EMAIL_TEMPLATES: Record<string, (d: any) => { subject: string; html
   }),
 
   consent_expiring: (d) => ({
-    subject: 'Your SEWA AI data consent is expiring soon',
+    subject: 'Your SEWA XAI data consent is expiring soon',
     html: BASE(`
       <h2>Your data consent is expiring 🔐</h2>
-      <p>Hi ${d.firstName}, your consent for SEWA AI to process your health data will expire on <strong style="color:#D0ECE6;">${d.expiryDate}</strong>.</p>
-      <p>To continue using SEWA AI services, please renew your consent in the patient portal.</p>
+      <p>Hi ${d.firstName}, your consent for SEWA XAI to process your health data will expire on <strong style="color:#D0ECE6;">${d.expiryDate}</strong>.</p>
+      <p>To continue using SEWA XAI services, please renew your consent in the patient portal.</p>
       <center style="margin:24px 0;">
         <a href="https://app.sewaxai.health/patient/consent" class="btn">Review & Renew Consent →</a>
       </center>

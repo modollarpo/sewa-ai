@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/ai-monitoring.ts
+// SEWA XAI — backend/src/routes/ai-monitoring.ts
 // Real-time AI platform observability — Super Admin only
 
 import { Router } from 'express';

@@ -1,8 +1,8 @@
-# SEWA AI Implementation Toolkit
+# SEWA XAI Implementation Toolkit
 ---
 ## Overview
 
-This IT toolkit helps you integrate SEWA AI with your existing systems!
+This IT toolkit helps you integrate SEWA XAI with your existing systems!
 
 ---
 ## 1. Prerequisites

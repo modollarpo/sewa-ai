@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/store/notificationStore.ts
+// SEWA XAI — frontend/src/store/notificationStore.ts
 import { create } from 'zustand';
 
 export interface Notification {

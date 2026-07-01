@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-SEWA AI — Sample Test Data Generator
+SEWA XAI — Sample Test Data Generator
 Generates anonymised synthetic DICOM-like test data for AI pipeline validation.
 No PHI. Safe for CI/CD, developer environments, and pilot demonstrations.
-© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 """
 
 import os
@@ -236,8 +236,8 @@ def create_dicom_dataset(case: dict) -> Optional["FileDataset"]:
     ds.StudyTime = time.strftime("%H%M%S")
     ds.Modality = case['modality']
     ds.BodyPartExamined = case['body_part']
-    ds.StudyDescription = f"SEWA AI TEST: {case['description']}"
-    ds.InstitutionName = "SEWA AI Test Institution"
+    ds.StudyDescription = f"SEWA XAI TEST: {case['description']}"
+    ds.InstitutionName = "SEWA XAI Test Institution"
     
     # Image info
     ds.Rows = 512
@@ -275,7 +275,7 @@ def create_dicom_dataset(case: dict) -> Optional["FileDataset"]:
 
 def run():
     print("=" * 60)
-    print("SEWA AI — Sample Test Data Generator")
+    print("SEWA XAI — Sample Test Data Generator")
     print("Generating anonymised synthetic test data...")
     print("=" * 60)
     
@@ -331,7 +331,7 @@ def run():
     print("  • Low-confidence case (tests uncertainty escalation)")
     print("  • Metacognition rejection test (TB on CT head)")
     print("  • Stroke code activation test (MRI DWI)")
-    print("\n© 2026 SEWA AI — a Storegrill Inc Ltd company.")
+    print("\n© 2026 SEWA XAI — a Storegrill Inc Ltd company.")
     print("All test data is synthetic — no PHI.")
 
 

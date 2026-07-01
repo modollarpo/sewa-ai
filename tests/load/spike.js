@@ -1,5 +1,5 @@
-// SEWA AI — k6 Spike Test (sudden 500 VU burst simulating major incident)
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// SEWA XAI — k6 Spike Test (sudden 500 VU burst simulating major incident)
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import http from 'k6/http';
 import { check } from 'k6';
 import { Rate } from 'k6/metrics';

@@ -1,11 +1,11 @@
 #!/bin/bash
 # ============================================================
-# SEWA AI — Full Azure End-to-End Deployment Script
+# SEWA XAI — Full Azure End-to-End Deployment Script
 # Deploys: Backend API · Frontend (Static Web App) ·
 #          AI Services (AKS GPU) · Mobile Build (EAS) ·
 #          Patient App · Infrastructure (Terraform)
 # ============================================================
-# © 2026 SEWA AI — a Storegrill Inc Ltd company.
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company.
 # Registered in England & Wales (14581073). All rights reserved.
 # Usage: bash scripts/deploy-azure-full.sh [environment] [region]
 #   environment: staging | production (default: staging)
@@ -44,7 +44,7 @@ STORAGE_ACCOUNT="${APP_NAME//-/}${ENV}stor"
 LOG_ANALYTICS="${APP_NAME}-${ENV}-logs"
 CONTAINER_REGISTRY="${ACR_NAME}.azurecr.io"
 
-section "SEWA AI — Azure Full Deployment"
+section "SEWA XAI — Azure Full Deployment"
 info "Environment: ${ENV}"
 info "Region:      ${REGION}"
 info "Timestamp:   ${TIMESTAMP}"
@@ -360,5 +360,5 @@ echo -e "    Namespace: ${APP_NAME}"
 echo -e "    Cluster:   ${AKS_CLUSTER}"
 echo -e "    Pods:      kubectl get pods -n ${APP_NAME}"
 echo ""
-echo -e "  ${CYAN}© 2026 SEWA AI — a Storegrill Inc Ltd company.${NC}"
+echo -e "  ${CYAN}© 2026 SEWA XAI — a Storegrill Inc Ltd company.${NC}"
 echo -e "  ${CYAN}Registered in England & Wales (14581073). All rights reserved.${NC}"

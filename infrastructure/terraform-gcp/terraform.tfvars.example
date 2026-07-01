@@ -1,4 +1,4 @@
-# SEWA AI — GCP terraform.tfvars.example
+# SEWA XAI — GCP terraform.tfvars.example
 # Copy to terraform.tfvars and fill in your values
 
 project_id   = "your-gcp-project-id"   # 🔑 Required

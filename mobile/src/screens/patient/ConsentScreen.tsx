@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/patient/ConsentScreen.tsx
+// SEWA XAI — mobile/src/screens/patient/ConsentScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Switch, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
@@ -8,7 +8,7 @@ import { useAuthStore } from '../../store/authStore';
 const T = { bg0:'#05100D', bg1:'#091A15', bg2:'#0D201A', teal:'#408D7B', teal2:'#52B09A', textHi:'#D6EDE8', textMd:'#5E9488', textLo:'#2E5048', border:'#1A3028' };
 
 const CONSENT_ITEMS = [
-  { key:'consentAI', label:'AI Analysis', desc:'Allow SEWA AI to analyse your medical images to detect conditions and generate reports.', required:true },
+  { key:'consentAI', label:'AI Analysis', desc:'Allow SEWA XAI to analyse your medical images to detect conditions and generate reports.', required:true },
   { key:'consentResearch', label:'Research Use', desc:'Allow de-identified data to be used for medical AI research to improve diagnostic accuracy.' },
   { key:'consentThirdParty', label:'Third-Party Sharing', desc:'Allow sharing with approved clinical partners for specialist review.' },
   { key:'consentMarketing', label:'Communications', desc:'Receive health tips and platform updates.' },

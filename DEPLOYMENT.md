@@ -1,7 +1,7 @@
-# SEWA AI — Deployment Guide
+# SEWA XAI — Deployment Guide
 *from hours, to seconds*
 
-© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 
 ---
 
@@ -313,5 +313,5 @@ kubectl logs -n sewa-ai -l app=sewa-backend --tail=50 -f
 
 ---
 
-*© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.*
+*© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.*
 *info@sewaxai.health · www.sewaxai.health · from hours, to seconds*

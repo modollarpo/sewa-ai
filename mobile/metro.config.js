@@ -1,4 +1,4 @@
-// SEWA AI — mobile/metro.config.js
+// SEWA XAI — mobile/metro.config.js
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 const defaultConfig = getDefaultConfig(__dirname);

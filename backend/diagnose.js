@@ -4,7 +4,7 @@ require('dotenv').config({ path: '.env.local' }); // Try local first, fallback t
 require('dotenv').config();
 
 async function checkDiagnostics() {
-  console.log('--- SEWA AI Backend Diagnostics ---');
+  console.log('--- SEWA XAI Backend Diagnostics ---');
   console.log(`Node Environment: ${process.env.NODE_ENV}`);
   console.log(`Database URL: ${process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 35) + '...' : 'Not defined'}`);
   console.log(`Redis URL: ${process.env.REDIS_URL ? process.env.REDIS_URL.substring(0, 35) + '...' : 'Not defined'}`);

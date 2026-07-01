@@ -1,4 +1,4 @@
-# SEWA AI Kubernetes Network Policies
+# SEWA XAI Kubernetes Network Policies
 # Enforces least-privilege network isolation for all services
 # Compliance: HIPAA, GDPR, NHS DSPT (network segmentation)
 

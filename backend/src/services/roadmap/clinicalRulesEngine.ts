@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/roadmap/clinicalRulesEngine.ts
+// SEWA XAI — backend/src/services/roadmap/clinicalRulesEngine.ts
 // Roadmap Feature 9: Clinical Decision Support Rules Engine
 // Configurable IF/THEN rules that fire on AI findings → automatic clinical actions
 

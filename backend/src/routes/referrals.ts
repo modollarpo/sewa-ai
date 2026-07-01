@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/referrals.ts
+// SEWA XAI — backend/src/routes/referrals.ts
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
 import { prisma } from '../utils/prismaClient';

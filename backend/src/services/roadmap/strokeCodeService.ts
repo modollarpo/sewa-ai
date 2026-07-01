@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/roadmap/strokeCodeService.ts
+// SEWA XAI — backend/src/services/roadmap/strokeCodeService.ts
 // Roadmap Feature 13: Real-Time Stroke Code Activation
 // Sub-30-second door-to-alert for LVO, ICH, and acute ischaemic stroke
 
@@ -161,7 +161,7 @@ class StrokeCodeService {
           <p><strong>Door-to-Alert:</strong> ${(doorToAlert / 1000).toFixed(1)} seconds</p>
           <p><strong>Code ID:</strong> ${codeId}</p>
           ${event.gradcamUrl ? `<p><a href="${event.gradcamUrl}" style="color:#ff8888">View Grad-CAM Heatmap →</a></p>` : ''}
-          <p style="color:#888;font-size:11px;margin-top:16px">SEWA AI — ${tenant?.name} | Activated: ${new Date().toISOString()}</p>
+          <p style="color:#888;font-size:11px;margin-top:16px">SEWA XAI — ${tenant?.name} | Activated: ${new Date().toISOString()}</p>
         </div>
       `,
     });

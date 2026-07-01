@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/utils/conditions.py
+# SEWA XAI — ai-services/triage/utils/conditions.py
 # Condition label maps per modality + body part
 
 CONDITION_MAP = {
@@ -31,6 +31,17 @@ CONDITION_MAP = {
     "US_Abdomen": [
         "Normal", "Gallstones", "Appendicitis", "Liver Lesion",
         "Ascites", "Kidney Stone", "AAA",
+    ],
+    "PATH_Tissue": [
+        "Normal", "Invasive Carcinoma", "Adenocarcinoma", "High-Grade Dysplasia",
+        "Tuberculosis Granuloma", "Malignancy", "Inflammatory Infiltrate",
+    ],
+    "ECG_Heart": [
+        "Normal Sinus Rhythm", "Atrial Fibrillation", "ST-Elevation MI", "Bundle Branch Block",
+        "QTc Prolongation", "Ventricular Tachycardia", "Arrhythmia",
+    ],
+    "US_Ob": [
+        "Viable Intrauterine Pregnancy", "Gestational Age Estimate", "Placenta Praevia", "Normal",
     ],
     "default": [
         "Normal", "Abnormal - Unclassified", "Critical Finding",

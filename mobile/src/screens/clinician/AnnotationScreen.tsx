@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/clinician/AnnotationScreen.tsx
+// SEWA XAI — mobile/src/screens/clinician/AnnotationScreen.tsx
 import React, { useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, PanResponder, Dimensions } from 'react-native';
 import { Canvas, Path, Skia, SkPath } from '@shopify/react-native-skia';

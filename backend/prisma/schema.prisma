@@ -1,4 +1,4 @@
-// SEWA AI — Prisma Schema
+// SEWA XAI — Prisma Schema
 // PostgreSQL 15+ | Multi-tenant schema isolation
 // README.pdf: Feature 1 (Multi-Tenant), Feature 2 (Auth), Feature 3 (AI), Feature 4 (FHIR/HL7)
 
@@ -42,6 +42,7 @@ model Tenant {
   address            String?
   providerMetadata   Json? // { mpesa: { shortcode, passkey }, flutterwave: { publicKey }, region-specific config }
   apiKey             String? @unique @default(uuid())
+  supportedModalities String[] @default(["CT", "XRAY"])
 
   // ── Billing & Quota ─────────────────────────────────────────
   subscriptionId      String? // Stripe subscription ID / Paystack subscription code

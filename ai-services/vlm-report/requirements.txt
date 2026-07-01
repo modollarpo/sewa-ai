@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/vlm-report/requirements.txt (CPU Edition)
+# SEWA XAI — ai-services/vlm-report/requirements.txt (CPU Edition)
 # VLM report generator is TEMPLATE-BASED on CPU — no heavy model needed.
 # Azure OpenAI API is the production LLM path (zero local GPU dependency).
 fastapi==0.109.0

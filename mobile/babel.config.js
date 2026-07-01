@@ -1,4 +1,4 @@
-// SEWA AI — mobile/babel.config.js
+// SEWA XAI — mobile/babel.config.js
 module.exports = {
   presets: ['module:@react-native/babel-preset'],
   plugins: [

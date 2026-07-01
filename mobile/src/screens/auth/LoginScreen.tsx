@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/auth/LoginScreen.tsx
+// SEWA XAI — mobile/src/screens/auth/LoginScreen.tsx
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
@@ -49,7 +49,7 @@ export default function LoginScreen() {
     const rnBio = new ReactNativeBiometrics();
     const { available } = await rnBio.isSensorAvailable();
     if (!available) { Alert.alert('Not Available', 'Biometric auth not available on this device'); return; }
-    const { success } = await rnBio.simplePrompt({ promptMessage: 'Sign in to SEWA AI' });
+    const { success } = await rnBio.simplePrompt({ promptMessage: 'Sign in to SEWA XAI' });
     if (success) {
       const savedPass = await AsyncStorage.getItem('bioPass');
       if (savedPass) {

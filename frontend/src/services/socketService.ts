@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-// SEWA AI — frontend/src/services/socketService.ts
+// SEWA XAI — frontend/src/services/socketService.ts
 import { io as socketIO, Socket } from 'socket.io-client';
 
 const isProd = typeof window !== 'undefined' && window.location.hostname.includes('sewaxai.health');

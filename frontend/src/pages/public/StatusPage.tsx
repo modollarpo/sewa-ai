@@ -1,6 +1,6 @@
-// SEWA AI — StatusPage.tsx
+// SEWA XAI — StatusPage.tsx
 // Real-time system status page at status.sewaxai.health
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React, { useState, useEffect } from 'react';
 import { PublicLayout } from '../../components/public/PublicLayout';
 const C = { bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', brand:'#408D7B', brandLt:'#52B09A', textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055', border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif", FM:"'IBM Plex Mono',monospace" };
@@ -94,7 +94,7 @@ export function StatusPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
           </p>
         </div>
         <p style={{ fontSize:11, color:C.textLo, marginTop:32, textAlign:'center' }}>
-          © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+          © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
         </p>
       </div>
     </PublicLayout>

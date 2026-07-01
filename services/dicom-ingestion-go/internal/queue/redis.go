@@ -1,4 +1,4 @@
-// Package queue provides a Redis-backed job queue for the SEWA AI scan pipeline.
+// Package queue provides a Redis-backed job queue for the SEWA XAI scan pipeline.
 //
 // Architecture:
 //   DICOM ingestion → Redis LPUSH "sewa:scan:queue" → Node.js backend BRPOP

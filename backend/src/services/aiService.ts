@@ -1,4 +1,4 @@
-// SEWA AI — src/services/aiService.ts
+// SEWA XAI — src/services/aiService.ts
 // AI service exports — delegates to aiOrchestrator and VLM engine
 import CircuitBreaker from 'opossum';
 export { triggerAITriage, runAIPipeline } from './aiOrchestrator';

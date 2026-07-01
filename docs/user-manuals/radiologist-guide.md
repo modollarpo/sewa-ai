@@ -1,6 +1,6 @@
 # Radiologist User Manual
 
-## SEWA AI — Radiologist User Guide
+## SEWA XAI — Radiologist User Guide
 
 ---
 

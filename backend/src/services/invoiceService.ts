@@ -1,7 +1,7 @@
-// SEWA AI — backend/src/services/invoiceService.ts
+// SEWA XAI — backend/src/services/invoiceService.ts
 // PDF invoice generation and delivery per billing cycle.
 // Generates structured invoice HTML → stores in Azure Blob → emails via SendGrid.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import { prisma } from '../utils/prismaClient';
 import { sendEmail } from './emailService';
 import { uploadToStorage } from './storageService';
@@ -64,7 +64,7 @@ export async function generateInvoice(paymentId: string): Promise<string | null>
         subscriptionId: tenant.subscriptionId || undefined,
       },
       lineItems: [{
-        description: `SEWA AI ${(tenant.plan || 'starter').charAt(0).toUpperCase() + (tenant.plan || 'starter').slice(1)} Plan`,
+        description: `SEWA XAI ${(tenant.plan || 'starter').charAt(0).toUpperCase() + (tenant.plan || 'starter').slice(1)} Plan`,
         quantity: 1,
         unitPrice: subtotal,
         total: subtotal,
@@ -101,7 +101,7 @@ export async function generateInvoice(paymentId: string): Promise<string | null>
     if (billingTo) {
       await sendEmail({
         to: billingTo,
-        subject: `SEWA AI Invoice ${invoiceNumber} — ${tenant.currency} ${total.toFixed(2)}`,
+        subject: `SEWA XAI Invoice ${invoiceNumber} — ${tenant.currency} ${total.toFixed(2)}`,
         template: 'invoice',
         data: {
           invoiceNumber, total, currency: tenant.currency,
@@ -151,7 +151,7 @@ function renderInvoiceHTML(d: InvoiceData): string {
 </head>
 <body>
 <div class="header">
-  <div class="logo">SEWA AI <span>a Storegrill Inc Ltd company · No. 14581073</span></div>
+  <div class="logo">SEWA XAI <span>a Storegrill Inc Ltd company · No. 14581073</span></div>
   <div class="invoice-meta">
     <h1>Invoice</h1>
     <p><strong>${d.invoiceNumber}</strong></p>
@@ -162,7 +162,7 @@ function renderInvoiceHTML(d: InvoiceData): string {
 <div class="parties">
   <div class="party">
     <h4>From</h4>
-    <p><strong>SEWA AI — Storegrill Inc Ltd</strong></p>
+    <p><strong>SEWA XAI — Storegrill Inc Ltd</strong></p>
     <p>18 Hampshire Close, Binley, Coventry, CV3 2FP, UK</p>
     <p>info@sewaxai.health</p>
     <p>sewaxai.health</p>
@@ -195,7 +195,7 @@ function renderInvoiceHTML(d: InvoiceData): string {
   This invoice was generated automatically. For queries, contact <a href="mailto:billing@sewaxai.health">billing@sewaxai.health</a>.
 </p>
 <div class="footer">
-  © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England &amp; Wales (14581073). All rights reserved.
+  © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England &amp; Wales (14581073). All rights reserved.
   · sewaxai.health · VAT No. (pending)
 </div>
 </body>

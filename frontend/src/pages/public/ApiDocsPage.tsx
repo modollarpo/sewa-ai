@@ -1,4 +1,4 @@
-// SEWA AI — ApiDocsPage.tsx
+// SEWA XAI — ApiDocsPage.tsx
 import React, { useState } from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
@@ -61,7 +61,7 @@ export function ApiDocsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             <h2 style={{ fontSize:22, fontWeight:800, color:C.textHi, marginBottom:20 }}>{active}</h2>
             {active === 'Introduction' && (
               <>
-                <p style={{ color:C.textMd, lineHeight:1.8, fontSize:14 }}>The SEWA AI API is a RESTful clinical intelligence interface. It allows for high-throughput DICOM processing, real-time triage alerts, and structured report generation using our proprietary Vision-Language Models.</p>
+                <p style={{ color:C.textMd, lineHeight:1.8, fontSize:14 }}>The SEWA XAI API is a RESTful clinical intelligence interface. It allows for high-throughput DICOM processing, real-time triage alerts, and structured report generation using our proprietary Vision-Language Models.</p>
                 <div style={{ marginTop:32 }}>
                    <div style={{ fontSize:12, fontWeight:700, color:C.textHi, marginBottom:12 }}>Base URLs</div>
                    <div style={{ padding:16, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:12, fontFamily:C.FM, fontSize:13 }}>

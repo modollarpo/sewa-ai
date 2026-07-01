@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/pyrefly.toml
+# SEWA XAI — ai-services/triage/pyrefly.toml
 # Pyrefly config for the TRIAGE service.
 # Sets search_path so that local imports resolve correctly:
 #   - "."             → resolves: utils.*, model

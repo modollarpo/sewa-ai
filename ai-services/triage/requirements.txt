@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/requirements.txt (CPU Edition)
+# SEWA XAI — ai-services/triage/requirements.txt (CPU Edition)
 # GPU packages (torch-cuda, torchvision-cuda) intentionally removed.
 # PyTorch CPU-only build: ~250MB vs 2.5GB for CUDA build — faster pull, cheaper nodes.
 # ONNX Runtime is the primary inference engine in production.

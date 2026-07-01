@@ -1,5 +1,5 @@
 #!/bin/bash
-# SEWA AI — Create Prisma Migration Baseline
+# SEWA XAI — Create Prisma Migration Baseline
 # For production safety. Run once before first deploy.
 
 set -e

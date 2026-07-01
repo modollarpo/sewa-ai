@@ -1,6 +1,6 @@
-// SEWA AI — Tooltip.tsx
+// SEWA XAI — Tooltip.tsx
 // Accessible tooltip with WCAG 2.2 AA keyboard support and clinical helper text.
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React, { useState, useRef, useId } from 'react';
 
 const C = {

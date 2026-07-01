@@ -1,6 +1,6 @@
-// SEWA AI — backend/src/services/longitudinalService.ts
+// SEWA XAI — backend/src/services/longitudinalService.ts
 // Longitudinal progression analysis — finding prior scans and preparing for registration
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import axios from 'axios';
 import { prisma } from '../utils/prismaClient';

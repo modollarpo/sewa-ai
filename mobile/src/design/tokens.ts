@@ -1,5 +1,5 @@
-// SEWA AI Mobile — Design Tokens
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// SEWA XAI Mobile — Design Tokens
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 export const C = {
   bg0: '#050F0C', bg1: '#08160F', bg2: '#0C1D17', bg3: '#111F1A',
   brand: '#408D7B', brandDark: '#2E6B5E', brandLight: '#52B09A',

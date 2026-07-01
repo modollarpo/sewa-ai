@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/auth/MFAScreen.tsx
+// SEWA XAI — mobile/src/screens/auth/MFAScreen.tsx
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useAuthStore } from '../../store/authStore';

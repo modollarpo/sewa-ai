@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/uncertainty/main.py (CPU-ONLY EDITION)
+# SEWA XAI — ai-services/uncertainty/main.py (CPU-ONLY EDITION)
 # GPU-Free Uncertainty Engine — Calibrated MC-Dropout on CPU
 #
 # Key CPU optimisation: MC-Dropout passes reduced 20 → 10
@@ -72,7 +72,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="SEWA AI — Uncertainty Engine (CPU Edition)",
+    title="SEWA XAI — Uncertainty Engine (CPU Edition)",
     version="3.1.0",
     description=f"Calibrated MC-Dropout ({MC_PASSES} passes) + ONNX gradient attribution. CPU-only.",
     lifespan=lifespan,

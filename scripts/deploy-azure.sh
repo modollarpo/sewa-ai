@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SEWA AI — scripts/deploy-azure.sh
+# SEWA XAI — scripts/deploy-azure.sh
 # ─────────────────────────────────────────────────────────────────
 # Full Azure deployment pipeline:
 #   1. Validates prerequisites and .env
@@ -49,7 +49,7 @@ set -a; source "$ENV_FILE"; set +a
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║       SEWA AI — Azure Deployment Pipeline                ║"
+echo "║       SEWA XAI — Azure Deployment Pipeline                ║"
 echo "╠══════════════════════════════════════════════════════════╣"
 echo "║  Environment : $ENV_NAME"
 echo "║  Image Tag   : $IMAGE_TAG"
@@ -218,7 +218,7 @@ FRONTEND_IP=$(kubectl get service sewa-frontend \
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║       ✅  SEWA AI Deployed to Azure Successfully         ║"
+echo "║       ✅  SEWA XAI Deployed to Azure Successfully         ║"
 echo "╠══════════════════════════════════════════════════════════╣"
 echo "║  Environment  : $ENV_NAME"
 echo "║  Image Tag    : $IMAGE_TAG"

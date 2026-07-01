@@ -1,4 +1,4 @@
-// SEWA AI — src/services/fcmService.ts
+// SEWA XAI — src/services/fcmService.ts
 // Firebase Cloud Messaging push notifications
 import axios from 'axios';
 const FCM_KEY = process.env.FCM_SERVER_KEY || '';

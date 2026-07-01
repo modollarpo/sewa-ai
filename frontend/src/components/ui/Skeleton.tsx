@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/components/ui/Skeleton.tsx
+// SEWA XAI — frontend/src/components/ui/Skeleton.tsx
 import React from 'react';
 
 interface SkeletonProps {

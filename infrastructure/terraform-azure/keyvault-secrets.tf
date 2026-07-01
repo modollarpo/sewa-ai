@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/terraform-azure/keyvault-secrets.tf
+# SEWA XAI — infrastructure/terraform-azure/keyvault-secrets.tf
 # Stores all SEWA secrets in Azure Key Vault.
 # AKS pods read these at runtime via the Azure Key Vault Provider for Secrets Store CSI Driver.
 # No secrets ever touch the filesystem or environment variables in plaintext in production.
@@ -154,7 +154,7 @@ resource "azurerm_key_vault_secret" "sentry_dsn" {
 }
 
 # ── FHIR Service Principal (App Registration) ─────────────────
-# Creates the Azure AD App Registration used by the SEWA AI backend
+# Creates the Azure AD App Registration used by the SEWA XAI backend
 # to authenticate against Azure Health Data Services (FHIR R4).
 # The App Registration is granted "FHIR Data Contributor" on the FHIR service.
 

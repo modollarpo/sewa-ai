@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/clinician/ReportEditorScreen.tsx
+// SEWA XAI — mobile/src/screens/clinician/ReportEditorScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

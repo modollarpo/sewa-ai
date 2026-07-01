@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/auth.ts
+// SEWA XAI — backend/src/routes/auth.ts
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { authenticate } from '../middleware/auth';
@@ -65,7 +65,7 @@ r.get('/invite/:token', async (req, res, next) => {
       select: { email: true, role: true, tenant: { select: { name: true } } },
     });
     if (!user) return res.status(404).json({ error: 'Invalid or expired invitation token' });
-    res.json({ email: user.email, role: user.role, tenantName: (user as any).tenant?.name ?? 'SEWA AI' });
+    res.json({ email: user.email, role: user.role, tenantName: (user as any).tenant?.name ?? 'SEWA XAI' });
   } catch (err) { next(err); }
 });
 

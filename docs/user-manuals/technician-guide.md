@@ -1,4 +1,4 @@
-# SEWA AI — Technician User Guide
+# SEWA XAI — Technician User Guide
 
 ## 1. Getting Started
 - **Accessing SEWA**: Navigate to your institution’s SEWA URL, e.g., `https://royal-london.sewaxai.health`

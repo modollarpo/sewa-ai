@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "SEWA AI Clinical Intelligence Platform Backend API",
+  "description": "SEWA XAI Clinical Intelligence Platform Backend API",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
@@ -24,6 +24,7 @@
     "@azure-rest/communication-messages": "^1.0.0-beta.1",
     "@azure/communication-email": "^1.1.0",
     "@azure/communication-sms": "^1.2.0-beta.4",
+    "@azure/monitor-opentelemetry": "^1.18.1",
     "@azure/storage-blob": "12.17.0",
     "@bull-board/api": "^8.0.1",
     "@bull-board/express": "^8.0.1",

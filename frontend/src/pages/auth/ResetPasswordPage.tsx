@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/pages/auth/ResetPasswordPage.tsx
+// SEWA XAI — frontend/src/pages/auth/ResetPasswordPage.tsx
 // Handles the password reset link: /reset-password?token=...&tenant=...
 // Lets clinical staff set a new password after requesting a reset.
 
@@ -78,7 +78,7 @@ export function ResetPasswordPage({ token, onLogin }: Props) {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: C.textHi, letterSpacing: '-0.02em' }}>SEWA AI</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: C.textHi, letterSpacing: '-0.02em' }}>SEWA XAI</div>
             <div style={{ fontSize: 10, color: C.textLo }}>Clinical Intelligence Platform</div>
           </div>
         </div>

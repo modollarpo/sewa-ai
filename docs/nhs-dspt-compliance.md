@@ -1,4 +1,4 @@
-# SEWA AI NHS DSPT Compliance Checklist (Clinical Study Pilot)
+# SEWA XAI NHS DSPT Compliance Checklist (Clinical Study Pilot)
 
 ## 1. Governance
 - ✅ Data Protection Officer appointed

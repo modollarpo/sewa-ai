@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/utils/dicom_loader.py
+# SEWA XAI — ai-services/triage/utils/dicom_loader.py
 import io
 import numpy as np
 import httpx

@@ -1,4 +1,4 @@
-// SEWA AI — src/services/dlqService.ts
+// SEWA XAI — src/services/dlqService.ts
 // Dead-Letter Queue (DLQ) for failed AI pipeline jobs.
 // BG1/BG2 fix: provides retry escalation for scans whose runAIPipeline() threw.
 // Uses Redis sorted-set as the queue (score = next retry timestamp in epoch ms).
@@ -9,7 +9,7 @@
 //   every 5 min             →  dlq.process() picks up due entries
 //   after 3 failures        →  scan permanently marked 'failed', ops alerted
 //
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import { redisClient } from '../config/redis';
 import { prisma }      from '../config/database';

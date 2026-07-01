@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/utils/conditions.py
+# SEWA XAI — ai-services/triage/utils/conditions.py
 # Condition label maps per modality + body part
 
 CONDITION_MAP = {

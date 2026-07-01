@@ -161,7 +161,7 @@ export const AIResultExplainer: React.FC<AIResultExplainerProps> = ({
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: B.textHi, letterSpacing: '-0.5px' }}>SEWA AI</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: B.textHi, letterSpacing: '-0.5px' }}>SEWA XAI</div>
               <div style={{ fontSize: 16, color: B.textMd }}>Clinical Triage Result</div>
             </div>
           </div>
@@ -342,7 +342,7 @@ export const ClinicalReportSummary: React.FC<ClinicalReportSummaryProps> = ({
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
               </div>
               <div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: B.textHi }}>SEWA AI</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: B.textHi }}>SEWA XAI</div>
                 <div style={{ fontSize: 12, color: B.textMd }}>Radiology Report Summary</div>
               </div>
             </div>
@@ -466,7 +466,7 @@ export const PlatformIntro: React.FC = (): any => {
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                 </svg>
               </div>
-              <div style={{ fontSize: 96, fontWeight: 900, color: B.textHi, letterSpacing: '-5px', marginBottom: 20 }}>SEWA AI</div>
+              <div style={{ fontSize: 96, fontWeight: 900, color: B.textHi, letterSpacing: '-5px', marginBottom: 20 }}>SEWA XAI</div>
               <div style={{ fontSize: 32, fontWeight: 500, color: B.textMd, maxWidth: 800, lineHeight: 1.4, margin: '0 auto' }}>
                 From Hours to Seconds:<br/>
                 The Global Standard for <span style={{ color: B.brand }}>Autonomous Clinical Intelligence</span>.
@@ -565,7 +565,7 @@ export const OnboardingWalkthrough: React.FC<OnboardingWalkthroughProps> = ({ ro
       <Sequence from={0} durationInFrames={60}>
         <AbsoluteFill style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <FadeIn>
-            <div style={{ fontSize: 28, color: B.textMd, marginBottom: 12 }}>Welcome to SEWA AI,</div>
+            <div style={{ fontSize: 28, color: B.textMd, marginBottom: 12 }}>Welcome to SEWA XAI,</div>
             <div style={{ fontSize: 64, fontWeight: 900, color: B.textHi, letterSpacing: '-2px', marginBottom: 12 }}>{firstName}</div>
             <div style={{ fontSize: 22, color: B.textMd }}>{hospital}</div>
           </FadeIn>

@@ -1,6 +1,6 @@
-// SEWA AI — src/utils/audit.ts
+// SEWA XAI — src/utils/audit.ts
 // Merkle-chained tamper-evident audit log + chain verification
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import crypto from 'crypto';
 import { prisma } from '../utils/prismaClient';
 import { io } from '../index';

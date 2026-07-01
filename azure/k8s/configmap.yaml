@@ -1,6 +1,6 @@
-# SEWA AI — Kubernetes ConfigMap (non-secret configuration)
+# SEWA XAI — Kubernetes ConfigMap (non-secret configuration)
 # All secrets are in the 'sewa-secrets' K8s Secret (sourced from Azure Key Vault).
-# © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/continuous-learning/main.py
+# SEWA XAI — ai-services/continuous-learning/main.py
 # Roadmap Feature 7: AI-Assisted Peer Review & Continuous Learning Loop
 # Captures radiologist corrections → fine-tuning pipeline → A/B deployment
 
@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import httpx
 
-app = FastAPI(title="SEWA AI — Continuous Learning Service", version="1.0.0")
+app = FastAPI(title="SEWA XAI — Continuous Learning Service", version="1.0.0")
 
 # Restrict CORS to trusted origins — configurable via env for AKS internal service mesh
 _CL_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://sewa-backend:5000").split(",")

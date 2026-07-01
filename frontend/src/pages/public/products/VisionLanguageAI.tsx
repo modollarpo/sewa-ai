@@ -1,4 +1,4 @@
-// SEWA AI — VisionLanguageAI.tsx
+// SEWA XAI — VisionLanguageAI.tsx
 // Dedicated landing page for the VLM Report Generator (Port 8001)
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../../components/public/PublicLayout';

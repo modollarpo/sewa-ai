@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/terraform-azure/variables.tf
+# SEWA XAI — infrastructure/terraform-azure/variables.tf
 
 # ── Deployment ─────────────────────────────────────────────────
 variable "environment" {

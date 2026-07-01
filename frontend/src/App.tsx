@@ -1,4 +1,4 @@
-// SEWA AI — App.tsx (COMPLETE — all pages wired, full public routing)
+// SEWA XAI — App.tsx (COMPLETE — all pages wired, full public routing)
 // Routes: Public site (10 pages) → Login → 11 role workspaces with sub-navigation
 // Socket.IO real-time, critical alert banner, notification panel, cookie banner
 
@@ -232,7 +232,7 @@ function StatusBar({ region, role }: { region:string; role:string }) {
       background:C.bg2, borderTop:`1px solid ${C.border}`,
       display:'flex', alignItems:'center', gap:8, padding:'0 12px', overflow:'hidden',
     }}>
-      <span style={{ fontSize:9, color:C.textLo, fontFamily:C.FM, flexShrink:0 }}>SEWA AI v2.4.1</span>
+      <span style={{ fontSize:9, color:C.textLo, fontFamily:C.FM, flexShrink:0 }}>SEWA XAI v2.4.1</span>
       <div style={{ width:1, height:12, background:C.border, flexShrink:0 }}/>
 
       <div style={{ display:'flex', gap:8, flex:1, overflow:'hidden' }}>

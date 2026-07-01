@@ -1,4 +1,4 @@
-# SEWA AI — k6 Load Tests
+# SEWA XAI — k6 Load Tests
 
 Tests the full AI pipeline under clinical load conditions.
 
@@ -31,4 +31,4 @@ API_URL=https://api.sewaxai.health k6 run tests/load/smoke.js
 | Error rate | < 0.1% |
 | Concurrent scans | 1,000 |
 
-© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).

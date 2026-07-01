@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/shared/NotificationsScreen.tsx
+// SEWA XAI — mobile/src/screens/shared/NotificationsScreen.tsx
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNotificationStore } from '../../store/notificationStore';

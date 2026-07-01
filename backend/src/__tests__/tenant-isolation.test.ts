@@ -15,7 +15,7 @@ describe('Enterprise Tenant Isolation (RLS)', () => {
         subdomain: 'tenant-a-iso',
         region: 'uk',
         currency: 'GBP',
-        plan: 'pro'
+        plan: 'starter'
       }
     });
 
@@ -28,7 +28,7 @@ describe('Enterprise Tenant Isolation (RLS)', () => {
         subdomain: 'tenant-b-iso',
         region: 'uk',
         currency: 'GBP',
-        plan: 'pro'
+        plan: 'starter'
       }
     });
 

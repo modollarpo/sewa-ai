@@ -1,4 +1,4 @@
-// SEWA AI — DoctorDashboard.tsx
+// SEWA XAI — DoctorDashboard.tsx
 // Physician workflow: patient list, AI alerts, critical findings, quick actions
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDoctorData } from '../../hooks/useDashboardData';

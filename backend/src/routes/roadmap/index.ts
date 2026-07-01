@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/roadmap/index.ts
+// SEWA XAI — backend/src/routes/roadmap/index.ts
 // Aggregated router for all roadmap feature endpoints
 
 import { Router, Request, Response, NextFunction } from 'express';

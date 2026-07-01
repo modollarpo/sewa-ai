@@ -1,4 +1,4 @@
-# SEWA AI — infrastructure/observability/prometheus.yml
+# SEWA XAI — infrastructure/observability/prometheus.yml
 global:
   scrape_interval:     15s
   evaluation_interval: 15s

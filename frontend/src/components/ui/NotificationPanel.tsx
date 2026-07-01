@@ -1,4 +1,4 @@
-// SEWA AI — NotificationPanel.tsx
+// SEWA XAI — NotificationPanel.tsx
 // Slide-out notification drawer — grouped, urgency-aware, mark read, socket-driven
 import React, { useEffect, useRef } from 'react';
 

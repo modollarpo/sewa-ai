@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/doctor/CriticalAlertsScreen.tsx
+// SEWA XAI — mobile/src/screens/doctor/CriticalAlertsScreen.tsx
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';

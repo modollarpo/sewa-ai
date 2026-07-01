@@ -1,11 +1,11 @@
-// SEWA AI — backend/prisma/seed.js
+// SEWA XAI — backend/prisma/seed.js
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding SEWA AI database (JS)...');
+  console.log('🌱 Seeding SEWA XAI database (JS)...');
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminPassword) throw new Error("ADMIN_PASSWORD environment variable is required to seed database safely.");
   const HASH = await bcrypt.hash(adminPassword, 12);

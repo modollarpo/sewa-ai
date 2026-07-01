@@ -1,4 +1,4 @@
-// SEWA AI — AppointmentsPage.tsx
+// SEWA XAI — AppointmentsPage.tsx
 // Full end-to-end appointment booking: monthly calendar, availability grid,
 // book modal, list/calendar toggle, cancel, iCal download, role-aware views
 

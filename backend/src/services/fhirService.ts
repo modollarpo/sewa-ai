@@ -1,6 +1,6 @@
-// SEWA AI — backend/src/services/fhirService.ts
+// SEWA XAI — backend/src/services/fhirService.ts
 // FHIR R4 integration — Azure Healthcare APIs (production) or HAPI FHIR (local dev)
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 //
 // CREDENTIAL SOURCES (in priority order):
 //   Production  → Azure Healthcare APIs (Azure API for FHIR / Azure Health Data Services)
@@ -153,7 +153,7 @@ export async function createFHIRImagingStudy(scan: any): Promise<string | null> 
       subject: { reference: `Patient/${scan.patient?.fhirId}` },
       started: scan.receivedAt,
       modality: [{ system: 'http://dicom.nema.org/resources/ontology/DCM', code: scan.modality }],
-      description: `${scan.modality} ${scan.bodyPart} — SEWA AI`,
+      description: `${scan.modality} ${scan.bodyPart} — SEWA XAI`,
       identifier: scan.dicomStudyUid
         ? [{ system: 'urn:dicom:uid', value: `urn:oid:${scan.dicomStudyUid}` }]
         : [],
@@ -198,7 +198,7 @@ export async function createFHIRObservation(scan: any, aiResult: any): Promise<s
         system: 'http://unitsofmeasure.org',
         code: '%'
       } : undefined,
-      device: { display: `SEWA AI Triage Engine ${aiResult.modelVersion || 'v2.4.1'}` },
+      device: { display: `SEWA XAI Triage Engine ${aiResult.modelVersion || 'v2.4.1'}` },
       note: aiResult.location ? [{ text: `Finding location: ${aiResult.location}` }] : [],
     };
     const res = await client().post('/Observation', resource, { headers: buildHeaders(token) });

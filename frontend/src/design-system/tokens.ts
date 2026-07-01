@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/design-system/tokens.ts
+// SEWA XAI — frontend/src/design-system/tokens.ts
 // Single source of truth for all design decisions.
 // Clinical, trustworthy, modern — inspired by Aidoc, Philips, DeepMind Health.
 

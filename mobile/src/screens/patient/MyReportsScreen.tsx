@@ -1,5 +1,5 @@
-// SEWA AI — mobile/src/screens/patient/MyReportsScreen.tsx
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+// SEWA XAI — mobile/src/screens/patient/MyReportsScreen.tsx
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Share } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -18,7 +18,7 @@ export default function MyReportsScreen() {
   const displayed = filter === 'recent'
     ? reports.filter(r => r.signedAt && (Date.now() - new Date(r.signedAt).getTime()) < 30*24*3600*1000)
     : reports;
-  const handleShare = async (r: any) => Share.share({ title:'My SEWA AI Report', message:`SEWA AI Report\n${r.scan.modality} ${r.scan.bodyPart}\n\nImpression:\n${r.impression ?? ''}` });
+  const handleShare = async (r: any) => Share.share({ title:'My SEWA XAI Report', message:`SEWA XAI Report\n${r.scan.modality} ${r.scan.bodyPart}\n\nImpression:\n${r.impression ?? ''}` });
   const renderReport = ({ item: r }: any) => (
     <View style={{ backgroundColor:T.bg1, borderRadius:16, marginBottom:14, borderWidth:1, borderColor:T.border, overflow:'hidden' }}>
       <View style={{ height:3, backgroundColor:T.teal }} />

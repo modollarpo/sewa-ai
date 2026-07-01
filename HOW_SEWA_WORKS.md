@@ -1,4 +1,4 @@
-# How SEWA AI Works
+# How SEWA XAI Works
 
 ## Smart Early Warning Assistant — Complete Technical & Clinical Guide
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-SEWA AI is an autonomous clinical diagnostic platform that analyses medical imaging (CT, MRI, X-ray) to detect life-threatening conditions in seconds, generate structured radiology reports, and alert the right clinician before a patient deteriorates. It is designed to work in a busy London NHS hospital and in a rural Nigerian clinic with a single shared tablet and patchy internet — the same core AI, adapted to the context.
+SEWA XAI is an autonomous clinical diagnostic platform that analyses medical imaging (CT, MRI, X-ray) to detect life-threatening conditions in seconds, generate structured radiology reports, and alert the right clinician before a patient deteriorates. It is designed to work in a busy London NHS hospital and in a rural Nigerian clinic with a single shared tablet and patchy internet — the same core AI, adapted to the context.
 
 This document explains every layer of how SEWA works: from the moment a scan is acquired, through the AI pipeline, to the alert on a doctor's phone.
 
@@ -407,6 +407,6 @@ AI-powered specialist matching across the SEWA network. A hospital in Accra can 
 
 ---
 
-*SEWA AI — "From Hours to Seconds: Autonomous AI-Powered Diagnostic Intelligence for Global Healthcare."*
+*SEWA XAI — "From Hours to Seconds: Autonomous AI-Powered Diagnostic Intelligence for Global Healthcare."*
 
 *Built for the world, not just the wealthy.*

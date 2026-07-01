@@ -1,5 +1,5 @@
-// SEWA AI Mobile — ClinicianProfileScreen
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+// SEWA XAI Mobile — ClinicianProfileScreen
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { C, FS, FW, SP } from '../../design/tokens';
@@ -11,7 +11,7 @@ export default function ClinicianProfileScreen() {
         <Text style={s.title}>Profile</Text>
       </View>
       <View style={s.body}>
-        <Text style={s.text}>Content available after connecting to SEWA AI backend.</Text>
+        <Text style={s.text}>Content available after connecting to SEWA XAI backend.</Text>
       </View>
     </ScrollView>
   );

@@ -82,7 +82,7 @@ export function FeedbackModal({ isOpen, onClose, onSubmitted }: Props) {
               Thank you for your feedback!
             </h3>
             <p style={{ fontSize:'13px', color:C.textMd, lineHeight:1.7, margin:'12px 0 0', fontFamily:C.F }}>
-              We appreciate you letting us know how we can improve SEWA AI.
+              We appreciate you letting us know how we can improve SEWA XAI.
             </p>
           </div>
         ) : (

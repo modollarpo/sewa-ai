@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/hl7Service.ts
+// SEWA XAI — backend/src/services/hl7Service.ts
 // Feature 9: HL7 v2 Integration — MLLP over TCP
 // Exports:
 //   - hl7Service singleton (used by strokeCodeService for buildADT_A02, buildORM, send)

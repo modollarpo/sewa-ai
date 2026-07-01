@@ -1,4 +1,4 @@
-// SEWA AI — DICOM Ingestion Service (Go) — Production Edition
+// SEWA XAI — DICOM Ingestion Service (Go) — Production Edition
 // Real DICOM parsing, PHI anonymisation, Redis dispatch, Prometheus metrics.
 //
 // Pipeline:
@@ -512,7 +512,7 @@ func main() {
 	svc.Start(ctx)
 
 
-	logger.Info("SEWA AI DICOM Ingestion Service ready",
+	logger.Info("SEWA XAI DICOM Ingestion Service ready",
 		zap.String("version", "2.0.0"),
 		zap.String("ae_title", cfg.AETTitle),
 		zap.Int("dicom_port", cfg.DicomPort),

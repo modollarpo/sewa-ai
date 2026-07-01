@@ -1,5 +1,5 @@
 # ───────────────────────────────
-# SEWA AI Terraform Backend Setup
+# SEWA XAI Terraform Backend Setup
 # ───────────────────────────────
 
 # Variables — update if needed

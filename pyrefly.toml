@@ -1,4 +1,4 @@
-# SEWA AI — pyrefly.toml (repo root)
+# SEWA XAI — pyrefly.toml (repo root)
 # Global Pyrefly config that applies to ALL Python files in this workspace.
 # Container-only packages (torch, onnxruntime, fastapi, flwr, opacus, etc.)
 # are not installed in the local dev venv — suppress all related warnings here.

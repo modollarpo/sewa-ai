@@ -1,4 +1,4 @@
-// SEWA AI — RegulatoryPage.tsx
+// SEWA XAI — RegulatoryPage.tsx
 // Compliance, Security, and Clinical Safety documentation
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
@@ -31,7 +31,7 @@ export function RegulatoryPage({ onNavigate }: { onNavigate:(p:string)=>void }) 
             <span style={{ color:C.brand }}>Clinical-grade trust.</span>
           </h1>
           <p style={{ fontSize:'clamp(15px, 2.5vw, 18px)', color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
-            SEWA AI is built to exceed the most stringent clinical and data security standards globally. We are committed to transparency, security by design, and proactive clinical safety.
+            SEWA XAI is built to exceed the most stringent clinical and data security standards globally. We are committed to transparency, security by design, and proactive clinical safety.
           </p>
         </div>
       </section>
@@ -68,13 +68,13 @@ export function RegulatoryPage({ onNavigate }: { onNavigate:(p:string)=>void }) 
              <div style={{ padding:24, background:C.bg2, borderRadius:16, border:`1px solid ${C.border}` }}>
                 <h3 style={{ fontSize:16, fontWeight:700, color:C.brand, marginBottom:12 }}>Bias Monitoring</h3>
                 <p style={{ fontSize:14, color:C.textMd, lineHeight:1.7 }}>
-                  We actively monitor our models for performance drift across varied demographics (age, ethnicity, gender, and device type). SEWA AI is validated on multi-ethnic datasets globally to ensure clinical equity.
+                  We actively monitor our models for performance drift across varied demographics (age, ethnicity, gender, and device type). SEWA XAI is validated on multi-ethnic datasets globally to ensure clinical equity.
                 </p>
              </div>
           </div>
           <div style={{ marginTop:48, padding:24, background:`${C.brand}08`, border:`1px solid ${C.brand}30`, borderRadius:16, textAlign:'center' }}>
             <p style={{ fontSize:13, color:C.textHi, fontWeight:600, lineHeight:1.6, margin:0 }}>
-              The SEWA AI multi-engine architecture, metacognition safety layer, federated learning subsystem, and sovereign deployment architecture are the sole invention of <strong style={{ color:C.brand }}>Dolapo Ariyo</strong>, protected by UK Provisional Patent Application (UKIPO, March 2026).
+              The SEWA XAI multi-engine architecture, metacognition safety layer, federated learning subsystem, and sovereign deployment architecture are the sole invention of <strong style={{ color:C.brand }}>Dolapo Ariyo</strong>, protected by UK Provisional Patent Application (UKIPO, March 2026).
             </p>
           </div>
         </div>

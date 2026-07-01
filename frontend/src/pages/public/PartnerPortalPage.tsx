@@ -1,4 +1,4 @@
-// SEWA AI — PartnerPortalPage.tsx
+// SEWA XAI — PartnerPortalPage.tsx
 // Password-gated investor & hospital due diligence data room.
 // Following the advisor's recommendation: forces email capture before access
 // to "secret sauce" — pitch deck, technical whitepaper, CER, financials.
@@ -142,7 +142,7 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
               <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'4px 14px', background:`${C.purple}14`, border:`1px solid ${C.purple}30`, borderRadius:20, marginBottom:20 }}>
                 <span style={{ fontSize:10, fontWeight:700, color:C.purple, letterSpacing:'0.1em', textTransform:'uppercase' }}>Private Data Room</span>
               </div>
-              <h1 style={{ fontSize:40, fontWeight:900, color:C.textHi, margin:'0 0 16px', letterSpacing:'-1.5px' }}>SEWA AI Partner Portal</h1>
+              <h1 style={{ fontSize:40, fontWeight:900, color:C.textHi, margin:'0 0 16px', letterSpacing:'-1.5px' }}>SEWA XAI Partner Portal</h1>
               <p style={{ fontSize:15, color:C.textMd, lineHeight:1.8, margin:'0 0 40px' }}>
                 Confidential documents for investors, hospital partners, and technology integrators. Access requires identity verification and NDA acceptance.
               </p>
@@ -195,7 +195,7 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
               <label style={{ display:'flex', gap:10, alignItems:'flex-start', cursor:'pointer', marginBottom:24 }}>
                 <input type="checkbox" checked={form.nda} onChange={e=>set('nda',e.target.checked)} style={{ marginTop:3, accentColor:C.purple, flexShrink:0 }}/>
                 <span style={{ fontSize:11, color:C.textLo, lineHeight:1.6 }}>
-                  I agree to treat all accessed documents as confidential and to the Non-Disclosure Agreement terms. I confirm I am not a competitor of SEWA AI. *
+                  I agree to treat all accessed documents as confidential and to the Non-Disclosure Agreement terms. I confirm I am not a competitor of SEWA XAI. *
                 </span>
               </label>
               <button onClick={handleRequest} disabled={submitting || !form.name || !form.email || !form.org || !form.nda}
@@ -250,7 +250,7 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
               <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'4px 12px', background:`${C.normal}14`, border:`1px solid ${C.normal}30`, borderRadius:20, marginBottom:12 }}>
                 <span style={{ fontSize:9, fontWeight:700, color:C.normal, letterSpacing:'0.1em', textTransform:'uppercase' }}>✓ Access Granted — Demo Mode</span>
               </div>
-              <h1 style={{ fontSize:32, fontWeight:800, color:C.textHi, margin:'0 0 6px', fontFamily:C.F, letterSpacing:'-0.5px' }}>SEWA AI Data Room</h1>
+              <h1 style={{ fontSize:32, fontWeight:800, color:C.textHi, margin:'0 0 6px', fontFamily:C.F, letterSpacing:'-0.5px' }}>SEWA XAI Data Room</h1>
               <p style={{ fontSize:13, color:C.textMd, margin:0 }}>Confidential documents for {VISITOR_TYPES.find(v=>v.id===visitorType)?.label}. All access is logged and audited.</p>
             </div>
             <div style={{ display:'flex', gap:8 }}>

@@ -1,4 +1,4 @@
-// SEWA AI — TrainingSimulator.tsx
+// SEWA XAI — TrainingSimulator.tsx
 // Gamified Simulation Mode for medical students and junior radiologists using anonymized historical scans
 import React, { useState, useEffect } from 'react';
 import { Skeleton } from '../../components/ui/Skeleton';

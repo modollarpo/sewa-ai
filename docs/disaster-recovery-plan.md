@@ -1,7 +1,7 @@
-# SEWA AI Disaster Recovery Plan (NHS Clinical Study Pilot)
+# SEWA XAI Disaster Recovery Plan (NHS Clinical Study Pilot)
 
 ## 1. Overview
-This document outlines the disaster recovery (DR) procedures for SEWA AI during the NHS clinical study pilot, with RTO (Recovery Time Objective) < 4 hours and RPO (Recovery Point Objective) < 15 minutes.
+This document outlines the disaster recovery (DR) procedures for SEWA XAI during the NHS clinical study pilot, with RTO (Recovery Time Objective) < 4 hours and RPO (Recovery Point Objective) < 15 minutes.
 
 ## 2. Infrastructure Setup
 - **Primary Region**: UK South
@@ -11,7 +11,7 @@ This document outlines the disaster recovery (DR) procedures for SEWA AI during 
 1. **Failover Database**: Promote Azure PostgreSQL read replica in secondary region to primary
 2. **Redirect Traffic**: Update Azure Front Door to route traffic to secondary region AKS
 3. **Restore Storage**: Failover Azure Storage (GRS) to secondary region
-4. **Verify Services**: Ensure all SEWA AI services are healthy in secondary region
+4. **Verify Services**: Ensure all SEWA XAI services are healthy in secondary region
 5. **Communicate**: Notify NHS trust study team of failover status
 
 ## 4. Failback

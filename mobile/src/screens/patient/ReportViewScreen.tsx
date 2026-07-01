@@ -1,4 +1,4 @@
-// SEWA AI — mobile/src/screens/patient/ReportViewScreen.tsx
+// SEWA XAI — mobile/src/screens/patient/ReportViewScreen.tsx
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share, ActivityIndicator } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ export default function ReportViewScreen({ route }: any) {
     queryFn: async () => (await apiClient.get(`/reports/${reportId}`)).data,
   });
 
-  const handleShare = () => Share.share({ message: `SEWA AI Report\n\n${report?.fullText || ''}`, title:'My Medical Report' });
+  const handleShare = () => Share.share({ message: `SEWA XAI Report\n\n${report?.fullText || ''}`, title:'My Medical Report' });
 
   if (isLoading) return <View style={{ flex:1, backgroundColor:T.bg0, alignItems:'center', justifyContent:'center' }}><ActivityIndicator color={T.teal2} /></View>;
 

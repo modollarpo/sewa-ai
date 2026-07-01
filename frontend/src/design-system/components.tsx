@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/design-system/components.tsx
+// SEWA XAI — frontend/src/design-system/components.tsx
 // Atomic component library — every UI primitive used across SEWA.
 // All components use inline styles tied to design tokens for portability.
 

@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/appointments/index.ts
+// SEWA XAI — backend/src/routes/appointments/index.ts
 // End-to-end appointment booking: CRUD, availability, reminders,
 // telehealth video rooms, iCal export, role-based access
 
@@ -337,7 +337,7 @@ r.get('/:id/ical', async (req: Request, res: Response, next: NextFunction) => {
     const ical = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//SEWA AI//Appointments//EN',
+      'PRODID:-//SEWA XAI//Appointments//EN',
       'CALSCALE:GREGORIAN',
       'METHOD:REQUEST',
       'BEGIN:VEVENT',
@@ -345,9 +345,9 @@ r.get('/:id/ical', async (req: Request, res: Response, next: NextFunction) => {
       `DTSTAMP:${fmt(new Date())}`,
       `DTSTART:${fmt(start)}`,
       `DTEND:${fmt(end)}`,
-      `SUMMARY:${appt.type} — SEWA AI`,
+      `SUMMARY:${appt.type} — SEWA XAI`,
       `DESCRIPTION:Appointment with Dr. ${doctor?.firstName ?? ''} ${doctor?.lastName ?? ''}`,
-      `LOCATION:${appt.location ?? 'SEWA AI Platform'}`,
+      `LOCATION:${appt.location ?? 'SEWA XAI Platform'}`,
       `STATUS:${appt.status === 'confirmed' ? 'CONFIRMED' : 'TENTATIVE'}`,
       'END:VEVENT',
       'END:VCALENDAR',

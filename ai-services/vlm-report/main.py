@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/vlm-report/main.py  (CPU Edition)
+# SEWA XAI — ai-services/vlm-report/main.py  (CPU Edition)
 # Template-based structured report generator — no local ML model required.
 # Production LLM path: Azure OpenAI GPT-4o (API call, zero GPU dependency).
 # CPU fallback: deterministic template engine (<30ms, clinical-grade structure).
@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="SEWA AI — VLM Report Generator (CPU Edition)",
+    title="SEWA XAI — VLM Report Generator (CPU Edition)",
     version="1.8.0",
     description="CPU-native structured report generation. Template mode: <30ms. Azure OpenAI mode: ~1-2s.",
     lifespan=lifespan,
@@ -126,7 +126,7 @@ async def generate_report(req: VLMReportRequest) -> VLMReportResponse:
 
         findings = f"""{findings_header}
 
-AI Triage Engine (SEWA AI v2.4.1) detected this finding with {req.confidence*100:.1f}% confidence.
+AI Triage Engine (SEWA XAI v2.4.1) detected this finding with {req.confidence*100:.1f}% confidence.
 Urgency classification: {req.urgency}.
 
 {shap_narrative}
@@ -232,7 +232,7 @@ AI Confidence:   {req.confidence*100:.1f}%
 Region:          {req.region.upper()}
 Compliance:      {compliance_str}
 Generated:       {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}
-Model:           SEWA AI VLM v1.8.0
+Model:           SEWA XAI VLM v1.8.0
 {'='*60}
 
 TECHNIQUE

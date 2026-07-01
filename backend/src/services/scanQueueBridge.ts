@@ -1,4 +1,4 @@
-// SEWA AI — Scan Queue Bridge (Go → BullMQ)
+// SEWA XAI — Scan Queue Bridge (Go → BullMQ)
 // Listens to "sewa:scan:queue" (LPUSHed by Go service) and enqueues to BullMQ
 import { redisClient } from '../config/redis';
 import { logger } from '../utils/logger';

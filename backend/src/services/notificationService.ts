@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/notificationService.ts
+// SEWA XAI — backend/src/services/notificationService.ts
 // Secure clinical messaging: WhatsApp, SMS, and Email via Azure Communication Services
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
@@ -36,7 +36,7 @@ export async function sendNotification(payload: NotificationPayload) {
     }
 
     // 3. Email Fallback
-    await sendEmail(to, payload.subject || 'SEWA AI Notification', body);
+    await sendEmail(to, payload.subject || 'SEWA XAI Notification', body);
     return { channel: 'email', status: 'sent' };
 
   } catch (err: any) {
@@ -73,7 +73,7 @@ async function sendEmail(to: string, subject: string, body: string) {
  * Specialized helper for Critical Finding alerts (ICH/Stroke)
  */
 export async function alertCriticalFinding(doctorPhone: string, patientName: string, finding: string) {
-  const message = `🚨 SEWA AI CRITICAL ALERT: ${finding} detected for patient ${patientName}. Please review the STAT dashboard immediately.`;
+  const message = `🚨 SEWA XAI CRITICAL ALERT: ${finding} detected for patient ${patientName}. Please review the STAT dashboard immediately.`;
   return sendNotification({
     to: doctorPhone,
     body: message,

@@ -1,4 +1,4 @@
-// SEWA AI — RadiologySimulator.tsx
+// SEWA XAI — RadiologySimulator.tsx
 // Gamified clinical triage training simulator for medical students.
 import React, { useState, useEffect } from 'react';
 
@@ -193,7 +193,7 @@ export function RadiologySimulator({ onClose }: { onClose: () => void }) {
             </div>
 
             <p className="text-xs text-[#3A6055] max-w-xs mx-auto leading-relaxed">
-              SEWA AI's algorithmic baseline for this dataset is 97.4%. Your results have been logged to the clinical registry.
+              SEWA XAI's algorithmic baseline for this dataset is 97.4%. Your results have been logged to the clinical registry.
             </p>
 
             <button 

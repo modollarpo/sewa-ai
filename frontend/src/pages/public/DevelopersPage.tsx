@@ -1,4 +1,4 @@
-// SEWA AI — DevelopersPage.tsx
+// SEWA XAI — DevelopersPage.tsx
 // API documentation and integration guide
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
@@ -28,7 +28,7 @@ export function DevelopersPage({ onNavigate }: { onNavigate:(p:string)=>void }) 
             Built for interoperability.
           </h1>
           <p style={{ fontSize:18, color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
-            SEWA AI was built using standard protocols (DICOM, HL7, FHIR) to ensure seamless integration into any hospital ecosystem. Access our microservices via a unified REST API or standard hospital gateways.
+            SEWA XAI was built using standard protocols (DICOM, HL7, FHIR) to ensure seamless integration into any hospital ecosystem. Access our microservices via a unified REST API or standard hospital gateways.
           </p>
         </div>
       </section>

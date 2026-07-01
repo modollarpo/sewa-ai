@@ -4,7 +4,7 @@ import { auditLog } from '../utils/audit';
 import { createFHIRImagingStudy, createFHIRDiagnosticReport } from './fhirService';
 
 /**
- * Background worker to keep SEWA AI synchronized with Hospital EMR (FHIR/HL7).
+ * Background worker to keep SEWA XAI synchronized with Hospital EMR (FHIR/HL7).
  * Implements Feature 4 compliance requirements.
  */
 export class FHIRSyncWorker {
@@ -92,7 +92,7 @@ export class FHIRSyncWorker {
 
   /**
    * Inbound Sync: FHIR -> Prisma (Webhook receiver)
-   * Essential for syncing patient demographics from EHR to SEWA AI.
+   * Essential for syncing patient demographics from EHR to SEWA XAI.
    */
   public async handleInboundWebhook(resourceType: string, data: any, tenantId: string) {
     logger.info(`[FHIR Inbound] Processing ${resourceType} for tenant ${tenantId}`);
@@ -122,7 +122,10 @@ export class FHIRSyncWorker {
               user: {
                 create: {
                   tenantId,
-                  email: email || `${mrn}@placeholder.sewaxai.health`,
+                  // Email is nullable — FHIR patients may not have one.
+                  // Using null is safer than a placeholder domain that silently fails
+                  // email sends and may breach NHS data quality standards.
+                  email: email || null,
                   firstName: firstName || 'FHIR',
                   lastName: lastName || 'IMPORT',
                   role: 'patient',

@@ -1,5 +1,5 @@
-// SEWA AI — AccessibilityPage.tsx
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+// SEWA XAI — AccessibilityPage.tsx
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 import React from 'react';
 import { PublicLayout } from '../../components/public/PublicLayout';
 const C = { bg0:'#050F0C', bg1:'#08160F', brand:'#408D7B', brandLight:'#52B09A', textHigh:'#D0ECE6', textMed:'#6FA898', textLow:'#3A6055', border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif" };
@@ -16,7 +16,7 @@ export function AccessibilityPage({ onNavigate }: { onNavigate:(p:string)=>void 
     <PublicLayout activePage="accessibility" onNavigate={onNavigate}>
       <section style={{ background:`linear-gradient(135deg,${C.bg0},${C.bg1})`, padding:'52px clamp(16px,5vw,80px) 44px', borderBottom:`1px solid ${C.border}` }}>
         <h1 style={{ fontSize:'clamp(26px,4vw,40px)', fontWeight:900, color:C.textHigh, fontFamily:C.F, margin:'0 0 12px' }}>Accessibility Statement</h1>
-        <p style={{ fontSize:15, color:C.textMed, maxWidth:640, lineHeight:1.75 }}>SEWA AI is committed to WCAG 2.2 Level AA. Clinical tools that are inaccessible put patients and clinicians at risk.</p>
+        <p style={{ fontSize:15, color:C.textMed, maxWidth:640, lineHeight:1.75 }}>SEWA XAI is committed to WCAG 2.2 Level AA. Clinical tools that are inaccessible put patients and clinicians at risk.</p>
       </section>
       <div style={{ maxWidth:960, margin:'0 auto', padding:'40px clamp(16px,5vw,48px) 80px' }}>
         <h2 style={{ fontSize:20, fontWeight:800, color:C.textHigh, fontFamily:C.F, marginBottom:20 }}>WCAG 2.2 AA Criteria Assessment</h2>
@@ -43,7 +43,7 @@ export function AccessibilityPage({ onNavigate }: { onNavigate:(p:string)=>void 
           <h3 style={{ fontSize:15, fontWeight:700, color:C.textHigh, fontFamily:C.F, marginBottom:8 }}>Feedback</h3>
           <p style={{ fontSize:13, color:C.textMed, lineHeight:1.7 }}>We welcome accessibility feedback. Contact: <a href="mailto:info@sewaxai.health" style={{ color:C.brandLight }}>info@sewaxai.health</a></p>
         </div>
-        <p style={{ fontSize:11, color:C.textLow, marginTop:32, textAlign:'center' }}>© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</p>
+        <p style={{ fontSize:11, color:C.textLow, marginTop:32, textAlign:'center' }}>© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</p>
       </div>
     </PublicLayout>
   );

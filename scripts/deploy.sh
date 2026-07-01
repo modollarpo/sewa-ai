@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SEWA AI — scripts/deploy.sh
+# SEWA XAI — scripts/deploy.sh
 # Master deployment orchestrator for Azure | AWS | GCP | all
 #
 # Usage:
@@ -210,7 +210,7 @@ deploy_gcp() {
     --repository-format=docker \
     --location="$GCP_REGION" \
     --project="$GCP_PROJECT" \
-    --description="SEWA AI containers"
+    --description="SEWA XAI containers"
 
   # Push images
   local gar="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/sewa"
@@ -266,7 +266,7 @@ health_check() {
 # ══════════════════════════════════════════════════════════════
 show_help() {
   echo ""
-  echo -e "${CYAN}SEWA AI — Deployment Script${NC}"
+  echo -e "${CYAN}SEWA XAI — Deployment Script${NC}"
   echo ""
   echo "Usage:"
   echo "  bash scripts/deploy.sh <target> [--build]"
@@ -300,7 +300,7 @@ show_help() {
 # ══════════════════════════════════════════════════════════════
 # ENTRYPOINT
 # ══════════════════════════════════════════════════════════════
-info "SEWA AI Deployment | Target: ${TARGET} | Tag: ${IMAGE_TAG}"
+info "SEWA XAI Deployment | Target: ${TARGET} | Tag: ${IMAGE_TAG}"
 
 [[ "$BUILD" == "true" ]] && build_images
 

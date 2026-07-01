@@ -1,8 +1,8 @@
 #!/bin/bash
-# SEWA AI — Edge Node Setup Script
+# SEWA XAI — Edge Node Setup Script
 # Offline-first deployment for Africa / low-bandwidth clinical settings
 # INT8 quantised AI model · Local SQLite · GSM SMS fallback
-# © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
+# © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 #
 # Usage: bash setup-edge-node.sh [--tenant-id=ID] [--api-key=KEY] [--region=africa]
 # Requirements: Ubuntu 22.04 LTS · 4-core CPU · 8GB RAM · 128GB SSD
@@ -33,7 +33,7 @@ done
 
 echo -e "${CYAN}"
 echo "  ╔══════════════════════════════════════════════════════╗"
-echo "  ║          SEWA AI — Edge Node Setup                   ║"
+echo "  ║          SEWA XAI — Edge Node Setup                   ║"
 echo "  ║          from hours, to seconds                      ║"
 echo "  ║          © 2026 Storegrill Inc Ltd (14581073)        ║"
 echo "  ╚══════════════════════════════════════════════════════╝"
@@ -54,8 +54,8 @@ apt-get install -y -qq \
   openssl
 success "System dependencies installed"
 
-# ── Step 2: SEWA AI Edge Directory ─────────────────────────────────────────
-info "Step 2: Setting up SEWA AI edge directory..."
+# ── Step 2: SEWA XAI Edge Directory ─────────────────────────────────────────
+info "Step 2: Setting up SEWA XAI edge directory..."
 mkdir -p /opt/sewa-edge/{models,data,logs,config,backup}
 mkdir -p /opt/sewa-edge/data/{scans,reports,audit}
 chmod 700 /opt/sewa-edge
@@ -98,7 +98,7 @@ info "Step 5: Installing edge AI inference service..."
 cat > /opt/sewa-edge/edge_triage.py << 'PYEOF'
 #!/usr/bin/env python3
 """
-SEWA AI Edge Triage Service — Offline INT8 Inference
+SEWA XAI Edge Triage Service — Offline INT8 Inference
 Runs ONNX quantised EfficientNet-B4 without internet connectivity
 Falls back to mock predictions when model unavailable (demo/dev mode)
 """
@@ -117,7 +117,7 @@ BASE_DIR   = Path("/opt/sewa-edge")
 MODEL_PATH = BASE_DIR / "models" / "triage_int8.onnx"
 DB_PATH    = BASE_DIR / "data" / "edge.db"
 
-app = FastAPI(title="SEWA AI Edge Triage", version="2.4.1")
+app = FastAPI(title="SEWA XAI Edge Triage", version="2.4.1")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # ── DB setup ──────────────────────────────────────────────────────────────
@@ -279,7 +279,7 @@ success "Edge AI service installed"
 info "Step 6: Installing cloud sync service..."
 cat > /opt/sewa-edge/sync_to_cloud.sh << 'SYNCEOF'
 #!/bin/bash
-# Sync unsynced edge results to SEWA AI cloud when connectivity available
+# Sync unsynced edge results to SEWA XAI cloud when connectivity available
 CLOUD_API="${CLOUD_API:-https://api.sewaxai.health}"
 API_KEY="${API_KEY}"
 TENANT_ID="${TENANT_ID}"
@@ -319,7 +319,7 @@ cat > /opt/sewa-edge/config/sms_config.json << SMSEOF
   "sender_id": "SEWAAI",
   "alert_recipients": [],
   "critical_only": true,
-  "message_template": "SEWA AI CRITICAL: {finding} ({confidence}%). Scan {scan_id}. Open SEWA AI app."
+  "message_template": "SEWA XAI CRITICAL: {finding} ({confidence}%). Scan {scan_id}. Open SEWA XAI app."
 }
 SMSEOF
 success "SMS config written"
@@ -367,7 +367,7 @@ fi
 
 echo ""
 echo -e "${GREEN}════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  SEWA AI Edge Node Setup Complete                       ${NC}"
+echo -e "${GREEN}  SEWA XAI Edge Node Setup Complete                       ${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════${NC}"
 echo ""
 echo "  API:        http://localhost:8000"
@@ -382,5 +382,5 @@ echo "    supervisorctl restart sewa-edge-triage"
 echo "    tail -f /opt/sewa-edge/logs/triage.out.log"
 echo "    /opt/sewa-edge/sync_to_cloud.sh   # Manual sync"
 echo ""
-echo -e "  ${CYAN}© 2026 SEWA AI — a Storegrill Inc Ltd company.${NC}"
+echo -e "  ${CYAN}© 2026 SEWA XAI — a Storegrill Inc Ltd company.${NC}"
 echo -e "  ${CYAN}Registered in England & Wales (14581073). All rights reserved.${NC}"

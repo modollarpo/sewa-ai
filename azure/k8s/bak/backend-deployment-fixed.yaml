@@ -1,4 +1,4 @@
-# SEWA AI — Backend API Deployment (Fixed for production)
+# SEWA XAI — Backend API Deployment (Fixed for production)
 # Image: ACR latest, production ENV, no Ingress placeholders/secrets dependency
 
 apiVersion: apps/v1

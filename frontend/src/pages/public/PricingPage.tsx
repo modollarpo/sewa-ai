@@ -1,4 +1,4 @@
-// SEWA AI — PricingPage.tsx
+// SEWA XAI — PricingPage.tsx
 import React, { useState } from 'react';
 
 const C = {
@@ -95,12 +95,12 @@ const ROI_METRICS = [
 ];
 
 const FAQS = [
-  { q:'Is SEWA AI a registered medical device?', a:'Yes. SEWA AI is CE marked under EU MDR 2017/745 as a Class IIb medical device, holds UKCA marking for the UK market, and is in FDA 510(k) clearance for the US market. All AI outputs are clearly marked as decision support, not autonomous diagnosis.' },
+  { q:'Is SEWA XAI a registered medical device?', a:'Yes. SEWA XAI is CE marked under EU MDR 2017/745 as a Class IIb medical device, holds UKCA marking for the UK market, and is in FDA 510(k) clearance for the US market. All AI outputs are clearly marked as decision support, not autonomous diagnosis.' },
   { q:'How does NHS pricing work?', a:'NHS Trusts and ICBs are eligible for our NHS Framework pricing, which includes DSPT compliance pre-configured, NHS Spine integration, and procurement through G-Cloud. Contact our NHS team for framework reference numbers and procurement routes.' },
-  { q:'Can I trial SEWA AI before committing?', a:'Yes. We offer a 30-day proof of concept for Hospital and Enterprise plans, including integration with your PACS/FHIR endpoint and up to 500 test scans run through the full AI pipeline. No credit card required.' },
+  { q:'Can I trial SEWA XAI before committing?', a:'Yes. We offer a 30-day proof of concept for Hospital and Enterprise plans, including integration with your PACS/FHIR endpoint and up to 500 test scans run through the full AI pipeline. No credit card required.' },
   { q:'What happens to my data?', a:'Your clinical imaging data is processed in your chosen region (UK, EU, US, or Africa) and never leaves that data residency zone. We are GDPR Art. 28 compliant, execute a DPA with all clients, and maintain ISO 27001 certification. Patient data is never used to train shared models without explicit consent and federated learning protocols.' },
   { q:'How does per-scan pricing work at volume?', a:'Plans include a monthly scan allowance. Overage is billed at £0.35–£0.85 per scan depending on modality and plan. Enterprise clients typically negotiate unlimited scan bundles. Federated learning nodes are priced separately.' },
-  { q:'Is there a free tier for researchers?', a:'We offer an Academic Research Programme with free access to the SEWA AI API (up to 1,000 scans/month) for peer-reviewed research. Apply via our research portal with your institution details and intended research protocol.' },
+  { q:'Is there a free tier for researchers?', a:'We offer an Academic Research Programme with free access to the SEWA XAI API (up to 1,000 scans/month) for peer-reviewed research. Apply via our research portal with your institution details and intended research protocol.' },
 ];
 
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
@@ -242,7 +242,7 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         <div className="callout-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:80 }}>
           {[
             { flag:'🌍', label:'Africa Healthcare Programme', color:C.normal, bg:`${C.normal}08`, border:`${C.normal}20`,
-              desc:'SEWA AI partners with African governments, donor-funded health programmes, and NGOs to deploy AI diagnostics at 60–80% reduced cost. Includes offline-first deployment for low-connectivity environments and local-language support.',
+              desc:'SEWA XAI partners with African governments, donor-funded health programmes, and NGOs to deploy AI diagnostics at 60–80% reduced cost. Includes offline-first deployment for low-connectivity environments and local-language support.',
               badges:['Kenya','Nigeria','Ghana','Rwanda','Tanzania','South Africa'],
               cta:'Learn about Africa Pricing' },
             { flag:'🏥', label:'NHS Framework Pricing', color:C.info, bg:`${C.info}08`, border:`${C.info}20`,
@@ -265,7 +265,7 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         {/* ROI Calculator */}
         <div style={{ background:C.bg2, border:`1px solid ${C.border}`, borderRadius:20, padding:'clamp(20px, 5vw, 40px)', marginBottom:80 }}>
           <h2 style={{ fontSize:26, fontWeight:800, color:C.textHi, margin:'0 0 8px', fontFamily:C.F, letterSpacing:'-0.5px' }}>Return on Investment Calculator</h2>
-          <p style={{ fontSize:13, color:C.textMd, margin:'0 0 32px' }}>Estimate the clinical and financial impact of deploying SEWA AI in your organisation.</p>
+          <p style={{ fontSize:13, color:C.textMd, margin:'0 0 32px' }}>Estimate the clinical and financial impact of deploying SEWA XAI in your organisation.</p>
 
           <div className="roi-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:40 }}>
             <div>
@@ -333,7 +333,7 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         {/* CTA */}
         <div style={{ textAlign:'center', padding:'clamp(32px, 8vw, 56px)', background:`linear-gradient(135deg,${C.bg2},${C.bg3})`, borderRadius:20, border:`1px solid ${C.border}` }}>
           <h2 style={{ fontSize:'clamp(24px, 5vw, 32px)', fontWeight:800, color:C.textHi, margin:'0 0 14px', fontFamily:C.F, letterSpacing:'-1px' }}>Ready to transform your radiology workflow?</h2>
-          <p style={{ fontSize:14, color:C.textMd, margin:'0 0 32px' }}>Join 47+ hospitals and clinics using SEWA AI across 7 countries.</p>
+          <p style={{ fontSize:14, color:C.textMd, margin:'0 0 32px' }}>Join 47+ hospitals and clinics using SEWA XAI across 7 countries.</p>
           <div className="hero-btns" style={{ display:'flex', gap:12, justifyContent:'center', flexWrap:'wrap' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'13px 32px', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:11, color:'white', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:C.F }}>Request a Demo →</button>
             <button onClick={() => onNavigate('clinical-validation')} style={{ padding:'13px 24px', background:'none', border:`1px solid ${C.border}`, borderRadius:11, color:C.textMd, fontSize:14, cursor:'pointer', fontFamily:C.F }}>View Clinical Evidence</button>

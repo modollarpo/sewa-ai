@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/services/notifications/notificationService.ts
+// SEWA XAI — backend/src/services/notifications/notificationService.ts
 // Universal notification dispatcher: FCM push + Email + WhatsApp
 // All users auto-subscribed by role. Respects per-user preferences.
 

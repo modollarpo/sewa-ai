@@ -1,4 +1,4 @@
-// SEWA AI — SecurityPage.tsx
+// SEWA XAI — SecurityPage.tsx
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
@@ -98,7 +98,7 @@ export function SecurityPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             Clinical-grade security,<br/>built from the ground up
           </h1>
           <p style={{ fontSize:15, color:C.textMd, lineHeight:1.8, maxWidth:540, margin:'0 auto' }}>
-            SEWA AI processes sensitive patient imaging data. Every architectural decision, every line of code, and every deployment is reviewed through a security-first lens.
+            SEWA XAI processes sensitive patient imaging data. Every architectural decision, every line of code, and every deployment is reviewed through a security-first lens.
           </p>
         </div>
       </div>
@@ -150,7 +150,7 @@ export function SecurityPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
           <div className="pen-test-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:32, alignItems:'start' }}>
             <div>
               <h2 style={{ fontSize:24, fontWeight:800, color:C.textHi, margin:'0 0 16px', fontFamily:C.F }}>Independent Penetration Testing</h2>
-              <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 20px' }}>SEWA AI undergoes independent penetration testing quarterly, conducted by certified specialists (CHECK, CREST, OSCP). Tests cover web application, API, mobile, and infrastructure attack surfaces.</p>
+              <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 20px' }}>SEWA XAI undergoes independent penetration testing quarterly, conducted by certified specialists (CHECK, CREST, OSCP). Tests cover web application, API, mobile, and infrastructure attack surfaces.</p>
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {[
                   { label:'Frequency',  value:'Quarterly (web/API) + Annual (infrastructure)' },

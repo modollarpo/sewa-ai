@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('SEWA AI - Clinical Workflow (E2E)', () => {
+test.describe('SEWA XAI - Clinical Workflow (E2E)', () => {
   test('User can login, view dashboard, and simulate a scan upload', async ({ page }) => {
     // 1. Visit Login Page
     await page.goto('/login');
     
     // Check title or basic element
-    await expect(page).toHaveTitle(/SEWA AI/);
+    await expect(page).toHaveTitle(/SEWA XAI/);
 
     // We won't actually login if the backend isn't seeded/running in this simple test,
     // but in a real CI environment, we would do:

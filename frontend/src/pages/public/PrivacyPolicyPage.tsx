@@ -1,4 +1,4 @@
-// SEWA AI — PrivacyPolicyPage.tsx
+// SEWA XAI — PrivacyPolicyPage.tsx
 import React, { useState } from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
@@ -88,7 +88,7 @@ const RIGHTS = [
           </div>
           <h1 style={{ fontSize:'clamp(32px, 8vw, 40px)', fontWeight:900, color:C.textHi, margin:'0 0 14px', letterSpacing:'-1.5px', fontFamily:C.F }}>Privacy Policy</h1>
           <p style={{ ...p, fontSize:15, margin:'0 0 20px' }}>
-            SEWA AI is committed to protecting the privacy of patients, clinicians, and all users of our platform. This policy explains how we collect, use, and protect personal data in compliance with UK GDPR, EU GDPR, and HIPAA.
+            SEWA XAI is committed to protecting the privacy of patients, clinicians, and all users of our platform. This policy explains how we collect, use, and protect personal data in compliance with UK GDPR, EU GDPR, and HIPAA.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
             {[['Last Updated','12 March 2026'],['Version','3.1'],['Effective From','1 January 2026'],['ICO Reg.','ZA000000']].map(([l,v]) => (
@@ -119,9 +119,9 @@ const RIGHTS = [
           {/* 1 */}
           <section id="controller" style={{ marginBottom:48 }}>
             <h2 style={h2}>1. Who We Are (Data Controller)</h2>
-            <p style={p}>SEWA AI — a Storegrill Inc Ltd company ("SEWA AI", "we", "us") is the data controller for personal data processed through the SEWA AI platform, website (sewaxai.health), and mobile applications. We are registered with the Information Commissioner's Office (ICO) under registration number ZA000000.</p>
+            <p style={p}>SEWA XAI — a Storegrill Inc Ltd company ("SEWA XAI", "we", "us") is the data controller for personal data processed through the SEWA XAI platform, website (sewaxai.health), and mobile applications. We are registered with the Information Commissioner's Office (ICO) under registration number ZA000000.</p>
             <div style={{ padding:16, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:12 }}>
-              {[['Legal name','SEWA AI — a Storegrill Inc Ltd company'],['18 Hampshire Close, Binley, Coventry, CV3 2FP, United Kingdom'],['Registration No. 14581073 (England & Wales)'],['DPO Email','dpo@sewaxai.health'],['ICO Registration','ZA000000'],['EU Representative','SEWA AI BV, Amsterdam, Netherlands (Art. 27 GDPR)']].map(([l,v]) => (
+              {[['Legal name','SEWA XAI — a Storegrill Inc Ltd company'],['18 Hampshire Close, Binley, Coventry, CV3 2FP, United Kingdom'],['Registration No. 14581073 (England & Wales)'],['DPO Email','dpo@sewaxai.health'],['ICO Registration','ZA000000'],['EU Representative','SEWA XAI BV, Amsterdam, Netherlands (Art. 27 GDPR)']].map(([l,v]) => (
                 <div className="info-row" key={l} style={{ display:'flex', gap:16, padding:'7px 0', borderBottom:`1px solid ${C.border}` }}>
                   <span style={{ fontSize:11, color:C.textLo, width:180, flexShrink:0 }}>{l}</span>
                   <span style={{ fontSize:11, color:C.textHi }}>{v}</span>
@@ -220,7 +220,7 @@ const RIGHTS = [
           {/* 9 Automated */}
           <section id="automated" style={{ marginBottom:48 }}>
             <h2 style={h2}>9. Automated Decision-Making</h2>
-            <p style={p}>SEWA AI's triage engine produces automated AI results. However, per our regulatory commitments and clinical design, <strong style={{ color:C.textHi }}>no automated decision produces a legal or similarly significant effect on a patient without human review</strong>. All AI outputs are clearly labelled as clinical decision support, require a qualified clinician to review and sign, and include explainability data (Grad-CAM, SHAP) to enable informed human oversight. This design satisfies GDPR Article 22 and EU AI Act Article 14 (human oversight of high-risk AI).</p>
+            <p style={p}>SEWA XAI's triage engine produces automated AI results. However, per our regulatory commitments and clinical design, <strong style={{ color:C.textHi }}>no automated decision produces a legal or similarly significant effect on a patient without human review</strong>. All AI outputs are clearly labelled as clinical decision support, require a qualified clinician to review and sign, and include explainability data (Grad-CAM, SHAP) to enable informed human oversight. This design satisfies GDPR Article 22 and EU AI Act Article 14 (human oversight of high-risk AI).</p>
           </section>
 
           {/* 10 Security */}
@@ -253,7 +253,7 @@ const RIGHTS = [
             <h2 style={{ ...h2, fontSize:16 }}>13. Contact & Complaints</h2>
             <p style={{ ...p, fontSize:12, margin:'0 0 16px' }}>For any privacy questions, data subject requests, or concerns, contact our Data Protection Officer:</p>
             <div className="contact-split" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-              {[['DPO Email','dpo@sewaxai.health'],['Postal','SEWA AI — a Storegrill Inc Ltd company, Coventry CV3 2FP'],['ICO (UK)','ico.org.uk · 0303 123 1113'],['CNIL (EU)','cnil.fr (French supervisory authority)']].map(([l,v]) => (
+              {[['DPO Email','dpo@sewaxai.health'],['Postal','SEWA XAI — a Storegrill Inc Ltd company, Coventry CV3 2FP'],['ICO (UK)','ico.org.uk · 0303 123 1113'],['CNIL (EU)','cnil.fr (French supervisory authority)']].map(([l,v]) => (
                 <div key={l} style={{ padding:'9px 12px', background:C.bg3, borderRadius:8 }}>
                   <div style={{ fontSize:9, color:C.textLo, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>{l}</div>
                   <div style={{ fontSize:12, color:C.textHi, marginTop:3 }}>{v}</div>

@@ -1,4 +1,4 @@
-// SEWA AI — frontend/src/components/layout/TopNav.tsx
+// SEWA XAI — frontend/src/components/layout/TopNav.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useSettingsStore } from '../../store/settingsStore';
@@ -145,7 +145,7 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick, onNavi
             </svg>
           </div>
           <div style={{ display: isMobile ? 'none' : 'block' }}>
-            <div style={{ fontSize:'13px', fontWeight:'700', color:C.textHi, letterSpacing:'-0.02em', fontFamily:"'IBM Plex Sans', system-ui, sans-serif", lineHeight:1 }}>SEWA AI</div>
+            <div style={{ fontSize:'13px', fontWeight:'700', color:C.textHi, letterSpacing:'-0.02em', fontFamily:"'IBM Plex Sans', system-ui, sans-serif", lineHeight:1 }}>SEWA XAI</div>
             <div style={{ fontSize:'9px', color:C.textLo, fontFamily:"'IBM Plex Mono', monospace", letterSpacing:'0.08em' }}>
               {user.tenantName || 'Clinical Platform'}
             </div>
@@ -402,7 +402,7 @@ export function TopNav({ user, unreadCount, onNotifClick, onProfileClick, onNavi
             animation:'slideIn 300ms ease'
           }}>
             <style>{`@keyframes slideIn { from { transform:translateX(-100%); } to { transform:none; } }`}</style>
-            <div style={{ fontSize:'18px', fontWeight:'700', color:C.textHi }}>SEWA AI</div>
+            <div style={{ fontSize:'18px', fontWeight:'700', color:C.textHi }}>SEWA XAI</div>
             
             <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
               <div style={{ fontSize:'10px', color:C.textLo, letterSpacing:'0.06em' }}>REGION</div>

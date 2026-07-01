@@ -1,4 +1,4 @@
-# SEWA AI — Workload Identity (User-Assigned Managed Identities)
+# SEWA XAI — Workload Identity (User-Assigned Managed Identities)
 # For Kubernetes service accounts to authenticate to Azure services (Key Vault, etc.)
 
 # Backend Workload Identity

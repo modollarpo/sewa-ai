@@ -1,4 +1,4 @@
-# SEWA AI — DICOM Ingestion Service (Go)
+# SEWA XAI — DICOM Ingestion Service (Go)
 
 ## Why Go?
 

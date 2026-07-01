@@ -1,6 +1,6 @@
 # Doctor User Guide
 
-## SEWA AI — Clinician/Doctor Guide
+## SEWA XAI — Clinician/Doctor Guide
 ---
 
 ## 1. Overview

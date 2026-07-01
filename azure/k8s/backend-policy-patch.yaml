@@ -55,6 +55,13 @@ spec:
     - podSelector:
         matchLabels:
           app: sewa-metacognition
+  - ports:
+    - port: 8002
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-pathology
   # PostgreSQL Flexible Server (VNet-injected, db-subnet 10.10.2.0/24)
   - ports:
     - port: 5432

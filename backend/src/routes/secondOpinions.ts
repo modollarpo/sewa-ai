@@ -1,4 +1,4 @@
-// SEWA AI — backend/src/routes/secondOpinions.ts
+// SEWA XAI — backend/src/routes/secondOpinions.ts
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { prisma } from '../utils/prismaClient';

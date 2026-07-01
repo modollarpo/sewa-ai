@@ -1,4 +1,4 @@
-// SEWA AI — TriageAI.tsx
+// SEWA XAI — TriageAI.tsx
 // Dedicated landing page for the Triage Engine (Port 8000)
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../../components/public/PublicLayout';

@@ -1,4 +1,4 @@
-// SEWA AI — ComplianceDashboard.tsx
+// SEWA XAI — ComplianceDashboard.tsx
 // Regulatory compliance centre: GDPR, HIPAA, NHS DSPT, EU MDR IIb,
 // FDA 510(k), EU AI Act High-Risk — evidence tracker, consent metrics, audit log
 
@@ -370,7 +370,7 @@ export function ComplianceDashboard() {
                   evidence: fw.evidence,
                   gaps: fw.gaps,
                   exportedAt: new Date().toISOString(),
-                  exportedBy: 'SEWA AI Compliance Dashboard',
+                  exportedBy: 'SEWA XAI Compliance Dashboard',
                 };
                 const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
                 const url  = URL.createObjectURL(blob);
@@ -384,7 +384,7 @@ export function ComplianceDashboard() {
               </button>
               <button onClick={() => {
                 // G3: Schedule Audit via pre-filled mailto
-                const subject = encodeURIComponent(`SEWA AI Compliance Audit Request — ${fw.name}`);
+                const subject = encodeURIComponent(`SEWA XAI Compliance Audit Request — ${fw.name}`);
                 const body    = encodeURIComponent(
                   `Please schedule a compliance audit for:\n\nFramework: ${fw.name}\nRegion: ${fw.region}\nCurrent Score: ${fw.score}%\nNext Review Due: ${fw.nextReview}\n\nPlease confirm availability.`
                 );

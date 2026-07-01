@@ -1,4 +1,4 @@
-// SEWA AI — ContactPage.tsx
+// SEWA XAI — ContactPage.tsx
 import React, { useState } from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
@@ -184,7 +184,7 @@ export function ContactPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
           <label style={{ display:'flex', gap:10, alignItems:'flex-start', cursor:'pointer', marginBottom:24 }}>
             <input type="checkbox" checked={form.consent} onChange={e => set('consent',e.target.checked)} style={{ marginTop:3, accentColor:C.brand, width:14, height:14, flexShrink:0 }}/>
             <span style={{ fontSize:11, color:C.textLo, lineHeight:1.6 }}>
-              I agree to SEWA AI contacting me. I have read the <button onClick={() => onNavigate('privacy-policy')} style={{ color:C.brand, background:'none', border:'none', cursor:'pointer', fontSize:11, fontFamily:C.F, textDecoration:'underline' }}>Privacy Policy</button>. *
+              I agree to SEWA XAI contacting me. I have read the <button onClick={() => onNavigate('privacy-policy')} style={{ color:C.brand, background:'none', border:'none', cursor:'pointer', fontSize:11, fontFamily:C.F, textDecoration:'underline' }}>Privacy Policy</button>. *
             </span>
           </label>
 

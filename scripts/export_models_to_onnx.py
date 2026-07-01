@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SEWA AI — scripts/export_models_to_onnx.py
+# SEWA XAI — scripts/export_models_to_onnx.py
 # One-time model export pipeline: PyTorch → ONNX → INT8 ONNX
 #
 # Run once per model release in Azure ML or locally with GPU if available.

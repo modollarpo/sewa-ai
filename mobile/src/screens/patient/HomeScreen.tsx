@@ -1,6 +1,6 @@
-// SEWA AI — mobile/src/screens/patient/HomeScreen.tsx
+// SEWA XAI — mobile/src/screens/patient/HomeScreen.tsx
 // Patient home dashboard: scan stats, quick actions, recent scans
-// © 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+// © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -105,7 +105,7 @@ export default function HomeScreen() {
       {/* Footer */}
       <View style={{ marginTop:32, paddingHorizontal:16, alignItems:'center' }}>
         <Text style={{ fontSize:11, color:T.textLo, textAlign:'center', marginBottom:8 }}>🔒 Your data is encrypted and protected under GDPR</Text>
-        <Text style={{ fontSize:10, color:T.textLo+'80', textAlign:'center', lineHeight:15 }}>© 2026 SEWA AI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</Text>
+        <Text style={{ fontSize:10, color:T.textLo+'80', textAlign:'center', lineHeight:15 }}>© 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.</Text>
       </View>
     </ScrollView>
   );

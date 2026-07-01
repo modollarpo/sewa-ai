@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/triage/utils/preprocessing.py  (CPU Edition)
+# SEWA XAI — ai-services/triage/utils/preprocessing.py  (CPU Edition)
 # Pure numpy/opencv preprocessing — NO torch dependency at inference time.
 # torchvision.transforms replaced with equivalent numpy operations.
 # Saves ~50ms startup latency (no transform JIT compilation on cold start).

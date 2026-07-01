@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/vlm-report/Dockerfile (CPU Edition)
+# SEWA XAI — ai-services/vlm-report/Dockerfile (CPU Edition)
 # Minimal image — template-based report generation, no ML model.
 # Final image: ~120MB (vs ~3.5GB GPU original)
 FROM python:3.11-slim AS builder

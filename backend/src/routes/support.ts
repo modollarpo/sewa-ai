@@ -1,4 +1,4 @@
-// SEWA AI — src/routes/support.ts
+// SEWA XAI — src/routes/support.ts
 // Customer Support Ticket Routes
 
 import { Router } from 'express';

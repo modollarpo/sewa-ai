@@ -1,4 +1,4 @@
-# SEWA AI — ai-services/metacognition/requirements.txt (CPU Edition)
+# SEWA XAI — ai-services/metacognition/requirements.txt (CPU Edition)
 # Metacognition is PURE RULE-BASED PYTHON — zero ML models needed.
 # Removing torch entirely shrinks image from ~3.5GB → ~150MB.
 fastapi==0.109.0
