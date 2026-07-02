@@ -187,7 +187,7 @@ export function FeedbackModal({ isOpen, onClose, onSubmitted }: Props) {
                   gap:'8px',
                 }}
               >
-                {submitting ? <LoadingSpinner size="small" /> : 'Submit Feedback'}
+                {submitting ? <LoadingSpinner size={16} /> : 'Submit Feedback'}
               </button>
             </form>
           </>

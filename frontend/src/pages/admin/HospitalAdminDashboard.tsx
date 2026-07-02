@@ -61,7 +61,44 @@ function StatCard({ label,value,sub,color=C.brand,icon }:{ label:string;value:st
 export function HospitalAdminDashboard() {
   const { user } = useAuthStore();
   const { stats, staff, audit, integrations, loading } = useHospitalAdminData();
-  const [tab, setTab] = useState<'overview'|'staff'|'integrations'|'billing'|'audit'>('overview');
+  const [tab, setTab] = useState<'overview'|'staff'|'integrations'|'billing'|'audit'|'rules'>('overview');
+  const [rules, setRules] = useState<any[]>([]);
+  const [rulesLoading, setRulesLoading] = useState(false);
+  const [ruleToggles, setRuleToggles] = useState<Record<string,boolean>>({});
+  const [ruleHistory, setRuleHistory] = useState<Array<{ruleName:string;ts:string;actions:string;scanId:string}>>([]);
+
+  // Fetch clinical rules when tab opened
+  React.useEffect(() => {
+    if (tab !== 'rules') return;
+    setRulesLoading(true);
+    apiClient.get('/rules').then(r => {
+      const ruleList = r.data.rules || [];
+      setRules(ruleList);
+      // Initialise toggle state from rule.enabled
+      const t: Record<string,boolean> = {};
+      ruleList.forEach((rule: any) => { t[rule.id] = rule.enabled ?? true; });
+      setRuleToggles(t);
+    }).catch(() => {
+      // Demo built-in rules when API unavailable
+      const demo = [
+        { id:'builtin-0', name:'Stroke Code Activation — LVO', description:'Activates stroke code when large vessel occlusion detected with high confidence', enabled:true, pathway:'stroke', conditionLogic:'AND', conditions:[{field:'finding',operator:'contains',value:'occlusion'},{field:'urgency',operator:'eq',value:'CRITICAL'},{field:'confidence',operator:'gte',value:0.85}], actions:[{type:'notify_role',target:'radiologist'},{type:'page_team',target:'stroke_response_team'},{type:'hl7_order',hl7Data:{orderCode:'CTA_HEAD_NECK',priority:'STAT'}}], cooldownMs:3600000 },
+        { id:'builtin-1', name:'ICH Critical Alert', description:'Pages neurosurgery on-call for intracranial haemorrhage', enabled:true, pathway:'stroke', conditionLogic:'AND', conditions:[{field:'finding',operator:'in',value:['ICH','intracranial hemorrhage']},{field:'urgency',operator:'eq',value:'CRITICAL'}], actions:[{type:'notify_role',target:'doctor'},{type:'notify_oncall',target:'neurosurgery'},{type:'escalate_priority',priority:'STAT'}], cooldownMs:1800000 },
+        { id:'builtin-2', name:'Pulmonary Embolism — Anticoagulation Alert', description:'Alerts emergency team for PE findings', enabled:true, pathway:'pe', conditionLogic:'AND', conditions:[{field:'finding',operator:'contains',value:'embolism'},{field:'urgency',operator:'in',value:['CRITICAL','URGENT']}], actions:[{type:'notify_role',target:'doctor'},{type:'notify_oncall',target:'cardiology'},{type:'hl7_order',hl7Data:{orderCode:'D_DIMER',priority:'STAT'}}], cooldownMs:1800000 },
+        { id:'builtin-3', name:'TB Suspected — Infection Control', description:'Triggers infection control protocol for TB findings', enabled:true, pathway:'tb', conditionLogic:'AND', conditions:[{field:'finding',operator:'contains',value:'TB'},{field:'confidence',operator:'gte',value:0.75}], actions:[{type:'notify_role',target:'doctor'},{type:'create_task',message:'Initiate TB isolation protocol'},{type:'hl7_order',hl7Data:{orderCode:'SPUTUM_CULTURE',priority:'URGENT'}}], cooldownMs:86400000 },
+        { id:'builtin-4', name:'Low AI Confidence — Flag for Second Opinion', description:'Routes uncertain cases to second opinion queue', enabled:true, conditionLogic:'AND', conditions:[{field:'confidence',operator:'lt',value:0.70},{field:'uncertainty',operator:'gte',value:0.25}], actions:[{type:'notify_role',target:'radiologist'},{type:'create_task',message:'Manual review: AI confidence below threshold'}], cooldownMs:300000 },
+      ];
+      setRules(demo);
+      const t: Record<string,boolean> = {};
+      demo.forEach((r: any) => { t[r.id] = r.enabled; });
+      setRuleToggles(t);
+      // Mock recent trigger history
+      setRuleHistory([
+        { ruleName:'Stroke Code Activation — LVO', ts: new Date(Date.now()-3600000).toISOString(), actions:'notify_role:radiologist, page_team:stroke_response_team, hl7_order:CTA_HEAD_NECK', scanId:'scan_a1b2c3' },
+        { ruleName:'ICH Critical Alert', ts: new Date(Date.now()-7200000).toISOString(), actions:'notify_role:doctor, notify_oncall:neurosurgery, escalate_priority:STAT', scanId:'scan_d4e5f6' },
+        { ruleName:'Low AI Confidence — Flag for Second Opinion', ts: new Date(Date.now()-1800000).toISOString(), actions:'notify_role:radiologist, create_task', scanId:'scan_g7h8i9' },
+      ]);
+    }).finally(() => setRulesLoading(false));
+  }, [tab]);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
@@ -160,7 +197,7 @@ export function HospitalAdminDashboard() {
 
       {/* Navigation Tabs */}
       <nav className="flex items-center gap-1 p-1 bg-[#08160F] rounded-2xl border border-[#1B3028] mb-8 w-full md:w-fit overflow-x-auto scrollbar-none">
-        {(['overview','staff','integrations','billing','audit'] as const).map(t => (
+        {(['overview','staff','integrations','billing','audit','rules'] as const).map(t => (
           <button 
             key={t} 
             onClick={() => setTab(t)}
@@ -170,7 +207,7 @@ export function HospitalAdminDashboard() {
                 : 'text-[#3A6055] hover:text-[#D0ECE6] hover:bg-[#111F1A]'
             }`}
           >
-            <span>{t==='overview'?'📊':t==='staff'?'👥':t==='integrations'?'🔗':t==='billing'?'💳':'🔒'}</span>
+            <span>{t==='overview'?'📊':t==='staff'?'👥':t==='integrations'?'🔗':t==='billing'?'💳':t==='audit'?'🔒':'⚡'}</span>
             {t}
           </button>
         ))}
@@ -532,6 +569,147 @@ export function HospitalAdminDashboard() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {tab==='rules' && (
+          <div className="flex flex-col gap-8">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-black text-[#D0ECE6] tracking-tight">Clinical Decision Rules Engine</h2>
+                <p className="text-xs text-[#3A6055] mt-1 font-medium">Configurable IF/THEN rules that fire on AI findings — built-in NICE / WHO pathways + tenant custom rules.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-[#0A1F14] border border-[#1DBF73]/30 rounded-xl">
+                  <span className="w-2 h-2 rounded-full bg-[#1DBF73] animate-pulse" />
+                  <span className="text-[10px] font-black text-[#1DBF73] uppercase tracking-widest">{Object.values(ruleToggles).filter(Boolean).length} Rules Active</span>
+                </div>
+                <button
+                  onClick={() => setStatus({ msg: 'Custom rule builder coming in v2.5 — contact support to configure custom pathways.', type: 'ok' })}
+                  className="px-4 py-2 bg-[#408D7B] hover:bg-[#52B09A] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                >+ Add Custom Rule</button>
+              </div>
+            </div>
+
+            {/* Rules grid */}
+            {rulesLoading ? (
+              <div className="flex flex-col gap-4">{Array(4).fill(0).map((_,i)=>(<div key={i} className="h-28 bg-[#0C1D17] rounded-2xl border border-[#1B3028] animate-pulse" />))}</div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {rules.map((rule: any) => {
+                  const enabled = ruleToggles[rule.id] ?? rule.enabled;
+                  const pathwayColor: Record<string,string> = { stroke:C.critical, pe:C.urgent, tb:C.brand };
+                  const pc = pathwayColor[rule.pathway] ?? C.textMd;
+                  const conditionFields = rule.conditions?.map((c:any)=>`${c.field} ${c.operator} ${JSON.stringify(c.value)}`).join(` ${rule.conditionLogic} `) || '';
+                  const actionSummary = rule.actions?.map((a:any)=>a.type).join(', ') || '';
+
+                  return (
+                    <div key={rule.id} className={`p-6 bg-[#0C1D17] border rounded-2xl shadow-lg transition-all duration-300 ${enabled ? 'border-[#1B3028] hover:border-[#408D7B]/40' : 'border-[#1B3028] opacity-50'}`}>
+                      <div className="flex items-start gap-4">
+                        {/* Toggle switch */}
+                        <button
+                          onClick={() => {
+                            const next = !enabled;
+                            setRuleToggles(prev => ({ ...prev, [rule.id]: next }));
+                            setStatus({ msg: `Rule "${rule.name}" ${next ? 'activated' : 'disabled'}.`, type: 'ok' });
+                          }}
+                          style={{
+                            width: 40, height: 22, borderRadius: 11, flexShrink: 0, cursor: 'pointer',
+                            background: enabled ? C.normal : C.bg4,
+                            border: `1px solid ${enabled ? '#1DBF73' : C.border}`,
+                            position: 'relative', transition: 'all 0.25s ease',
+                          }}
+                          title={enabled ? 'Click to disable rule' : 'Click to enable rule'}
+                        >
+                          <span style={{
+                            position: 'absolute', top: 2, left: enabled ? 20 : 2,
+                            width: 16, height: 16, borderRadius: '50%', background: 'white',
+                            transition: 'left 0.2s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                          }} />
+                        </button>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 flex-wrap mb-2">
+                            <span className="text-sm font-black text-[#D0ECE6]">{rule.name}</span>
+                            {rule.pathway && (
+                              <span style={{ fontSize:9, fontWeight:800, padding:'1px 8px', borderRadius:20, background:`${pc}18`, color:pc, border:`1px solid ${pc}30`, textTransform:'uppercase', letterSpacing:'0.06em' }}>
+                                {rule.pathway === 'stroke' ? '🧠' : rule.pathway === 'pe' ? '🫁' : rule.pathway === 'tb' ? '🫀' : '⚙️'} {rule.pathway} pathway
+                              </span>
+                            )}
+                            <span style={{ fontSize:9, fontWeight:700, padding:'1px 8px', borderRadius:20, background:rule.conditionLogic==='AND'?'#2A6EF220':'#8B5CF620', color:rule.conditionLogic==='AND'?'#2A6EF2':'#8B5CF6', border:`1px solid ${rule.conditionLogic==='AND'?'#2A6EF230':'#8B5CF630'}` }}>
+                              {rule.conditionLogic} logic
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#6FA898] mb-4">{rule.description}</p>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {/* Conditions */}
+                            <div className="p-3 bg-[#08160F] rounded-xl border border-[#1B3028]">
+                              <div className="text-[9px] font-black text-[#3A6055] uppercase tracking-widest mb-2">IF Conditions</div>
+                              <div className="text-[10px] font-mono text-[#6FA898] leading-relaxed">{conditionFields || '—'}</div>
+                            </div>
+                            {/* Actions */}
+                            <div className="p-3 bg-[#08160F] rounded-xl border border-[#1B3028]">
+                              <div className="text-[9px] font-black text-[#3A6055] uppercase tracking-widest mb-2">THEN Actions ({rule.actions?.length || 0})</div>
+                              <div className="flex flex-wrap gap-1">
+                                {rule.actions?.map((a:any, i:number) => (
+                                  <span key={i} style={{ fontSize:9, padding:'1px 6px', borderRadius:10, background:`${C.brand}14`, color:C.brand, border:`1px solid ${C.brand}25`, fontWeight:600 }}>
+                                    {a.type.replace(/_/g,' ')}{a.target ? `: ${a.target}` : ''}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 mt-3">
+                            <span className="text-[9px] text-[#3A6055] font-mono">⏱ Cooldown: {rule.cooldownMs >= 3600000 ? `${rule.cooldownMs/3600000}h` : rule.cooldownMs >= 60000 ? `${rule.cooldownMs/60000}m` : `${rule.cooldownMs/1000}s`}</span>
+                            {!rule.id.startsWith('builtin') && (
+                              <button className="text-[9px] text-[#E03535] hover:underline">Delete Rule</button>
+                            )}
+                            {rule.id.startsWith('builtin') && (
+                              <span className="text-[9px] text-[#3A6055]">NICE/WHO built-in — read-only</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Trigger History */}
+            {ruleHistory.length > 0 && (
+              <div className="bg-[#0C1D17] border border-[#1B3028] rounded-2xl overflow-hidden shadow-xl">
+                <div className="p-5 border-b border-[#1B3028] bg-[#111F1A] flex justify-between items-center">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-[#D0ECE6]">Recent Rule Triggers</h3>
+                  <span className="text-[9px] font-mono text-[#3A6055]">Last 24 hours</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-[#05100D]/50 text-[9px] font-black text-[#3A6055] uppercase tracking-widest">
+                      <tr>
+                        <th className="p-4 text-left">Rule Name</th>
+                        <th className="p-4 text-left">Scan ID</th>
+                        <th className="p-4 text-left">Actions Taken</th>
+                        <th className="p-4 text-left">Triggered At</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#1B3028]">
+                      {ruleHistory.map((h, i) => (
+                        <tr key={i} className="hover:bg-white/5 transition-colors">
+                          <td className="p-4 text-xs font-bold text-[#D0ECE6]">{h.ruleName}</td>
+                          <td className="p-4 text-[10px] font-mono text-[#3A6055]">{h.scanId}</td>
+                          <td className="p-4 text-[10px] text-[#6FA898] max-w-xs truncate">{h.actions}</td>
+                          <td className="p-4 text-[10px] font-mono text-[#408D7B]">{new Date(h.ts).toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

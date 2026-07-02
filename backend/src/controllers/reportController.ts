@@ -37,6 +37,28 @@ export async function generateReport(req: Request, res: Response, next: NextFunc
   } catch (err) { next(err); }
 }
 
+// POST /api/v1/reports/feedback/:scanId — ACI Feedback Loop
+export async function logFeedback(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { tenantId, id: userId } = req.user!;
+    const { scanId } = req.params;
+    const { originalText, correctedText, source } = req.body;
+
+    const feedback = await prisma.aCIFeedback.create({
+      data: {
+        scanId,
+        userId,
+        tenantId,
+        originalText,
+        correctedText,
+        source
+      }
+    });
+
+    res.json({ message: 'Feedback logged for ACI refinement', feedbackId: feedback.id });
+  } catch (err) { next(err); }
+}
+
 // PATCH /api/v1/reports/:id
 export async function updateReport(req: Request, res: Response, next: NextFunction) {
   try {

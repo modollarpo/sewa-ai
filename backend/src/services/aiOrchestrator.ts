@@ -28,6 +28,8 @@ import * as longitudinalService from './longitudinalService';
 import { dlq } from './dlqService';
 import { createAxiosInstance } from '../utils/axiosInstance';
 import { buildVLMSystemPrompt, translateUrgency, type SupportedLanguage } from './vlmLanguageService';
+import { clinicalRulesEngine } from './roadmap/clinicalRulesEngine';
+import { strokeCodeService, type StrokeCodeType } from './roadmap/strokeCodeService';
 
 const axios = createAxiosInstance();
 

@@ -75,7 +75,7 @@ function GlobeMap({ data }: { data: { region: string, count: number }[] }) {
 
 export function SuperAdminDashboard() {
   const { stats, tenants, regionalStats, health, audit, telemetry, loading, error } = useSuperAdminData();
-  const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'diagnostics'|'federated'|'billing'>('overview');
+  const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'diagnostics'|'federated'|'billing'|'edge'>('overview');
   const [tenantSearch, setTenantSearch] = useState('');
   const [showProvision, setShowProvision] = useState(false);
   const [logLimit, setLogLimit] = useState(50);
@@ -86,6 +86,11 @@ export function SuperAdminDashboard() {
   const [dlqDepth, setDlqDepth]           = useState<number|null>(null);
   const [failedScans, setFailedScans]     = useState<any[]>([]);
   const [diagLoading, setDiagLoading]     = useState(false);
+  const [fedNodes, setFedNodes]           = useState<any[]>([]);
+  const [fedRounds, setFedRounds]         = useState<any[]>([]);
+  const [fedLoading, setFedLoading]       = useState(false);
+  const [edgeDevices, setEdgeDevices]     = useState<any[]>([]);
+  const [edgeLoading, setEdgeLoading]     = useState(false);
 
   useEffect(() => {
     setAiModelsLoading(true);
@@ -108,6 +113,37 @@ export function SuperAdminDashboard() {
     }).finally(() => setDiagLoading(false));
   }, [tab]);
 
+  useEffect(() => {
+    if (tab !== 'federated') return;
+    const fetchFed = () => {
+      setFedLoading(true);
+      Promise.all([
+        apiClient.get('/ai/federated/nodes').catch(() => ({ data: [] })),
+        apiClient.get('/ai/federated/rounds').catch(() => ({ data: [] })),
+      ]).then(([nodesRes, roundsRes]) => {
+        setFedNodes(nodesRes.data || []);
+        setFedRounds(roundsRes.data || []);
+      }).finally(() => setFedLoading(false));
+    };
+    fetchFed();
+    // Poll every 5s while on tab
+    const interval = setInterval(fetchFed, 5000);
+    return () => clearInterval(interval);
+  }, [tab]);
+
+  useEffect(() => {
+    if (tab !== 'edge') return;
+    const fetchEdge = () => {
+      setEdgeLoading(true);
+      apiClient.get('/ai/edge/devices').then(res => {
+        setEdgeDevices(res.data || []);
+      }).catch(() => setEdgeDevices([])).finally(() => setEdgeLoading(false));
+    };
+    fetchEdge();
+    const interval = setInterval(fetchEdge, 5000);
+    return () => clearInterval(interval);
+  }, [tab]);
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -123,7 +159,7 @@ export function SuperAdminDashboard() {
     display:'flex',alignItems:'center',gap:5,
   });
 
-  const filteredTenants = useMemo(() => tenants.filter(t=>!tenantSearch||(t.name||'').toLowerCase().includes(tenantSearch.toLowerCase())||(t.region||'').includes(tenantSearch)), [tenants, tenantSearch]);
+  const filteredTenants = useMemo(() => tenants.filter((t:any)=>!tenantSearch||(t.name||'').toLowerCase().includes(tenantSearch.toLowerCase())||(t.region||'').includes(tenantSearch)), [tenants, tenantSearch]);
 
   const [adminStatus, setAdminStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
   const [showTrainingConfirm, setShowTrainingConfirm] = useState(false);
@@ -160,15 +196,15 @@ export function SuperAdminDashboard() {
           <p style={{margin:'4px 0 0',fontSize:12,color:C.textMd}}>Global infrastructure management</p>
         </div>
         <div style={{display:'flex',gap:8}}>
-          <button onClick={() => setShowProvision(true)} style={{flex: isMobile ? 1 : 'none', padding:'8px 20px',borderRadius:10,background:C.brand,color:'white',border:'none',fontSize:11,fontWeight:700,cursor:'pointer', textTransform: 'uppercase', tracking: '0.05em'}}>+ Provision Tenant</button>
+          <button onClick={() => setShowProvision(true)} style={{flex: isMobile ? 1 : 'none', padding:'8px 20px',borderRadius:10,background:C.brand,color:'white',border:'none',fontSize:11,fontWeight:700,cursor:'pointer', textTransform: 'uppercase', letterSpacing: '0.05em'}}>+ Provision Tenant</button>
         </div>
       </div>
 
       <div style={{borderBottom:`1px solid ${C.border}`, display:'flex', gap:2, marginBottom:24, overflowX:'auto', scrollbarWidth: 'none'}}>
-        {(['overview','tenants','aimodels','deployments','diagnostics','federated','billing'] as const).map(t=>(
+        {(['overview','tenants','aimodels','deployments','diagnostics','federated','edge','billing'] as const).map(t=>(
           <button key={t} style={tabStyle(t)} onClick={()=>setTab(t)}>
-            {t==='overview'&&'🌐 '}{t==='tenants'&&'🏥 '}{t==='aimodels'&&'🤖 '}{t==='deployments'&&'⚡ '}{t==='diagnostics'&&'🔧 '}{t==='federated'&&'🤝 '}{t==='billing'&&'💰 '}
-            {t.charAt(0).toUpperCase() + t.slice(1)}
+            {t==='overview'&&'🌐 '}{t==='tenants'&&'🏥 '}{t==='aimodels'&&'🤖 '}{t==='deployments'&&'⚡ '}{t==='diagnostics'&&'🔧 '}{t==='federated'&&'🤝 '}{t==='edge'&&'📡 '}{t==='billing'&&'💰 '}
+            {t==='edge' ? 'Edge AI' : t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
         ))}
       </div>
@@ -221,7 +257,7 @@ export function SuperAdminDashboard() {
                   <tr><td colSpan={5} style={{padding:32,textAlign:'center',color:C.textLo,fontSize:12}}>
                     {tenantSearch ? `No tenants matching "${tenantSearch}"` : 'No tenants provisioned yet.'}
                   </td></tr>
-                ) : filteredTenants.map((t,i)=>(
+                ) : filteredTenants.map((t:any, i:number)=>(
                   <tr key={i} style={{borderTop:`1px solid ${C.border}`}}>
                     <td style={{padding:'12px 12px',fontSize:12,color:C.textHi}}>{t.name}</td>
                     <td style={{padding:'12px 12px',fontSize:10,color:C.textMd}}>{t.region}</td>
@@ -397,10 +433,61 @@ export function SuperAdminDashboard() {
 
       {tab==='federated' && (
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
-           <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
-              <div style={{fontSize:16,fontWeight:700,color:C.textHi}}>Federated Learning</div>
-              <p style={{fontSize:12,color:C.textMd}}>Aggregating weights from {tenants.length} nodes.</p>
-              <button onClick={()=>setShowTrainingConfirm(true)} style={{padding:'8px 16px',background:C.info,color:'white',border:'none',borderRadius:8,cursor:'pointer'}}>Start Training Round</button>
+           <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+              <div>
+                <div style={{fontSize:16,fontWeight:700,color:C.textHi}}>Federated Learning Global Orchestrator</div>
+                <p style={{fontSize:12,color:C.textMd,margin:'4px 0 0'}}>Aggregating neural weights from {fedNodes.length} opted-in clinical nodes.</p>
+              </div>
+              <button onClick={()=>setShowTrainingConfirm(true)} style={{padding:'8px 16px',background:C.info,color:'white',border:'none',borderRadius:8,cursor:'pointer', fontWeight:600, fontSize:12}}>Start Training Round</button>
+           </div>
+           
+           <div style={{display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:16}}>
+             <div style={{background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,overflow:'hidden'}}>
+               <div style={{padding:'12px 16px',borderBottom:`1px solid ${C.border}`,fontSize:13,fontWeight:700,color:C.textHi}}>Active Federated Nodes</div>
+               <table style={{width:'100%',borderCollapse:'collapse'}}>
+                 <thead>
+                   <tr style={{background:C.bg3}}>
+                     <th style={{padding:'10px 16px',textAlign:'left',fontSize:10,color:C.textLo,fontWeight:600}}>HOSPITAL</th>
+                     <th style={{padding:'10px 16px',textAlign:'left',fontSize:10,color:C.textLo,fontWeight:600}}>REGION</th>
+                     <th style={{padding:'10px 16px',textAlign:'right',fontSize:10,color:C.textLo,fontWeight:600}}>SCANS TRAINED</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {fedNodes.length === 0 ? <tr><td colSpan={3} style={{padding:20,textAlign:'center',color:C.textLo,fontSize:12}}>No active nodes</td></tr> : fedNodes.map(n => (
+                     <tr key={n.id} style={{borderTop:`1px solid ${C.border}`}}>
+                       <td style={{padding:'12px 16px',fontSize:12,color:C.textHi}}>{n.tenant?.name || n.tenantId}</td>
+                       <td style={{padding:'12px 16px',fontSize:12,color:C.textMd}}>{n.tenant?.region}</td>
+                       <td style={{padding:'12px 16px',fontSize:12,color:C.brand,textAlign:'right',fontFamily:C.FM}}>{n.totalScansContributed.toLocaleString()}</td>
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+             </div>
+             <div style={{background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,overflow:'hidden'}}>
+               <div style={{padding:'12px 16px',borderBottom:`1px solid ${C.border}`,fontSize:13,fontWeight:700,color:C.textHi}}>Global Training Rounds</div>
+               <table style={{width:'100%',borderCollapse:'collapse'}}>
+                 <thead>
+                   <tr style={{background:C.bg3}}>
+                     <th style={{padding:'10px 16px',textAlign:'left',fontSize:10,color:C.textLo,fontWeight:600}}>ROUND</th>
+                     <th style={{padding:'10px 16px',textAlign:'left',fontSize:10,color:C.textLo,fontWeight:600}}>STATUS</th>
+                     <th style={{padding:'10px 16px',textAlign:'right',fontSize:10,color:C.textLo,fontWeight:600}}>ACCURACY</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {fedRounds.length === 0 ? <tr><td colSpan={3} style={{padding:20,textAlign:'center',color:C.textLo,fontSize:12}}>No completed rounds</td></tr> : fedRounds.map(r => (
+                     <tr key={r.id} style={{borderTop:`1px solid ${C.border}`}}>
+                       <td style={{padding:'12px 16px',fontSize:12,color:C.textHi,fontWeight:600}}>#{r.roundNumber}</td>
+                       <td style={{padding:'12px 16px',fontSize:11}}>
+                         {r.status === 'in_progress' ? <span style={{color:C.urgent}}>⏳ Aggregating...</span> : <span style={{color:C.normal}}>✓ Completed</span>}
+                       </td>
+                       <td style={{padding:'12px 16px',fontSize:12,color:r.accuracy?C.normal:C.textLo,textAlign:'right',fontFamily:C.FM}}>
+                         {r.accuracy ? `${(r.accuracy * 100).toFixed(1)}%` : '--'}
+                       </td>
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+             </div>
            </div>
         </div>
       )}
@@ -419,11 +506,56 @@ export function SuperAdminDashboard() {
                   await apiClient.post('/ai/federated/train');
                   setAdminStatus({ msg: 'Federated training round initiated.', type:'ok' });
                 } catch(e: any) {
-                  setAdminStatus({ msg: `Training trigger failed: ${e.message}`, type:'err' });
+                  setAdminStatus({ msg: `Training trigger failed: ${e.response?.data?.error || e.message}`, type:'err' });
                 }
               }} style={{flex:1,padding:12,background:C.info,color:'white',border:'none',borderRadius:10,fontWeight:700,cursor:'pointer'}}>Initiate Round</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {tab==='edge' && (
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+           <div style={{padding:20,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+              <div>
+                <div style={{fontSize:16,fontWeight:700,color:C.textHi}}>Edge AI Fleet Management</div>
+                <p style={{fontSize:12,color:C.textMd,margin:'4px 0 0'}}>Monitoring {edgeDevices.length} remote devices operating in zero-connectivity environments.</p>
+              </div>
+           </div>
+           
+           <div style={{background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`,overflow:'hidden'}}>
+             <div style={{padding:'12px 16px',borderBottom:`1px solid ${C.border}`,fontSize:13,fontWeight:700,color:C.textHi}}>Field Units</div>
+             <div style={{overflowX:'auto'}}>
+               <table style={{width:'100%',borderCollapse:'collapse', minWidth: 600}}>
+                 <thead>
+                   <tr style={{background:C.bg3}}>
+                     <th style={{padding:'10px 16px',textAlign:'left',fontSize:10,color:C.textLo,fontWeight:600}}>DEVICE ID</th>
+                     <th style={{padding:'10px 16px',textAlign:'left',fontSize:10,color:C.textLo,fontWeight:600}}>HOSPITAL / REGION</th>
+                     <th style={{padding:'10px 16px',textAlign:'left',fontSize:10,color:C.textLo,fontWeight:600}}>STATUS</th>
+                     <th style={{padding:'10px 16px',textAlign:'right',fontSize:10,color:C.textLo,fontWeight:600}}>OFFLINE STORAGE USED</th>
+                     <th style={{padding:'10px 16px',textAlign:'right',fontSize:10,color:C.textLo,fontWeight:600}}>TOTAL SCANS SYNCED</th>
+                     <th style={{padding:'10px 16px',textAlign:'right',fontSize:10,color:C.textLo,fontWeight:600}}>LAST HEARTBEAT</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {edgeDevices.length === 0 ? <tr><td colSpan={6} style={{padding:20,textAlign:'center',color:C.textLo,fontSize:12}}>No Edge Devices registered</td></tr> : edgeDevices.map(d => (
+                     <tr key={d.id} style={{borderTop:`1px solid ${C.border}`}}>
+                       <td style={{padding:'12px 16px',fontSize:12,color:C.textHi,fontWeight:600}}>{d.deviceId.substring(0,8)}</td>
+                       <td style={{padding:'12px 16px',fontSize:12,color:C.textHi}}>{d.tenant?.name || d.tenantId} <span style={{color:C.textLo}}>({d.region || 'Unknown'})</span></td>
+                       <td style={{padding:'12px 16px',fontSize:11}}>
+                         {d.status === 'online' && <span style={{color:C.normal}}>🟢 Online</span>}
+                         {d.status === 'offline' && <span style={{color:C.textLo}}>⚫ Offline</span>}
+                         {d.status === 'syncing' && <span style={{color:C.urgent}}>⏳ Syncing...</span>}
+                       </td>
+                       <td style={{padding:'12px 16px',fontSize:12,color:C.textMd,textAlign:'right',fontFamily:C.FM}}>{d.storageUsedMB} MB</td>
+                       <td style={{padding:'12px 16px',fontSize:12,color:C.brand,textAlign:'right',fontFamily:C.FM}}>{d.totalSyncedScans.toLocaleString()}</td>
+                       <td style={{padding:'12px 16px',fontSize:11,color:C.textLo,textAlign:'right',fontFamily:C.FM}}>{new Date(d.lastHeartbeat).toLocaleString('en-GB')}</td>
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+             </div>
+           </div>
         </div>
       )}
 

@@ -8,6 +8,7 @@ r.get('/',                ctrl.listReports);
 r.get('/:id',             ctrl.getReport);
 r.get('/:id/download',    ctrl.downloadReport);
 r.post('/generate/:scanId', ctrl.generateReport);
+r.post('/feedback/:scanId', ctrl.logFeedback);
 r.patch('/:id',           ctrl.updateReport);
 r.post('/:id/sign',       authorize('radiologist','admin','superadmin'), ctrl.signReport);
 export default r;

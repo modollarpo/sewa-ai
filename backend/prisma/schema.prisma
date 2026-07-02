@@ -77,6 +77,8 @@ model Tenant {
   modelPerformanceMetrics ModelPerformanceMetric[]
   aiDriftEvents           AIDriftEvent[]
   customerFeedbacks       CustomerFeedback[]
+  federatedNodes          FederatedNode[]
+  edgeDevices             EdgeDevice[]
 
   @@index([region])
   @@index([status])
@@ -193,6 +195,7 @@ model Scan {
   status          String  @default("pending") // pending | processing | ai_complete | reported | approved | rejected | failed
   errorMessage    String? // populated when status = 'failed' — DICOM corrupt, AI service down, etc.
   accessionNumber String? @unique // Hospital-provided identifier for the scan
+  origin          String  @default("cloud") // cloud | edge
 
   // DICOM
   dicomInstanceUid String?
@@ -359,6 +362,23 @@ model Report {
   @@index([tenantId])
   @@index([status])
   @@index([authorId])
+}
+
+// ── ACI FEEDBACK (Ambient Clinical Intelligence loop) ────────
+model ACIFeedback {
+  id            String   @id @default(uuid())
+  scanId        String
+  userId        String
+  tenantId      String
+  
+  originalText  String   @db.Text
+  correctedText String   @db.Text
+  source        String   // e.g. VOICE_DICTATION, VLM_PREFILL
+  
+  createdAt     DateTime @default(now())
+
+  @@index([scanId])
+  @@index([tenantId])
 }
 
 // ── REPORT TEMPLATES (Feature 11) ─────────────────────────────
@@ -817,4 +837,84 @@ model CustomerFeedback {
   @@index([feedbackType])
   @@index([status])
   @@index([createdAt])
+}
+
+// ── FEDERATED LEARNING ───────────────────────────────────────────────
+model FederatedNode {
+  id                    String   @id @default(uuid())
+  tenantId              String
+  tenant                Tenant   @relation(fields: [tenantId], references: [id])
+  status                String   @default("active") // active | offline | syncing
+  totalScansContributed Int      @default(0)
+  computeCapacity       String   @default("medium") // low | medium | high
+  lastSyncAt            DateTime @default(now())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model FederatedRound {
+  id                 String   @id @default(uuid())
+  roundNumber        Int      @unique
+  status             String   @default("in_progress") // pending | in_progress | completed | failed
+  participatingNodes Int      @default(0)
+  totalDataVolume    Int      @default(0) // total scans used in this round
+  epochLoss          Float?
+  accuracy           Float?
+  aggregatedAt       DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([status])
+}
+
+// ── EDGE AI (OFFLINE SYNC) ─────────────────────────────────────────
+model EdgeDevice {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  deviceId        String   @unique // Hardware serial or MAC
+  deviceName      String   @default("Mobile Clinic Tablet")
+  status          String   @default("offline") // online | offline | syncing
+  lastHeartbeat   DateTime @default(now())
+  storageUsedMB   Int      @default(0)
+  totalSyncedScans Int     @default(0)
+  region          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  syncLogs        EdgeSyncLog[]
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model EdgeSyncLog {
+  id               String      @id @default(uuid())
+  edgeDeviceId     String
+  edgeDevice       EdgeDevice  @relation(fields: [edgeDeviceId], references: [id])
+  scansUploaded    Int         @default(0)
+  bytesTransferred Int         @default(0)
+  syncDurationSec  Int         @default(0)
+  status           String      @default("success") // success | failed | partial
+  createdAt        DateTime    @default(now())
+
+  @@index([edgeDeviceId])
+}
+
+// ── POPULATION HEALTH & EPIDEMIOLOGY ────────────────────────────────
+model EpidemiologyEvent {
+  id              String   @id @default(uuid())
+  disease         String   // e.g., Tuberculosis, Pneumonia, ICH, Stroke
+  region          String   // e.g., UK, NG, KE
+  subRegion       String?  // e.g., Lagos, Nairobi, London
+  severity        String   // High, Medium, Low
+  confidenceScore Float    // AI confidence
+  scanOrigin      String   @default("cloud") // edge vs cloud
+  detectedAt      DateTime @default(now())
+
+  @@index([disease, region])
+  @@index([detectedAt])
 }

@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # openslide-tools libopenslide-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY pathology/requirements.txt .
 RUN pip install --prefix=/install -r requirements.txt
 
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────
@@ -45,8 +45,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Copy source code
-COPY . .
+# Copy pathology service source
+COPY pathology/ .
+
+# Copy shared CPU inference engine (required by main.py)
+COPY shared/ ./shared/
 
 # Model cache directory (populated via AKS PVC ReadOnlyMany in production)
 RUN mkdir -p /models && chmod 777 /models

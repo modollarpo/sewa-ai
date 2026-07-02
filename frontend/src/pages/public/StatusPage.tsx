@@ -36,8 +36,20 @@ export function StatusPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
     await Promise.allSettled(
       SERVICES.map(async svc => {
         try {
-          const r = await fetch(svc.url, { method:'GET', signal: AbortSignal.timeout(5000) });
-          results[svc.name] = r.ok ? 'operational' : 'degraded';
+          const r = await fetch(svc.url, { method:'GET', signal: AbortSignal.timeout(6000) });
+          if (r.ok) {
+            try {
+              const data = await r.json();
+              // Use the status field from the JSON body if available
+              const svcStatus: string = data?.status ?? 'operational';
+              results[svc.name] = (svcStatus === 'operational' || svcStatus === 'healthy') ? 'operational'
+                : svcStatus === 'degraded' ? 'degraded' : 'down';
+            } catch {
+              results[svc.name] = 'operational';
+            }
+          } else {
+            results[svc.name] = 'degraded';
+          }
         } catch {
           results[svc.name] = 'down';
         }

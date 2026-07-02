@@ -290,7 +290,7 @@ export function ComplianceDashboard() {
         </div>
 
         {frameworks.map(f => {
-          const cfg = STATUS_CFG[f.status];
+          const cfg = STATUS_CFG[f.status as keyof typeof STATUS_CFG];
           return (
             <button key={f.id} onClick={() => { setSelected(f.id); if (isMobile) setMobileMenuOpen(false); }} style={{
               width:'100%', display:'flex', alignItems:'center', gap:10, padding:'10px 10px',
@@ -494,7 +494,7 @@ export function ComplianceDashboard() {
             <div>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
                 <div style={{ fontSize:12, color:C.textMd }}>
-                  {fw.evidence.filter(e=>e.status==='verified').length} verified · {fw.evidence.filter(e=>e.status==='pending').length} pending · {fw.evidence.filter(e=>e.status==='expired').length} expired
+                  {fw.evidence.filter((e:any)=>e.status==='verified').length} verified · {fw.evidence.filter((e:any)=>e.status==='pending').length} pending · {fw.evidence.filter((e:any)=>e.status==='expired').length} expired
                 </div>
                 {/* G4: Upload Evidence button with real file picker */}
                 <input ref={evidenceInputRef} type="file" style={{display:'none'}} accept=".pdf,.doc,.docx,.xlsx,.png,.jpg"
@@ -528,7 +528,7 @@ export function ComplianceDashboard() {
                     <div key={h} style={{ fontSize:9, fontWeight:600, color:C.textLo, letterSpacing:'0.06em', textTransform:'uppercase', fontFamily:C.F }}>{h}</div>
                   ))}
                 </div>
-                {fw.evidence.map(item => <EvidenceRow key={item.id} item={item}/>)}
+                {fw.evidence.map((item:any) => <EvidenceRow key={item.id} item={item}/>)}
               </div>
             </div>
           )}

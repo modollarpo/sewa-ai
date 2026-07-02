@@ -9,9 +9,9 @@ import { useScanStore }              from './store/scanStore';
 import { useNotificationStore }      from './store/notificationStore';
 import { useTranslation }            from './i18n/I18nContext';
 import { TranslationKey }            from './i18n/translations';
-import { 
+import {
   ChevronLeft, ChevronRight, LayoutDashboard, Brain, Map, 
-  Lock, CreditCard, Activity, Rocket, Calendar 
+  Lock, CreditCard, Activity, Rocket, Calendar, Settings2, Network
 } from 'lucide-react';
 
 // Clinical pages
@@ -22,6 +22,7 @@ import { ResetPasswordPage }         from './pages/auth/ResetPasswordPage';
 import { VerifyEmailPage }           from './pages/auth/VerifyEmailPage';
 import { RadiologistWorkspace }      from './pages/radiologist/RadiologistWorkspace';
 import { TrainingSimulator }         from './pages/radiologist/TrainingSimulator';
+import { PeerReviewWorkspace }       from './pages/radiologist/PeerReviewWorkspace';
 import { DoctorDashboard }           from './pages/doctor/DoctorDashboard';
 import { PatientPortal }             from './pages/patient/PatientPortal';
 import { TechnicianWorkspace }       from './pages/technician/TechnicianWorkspace';
@@ -35,8 +36,12 @@ import { OnboardingWizard }          from './pages/onboarding/OnboardingWizard';
 import { SpecialistOnboarding }     from './pages/onboarding/SpecialistOnboarding';
 import { RoadmapPage }               from './pages/roadmap/RoadmapPage';
 import { AppointmentsPage }          from './pages/appointments/AppointmentsPage';
+import { ReferralNetwork }           from './pages/referral/ReferralNetwork';
 import { ProfileSettings }         from './pages/settings/ProfileSettings';
 import { SupportTicketsPage }   from './pages/user/SupportTicketsPage';
+import { PatientProfile }            from './pages/patient/PatientProfile';
+import { ClinicalRulesDashboard }    from './pages/admin/ClinicalRulesDashboard';
+import { RoadmapOrchestrator }       from './pages/admin/RoadmapOrchestrator';
 
 // Public pages
 import { LandingPage }               from './pages/public/LandingPage';
@@ -93,11 +98,14 @@ const ADMIN_NAV = [
   { id:'overview',          labelKey:'overview' as TranslationKey,           icon:<LayoutDashboard size={16}/> },
   { id:'ai-performance',    labelKey:'aiPerformance' as TranslationKey,      icon:<Brain size={16}/> },
   { id:'population-health', labelKey:'populationHealth' as TranslationKey,   icon:<Map size={16}/> },
-  { id:'appointments',      labelKey:'appointments' as TranslationKey,    icon:<Calendar size={16}/> },
+  { id:'clinical-rules',    labelKey:'clinicalRules' as TranslationKey,      icon:<Settings2 size={16}/> },
+  { id:'referrals',         labelKey:'referrals' as TranslationKey,          icon:<Activity size={16}/> },
+  { id:'appointments',      labelKey:'appointments' as TranslationKey,       icon:<Calendar size={16}/> },
   { id:'compliance',        labelKey:'compliance' as TranslationKey,         icon:<Lock size={16}/> },
   { id:'billing',           labelKey:'billing' as TranslationKey,            icon:<CreditCard size={16}/> },
   { id:'onboarding',        labelKey:'onboarding' as TranslationKey,         icon:<Rocket size={16}/> },
   { id:'roadmap',           labelKey:'roadmap' as TranslationKey,            icon:<Map size={16}/> },
+  { id:'advanced-orchestrator', labelKey:'advancedOrchestration' as TranslationKey, icon:<Network size={16}/> },
 ] as const;
 
 const SUPER_NAV = [
@@ -108,8 +116,14 @@ const SUPER_NAV = [
   { id:'roadmap',        labelKey:'roadmap' as TranslationKey,        icon:<Map size={16}/> },
 ] as const;
 
-type AdminPage = typeof ADMIN_NAV[number]['id'];
-type SuperPage = typeof SUPER_NAV[number]['id'];
+const RADIOLOGIST_NAV = [
+  { id:'workspace',   labelKey:'worklist' as TranslationKey,   icon:<LayoutDashboard size={16}/> },
+  { id:'peer-review', labelKey:'peerReview' as TranslationKey, icon:<Activity size={16}/> },
+] as const;
+
+type AdminPage      = typeof ADMIN_NAV[number]['id'];
+type SuperPage      = typeof SUPER_NAV[number]['id'];
+type RadiologistPage = typeof RADIOLOGIST_NAV[number]['id'];
 
 // ── AI service status names ────────────────────────────────────
 const SERVICES = ['Triage AI','VLM','Uncertainty','Metacognition','FL','CL','FHIR R4','HL7v2','PACS','Socket.IO','Stripe','Paystack'];
@@ -275,7 +289,9 @@ export default function App() {
   const [supportPage, setSupportPage] = useState(false);
   const [adminPage,   setAdminPage]   = useState<AdminPage>('overview');
   const [superPage,   setSuperPage]   = useState<SuperPage>('platform');
+  const [radiologistPage, setRadiologistPage] = useState<RadiologistPage>('workspace');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   // Detect staff invite link: /auth/accept-invite?token=...
   const inviteToken = (() => {
@@ -467,7 +483,25 @@ export default function App() {
       );
     }
 
-    if (role === 'radiologist') return <ErrorBoundary name="Radiologist Workspace"><RadiologistWorkspace onNavigate={navigate} /></ErrorBoundary>;
+    if (selectedPatientId) {
+      return <ErrorBoundary name="Patient Profile"><PatientProfile patientId={selectedPatientId} onBack={() => setSelectedPatientId(null)} /></ErrorBoundary>;
+    }
+
+    if (role === 'radiologist') return (
+      <div style={{ display:'flex', height:'calc(100vh - 52px - 24px)', overflow:'hidden' }}>
+        <SubNav
+          items={RADIOLOGIST_NAV}
+          active={radiologistPage}
+          onChange={id => setRadiologistPage(id as RadiologistPage)}
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+        <div style={{ flex:1, overflowY:'auto' }}>
+          {radiologistPage === 'workspace'   && <ErrorBoundary name="Radiologist Workspace"><RadiologistWorkspace onNavigate={navigate} /></ErrorBoundary>}
+          {radiologistPage === 'peer-review' && <ErrorBoundary name="Peer Review Workspace"><PeerReviewWorkspace /></ErrorBoundary>}
+        </div>
+      </div>
+    );
     if (role === 'doctor')      return <ErrorBoundary name="Doctor Dashboard"><DoctorDashboard onLogout={logout} /></ErrorBoundary>;
     if (role === 'patient')     return <ErrorBoundary name="Patient Portal"><PatientPortal /></ErrorBoundary>;
     if (role === 'technician')  return <ErrorBoundary name="Technician Workspace"><TechnicianWorkspace /></ErrorBoundary>;
@@ -485,11 +519,13 @@ export default function App() {
           {adminPage === 'overview'          && <ErrorBoundary name="Hospital Admin Dashboard"><HospitalAdminDashboard /></ErrorBoundary>}
           {adminPage === 'ai-performance'    && <ErrorBoundary name="AI Performance"><AIPerformanceDashboard /></ErrorBoundary>}
           {adminPage === 'population-health' && <ErrorBoundary name="Population Health"><PopulationHealthDashboard /></ErrorBoundary>}
+          {adminPage === 'referrals'         && <ErrorBoundary name="Referral Network"><ReferralNetwork /></ErrorBoundary>}
           {adminPage === 'appointments'      && <ErrorBoundary name="Appointments"><AppointmentsPage /></ErrorBoundary>}
           {adminPage === 'compliance'        && <ErrorBoundary name="Compliance"><ComplianceDashboard /></ErrorBoundary>}
           {adminPage === 'billing'           && <ErrorBoundary name="Billing"><BillingDashboard /></ErrorBoundary>}
           {adminPage === 'onboarding'        && <ErrorBoundary name="Onboarding"><OnboardingWizard /></ErrorBoundary>}
           {adminPage === 'roadmap'           && <ErrorBoundary name="Roadmap"><RoadmapPage /></ErrorBoundary>}
+          {adminPage === 'advanced-orchestrator' && <ErrorBoundary name="Advanced Orchestration"><RoadmapOrchestrator /></ErrorBoundary>}
         </div>
       </div>
     );

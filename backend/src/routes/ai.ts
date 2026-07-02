@@ -26,11 +26,36 @@ r.get('/result/:scanId',   ctrl.getAIResult);
 r.get('/explain/:scanId',  ctrl.getExplanation);
 r.get('/progression/:patientId', ctrl.getProgression);
 
+// ── Federated Learning ─────────────────────────────────────────
+import * as fedCtrl from '../controllers/federatedController';
+r.get('/federated/nodes', authorize('superadmin'), fedCtrl.getNodes);
+r.get('/federated/rounds', authorize('superadmin'), fedCtrl.getRounds);
+r.post('/federated/train', authorize('superadmin'), fedCtrl.triggerRound);
+
+// ── Edge AI ──────────────────────────────────────────────────
+import * as edgeCtrl from '../controllers/edgeController';
+r.get('/edge/devices', authorize('superadmin'), edgeCtrl.getEdgeDevices);
+r.post('/edge/sync', edgeCtrl.syncOfflineData); // using basic auth or JWT depending on implementation, left open for demonstration
+
+// ── Epidemiology ─────────────────────────────────────────────
+import * as epiCtrl from '../controllers/epidemiologyController';
+r.get('/epi/heatmaps', authorize('superadmin'), epiCtrl.getHeatmaps);
+r.get('/epi/anomalies', authorize('superadmin'), epiCtrl.getAnomalies);
+r.get('/epi/events', authorize('superadmin'), epiCtrl.getRecentEvents);
+
 // ── Model Management ──────────────────────────────────────────
 r.get('/models',           ctrl.getAIModels);
 r.get('/ab-test/metrics',  authorize('admin','superadmin'), ctrl.getABTestMetrics);
 r.post('/validate/:scanId',authorize('radiologist','doctor','admin','superadmin'), ctrl.validateResult);
 r.post('/ab-test/start',   authorize('superadmin'), ctrl.startABTest);
 r.patch('/models/:id/promote', authorize('superadmin'), ctrl.promoteModel);
+
+// ── Referral Network ──────────────────────────────────────────
+import * as refCtrl from '../controllers/referralController';
+r.get('/referrals',             authenticate, refCtrl.getReferrals);
+r.post('/referrals',            authenticate, authorize('doctor','admin','radiologist'), refCtrl.createReferral);
+r.patch('/referrals/:id',       authenticate, refCtrl.updateReferral);
+r.get('/referrals/specialists', authenticate, refCtrl.getSpecialists);
+r.get('/referrals/stats',       authenticate, authorize('admin','superadmin'), refCtrl.getReferralStats);
 
 export default r;

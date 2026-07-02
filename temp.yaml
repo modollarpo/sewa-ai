@@ -1,0 +1,344 @@
+# SEWA XAI — AI Services Deployment
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    azure.workload.identity/client-id: "${AI_SERVICES_WORKLOAD_IDENTITY_CLIENT_ID}"
+  name: sewa-ai-sa
+  namespace: sewa-ai
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-triage
+  namespace: sewa-ai
+  labels:
+    app: sewa-triage
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-triage
+  template:
+    metadata:
+      labels:
+        app: sewa-triage
+    spec:
+      serviceAccountName: sewa-ai-sa
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: triage
+        image: "sewaaiproductionacr.azurecr.io/sewa-triage:production-latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            memory: "6Gi"
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
+        - secretRef:
+            name: sewa-secrets
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-triage
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-triage
+  ports:
+  - port: 8000
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-vlm-report
+  namespace: sewa-ai
+  labels:
+    app: sewa-vlm-report
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-vlm-report
+  template:
+    metadata:
+      labels:
+        app: sewa-vlm-report
+    spec:
+      serviceAccountName: sewa-ai-sa
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: vlm-report
+        image: "sewaaiproductionacr.azurecr.io/sewa-vlm-report:production-latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8001
+        resources:
+          limits:
+            memory: "16Gi"
+          requests:
+            memory: "8Gi"
+            cpu: "1000m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
+        - secretRef:
+            name: sewa-secrets
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-vlm-report
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-vlm-report
+  ports:
+  - port: 8001
+    targetPort: 8001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-pathology
+  namespace: sewa-ai
+  labels:
+    app: sewa-pathology
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-pathology
+  template:
+    metadata:
+      labels:
+        app: sewa-pathology
+    spec:
+      serviceAccountName: sewa-ai-sa
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: pathology
+        image: "sewaaiproductionacr.azurecr.io/sewa-pathology:production-latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8002
+        resources:
+          limits:
+            memory: "8Gi"
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
+        - secretRef:
+            name: sewa-secrets
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-pathology
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-pathology
+  ports:
+  - port: 8002
+    targetPort: 8002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-uncertainty
+  namespace: sewa-ai
+  labels:
+    app: sewa-uncertainty
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-uncertainty
+  template:
+    metadata:
+      labels:
+        app: sewa-uncertainty
+    spec:
+      serviceAccountName: sewa-ai-sa
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: uncertainty
+        image: "sewaaiproductionacr.azurecr.io/sewa-uncertainty:production-latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8002
+        resources:
+          limits:
+            memory: "8Gi"
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
+        - secretRef:
+            name: sewa-secrets
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-uncertainty
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-uncertainty
+  ports:
+  - port: 8002
+    targetPort: 8002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-federated
+  namespace: sewa-ai
+  labels:
+    app: sewa-federated
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-federated
+  template:
+    metadata:
+      labels:
+        app: sewa-federated
+    spec:
+      serviceAccountName: sewa-ai-sa
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: federated
+        image: "sewaaiproductionacr.azurecr.io/sewa-federated:production-latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8004
+        resources:
+          limits:
+            memory: "4Gi"
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
+        - secretRef:
+            name: sewa-secrets
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-federated
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-federated
+  ports:
+  - port: 8004
+    targetPort: 8004
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-continuous
+  namespace: sewa-ai
+  labels:
+    app: sewa-continuous
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-continuous
+  template:
+    metadata:
+      labels:
+        app: sewa-continuous
+    spec:
+      serviceAccountName: sewa-ai-sa
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: continuous
+        image: "sewaaiproductionacr.azurecr.io/sewa-continuous:production-latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8005
+        resources:
+          limits:
+            memory: "4Gi"
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+        envFrom:
+        - configMapRef:
+            name: sewa-config
+        - secretRef:
+            name: sewa-secrets
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8005
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sewa-continuous
+  namespace: sewa-ai
+spec:
+  selector:
+    app: sewa-continuous
+  ports:
+  - port: 8005
+    targetPort: 8005

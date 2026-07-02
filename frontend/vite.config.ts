@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // @ts-ignore
   test: {
     globals: true,
     environment: 'jsdom',

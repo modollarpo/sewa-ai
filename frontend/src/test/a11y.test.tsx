@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
-import { expect } from 'vitest';
+import { expect, test } from 'vitest';
 
 expect.extend(toHaveNoViolations);
 

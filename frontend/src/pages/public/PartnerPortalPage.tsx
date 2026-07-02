@@ -235,7 +235,7 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
         <div style={{ maxWidth:1100, margin:'0 auto', padding:'100px 24px 80px' }}>
           {status && (
             <div style={{ 
-              padding:'12px 20px', background: status.type==='ok'?`${C.normal}10`:C.critBg, 
+              padding:'12px 20px', background: status.type==='ok'?`${C.normal}10`:`${C.critical}10`, 
               border:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
               borderRadius:12, marginBottom:32, display:'flex', justifyContent:'space-between', alignItems:'center',
               color: status.type==='ok'?C.normal:C.critical, fontSize:13, fontWeight:600

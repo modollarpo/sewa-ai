@@ -9,7 +9,7 @@ import { config } from '../config/env';
 
 export interface PriorScanInfo {
   id: string;
-  receivedAt: Date;
+  createdAt: Date;
   finding: string;
   urgency: string;
   vlmImpression: string | null;
@@ -30,7 +30,7 @@ export async function findPriorScan(patientId: string, currentScanId: string, mo
         status: 'COMPLETED',
         aiResult: { isNot: null }
       },
-      orderBy: { receivedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: { aiResult: true }
     });
 
@@ -38,7 +38,7 @@ export async function findPriorScan(patientId: string, currentScanId: string, mo
 
     return {
       id: prior.id,
-      receivedAt: prior.receivedAt,
+      createdAt: prior.createdAt,
       finding: prior.aiResult?.primaryFinding || 'Normal',
       urgency: prior.aiResult?.urgency || 'NORMAL',
       vlmImpression: prior.aiResult?.vlmImpression || null,
@@ -55,7 +55,7 @@ export async function findPriorScan(patientId: string, currentScanId: string, mo
 export function formatLongitudinalPrompt(prior: PriorScanInfo | null): string {
   if (!prior) return "No prior scans available for longitudinal comparison.";
   
-  return `[PRIOR SCAN]: ${prior.receivedAt.toISOString()} | [FINDING]: ${prior.finding} | [IMPRESSION]: ${prior.vlmImpression || 'None'}`;
+  return `[PRIOR SCAN]: ${prior.createdAt.toISOString()} | [FINDING]: ${prior.finding} | [IMPRESSION]: ${prior.vlmImpression || 'None'}`;
 }
 /**
  * Performs Deformable Image Registration (SimpleElastix) via the Python AI Engine.

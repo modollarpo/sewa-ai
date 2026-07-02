@@ -1,227 +1,333 @@
 // SEWA XAI — PopulationHealthDashboard.tsx
-// Population health analytics: disease burden, geography, cohort trends, referrals
-import React, { useState, useEffect } from 'react';
-import { usePopulationHealthData } from '../../hooks/useDashboardData';
+// Real-time epidemiological surveillance powered by live AI scan data
+import React, { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '../../services/apiClient';
 
 const C = {
-  bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
+  bg0:'#050F0C',bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
   brand:'#408D7B',brandLt:'#52B09A',
-  critical:'#E03535',urgent:'#E08A20',normal:'#1DBF73',normalBg:'#0A1F14',
-  info:'#2A6EF2',textHi:'#D0ECE6',textMd:'#6FA898',textLo:'#3A6055',
-  border:'#1B3028',F:"'IBM Plex Sans',system-ui,sans-serif",FM:"'IBM Plex Mono',monospace",
+  critical:'#E03535',critBg:'#2A0A0A',
+  urgent:'#E08A20',urgBg:'#2A1800',
+  normal:'#1DBF73',normalBg:'#0A1F14',
+  info:'#2A6EF2',infoBg:'#0A1530',
+  textHi:'#D0ECE6',textMd:'#6FA898',textLo:'#3A6055',
+  border:'#1B3028',
+  F:"'IBM Plex Sans',system-ui,sans-serif",
+  FM:"'IBM Plex Mono',monospace",
 };
 
-// Fallbacks handled in hook
+const DISEASE_COLORS: Record<string, string> = {
+  'Tuberculosis': '#E08A20',
+  'Pneumonia':    '#2A6EF2',
+  'ICH':          '#E03535',
+  'Stroke':       '#8B5CF6',
+};
 
-// Geography fallbacks are now handled via dynamic API enrichment in analytics.ts
+const REGION_COORDS: Record<string, { x: number; y: number; label: string; flag: string }> = {
+  UK: { x: 46, y: 20, label: 'United Kingdom', flag: '🇬🇧' },
+  NG: { x: 49, y: 50, label: 'Nigeria', flag: '🇳🇬' },
+  KE: { x: 55, y: 56, label: 'Kenya', flag: '🇰🇪' },
+  ZA: { x: 52, y: 70, label: 'South Africa', flag: '🇿🇦' },
+  GH: { x: 47, y: 52, label: 'Ghana', flag: '🇬🇭' },
+  US: { x: 18, y: 32, label: 'United States', flag: '🇺🇸' },
+};
 
 export function PopulationHealthDashboard() {
-  const { stats, conditions, geography, trends, referrals = [], loading } = usePopulationHealthData();
-  const [tab, setTab] = useState<'burden'|'geography'|'trends'|'referrals'>('burden');
+  const [tab, setTab] = useState<'anomalies'|'heatmap'|'events'>('anomalies');
+  const [heatmaps, setHeatmaps] = useState<any[]>([]);
+  const [anomalies, setAnomalies] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [days, setDays] = useState(30);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const r = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', r);
+    return () => window.removeEventListener('resize', r);
   }, []);
 
-  const tabStyle = (t:string):React.CSSProperties => ({
-    padding:'7px 13px',fontSize:11,fontWeight:tab===t?600:400,
-    color:tab===t?C.brand:C.textLo,background:'none',border:'none',
-    borderBottom:`2px solid ${tab===t?C.brand:'transparent'}`,
-    marginBottom:'-1px',cursor:'pointer',fontFamily:C.F,whiteSpace:'nowrap',
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [heatRes, anomRes, evtRes] = await Promise.all([
+        apiClient.get(`/ai/epi/heatmaps?days=${days}`),
+        apiClient.get('/ai/epi/anomalies'),
+        apiClient.get('/ai/epi/events'),
+      ]);
+      setHeatmaps(heatRes.data || []);
+      setAnomalies(anomRes.data || []);
+      setEvents(evtRes.data || []);
+    } catch {
+      // gracefully remain empty if backend isn't seeded yet
+    } finally {
+      setLoading(false);
+    }
+  }, [days]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const tabStyle = (t: string): React.CSSProperties => ({
+    padding: '8px 14px', fontSize: 12, fontWeight: tab === t ? 600 : 400,
+    color: tab === t ? C.brand : C.textLo, background: 'none', border: 'none',
+    borderBottom: `2px solid ${tab === t ? C.brand : 'transparent'}`,
+    marginBottom: '-1px', cursor: 'pointer', fontFamily: C.F, whiteSpace: 'nowrap',
   });
 
+  // Aggregate by region for map
+  const byRegion: Record<string, { total: number; diseases: Record<string, number> }> = {};
+  heatmaps.forEach((h: any) => {
+    if (!byRegion[h.region]) byRegion[h.region] = { total: 0, diseases: {} };
+    byRegion[h.region].total += h._count.id;
+    byRegion[h.region].diseases[h.disease] = (byRegion[h.region].diseases[h.disease] || 0) + h._count.id;
+  });
+
+  // Top disease per region
+  const maxCases = Math.max(...Object.values(byRegion).map(r => r.total), 1);
+
   return (
-    <div style={{padding: isMobile ? 16 : 24, background:C.bg1, minHeight:'calc(100vh - 76px)', fontFamily:C.F}}>
-      <div style={{marginBottom:24}}>
-        <h2 style={{margin:0, fontSize: isMobile ? 18 : 20, fontWeight:700, color:C.textHi}}>Population Health Analytics</h2>
-        <p style={{margin:'4px 0 0',fontSize:12,color:C.textMd}}>
-          Aggregate, anonymised disease surveillance · Powered by SEWA XAI
-        </p>
+    <div style={{ padding: isMobile ? 16 : 24, background: C.bg1, minHeight: 'calc(100vh - 76px)', fontFamily: C.F }}>
+      
+      {/* Header */}
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: `${C.urgent}14`, color: C.urgent, border: `1px solid ${C.urgent}30`, letterSpacing: '0.06em' }}>
+              🌍 EPIDEMIOLOGY
+            </span>
+          </div>
+          <h2 style={{ margin: 0, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: C.textHi }}>Population Health Surveillance</h2>
+          <p style={{ margin: '4px 0 0', fontSize: 12, color: C.textMd }}>
+            Real-time, anonymised disease signals aggregated from SEWA AI scan analysis
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <label style={{ fontSize: 11, color: C.textLo }}>Range:</label>
+          {[7, 30, 90].map(d => (
+            <button key={d} onClick={() => setDays(d)} style={{
+              padding: '5px 12px', borderRadius: 8, fontSize: 11, fontWeight: days === d ? 700 : 400,
+              background: days === d ? `${C.brand}22` : 'transparent', color: days === d ? C.brand : C.textLo,
+              border: `1px solid ${days === d ? `${C.brand}50` : C.border}`, cursor: 'pointer'
+            }}>{d}d</button>
+          ))}
+          <button onClick={fetchData} style={{ padding: '5px 12px', borderRadius: 8, fontSize: 11, background: C.brand, color: 'white', border: 'none', cursor: 'pointer' }}>↻ Refresh</button>
+        </div>
       </div>
 
-      {/* Key headline stats */}
-      <div style={{
-        display:'grid',
-        gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap:12,
-        marginBottom:24
-      }}>
+      {/* Summary stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
         {[
-          {label:'Total Scans',value:loading ? '...' : stats.totalScans.toLocaleString(),sub:'Catchment area',icon:'🩻'},
-          {label:'Positives',value:loading ? '...' : stats.positives.toLocaleString(),sub:`Detection rate: ${stats.totalScans ? ((stats.positives/stats.totalScans)*100).toFixed(1) : 0}%`,icon:'🔍'},
-          {label:'Criticals',value:loading ? '...' : stats.criticals.toLocaleString(),sub:'Urgency-1',icon:'🚨'},
-          {label:'Impact',value:loading ? '...' : stats.impact.toLocaleString(),sub:'AI-assisted',icon:'❤️'},
-        ].map(s=>(
-          <div key={s.label} style={{padding: isMobile ? 12 : 16, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`}}>
-            <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}>
-              <span style={{fontSize:9,color:C.textMd, textTransform: 'uppercase', letterSpacing: '0.05em'}}>{s.label}</span>
-              <span style={{fontSize:16}}>{s.icon}</span>
+          { label: 'Total Events', value: heatmaps.reduce((a, h) => a + h._count.id, 0).toLocaleString(), icon: '🔬', color: C.brand },
+          { label: 'Outbreak Alerts', value: anomalies.length, icon: '⚠️', color: anomalies.length > 0 ? C.critical : C.normal },
+          { label: 'Regions Monitored', value: Object.keys(byRegion).length, icon: '🌍', color: C.info },
+          { label: 'Diseases Tracked', value: new Set(heatmaps.map((h: any) => h.disease)).size, icon: '🧬', color: C.urgent },
+        ].map(s => (
+          <div key={s.label} style={{ padding: 16, background: C.bg2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span style={{ fontSize: 10, color: C.textMd, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</span>
+              <span style={{ fontSize: 16 }}>{s.icon}</span>
             </div>
-            <div style={{fontSize: isMobile ? 20 : 24, fontWeight:700, color:C.textHi, fontFamily:C.FM, lineHeight:1}}>{s.value}</div>
-            <div style={{fontSize:9,color:C.textLo,marginTop:6}}>{s.sub}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: s.color, fontFamily: C.FM, lineHeight: 1 }}>{loading ? '—' : s.value}</div>
           </div>
         ))}
       </div>
 
-      <div style={{borderBottom:`1px solid ${C.border}`, display:'flex', gap:2, marginBottom:20, overflowX: 'auto', scrollbarWidth: 'none'}}>
-        {['burden','geography','trends','referrals'].map(t=>(
-          <button key={t} style={tabStyle(t)} onClick={()=>setTab(t as any)}>
-            {t==='burden'&&'📊 Burden'}{t==='geography'&&'🗺 Geography'}
-            {t==='trends'&&'📈 Trends'}{t==='referrals'&&'🔗 Referrals'}
-          </button>
-        ))}
+      {/* Tabs */}
+      <div style={{ borderBottom: `1px solid ${C.border}`, display: 'flex', gap: 2, marginBottom: 20 }}>
+        <button style={tabStyle('anomalies')} onClick={() => setTab('anomalies')}>⚠️ Outbreak Alerts</button>
+        <button style={tabStyle('heatmap')} onClick={() => setTab('heatmap')}>🗺 Disease Heatmap</button>
+        <button style={tabStyle('events')} onClick={() => setTab('events')}>📋 Recent Events</button>
       </div>
 
-      {tab==='burden' && (
-        <div style={{display:'flex',flexDirection:'column',gap:8}}>
-          {conditions.length === 0 ? (
-            <div style={{padding:40,textAlign:'center',color:C.textLo}}>{loading?'Aggregating disease burden...':'No epidemiological data found.'}</div>
-          ) : conditions.map((d:any,i:number)=>(
-            <div key={d.condition} style={{
-              padding:14, background:i%2===0?C.bg2:'transparent', borderRadius:10, border:`1px solid ${C.border}`,
-              display:'grid',
-              gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr 1fr',
-              gap: isMobile ? 16 : 12, alignItems:'center'
+      {/* OUTBREAK ALERTS */}
+      {tab === 'anomalies' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {loading ? (
+            <div style={{ padding: 40, textAlign: 'center', color: C.textLo, fontSize: 13 }}>Analysing signals...</div>
+          ) : anomalies.length === 0 ? (
+            <div style={{ padding: 32, textAlign: 'center', background: C.bg2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>✅</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.normal }}>No outbreak signals detected</div>
+              <div style={{ fontSize: 12, color: C.textLo, marginTop: 4 }}>
+                No region is showing a significant spike above the 7-day baseline.
+              </div>
+            </div>
+          ) : anomalies.map((a: any, i: number) => (
+            <div key={i} style={{
+              padding: 16, borderRadius: 12, border: `1px solid ${a.status === 'critical' ? `${C.critical}50` : `${C.urgent}50`}`,
+              background: a.status === 'critical' ? C.critBg : C.urgBg,
             }}>
-              <div>
-                <div style={{fontSize:13,fontWeight:600,color:C.textHi}}>{d.condition}</div>
-                <div style={{fontSize:10,color:C.textLo,marginTop:2}}>Median age: {d.ageMedian}</div>
-              </div>
-              <div style={{ textAlign: isMobile ? 'right' : 'left' }}>
-                <div style={{fontSize:16,fontWeight:700,color:C.textHi,fontFamily:C.FM}}>{d.count}</div>
-                <div style={{fontSize:9,color:C.textLo}}>Cases detected</div>
-              </div>
-              {!isMobile && (
-                <>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 20 }}>{a.status === 'critical' ? '🚨' : '⚠️'}</span>
                   <div>
-                    <span style={{fontSize:12,fontWeight:700,color:d.trend>0?C.critical:C.normal,fontFamily:C.FM}}>
-                      {d.trend>0?'↑':'↓'} {Math.abs(d.trend)}%
-                    </span>
-                    <div style={{fontSize:9,color:C.textLo}}>Trend (Rel)</div>
-                  </div>
-                  <div>
-                    <div style={{fontSize:12,fontWeight:600,color:C.textHi}}>{d.mortality}</div>
-                    <div style={{fontSize:9,color:C.textLo}}>Mortality</div>
-                  </div>
-                  <div style={{flex:1}}>
-                    <div style={{height:4,background:C.bg4,borderRadius:2,overflow:'hidden'}}>
-                      <div style={{width:`${Math.min(100, (d.count/50)*100)}%`,height:'100%',background:d.count>40?C.critical:d.count>20?C.urgent:C.brand}}/>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: a.status === 'critical' ? C.critical : C.urgent }}>
+                      {a.disease} Spike — {REGION_COORDS[a.region]?.flag || ''} {REGION_COORDS[a.region]?.label || a.region}
+                    </div>
+                    <div style={{ fontSize: 11, color: C.textMd, marginTop: 2 }}>
+                      Detected {a.actualCount} cases in the last 7 days vs expected {a.baselineWeeklyExpected}
                     </div>
                   </div>
-                </>
-              )}
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: a.status === 'critical' ? C.critical : C.urgent, fontFamily: C.FM }}>
+                    +{a.percentageIncrease}%
+                  </div>
+                  <div style={{ fontSize: 10, color: C.textLo }}>vs 7-day baseline</div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, height: 4, background: `${C.border}`, borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min(100, a.percentageIncrease)}%`, background: a.status === 'critical' ? C.critical : C.urgent, borderRadius: 2 }} />
+              </div>
+              <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                <button style={{ padding: '5px 14px', borderRadius: 8, fontSize: 11, background: a.status === 'critical' ? C.critical : C.urgent, color: 'white', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
+                  Alert Public Health Authority
+                </button>
+                <button style={{ padding: '5px 14px', borderRadius: 8, fontSize: 11, background: 'transparent', color: C.textLo, border: `1px solid ${C.border}`, cursor: 'pointer' }}>
+                  Export Report
+                </button>
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      {tab==='geography' && (
-        <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
-          <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:16}}>Global Disease Incidence</div>
-          <div style={{position:'relative',height:320,background:`linear-gradient(180deg,${C.bg3},${C.bg2})`,borderRadius:10,border:`1px solid ${C.border}`,overflow:'hidden'}}>
+      {/* DISEASE HEATMAP */}
+      {tab === 'heatmap' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* World Map */}
+          <div style={{ position: 'relative', height: 340, background: `linear-gradient(180deg,${C.bg3},${C.bg2})`, borderRadius: 12, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
             {/* Grid */}
-            {[1,2,3,4,5,6,7,8].map(i=><div key={`h${i}`} style={{position:'absolute',top:`${12.5*i}%`,left:0,right:0,height:1,background:`${C.border}60`}}/>)}
-            {[1,2,3,4,5,6,7,8].map(i=><div key={`v${i}`} style={{position:'absolute',left:`${12.5*i}%`,top:0,bottom:0,width:1,background:`${C.border}60`}}/>)}
-            
-            {/* World Map Overlay (Conceptual) */}
-            <div style={{position:'absolute',inset:0,opacity:0.05,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',fontSize:200,fontFamily:'sans-serif'}}>🌍</div>
+            {[1,2,3,4,5,6,7].map(i => <div key={`h${i}`} style={{ position: 'absolute', top: `${14*i}%`, left: 0, right: 0, height: 1, background: `${C.border}60` }}/>)}
+            {[1,2,3,4,5,6,7,8].map(i => <div key={`v${i}`} style={{ position: 'absolute', left: `${12.5*i}%`, top: 0, bottom: 0, width: 1, background: `${C.border}60` }}/>)}
+            <div style={{ position: 'absolute', inset: 0, opacity: 0.04, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 300 }}>🌍</div>
+            <div style={{ position: 'absolute', top: 10, left: 12, fontSize: 11, fontWeight: 700, color: C.textMd }}>Global Disease Incidence Map ({days}-day window)</div>
 
-            {/* Dynamic Geography Markers */}
-            {(geography && geography.length > 0 ? geography : []).map((loc:any, i:number)=>{
-              // Dynamic global projection if lat/lng exists, else fallback to grid distribution
-              let x = 10 + (i%4)*22;
-              let y = 15 + Math.floor(i/4)*40;
-              let name = loc.name || loc.label || loc.code;
-              let count = loc.count || loc.cases;
-              let color = count > 50 ? C.critical : count > 20 ? C.urgent : C.brand;
-              let r = Math.max(8, Math.min(24, count / 2));
-
-              if (loc.lat !== undefined && loc.lng !== undefined && loc.lat !== null) {
-                // Approximate Web Mercator or simple Equirectangular
-                x = ((loc.lng + 180) / 360) * 100;
-                y = ((90 - loc.lat) / 180) * 100;
-              }
-
+            {Object.entries(byRegion).map(([code, data]) => {
+              const coord = REGION_COORDS[code];
+              if (!coord) return null;
+              const radius = Math.max(12, Math.min(36, (data.total / maxCases) * 36));
+              const topDisease = Object.entries(data.diseases).sort(([,a],[,b]) => b-a)[0]?.[0];
+              const color = DISEASE_COLORS[topDisease] || C.brand;
+              const isCritical = data.total > maxCases * 0.6;
               return (
-                <div key={loc.tenantId || loc.code || i} style={{position:'absolute',left:`${x}%`,top:`${y}%`,transform:'translate(-50%,-50%)'}}>
-                  <div style={{width:r*2,height:r*2,borderRadius:'50%',background:color,opacity:0.7,border:`2px solid ${color}`,boxShadow:`0 0 ${r}px ${color}60`}}/>
-                  <div style={{position:'absolute',top:'110%',left:'50%',transform:'translateX(-50%)',whiteSpace:'nowrap',textAlign:'center'}}>
-                    <div style={{fontSize:10,color:C.textHi,fontFamily:C.FM,fontWeight:700,textShadow:`0 2px 4px rgba(0,0,0,0.8)`}}>{name}</div>
-                    <div style={{fontSize:9,color:C.textLo,fontFamily:C.FM}}>{count} cases</div>
+                <div key={code} style={{ position: 'absolute', left: `${coord.x}%`, top: `${coord.y}%`, transform: 'translate(-50%,-50%)' }}>
+                  <div style={{
+                    width: radius * 2, height: radius * 2, borderRadius: '50%',
+                    background: `${color}50`, border: `2px solid ${color}`,
+                    boxShadow: `0 0 ${radius}px ${color}60`,
+                    animation: isCritical ? 'pulse 1.5s infinite' : undefined,
+                  }}/>
+                  <style>{`@keyframes pulse{0%,100%{box-shadow:0 0 ${radius}px ${color}60}50%{box-shadow:0 0 ${radius*2}px ${color}90}}`}</style>
+                  <div style={{ position: 'absolute', top: '110%', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', textAlign: 'center', pointerEvents: 'none' }}>
+                    <div style={{ fontSize: 11, color: C.textHi, fontWeight: 700, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{coord.flag} {code}</div>
+                    <div style={{ fontSize: 9, color: C.textLo, fontFamily: C.FM }}>{data.total} events</div>
                   </div>
                 </div>
               );
             })}
+
             {/* Legend */}
-            <div style={{position:'absolute',bottom:10,right:12,display:'flex',gap:8,background:C.bg3,padding:'6px 8px',borderRadius:8,border:`1px solid ${C.border}`}}>
-              {[{color:C.critical,label:'High Volume'},{color:C.urgent,label:'Medium Volume'},{color:C.brand,label:'Low Volume'}].map(l=>(
-                <div key={l.label} style={{display:'flex',alignItems:'center',gap:4}}>
-                  <div style={{width:8,height:8,borderRadius:'50%',background:l.color}}/>
-                  <span style={{fontSize:9,color:C.textLo,fontFamily:C.F}}>{l.label}</span>
+            <div style={{ position: 'absolute', bottom: 10, right: 12, display: 'flex', gap: 8, background: C.bg3, padding: '6px 10px', borderRadius: 8, border: `1px solid ${C.border}` }}>
+              {Object.entries(DISEASE_COLORS).map(([d, c]) => (
+                <div key={d} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }}/>
+                  <span style={{ fontSize: 9, color: C.textLo }}>{d}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{marginTop:12,display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))',gap:8}}>
-            {(geography || []).slice(0, 4).map((loc:any)=>(
-              <div key={loc.tenantId} style={{padding:'10px 12px',background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`}}>
-                <div style={{fontSize:12,fontWeight:700,color:C.textHi,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{loc.name}</div>
-                <div style={{fontSize:10,color:C.textLo,marginTop:2}}>{loc.region.toUpperCase()} • {loc.timezone}</div>
-                <div style={{fontSize:14,fontWeight:700,color:loc.count > 50 ? C.critical : C.brand,fontFamily:C.FM,marginTop:6}}>{loc.count} cases logged</div>
-              </div>
-            ))}
+
+          {/* Regional Table */}
+          <div style={{ background: C.bg2, borderRadius: 12, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+            <div style={{ padding: '12px 16px', borderBottom: `1px solid ${C.border}`, fontSize: 13, fontWeight: 700, color: C.textHi }}>Regional Breakdown</div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
+                <thead>
+                  <tr style={{ background: C.bg3 }}>
+                    {['REGION', 'TOP DISEASE', 'TOTAL EVENTS', 'BREAKDOWN', 'SEVERITY'].map(h => (
+                      <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10, color: C.textLo, fontWeight: 600 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(byRegion).sort(([,a],[,b]) => b.total - a.total).map(([code, data]) => {
+                    const coord = REGION_COORDS[code];
+                    const topDisease = Object.entries(data.diseases).sort(([,a],[,b]) => b-a)[0];
+                    const severity = data.total > maxCases * 0.6 ? 'High' : data.total > maxCases * 0.3 ? 'Medium' : 'Low';
+                    return (
+                      <tr key={code} style={{ borderTop: `1px solid ${C.border}` }}>
+                        <td style={{ padding: '12px 16px', fontSize: 13, color: C.textHi, fontWeight: 600 }}>
+                          {coord?.flag || ''} {coord?.label || code}
+                        </td>
+                        <td style={{ padding: '12px 16px', fontSize: 12 }}>
+                          <span style={{ color: DISEASE_COLORS[topDisease?.[0]] || C.brand, fontWeight: 600 }}>{topDisease?.[0] || '—'}</span>
+                        </td>
+                        <td style={{ padding: '12px 16px', fontSize: 14, fontWeight: 700, color: C.textHi, fontFamily: C.FM }}>{data.total}</td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {Object.entries(data.diseases).map(([d, n]) => (
+                              <span key={d} style={{ padding: '2px 7px', borderRadius: 10, fontSize: 10, background: `${DISEASE_COLORS[d] || C.brand}20`, color: DISEASE_COLORS[d] || C.brand, border: `1px solid ${DISEASE_COLORS[d] || C.brand}30` }}>
+                                {d}: {n}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{ padding: '3px 9px', borderRadius: 10, fontSize: 10, fontWeight: 700, background: severity === 'High' ? `${C.critical}20` : severity === 'Medium' ? `${C.urgent}20` : `${C.normal}20`, color: severity === 'High' ? C.critical : severity === 'Medium' ? C.urgent : C.normal }}>
+                            {severity}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {Object.keys(byRegion).length === 0 && (
+                    <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: C.textLo, fontSize: 12 }}>No epidemiology data yet. Run the seed script to populate data.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
-      {tab==='trends' && (
-        <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
-          <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:16}}>12-Month Incidence Trends</div>
-          <div style={{display:'flex',alignItems:'flex-end',gap:4,height:120,marginBottom:8}}>
-            {trends?.length > 0 ? trends.map((v:any,i:number)=>(
-              <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
-                <div style={{width:'100%',height:`${Math.max(5, (v.count/Math.max(...trends.map((x:any)=>x.count), 1))*100)}%`,background:`linear-gradient(180deg,${C.critical},${C.urgent})`,borderRadius:'3px 3px 0 0',opacity:0.8}}/>
-              </div>
-            )) : Array(12).fill(0).map((_,i)=>(
-              <div key={i} style={{flex:1,height:4,background:C.bg3,borderRadius:2}}/>
-            ))}
+      {/* RECENT EVENTS */}
+      {tab === 'events' && (
+        <div style={{ background: C.bg2, borderRadius: 12, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', borderBottom: `1px solid ${C.border}`, fontSize: 13, fontWeight: 700, color: C.textHi }}>
+            Recent AI-Detected Events ({events.length} shown)
           </div>
-          <div style={{display:'flex',justifyContent:'space-between',marginBottom:16}}>
-            {trends?.length > 0 ? trends.map((v:any)=>(
-              <span key={v.month} style={{fontSize:9,color:C.textLo,fontFamily:C.FM}}>{v.month}</span>
-            )) : ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'].map(m=>(
-              <span key={m} style={{fontSize:9,color:C.textLo,fontFamily:C.FM}}>{m}</span>
-            ))}
-          </div>
-          <div style={{padding:14,background:`${C.critical}0A`,borderRadius:10,border:`1px solid ${C.critical}30`}}>
-            <div style={{fontSize:12,fontWeight:700,color:C.critical,marginBottom:4}}>⚠ Trend Alert</div>
-            <div style={{fontSize:11,color:C.textMd}}>ICH incidence has increased 76% over 12 months in East London. Recommend review with public health team.</div>
-          </div>
-        </div>
-      )}
-
-      {tab==='referrals' && (
-        <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
-          <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:16}}>SEWA Referral Network</div>
-          <div style={{display:'flex',flexDirection:'column',gap:10}}>
-            {referrals.length === 0 ? (
-              <div style={{padding:40,textAlign:'center',color:C.textLo}}>{loading?'Fetching network flows...':'No active referrals in this region.'}</div>
-            ) : referrals.map((r:any)=>(
-              <div key={r.to} style={{padding:14,background:C.bg3,borderRadius:10,border:`1px solid ${C.border}`}}>
-                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
-                  <span style={{fontSize:11,color:C.textMd}}>{r.from}</span>
-                  <span style={{color:C.brand}}>→</span>
-                  <span style={{fontSize:11,fontWeight:600,color:C.textHi}}>{r.to}</span>
-                </div>
-                <div style={{display:'flex',gap:12}}>
-                  <span style={{fontSize:10,color:C.textLo}}>{r.count} referrals/month</span>
-                  <span style={{fontSize:10,color:C.brand}}>{r.type}</span>
-                  <span style={{fontSize:10,color:C.normal}}>{r.time}</span>
-                </div>
-              </div>
-            ))}
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
+              <thead>
+                <tr style={{ background: C.bg3 }}>
+                  {['DISEASE', 'REGION', 'SUB-REGION', 'SEVERITY', 'CONFIDENCE', 'SOURCE', 'DETECTED'].map(h => (
+                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10, color: C.textLo, fontWeight: 600 }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {events.length === 0 ? (
+                  <tr><td colSpan={7} style={{ padding: 24, textAlign: 'center', color: C.textLo }}>No events yet</td></tr>
+                ) : events.map((e: any) => (
+                  <tr key={e.id} style={{ borderTop: `1px solid ${C.border}` }}>
+                    <td style={{ padding: '10px 16px', fontSize: 12, fontWeight: 600, color: DISEASE_COLORS[e.disease] || C.brand }}>{e.disease}</td>
+                    <td style={{ padding: '10px 16px', fontSize: 12, color: C.textHi }}>{REGION_COORDS[e.region]?.flag || ''} {e.region}</td>
+                    <td style={{ padding: '10px 16px', fontSize: 12, color: C.textMd }}>{e.subRegion || '—'}</td>
+                    <td style={{ padding: '10px 16px', fontSize: 11 }}>
+                      <span style={{ padding: '2px 8px', borderRadius: 8, background: e.severity === 'High' ? `${C.critical}20` : `${C.urgent}20`, color: e.severity === 'High' ? C.critical : C.urgent, fontWeight: 600 }}>{e.severity}</span>
+                    </td>
+                    <td style={{ padding: '10px 16px', fontSize: 12, color: C.textMd, fontFamily: C.FM }}>{(e.confidenceScore * 100).toFixed(1)}%</td>
+                    <td style={{ padding: '10px 16px', fontSize: 11 }}>
+                      <span style={{ padding: '2px 7px', borderRadius: 6, background: e.scanOrigin === 'edge' ? `${C.urgent}20` : `${C.brand}20`, color: e.scanOrigin === 'edge' ? C.urgent : C.brand, fontSize: 10 }}>
+                        {e.scanOrigin === 'edge' ? '📡 Edge' : '☁️ Cloud'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '10px 16px', fontSize: 11, color: C.textLo, fontFamily: C.FM }}>{new Date(e.detectedAt).toLocaleDateString('en-GB')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

@@ -60,6 +60,33 @@ function ConfBar({ v,height=3 }:{ v:number,height?:number }) {
 
 
 import { ReferralModal } from './ReferralModal';
+import { SecondOpinionModal } from '../../components/shared/SecondOpinionModal';
+
+interface Patient {
+  id: string;
+  name: string;
+  age: number | string;
+  mrn: string;
+  lastScan?: {
+    modality: string;
+    bodyPart: string;
+    urgency: string;
+    finding: string;
+    confidence: number;
+    time: string;
+  };
+  status: string;
+}
+
+interface Alert {
+  id: string;
+  patient: string;
+  finding: string;
+  urgency: string;
+  confidence: number;
+  time: string;
+  scanId: string;
+}
 
 export function DoctorDashboard({ onLogout }: { onLogout:()=>void }) {
   const { user } = useAuthStore();
@@ -76,16 +103,16 @@ export function DoctorDashboard({ onLogout }: { onLogout:()=>void }) {
   }, []);
 
   const filteredPatients = useMemo(() => 
-    patients.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.mrn.includes(search)),
+    (patients as Patient[]).filter((p: Patient) => p.name.toLowerCase().includes(search.toLowerCase()) || p.mrn.includes(search)),
     [patients, search]
   );
 
   const activeAlerts = useMemo(() => 
-    alerts.filter(a => a.patient.toLowerCase().includes(search.toLowerCase())),
+    (alerts as Alert[]).filter((a: Alert) => a.patient.toLowerCase().includes(search.toLowerCase())),
     [alerts, search]
   );
 
-  const criticalCount = alerts.filter(a => a.urgency === 'CRITICAL').length;
+  const criticalCount = (alerts as Alert[]).filter((a: Alert) => a.urgency === 'CRITICAL').length;
 
   return (
     <div className="flex h-screen bg-[#05100D] overflow-hidden font-sans text-[#D0ECE6]">
@@ -113,8 +140,8 @@ export function DoctorDashboard({ onLogout }: { onLogout:()=>void }) {
             {[
               { label: 'Assigned', val: patients.length, col: '#D0ECE6' },
               { label: 'Critical', val: criticalCount, col: C.critical },
-              { label: 'Pending', val: patients.filter(p=>p.status==='ai_complete').length, col: C.urgent },
-              { label: 'Signed', val: patients.filter(p=>p.status==='signed').length, col: C.normal }
+              { label: 'Pending', val: (patients as Patient[]).filter((p: Patient) => p.status === 'ai_complete').length, col: C.urgent },
+              { label: 'Signed', val: (patients as Patient[]).filter((p: Patient) => p.status === 'signed').length, col: C.normal }
             ].map(s => (
               <div key={s.label} className="bg-[#0C1D17] border border-[#1B3028] p-2.5 rounded-xl text-center group hover:border-[#408D7B]/30 transition-all">
                 <div className="text-lg font-black font-mono leading-none mb-1" style={{ color: s.col }}>{s.val}</div>
@@ -161,7 +188,7 @@ export function DoctorDashboard({ onLogout }: { onLogout:()=>void }) {
             ))
           ) : (
             <div className="animate-fade-in">
-              {tab === 'alerts' && activeAlerts.map(alert => (
+              {tab === 'alerts' && activeAlerts.map((alert: Alert) => (
                 <div 
                   key={alert.id}
                   onClick={() => setSelectedPatient({...alert, type:'alert'})}
@@ -181,7 +208,7 @@ export function DoctorDashboard({ onLogout }: { onLogout:()=>void }) {
                   <ConfBar v={alert.confidence} />
                 </div>
               ))}
-              {tab === 'patients' && filteredPatients.map(p => (
+              {tab === 'patients' && filteredPatients.map((p: Patient) => (
                 <div 
                   key={p.id}
                   onClick={() => setSelectedPatient(p)}
@@ -197,7 +224,7 @@ export function DoctorDashboard({ onLogout }: { onLogout:()=>void }) {
                       <h3 className="text-sm font-bold text-[#D0ECE6]">{p.name}</h3>
                       <div className="text-[10px] text-[#3A6055] font-mono mt-0.5">{p.mrn} <span className="mx-1">•</span> {p.age}y</div>
                     </div>
-                    <UrgencyDot u={p.lastScan?.urgency} />
+                    <UrgencyDot u={p.lastScan?.urgency || 'NORMAL'} />
                   </div>
                 </div>
               ))}
@@ -235,6 +262,7 @@ export function DoctorDashboard({ onLogout }: { onLogout:()=>void }) {
 
 function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void }) {
   const [showReferral, setShowReferral] = useState<string | null>(null);
+  const [showSecondOpinion, setShowSecondOpinion] = useState(false);
   const [explaining, setExplaining] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
   const [correcting, setCorrecting] = useState(false);
@@ -339,6 +367,7 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
                 { label: 'Confirm', icon: '✓', action: () => handleAction('confirm'), color: '#1DBF73' },
                 { label: 'Refer', icon: '🔗', action: () => setShowReferral(scanId), color: '#2A6EF2' },
                 { label: 'Explain', icon: '🤖', action: () => handleAction('explain'), color: '#8B5CF6', loading: explaining },
+                { label: '2nd Opinion', icon: '👨‍⚕️', action: () => setShowSecondOpinion(true), color: '#408D7B' },
                 { label: 'Correct', icon: '✎', action: () => setCorrecting(true), color: '#E08A20' },
                 { label: 'Viewer', icon: '🩻', action: () => window.open(`/dashboard?scanId=${scanId}`, '_blank'), color: '#408D7B' },
                 { label: 'Download', icon: '📥', action: () => patient.reportId ? downloadReport(patient.reportId) : alert('No report available yet'), color: '#408D7B' },
@@ -364,6 +393,7 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
       </div>
 
       {showReferral && <ReferralModal scanId={showReferral} onClose={() => setShowReferral(null)} />}
+      {showSecondOpinion && <SecondOpinionModal isOpen={showSecondOpinion} onClose={() => setShowSecondOpinion(false)} scanId={scanId} reportId={patient.reportId} />}
       
       {/* Overlays for Correcting/Escalating maintained but styled with premium medical aesthetic */}
       {correcting && (

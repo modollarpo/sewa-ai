@@ -42,8 +42,8 @@ MODEL_CACHE       = os.getenv("MODEL_CACHE", "/models")
 DP_EPSILON        = float(os.getenv("DP_EPSILON",  "8.0"))   # Privacy budget ε
 DP_DELTA          = float(os.getenv("DP_DELTA",    "1e-5"))  # Privacy budget δ
 DP_MAX_GRAD_NORM  = float(os.getenv("DP_MAX_GRAD_NORM", "1.0"))
-MIN_FIT_CLIENTS   = int(os.getenv("MIN_FIT_CLIENTS",    "3"))  # Minimum hospitals for round
-MIN_EVAL_CLIENTS  = int(os.getenv("MIN_EVAL_CLIENTS",   "2"))
+MIN_FIT_CLIENTS   = int(os.getenv("MIN_FIT_CLIENTS",    "1"))  # Minimum hospitals for round
+MIN_EVAL_CLIENTS  = int(os.getenv("MIN_EVAL_CLIENTS",   "1"))
 NUM_ROUNDS        = int(os.getenv("NUM_ROUNDS",          "10"))
 
 app = FastAPI(title="SEWA XAI — Federated Learning Coordinator", version="1.0.0")

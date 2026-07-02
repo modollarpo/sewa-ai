@@ -99,3 +99,19 @@ export async function updateFeedback(id: string, data: { status?: string; priori
   return res.data;
 }
 
+// Second Opinion API
+export async function getPendingSecondOpinions() {
+  const res = await apiClient.get('/second-opinions/pending');
+  return res.data;
+}
+
+export async function createSecondOpinion(data: { scanId: string; reportId?: string; assignedToId?: string; notes?: string }) {
+  const res = await apiClient.post('/second-opinions', data);
+  return res.data;
+}
+
+export async function updateSecondOpinion(id: string, data: { status?: string; findings?: string; impression?: string; recommendation?: string }) {
+  const res = await apiClient.patch(`/second-opinions/${id}`, data);
+  return res.data;
+}
+

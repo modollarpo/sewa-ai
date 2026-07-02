@@ -44,7 +44,7 @@ export function useSuperAdminData() {
 
   return {
     stats: dashboardRes?.data || { tenants: 0, totalScans: 0, criticalToday: 0, totalRevenueUSD: 0, avgAIConfidence: 0, avgInferenceMs: 0, totalInferences: 0, uptime: '100%' },
-    tenants: tenantsRes?.data?.length > 0 ? tenantsRes.data : [],
+    tenants: tenantsRes?.data || [],
     regionalStats: analyticsRes?.data?.regionalStats || [],
     health: healthRes?.data || [],
     telemetry: telemetryRes?.data || { global:{}, infrastructure:{cpu:35,memory:65}, aiPerformance:{} },
@@ -53,7 +53,6 @@ export function useSuperAdminData() {
     error: (statsError || tenantsError || analyticsError || healthError || auditError) as any
   };
 }
-
 
 export function useAIData() {
   const { data: modelsRes } = useQuery({
@@ -85,7 +84,7 @@ export function useAIData() {
   });
 
   return {
-    models: modelsRes?.data?.length > 0 ? modelsRes.data : [],
+    models: modelsRes?.data || [],
     metrics: metricsRes?.data?.events || [],
     health: healthRes?.data || [],
     drift: driftRes?.data || { status: 'stable', kappa: 0.84, psi: 0.02 },
