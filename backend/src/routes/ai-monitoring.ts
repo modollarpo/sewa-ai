@@ -20,6 +20,9 @@ r.get('/health', async (req, res, next) => {
       { name: 'VLM Report Gen',       url: config.VLM_SERVICE_URL },
       { name: 'Uncertainty Engine',   url: config.UNCERTAINTY_SERVICE_URL },
       { name: 'Metacognition AI',     url: config.METACOGNITION_SERVICE_URL },
+      { name: 'Pathology AI',         url: config.PATHOLOGY_SERVICE_URL },
+      { name: 'Federated Learning',   url: config.FL_SERVICE_URL },
+      { name: 'Continuous Learning',  url: config.CL_SERVICE_URL },
     ];
 
     const results = await Promise.all(services.map(async (s) => {

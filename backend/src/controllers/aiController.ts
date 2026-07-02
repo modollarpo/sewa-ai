@@ -11,6 +11,9 @@ const AI_SERVICE_URLS: Record<string, string> = {
   vlm:           config.VLM_SERVICE_URL,
   uncertainty:   config.UNCERTAINTY_SERVICE_URL,
   metacognition: config.METACOGNITION_SERVICE_URL,
+  pathology:     config.PATHOLOGY_SERVICE_URL,
+  federated:     config.FL_SERVICE_URL,
+  continuous:    config.CL_SERVICE_URL,
 };
 
 export const getAIHealth = (engine: string) => async (req: Request, res: Response) => {

@@ -8,9 +8,12 @@ const C = { bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', brand:'#408D7B', brandL
 const SERVICES = [
   { name:'API (sewaxai.health)',          url:'https://api.sewaxai.health/health',                  group:'Core' },
   { name:'Triage Engine (Engine 1)',       url:'https://api.sewaxai.health/api/v1/ai/triage/health', group:'AI Pipeline' },
-  { name:'VLM Report Generator (Engine 3)',url:'https://api.sewaxai.health/api/v1/ai/vlm/health',   group:'AI Pipeline' },
   { name:'Uncertainty Engine (Engine 2)',  url:'https://api.sewaxai.health/api/v1/ai/uncertainty/health', group:'AI Pipeline' },
+  { name:'VLM Report Generator (Engine 3)',url:'https://api.sewaxai.health/api/v1/ai/vlm/health',   group:'AI Pipeline' },
   { name:'Metacognition (Engine 4)',       url:'https://api.sewaxai.health/api/v1/ai/metacognition/health', group:'AI Pipeline' },
+  { name:'Pathology AI',                   url:'https://api.sewaxai.health/api/v1/ai/pathology/health', group:'AI Pipeline' },
+  { name:'Federated Learning Orchestrator',url:'https://api.sewaxai.health/api/v1/ai/federated/health', group:'AI Pipeline' },
+  { name:'Continuous Learning Engine',     url:'https://api.sewaxai.health/api/v1/ai/continuous/health', group:'AI Pipeline' },
   { name:'FHIR R4 Interface',              url:'https://api.sewaxai.health/api/v1/fhir/health',     group:'Integrations' },
   { name:'Database (PostgreSQL)',          url:'https://api.sewaxai.health/health',                  group:'Infrastructure' },
   { name:'Cache (Redis)',                  url:'https://api.sewaxai.health/health',                  group:'Infrastructure' },

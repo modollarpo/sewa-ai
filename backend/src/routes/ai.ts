@@ -9,6 +9,9 @@ r.get('/triage/health',       ctrl.getAIHealth('triage'));
 r.get('/vlm/health',          ctrl.getAIHealth('vlm'));
 r.get('/uncertainty/health',  ctrl.getAIHealth('uncertainty'));
 r.get('/metacognition/health',ctrl.getAIHealth('metacognition'));
+r.get('/pathology/health',    ctrl.getAIHealth('pathology'));
+r.get('/federated/health',    ctrl.getAIHealth('federated'));
+r.get('/continuous/health',   ctrl.getAIHealth('continuous'));
 
 r.use(authenticate);
 
