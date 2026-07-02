@@ -1,0 +1,91 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-backend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-frontend
+    ports:
+    - port: 3000
+      protocol: TCP
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+    ports:
+    - port: 3000
+      protocol: TCP
+  egress:
+  # AI service pods
+  - ports:
+    - port: 8000
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-triage
+  - ports:
+    - port: 8001
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-vlm-report
+  - ports:
+    - port: 8002
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-uncertainty
+  - ports:
+    - port: 8003
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-metacognition
+  - ports:
+    - port: 8002
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-pathology
+  # PostgreSQL Flexible Server (VNet-injected, db-subnet 10.10.2.0/24)
+  - ports:
+    - port: 5432
+      protocol: TCP
+    to:
+    - ipBlock:
+        cidr: 10.10.2.0/24
+  # Azure Cache for Redis (redis-subnet 10.10.3.0/24)
+  - ports:
+    - port: 6379
+      protocol: TCP
+    - port: 6380
+      protocol: TCP
+    to:
+    - ipBlock:
+        cidr: 10.10.3.0/24
+  # DNS resolution
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+  # External HTTPS (Azure APIs, SendGrid, etc.)
+  - ports:
+    - port: 443
+      protocol: TCP
+
