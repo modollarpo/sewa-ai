@@ -48,36 +48,52 @@ const CAT_CFG: Record<Category, { color:string; label:string; icon:string }> = {
 };
 
 const ROADMAP: RoadmapItem[] = [
-  // Q1 2026 (shipped / in progress)
-  { id:'r1',  title:'EU AI Act Registration Portal', desc:'Automated submission to the EU AI Act EUDR database for High-Risk AI classification.', status:'in_progress', category:'compliance', votes:142, quarter:'Q1 2026', impact:'high' },
-  { id:'r2',  title:'VLM Report Generator v1.8', desc:'Improved impression generation with structured DSM-5 / ACR Rad-Lex terminology mapping.', status:'shipped', category:'ai', votes:298, quarter:'Q1 2026', impact:'high' },
-  { id:'r3',  title:'Multi-tenant billing — Africa region', desc:'Paystack, Flutterwave and M-Pesa payment gateway integration for NG, KE, GH, ZA.', status:'shipped', category:'platform', votes:89, quarter:'Q1 2026', impact:'high' },
-  { id:'r4',  title:'Doctor mobile app — iOS/Android', desc:'React Native clinical app with scan inbox, voice dictation, and AI report drafts.', status:'in_progress', category:'mobile', votes:214, quarter:'Q1 2026', impact:'high' },
-  { id:'r5',  title:'Federated Learning Round 50+', desc:'Cross-institution FL training with ε-DP privacy guarantees, contributing to global model accuracy.', status:'shipped', category:'ai', votes:167, quarter:'Q1 2026', impact:'medium' },
-  { id:'r6',  title:'DICOM SR structured reports', desc:'Export AI findings as DICOM Structured Reports (SR) for direct PACS archiving.', status:'shipped', category:'integrations', votes:122, quarter:'Q1 2026', impact:'medium' },
+  // Q1 2025 - Q1 2026 (shipped / in progress)
+  { id:'r1',  title:'Edge AI (Africa)', desc:'Fully offline SEWA on ruggedised tablets for zero-connectivity environments.', status:'shipped', category:'ai', votes:356, quarter:'Q1 2025', impact:'high' },
+  { id:'r2',  title:'Triage AI v2.4', desc:'CT/MRI/XR triage with 98% sensitivity for critical findings — ONNX Runtime, CPU-optimised.', status:'shipped', category:'ai', votes:421, quarter:'Q1 2025', impact:'high' },
+  { id:'r3',  title:'Uncertainty Quantification', desc:'AI confidence scores with uncertainty bounds and out-of-distribution detection.', status:'shipped', category:'ai', votes:287, quarter:'Q2 2025', impact:'high' },
+  { id:'r4',  title:'VLM Report Generator', desc:'Vision-language model to auto-generate radiology reports from scan findings.', status:'shipped', category:'ai', votes:298, quarter:'Q2 2025', impact:'high' },
+  { id:'r5',  title:'Clinical Rules Engine', desc:'Configurable CDS rules for stroke, PE, trauma — auto-alert, order entry, pathway activation.', status:'shipped', category:'clinical', votes:312, quarter:'Q2 2025', impact:'high' },
+  { id:'r6',  title:'Federated Learning v1', desc:'Cross-institution model training with ε-DP privacy guarantees.', status:'shipped', category:'ai', votes:167, quarter:'Q2 2025', impact:'high' },
+  { id:'r7',  title:'Metacognition Safety Layer', desc:'AI self-monitoring, hallucination detection, and contradiction checks.', status:'shipped', category:'ai', votes:245, quarter:'Q3 2025', impact:'high' },
+  { id:'r8',  title:'Continuous Learning Loop', desc:'Radiologist corrections auto-fed to model retraining pipeline with A/B testing.', status:'shipped', category:'ai', votes:198, quarter:'Q3 2025', impact:'high' },
+  { id:'r9',  title:'Referral Network', desc:'AI-powered specialist marketplace with secure DICOM sharing and SLA tracking.', status:'shipped', category:'clinical', votes:223, quarter:'Q3 2025', impact:'high' },
+  { id:'r10', title:'Population Health Dashboard', desc:'Disease prevalence maps, outbreak detection, and public health data exports.', status:'shipped', category:'platform', votes:178, quarter:'Q4 2025', impact:'high' },
+  { id:'r11', title:'Stroke Code Activation', desc:'Auto-activate stroke code on LVO detection with multi-channel alerts.', status:'shipped', category:'clinical', votes:341, quarter:'Q4 2025', impact:'high' },
+  { id:'r12', title:'Pathology slide analysis (WSI)', desc:'Whole Slide Image analysis for histopathology — cancer grading, Ki-67, HER2.', status:'shipped', category:'ai', votes:389, quarter:'Q4 2025', impact:'high' },
+  { id:'r13', title:'Zero-Knowledge Consent', desc:'Cryptographic consent verification without revealing patient identity.', status:'shipped', category:'compliance', votes:156, quarter:'Q1 2026', impact:'medium' },
+  { id:'r14', title:'Multimodal Clinical Fusion', desc:'Fuse imaging with labs, vitals, and EHR data for improved diagnostic accuracy.', status:'shipped', category:'ai', votes:412, quarter:'Q1 2026', impact:'high' },
+  { id:'r15', title:'EU AI Act Registration Portal', desc:'Automated submission to the EU AI Act EUDR database for High-Risk AI classification.', status:'in_progress', category:'compliance', votes:142, quarter:'Q1 2026', impact:'high' },
+  { id:'r16', title:'VLM Report Generator v1.8', desc:'Improved impression generation with structured DSM-5 / ACR Rad-Lex terminology mapping.', status:'shipped', category:'ai', votes:298, quarter:'Q1 2026', impact:'high' },
+  { id:'r17', title:'Multi-tenant billing — Africa region', desc:'Paystack, Flutterwave and M-Pesa payment gateway integration for NG, KE, GH, ZA.', status:'shipped', category:'platform', votes:89, quarter:'Q1 2026', impact:'high' },
+  { id:'r18', title:'Doctor mobile app — iOS/Android', desc:'React Native clinical app with scan inbox, voice dictation, and AI report drafts.', status:'in_progress', category:'mobile', votes:214, quarter:'Q1 2026', impact:'high' },
+  { id:'r19', title:'Federated Learning Round 50+', desc:'Cross-institution FL training with ε-DP privacy guarantees.', status:'shipped', category:'ai', votes:167, quarter:'Q1 2026', impact:'medium' },
+  { id:'r20', title:'DICOM SR structured reports', desc:'Export AI findings as DICOM Structured Reports (SR) for direct PACS archiving.', status:'shipped', category:'integrations', votes:122, quarter:'Q1 2026', impact:'medium' },
+  { id:'r21', title:'Radiology Training Simulator', desc:'Gamified training platform with AI feedback and CME credits.', status:'in_progress', category:'clinical', votes:367, quarter:'Q1 2026', impact:'high' },
+  { id:'r22', title:'Longitudinal Patient Tracking', desc:'Compare current/historic scans, auto-track lesion growth and RECIST criteria.', status:'in_progress', category:'clinical', votes:254, quarter:'Q1 2026', impact:'high' },
 
   // Q2 2026
-  { id:'r7',  title:'Prostate MRI (PI-RADS) scoring', desc:'AI-assisted PI-RADS v2.1 scoring for mpMRI with lesion localisation heatmap.', status:'planned', category:'ai', votes:441, quarter:'Q2 2026', impact:'high' },
-  { id:'r8',  title:'Mammography AI (ACR BI-RADS)', desc:'Automated BI-RADS classification with calcification and mass detection.', status:'planned', category:'ai', votes:378, quarter:'Q2 2026', impact:'high' },
-  { id:'r9',  title:'NHS Spine integration', desc:'Direct integration with NHS Spine APIs: PDS, EMIS, SystmOne for patient demographics.', status:'planned', category:'integrations', votes:205, quarter:'Q2 2026', impact:'high' },
-  { id:'r10', title:'Second opinion workflow', desc:'Formal second-opinion request system with case routing, peer review, and audit trail.', status:'in_progress', category:'clinical', votes:187, quarter:'Q2 2026', impact:'medium' },
-  { id:'r11', title:'Pen testing — CREST certified', desc:'External penetration test for NHS DSPT and Cyber Essentials Plus renewal.', status:'planned', category:'compliance', votes:56, quarter:'Q2 2026', impact:'high' },
-  { id:'r12', title:'Offline-first mobile mode', desc:'React Native app with local SQLite cache and background sync for low-connectivity environments (Africa).', status:'planned', category:'mobile', votes:266, quarter:'Q2 2026', impact:'high' },
+  { id:'r23', title:'Prostate MRI (PI-RADS) scoring', desc:'AI-assisted PI-RADS v2.1 scoring for mpMRI with lesion localisation.', status:'shipped', category:'ai', votes:441, quarter:'Q2 2026', impact:'high' },
+  { id:'r24', title:'Mammography AI (ACR BI-RADS)', desc:'Automated BI-RADS classification with calcification and mass detection.', status:'shipped', category:'ai', votes:378, quarter:'Q2 2026', impact:'high' },
+  { id:'r25', title:'NHS Spine integration', desc:'Direct integration with NHS Spine APIs: PDS, EMIS, SystmOne.', status:'planned', category:'integrations', votes:205, quarter:'Q2 2026', impact:'high' },
+  { id:'r26', title:'Second opinion workflow', desc:'Formal second-opinion request system with audit trail, specialist matching and SLA tracking.', status:'shipped', category:'clinical', votes:187, quarter:'Q2 2026', impact:'medium' },
+  { id:'r27', title:'Pen testing — CREST certified', desc:'External penetration test for NHS DSPT and Cyber Essentials Plus.', status:'planned', category:'compliance', votes:56, quarter:'Q2 2026', impact:'high' },
+  { id:'r28', title:'Ambient Clinical Intelligence', desc:'Real-time voice transcription + gaze tracking for auto-reporting.', status:'researching', category:'clinical', votes:423, quarter:'Q2 2026', impact:'high' },
 
   // Q3 2026
-  { id:'r13', title:'Retinal fundus AI (DR screening)', desc:'Diabetic retinopathy grading from fundus photographs — DR/ARMD/glaucoma detection.', status:'planned', category:'ai', votes:512, quarter:'Q3 2026', impact:'high' },
-  { id:'r14', title:'Pathology slide analysis (WSI)', desc:'Whole Slide Image analysis for histopathology — cancer grading, Ki-67, HER2.', status:'researching', category:'ai', votes:389, quarter:'Q3 2026', impact:'high' },
-  { id:'r15', title:'FDA 510(k) De Novo submission', desc:'Submit De Novo classification request for SEWA XAI as SaMD for triage of CT/MRI/XR findings.', status:'planned', category:'compliance', votes:134, quarter:'Q3 2026', impact:'high' },
-  { id:'r16', title:'Natural language query for imaging', desc:'Ask questions about scan findings in plain English: "Show me all PE cases in the last 30 days".', status:'researching', category:'clinical', votes:445, quarter:'Q3 2026', impact:'medium' },
-  { id:'r17', title:'Epic & Cerner EHR deep integration', desc:'Bi-directional Epic FHIR and Cerner Millennium integration with AI result push.', status:'planned', category:'integrations', votes:312, quarter:'Q3 2026', impact:'high' },
+  { id:'r29', title:'Retinal fundus AI (DR screening)', desc:'Diabetic retinopathy grading from fundus photographs.', status:'shipped', category:'ai', votes:512, quarter:'Q3 2026', impact:'high' },
+  { id:'r30', title:'FDA 510(k) De Novo submission', desc:'Submit De Novo classification request for SEWA XAI as SaMD.', status:'planned', category:'compliance', votes:134, quarter:'Q3 2026', impact:'high' },
+  { id:'r31', title:'Natural language query for imaging', desc:'Ask plain English questions about scan findings.', status:'shipped', category:'clinical', votes:445, quarter:'Q3 2026', impact:'medium' },
+  { id:'r32', title:'Epic & Cerner EHR deep integration', desc:'Bi-directional Epic FHIR and Cerner Millennium integration.', status:'shipped', category:'integrations', votes:312, quarter:'Q3 2026', impact:'high' },
 
   // Q4 2026
-  { id:'r18', title:'Federated Learning v2 — cross-country', desc:'Second-generation FL with secure aggregation across UK, EU, and Africa nodes simultaneously.', status:'researching', category:'ai', votes:198, quarter:'Q4 2026', impact:'high' },
-  { id:'r19', title:'Population health API', desc:'RESTful API for exporting anonymised population health trends to NHS analytics and BI tools.', status:'planned', category:'platform', votes:143, quarter:'Q4 2026', impact:'medium' },
-  { id:'r20', title:'AWS GovCloud deployment', desc:'US federal and VA hospital deployment on AWS GovCloud with FedRAMP authorization.', status:'researching', category:'platform', votes:89, quarter:'Q4 2026', impact:'high' },
+  { id:'r33', title:'Federated Learning v2 — cross-country', desc:'Secure aggregation across UK, EU, and Africa nodes.', status:'researching', category:'ai', votes:198, quarter:'Q4 2026', impact:'high' },
+  { id:'r34', title:'Universal Health ID Integration', desc:'NHS Number, NHIA, NHIF, NIN cross-reference with QR scan support.', status:'shipped', category:'integrations', votes:267, quarter:'Q2 2026', impact:'high' },
+  { id:'r35', title:'Population health API', desc:'RESTful API for anonymised health trend exports (surveillance, outbreaks, prevalence).', status:'shipped', category:'platform', votes:143, quarter:'Q2 2026', impact:'medium' },
+  { id:'r36', title:'AWS GovCloud deployment', desc:'US federal/VA deployment with FedRAMP authorization.', status:'researching', category:'platform', votes:89, quarter:'Q4 2026', impact:'high' },
 ];
 
-const QUARTERS = ['Q1 2026','Q2 2026','Q3 2026','Q4 2026'];
+const QUARTERS = ['Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026','Q2 2026','Q3 2026','Q4 2026'];
 const ALL_CATS: Category[] = ['ai','clinical','platform','compliance','mobile','integrations'];
 
 function StatusBadge({ status }: { status:Status }) {
@@ -212,7 +228,7 @@ export function RoadmapPage() {
 
       {/* BOARD VIEW */}
       {view === 'board' && (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, alignItems:'start' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:14, alignItems:'start' }}>
           {QUARTERS.map(q => {
             const qItems = filtered.filter(i => i.quarter === q);
             return (
@@ -271,7 +287,7 @@ export function RoadmapPage() {
 
       {/* Bottom note */}
       <div style={{ marginTop:28, padding:'12px 16px', background:C.bg2, borderRadius:10, border:`1px solid ${C.border}`, fontSize:11, color:C.textLo, lineHeight:1.6 }}>
-        📌 Roadmap items are subject to change. Voting influences prioritisation. For urgent feature requests or enterprise commitments, contact <span style={{ color:C.brand }}>product@sewaxai.health</span> · Roadmap last updated: 12 Mar 2026
+        📌 Roadmap items are subject to change. Voting influences prioritisation. For urgent feature requests or enterprise commitments, contact <span style={{ color:C.brand }}>product@sewaxai.health</span> · Roadmap last updated: {new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' })}
       </div>
     </div>
   );

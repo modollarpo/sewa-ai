@@ -5,6 +5,7 @@ import { useTechnicianData, useAppointmentData } from '../../hooks/useDashboardD
 import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Tooltip } from '../../components/ui/Tooltip';
+import { QrScannerModal } from '../../components/shared/QrScannerModal';
 
 interface UploadJob {
   id: string;
@@ -119,6 +120,7 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
   const { worklist, loading: listLoading } = useTechnicianData();
   const [jobs, setJobs] = useState<UploadJob[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [showQrScanner, setShowQrScanner] = useState(false);
   const [form, setForm] = useState({ modality:'CT', bodyPart:'', priority:'ROUTINE', patientId:'', indication:'' });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -435,8 +437,13 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Patient MRN</label>
-                    <input value={form.patientId} onChange={e => setForm(f=>({...f, patientId:e.target.value}))} placeholder="LOCAL-EHR-XXXX" className="w-full bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all" />
+                    <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Patient ID (MRN / Universal Health ID)</label>
+                    <div className="flex gap-2">
+                      <input value={form.patientId} onChange={e => setForm(f=>({...f, patientId:e.target.value}))} placeholder="Scan or enter ID..." className="flex-1 bg-[#0C1D17] border border-[#1B3028] rounded-xl px-4 py-3 text-sm focus:border-[#408D7B] transition-all" />
+                      <button onClick={() => setShowQrScanner(true)} className="px-4 bg-[#0C1D17] border border-[#1B3028] rounded-xl text-[#408D7B] hover:bg-[#408D7B]/10 transition-all flex items-center justify-center text-xl">
+                        📷
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest ml-1">Clinical Indication</label>
@@ -554,6 +561,16 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
           </div>
         </footer>
       </main>
+
+      {/* QR Scanner Modal */}
+      <QrScannerModal
+        isOpen={showQrScanner}
+        onClose={() => setShowQrScanner(false)}
+        onScan={(id) => {
+          setForm(f => ({ ...f, patientId: id }));
+          setShowQrScanner(false);
+        }}
+      />
     </div>
   );
 }

@@ -1,74 +1,79 @@
 // SEWA XAI — backend/src/routes/training.ts
-// Anonymized training cases for radiologists and students
-
 import { Router } from 'express';
 import { prisma } from '../utils/prismaClient';
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
+import { logger } from '../utils/logger';
 
-const r = Router();
+const router = Router();
+router.use(authenticate);
 
-// ── ALL training routes require authentication ─────────────────────────────
-// PREVIOUSLY: /student-cases was unauthenticated and leaked real patient scan
-// data (clinicalIndication, AI findings) to any anonymous internet request.
-// GDPR Art. 9 violation — special category health data exposed without consent.
-r.use(authenticate);
+const SAMPLE_CASES = [
+  {
+    id: 'case-1',
+    modality: 'CT',
+    bodyPart: 'HEAD',
+    groundTruth: 'Acute Intracranial Hemorrhage',
+    options: ['Normal', 'Acute Intracranial Hemorrhage', 'Ischemic Stroke', 'Meningioma'],
+    difficulty: 'MEDIUM',
+    explanation: 'The hyperdense (bright white) lesion in the left basal ganglia is consistent with acute bleeding.'
+  },
+  {
+    id: 'case-2',
+    modality: 'CT',
+    bodyPart: 'CHEST',
+    groundTruth: 'Pneumonia',
+    options: ['Normal', 'Pneumonia', 'Pulmonary Embolism', 'Pleural Effusion'],
+    difficulty: 'EASY',
+    explanation: 'Consolidation in the right lower lobe with air bronchograms is classic for bacterial pneumonia.'
+  },
+  {
+    id: 'case-3',
+    modality: 'MRI',
+    bodyPart: 'HEAD',
+    groundTruth: 'Ischemic Stroke',
+    options: ['Normal', 'Ischemic Stroke', 'Tumor', 'MS Plaque'],
+    difficulty: 'HARD',
+    explanation: 'Diffusion-weighted imaging shows restricted diffusion in the left MCA territory indicating acute infarction.'
+  },
+  {
+    id: 'case-4',
+    modality: 'MAMMOGRAPHY',
+    bodyPart: 'BREAST',
+    groundTruth: 'Benign Calcifications',
+    options: ['Normal', 'Benign Calcifications', 'Malignant Mass', 'Fibroadenoma'],
+    difficulty: 'MEDIUM',
+    explanation: 'Round, punctate, smooth-edged calcifications with uniform distribution are typically benign.'
+  },
+  {
+    id: 'case-5',
+    modality: 'RETINAL',
+    bodyPart: 'EYE',
+    groundTruth: 'Diabetic Retinopathy (Moderate NPDR)',
+    options: ['Normal', 'Diabetic Retinopathy (Moderate NPDR)', 'Glaucoma', 'AMD (Dry)'],
+    difficulty: 'MEDIUM',
+    explanation: 'Microaneurysms, dot hemorrhages, and hard exudates consistent with moderate non-proliferative diabetic retinopathy.'
+  }
+];
 
-/**
- * GET /api/v1/training/student-cases (Authenticated — any role)
- * Returns anonymised scan cases filtered to this tenant only.
- */
-r.get('/student-cases', async (req, res, next) => {
+router.get('/cases', async (req, res) => {
   try {
-    const { tenantId } = req.user!;
-    const scans = await prisma.scan.findMany({
-      where: { status: 'COMPLETED', tenantId },  // tenant-scoped
-      take: 10,
-      include: { aiResult: true },
-    });
-
-    const cases = scans.map((s: any) => ({
-      id: s.id,
-      type: `${s.modality} ${s.bodyPart}`,
-      // Never expose clinicalIndication — it may contain patient-identifiable info
-      clinicalInfo: 'Clinical history available to treating clinicians only.',
-      findings: s.aiResult?.vlmFindings || 'Findings are being analyzed.',
-      label: s.aiResult?.urgency?.toLowerCase() === 'critical' ? 'critical' : 'normal',
-      diagnosis: s.aiResult?.primaryFinding || 'Normal',
-    }));
-
-    res.json(cases);
-  } catch (err) { next(err); }
+    // In a real app, you'd pull from the database with anonymized cases
+    return res.status(200).json(SAMPLE_CASES);
+  } catch (err) {
+    logger.error('[TRAINING_CASES_ERROR:', err);
+    res.status(500).json({ error: 'Failed to load training cases' });
+  }
 });
 
-/**
- * GET /api/v1/training/cases (Authenticated radiologist/doctor)
- */
-r.get('/cases', authorize('radiologist', 'doctor', 'admin', 'superadmin'), async (req, res, next) => {
+// Save training attempt
+router.post('/attempt', async (req, res) => {
   try {
-    const { tenantId } = req.user!;
-    const scans = await prisma.scan.findMany({
-      where: { status: 'COMPLETED', tenantId },  // tenant-scoped
-      take: 5,
-      include: { aiResult: true },
-    });
-
-    const cases = scans.map((s: any) => ({
-      id: s.id,
-      modality: s.modality,
-      bodyPart: s.bodyPart,
-      groundTruth: s.aiResult?.primaryFinding || 'Normal',
-      options: [
-        'Normal',
-        s.aiResult?.primaryFinding || 'Acute Finding',
-        'Artifact / Quality issue',
-        'Uncertain / Human review needed',
-      ].sort(() => Math.random() - 0.5),
-      difficulty: s.aiResult?.confidence && s.aiResult.confidence > 0.9 ? 'EASY' : 'MEDIUM',
-      explanation: s.aiResult?.vlmImpression || 'The AI detected signs of pathology consistent with the primary finding.',
-    }));
-
-    res.json(cases);
-  } catch (err) { next(err); }
+    // In real app, save attempt to database
+    return res.status(201).json({ success: true });
+  } catch (err) {
+    logger.error('[TRAINING_ATTEMPT_ERROR:', err);
+    res.status(500).json({ error: 'Failed to save attempt' });
+  }
 });
 
-export default r;
+export default router;

@@ -162,6 +162,10 @@ model Patient {
   allergies         String[]
   conditions        String[]
   nhsNumber         String? // National Health Service Number (UK specific)
+  nghiaNumber       String? // NHIA Number (Ghana specific)
+  nhifNumber        String? // NHIF Number (Kenya specific)
+  ninNumber         String? // National Identification Number (Nigeria specific)
+  universalHealthId String? // Universal Health ID (cross-jurisdiction)
   fhirId            String? // FHIR Patient resource ID
   consentAI         Boolean   @default(true)
   consentResearch   Boolean   @default(false)

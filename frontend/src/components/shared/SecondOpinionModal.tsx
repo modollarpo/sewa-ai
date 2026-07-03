@@ -1,15 +1,25 @@
 // SEWA XAI — Second Opinion Modal
-import React, { useState } from 'react';
-import { createSecondOpinion } from '../../services/apiClient';
+import React, { useState, useEffect } from 'react';
+import { createSecondOpinion, getSpecialists } from '../../services/apiClient';
 
 const C = {
   bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
   brand:'#408D7B', brandLt:'#52B09A', brandDk:'#2E6B5E',
-  critical:'#E03535', textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
+  critical:'#E03535', urgent:'#E08A20', normal:'#1DBF73',
+  textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
   border:'#1B3028',
   F:"'IBM Plex Sans',system-ui,sans-serif",
   FM:"'IBM Plex Mono',monospace",
 };
+
+interface Specialist {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  speciality?: string;
+  email: string;
+}
 
 interface SecondOpinionModalProps {
   isOpen: boolean;
@@ -20,9 +30,18 @@ interface SecondOpinionModalProps {
 
 export function SecondOpinionModal({ isOpen, onClose, scanId, reportId }: SecondOpinionModalProps) {
   const [notes, setNotes] = useState('');
+  const [reason, setReason] = useState('');
+  const [priority, setPriority] = useState<'STAT'|'URGENT'|'ROUTINE'>('ROUTINE');
   const [assignedToId, setAssignedToId] = useState('');
+  const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      getSpecialists().then(setSpecialists).catch(console.error);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -30,7 +49,14 @@ export function SecondOpinionModal({ isOpen, onClose, scanId, reportId }: Second
     e.preventDefault();
     setLoading(true);
     try {
-      await createSecondOpinion({ scanId, reportId, notes, assignedToId: assignedToId || undefined });
+      await createSecondOpinion({ 
+        scanId, 
+        reportId, 
+        notes, 
+        reason,
+        priority,
+        assignedToId: assignedToId || undefined 
+      });
       setSuccess(true);
       setTimeout(onClose, 1500);
     } catch (err) {
@@ -47,7 +73,7 @@ export function SecondOpinionModal({ isOpen, onClose, scanId, reportId }: Second
     }} onClick={onClose}>
       <div style={{
         background:C.bg1, borderRadius:16, border:`1px solid ${C.border}`,
-        width:'100%', maxWidth:500, padding:24,
+        width:'100%', maxWidth:600, padding:24, maxHeight:'90vh', overflowY:'auto',
       }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
           <h3 style={{ margin:0, fontSize:20, fontWeight:800, color:C.textHi, fontFamily:C.F }}>Request Second Opinion</h3>
@@ -59,6 +85,39 @@ export function SecondOpinionModal({ isOpen, onClose, scanId, reportId }: Second
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:16 }}>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:C.textLo, letterSpacing:'0.08em', textTransform:'uppercase', display:'block', marginBottom:6, fontFamily:C.F }}>Priority</label>
+              <div style={{ display:'flex', gap:10 }}>
+                {(['STAT','URGENT','ROUTINE'] as const).map((p) => (
+                  <button key={p} type="button" onClick={() => setPriority(p)}
+                    style={{ flex:1, padding:'10px 12px', borderRadius:10, border:`1px solid ${priority === p ? (p === 'STAT' ? C.critical : p === 'URGENT' ? C.urgent : C.brand) : C.border}`,
+                    background:priority === p ? (p === 'STAT' ? C.critical + '20' : p === 'URGENT' ? C.urgent + '20' : C.brand + '20') : C.bg2,
+                    color:priority === p ? (p === 'STAT' ? C.critical : p === 'URGENT' ? C.urgent : C.brand) : C.textMd,
+                    cursor:'pointer', fontSize:13, fontFamily:C.F, fontWeight:600 }}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:C.textLo, letterSpacing:'0.08em', textTransform:'uppercase', display:'block', marginBottom:6, fontFamily:C.F }}>Reason</label>
+              <input value={reason} onChange={(e) => setReason(e.target.value)}
+                style={{ width:'100%', background:C.bg2, border:`1px solid ${C.border}`, borderRadius:10, padding:12, color:C.textHi, fontFamily:C.F, fontSize:14 }}
+                placeholder="Brief reason for second opinion..."
+              />
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:C.textLo, letterSpacing:'0.08em', textTransform:'uppercase', display:'block', marginBottom:6, fontFamily:C.F }}>Assign to Specialist (Optional)</label>
+              <select value={assignedToId} onChange={(e) => setAssignedToId(e.target.value)}
+                style={{ width:'100%', background:C.bg2, border:`1px solid ${C.border}`, borderRadius:10, padding:12, color:C.textHi, fontFamily:C.F, fontSize:14 }}>
+                <option value="">Auto-assign to best specialist</option>
+                {specialists.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.firstName} {s.lastName} — {s.speciality || s.role}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label style={{ fontSize:11, fontWeight:700, color:C.textLo, letterSpacing:'0.08em', textTransform:'uppercase', display:'block', marginBottom:6, fontFamily:C.F }}>Notes for Reviewer</label>
               <textarea value={notes} onChange={(e) => setNotes(e.target.value)}

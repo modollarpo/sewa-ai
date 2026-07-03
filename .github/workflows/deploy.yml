@@ -209,6 +209,9 @@ jobs:
           - service: ai-continuous
             dockerfile: ai-services/continuous-learning/Dockerfile
             context: ai-services/continuous-learning
+          - service: ai-pathology
+            dockerfile: ai-services/pathology/Dockerfile
+            context: ai-services/pathology
     steps:
       - uses: actions/checkout@v4
 
@@ -309,7 +312,7 @@ jobs:
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
           TAG="main-${SHORT_SHA}"
-          SERVICES="backend frontend ai-triage ai-vlm ai-uncertainty ai-metacognition ai-federated ai-continuous"
+          SERVICES="backend frontend ai-triage ai-vlm ai-uncertainty ai-metacognition ai-federated ai-continuous ai-pathology"
           for svc in $SERVICES; do
             kubectl set image deployment/sewa-${svc} sewa-${svc}=sewaairegistry.azurecr.io/sewa-${svc}:${TAG} -n sewa-ai
           done

@@ -5,6 +5,7 @@ import { Router } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { authenticate, authorize } from '../middleware/auth';
 import { generateComplianceReport } from '../services/compliance-evidence';
+import { logger } from '../utils/logger';
 
 const r = Router();
 
@@ -60,6 +61,61 @@ r.get('/report', async (req, res, next) => {
     const report = await generateComplianceReport(tenantId, framework);
     res.json(report);
   } catch (err) { next(err); }
+});
+
+// --------------- EU AI ACT ENDPOINTS ---------------
+const EU_AI_ACT_MODELS = [
+  { id: 'triage-ct-head', name: 'CT Head Triage', riskCategory: 'HIGH', status: 'REGISTERED' },
+  { id: 'triage-ct-chest', name: 'CT Chest Triage', riskCategory: 'HIGH', status: 'REGISTERED' },
+  { id: 'triage-xray-chest', name: 'Chest X-Ray Triage', riskCategory: 'MEDIUM', status: 'REGISTERED' },
+  { id: 'mammography', name: 'Mammography Screening', riskCategory: 'HIGH', status: 'REGISTERED' },
+  { id: 'retinal-dr', name: 'Diabetic Retinopathy Screening', riskCategory: 'MEDIUM', status: 'REGISTERED' }
+];
+
+// Get all EU AI Act registered models
+r.get('/eu-ai-act/models', async (req, res, next) => {
+  try {
+    res.json(EU_AI_ACT_MODELS);
+  } catch (err) {
+    logger.error('[EU_AI_ACT] Failed to get models:', err);
+    next(err);
+  }
+});
+
+// Get EU AI Act registration summary
+r.get('/eu-ai-act/summary', async (req, res, next) => {
+  try {
+    const tenantId = (req as any).user.tenantId;
+    const total = EU_AI_ACT_MODELS.length;
+    const highRisk = EU_AI_ACT_MODELS.filter(m => m.riskCategory === 'HIGH').length;
+    const mediumRisk = EU_AI_ACT_MODELS.filter(m => m.riskCategory === 'MEDIUM').length;
+
+    res.json({
+      total,
+      highRisk,
+      mediumRisk,
+      lastUpdated: new Date().toISOString(),
+      tenantId
+    });
+  } catch (err) {
+    logger.error('[EU_AI_ACT] Failed to get summary:', err);
+    next(err);
+  }
+});
+
+// Add EU AI Act model documentation note (demo)
+r.post('/eu-ai-act/documentation', async (req, res, next) => {
+  try {
+    const { modelId, notes } = req.body;
+    if (!modelId || !notes) {
+      return res.status(400).json({ error: 'modelId and notes are required' });
+    }
+
+    res.json({ success: true, modelId, notes, timestamp: new Date().toISOString() });
+  } catch (err) {
+    logger.error('[EU_AI_ACT] Failed to add documentation:', err);
+    next(err);
+  }
 });
 
 export default r;

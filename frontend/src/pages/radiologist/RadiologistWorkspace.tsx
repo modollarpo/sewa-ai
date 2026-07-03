@@ -1066,21 +1066,54 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
           <>
             {/* Panel 1: Worklist Sidebar */}
             <aside className="w-80 flex flex-col bg-[#08160F] border-r border-[#1B3028] shadow-2xl z-10 transition-all duration-300">
-              <div className="p-4 border-b border-[#1B3028] bg-[#0C1D17]/50 backdrop-blur-md flex justify-between items-center">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-[#3A6055] uppercase tracking-widest mb-0.5">Radiology Worklist</span>
-                  <span className="text-sm font-extrabold text-[#D0ECE6]">
-                    {tab === 'worklist' ? `Active Scans (${stats.total})` : `Pending Second Opinions (${pendingOpinions.length})`}
-                  </span>
+              <div className="p-4 border-b border-[#1B3028] bg-[#0C1D17]/50 backdrop-blur-md flex flex-col gap-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-[#3A6055] uppercase tracking-widest mb-0.5">Radiology Worklist</span>
+                    <span className="text-sm font-extrabold text-[#D0ECE6]">
+                      {tab === 'worklist' ? `Active Scans (${stats.total})` : `Pending Second Opinions (${pendingOpinions.length})`}
+                    </span>
+                  </div>
+                  <Tooltip content="Launch Training Simulator">
+                    <button 
+                      onClick={() => onNavigate('training')} 
+                      className="p-2 rounded-lg bg-[#408D7B]/10 text-[#408D7B] border border-[#408D7B]/20 hover:bg-[#408D7B]/20 transition-all active:scale-95"
+                    >
+                      🎓
+                    </button>
+                  </Tooltip>
                 </div>
-                <Tooltip content="Launch Training Simulator">
-                  <button 
-                    onClick={() => onNavigate('training')} 
-                    className="p-2 rounded-lg bg-[#408D7B]/10 text-[#408D7B] border border-[#408D7B]/20 hover:bg-[#408D7B]/20 transition-all active:scale-95"
-                  >
-                    🎓
-                  </button>
-                </Tooltip>
+                {/* Natural Language Query Search */}
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6FA898] text-xs">
+                    💬
+                  </div>
+                  <input 
+                    placeholder="Ask: \"show me all STAT head CTs from today\" or \"find critical chest X-rays\""
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#050F0C] border border-[#1B3028] text-[11px] text-[#D0ECE6] outline-none focus:border-[#408D7B] transition-all"
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter') {
+                        const query = e.currentTarget.value.trim();
+                        if (!query) return;
+                        
+                        try {
+                          const result = await apiClient.post('/nlq/query', { query });
+                          const data = result.data;
+                          if (data.results && data.results.length > 0) {
+                            // Update scan store or local state
+                            handleSelect(data.results[0]);
+                            setStatus({ msg: data.summary, type: 'ok' });
+                          } else {
+                            setStatus({ msg: data.summary, type: 'err' });
+                          }
+                        } catch (err: any) {
+                          console.error('[NLQ] Failed:', err);
+                          setStatus({ msg: 'Query failed: ' + (err.response?.data?.message || err.message), type: 'err' });
+                        }
+                      }
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Tab bar for switching between worklist, second opinions, and peer review */}

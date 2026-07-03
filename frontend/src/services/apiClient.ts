@@ -100,17 +100,38 @@ export async function updateFeedback(id: string, data: { status?: string; priori
 }
 
 // Second Opinion API
+export async function getSpecialists() {
+  const res = await apiClient.get('/second-opinions/specialists');
+  return res.data;
+}
+
+export async function getAllSecondOpinions() {
+  const res = await apiClient.get('/second-opinions');
+  return res.data;
+}
+
 export async function getPendingSecondOpinions() {
   const res = await apiClient.get('/second-opinions/pending');
   return res.data;
 }
 
-export async function createSecondOpinion(data: { scanId: string; reportId?: string; assignedToId?: string; notes?: string }) {
+export async function createSecondOpinion(data: { 
+  scanId: string; 
+  reportId?: string; 
+  assignedToId?: string; 
+  notes?: string;
+  priority?: 'STAT'|'URGENT'|'ROUTINE';
+  reason?: string;
+}) {
   const res = await apiClient.post('/second-opinions', data);
   return res.data;
 }
 
-export async function updateSecondOpinion(id: string, data: { status?: string; findings?: string; impression?: string; recommendation?: string }) {
+export async function updateSecondOpinion(id: string, data: { 
+  status?: string; 
+  reviewNotes?: string;
+  agreedWithAI?: boolean;
+}) {
   const res = await apiClient.patch(`/second-opinions/${id}`, data);
   return res.data;
 }
