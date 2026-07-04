@@ -83,11 +83,13 @@ export const config = {
   // Azure: http://ai-triage:8000 … (AKS internal DNS)
   AI_SERVICE_URL:            optional('AI_SERVICE_URL',            optional('TRIAGE_URL',         IS_AZURE ? 'http://sewa-triage:8000'        : 'http://localhost:8000')),
   VLM_SERVICE_URL:           optional('VLM_SERVICE_URL',           optional('VLM_URL',            IS_AZURE ? 'http://sewa-vlm-report:8001'   : 'http://localhost:8001')),
-  UNCERTAINTY_SERVICE_URL:   optional('UNCERTAINTY_SERVICE_URL',   optional('UNCERTAINTY_URL',    IS_AZURE ? 'http://sewa-uncertainty:8002'  : 'http://localhost:8002')),
+  UNCERTAINTY_SERVICE_URL:   optional('UNCERTAINTY_SERVICE_URL',   optional('UNCERTAINTY_URL',    IS_AZURE ? 'http://sewa-uncertainty:8009'  : 'http://localhost:8009')),
   METACOGNITION_SERVICE_URL: optional('METACOGNITION_SERVICE_URL', optional('METACOGNITION_URL', IS_AZURE ? 'http://sewa-metacognition:8003' : 'http://localhost:8003')),
-  FL_SERVICE_URL:            optional('FL_SERVICE_URL',            IS_AZURE ? 'http://sewa-federated-learning:8004' : 'http://localhost:8004'),
-  CL_SERVICE_URL:            optional('CL_SERVICE_URL',            IS_AZURE ? 'http://sewa-continuous-learning:8005' : 'http://localhost:8005'),
-  PATHOLOGY_SERVICE_URL:     optional('PATHOLOGY_SERVICE_URL',     IS_AZURE ? 'http://sewa-pathology:8002'          : 'http://localhost:8006'),
+  FL_SERVICE_URL:            optional('FL_SERVICE_URL',            IS_AZURE ? 'http://sewa-federated:8004' : 'http://localhost:8004'),
+  CL_SERVICE_URL:            optional('CL_SERVICE_URL',            IS_AZURE ? 'http://sewa-continuous:8005' : 'http://localhost:8005'),
+  PATHOLOGY_SERVICE_URL:     optional('PATHOLOGY_SERVICE_URL',     IS_AZURE ? 'http://sewa-pathology:8002'          : 'http://localhost:8002'),
+  MAMMOGRAPHY_SERVICE_URL:   optional('MAMMOGRAPHY_SERVICE_URL',   IS_AZURE ? 'http://sewa-mammography:8007'        : 'http://localhost:8007'),
+  RETINAL_SERVICE_URL:       optional('RETINAL_SERVICE_URL',       IS_AZURE ? 'http://sewa-retinal:8008'            : 'http://localhost:8008'),
 
   // ── FHIR R4 ──────────────────────────────────────────────────
   FHIR_BASE_URL:      optional('FHIR_BASE_URL'),

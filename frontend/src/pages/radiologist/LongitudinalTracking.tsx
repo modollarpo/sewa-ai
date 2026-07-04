@@ -6,6 +6,7 @@ const C = {
   bg1: '#08160F', bg2: '#0C1D17', bg3: '#111F1A',
   brand: '#408D7B', brandLt: '#52B09A',
   normal: '#1DBF73', urgent: '#E08A20', critical: '#E03535',
+  normalBg: '#1DBF7314', urgentBg: '#E08A2014', critBg: '#E0353514',
   textHi: '#D0ECE6', textMd: '#6FA898', textLo: '#3A6055',
   border: '#1B3028',
   F: "'IBM Plex Sans',system-ui,sans-serif",

@@ -70,8 +70,11 @@ services:
       AI_SERVICE_URL:       http://ai-triage:8000
       TRIAGE_URL:           http://ai-triage:8000
       VLM_URL:              http://ai-vlm:8001
-      UNCERTAINTY_URL:      http://ai-uncertainty:8002
+      UNCERTAINTY_URL:      http://ai-uncertainty:8009
       METACOGNITION_URL:    http://ai-metacognition:8003
+      PATHOLOGY_SERVICE_URL: http://ai-pathology:8002
+      MAMMOGRAPHY_SERVICE_URL: http://ai-mammography:8007
+      RETINAL_SERVICE_URL:   http://ai-retinal:8008
       FL_SERVICE_URL:       http://ai-federated:8004
       CL_SERVICE_URL:       http://ai-continuous:8005
       # Email (mailhog in dev)
@@ -88,7 +91,7 @@ services:
       # Storage (Azurite emulator in dev)
       AZURE_STORAGE_CONNECTION_STRING: "UseDevelopmentStorage=true"
       AZURE_STORAGE_CONTAINER: scans
-      AI_UNCERTAINTY_URL:   http://ai-uncertainty:8002
+      AI_UNCERTAINTY_URL:   http://ai-uncertainty:8009
       AI_METACOGNITION_URL: http://ai-metacognition:8003
       AI_VLM_URL:           http://ai-vlm:8001
       CORS_ORIGINS:         http://localhost:5173,http://localhost:3001
@@ -178,7 +181,110 @@ services:
     restart: unless-stopped
     networks: [sewa-net]
     ports:
+      - "8009:8009"
+    volumes:
+      - model-cache:/models
+    environment:
+      MODEL_CACHE:          /models
+      MODEL_VERSION:        v2.4.1
+      MC_DROPOUT_PASSES:    "10"
+      MC_NOISE_STD:         "0.05"
+      VCPU_COUNT:           "4"
+      OMP_NUM_THREADS:      "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS:      "1"
+      AZURE_STORAGE_URL:    ""
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5000,http://localhost:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8009/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
+  ai-pathology:
+    build:
+      context: ./ai-services/pathology
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [sewa-net]
+    ports:
       - "8002:8002"
+    volumes:
+      - model-cache:/models
+    environment:
+      MODEL_CACHE:         /models
+      MODEL_VERSION:       v1.0.0
+      VCPU_COUNT:          "4"
+      MAX_BATCH_SIZE:      "2"
+      MAX_BATCH_WAIT_MS:   "50"
+      OMP_NUM_THREADS:     "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS:     "1"
+      AZURE_STORAGE_URL:   ""
+      ALLOWED_ORIGINS:     "http://localhost:3000,http://localhost:5000,http://localhost:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
+  ai-mammography:
+    build:
+      context: ./ai-services/mammography
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [sewa-net]
+    ports:
+      - "8007:8007"
+    volumes:
+      - model-cache:/models
+    environment:
+      MODEL_CACHE:         /models
+      MODEL_VERSION:       v1.0.0
+      VCPU_COUNT:          "4"
+      MAX_BATCH_SIZE:      "2"
+      MAX_BATCH_WAIT_MS:   "50"
+      OMP_NUM_THREADS:     "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS:     "1"
+      AZURE_STORAGE_URL:   ""
+      ALLOWED_ORIGINS:     "http://localhost:3000,http://localhost:5000,http://localhost:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8007/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
+  ai-retinal:
+    build:
+      context: ./ai-services/retinal
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [sewa-net]
+    ports:
+      - "8008:8008"
+    volumes:
+      - model-cache:/models
+    environment:
+      MODEL_CACHE:         /models
+      MODEL_VERSION:       v1.0.0
+      VCPU_COUNT:          "4"
+      MAX_BATCH_SIZE:      "2"
+      MAX_BATCH_WAIT_MS:   "50"
+      OMP_NUM_THREADS:     "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS:     "1"
+      AZURE_STORAGE_URL:   ""
+      ALLOWED_ORIGINS:     "http://localhost:3000,http://localhost:5000,http://localhost:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8008/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
     volumes:
       - model-cache:/models
     environment:

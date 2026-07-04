@@ -21,6 +21,8 @@ r.get('/health', async (req, res, next) => {
       { name: 'Uncertainty Engine',   url: config.UNCERTAINTY_SERVICE_URL },
       { name: 'Metacognition AI',     url: config.METACOGNITION_SERVICE_URL },
       { name: 'Pathology AI',         url: config.PATHOLOGY_SERVICE_URL },
+      { name: 'Mammography AI',       url: config.MAMMOGRAPHY_SERVICE_URL },
+      { name: 'Retinal AI',           url: config.RETINAL_SERVICE_URL },
       { name: 'Federated Learning',   url: config.FL_SERVICE_URL },
       { name: 'Continuous Learning',  url: config.CL_SERVICE_URL },
     ];

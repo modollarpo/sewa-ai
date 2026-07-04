@@ -33,7 +33,7 @@ Out-Success "Backend build complete."
 
 # 3. Build & Push AI Services
 Write-Host "[3/6] Building AI Services via ACR Tasks..." -ForegroundColor Yellow
-$AI_SERVICES = @{ "triage"="triage"; "uncertainty"="uncertainty"; "vlm-report"="vlm-report"; "metacognition"="metacognition"; "federated"="federated-learning"; "continuous"="continuous-learning"; "pathology"="pathology" }
+$AI_SERVICES = @{ "triage"="triage"; "uncertainty"="uncertainty"; "vlm-report"="vlm-report"; "metacognition"="metacognition"; "federated"="federated-learning"; "continuous"="continuous-learning"; "pathology"="pathology"; "mammography"="mammography"; "retinal"="retinal" }
 foreach ($svc in $AI_SERVICES.Keys) {
     $dir = $AI_SERVICES[$svc]
     Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan

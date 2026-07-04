@@ -408,4 +408,4 @@ async def health() -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8002, workers=1, loop="uvloop", access_log=False)
+    uvicorn.run("main:app", host="0.0.0.0", port=8009, workers=1, loop="uvloop", access_log=False)

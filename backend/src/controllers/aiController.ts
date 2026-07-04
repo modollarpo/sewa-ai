@@ -12,6 +12,9 @@ const AI_SERVICE_URLS: Record<string, string> = {
   uncertainty:   config.UNCERTAINTY_SERVICE_URL,
   metacognition: config.METACOGNITION_SERVICE_URL,
   pathology:     config.PATHOLOGY_SERVICE_URL,
+  mammography:   config.MAMMOGRAPHY_SERVICE_URL,
+  retinal:       config.RETINAL_SERVICE_URL,
+  xai:           config.AI_SERVICE_URL, // XAI uses the main AI service
   federated:     config.FL_SERVICE_URL,
   continuous:    config.CL_SERVICE_URL,
 };

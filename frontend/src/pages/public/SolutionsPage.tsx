@@ -76,6 +76,45 @@ const ENGINES = [
     ],
     pipeline:'AI Result → Grad-CAM backward pass → SHAP TreeExplainer → Heatmap overlay → DICOM viewer render',
   },
+  {
+    id:'pathology', icon:'🔬', label:'Pathology Engine', color:C.info,
+    headline:'Digital pathology with H&E stain normalization',
+    description:'Our Digital Pathology Engine analyzes H&E-stained tissue slides using Macenko SVD-based stain normalization to reduce batch effects. It provides patch-level carcinoma detection, Gleason grade estimation for prostate tissue, and Ki67 proliferation index estimates — all on standard CPU hardware.',
+    conditions:['Invasive Carcinoma','Adenocarcinoma','High-Grade Dysplasia','Malignancy','Tuberculosis Granuloma','Inflammatory Infiltrate','Necrosis','Normal Tissue'],
+    metrics:[
+      { label:'Tile analysis time', value:'<1.8s' },
+      { label:'Stain normalisation', value:'Macenko' },
+      { label:'Gleason grade', value:'Prostate-only' },
+      { label:'Ki67 estimate', value:'Built-in' },
+    ],
+    pipeline:'Tile → Stain normalization → EfficientNet-B0 → Classification → Metrics estimation → MDT alert',
+  },
+  {
+    id:'mammography', icon:'🩺', label:'Mammography Engine', color:C.brand,
+    headline:'Breast cancer detection with BI-RADS classification',
+    description:'Our Mammography Engine provides BI-RADS classification (0-5), mass detection, and micro-calcification identification. It runs on standard CPU hardware, making it accessible to clinics globally — even in low-resource settings where GPU access is limited.',
+    conditions:['Normal Breast Tissue','Benign Mass','Malignant Mass','Benign Calcifications','Malignant Calcifications','Architectural Distortion','Asymmetry','Lymphadenopathy'],
+    metrics:[
+      { label:'BI-RADS scale', value:'0-5' },
+      { label:'Inference time', value:'<2.0s' },
+      { label:'Sensitivity (malignant)', value:'93.5%' },
+      { label:'Findings', value:'8' },
+    ],
+    pipeline:'Mammogram → Preprocessing → Classification → BI-RADS → Urgency scoring → Recommendations',
+  },
+  {
+    id:'retinal', icon:'👁️', label:'Retinal Engine', color:C.normal,
+    headline:'Diabetic retinopathy grading and more',
+    description:'Our Retinal Engine provides diabetic retinopathy grading (0-4), glaucoma detection, AMD identification, and retinal vascular occlusion analysis — all on standard CPU hardware, perfect for mobile clinics and underserved regions.',
+    conditions:['Normal Retina','No DR','Mild NPDR','Moderate NPDR','Severe NPDR','PDR','Glaucoma Suspect','Primary Open-Angle Glaucoma','Dry AMD','Wet AMD','Hypertensive Retinopathy','Retinal Vein Occlusion','Retinal Artery Occlusion'],
+    metrics:[
+      { label:'DR grading', value:'0-4' },
+      { label:'Inference time', value:'<1.9s' },
+      { label:'Sensitivity (PDR)', value:'95.2%' },
+      { label:'Conditions', value:'8+' },
+    ],
+    pipeline:'Fundus photo → Preprocessing → Classification → DR grade → Urgency scoring → Recommendations',
+  },
 ];
 
 const ROLES = [
@@ -126,7 +165,7 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         <div style={{ maxWidth:720, margin:'0 auto' }}>
           <Tag label="Clinical AI Platform" color={C.brand} />
           <h1 className="hero-h1" style={{ fontSize:'clamp(32px, 8vw, 52px)', fontWeight:900, color:C.textHi, margin:'20px 0 18px', letterSpacing:'-0.04em', lineHeight:1.1, fontFamily:C.F }}>
-            Five AI engines.<br/>One clinical platform.
+            Eight AI engines.<br/>One clinical platform.
           </h1>
           <p style={{ fontSize:15, color:C.textMd, lineHeight:1.8, margin:'0 0 36px' }}>
             SEWA XAI is not a single model — it is a layered clinical intelligence pipeline. Each engine is independently validated, explainable, and designed to improve patient outcomes at every step of the diagnostic workflow.
@@ -181,7 +220,7 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
               </div>
               <div style={{ padding:16, background:`${engine.color}14`, borderRadius:12, border:`1px solid ${engine.color}40`, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center' }}>
                 <div style={{ fontSize:12, fontWeight:700, color:engine.color, marginBottom:4 }}>Dedicated Engine Page</div>
-                <button onClick={() => onNavigate(engine.id === 'triage' ? 'triage-ai' : engine.id === 'uncertainty' ? 'uncertainty-ai' : engine.id === 'metacognition' ? 'metacognition-ai' : engine.id === 'vlm' ? 'vision-language-ai' : 'explainable-ai')} style={{ background:engine.color, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, padding:'6px 12px', cursor:'pointer' }}>
+                <button onClick={() => onNavigate(engine.id === 'triage' ? 'triage-ai' : engine.id === 'uncertainty' ? 'uncertainty-ai' : engine.id === 'metacognition' ? 'metacognition-ai' : engine.id === 'vlm' ? 'vision-language-ai' : engine.id === 'pathology' ? 'pathology-ai' : engine.id === 'mammography' ? 'mammography-ai' : engine.id === 'retinal' ? 'retinal-ai' : 'explainable-ai')} style={{ background:engine.color, border:'none', borderRadius:6, color:'white', fontSize:10, fontWeight:700, padding:'6px 12px', cursor:'pointer' }}>
                   Full Technical Breakdown →
                 </button>
               </div>

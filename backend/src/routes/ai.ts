@@ -10,6 +10,9 @@ r.get('/vlm/health',          ctrl.getAIHealth('vlm'));
 r.get('/uncertainty/health',  ctrl.getAIHealth('uncertainty'));
 r.get('/metacognition/health',ctrl.getAIHealth('metacognition'));
 r.get('/pathology/health',    ctrl.getAIHealth('pathology'));
+r.get('/mammography/health',  ctrl.getAIHealth('mammography'));
+r.get('/retinal/health',      ctrl.getAIHealth('retinal'));
+r.get('/xai/health',          ctrl.getAIHealth('xai'));
 r.get('/federated/health',    ctrl.getAIHealth('federated'));
 r.get('/continuous/health',   ctrl.getAIHealth('continuous'));
 

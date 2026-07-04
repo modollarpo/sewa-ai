@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [triage, vlm-report, uncertainty, metacognition]
+        service: [triage, vlm-report, uncertainty, metacognition, mammography, retinal]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -212,6 +212,12 @@ jobs:
           - service: ai-pathology
             dockerfile: ai-services/pathology/Dockerfile
             context: ai-services/pathology
+          - service: ai-mammography
+            dockerfile: ai-services/mammography/Dockerfile
+            context: ai-services/mammography
+          - service: ai-retinal
+            dockerfile: ai-services/retinal/Dockerfile
+            context: ai-services/retinal
     steps:
       - uses: actions/checkout@v4
 
@@ -312,7 +318,7 @@ jobs:
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
           TAG="main-${SHORT_SHA}"
-          SERVICES="backend frontend ai-triage ai-vlm ai-uncertainty ai-metacognition ai-federated ai-continuous ai-pathology"
+          SERVICES="backend frontend ai-triage ai-vlm ai-uncertainty ai-metacognition ai-federated ai-continuous ai-pathology ai-mammography ai-retinal"
           for svc in $SERVICES; do
             kubectl set image deployment/sewa-${svc} sewa-${svc}=sewaairegistry.azurecr.io/sewa-${svc}:${TAG} -n sewa-ai
           done
