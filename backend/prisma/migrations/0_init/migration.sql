@@ -58,6 +58,7 @@ CREATE TABLE "User" (
     "biometricKey" TEXT,
     "status" TEXT NOT NULL DEFAULT 'active',
     "lastLoginAt" TIMESTAMP(3),
+    "stripeAccountId" TEXT,
     "fcmTokens" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "whatsappNumber" TEXT,
     "whatsappVerified" BOOLEAN NOT NULL DEFAULT false,
@@ -120,6 +121,9 @@ CREATE TABLE "Scan" (
     "pacsUrl" TEXT,
     "storageUrl" TEXT,
     "fileSize" INTEGER,
+    "accessionNumber" TEXT,
+    "origin" TEXT NOT NULL DEFAULT 'cloud',
+    "fileName" TEXT,
     "clinicalIndication" TEXT,
     "technique" TEXT,
     "fhirImagingStudyId" TEXT,
@@ -437,7 +441,6 @@ CREATE INDEX "Tenant_region_idx" ON "Tenant"("region");
 
 -- CreateIndex
 CREATE INDEX "Tenant_status_idx" ON "Tenant"("status");
-
 -- CreateIndex
 CREATE INDEX "User_role_idx" ON "User"("role");
 
@@ -482,6 +485,9 @@ CREATE INDEX "Scan_urgency_idx" ON "Scan"("urgency");
 
 -- CreateIndex
 CREATE INDEX "Scan_requiresHumanReview_idx" ON "Scan"("requiresHumanReview");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Scan_accessionNumber_key" ON "Scan"("accessionNumber");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AIResult_scanId_key" ON "AIResult"("scanId");
