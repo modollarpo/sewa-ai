@@ -46,7 +46,7 @@ describe('POST /api/v1/auth/login', () => {
   it('rejects invalid credentials', async () => {
     const res = await request(app.default)
       .post('/api/v1/auth/login')
-      .send({ email: 'nonexistent@sewaxai.health', password: 'wrongpassword' });
+      .send({ email: 'nonexistent@sewaxai.health', password: 'wrongpassword', tenantSlug: 'invalid-tenant' });
     expect(res.status).toBe(401);
   });
 

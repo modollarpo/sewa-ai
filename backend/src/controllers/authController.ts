@@ -31,6 +31,10 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password, tenantSlug } = req.body;
 
+    if (!email || !password || !tenantSlug) {
+      throw new AppError('Email, password, and tenantSlug are required', 400);
+    }
+
     const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
     if (!tenant || tenant.status === 'suspended') {
       throw new AppError('Invalid tenant or account suspended', 401);
