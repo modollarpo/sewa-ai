@@ -1,39 +1,84 @@
-import axios from 'axios';
-import { generateVLMReport, generateICDCodes } from '../services/aiService';
-import { prisma } from '../utils/prismaClient';
+/**
+ * AI Service — Circuit Breaker & ICD Code Tests
+ *
+ * Strategy: mock createAxiosInstance via inline factory so Jest hoisting
+ * sees the mock before aiService.ts (and its transitive imports) execute
+ * axios.create() / instance.interceptors.
+ */
 
-jest.mock('axios');
+// ── Shared mock axios instance ────────────────────────────────────────────
+const mockPost = jest.fn();
+
+jest.mock('../utils/axiosInstance', () => ({
+  createAxiosInstance: jest.fn(() => ({
+    post: mockPost,
+    get:  jest.fn(),
+    put:  jest.fn(),
+    delete: jest.fn(),
+    interceptors: {
+      request:  { use: jest.fn(), eject: jest.fn() },
+      response: { use: jest.fn(), eject: jest.fn() },
+    },
+  })),
+}));
+
+// ── Seal off side-effect-heavy modules ───────────────────────────────────
+jest.mock('../index', () => ({
+  io: { to: jest.fn().mockReturnValue({ emit: jest.fn() }) },
+}));
+jest.mock('../config/redis', () => ({
+  redisClient: { setex: jest.fn().mockResolvedValue('OK') },
+}));
+jest.mock('../services/alertService', () => ({
+  alertService: { dispatch: jest.fn().mockResolvedValue(undefined) },
+}));
+jest.mock('../services/dlqService', () => ({
+  dlq: { enqueue: jest.fn().mockResolvedValue(undefined) },
+}));
+jest.mock('../utils/audit', () => ({
+  auditLog: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../utils/prismaClient', () => ({
   prisma: {
     aIResult: {
-      update: jest.fn(),
-      findUnique: jest.fn()
-    }
+      update:     jest.fn(),
+      findUnique: jest.fn(),
+    },
   },
   tenantStorage: {
-    getStore: jest.fn()
-  }
+    getStore: jest.fn(),
+  },
 }));
 
+// ── Imports (after mocks) ─────────────────────────────────────────────────
+import { generateVLMReport, generateICDCodes } from '../services/aiService';
+import { prisma } from '../utils/prismaClient';
+
+// ── Tests ─────────────────────────────────────────────────────────────────
 describe('AI Service Circuit Breaker', () => {
   beforeEach(() => {
+    mockPost.mockReset();
     jest.clearAllMocks();
   });
 
   it('should successfully generate report on API success', async () => {
-    (axios.post as jest.Mock).mockResolvedValueOnce({ data: { impression: 'Normal' } });
+    mockPost.mockResolvedValueOnce({ data: { impression: 'Normal' } });
     (prisma.aIResult.update as jest.Mock).mockResolvedValueOnce({});
 
     const result = await generateVLMReport('scan1', 'tenant1');
+
     expect(result.impression).toBe('Normal');
-    expect(axios.post).toHaveBeenCalled();
+    expect(mockPost).toHaveBeenCalled();
     expect(prisma.aIResult.update).toHaveBeenCalled();
   });
 
   it('should trigger circuit breaker and throw error on API failure', async () => {
-    (axios.post as jest.Mock).mockRejectedValueOnce(new Error('Network Error'));
-    
-    await expect(generateVLMReport('scan1', 'tenant1')).rejects.toThrow('VLM Engine currently unavailable. Request queued for secondary processing.');
+    mockPost.mockRejectedValueOnce(new Error('Network Error'));
+
+    await expect(generateVLMReport('scan1', 'tenant1')).rejects.toThrow(
+      'VLM Engine currently unavailable. Request queued for secondary processing.',
+    );
   });
 });
 
