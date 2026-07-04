@@ -28,4 +28,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS "Scan_accessionNumber_key" ON "Scan"("accessio
 
 -- ── User ──────────────────────────────────────────────────────────────────
 ALTER TABLE "User"
-  ADD COLUMN IF NOT EXISTS "stripeAccountId" TEXT;
+  ADD COLUMN IF NOT EXISTS "stripeAccountId" TEXT,
+  ADD COLUMN IF NOT EXISTS "inviteToken"     TEXT,
+  ADD COLUMN IF NOT EXISTS "consentPrefs"    JSONB;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "User_inviteToken_key" ON "User"("inviteToken");

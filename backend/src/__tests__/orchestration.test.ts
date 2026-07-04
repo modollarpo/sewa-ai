@@ -52,8 +52,8 @@ import { prisma } from '../utils/prismaClient';
 
 // ── Tests ─────────────────────────────────────────────────────────────────
 describe('AI Orchestration Pipeline — Integration', () => {
-  const mockTenantId = 'test-tenant-id';
-  const mockScanId   = 'test-scan-id';
+  const mockTenantId = 'a0000000-0000-0000-0000-000000000001';
+  const mockScanId   = 'b0000000-0000-0000-0000-000000000001';
 
   beforeEach(async () => {
     mockPost.mockReset();

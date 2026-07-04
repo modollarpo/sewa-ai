@@ -57,12 +57,14 @@ CREATE TABLE "User" (
     "mfaSecret" TEXT,
     "biometricKey" TEXT,
     "status" TEXT NOT NULL DEFAULT 'active',
+    "inviteToken" TEXT,
     "lastLoginAt" TIMESTAMP(3),
     "stripeAccountId" TEXT,
     "fcmTokens" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "whatsappNumber" TEXT,
     "whatsappVerified" BOOLEAN NOT NULL DEFAULT false,
     "notifPrefs" JSONB,
+    "consentPrefs" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -449,6 +451,9 @@ CREATE INDEX "User_tenantId_idx" ON "User"("tenantId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_tenantId_email_key" ON "User"("tenantId", "email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_inviteToken_key" ON "User"("inviteToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_token_key" ON "Session"("token");
