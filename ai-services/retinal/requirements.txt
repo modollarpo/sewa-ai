@@ -17,8 +17,8 @@ onnx==1.15.0
 # ── PyTorch CPU-only (for model export pipeline only, not inference) ──
 # CPU build is 250MB vs 2.5GB for CUDA — acceptable for export jobs.
 # In production inference containers, torch can be removed if ONNX models are pre-exported.
-torch==2.2.0+cpu
-torchvision==0.17.0+cpu
+torch==2.2.0
+torchvision==0.17.0
 
 # ── Data / Imaging ─────────────────────────────────────────────
 numpy==1.26.3
