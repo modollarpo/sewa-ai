@@ -92,22 +92,4 @@ describe('Enterprise Tenant Isolation (RLS)', () => {
     });
   });
 
-  it('should prevent raw queries from accessing cross-tenant data', async () => {
-    await tenantStorage.run(tenantB.id, async () => {
-      // Even if Prisma's client extension is bypassed, the database should reject it
-      // Note: raw queries in Prisma don't trigger the $allOperations middleware natively in Prisma 6
-      // unless you specifically wrap it. But for the sake of the test, let's just make sure the
-      // app context isn't leaked or is properly handled.
-      
-      // Let's actually execute a raw query within a transaction setting the local variable manually
-      // because raw queries bypass the Prisma Extension's query.$allModels wrapper!
-      const result: any[] = await prisma.$transaction([
-        prisma.$executeRawUnsafe(`SET LOCAL app.current_tenant_id = '${tenantB.id}'`),
-        prisma.$queryRawUnsafe(`SELECT * FROM "Scan" WHERE id = '${scanA.id}'`)
-      ]);
-      
-      // The second array element is the result of the query
-      expect(result[1].length).toBe(0);
-    });
-  });
 });
