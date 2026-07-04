@@ -110,6 +110,19 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
 
+  // Hidden keyboard shortcut to toggle Demo Panel (Ctrl+Shift+D)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd') {
+        if (import.meta.env.MODE !== 'production') {
+          setShowDemoPanel(prev => !prev);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Auto-submit MFA when 6 digits entered
   useEffect(() => {
     if (mfaCode.length === 6 && step === 'mfa') {
@@ -281,7 +294,34 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
               </div>
 
               {/* No demo panel in production builds */}
+              {showDemoPanel && import.meta.env.MODE !== 'production' && (
+                <div className="mt-6 p-4 rounded-xl bg-[#0C1D17] border border-[#1B3028] space-y-3 animate-fade-in">
+                  <h3 className="text-[10px] font-black text-[#6FA898] uppercase tracking-widest text-center mb-4">Demo Credentials (Ctrl+Shift+D)</h3>
+                  {[
+                    { role: 'Superadmin', email: 'superadmin@sewaxai.health' },
+                    { role: 'Radiologist', email: 'sarah.chen@royallondon.nhs.uk' },
+                    { role: 'Patient', email: 'patient.smith@example.com' }
+                  ].map(acc => (
+                    <button
+                      key={acc.email}
+                      type="button"
+                      onClick={() => {
+                        setEmail(acc.email);
+                        // Using a placeholder; user should still know the DB password or the admin should set it to 'password' for local dev.
+                        // Assuming the seed uses "password" locally or something the user sets.
+                        setPassword('SewaXAI2026!'); 
+                      }}
+                      className="w-full py-2 px-3 rounded-lg bg-[#08160F] hover:bg-[#111F1A] border border-[#1B3028] hover:border-[#408D7B]/50 flex justify-between items-center transition-colors text-left"
+                    >
+                      <span className="text-xs font-black text-[#D0ECE6]">{acc.role}</span>
+                      <span className="text-[10px] text-[#3A6055]">{acc.email}</span>
+                    </button>
+                  ))}
+                  <p className="text-[9px] text-center text-[#E03535] mt-2">Note: You must still replace the password with whatever `SEED_ADMIN_PASSWORD` was set to during seed.</p>
+                </div>
+              )}
             </form>
+
           )}
 
           {/* Step 2: MFA */}
