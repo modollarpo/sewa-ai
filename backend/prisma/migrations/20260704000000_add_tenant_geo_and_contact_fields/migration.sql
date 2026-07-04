@@ -1,7 +1,8 @@
--- AlterTable: add all columns that exist in schema.prisma Tenant model
--- but were missing from the 0_init migration (schema drift fix).
--- Uses IF NOT EXISTS so this is safe to run against databases that
--- already have some or all of these columns.
+-- AlterTable: backfill columns that were added to schema.prisma after the
+-- 0_init migration was written (schema drift fix).
+-- This migration is safe to re-run — all statements are IF NOT EXISTS.
+-- Databases migrated from the updated 0_init will already have these columns
+-- and Postgres will silently skip them.
 
 ALTER TABLE "Tenant"
   ADD COLUMN IF NOT EXISTS "latitude"            DOUBLE PRECISION,
@@ -14,5 +15,5 @@ ALTER TABLE "Tenant"
   ADD COLUMN IF NOT EXISTS "whatsappEnabled"     BOOLEAN NOT NULL DEFAULT false,
   ADD COLUMN IF NOT EXISTS "smsEnabled"          BOOLEAN NOT NULL DEFAULT false;
 
--- CreateIndex (apiKey must be unique per schema.prisma)
+-- Unique index for apiKey (IF NOT EXISTS requires PG 9.5+ — always available on PG 15)
 CREATE UNIQUE INDEX IF NOT EXISTS "Tenant_apiKey_key" ON "Tenant"("apiKey");

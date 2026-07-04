@@ -14,9 +14,18 @@ CREATE TABLE "Tenant" (
     "pacsEndpoint" TEXT,
     "stripeCustomerId" TEXT,
     "paystackCustomerId" TEXT,
+    "latitude" DOUBLE PRECISION,
+    "longitude" DOUBLE PRECISION,
+    "timezone" TEXT NOT NULL DEFAULT 'UTC',
+    "address" TEXT,
     "providerMetadata" JSONB,
+    "apiKey" TEXT,
+    "supportedModalities" TEXT[] NOT NULL DEFAULT ARRAY['CT','XRAY']::TEXT[],
     "subscriptionId" TEXT,
     "subscriptionStatus" TEXT DEFAULT 'trial',
+    "whatsappEnabled" BOOLEAN NOT NULL DEFAULT false,
+    "smsEnabled" BOOLEAN NOT NULL DEFAULT false,
+    "primaryContactEmail" TEXT,
     "scanQuota" INTEGER,
     "scansUsedThisMonth" INTEGER NOT NULL DEFAULT 0,
     "billingCycleResetAt" TIMESTAMP(3),
@@ -419,6 +428,9 @@ CREATE UNIQUE INDEX "Tenant_slug_key" ON "Tenant"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Tenant_subdomain_key" ON "Tenant"("subdomain");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Tenant_apiKey_key" ON "Tenant"("apiKey");
 
 -- CreateIndex
 CREATE INDEX "Tenant_region_idx" ON "Tenant"("region");
