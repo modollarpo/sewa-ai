@@ -46,7 +46,7 @@ router.get('/prevalence', async (req, res, next) => {
 });
 
 /** Get global summary stats (super-admin only) */
-router.get('/summary', authorize(['superadmin']), async (req, res, next) => {
+router.get('/summary', authorize('superadmin'), async (req, res, next) => {
   try {
     const summary = await populationHealthService.getGlobalSummary();
     res.json(summary);

@@ -42,6 +42,10 @@ router.get('/prior/:scanId', async (req, res) => {
       return res.status(404).json({ error: 'Scan not found' });
     }
 
+    if (!currentScan.patientId) {
+      return res.status(400).json({ error: 'Scan has no patient ID' });
+    }
+
     const priorScan = await findPriorScan(
       currentScan.patientId,
       currentScan.id,

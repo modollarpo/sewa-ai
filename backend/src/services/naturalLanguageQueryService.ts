@@ -68,7 +68,7 @@ export class NaturalLanguageQueryService {
     });
 
     // Extract body parts
-    CLINICAL_KEYWORDS.bodyParts.forEach((bodyPart) => {
+    CLINICAL_KEYWORDS.body_parts.forEach((bodyPart: string) => {
       if (lowerQuery.includes(bodyPart)) {
         parsed.bodyParts.push(bodyPart);
       }
