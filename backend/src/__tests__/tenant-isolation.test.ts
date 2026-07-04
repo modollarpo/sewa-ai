@@ -45,7 +45,7 @@ describe('Enterprise Tenant Isolation (RLS)', () => {
         }
       });
 
-      const patientA = await prisma.patient.create({
+      await prisma.patient.create({
         data: {
           tenantId: tenantA.id,
           userId: userA.id,
@@ -58,7 +58,6 @@ describe('Enterprise Tenant Isolation (RLS)', () => {
       scanA = await prisma.scan.create({
         data: {
           id: 'scan-a-iso',
-          patientId: patientA.id,
           tenantId: tenantA.id,
           modality: 'CT',
           bodyPart: 'HEAD',
