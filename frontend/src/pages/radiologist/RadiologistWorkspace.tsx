@@ -1089,7 +1089,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
                     💬
                   </div>
                   <input 
-                    placeholder="Ask: \"show me all STAT head CTs from today\" or \"find critical chest X-rays\""
+                    placeholder="Ask: 'show me all STAT head CTs from today' or 'find critical chest X-rays'"
                     className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#050F0C] border border-[#1B3028] text-[11px] text-[#D0ECE6] outline-none focus:border-[#408D7B] transition-all"
                     onKeyDown={async (e) => {
                       if (e.key === 'Enter') {
