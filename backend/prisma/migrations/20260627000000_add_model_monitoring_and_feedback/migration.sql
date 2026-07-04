@@ -1,5 +1,5 @@
--- Add inviteToken column to User table
-ALTER TABLE "User" ADD COLUMN "inviteToken" TEXT;
+-- Add consentPrefs column to User table (inviteToken already in 0_init)
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "consentPrefs" JSONB;
 
 -- CreateTable
 CREATE TABLE "SupportTicket" (
@@ -88,8 +88,8 @@ CREATE TABLE "CustomerFeedback" (
     CONSTRAINT "CustomerFeedback_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "User_inviteToken_key" ON "User"("inviteToken");
+-- CreateIndex (inviteToken index already created in 0_init; use IF NOT EXISTS for safety)
+CREATE UNIQUE INDEX IF NOT EXISTS "User_inviteToken_key" ON "User"("inviteToken");
 
 -- CreateIndex
 CREATE INDEX "SupportTicket_tenantId_idx" ON "SupportTicket"("tenantId");
