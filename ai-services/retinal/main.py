@@ -35,8 +35,7 @@ import uvicorn
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 from pythonjsonlogger import jsonlogger
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
-from cpu_inference_engine import registry, run_async, MicroBatchQueue
+from shared.cpu_inference_engine import registry, run_async, MicroBatchQueue
 
 logger = logging.getLogger("sewa-retinal")
 logger.setLevel(logging.INFO)

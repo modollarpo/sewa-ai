@@ -1,43 +1,47 @@
-# SEWA XAI — ai-services/pathology/Dockerfile
-# Digital Pathology AI Service — CPU-Only, Multi-Stage Build
+# SEWA XAI — ai-services/pathology/Dockerfile (CPU Edition)
+# Multi-stage build — runtime image ~400MB vs ~3.5GB GPU build
 #
-# Stage 1: Builder — installs all Python deps
-# Stage 2: Runtime — lean image with only runtime artifacts
+# Stage 1: Builder — installs all deps including torch (for potential export)
+# Stage 2: Runtime — only what's needed for ORT inference
 #
-# Deploy target: Azure AKS Standard_D4s_v5 (4 vCPU, 16GB) — pathology is memory-intensive
-# Port: 8002 (triage=8000, uncertainty=8001, pathology=8002)
+# Target: Standard_F8s_v2 (8 vCPU / 16GB RAM) on Azure AKS
+# Intel Ice Lake / Sapphire Rapids nodes: add --platform linux/amd64 for AVX-512
 
-# ── Stage 1: Build ────────────────────────────────────────────────────────
+# ── Stage 1: Build ─────────────────────────────────────────────
 FROM python:3.11-slim AS builder
 
 WORKDIR /build
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev \
-    gcc g++ wget \
-    # openslide-tools for native SVS support (uncomment to enable):
-    # openslide-tools libopenslide-dev \
+    libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev gcc g++ wget \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pathology/requirements.txt .
-RUN pip install --prefix=/install -r requirements.txt
+# Install Python deps into /install (isolated from system)
+COPY requirements.txt .
 
-# ── Stage 2: Runtime ──────────────────────────────────────────────────────
+# PyTorch CPU-only index — significantly smaller than default (CUDA) wheel
+RUN pip install --prefix=/install \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    -r requirements.txt
+
+
+# ── Stage 2: Runtime ───────────────────────────────────────────
 FROM python:3.11-slim AS runtime
 
 WORKDIR /app
-
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH="/app:/app/shared" \
     OMP_NUM_THREADS=1 \
-    VCPU_COUNT=4 \
+    # Prevent ORT from spawning more threads than vCPU allocation
+    # Override via env var in K8s deployment
+    VCPU_COUNT=8 \
     MODEL_CACHE=/models \
-    TILE_SIZE=224 \
-    MAX_BATCH_SIZE=4 \
+    # ORT tuning: use all available cores, no profiling in prod
     ORT_PROFILING=0
 
+# Runtime system libs only
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 libglib2.0-0 wget \
     && rm -rf /var/lib/apt/lists/*
@@ -45,25 +49,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Copy pathology service source
-COPY pathology/ .
+# Copy source
+COPY . .
 
-# Copy shared CPU inference engine (required by main.py)
-COPY shared/ ./shared/
 
-# Model cache directory (populated via AKS PVC ReadOnlyMany in production)
+# Model cache directory (populated via AKS PVC in production)
 RUN mkdir -p /models && chmod 777 /models
 
-# Non-root user for security
-RUN adduser --disabled-password --gecos '' pathuser \
-    && chown -R pathuser:pathuser /app /models
-USER pathuser
+# Non-root user
+RUN adduser --disabled-password --gecos '' aiuser \
+    && chown -R aiuser:aiuser /app /models
+USER aiuser
 
 EXPOSE 8002
 
+# Reduced healthcheck interval — startup can take ~30s for model load+warmup
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s \
     CMD wget -qO- http://localhost:8002/health || exit 1
 
+# Single uvicorn worker — ORT manages its own thread pool internally.
+# Horizontal scaling: add replicas in K8s, NOT uvicorn workers.
 CMD ["uvicorn", "main:app", \
      "--host", "0.0.0.0", \
      "--port", "8002", \

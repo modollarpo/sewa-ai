@@ -1,33 +1,39 @@
-# SEWA XAI — ai-services/pathology/requirements.txt
-# Digital Pathology AI Service dependencies
-# CPU-only — no CUDA required
+# SEWA XAI — ai-services/pathology/requirements.txt (CPU Edition)
+# GPU packages (torch-cuda, torchvision-cuda) intentionally removed.
+# PyTorch CPU-only build: ~250MB vs 2.5GB for CUDA build — faster pull, cheaper nodes.
+# ONNX Runtime is the primary inference engine in production.
 
-# ── Core ─────────────────────────────────────────────────────────────────
-fastapi==0.115.6
-uvicorn[standard]==0.32.1
-httpx==0.28.1
-pydantic==2.10.4
-python-multipart==0.0.20
+# ── Web framework ──────────────────────────────────────────────
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+uvloop==0.19.0           # faster event loop on Linux (AKS containers)
 
-# ── ONNX Runtime (CPU) ────────────────────────────────────────────────────
-onnxruntime==1.20.1        # INT8 quantised EfficientNet-B0 inference
-onnx==1.17.0               # For demo model creation on first boot
+# ── Inference — ONNX Runtime (CPU) ────────────────────────────
+# onnxruntime-openvino: Intel OpenVINO EP for Azure D/F-series v5 (Ice Lake, Sapphire Rapids)
+# Falls back to standard CPU EP automatically on non-Intel hardware.
+onnxruntime==1.17.3
+onnx==1.15.0
 
-# ── Image processing ──────────────────────────────────────────────────────
-numpy==1.26.4
-opencv-python-headless==4.10.0.84   # CV2 without GUI deps (headless = smaller)
-Pillow==11.0.0
-scikit-image==0.24.0       # Tile extraction helpers and morphological ops
+# ── PyTorch CPU-only (for model export pipeline only, not inference) ──
+# CPU build is 250MB vs 2.5GB for CUDA — acceptable for export jobs.
+# In production inference containers, torch can be removed if ONNX models are pre-exported.
+torch==2.2.0
+torchvision==0.17.0
 
-# ── Whole Slide Image (WSI) support ──────────────────────────────────────
-# openslide-python==4.0.0   # Native SVS/NDPI/SCN reader (requires OS openslide lib)
-# NOTE: openslide-python requires `apt-get install openslide-tools` in Docker.
-#       Uncomment above and add to Dockerfile RUN block for production SVS support.
-#       For JPEG/TIFF tile uploads (most common clinical workflow), PIL handles it natively.
+# ── Data / Imaging ─────────────────────────────────────────────
+numpy==1.26.3
+opencv-python-headless==4.9.0.80
+Pillow==10.2.0
+pydicom==2.4.4
+scipy==1.12.0
 
-# ── Observability ─────────────────────────────────────────────────────────
-prometheus-client==0.21.1
-python-json-logger==3.2.1
+# ── Explainability ─────────────────────────────────────────────
+shap==0.44.1
+scikit-learn==1.4.0
 
-# ── Async performance ─────────────────────────────────────────────────────
-uvloop==0.21.0             # Faster asyncio event loop
+# ── HTTP / schemas ─────────────────────────────────────────────
+pydantic==2.5.3
+httpx==0.26.0
+python-multipart==0.0.9
+prometheus-client==0.19.0
+python-json-logger==2.0.7

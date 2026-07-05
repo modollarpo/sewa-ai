@@ -43,8 +43,7 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTEN
 from pythonjsonlogger import jsonlogger
 
 # Shared CPU inference engine — same registry used across all AI services
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
-from cpu_inference_engine import registry, run_async, MicroBatchQueue  # type: ignore[import-untyped]
+from shared.cpu_inference_engine import registry, run_async, MicroBatchQueue
 
 # ── Structured JSON logging ────────────────────────────────────────────────
 logger = logging.getLogger("sewa-pathology")

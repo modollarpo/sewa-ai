@@ -61,17 +61,17 @@ RUN adduser --disabled-password --gecos '' aiuser \
     && chown -R aiuser:aiuser /app /models
 USER aiuser
 
-EXPOSE 8004
+EXPOSE 8008
 
 # Reduced healthcheck interval — startup can take ~30s for model load+warmup
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s \
-    CMD wget -qO- http://localhost:8004/health || exit 1
+    CMD wget -qO- http://localhost:8008/health || exit 1
 
 # Single uvicorn worker — ORT manages its own thread pool internally.
 # Horizontal scaling: add replicas in K8s, NOT uvicorn workers.
 CMD ["uvicorn", "main:app", \
      "--host", "0.0.0.0", \
-     "--port", "8004", \
+     "--port", "8008", \
      "--workers", "1", \
      "--loop", "uvloop", \
      "--no-access-log"]
