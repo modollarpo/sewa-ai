@@ -48,13 +48,13 @@ Test-CommandExists "npm"
 Write-Host " -> Checking for kubelogin..." -ForegroundColor Cyan
 try {
     $null = Get-Command "kubelogin" -ErrorAction SilentlyContinue
-    Write-Host "   ✓ kubelogin found" -ForegroundColor Green
+    Write-Host "   [OK] kubelogin found" -ForegroundColor Green
 } catch {
-    Write-Host "   ⚠ kubelogin not found. Installing via az aks install-cli..." -ForegroundColor Yellow
+    Write-Host "   [WARN] kubelogin not found. Installing via az aks install-cli..." -ForegroundColor Yellow
     az aks install-cli
     # Add to PATH (for current session)
     $env:PATH = "$env:USERPROFILE\.azure-kubelogin;$env:PATH"
-    Write-Host "   ✓ kubelogin installed" -ForegroundColor Green
+    Write-Host "   [OK] kubelogin installed" -ForegroundColor Green
 }
 
 Test-AzureAuthentication
