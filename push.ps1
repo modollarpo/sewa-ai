@@ -134,8 +134,8 @@ try {
         --resource-group $RESOURCE_GROUP `
         --name $AKS_CLUSTER `
         --overwrite-existing `
-        --admin `
         --output none
+    kubelogin convert-kubeconfig -l azurecli
     Out-Success "AKS credentials acquired."
 } catch {
     Out-Error "Failed to get AKS credentials: $_"

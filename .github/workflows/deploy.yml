@@ -286,14 +286,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Install kubelogin (for AAD-enabled clusters)
-        run: |
-          az aks install-cli
+        uses: azure/setup-kubelogin@v1
       - name: Set AKS context
-        uses: azure/aks-set-context@v3
-        with:
-          resource-group: sewa-ai-staging-rg
-          cluster-name:   sewa-ai-staging-aks
-          admin: true
+        run: az aks get-credentials --resource-group sewa-ai-staging-rg --name sewa-ai-staging-aks --overwrite-existing
+      - name: Configure kubelogin to use service principal
+        run: |
+          kubelogin convert-kubeconfig -l azurecli
       - name: Deploy to AKS
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
@@ -327,13 +325,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Install kubelogin (for AAD-enabled clusters)
+        uses: azure/setup-kubelogin@v1
+      - name: Set AKS context
+        run: az aks get-credentials --resource-group sewa-ai-production-rg --name sewa-ai-production-aks --overwrite-existing
+      - name: Configure kubelogin to use service principal
         run: |
-          az aks install-cli
-      - uses: azure/aks-set-context@v3
-        with:
-          resource-group: sewa-ai-production-rg
-          cluster-name:   sewa-ai-production-aks
-          admin: true
+          kubelogin convert-kubeconfig -l azurecli
       - name: Rolling deploy — all services
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
@@ -465,13 +462,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Install kubelogin (for AAD-enabled clusters)
+        uses: azure/setup-kubelogin@v1
+      - name: Set AKS context
+        run: az aks get-credentials --resource-group sewa-ai-production-rg --name sewa-ai-production-aks --overwrite-existing
+      - name: Configure kubelogin to use service principal
         run: |
-          az aks install-cli
-      - uses: azure/aks-set-context@v3
-        with:
-          resource-group: sewa-ai-production-rg
-          cluster-name:   sewa-ai-production-aks
-          admin: true
+          kubelogin convert-kubeconfig -l azurecli
       - name: Run Prisma migrate deploy
         run: |
           kubectl exec -n sewa-ai deploy/sewa-backend -- \
