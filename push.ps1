@@ -134,6 +134,7 @@ try {
         --resource-group $RESOURCE_GROUP `
         --name $AKS_CLUSTER `
         --overwrite-existing `
+        --admin `
         --output none
     Out-Success "AKS credentials acquired."
 } catch {

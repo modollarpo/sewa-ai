@@ -293,6 +293,7 @@ jobs:
         with:
           resource-group: sewa-ai-staging-rg
           cluster-name:   sewa-ai-staging-aks
+          admin: true
       - name: Deploy to AKS
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
@@ -332,6 +333,7 @@ jobs:
         with:
           resource-group: sewa-ai-production-rg
           cluster-name:   sewa-ai-production-aks
+          admin: true
       - name: Rolling deploy — all services
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
@@ -469,6 +471,7 @@ jobs:
         with:
           resource-group: sewa-ai-production-rg
           cluster-name:   sewa-ai-production-aks
+          admin: true
       - name: Run Prisma migrate deploy
         run: |
           kubectl exec -n sewa-ai deploy/sewa-backend -- \
