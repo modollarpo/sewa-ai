@@ -285,6 +285,9 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Install kubelogin (for AAD-enabled clusters)
+        run: |
+          az aks install-cli
       - name: Set AKS context
         uses: azure/aks-set-context@v3
         with:
@@ -322,6 +325,9 @@ jobs:
       - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Install kubelogin (for AAD-enabled clusters)
+        run: |
+          az aks install-cli
       - uses: azure/aks-set-context@v3
         with:
           resource-group: sewa-ai-production-rg
@@ -456,6 +462,9 @@ jobs:
       - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Install kubelogin (for AAD-enabled clusters)
+        run: |
+          az aks install-cli
       - uses: azure/aks-set-context@v3
         with:
           resource-group: sewa-ai-production-rg
