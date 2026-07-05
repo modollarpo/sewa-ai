@@ -28,7 +28,7 @@ data:
   AI_UNCERTAINTY_URL:   "http://sewa-uncertainty:8009"
   METACOGNITION_URL:        "http://sewa-metacognition:8003"
   AI_METACOGNITION_URL:     "http://sewa-metacognition:8003"
-  PATHOLOGY_SERVICE_URL:    "http://sewa-pathology:8006"
+  PATHOLOGY_SERVICE_URL:    "http://sewa-pathology:8002"
   MAMMOGRAPHY_SERVICE_URL:  "http://sewa-mammography:8007"
   RETINAL_SERVICE_URL:      "http://sewa-retinal:8008"
   FL_SERVICE_URL:           "http://sewa-federated:8004"
