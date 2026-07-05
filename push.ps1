@@ -141,7 +141,7 @@ try {
     Out-Error "Failed to get AKS credentials: $_"
 }
 
-# 4b. Recreate ACR Secret (Imperative is more robust than patching)
+# 4b. Recreate ACR Pull Secret
 Write-Host " -> Recreating ACR pull secret..." -ForegroundColor Cyan
 try {
     $null = kubectl delete secret acr-secret -n $NS --ignore-not-found 2>&1
@@ -152,20 +152,21 @@ try {
         -o tsv
     
     if (-not $ACR_PWD) {
-        Out-Error "Failed to retrieve ACR password"
+        Write-Host "   [WARN] Could not retrieve ACR password; skipping secret update" -ForegroundColor Yellow
+    } else {
+        kubectl create secret docker-registry acr-secret `
+            --namespace=$NS `
+            --docker-server=$ACR_SERVER `
+            --docker-username=$ACR_NAME `
+            --docker-password=$ACR_PWD `
+            --docker-email="deploy@sewaxai.health" `
+            --output=json | Out-Null
+        
+        Out-Success "ACR secret created."
     }
-    
-    kubectl create secret docker-registry acr-secret `
-        --namespace=$NS `
-        --docker-server=$ACR_SERVER `
-        --docker-username=$ACR_NAME `
-        --docker-password=$ACR_PWD `
-        --docker-email="deploy@sewaxai.health" `
-        --output=json | Out-Null
-    
-    Out-Success "ACR secret created."
 } catch {
-    Out-Error "Failed to create ACR secret: $_"
+    Write-Host "   [WARN] Could not update ACR secret (likely RBAC): $_" -ForegroundColor Yellow
+    Write-Host "   -> Continuing without secret update..." -ForegroundColor Yellow
 }
 
 # Substitute image tags in manifests and apply
