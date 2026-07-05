@@ -105,6 +105,7 @@ try {
         --image $frontendImg `
         --image $frontendLatest `
         --build-arg VITE_API_URL=https://api.sewaxai.health/api/v1 `
+        --file frontend/Dockerfile `
         ./frontend `
         --output table
     Out-Success "Frontend AKS build complete."

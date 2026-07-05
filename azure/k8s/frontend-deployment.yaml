@@ -13,9 +13,12 @@ spec:
       labels:
         app: sewa-frontend
     spec:
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: frontend
-        image: sewaaiproductionacr.azurecr.io/sewa-frontend:latest
+        image: "{{CONTAINER_REGISTRY}}/sewa-frontend:{{IMAGE_TAG}}"
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources:
