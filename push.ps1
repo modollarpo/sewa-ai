@@ -72,8 +72,8 @@ try {
 
 # 2. Build & Push Backend via ACR Tasks
 Write-Host "[2/6] Building Backend via ACR Tasks..." -ForegroundColor Yellow
-$backendImg = "sewa-ai-backend:$IMAGE_TAG"
-$backendLatest = "sewa-ai-backend:production-latest"
+$backendImg = "sewa-backend:$IMAGE_TAG"
+$backendLatest = "sewa-backend:production-latest"
 try {
     az acr build `
         --registry $ACR_NAME `
@@ -89,7 +89,7 @@ try {
 
 # 3. Build & Push AI Services
 Write-Host "[3/6] Building AI Services via ACR Tasks..." -ForegroundColor Yellow
-$AI_SERVICES = @{ "triage"="triage"; "uncertainty"="uncertainty"; "vlm-report"="vlm-report"; "metacognition"="metacognition"; "federated"="federated-learning"; "continuous"="continuous-learning"; "pathology"="pathology"; "mammography"="mammography"; "retinal"="retinal" }
+$AI_SERVICES = @{ "ai-triage"="triage"; "ai-uncertainty"="uncertainty"; "ai-vlm"="vlm-report"; "ai-metacognition"="metacognition"; "ai-federated"="federated-learning"; "ai-continuous"="continuous-learning"; "ai-pathology"="pathology"; "ai-mammography"="mammography"; "ai-retinal"="retinal" }
 foreach ($svc in $AI_SERVICES.Keys) {
     $dir = $AI_SERVICES[$svc]
     Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan

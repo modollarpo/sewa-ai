@@ -29,7 +29,7 @@ spec:
       - name: acr-secret
       containers:
       - name: triage
-        image: "{{CONTAINER_REGISTRY}}/sewa-triage:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-triage:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -85,7 +85,7 @@ spec:
       - name: acr-secret
       containers:
       - name: vlm-report
-        image: "{{CONTAINER_REGISTRY}}/sewa-vlm-report:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-vlm:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8001
@@ -141,7 +141,7 @@ spec:
       - name: acr-secret
       containers:
       - name: pathology
-        image: "{{CONTAINER_REGISTRY}}/sewa-pathology:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-pathology:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8002
@@ -197,7 +197,7 @@ spec:
       - name: acr-secret
       containers:
       - name: uncertainty
-        image: "{{CONTAINER_REGISTRY}}/sewa-uncertainty:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-uncertainty:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8009
@@ -253,7 +253,7 @@ spec:
       - name: acr-secret
       containers:
       - name: federated
-        image: "{{CONTAINER_REGISTRY}}/sewa-federated:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-federated:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8004
@@ -309,7 +309,7 @@ spec:
       - name: acr-secret
       containers:
       - name: continuous
-        image: "{{CONTAINER_REGISTRY}}/sewa-continuous:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-continuous:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8005
@@ -365,7 +365,7 @@ spec:
       - name: acr-secret
       containers:
       - name: metacognition
-        image: "{{CONTAINER_REGISTRY}}/sewa-metacognition:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-metacognition:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8003
@@ -421,7 +421,7 @@ spec:
       - name: acr-secret
       containers:
       - name: mammography
-        image: "{{CONTAINER_REGISTRY}}/sewa-mammography:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-mammography:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8007
@@ -477,7 +477,7 @@ spec:
       - name: acr-secret
       containers:
       - name: retinal
-        image: "{{CONTAINER_REGISTRY}}/sewa-retinal:{{IMAGE_TAG}}"
+        image: "{{CONTAINER_REGISTRY}}/sewa-ai-retinal:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
         - containerPort: 8008
