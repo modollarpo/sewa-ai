@@ -141,8 +141,6 @@ spec:
           readOnly: true
           volumeAttributes:
             secretProviderClass: "sewa-azure-kv"
-          nodePublishSecretRef:
-            name: secrets-store-creds
 ---
 apiVersion: v1
 kind: Service
