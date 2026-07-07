@@ -124,7 +124,8 @@ cd ..
 
 # ── Step 4: Build & Push AI Services ─────────────────────────────────────
 section "Step 4: AI Services — Build & Push"
-AI_SERVICES="triage uncertainty vlm-report metacognition federated-learning continuous-learning"
+# Core pipeline + specialty engines — all services must be built
+AI_SERVICES="triage uncertainty vlm-report metacognition federated-learning continuous-learning pathology mammography retinal"
 
 for svc in $AI_SERVICES; do
   svc_dir="ai-services/${svc}"
@@ -186,12 +187,12 @@ kubectl rollout status deployment/sewa-backend \
   --namespace "${APP_NAME}" \
   --timeout=300s
 
-# Wait for AI services
-for svc in triage uncertainty vlm-report metacognition; do
-  info "Waiting for ${svc} rollout..."
+# Wait for AI services (all 9)
+for svc in triage uncertainty vlm-report metacognition pathology mammography retinal federated continuous; do
+  info "Waiting for sewa-${svc} rollout..."
   kubectl rollout status deployment/sewa-${svc} \
     --namespace "${APP_NAME}" \
-    --timeout=300s || warn "${svc} rollout timed out"
+    --timeout=300s || warn "sewa-${svc} rollout timed out"
 done
 
 success "AKS deployment complete"

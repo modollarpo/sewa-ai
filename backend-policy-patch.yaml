@@ -1,0 +1,61 @@
+
+spec:
+  egress:
+  - ports:
+    - port: 8000
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-triage
+  - ports:
+    - port: 8001
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-vlm-report
+  - ports:
+    - port: 8002
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-uncertainty
+  - ports:
+    - port: 8003
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-metacognition
+  - ports:
+    - port: 8002
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-pathology
+  - ports:
+    - port: 5432
+      protocol: TCP
+    to:
+    - ipBlock:
+        cidr: 10.10.2.0/24
+  - ports:
+    - port: 6379
+      protocol: TCP
+    - port: 6380
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-redis
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+  - ports:
+    - port: 443
+      protocol: TCP

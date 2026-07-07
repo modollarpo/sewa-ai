@@ -314,9 +314,15 @@ services:
     volumes:
       - model-cache:/models
     environment:
-      MODEL_CACHE_DIR: /models
+      MODEL_CACHE: /models
       FL_ROUNDS: "3"
       FL_MIN_CLIENTS: "2"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
 
   ai-continuous:
     build:
@@ -332,6 +338,12 @@ services:
       KAPPA_THRESHOLD: "0.75"
     depends_on:
       - postgres
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
 
   # ── FHIR Validator (HAPI FHIR Validator — local dev only) ─────
   # Access: http://localhost:8081  |  Validate: POST http://localhost:8081/validate

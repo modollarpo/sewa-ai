@@ -1,0 +1,81 @@
+# SEWA XAI  Backend API Deployment
+#  2026 SEWA XAI  a Storegrill Inc Ltd company. Registered in England & Wales (14581073). All rights reserved.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sewa-backend
+  namespace: sewa-ai
+  labels:
+    app: sewa-backend
+    component: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sewa-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: sewa-backend
+    spec:
+      serviceAccountName: default
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: backend
+        image: sewaaiproductionacr.azurecr.io/sewa-ai-backend:prod-20260621-211139
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - secretRef:
+            name: sewa-secrets
+        - configMapRef:
+            name: sewa-config
+        env:
+        - name: REDIS_URL
+          value: "redis://sewa-redis:6379"
+        - name: CORS_ORIGINS
+          value: "https://app.sewaxai.health,https://superadmin.sewaxai.health,https://www.sewaxai.health,https://white-grass-00dc51603.4.azurestaticapps.net"
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: TRIAGE_URL
+          value: "http://sewa-triage:8000"
+        - name: VLM_URL
+          value: "http://sewa-vlm-report:8001"
+        - name: UNCERTAINTY_URL
+          value: "http://sewa-uncertainty:8002"
+        - name: METACOGNITION_URL
+          value: "http://sewa-metacognition:8003"
+        - name: FL_SERVICE_URL
+          value: "http://sewa-federated:8004"
+        - name: CL_SERVICE_URL
+          value: "http://sewa-continuous:8005"
+        - name: AZURE_STORAGE_CONTAINER
+          value: "scans"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "2000m"
+            memory: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5

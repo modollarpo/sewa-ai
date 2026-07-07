@@ -1,0 +1,28 @@
+﻿spec:
+  template:
+    spec:
+      containers:
+      - name: backend
+        env:
+        - name: REDIS_URL
+          value: "redis://sewa-redis:6379"
+        - name: CORS_ORIGINS
+          value: "https://app.sewaxai.health,https://superadmin.sewaxai.health,https://www.sewaxai.health,https://white-grass-00dc51603.4.azurestaticapps.net"
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: TRIAGE_URL
+          value: "http://sewa-triage:8000"
+        - name: VLM_URL
+          value: "http://sewa-vlm-report:8001"
+        - name: UNCERTAINTY_URL
+          value: "http://sewa-uncertainty:8002"
+        - name: METACOGNITION_URL
+          value: "http://sewa-metacognition:8003"
+        - name: FL_SERVICE_URL
+          value: "http://sewa-federated:8004"
+        - name: CL_SERVICE_URL
+          value: "http://sewa-continuous:8005"
+        - name: AZURE_STORAGE_CONTAINER
+          value: "scans"

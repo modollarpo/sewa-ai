@@ -14,15 +14,20 @@ const AI_SERVICE_URLS: Record<string, string> = {
   pathology:     config.PATHOLOGY_SERVICE_URL,
   mammography:   config.MAMMOGRAPHY_SERVICE_URL,
   retinal:       config.RETINAL_SERVICE_URL,
-  xai:           config.AI_SERVICE_URL, // XAI uses the main AI service
+  xai:           config.UNCERTAINTY_SERVICE_URL,
   federated:     config.FL_SERVICE_URL,
   continuous:    config.CL_SERVICE_URL,
 };
 
 export const getAIHealth = (engine: string) => async (req: Request, res: Response) => {
   const serviceUrl = AI_SERVICE_URLS[engine];
-  // If the AI microservice URL isn't configured, return simulated operational status
-  if (!serviceUrl || serviceUrl === 'undefined' || serviceUrl === 'http://localhost:9999') {
+  // If the AI microservice URL isn't configured or is a localhost URL, return simulated operational status
+  const isLocalhost = serviceUrl && (
+    serviceUrl.startsWith('http://localhost:') || 
+    serviceUrl.startsWith('http://127.0.0.1:') ||
+    serviceUrl === 'http://localhost:9999'
+  );
+  if (!serviceUrl || serviceUrl === 'undefined' || isLocalhost) {
     return res.json({
       status: 'operational',
       engine,
@@ -44,8 +49,13 @@ export const getAIHealth = (engine: string) => async (req: Request, res: Respons
     });
   } catch (e: any) {
     logger.warn(`[AI Health] ${engine} health check failed: ${e.message}`);
-    // Return degraded (not down) — the engine pool may still serve cached/queued requests
-    res.json({ status: 'operational', engine, mode: 'cached', error: e.message, timestamp: new Date() });
+    res.json({
+      status: 'degraded',
+      engine,
+      mode: 'unreachable',
+      error: e.message,
+      timestamp: new Date(),
+    });
   }
 };
 

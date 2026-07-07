@@ -1,0 +1,30 @@
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-redis
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    - podSelector:
+        matchLabels:
+          app: sewa-dicom-ingestion
+    ports:
+    - port: 6379
+      protocol: TCP
+  egress:
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP

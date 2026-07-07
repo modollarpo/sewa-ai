@@ -15,39 +15,49 @@ r.use(authenticate, authorize('superadmin'));
 
 r.get('/health', async (req, res, next) => {
   try {
+    // Helper: try each service individually with retry, so one failure doesn't cascade
+    const checkSingle = async (s: { name: string; url: string }) => {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const start = Date.now();
+          const resp = await axios.get(`${s.url}/health`, { timeout: 3000 });
+          const latency = Date.now() - start;
+          return {
+            name: s.name,
+            status: 'healthy',
+            latency,
+            version: resp.data.version || 'v2.4.1',
+            backend: resp.data.backend || 'unknown'
+          };
+        } catch (err: any) {
+          if (attempt === 0) {
+            // Wait 200ms and retry once
+            await new Promise(r => setTimeout(r, 200));
+            continue;
+          }
+          return {
+            name: s.name,
+            status: 'unreachable',
+            error: err.message,
+            url: s.url
+          };
+        }
+      }
+    };
+
     const services = [
-      { name: 'Triage Engine',        url: config.AI_SERVICE_URL },
-      { name: 'VLM Report Gen',       url: config.VLM_SERVICE_URL },
-      { name: 'Uncertainty Engine',   url: config.UNCERTAINTY_SERVICE_URL },
-      { name: 'Metacognition AI',     url: config.METACOGNITION_SERVICE_URL },
-      { name: 'Pathology AI',         url: config.PATHOLOGY_SERVICE_URL },
-      { name: 'Mammography AI',       url: config.MAMMOGRAPHY_SERVICE_URL },
-      { name: 'Retinal AI',           url: config.RETINAL_SERVICE_URL },
-      { name: 'Federated Learning',   url: config.FL_SERVICE_URL },
-      { name: 'Continuous Learning',  url: config.CL_SERVICE_URL },
+      { name: 'Triage Engine (Core)',  url: config.AI_SERVICE_URL },
+      { name: 'VLM Report Generator',  url: config.VLM_SERVICE_URL },
+      { name: 'Uncertainty Engine',    url: config.UNCERTAINTY_SERVICE_URL },
+      { name: 'Metacognition AI',      url: config.METACOGNITION_SERVICE_URL },
+      { name: 'Pathology AI',          url: config.PATHOLOGY_SERVICE_URL },
+      { name: 'Mammography AI',        url: config.MAMMOGRAPHY_SERVICE_URL },
+      { name: 'Retinal AI',            url: config.RETINAL_SERVICE_URL },
+      { name: 'Federated Learning',    url: config.FL_SERVICE_URL },
+      { name: 'Continuous Learning',   url: config.CL_SERVICE_URL },
     ];
 
-    const results = await Promise.all(services.map(async (s) => {
-      try {
-        const start = Date.now();
-        const resp = await axios.get(`${s.url}/health`, { timeout: 3000 });
-        const latency = Date.now() - start;
-        return {
-          name: s.name,
-          status: 'healthy',
-          latency,
-          version: resp.data.version || 'v2.4.1',
-          backend: resp.data.backend || 'unknown'
-        };
-      } catch (err: any) {
-        return {
-          name: s.name,
-          status: 'unreachable',
-          error: err.message,
-          url: s.url
-        };
-      }
-    }));
+    const results = await Promise.all(services.map(checkSingle));
 
     res.json(results);
   } catch (err) { next(err); }

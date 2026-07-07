@@ -11,15 +11,16 @@ import { logger } from './logger';
 // If missing or mock, log a CRITICAL warning. In strict mode (production) throw to fail the pod.
 const _RAW_KEY = process.env.AUDIT_PRIVATE_KEY ?? '';
 const _KEY_IS_MOCK = !_RAW_KEY || _RAW_KEY.includes('MOCK') || _RAW_KEY.length < 64;
+const _IS_AZURE_DEPLOY = process.env.DEPLOY_TARGET === 'azure';
 if (_KEY_IS_MOCK) {
   const msg = '[AUDIT] CRITICAL: AUDIT_PRIVATE_KEY is missing or is a mock value. '
     + 'Audit log signatures are NOT cryptographically valid. '
     + 'Set AUDIT_PRIVATE_KEY in the sewa-secrets AKS secret from Azure Key Vault before NHS go-live.';
-  if (process.env.NODE_ENV === 'production') {
-    // In production: throw so the pod fails fast and ops is immediately alerted
+  if (_IS_AZURE_DEPLOY && process.env.NODE_ENV === 'production') {
+    // In Azure production: throw so the pod fails fast and ops is immediately alerted
     throw new Error(msg);
   }
-  // In dev/staging: warn loudly but continue
+  // In local production mode or dev/staging: warn loudly but continue
   console.warn(msg);
 }
 

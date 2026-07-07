@@ -38,8 +38,8 @@ RUN adduser --disabled-password --gecos '' aiuser \
     && chown -R aiuser:aiuser /app /models
 USER aiuser
 
-EXPOSE 8002
+EXPOSE 8009
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s \
-    CMD wget -qO- http://localhost:8002/health || exit 1
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002", \
+    CMD wget -qO- http://localhost:8009/health || exit 1
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8009", \
      "--workers", "1", "--loop", "uvloop", "--no-access-log"]

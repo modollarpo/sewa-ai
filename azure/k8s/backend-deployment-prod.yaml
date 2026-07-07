@@ -78,18 +78,36 @@ spec:
             secretKeyRef:
               name: sewa-secrets-store
               key: sewa-storage-connection-string
+        # ── AI Service URLs ────────────────────────────────────────────
+        # All ports must match the actual containerPort in ai-services-deployment-prod.yaml
+        # triage=8000, vlm=8001, pathology=8002, metacognition=8003,
+        # federated=8004, continuous=8005, mammography=8007, retinal=8008, uncertainty=8009
         - name: TRIAGE_URL
+          value: "http://sewa-triage:8000"
+        - name: AI_SERVICE_URL
           value: "http://sewa-triage:8000"
         - name: VLM_URL
           value: "http://sewa-vlm-report:8001"
+        - name: VLM_SERVICE_URL
+          value: "http://sewa-vlm-report:8001"
         - name: UNCERTAINTY_URL
-          value: "http://sewa-uncertainty:8002"
+          value: "http://sewa-uncertainty:8009"
+        - name: UNCERTAINTY_SERVICE_URL
+          value: "http://sewa-uncertainty:8009"
         - name: METACOGNITION_URL
+          value: "http://sewa-metacognition:8003"
+        - name: METACOGNITION_SERVICE_URL
           value: "http://sewa-metacognition:8003"
         - name: FL_SERVICE_URL
           value: "http://sewa-federated:8004"
         - name: CL_SERVICE_URL
           value: "http://sewa-continuous:8005"
+        - name: PATHOLOGY_SERVICE_URL
+          value: "http://sewa-pathology:8002"
+        - name: MAMMOGRAPHY_SERVICE_URL
+          value: "http://sewa-mammography:8007"
+        - name: RETINAL_SERVICE_URL
+          value: "http://sewa-retinal:8008"
         - name: AZURE_STORAGE_CONTAINER
           value: "scans"
         - name: FHIR_TENANT_ID
