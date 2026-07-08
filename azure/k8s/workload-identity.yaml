@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations:
-    azure.workload.identity/client-id: "${BACKEND_WORKLOAD_IDENTITY_CLIENT_ID}"
+    azure.workload.identity/client-id: "ffb48448-dbbf-431b-8a1b-c263b3cf0cf1"
   name: sewa-backend-sa
   namespace: sewa-ai
 ---
@@ -35,9 +35,9 @@ spec:
   parameters:
     usePodIdentity: "false"
     useVMManagedIdentity: "false"
-    clientID: "${BACKEND_WORKLOAD_IDENTITY_CLIENT_ID}"
-    keyvaultName: "${KEY_VAULT_NAME}"
-    tenantId: "${AZURE_TENANT_ID}"
+    clientID: "ffb48448-dbbf-431b-8a1b-c263b3cf0cf1"
+    keyvaultName: "sewa-ai-production-kv"
+    tenantId: "cbe60f81-8bd5-4435-9199-cd97cfa950af"
     objects: |
       array:
         - |
