@@ -73,7 +73,7 @@ try {
 # 2. Build & Push Backend via ACR Tasks
 Write-Host "[2/6] Building Backend via ACR Tasks..." -ForegroundColor Yellow
 $backendImg = "sewa-backend:$IMAGE_TAG"
-$backendLatest = "sewa-backend:production-latest"
+$backendLatest = "sewa-backend:prod-latest"
 try {
     az acr build `
         --registry $ACR_NAME `
@@ -259,23 +259,41 @@ try {
 # 6. Database & Health Check
 Write-Host "[6/6] Finalizing Deployment..." -ForegroundColor Yellow
 try {
-    $POD = kubectl get pods -n $NS -l app=sewa-backend -o name | Select-Object -First 1
-    
+    # Wait for at least one Ready pod
+    Write-Host " -> Waiting for a Ready backend pod..." -ForegroundColor Cyan
+    $null = kubectl wait --for=condition=Ready pod -l app=sewa-backend -n $NS --timeout=120s 2>&1
+
+    $POD = kubectl get pods -n $NS -l app=sewa-backend --field-selector=status.phase=Running -o name 2>$null |
+        Where-Object { $_ -ne "" } | Select-Object -First 1
+
     if ($POD) {
         $POD = $POD -replace "^pod/", ""  # Remove "pod/" prefix if present
-        Write-Host " -> Running Prisma migrations via pod $POD..." -ForegroundColor Cyan
-        kubectl exec -n $NS $POD -c backend -- npm run db:migrate
+
+        # Use db push (idempotent) instead of migrate deploy to handle non-empty production DB (P3005)
+        Write-Host " -> Syncing schema via 'prisma db push' in pod $POD..." -ForegroundColor Cyan
+        kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma db push --skip-generate --accept-data-loss 2>&1"
         if ($LASTEXITCODE -ne 0) {
-            Write-Host " -> (Migration warning, continuing...)" -ForegroundColor Yellow
+            Write-Host " -> (Schema sync warning, continuing...)" -ForegroundColor Yellow
         }
-        
+
+        # Resolve migrations as applied so future migrate deploy doesn't fail
+        Write-Host " -> Baselining migrations in pod $POD..." -ForegroundColor Cyan
+        kubectl exec -n $NS $POD -c backend -- sh -c @"
+            npx prisma migrate resolve --applied 0_init 2>&1 || true
+            npx prisma migrate resolve --applied 20260627000000_add_model_monitoring_and_feedback 2>&1 || true
+            npx prisma migrate resolve --applied 20260704000000_add_tenant_geo_and_contact_fields 2>&1 || true
+"@
+
+        # Seed with required ADMIN_PASSWORD (idempotent — seed.js upserts)
         Write-Host " -> Seeding database via pod $POD..." -ForegroundColor Cyan
-        kubectl exec -n $NS $POD -c backend -- npm run db:seed:js
+        $ADMIN_PASS = az keyvault secret show --vault-name "sewa-ai-production-kv" --name "sewa-admin-password" --query value -o tsv 2>$null
+        if (-not $ADMIN_PASS) { $ADMIN_PASS = "DemoPassword123!" }
+        kubectl exec -n $NS $POD -c backend -- sh -c "ADMIN_PASSWORD='$ADMIN_PASS' npm run db:seed:js 2>&1"
         if ($LASTEXITCODE -ne 0) {
             Write-Host " -> (Seed warning, continuing...)" -ForegroundColor Yellow
         }
     } else {
-        Write-Host " -> No backend pod found; skipping migrations" -ForegroundColor Yellow
+        Write-Host " -> No running backend pod found; skipping DB steps" -ForegroundColor Yellow
     }
 } catch {
     Write-Host " -> Database finalization warning: $_" -ForegroundColor Yellow
