@@ -65,6 +65,7 @@ spec:
     - protocol: TCP
       port: 3000
   egress:
+  # Core AI Pipeline
   - to:
     - podSelector:
         matchLabels:
@@ -85,7 +86,7 @@ spec:
           app: sewa-uncertainty
     ports:
     - protocol: TCP
-      port: 8002
+      port: 8009      # Fixed: was 8002
   - to:
     - podSelector:
         matchLabels:
@@ -93,11 +94,62 @@ spec:
     ports:
     - protocol: TCP
       port: 8003
+  # Specialty AI Engines
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-pathology
+    ports:
+    - protocol: TCP
+      port: 8002
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-mammography
+    ports:
+    - protocol: TCP
+      port: 8007
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-retinal
+    ports:
+    - protocol: TCP
+      port: 8008
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-federated
+    ports:
+    - protocol: TCP
+      port: 8004
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-continuous
+    ports:
+    - protocol: TCP
+      port: 8005
+  # Infrastructure
+  - to:
+    - podSelector:
+        matchLabels:
+          app: sewa-redis
+    ports:
+    - protocol: TCP
+      port: 6379
   - to:
     ports:
     - protocol: TCP
-      port: 443  # Azure services (Key Vault, Storage, etc.)
-
+      port: 443  # Azure services (Key Vault, Storage, ACS, etc.)
+  - to:
+    ports:
+    - protocol: TCP
+      port: 5432  # Azure PostgreSQL
+  - to:
+    ports:
+    - protocol: TCP
+      port: 6380  # Azure Redis (TLS)
 ---
 # Frontend network policy
 apiVersion: networking.k8s.io/v1
@@ -210,4 +262,4 @@ spec:
           app: sewa-backend
     ports:
     - protocol: TCP
-      port: 8002
+      port: 8009
