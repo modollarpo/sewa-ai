@@ -36,6 +36,7 @@ model Tenant {
   pacsEndpoint       String?
   stripeCustomerId   String?
   paystackCustomerId String?
+  stripeAccountId    String?
   latitude           Float?
   longitude          Float?
   timezone           String  @default("UTC")
@@ -440,6 +441,11 @@ model SecondOpinion {
   notes        String?  @db.Text
   reviewNotes  String?  @db.Text
   agreedWithAI Boolean?
+
+  // Billing & Payment
+  billingType   String   @default("hospital") // hospital | patient
+  paymentStatus String   @default("unpaid")   // unpaid | paid | refunded
+  paymentLinkId String?
 
   // SLA & Workflow
   slaDeadline DateTime?

@@ -124,6 +124,18 @@ export function OnboardingWizard() {
 
   const update = (fields: Partial<typeof data>) => setData(d => ({ ...d, ...fields }));
 
+  // Pre-select plan/tier from URL query parameters (e.g. from pricing page)
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const planParam = params.get('plan') || params.get('tier');
+    if (planParam) {
+      const normalizedPlan = planParam.toLowerCase() === 'pro' ? 'hospital' : planParam.toLowerCase();
+      if (['starter', 'hospital', 'enterprise'].includes(normalizedPlan)) {
+        update({ tier: normalizedPlan });
+      }
+    }
+  }, []);
+
   const handleLaunch = async () => {
     setLoading(true);
     try {
@@ -552,9 +564,9 @@ export function OnboardingWizard() {
                   <label style={{ display:'block', fontSize:11, fontWeight:600, color:C.textMd, marginBottom:10, fontFamily:C.F }}>Service Tier</label>
                   <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                     {[
-                      { key:'starter',    label:'Starter',    price:'£499/mo',  scans:'Up to 500 scans/mo', support:'Email support' },
-                      { key:'pro',        label:'Pro',        price:'£1,499/mo', scans:'Up to 2,000 scans/mo', support:'Priority support + SLA' },
-                      { key:'enterprise', label:'Enterprise', price:'Custom',    scans:'Unlimited scans', support:'Dedicated CSM + 24/7 support' },
+                      { key:'starter',    label:'Starter Clinic', price:'£549/mo',  scans:'Up to 500 scans/mo', support:'Email support (48h)' },
+                      { key:'hospital',   label:'Hospital Pro',   price:'£2,199/mo', scans:'Up to 5,000 scans/mo', support:'Priority support + SLA (4h)' },
+                      { key:'enterprise', label:'Enterprise',     price:'Custom',    scans:'Unlimited scans', support:'Dedicated CSM + 24/7 support' },
                     ].map(tier => (
                       <div key={tier.key} onClick={() => update({ tier: tier.key })}
                         style={{ padding:14, borderRadius:12, cursor:'pointer', border:`2px solid ${data.tier===tier.key?C.brand:C.border}`, background: data.tier===tier.key?`${C.brand}12`:C.bg2, display:'flex', alignItems:'center', justifyContent:'space-between', transition:'all 150ms' }}>

@@ -18,72 +18,65 @@ const REGIONS = [
 
 const PLANS = [
   {
-    id:'starter', name:'Clinic', badge:null,
+    id:'starter', name:'Starter Clinic', badge:null,
     prices:{ uk:{ monthly:549,annual:459 }, eu:{ monthly:609,annual:519 }, us:{ monthly:649,annual:549 }, africa:{ monthly:169,annual:139 } },
     tagline:'For independent clinics and outpatient imaging centres',
-    scans:'Up to 500 scans/month',
+    scans:'Up to 500 AI scans/month',
     users:'Up to 10 clinicians',
     color: C.textMd,
     features:[
       'Triage AI (CT, X-ray)',
-      'VLM report generation',
-      'Mobile app (iOS + Android)',
-      'PWA access',
-      'Email notifications',
-      'FHIR R4 integration',
-      '99.5% uptime SLA',
-      'Email support (48h)',
+      'VLM diagnostic report generation',
+      'Clinical Decision Support (CDS) alerts',
+      'Secure mobile app (iOS & Android)',
+      'Web-based DICOM viewer (PWA)',
+      'FHIR R4 compliant APIs',
+      '99.5% guaranteed uptime SLA',
+      '48-hour clinical support response',
     ],
-    missing:['Uncertainty Engine','Metacognition Engine','PACS integration','WhatsApp alerts','Population health','Federated learning','Custom AI models','Dedicated CSM'],
   },
   {
-    id:'hospital', name:'Hospital', badge:'Most Popular',
+    id:'hospital', name:'Hospital Pro', badge:'Most Popular',
     prices:{ uk:{ monthly:2199,annual:1899 }, eu:{ monthly:2409,annual:2099 }, us:{ monthly:2599,annual:2199 }, africa:{ monthly:599,annual:499 } },
-    tagline:'For NHS Trusts, private hospitals and radiology groups',
-    scans:'Up to 5,000 scans/month',
+    tagline:'For NHS Trusts, private hospitals, and radiology groups',
+    scans:'Up to 5,000 AI scans/month',
     users:'Up to 100 clinicians',
     color: C.brand,
     features:[
-      'Everything in Clinic',
+      'Everything in Starter Clinic',
       'Uncertainty Engine (confidence quantification)',
       'Metacognition Engine (hallucination detection)',
-      'Grad-CAM + SHAP explainability',
-      'PACS + HL7v2 integration',
-      'WhatsApp + SMS alerts',
-      'Appointment booking module',
-      'Population health analytics',
-      'Multi-department / multi-site',
-      'SSO / SAML 2.0',
-      'Audit logs (HIPAA/NHS DSPT)',
-      '99.9% uptime SLA',
-      'Dedicated CSM',
-      'Priority support (4h)',
+      'Grad-CAM & SHAP visual explainability',
+      'Native PACS & HL7v2 integration',
+      'Automated referral routing & payments',
+      'WhatsApp, SMS & EHR critical alerts',
+      'Multi-department / multi-site support',
+      'SSO / SAML 2.0 (NHS Care Identity Service)',
+      'Audit logs (HIPAA & NHS DSPT compliant)',
+      '99.9% guaranteed uptime SLA',
+      'Priority 4-hour technical support',
+      'Dedicated Customer Success Manager',
     ],
-    missing:['Federated learning','Custom AI fine-tuning','On-premise deployment','Professional Services'],
   },
   {
     id:'enterprise', name:'Enterprise', badge:'NHS & Large Health Systems',
     prices:{ uk:{ monthly:0,annual:0 }, eu:{ monthly:0,annual:0 }, us:{ monthly:0,annual:0 }, africa:{ monthly:0,annual:0 } },
-    tagline:'For NHS Integrated Care Boards, health networks and government programmes',
+    tagline:'For NHS Integrated Care Boards and national health programmes',
     scans:'Unlimited scans',
     users:'Unlimited users',
     color: C.amber,
     features:[
-      'Everything in Hospital',
-      'Federated learning (privacy-preserving)',
-      'Custom AI fine-tuning on your data',
-      'On-premise / hybrid deployment option',
-      'Data residency guarantee (in-country)',
-      'Dedicated Azure/AWS/GCP tenancy',
-      'White-label option',
-      'Custom compliance reporting',
-      'Professional services & training',
-      'SLA up to 99.99%',
-      '24/7 dedicated support line',
+      'Everything in Hospital Pro',
+      'Federated learning (privacy-preserving AI)',
+      'Custom Vision-Language Model fine-tuning',
+      'On-premise & hybrid edge deployment options',
+      'Data residency guarantees (in-country execution)',
+      'Dedicated single-tenant Azure/AWS infrastructure',
+      'White-label portal & bespoke integrations',
       'Regulatory submission support (MDR/510k)',
-      'Executive quarterly business reviews',
+      '24/7 dedicated clinical engineering support',
+      '99.99% critical infrastructure SLA',
     ],
-    missing:[],
   },
 ];
 
@@ -213,7 +206,14 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
                   </div>
                 </div>
 
-                <button onClick={() => onNavigate(plan.id === 'enterprise' ? 'contact' : 'contact')} style={{
+                <button onClick={() => {
+                  if (plan.id === 'enterprise') {
+                    onNavigate('contact');
+                  } else {
+                    // Navigate to register with the selected plan and billing interval
+                    window.location.href = `/register?plan=${plan.id}&interval=${billing}`;
+                  }
+                }} style={{
                   padding:'11px 0', borderRadius:10, border: isPopular ? 'none' : `1px solid ${C.border}`,
                   background: isPopular ? `linear-gradient(135deg,${C.brand},${C.brandDk})` : C.bg3,
                   color: isPopular ? 'white' : C.textMd, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:C.F, marginBottom:24,
@@ -225,11 +225,6 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
                   {plan.features.map(f => (
                     <div key={f} style={{ display:'flex', gap:8, padding:'5px 0', fontSize:12, color:C.textMd }}>
                       <span style={{ color:C.normal, fontSize:11, flexShrink:0 }}>✓</span>{f}
-                    </div>
-                  ))}
-                  {plan.missing.slice(0,4).map(f => (
-                    <div key={f} style={{ display:'flex', gap:8, padding:'5px 0', fontSize:12, color:C.textLo }}>
-                      <span style={{ fontSize:11, flexShrink:0 }}>—</span>{f}
                     </div>
                   ))}
                 </div>

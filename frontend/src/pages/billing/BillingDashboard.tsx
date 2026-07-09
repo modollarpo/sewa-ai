@@ -63,6 +63,7 @@ export function BillingDashboard() {
   const { stats, history, loading } = useBillingData();
   const region = user?.region ?? 'uk';
   const [tab, setTab] = useState<'overview'|'plans'|'payment'|'history'>('overview');
+  const [interval, setInterval] = useState<'monthly'|'annual'>('annual');
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string|null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -77,7 +78,9 @@ export function BillingDashboard() {
 
   const handleUpgrade = async (plan: string) => {
     try {
-      const res = await apiClient.post('/payments/subscription', { plan: plan.toLowerCase() });
+      // Map frontend label to backend plan ID
+      const planId = plan.toLowerCase() === 'pro' ? 'hospital' : plan.toLowerCase();
+      const res = await apiClient.post('/payments/subscription', { plan: planId, interval });
       if (res.data.authorizationUrl) {
         window.location.href = res.data.authorizationUrl;
       } else if (res.data.paymentLink) {
@@ -263,7 +266,14 @@ export function BillingDashboard() {
 
 
             {tab === 'plans' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-6">
+                <div className="flex justify-center mb-6">
+                  <div className="flex gap-2 bg-[#08160F] border border-[#1B3028] p-1.5 rounded-xl">
+                    <button onClick={() => setInterval('monthly')} className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${interval === 'monthly' ? 'bg-[#408D7B] text-white' : 'text-[#3A6055] hover:text-[#6FA898]'}`}>Monthly</button>
+                    <button onClick={() => setInterval('annual')} className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${interval === 'annual' ? 'bg-[#408D7B] text-white' : 'text-[#3A6055] hover:text-[#6FA898]'}`}>Annual (Save 15%)</button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {plans.map(plan => (
                   <div key={plan.label} className={`p-8 rounded-[2.5rem] border-2 transition-all flex flex-col gap-6 relative shadow-2xl ${
                     plan.highlight ? 'bg-[#408D7B]/10 border-[#408D7B]' : 'bg-[#08160F] border-[#1B3028] hover:border-[#408D7B]/30'
@@ -293,6 +303,7 @@ export function BillingDashboard() {
                     </button>
                   </div>
                 ))}
+                </div>
               </div>
             )}
 

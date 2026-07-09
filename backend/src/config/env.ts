@@ -153,6 +153,13 @@ export const config = {
   MPESA_SHORTCODE:          optional('MPESA_SHORTCODE'),
   MPESA_PASSKEY:            optional('MPESA_PASSKEY'),
 
+  // ── CRM & Support ─────────────────────────────────────────────
+  HUBSPOT_ACCESS_TOKEN:     optional('HUBSPOT_ACCESS_TOKEN'),
+  SUPPORT_SLACK_WEBHOOK:    optional('SUPPORT_SLACK_WEBHOOK'),
+  ZENDESK_SUBDOMAIN:        optional('ZENDESK_SUBDOMAIN'),
+  ZENDESK_EMAIL:            optional('ZENDESK_EMAIL'),
+  ZENDESK_API_TOKEN:        optional('ZENDESK_API_TOKEN'),
+
   // ── Firebase / FCM ────────────────────────────────────────────
   FIREBASE_PROJECT_ID:   optional('FIREBASE_PROJECT_ID'),
   FIREBASE_PRIVATE_KEY:  optional('FIREBASE_PRIVATE_KEY'),

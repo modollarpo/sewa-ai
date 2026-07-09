@@ -16,7 +16,7 @@ export const TenantOnboardSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   region: z.enum(['uk', 'eu', 'us', 'ng', 'ke', 'za', 'gh', 'in']),
   currency: z.string().length(3),
-  plan: z.enum(['starter', 'pro', 'enterprise']),
+  plan: z.enum(['starter', 'pro', 'hospital', 'enterprise']),
 });
 
 // Patient Record (Feature 4)

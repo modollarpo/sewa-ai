@@ -239,7 +239,8 @@ r.post('/launch', authLimiter, async (req, res, next) => {
 
     // 2. Initiate Payment Handshake (Async but required for response)
     // Map tier to internal plan names
-    const plan = (tier || 'starter').toLowerCase();
+    let plan = (tier || 'starter').toLowerCase();
+    if (plan === 'pro') plan = 'hospital';
     
     try {
       const paymentHandshake = await createSubscription(

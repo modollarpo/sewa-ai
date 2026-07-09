@@ -49,7 +49,7 @@ export function ReferralNetwork() {
   const [isMobile, setIsMobile]         = useState(window.innerWidth < 768);
 
   // New referral form state
-  const [newForm, setNewForm] = useState({ scanId: '', reason: '', priority: 'ROUTINE', specialistId: '' });
+  const [newForm, setNewForm] = useState({ scanId: '', reason: '', priority: 'ROUTINE', specialistId: '', billingType: 'patient' });
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg]   = useState<{ type: 'ok'|'err'; msg: string }|null>(null);
 
@@ -99,7 +99,7 @@ export function ReferralNetwork() {
     try {
       await apiClient.post('/ai/referrals', newForm);
       setSubmitMsg({ type: 'ok', msg: 'Referral submitted successfully.' });
-      setNewForm({ scanId: '', reason: '', priority: 'ROUTINE', specialistId: '' });
+      setNewForm({ scanId: '', reason: '', priority: 'ROUTINE', specialistId: '', billingType: 'patient' });
       setTimeout(() => { setShowNewModal(false); setSubmitMsg(null); fetchAll(); }, 1500);
     } catch (e: any) {
       setSubmitMsg({ type: 'err', msg: e.response?.data?.error || 'Failed to submit referral.' });
@@ -402,6 +402,18 @@ export function ReferralNetwork() {
                 <option value="ROUTINE">ROUTINE (72h SLA)</option>
                 <option value="URGENT">URGENT (8h SLA)</option>
                 <option value="STAT">STAT (2h SLA)</option>
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 11, color: C.textLo, display: 'block', marginBottom: 4 }}>Billing Setup</label>
+              <select
+                value={newForm.billingType}
+                onChange={e => setNewForm(p => ({ ...p, billingType: e.target.value }))}
+                style={{ width: '100%', padding: '10px 12px', background: C.bg3, border: `1px solid ${C.border}`, borderRadius: 8, color: C.textHi, fontSize: 12, fontFamily: C.F }}
+              >
+                <option value="patient">Patient Pays Out-of-Pocket ($150)</option>
+                <option value="hospital">Hospital Invoice ($75 Platform Fee)</option>
               </select>
             </div>
 

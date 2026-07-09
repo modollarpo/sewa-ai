@@ -136,10 +136,11 @@ r.post('/subscription',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId } = req.user!;
-      const { plan, phone } = req.body;
+      const { plan, phone, interval = 'monthly' } = req.body;
 
       if (!plan) throw new AppError('plan is required', 400);
       if (!PLANS[plan as keyof typeof PLANS]) throw new AppError(`Unknown plan: ${plan}`, 400);
+      if (!['monthly', 'annual'].includes(interval)) throw new AppError('Invalid interval', 400);
 
       const tenant = await prisma.tenant.findUnique({
         where: { id: tenantId },
@@ -151,11 +152,12 @@ r.post('/subscription',
       if (['ke', 'tz'].includes(tenant.region) && phone) {
         const planConf = PLANS[plan as keyof typeof PLANS];
         const amount = planConf.priceUSD ?? 0;
+        // M-Pesa is always monthly for now
         const result = await initiateMpesaSTK(tenantId, phone, amount, tenant.currency);
         return res.json(result);
       }
 
-      const result = await createSubscription(tenantId, plan, tenant.region, tenant.currency);
+      const result = await createSubscription(tenantId, plan, tenant.region, tenant.currency, interval as 'monthly'|'annual');
       res.json(result);
     } catch (err) { next(err); }
   }
