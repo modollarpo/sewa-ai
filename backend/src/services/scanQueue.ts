@@ -22,7 +22,7 @@ const bullConnectionOptions = {
 
 // Create the queue (needs its own connection)
 export const scanQueue = new Queue<ScanJobData, any, string>(QUEUE_NAME, {
-  connection: new IORedis(config.REDIS_URL, bullConnectionOptions),
+  connection: new IORedis(config.REDIS_URL, bullConnectionOptions) as any,
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -52,7 +52,7 @@ export async function enqueueScanProcessing(
 
   const job = await scanQueue.add(
     'process-scan' as any,
-    { scanId, tenantId },
+    { scanId, tenantId } as any,
     {
       priority: bullPriority,
       jobId: scanId, // Use scanId as jobId to prevent duplicates
@@ -77,7 +77,7 @@ export function startScanWorker(concurrency: number = 10): Worker<ScanJobData, a
     QUEUE_NAME,
     processScanJob,
     {
-      connection: new IORedis(config.REDIS_URL, bullConnectionOptions),
+      connection: new IORedis(config.REDIS_URL, bullConnectionOptions) as any,
       concurrency,
     }
   );

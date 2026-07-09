@@ -78,8 +78,8 @@ export async function startScanQueueBridge() {
         3;
 
       await scanQueue.add(
-        'process-scan',
-        { scanId: goJob.scanId, tenantId: goJob.tenantId },
+        'process-scan' as any,
+        { scanId: goJob.scanId, tenantId: goJob.tenantId } as any,
         {
           priority: bullPriority,
           jobId: goJob.scanId,
