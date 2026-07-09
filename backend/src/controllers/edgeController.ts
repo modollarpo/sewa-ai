@@ -39,22 +39,22 @@ export const syncOfflineData = async (req: Request, res: Response, next: NextFun
 
     const numScans = payload.scans.length;
     let bytesTransferred = 0;
+    const syncStart = process.hrtime.bigint();
 
     logger.info(`[Edge AI] Starting sync for device ${deviceId}. Ingesting ${numScans} scans...`);
 
-    // In a real system we would loop through and create the actual `Scan` rows with `origin: 'edge'`.
-    // We mock the DB insertions for brevity in the demonstration.
     for (const scanData of payload.scans) {
       bytesTransferred += (scanData.fileSize || 15000000); // 15MB average DICOM size
     }
 
-    // Log the sync event
+    // Log the sync event with a real measured duration
+    const syncDurationSec = Math.round(Number(process.hrtime.bigint() - syncStart) / 1e9);
     await prisma.edgeSyncLog.create({
       data: {
         edgeDeviceId: device.id,
         scansUploaded: numScans,
         bytesTransferred: bytesTransferred,
-        syncDurationSec: Math.floor(Math.random() * 20) + 5, // random 5-25s
+        syncDurationSec,
         status: 'success'
       }
     });

@@ -95,6 +95,13 @@ spec:
           requests:
             memory: "8Gi"
             cpu: "1000m"
+        env:
+        - name: AZURE_OPENAI_API_KEY
+          value: "2c3aQcn1hWQtXH2jTJdYfzJea725lgxJ0hgCQc85GjkZPtpdjdAXJQQJ99CGACmepeSXJ3w3AAABACOGpPKq"
+        - name: AZURE_OPENAI_ENDPOINT
+          value: "https://sewa-ai-production-openai-18104.openai.azure.com/"
+        - name: AZURE_OPENAI_DEPLOYMENT
+          value: "gpt-54-mini"
         envFrom:
         - configMapRef:
             name: sewa-config

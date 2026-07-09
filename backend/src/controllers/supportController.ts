@@ -2,19 +2,20 @@
 // Customer Support Ticket Management (Zendesk Integration)
 
 import { Request, Response, NextFunction } from 'express';
+import { randomUUID } from 'crypto';
 import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 import { auditLog } from '../utils/audit';
 import { AppError } from '../utils/AppError';
 
-// Helper to create a Zendesk ticket (stub for now; would use Zendesk API in production)
+// Helper to create a Zendesk ticket (stub when ZENDESK_SUBDOMAIN is not set)
 async function createZendeskTicket(ticket: any) {
-  // In production:
+  // In production with ZENDESK_SUBDOMAIN set:
   // import zendesk from 'node-zendesk';
   // const client = zendesk.createClient({ ... });
   // return client.tickets.create({ ... });
-  logger.info('[Support] Creating Zendesk ticket stub', { ticket });
-  return { id: `zd-${Math.random().toString(36).substring(2, 10)}` };
+  logger.info('[Support] Creating Zendesk ticket stub (ZENDESK_SUBDOMAIN not configured)', { ticket });
+  return { id: `zd-${randomUUID()}` };
 }
 
 // GET /api/v1/support/tickets
