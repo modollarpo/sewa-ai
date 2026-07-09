@@ -45,6 +45,23 @@ spec:
         matchLabels:
           app: sewa-metacognition
   - ports:
+    - port: 8004
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-federated
+    - podSelector:
+        matchLabels:
+          app: sewa-federated-learning
+  - ports:
+    - port: 8005
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-continuous
+  - ports:
     - port: 8007
       protocol: TCP
     to:
