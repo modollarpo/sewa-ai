@@ -111,6 +111,11 @@ spec:
           value: "https://sewa-ai-production-openai-18104.openai.azure.com/"
         - name: AZURE_OPENAI_DEPLOYMENT_NAME
           value: "gpt-54-mini"
+        # ── Azure AI Speech (ACI Voice Dictation — F0 Free Tier) ─────
+        - name: AZURE_SPEECH_KEY
+          value: "Fr80QwOXSmi8oBVKAzdiSZNYTT3Le9yWqH8TXIwcTXNcGLFCxlNZJQQJ99CGACmepeSXJ3w3AAAYACOGDTNo"
+        - name: AZURE_SPEECH_REGION
+          value: "uksouth"
         - name: AZURE_STORAGE_CONTAINER
           value: "scans"
         - name: FHIR_TENANT_ID

@@ -1,6 +1,10 @@
-﻿# SEWA XAI - Production Deployment Script
+# SEWA XAI - Production Deployment Script
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+# Fix Azure CLI UnicodeEncodeError on Windows (colorama/cp1252 issue)
+$env:PYTHONUTF8        = "1"
+$env:PYTHONIOENCODING  = "utf-8"
+$env:PYTHONLEGACYWINDOWSSTDIO = "0"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd-HHmmss"
 $ACR_NAME = "sewaaiproductionacr"
 $ACR_SERVER = "sewaaiproductionacr.azurecr.io"

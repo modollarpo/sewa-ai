@@ -19,7 +19,7 @@ const REGIONS = [
 const PLANS = [
   {
     id:'starter', name:'Clinic', badge:null,
-    prices:{ uk:{ monthly:490,annual:420 }, eu:{ monthly:550,annual:470 }, us:{ monthly:590,annual:499 }, africa:{ monthly:149,annual:119 } },
+    prices:{ uk:{ monthly:549,annual:459 }, eu:{ monthly:609,annual:519 }, us:{ monthly:649,annual:549 }, africa:{ monthly:169,annual:139 } },
     tagline:'For independent clinics and outpatient imaging centres',
     scans:'Up to 500 scans/month',
     users:'Up to 10 clinicians',
@@ -38,7 +38,7 @@ const PLANS = [
   },
   {
     id:'hospital', name:'Hospital', badge:'Most Popular',
-    prices:{ uk:{ monthly:1890,annual:1590 }, eu:{ monthly:2100,annual:1790 }, us:{ monthly:2290,annual:1940 }, africa:{ monthly:490,annual:390 } },
+    prices:{ uk:{ monthly:2199,annual:1899 }, eu:{ monthly:2409,annual:2099 }, us:{ monthly:2599,annual:2199 }, africa:{ monthly:599,annual:499 } },
     tagline:'For NHS Trusts, private hospitals and radiology groups',
     scans:'Up to 5,000 scans/month',
     users:'Up to 100 clinicians',

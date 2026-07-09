@@ -198,6 +198,9 @@ export const config = {
   AZURE_OPENAI_ENDPOINT: optional('AZURE_OPENAI_ENDPOINT'),
   AZURE_OPENAI_DEPLOYMENT_NAME: optional('AZURE_OPENAI_DEPLOYMENT_NAME', 'gpt-54-mini'),
   AZURE_OPENAI_WHISPER_DEPLOYMENT: optional('AZURE_OPENAI_WHISPER_DEPLOYMENT', 'whisper'),
+  // ── Azure AI Speech (real-time transcription, F0 free tier) ──
+  AZURE_SPEECH_KEY: optional('AZURE_SPEECH_KEY'),
+  AZURE_SPEECH_REGION: optional('AZURE_SPEECH_REGION', 'uksouth'),
 
 } as const;
 
