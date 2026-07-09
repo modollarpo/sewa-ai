@@ -20,6 +20,7 @@ r.use(authenticate);
 
 // ── AI Operations ─────────────────────────────────────────────
 r.post('/triage/:scanId', authorize('admin','superadmin','radiologist'), ctrl.triggerTriage);
+r.post('/ambient-dictation', authorize('admin','superadmin','radiologist', 'doctor'), ctrl.ambientDictation);
 
 // Standard VLM (Full report)
 r.post('/vlm/:scanId',    authorize('admin','superadmin','radiologist'), ctrl.streamVLMReport); // Switched to streaming by default for better UX

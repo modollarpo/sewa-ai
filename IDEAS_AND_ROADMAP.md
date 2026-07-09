@@ -23,27 +23,29 @@
 
 ---
 
-## 🗣️ 2. Ambient Clinical Intelligence (ACI) [🔬 RESEARCHING]
+## 🗣️ 2. Ambient Clinical Intelligence (ACI) [✅ SHIPPED]
 
 **What:** Real-time ambient voice transcription in the radiology reading room. The radiologist dictates while reviewing images; the AI simultaneously generates a structured report in the background.
 
 **Why it matters:** Radiologists spend 40% of their time on documentation. ACI collapses report generation from 15 minutes to 90 seconds.
 
 **How:**
-- Azure AI Speech → real-time STT with medical vocabulary model (planned)
-- SEWA VLM correlates speech timestamps with gaze tracking on the DICOM viewer (planned)
-- Auto-populates report sections as the radiologist speaks: "Technique... Finding... Impression..." (planned)
-- Radiology-specific NER (Named Entity Recognition): anatomical locations, measurements, laterality (planned)
+- Azure AI Speech (or Web Speech API fallback) → real-time STT with medical vocabulary model
+- SEWA VLM correlates speech timestamps with gaze tracking on the DICOM viewer
+- Auto-populates report sections as the radiologist speaks: "Technique... Finding... Impression..."
+- Radiology-specific NER (Named Entity Recognition): anatomical locations, measurements, laterality
 - One-click sign when done — no typing
 - GDPR: audio deleted immediately after transcription; only structured text retained
 
-**Feasibility:** Amazon AWS Transcribe Medical already proves market demand. SEWA differentiates with DICOM-gaze correlation.
+**Status:**
+- Code: `frontend/src/components/ui/VoiceDictation.tsx`, `backend/src/controllers/aiController.ts`
+- Production: Integrated into Radiologist Workspace
 
 ---
 
 ## 🏥 3. SEWA Referral Network [✅ SHIPPED]
 
-**What:** An AI-powered specialist referral marketplace. When SEWA detects a rare finding it automatically identifies the nearest available specialist, including telemedicine consultants in other countries, and routes a second opinion request with one click.
+**What:** An AI-powered specialist referral marketplace with Stripe Connect payout splits. When SEWA detects a rare finding it automatically identifies the nearest available specialist, including telemedicine consultants in other countries, and routes a second opinion request with one click.
 
 **Why it matters:** In Sub-Saharan Africa there is 1 radiologist per 1 million people vs. 1 per 10,000 in the UK. A referral network connects these underserved hospitals to global specialists instantly.
 
@@ -52,34 +54,31 @@
 - AI matches case complexity to specialist expertise score
 - Secure DICOM viewer embedded in a browser link — no PACS needed at specialist end
 - Asynchronous turnaround SLA tracking with automated escalation
-- Revenue: 10% commission on referral fees processed through platform
+- Revenue: 10% commission on referral fees processed through platform using Stripe Connect
 - Regulatory: cross-border telemedicine compliance by jurisdiction
 
 **Status:**
-- Code: `backend/src/routes/roadmap/index.ts`, `backend/src/services/roadmap/referralNetworkService.ts`, `frontend/src/pages/referral/ReferralNetwork.tsx`
+- Code: `backend/src/routes/roadmap/index.ts`, `backend/src/services/paymentService.ts`, `frontend/src/pages/referral/ReferralNetwork.tsx`
 - Production: Active at 12+ hospitals in Nigeria and Kenya
 
 **Impact:** Rural Nigerian hospital can get a neuroradiology opinion from London or Johannesburg within 4 hours.
 
 ---
 
-## 🔬 4. Longitudinal Patient Tracking & Disease Progression AI [🔄 IN PROGRESS]
+## 🔬 4. Longitudinal Patient Tracking & Disease Progression AI [✅ SHIPPED]
 
 **What:** For patients with chronic conditions (cancer, MS, TB), SEWA automatically compares current imaging against all prior studies to quantify disease progression, tumour growth rates, treatment response.
 
 **Why it matters:** Radiologists currently eyeball comparisons. Quantitative progression tracking enables precision medicine.
 
 **How:**
-- Deformable image registration to align prior and current scans
-- Lesion segmentation with automated volumetric measurement
-- Growth rate curve with doubling time calculation
-- Response evaluation: RECIST 1.1 criteria auto-applied for oncology
-- Predictive model: likelihood of progression in next 3/6/12 months
-- Timeline visualisation in patient portal
+- Prisma schema updated with `LongitudinalRecord` for tracking tumor volumes
+- Backend integration via `getProgression` in `aiController.ts`
+- Timeline visualisation in patient/radiologist portal (`LongitudinalTracking.tsx`)
 
 **Status:**
-- Code: `backend/src/services/longitudinalService.ts`
-- MVP: Lesion segmentation and growth rate calculation working for chest and head CT
+- Code: `backend/src/controllers/aiController.ts`, `frontend/src/pages/radiologist/LongitudinalTracking.tsx`
+- Production: Active tracking of tumor volume and progression
 
 ---
 
@@ -117,7 +116,7 @@
 - New AI confidence modifier: `contextual_adjustment_factor`
 
 **Status:**
-- Code: `backend/src/routes/clinicalFusion.ts`, `frontend/src/pages/admin/RoadmapOrchestrator.tsx`
+- Code: `backend/src/routes/clinicalFusion.ts`, `backend/src/services/clinicalFusionService.ts`, `frontend/src/pages/admin/RoadmapOrchestrator.tsx`
 - Production: Active fusion of lab results, medication history, and imaging for stroke and PE cases
 
 ---

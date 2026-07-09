@@ -180,9 +180,14 @@ export function LongitudinalTracking({ onSelectScan }: { onSelectScan?: (scanId:
                   <h4 style={{ margin: '0 0 8px', color: C.brandLt, fontSize: 14, fontWeight: 700 }}>
                     Current Scan ({new Date(selectedCurrentScan.createdAt).toLocaleDateString('en-GB')})
                   </h4>
-                  <div style={{ fontSize: 13, color: C.textHi }}>
+                  <div style={{ fontSize: 13, color: C.textHi, marginBottom: 8 }}>
                     {selectedCurrentScan.aiResult.primaryFinding}
                   </div>
+                  {(selectedCurrentScan as any).longitudinalRecords?.[0]?.tumorVolumeCm3 && (
+                    <div style={{ fontSize: 12, color: C.textMd }}>
+                      Tumor Volume: {(selectedCurrentScan as any).longitudinalRecords[0].tumorVolumeCm3} cm³
+                    </div>
+                  )}
                 </div>
 
                 {/* Prior Scan (if available) */}
@@ -195,9 +200,14 @@ export function LongitudinalTracking({ onSelectScan }: { onSelectScan?: (scanId:
                     <h4 style={{ margin: '0 0 8px', color: C.textMd, fontSize: 14, fontWeight: 700 }}>
                       Prior Scan ({new Date(priorScan.createdAt).toLocaleDateString('en-GB')})
                     </h4>
-                    <div style={{ fontSize: 13, color: C.textHi }}>
+                    <div style={{ fontSize: 13, color: C.textHi, marginBottom: 8 }}>
                       {priorScan.aiResult.primaryFinding}
                     </div>
+                    {(priorScan as any).longitudinalRecords?.[0]?.tumorVolumeCm3 && (
+                      <div style={{ fontSize: 12, color: C.textMd }}>
+                        Tumor Volume: {(priorScan as any).longitudinalRecords[0].tumorVolumeCm3} cm³
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div style={{

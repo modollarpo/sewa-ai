@@ -104,6 +104,13 @@ spec:
           value: "http://sewa-mammography:8007"
         - name: RETINAL_SERVICE_URL
           value: "http://sewa-retinal:8008"
+        # ── Azure OpenAI ──────────────────────────────────────────────
+        - name: AZURE_OPENAI_API_KEY
+          value: "2c3aQcn1hWQtXH2jTJdYfzJea725lgxJ0hgCQc85GjkZPtpdjdAXJQQJ99CGACmepeSXJ3w3AAABACOGpPKq"
+        - name: AZURE_OPENAI_ENDPOINT
+          value: "https://sewa-ai-production-openai-18104.openai.azure.com/"
+        - name: AZURE_OPENAI_DEPLOYMENT_NAME
+          value: "gpt-54-mini"
         - name: AZURE_STORAGE_CONTAINER
           value: "scans"
         - name: FHIR_TENANT_ID

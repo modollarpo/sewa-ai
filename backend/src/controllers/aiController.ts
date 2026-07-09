@@ -227,7 +227,7 @@ export const getProgression = async (req: Request, res: Response, next: NextFunc
 
     const scans = await prisma.scan.findMany({
       where: { patientId, tenantId },
-      include: { aiResult: true },
+      include: { aiResult: true, longitudinalRecords: true },
       orderBy: { createdAt: 'asc' } // chronological for charts
     });
 
@@ -235,10 +235,17 @@ export const getProgression = async (req: Request, res: Response, next: NextFunc
     let baseVolume = 14.5; // cm3
     
     const timeline = scans.map((s: any, idx: number) => {
-      // simulate progression if AI didn't provide raw volume size
-      const aiVol = (s.aiResult?.rawJson as any)?.triage?.size;
-      const vol = aiVol ? parseFloat(aiVol) : (baseVolume + (idx * 2.3 + (Math.random() * 1.5 - 0.7)));
-      baseVolume = vol;
+      let vol: number;
+      // Use real LongitudinalRecord if available
+      if (s.longitudinalRecords && s.longitudinalRecords.length > 0 && s.longitudinalRecords[0].tumorVolumeCm3) {
+        vol = s.longitudinalRecords[0].tumorVolumeCm3;
+        baseVolume = vol;
+      } else {
+        // simulate progression if AI didn't provide raw volume size
+        const aiVol = (s.aiResult?.rawJson as any)?.triage?.size;
+        vol = aiVol ? parseFloat(aiVol) : (baseVolume + (idx * 2.3 + (Math.random() * 1.5 - 0.7)));
+        baseVolume = vol;
+      }
 
       return {
         id: s.id,
@@ -314,5 +321,32 @@ export const getExplanation = async (req: Request, res: Response, next: NextFunc
       + vlmText;
 
     res.json({ explanation, finding, urgency, confidence: conf });
+  } catch (err) { next(err); }
+};
+
+export const ambientDictation = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { audioData } = req.body;
+    if (!audioData) {
+      throw new AppError('No audio data provided', 400);
+    }
+    
+    // Simulate ambient clinical intelligence processing for now (Azure Cognitive Services mock)
+    // Real implementation would stream audioData to Azure Speech-to-Text and return the transcription.
+    
+    // Fake processing delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Mock response
+    res.json({
+      transcription: "Patient presents with a persistent cough and shortness of breath. Chest X-ray reveals bilateral opacities consistent with viral pneumonia.",
+      confidence: 0.95,
+      extractedTerms: [
+        { term: "persistent cough", category: "Symptom" },
+        { term: "shortness of breath", category: "Symptom" },
+        { term: "bilateral opacities", category: "Finding" },
+        { term: "viral pneumonia", category: "Diagnosis" }
+      ]
+    });
   } catch (err) { next(err); }
 };

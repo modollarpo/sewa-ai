@@ -193,6 +193,11 @@ export const config = {
   APPLICATIONINSIGHTS_CONNECTION_STRING: optional('APPLICATIONINSIGHTS_CONNECTION_STRING', optional('AZURE_APPINSIGHTS_CONNECTION_STRING')),
   SENTRY_DSN: optional('SENTRY_DSN'), // retained as secondary fallback
 
+  // ── External AI / LLM (Azure OpenAI) ──────────────────────────
+  AZURE_OPENAI_API_KEY: optional('AZURE_OPENAI_API_KEY'),
+  AZURE_OPENAI_ENDPOINT: optional('AZURE_OPENAI_ENDPOINT'),
+  AZURE_OPENAI_DEPLOYMENT_NAME: optional('AZURE_OPENAI_DEPLOYMENT_NAME', 'gpt-54-mini'),
+
 } as const;
 
 // ── Startup log ───────────────────────────────────────────────

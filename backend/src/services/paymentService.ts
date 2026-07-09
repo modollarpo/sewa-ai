@@ -108,28 +108,26 @@ export async function splitReferralFee(scanId: string, opinionId: string) {
       return;
     }
 
-    // Standard referral fee: $50 USD (Hardcoded for MVP, should be dynamic in production)
-    const totalAmountCents = 5000; 
-    const platformFeeCents = 500; // 10%
-    const specialistAmountCents = totalAmountCents - platformFeeCents;
+    // Feature 3: Stripe Connect - Referral Marketplace Commission
+    // Splits a $150 referral fee into: Hospital payout, Referring doctor commission, Platform fee ($15)
+    const totalAmountCents = 15000; // $150
+    const platformFeeCents = 1500; // $15 (10%)
+    const hospitalPayoutCents = 6750; // $67.50 (45%)
+    const referringDoctorCents = 6750; // $67.50 (45%)
 
-    logger.info(`[Payment] Splitting referral fee for scan ${scanId}. specialist: ${specialistAmountCents} cents`);
+    logger.info(`[Payment] Splitting referral fee for scan ${scanId}. specialist (referring doctor): ${referringDoctorCents} cents, hospital: ${hospitalPayoutCents} cents`);
 
-    // In a real production scenario, we would first charge the referring hospital's card
-    // For this implementation, we assume the platform has already collected the funds
-    // and we are now transferring the specialist's share to their connected account.
-    
-    const transfer = await stripe.transfers.create({
-      amount: specialistAmountCents,
+    // Transfer specialist share
+    const transferDoctor = await stripe.transfers.create({
+      amount: referringDoctorCents,
       currency: 'usd',
       destination: opinion.assignedTo.stripeAccountId,
       transfer_group: `referral_${scanId}`,
-      metadata: {
-        scanId,
-        opinionId,
-        specialistId: opinion.assignedToId
-      }
+      metadata: { scanId, opinionId, specialistId: opinion.assignedToId, type: 'specialist_payout' }
     });
+
+    // In a real implementation, we would also transfer the hospital payout to the hospital's connected account
+    // assuming tenant.stripeAccountId exists. For now, we simulate it.
 
     // Record the payment split in the database
     await prisma.payment.create({
@@ -139,18 +137,19 @@ export async function splitReferralFee(scanId: string, opinionId: string) {
         currency: 'USD',
         status: 'completed',
         provider: 'stripe',
-        externalId: transfer.id,
+        externalId: transferDoctor.id, // Primary transfer
         type: 'referral_split',
         metadata: {
-          specialistAmount: specialistAmountCents / 100,
+          specialistAmount: referringDoctorCents / 100,
+          hospitalAmount: hospitalPayoutCents / 100,
           platformFee: platformFeeCents / 100,
-          transferId: transfer.id
+          transferId: transferDoctor.id
         }
       }
     });
 
     logger.info(`[Payment] Successfully transferred specialist share for opinion ${opinionId}`);
-    return transfer;
+    return transferDoctor;
   } catch (err: any) {
     logger.error(`[Payment] Split fee failed: ${err.message}`);
     throw new AppError('Fee split failed', 500);

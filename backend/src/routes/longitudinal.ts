@@ -19,7 +19,7 @@ router.get('/patient/:patientId', async (req, res) => {
         status: 'COMPLETED',
         aiResult: { isNot: null }
       },
-      include: { patient: true, aiResult: true },
+      include: { patient: true, aiResult: true, longitudinalRecords: true },
       orderBy: { createdAt: 'desc' }
     });
 

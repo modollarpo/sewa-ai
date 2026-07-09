@@ -1,4 +1,4 @@
-# SEWA XAI - Production Deployment Script
+﻿# SEWA XAI - Production Deployment Script
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $TIMESTAMP = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -6,7 +6,7 @@ $ACR_NAME = "sewaaiproductionacr"
 $ACR_SERVER = "sewaaiproductionacr.azurecr.io"
 $AKS_CLUSTER = "sewa-ai-production-aks"
 $RESOURCE_GROUP = "sewa-ai-production-rg"
-$NS = "sewa-ai"   # CANONICAL NAMESPACE — do NOT change; cluster has been live for 92+ days on this value.
+$NS = "sewa-ai"   # CANONICAL NAMESPACE - do NOT change; cluster has been live for 92+ days on this value.
 $IMAGE_TAG = "prod-$TIMESTAMP"
 
 function Out-Success {
@@ -138,10 +138,10 @@ try {
     kubelogin convert-kubeconfig -l azurecli
     Out-Success "AKS credentials acquired."
 
-    # ── Namespace guard: fail loudly rather than deploy to wrong NS ──────
+    # â”€â”€ Namespace guard: fail loudly rather than deploy to wrong NS â”€â”€â”€â”€â”€â”€
     $nsExists = kubectl get namespace $NS --ignore-not-found -o name 2>$null
     if (-not $nsExists) {
-        Write-Host "   [WARN] Namespace '$NS' not found — creating it now." -ForegroundColor Yellow
+        Write-Host "   [WARN] Namespace '$NS' not found - creating it now." -ForegroundColor Yellow
         kubectl create namespace $NS
         kubectl label namespace $NS environment=production app.kubernetes.io/part-of=sewa-xai
         Write-Host "   [OK] Namespace '$NS' created." -ForegroundColor Green
@@ -282,24 +282,23 @@ try {
 
         # Use db push (idempotent) instead of migrate deploy to handle non-empty production DB (P3005)
         Write-Host " -> Syncing schema via 'prisma db push' in pod $POD..." -ForegroundColor Cyan
-        kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma db push --skip-generate --accept-data-loss 2>&1"
+        kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma db push --skip-generate --accept-data-loss"
         if ($LASTEXITCODE -ne 0) {
             Write-Host " -> (Schema sync warning, continuing...)" -ForegroundColor Yellow
         }
 
         # Resolve migrations as applied so future migrate deploy doesn't fail
         Write-Host " -> Baselining migrations in pod $POD..." -ForegroundColor Cyan
-        kubectl exec -n $NS $POD -c backend -- sh -c @"
-            npx prisma migrate resolve --applied 0_init 2>&1 || true
-            npx prisma migrate resolve --applied 20260627000000_add_model_monitoring_and_feedback 2>&1 || true
-            npx prisma migrate resolve --applied 20260704000000_add_tenant_geo_and_contact_fields 2>&1 || true
-"@
+        kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 0_init 2>/dev/null; true"
+        kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260627000000_add_model_monitoring_and_feedback 2>/dev/null; true"
+        kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260704000000_add_tenant_geo_and_contact_fields 2>/dev/null; true"
+        kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260709000000_add_longitudinal_record 2>/dev/null; true"
 
-        # Seed with required ADMIN_PASSWORD (idempotent — seed.js upserts)
+        # Seed with required ADMIN_PASSWORD (idempotent - seed.js upserts)
         Write-Host " -> Seeding database via pod $POD..." -ForegroundColor Cyan
         $ADMIN_PASS = az keyvault secret show --vault-name "sewa-ai-production-kv" --name "sewa-admin-password" --query value -o tsv 2>$null
         if (-not $ADMIN_PASS) { $ADMIN_PASS = "DemoPassword123!" }
-        kubectl exec -n $NS $POD -c backend -- sh -c "ADMIN_PASSWORD='$ADMIN_PASS' npm run db:seed:js 2>&1"
+        kubectl exec -n $NS $POD -c backend -- sh -c "ADMIN_PASSWORD='$ADMIN_PASS' npm run db:seed:js 2>/dev/null"
         if ($LASTEXITCODE -ne 0) {
             Write-Host " -> (Seed warning, continuing...)" -ForegroundColor Yellow
         }
@@ -318,3 +317,4 @@ Write-Host ""
 Write-Host "Production push complete! Platform is live." -ForegroundColor Green
 Write-Host "  Image tag: $IMAGE_TAG" -ForegroundColor Cyan
 Write-Host ""
+

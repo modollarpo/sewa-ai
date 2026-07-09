@@ -197,12 +197,28 @@ app.get('/health', async (_req, res) => {
   const timeoutPromise = new Promise<false>((resolve) => setTimeout(() => resolve(false), 4000));
   const safeCheck = (p: Promise<any>) => Promise.race([p, timeoutPromise]);
 
+  // Redis check: use status first, only call ping() if already 'ready'.
+  // The shared singleton has maxRetriesPerRequest:null which queues commands
+  // indefinitely during reconnection — a plain ping() would block until timeout.
+  const redisCheck = async (): Promise<boolean> => {
+    const status = redisClient.status;
+    if (status !== 'ready') {
+      logger.warn(`[Health] Redis status: ${status} (not ready)`);
+      return false;
+    }
+    try {
+      const r = await redisClient.ping() as string;
+      logger.debug(`[Health] Redis ping: ${JSON.stringify(r)}`);
+      return !!(r && (r.toUpperCase() === 'PONG' || r === '+PONG'));
+    } catch (e: any) {
+      logger.error(`[Health] Redis ping error: ${e.message}`);
+      return false;
+    }
+  };
+
   const [dbOk, redisOk, triageOk] = await Promise.all([
     safeCheck(prisma.$queryRaw`SELECT 1`.then(()=>true).catch(()=>false)),
-    safeCheck(redisClient.ping().then((r: string | null) => { 
-      logger.debug(`[Health] Redis ping response: ${JSON.stringify(r)}`);
-      return !!(r && (r.toUpperCase() === 'PONG' || r === '+PONG'));
-    }).catch((e: any) => { logger.error(`[Health] Redis ping error: ${e.message}`); return false; })),
+    safeCheck(redisCheck()),
     safeCheck(axios.get(`${config.AI_SERVICE_URL}/health`, { timeout: 2000 }).then((r: any) => r.status === 200).catch(() => false))
   ]);
 

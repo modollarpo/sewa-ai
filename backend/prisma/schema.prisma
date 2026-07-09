@@ -79,6 +79,7 @@ model Tenant {
   customerFeedbacks       CustomerFeedback[]
   federatedNodes          FederatedNode[]
   edgeDevices             EdgeDevice[]
+  longitudinalRecords     LongitudinalRecord[]
 
   @@index([region])
   @@index([status])
@@ -178,6 +179,7 @@ model Patient {
   scans       Scan[]
   messages    Message[]
   Appointment Appointment[]
+  longitudinalRecords LongitudinalRecord[]
 
   @@unique([tenantId, mrn])
   @@index([tenantId])
@@ -239,6 +241,7 @@ model Scan {
   secondOpinions          SecondOpinion[]
   clinicalValidation      ClinicalValidation?
   modelPerformanceMetrics ModelPerformanceMetric[]
+  longitudinalRecords     LongitudinalRecord[]
 
   @@index([tenantId])
   @@index([status])
@@ -921,4 +924,29 @@ model EpidemiologyEvent {
 
   @@index([disease, region])
   @@index([detectedAt])
+}
+
+// ── LONGITUDINAL PATIENT TRACKING ─────────────────────────────
+model LongitudinalRecord {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  patientId       String
+  patient         Patient  @relation(fields: [patientId], references: [id])
+  scanId          String
+  scan            Scan     @relation(fields: [scanId], references: [id])
+  
+  recordedAt      DateTime @default(now())
+  
+  // Progression metrics (RECIST 1.1 equivalent)
+  tumorVolumeCm3  Float?
+  longestDiameterMm Float?
+  progressionPct  Float? // Compared to previous baseline scan
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([scanId])
 }

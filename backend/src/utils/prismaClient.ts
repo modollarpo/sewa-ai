@@ -16,7 +16,7 @@ export const prisma = basePrisma.$extends({
       async $allOperations({ model, operation, args, query }) {
         const tenantId = tenantStorage.getStore();
         // Only enforce for known tenant models
-        const tenantModels = ['Scan', 'Patient', 'AIResult', 'Doctor', 'Technician', 'Report', 'User'];
+        const tenantModels = ['Scan', 'Patient', 'AIResult', 'Doctor', 'Technician', 'Report', 'User', 'LongitudinalRecord'];
         
         if (tenantId && tenantModels.includes(model as string)) {
           const anyArgs = args as any;

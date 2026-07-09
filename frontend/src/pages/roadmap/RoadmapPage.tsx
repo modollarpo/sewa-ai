@@ -70,7 +70,7 @@ const ROADMAP: RoadmapItem[] = [
   { id:'r19', title:'Federated Learning Round 50+', desc:'Cross-institution FL training with ε-DP privacy guarantees.', status:'shipped', category:'ai', votes:167, quarter:'Q1 2026', impact:'medium' },
   { id:'r20', title:'DICOM SR structured reports', desc:'Export AI findings as DICOM Structured Reports (SR) for direct PACS archiving.', status:'shipped', category:'integrations', votes:122, quarter:'Q1 2026', impact:'medium' },
   { id:'r21', title:'Radiology Training Simulator', desc:'Gamified training platform with AI feedback and CME credits.', status:'in_progress', category:'clinical', votes:367, quarter:'Q1 2026', impact:'high' },
-  { id:'r22', title:'Longitudinal Patient Tracking', desc:'Compare current/historic scans, auto-track lesion growth and RECIST criteria.', status:'in_progress', category:'clinical', votes:254, quarter:'Q1 2026', impact:'high' },
+  { id:'r22', title:'Longitudinal Patient Tracking', desc:'Compare current/historic scans, auto-track lesion growth and RECIST criteria.', status:'shipped', category:'clinical', votes:254, quarter:'Q1 2026', impact:'high' },
 
   // Q2 2026
   { id:'r23', title:'Prostate MRI (PI-RADS) scoring', desc:'AI-assisted PI-RADS v2.1 scoring for mpMRI with lesion localisation.', status:'shipped', category:'ai', votes:441, quarter:'Q2 2026', impact:'high' },
@@ -78,7 +78,7 @@ const ROADMAP: RoadmapItem[] = [
   { id:'r25', title:'NHS Spine integration', desc:'Direct integration with NHS Spine APIs: PDS, EMIS, SystmOne.', status:'planned', category:'integrations', votes:205, quarter:'Q2 2026', impact:'high' },
   { id:'r26', title:'Second opinion workflow', desc:'Formal second-opinion request system with audit trail, specialist matching and SLA tracking.', status:'shipped', category:'clinical', votes:187, quarter:'Q2 2026', impact:'medium' },
   { id:'r27', title:'Pen testing — CREST certified', desc:'External penetration test for NHS DSPT and Cyber Essentials Plus.', status:'planned', category:'compliance', votes:56, quarter:'Q2 2026', impact:'high' },
-  { id:'r28', title:'Ambient Clinical Intelligence', desc:'Real-time voice transcription + gaze tracking for auto-reporting.', status:'researching', category:'clinical', votes:423, quarter:'Q2 2026', impact:'high' },
+  { id:'r28', title:'Ambient Clinical Intelligence', desc:'Real-time voice transcription + gaze tracking for auto-reporting.', status:'shipped', category:'clinical', votes:423, quarter:'Q2 2026', impact:'high' },
 
   // Q3 2026
   { id:'r29', title:'Retinal fundus AI (DR screening)', desc:'Diabetic retinopathy grading from fundus photographs.', status:'shipped', category:'ai', votes:512, quarter:'Q3 2026', impact:'high' },
