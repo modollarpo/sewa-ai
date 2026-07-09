@@ -15,7 +15,7 @@ spec:
     - port: 3000
       protocol: TCP
   egress:
-  # AI service pods
+  # ── AI service pods (ports must match ai-services-deployment-prod.yaml) ──
   - ports:
     - port: 8000
       protocol: TCP
@@ -36,7 +36,7 @@ spec:
     to:
     - podSelector:
         matchLabels:
-          app: sewa-uncertainty
+          app: sewa-pathology
   - ports:
     - port: 8003
       protocol: TCP
@@ -45,20 +45,34 @@ spec:
         matchLabels:
           app: sewa-metacognition
   - ports:
-    - port: 8002
+    - port: 8007
       protocol: TCP
     to:
     - podSelector:
         matchLabels:
-          app: sewa-pathology
-  # PostgreSQL Flexible Server (VNet-injected, db-subnet 10.10.2.0/24)
+          app: sewa-mammography
+  - ports:
+    - port: 8008
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-retinal
+  - ports:
+    - port: 8009
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: sewa-uncertainty
+  # ── PostgreSQL Flexible Server (VNet-injected, db-subnet 10.10.2.0/24) ──
   - ports:
     - port: 5432
       protocol: TCP
     to:
     - ipBlock:
         cidr: 10.10.2.0/24
-  # Azure Cache for Redis (redis-subnet 10.10.3.0/24) OR internal redis
+  # ── Redis: in-cluster pod OR Azure Cache (redis-subnet 10.10.3.0/24) ──
   - ports:
     - port: 6379
       protocol: TCP
@@ -70,13 +84,13 @@ spec:
     - podSelector:
         matchLabels:
           app: sewa-redis
-  # DNS resolution
+  # ── DNS resolution ──
   - ports:
     - port: 53
       protocol: UDP
     - port: 53
       protocol: TCP
-  # External HTTPS (Azure APIs, SendGrid, etc.)
+  # ── External HTTPS (Azure APIs, SendGrid, Stripe, etc.) ──
   - ports:
     - port: 443
       protocol: TCP
