@@ -23,11 +23,14 @@ interface GoScanJob {
 // Start the bridge worker that consumes from "sewa:scan:queue"
 export async function startScanQueueBridge() {
   logger.info('Starting scan queue bridge (Go Redis List → BullMQ)');
+  
+  // Create a dedicated connection for blocking commands
+  const bridgeClient = redisClient.duplicate();
 
   while (true) {
     try {
       // BRPOP: block until a job is available (ioredis signature: brpop(...keys, timeoutSeconds))
-      const result = await redisClient.brpop('sewa:scan:queue', 0);
+      const result = await bridgeClient.brpop('sewa:scan:queue', 0);
       if (!result || !result[1]) continue;
 
       const rawJob = result[1];
@@ -39,7 +42,7 @@ export async function startScanQueueBridge() {
       } catch (parseErr) {
         logger.error('Failed to parse Go scan job', { rawJob, error: parseErr });
         // Move to dead-letter (we'll use the same key as Go service for consistency)
-        await redisClient.lpush('sewa:scan:dead', rawJob);
+        await bridgeClient.lpush('sewa:scan:dead', rawJob);
         continue;
       }
 
@@ -62,7 +65,7 @@ export async function startScanQueueBridge() {
         // If scan already exists (idempotency), that's okay!
         if (dbErr.code !== 'P2002') {
           logger.error('Failed to create scan in database', { scanId: goJob.scanId, error: dbErr });
-          await redisClient.lpush('sewa:scan:dead', rawJob);
+          await bridgeClient.lpush('sewa:scan:dead', rawJob);
           continue;
         }
       }

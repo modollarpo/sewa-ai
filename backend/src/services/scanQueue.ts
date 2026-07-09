@@ -1,7 +1,8 @@
 // SEWA XAI — Scan Queue (BullMQ)
 // Manages AI pipeline job queuing for 1000+ concurrent scan support
+import IORedis from 'ioredis';
+import { config } from '../config/env';
 import { Queue, Worker, Job } from 'bullmq';
-import { redisClient } from '../config/redis';
 import { runAIPipeline } from './aiOrchestrator';
 import { logger } from '../utils/logger';
 
@@ -14,9 +15,14 @@ interface ScanJobData {
 // Queue name
 const QUEUE_NAME = 'scan-ai-pipeline';
 
-// Create the queue
+const bullConnectionOptions = {
+  maxRetriesPerRequest: null,
+  lazyConnect: false
+};
+
+// Create the queue (needs its own connection)
 export const scanQueue = new Queue<ScanJobData, any, string>(QUEUE_NAME, {
-  connection: redisClient as any,
+  connection: new IORedis(config.REDIS_URL, bullConnectionOptions),
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -71,7 +77,7 @@ export function startScanWorker(concurrency: number = 10): Worker<ScanJobData, a
     QUEUE_NAME,
     processScanJob,
     {
-      connection: redisClient as any,
+      connection: new IORedis(config.REDIS_URL, bullConnectionOptions),
       concurrency,
     }
   );
