@@ -1,0 +1,100 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pathology-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-pathology
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - port: 8002
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mammography-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-mammography
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - port: 8007
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: retinal-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-retinal
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - port: 8008
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: federated-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-federated
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - port: 8004
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: continuous-policy
+  namespace: sewa-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: sewa-continuous
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: sewa-backend
+    ports:
+    - port: 8005
+      protocol: TCP
