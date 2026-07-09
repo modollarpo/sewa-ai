@@ -194,12 +194,15 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // ── Health ─────────────────────────────────────────────────────
 app.get('/health', async (_req, res) => {
-  const timeoutPromise = new Promise<false>((resolve) => setTimeout(() => resolve(false), 2000));
+  const timeoutPromise = new Promise<false>((resolve) => setTimeout(() => resolve(false), 4000));
   const safeCheck = (p: Promise<any>) => Promise.race([p, timeoutPromise]);
 
   const [dbOk, redisOk, triageOk] = await Promise.all([
     safeCheck(prisma.$queryRaw`SELECT 1`.then(()=>true).catch(()=>false)),
-    safeCheck(redisClient.ping().then((r: string | null) => r === 'PONG').catch(() => false)),
+    safeCheck(redisClient.ping().then((r: string | null) => { 
+      logger.debug(`[Health] Redis ping response: ${JSON.stringify(r)}`);
+      return !!(r && (r.toUpperCase() === 'PONG' || r === '+PONG'));
+    }).catch((e: any) => { logger.error(`[Health] Redis ping error: ${e.message}`); return false; })),
     safeCheck(axios.get(`${config.AI_SERVICE_URL}/health`, { timeout: 2000 }).then((r: any) => r.status === 200).catch(() => false))
   ]);
 

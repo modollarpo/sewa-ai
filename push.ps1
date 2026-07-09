@@ -6,7 +6,7 @@ $ACR_NAME = "sewaaiproductionacr"
 $ACR_SERVER = "sewaaiproductionacr.azurecr.io"
 $AKS_CLUSTER = "sewa-ai-production-aks"
 $RESOURCE_GROUP = "sewa-ai-production-rg"
-$NS = "sewa-ai"
+$NS = "sewa-ai"   # CANONICAL NAMESPACE — do NOT change; cluster has been live for 92+ days on this value.
 $IMAGE_TAG = "prod-$TIMESTAMP"
 
 function Out-Success {
@@ -137,6 +137,17 @@ try {
         --output none
     kubelogin convert-kubeconfig -l azurecli
     Out-Success "AKS credentials acquired."
+
+    # ── Namespace guard: fail loudly rather than deploy to wrong NS ──────
+    $nsExists = kubectl get namespace $NS --ignore-not-found -o name 2>$null
+    if (-not $nsExists) {
+        Write-Host "   [WARN] Namespace '$NS' not found — creating it now." -ForegroundColor Yellow
+        kubectl create namespace $NS
+        kubectl label namespace $NS environment=production app.kubernetes.io/part-of=sewa-xai
+        Write-Host "   [OK] Namespace '$NS' created." -ForegroundColor Green
+    } else {
+        Write-Host "   [OK] Namespace '$NS' confirmed." -ForegroundColor Green
+    }
 } catch {
     Out-Error "Failed to get AKS credentials: $_"
 }

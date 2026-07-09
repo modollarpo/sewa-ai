@@ -11,18 +11,7 @@ spec:
   - Ingress
   - Egress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: sewa-frontend
-    ports:
-    - port: 3000
-      protocol: TCP
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: ingress-nginx
-    ports:
+  - ports:
     - port: 3000
       protocol: TCP
   egress:
@@ -69,7 +58,7 @@ spec:
     to:
     - ipBlock:
         cidr: 10.10.2.0/24
-  # Azure Cache for Redis (redis-subnet 10.10.3.0/24)
+  # Azure Cache for Redis (redis-subnet 10.10.3.0/24) OR internal redis
   - ports:
     - port: 6379
       protocol: TCP
@@ -78,6 +67,9 @@ spec:
     to:
     - ipBlock:
         cidr: 10.10.3.0/24
+    - podSelector:
+        matchLabels:
+          app: sewa-redis
   # DNS resolution
   - ports:
     - port: 53
