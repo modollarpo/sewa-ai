@@ -1,0 +1,226 @@
+﻿# SEWA XAI â€” Prometheus Monitoring Stack
+# Deploys: kube-prometheus-stack (Prometheus + Grafana + Alertmanager)
+# ServiceMonitors for all SEWA XAI services
+# PrometheusRules for clinical SLA alerting
+---
+# Monitoring namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+---
+# ServiceMonitor â€” Backend API
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-backend-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - sewa-ai
+  selector:
+    matchLabels:
+      app: sewa-backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+---
+# ServiceMonitor â€” Triage AI Engine
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-triage-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - sewa-ai
+  selector:
+    matchLabels:
+      app: sewa-triage
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+# ServiceMonitor â€” Uncertainty Engine
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-uncertainty-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - sewa-ai
+  selector:
+    matchLabels:
+      app: sewa-uncertainty
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+# ServiceMonitor â€” DICOM Ingestion (Go service exposes /metrics natively)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-dicom-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - sewa-ai
+  selector:
+    matchLabels:
+      app: sewa-dicom-ingestion
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 10s   # higher frequency â€” ingestion is the entry point
+---
+# ServiceMonitor â€” VLM Report
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-vlm-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - sewa-ai
+  selector:
+    matchLabels:
+      app: sewa-vlm-report
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+# ServiceMonitor â€” Metacognition
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sewa-metacognition-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - sewa-ai
+  selector:
+    matchLabels:
+      app: sewa-metacognition
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+# PrometheusRule â€” Clinical SLA Alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sewa-clinical-sla-rules
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: sewa.clinical.sla
+      interval: 30s
+      rules:
+        # AI inference latency SLA: p95 must be < 4 seconds
+        - alert: TriageLatencyBreached
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(sewa_dicom_processing_seconds_bucket[5m])) by (le)
+            ) > 4
+          for: 2m
+          labels:
+            severity: critical
+            team: clinical-engineering
+          annotations:
+            summary: "Triage p95 latency exceeded 4s SLA"
+            description: "p95 DICOM processing latency is {{ $value | humanizeDuration }} (SLA: 4s)"
+
+        # DICOM ingestion failure rate > 5%
+        - alert: DicomHighFailureRate
+          expr: |
+            rate(sewa_dicom_failed_total[5m]) /
+            rate(sewa_dicom_received_total[5m]) > 0.05
+          for: 3m
+          labels:
+            severity: warning
+          annotations:
+            summary: "DICOM ingestion failure rate > 5%"
+            description: "Failure rate: {{ $value | humanizePercentage }}"
+
+        # Redis queue depth too high â€” AI pipeline backing up
+        - alert: ScanQueueBacklogHigh
+          expr: sewa_redis_scan_queue_depth > 500
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Redis scan queue depth high ({{ $value }} jobs)"
+            description: "AI pipeline may be backing up. Consider scaling triage/uncertainty."
+
+        # Any AI service pod count drops to 0
+        - alert: AIServiceDown
+          expr: |
+            kube_deployment_status_replicas_available{
+              namespace="sewa-ai",
+              deployment=~"sewa-triage|sewa-uncertainty|sewa-vlm-report|sewa-metacognition"
+            } == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "AI service {{ $labels.deployment }} has 0 available replicas"
+            description: "Clinical AI pathway is broken. Immediate action required."
+
+        # Dead-letter queue accumulating failed scans
+        - alert: DeadLetterQueueGrowing
+          expr: sewa_redis_scan_queue_depth{queue="sewa:scan:dead"} > 10
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "DICOM dead-letter queue has {{ $value }} failed jobs"
+
+    - name: sewa.infrastructure
+      rules:
+        # Node memory pressure
+        - alert: NodeMemoryPressure
+          expr: |
+            (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.15
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node {{ $labels.instance }} memory < 15% free"
+
+        # Redis connection failures
+        - alert: RedisDown
+          expr: redis_up == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Redis is unreachable â€” AI pipeline halted"

@@ -40,23 +40,23 @@ const PROVIDER_MAP: Record<string, string[]> = {
 // Subscription plans — Stripe products/prices created 2026-06-30 via Stripe API to match Frontend pricing exactly
 export const PLANS = {
   starter: { // Clinic Plan
-    priceUSD: 590, scans: 500,
-    stripeProductId: 'prod_UnZDNgZEiq7oD6',
+    priceUSD: 649, scans: 500,
+    stripeProductId: 'prod_UqvTrS0OdOHU6n',
     stripePriceId: {
-      uk: 'price_1Tny52E18kkIjUPtWIpoiznd',      // £490
-      eu: 'price_1Tny52E18kkIjUPtBU3NYCER',      // €550
-      us: 'price_1Tny53E18kkIjUPtgJwlEdsE',      // $590
-      africa: 'price_1Tny53E18kkIjUPtDqz9VTVI',  // $149
+      uk: 'price_1TrDd1E18kkIjUPtGnAlJe1N',
+      eu: 'price_1TrDd2E18kkIjUPtqnllKl4V',
+      us: 'price_1TrDd2E18kkIjUPtDIKEmsy2',
+      africa: 'price_1TrDd3E18kkIjUPtCxKEQO4n',
     },
   },
   hospital: { // Hospital Plan (formerly Pro)
-    priceUSD: 2290, scans: 5000,
-    stripeProductId: 'prod_UnZDNCQZsKcRaL',
+    priceUSD: 2599, scans: 5000,
+    stripeProductId: 'prod_UqvUMnmCvLLLcI',
     stripePriceId: {
-      uk: 'price_1Tny54E18kkIjUPtrcqj92Gw',      // £1890
-      eu: 'price_1Tny54E18kkIjUPtLs4ugMAD',      // €2100
-      us: 'price_1Tny55E18kkIjUPt1PCVRIl2',      // $2290
-      africa: 'price_1Tny55E18kkIjUPtGZg19o1l',  // $490
+      uk: 'price_1TrDd5E18kkIjUPt9lN3OXNu',
+      eu: 'price_1TrDd5E18kkIjUPt2VZUnRIe',
+      us: 'price_1TrDd6E18kkIjUPtQe60dDnS',
+      africa: 'price_1TrDd6E18kkIjUPtsQ5uv29F',
     },
   },
   enterprise: { priceUSD: null as number | null, scans: null as number | null },
