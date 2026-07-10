@@ -23,7 +23,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', loading, icon, iconRight, fullWidth, children, disabled, style, ...props }, ref) => {
+  ({ variant = 'primary', size = 'md', loading, icon, iconRight, fullWidth, children, disabled, style, 'aria-label': ariaLabel, ...props }, ref) => {
     const [hovered, setHovered] = useState(false);
 
     const base: React.CSSProperties = {
@@ -83,6 +83,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
         disabled={disabled || loading}
+        aria-label={ariaLabel}
+        aria-disabled={disabled || loading}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{ ...base, ...sizeStyles[size], ...variantStyles[variant], ...style }}
@@ -472,12 +474,18 @@ export function StatCard({
 // CARD
 // ─────────────────────────────────────────────────────────────
 export function Card({
-  children, padding = 20, style, onClick, hoverable
+  children, padding = '20px', style, onClick, hoverable
 }: {
-  children: React.ReactNode; padding?: number;
+  children: React.ReactNode; padding?: string | number;
   style?: React.CSSProperties; onClick?: () => void; hoverable?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
+  const computePadding = (p: string | number) => {
+    if (typeof p === 'number') {
+      return `${p}px`;
+    }
+    return p;
+  };
   return (
     <div
       onClick={onClick}
@@ -487,7 +495,7 @@ export function Card({
         background:   colors.bg2,
         border:       `1px solid ${hovered && hoverable ? colors.brand + '60' : colors.bgBorder}`,
         borderRadius: radius.xl,
-        padding:      `${padding}px`,
+        padding:      computePadding(padding),
         transition:   `all ${transitions.base}`,
         cursor:       onClick ? 'pointer' : undefined,
         boxShadow:    hovered && hoverable ? shadows.brand : shadows.sm,
@@ -698,6 +706,9 @@ export function Modal({ open, onClose, title, children, width = 560 }: {
       animation: 'sewa-fadeIn 150ms ease',
     }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
     >
       <style>{`@keyframes sewa-fadeIn { from { opacity:0; } to { opacity:1; } }`}</style>
       <div style={{
@@ -710,13 +721,188 @@ export function Modal({ open, onClose, title, children, width = 560 }: {
       }}>
         <style>{`@keyframes sewa-slideUp { from { transform:translateY(12px); opacity:0; } to { transform:translateY(0); opacity:1; } }`}</style>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px 16px', borderBottom: `1px solid ${colors.bgBorder}` }}>
-          <h2 style={{ margin: 0, fontSize: typography.size.xl, fontWeight: typography.weight.semibold, color: colors.textHigh, fontFamily: typography.fontBase }}>{title}</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: colors.textLow, cursor: 'pointer', padding: '4px', borderRadius: radius.md, display: 'flex' }}>
+          <h2 id="modal-title" style={{ margin: 0, fontSize: typography.size.xl, fontWeight: typography.weight.semibold, color: colors.textHigh, fontFamily: typography.fontBase }}>{title}</h2>
+          <button onClick={onClose} aria-label="Close modal" style={{ background: 'none', border: 'none', color: colors.textLow, cursor: 'pointer', padding: '4px', borderRadius: radius.md, display: 'flex' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
         </div>
         <div style={{ padding: '20px 24px' }}>{children}</div>
       </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// TABLE
+// ─────────────────────────────────────────────────────────────
+interface TableProps {
+  columns: { key: string; header: string; render?: (row: any, index: number) => React.ReactNode }[];
+  data: any[];
+  loading?: boolean;
+  emptyMessage?: string;
+}
+
+export function Table({ columns, data, loading, emptyMessage = 'No data' }: TableProps) {
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} height={40} />)}
+      </div>
+    );
+  }
+  if (!data.length) {
+    return <div style={{ padding: '40px', textAlign: 'center', color: colors.textLow, fontSize: typography.size.sm, fontFamily: typography.fontBase }}>{emptyMessage}</div>;
+  }
+
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: typography.fontBase }} role="grid">
+        <thead>
+          <tr>
+            {columns.map(col => (
+              <th key={col.key} style={{
+                textAlign: 'left',
+                padding: '10px 12px',
+                borderBottom: `1px solid ${colors.bgBorder}`,
+                fontSize: typography.size.xs,
+                fontWeight: typography.weight.semibold,
+                color: colors.textMed,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+              }}>
+                {col.header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row, idx) => (
+            <tr key={idx} style={{ borderBottom: `1px solid ${colors.bgBorder}`, transition: `background ${transitions.fast}` }}>
+              {columns.map(col => (
+                <td key={col.key} style={{
+                  padding: '12px',
+                  fontSize: typography.size.sm,
+                  color: colors.textHigh,
+                }}>
+                  {col.render ? col.render(row, idx) : row[col.key]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// CHART (simple line/bar)
+// ─────────────────────────────────────────────────────────────
+interface ChartProps {
+  type: 'line' | 'bar';
+  data: { label: string; value: number }[];
+  color?: string;
+  height?: number;
+}
+
+export function Chart({ type = 'bar', data, color = colors.brand, height = 160 }: ChartProps) {
+  const maxVal = Math.max(...data.map(d => d.value));
+  return (
+    <div style={{ width: '100%', height }}>
+      {type === 'bar' ? (
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: 'calc(100% - 24px)' }}>
+          {data.map((d, idx) => (
+            <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: 'calc(100% / 8)', minWidth: '36px' }}>
+              <div style={{
+                width: '100%',
+                height: `${(d.value / maxVal) * 100}%`,
+                background: `linear-gradient(180deg, ${color}, ${color}60)`,
+                borderRadius: `${radius.sm} ${radius.sm} 0 0`,
+                transition: `height ${transitions.slow}`,
+              }} />
+              <span style={{ fontSize: typography.size.xs, color: colors.textLow, fontFamily: typography.fontBase }}>{d.label}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }} preserveAspectRatio="none">
+          <polyline
+            fill="none"
+            stroke={color}
+            strokeWidth="2"
+            points={data.map((d, idx) => {
+              const x = (idx / (data.length - 1)) * 100;
+              const y = 100 - (d.value / maxVal) * 100;
+              return `${x},${y}`;
+            }).join(' ')}
+          />
+          {data.map((d, idx) => {
+            const x = (idx / (data.length - 1)) * 100;
+            const y = 100 - (d.value / maxVal) * 100;
+            return <circle key={idx} cx={x} cy={y} r="2" fill={color} />;
+          })}
+        </svg>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// TOAST / NOTIFICATION
+// ─────────────────────────────────────────────────────────────
+interface ToastProps {
+  type?: 'info' | 'success' | 'warning' | 'critical';
+  title: string;
+  message?: string;
+  onClose?: () => void;
+  autoClose?: number;
+}
+
+export function Toast({ type = 'info', title, message, onClose, autoClose }: ToastProps) {
+  const [visible, setVisible] = useState(true);
+
+  React.useEffect(() => {
+    if (autoClose && onClose) {
+      const timer = setTimeout(() => {
+        setVisible(false);
+        setTimeout(onClose, 150);
+      }, autoClose);
+      return () => clearTimeout(timer);
+    }
+  }, [autoClose, onClose]);
+
+  const styles = {
+    info:     { bg: colors.infoBg,     border: '#152040', color: colors.info },
+    success:  { bg: colors.normalBg,   border: '#0D2A1A', color: colors.normal },
+    warning:  { bg: colors.warningBg,  border: '#2A1800', color: colors.warning },
+    critical: { bg: colors.criticalBg, border: colors.criticalMuted, color: colors.critical },
+  };
+  const s = styles[type];
+
+  if (!visible) return null;
+
+  return (
+    <div style={{
+      display: 'flex', gap: '12px',
+      padding: '14px 16px',
+      background: s.bg,
+      border: `1px solid ${s.border}`,
+      borderLeft: `3px solid ${s.color}`,
+      borderRadius: radius.lg,
+      boxShadow: shadows.lg,
+      animation: 'sewa-toastIn 200ms ease',
+    }}>
+      <style>{`@keyframes sewa-toastIn { from { transform: translateX(12px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
+      <span style={{ fontSize: '14px', lineHeight: 1 }}>
+        {type === 'critical' ? '🚨' : type === 'success' ? '✓' : type === 'warning' ? '⚠' : 'ℹ'}
+      </span>
+      <div style={{ flex: 1 }}>
+        <p style={{ fontSize: typography.size.sm, fontWeight: typography.weight.semibold, color: s.color, margin: 0, fontFamily: typography.fontBase }}>{title}</p>
+        {message && <p style={{ fontSize: typography.size.xs, color: colors.textMed, marginTop: '4px', margin: 0, fontFamily: typography.fontBase }}>{message}</p>}
+      </div>
+      {onClose && (
+        <button onClick={() => { setVisible(false); setTimeout(onClose, 150); }} aria-label="Close notification" style={{ background: 'none', border: 'none', color: colors.textLow, cursor: 'pointer', padding: '0', lineHeight: 1, fontSize: '14px' }}>✕</button>
+      )}
     </div>
   );
 }
