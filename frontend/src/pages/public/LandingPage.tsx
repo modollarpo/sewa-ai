@@ -8,25 +8,25 @@ import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal
 const FEATURES = [
   { id:'triage-ai',          icon:'⚡', title:'Triage in Seconds', desc:'EfficientNet-B4 deep learning detects ICH, PE, pneumothorax, TB and stroke with AUC > 0.95 in under 2 seconds.', tag:'Triage Engine' },
   { id:'uncertainty-ai',     icon:'🎯', title:'Uncertainty Engine', desc:'Stochastic Monte Carlo dropout with multi-pass uncertainty quantification computes epistemic and aleatoric uncertainty. Flags low-confidence scans for human review.', tag:'Safety' },
-  { id:'metacognition-ai',   icon:'🧠', title:'Metacognition AI', desc:'Advanced multi-layer self-evaluation detects hallucinations before reports reach clinicians. Confidence integrity score per result.', tag:'Quality Assurance' },
+  { id:'metacognition-ai',   icon:'🧠', title:'Metacognition AI', desc:'Advanced multi-layer self-evaluation to detect hallucinations. Confidence integrity score per result.', tag:'Quality Assurance' },
   { id:'vision-language-ai', icon:'📋', title:'VLM Report Generator', desc:'Vision-Language Model generates structured, editable radiology reports in seconds — with clinical findings, impression, and recommendations.', tag:'Reporting' },
   { id:'explainable-ai',     icon:'🔒', title:'Explainable AI', desc:'Grad-CAM pixel attribution show exactly what the AI detected and why — pixel by pixel.', tag:'Explainability' },
-  { id:'downloads',          icon:'🌍', title:'Global Deployment', desc:'Multi-region on Azure (UK, EU, US, Africa). Data residency, compliance, and billing adapted per region automatically.', tag:'Infrastructure' },
+  { id:'downloads',          icon:'🌍', title:'Sovereign Infrastructure', desc:'Multi-region architecture ready for Azure (UK, EU, US, Africa). Strict data residency, compliance, and isolation.', tag:'Infrastructure' },
 ];
 
 const STATS = [
   { value:'>0.95', label:'AUC-ROC on ICH detection', icon:'🎯' },
   { value:'<2s',  label:'Median triage inference time', icon:'⚡' },
-  { value:'7+',   label:'Global deployment regions', icon:'🌍' },
-  { value:'99.9%',label:'Platform uptime SLA', icon:'✅' },
+  { value:'7+',   label:'Planned deployment regions', icon:'🌍' },
+  { value:'TRL 5',label:'Validation Stage', icon:'✅' },
 ];
 
 const COMPLIANCE = [
-  { label:'NHS DSPT', flag:'🇬🇧', desc:'UK Digital' },
-  { label:'GDPR', flag:'🇪🇺', desc:'EU Privacy' },
-  { label:'HIPAA', flag:'🇺🇸', desc:'US Health' },
-  { label:'MDR IIb', flag:'🔬', desc:'EU Medical' },
-  { label:'EU AI Act', flag:'🤖', desc:'High-Risk' },
+  { label:'NHS Innovation', flag:'🇬🇧', desc:'INN-2604-0064-2' },
+  { label:'DCB0129', flag:'🇬🇧', desc:'Clinical Safety' },
+  { label:'Patent Pending', flag:'🔬', desc:'GB2609706.3' },
+  { label:'TRL 5', flag:'📈', desc:'Engineering Validated' },
+  { label:'GDPR & HIPAA', flag:'🔒', desc:'Privacy Ready' },
 ];
 
 export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavigate:(p:string)=>void }) {
@@ -72,7 +72,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#408D7B]"></span>
           </span>
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#408D7B]">
-            {counter.toLocaleString()} SCANS PROCESSED TODAY
+            {counter.toLocaleString()} SCANS IN VALIDATION PIPELINE
           </span>
         </div>
 
@@ -86,8 +86,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             {' '}at Scale.
           </h1>
           <p className="text-[clamp(1rem,2vw,1.25rem)] text-[#6FA898] max-w-2xl mx-auto leading-relaxed font-medium animate-slide-up [animation-delay:200ms]">
-            NHS-certified clinical AI detecting critical findings in milliseconds. 
-            Uncertainty quantification, autonomous VLM reporting, and pixel-level explainability.
+            A Trustworthy Clinical Intelligence Platform designed to support clinicians through explainable, uncertainty-aware AI for diagnostic imaging.
           </p>
         </div>
 
@@ -186,6 +185,51 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
         </div>
       </section>
 
+      {/* Trust & Explainability Section */}
+      <section className="relative py-32 bg-[#05100D] border-y border-[#1B3028]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col lg:flex-row gap-16 items-center">
+            <div className="lg:w-1/2">
+              <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em] mb-4">Clinical Governance</div>
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight text-[#D0ECE6] mb-8">AI you can actually trust.</h2>
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="text-3xl">🔍</div>
+                  <div>
+                    <h3 className="text-[#D0ECE6] font-bold text-lg">Radical Explainability</h3>
+                    <p className="text-[#6FA898] text-sm leading-relaxed">Every positive triage generates pixel-perfect Grad-CAM heatmaps. See exactly what the AI saw, ensuring the algorithm's attention aligns with human clinical judgment.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="text-3xl">⚖️</div>
+                  <div>
+                    <h3 className="text-[#D0ECE6] font-bold text-lg">Uncertainty Quantification</h3>
+                    <p className="text-[#6FA898] text-sm leading-relaxed">Using Monte Carlo dropout, SEWA knows when it doesn't know. Borderline or out-of-distribution cases are flagged with high epistemic uncertainty for mandatory human review.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="text-3xl">🩺</div>
+                  <div>
+                    <h3 className="text-[#D0ECE6] font-bold text-lg">Human-in-the-Loop Workflow</h3>
+                    <p className="text-[#6FA898] text-sm leading-relaxed">AI acts as a triage assistant, never an autonomous decision maker. Our architecture mandates that a qualified radiologist always signs off on the final diagnostic report.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="lg:w-1/2 bg-[#08160F] p-8 rounded-[2rem] border border-[#1B3028] shadow-2xl">
+               <div className="aspect-video bg-[#0C1D17] rounded-xl border border-[#1B3028] flex items-center justify-center relative overflow-hidden">
+                 <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+                 <div className="text-[#408D7B] font-mono text-sm">[ Grad-CAM / SHAP Visualization Placeholder ]</div>
+               </div>
+               <div className="mt-6 flex justify-between items-center px-4">
+                 <div className="text-[#6FA898] text-xs font-mono">Confidence: 97.4%</div>
+                 <div className="text-[#E03535] text-xs font-mono">Uncertainty: 0.02 (Low)</div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Global Map Section */}
       <section className="relative py-32 bg-[#08160F] border-y border-[#1B3028]">
         <div className="max-w-7xl mx-auto px-6">
@@ -193,7 +237,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             <div className="lg:w-1/3 space-y-6">
               <h2 className="text-4xl font-black text-[#D0ECE6] tracking-tight">Global Reach,<br/><span className="text-[#408D7B]">Local Residency.</span></h2>
               <p className="text-[#6FA898] font-medium leading-relaxed">
-                SEWA XAI deploys across 7+ sovereign cloud regions, ensuring 100% adherence to local health data regulations including NHS, HIPAA, and GDPR.
+                SEWA XAI's infrastructure is built for 7+ sovereign cloud regions, ensuring future adherence to local health data regulations including NHS, HIPAA, and GDPR.
               </p>
               <div className="space-y-4 pt-6">
                 <div className="flex items-center gap-4">
@@ -234,7 +278,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
           <div className="absolute top-0 right-0 p-20 opacity-5 text-9xl">⚡</div>
           <h2 className="text-3xl md:text-4xl font-black text-[#D0ECE6] mb-6">Ready to Modernize Your Clinical Node?</h2>
           <p className="text-[#6FA898] text-lg font-medium mb-10 max-w-xl mx-auto">
-            Join thousands of clinical specialists using SEWA to reduce burnout and improve patient outcomes.
+            Join the clinical validation network to partner with SEWA on our pre-clinical R&D phase.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

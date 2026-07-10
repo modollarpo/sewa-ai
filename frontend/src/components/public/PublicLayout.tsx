@@ -23,10 +23,11 @@ const NAV_LINKS = [
     { label:'Mammography AI',    id:'mammography-ai',  desc:'BI-RADS classification, cancer detection' },
     { label:'Retinal AI',        id:'retinal-ai',      desc:'Diabetic retinopathy, AMD, glaucoma' },
   ]},
+  { label:'Clinical Evidence', id:'clinical-evidence', children:null },
+  { label:'AI Safety', id:'ai-safety', children:null },
   { label:'Research',   id:'research',   children:null },
-  { label:'Compliance', id:'regulatory', children:null },
-  { label:'Validation', id:'clinical-validation', children:null },
-  { label:'Pricing',    id:'pricing',    children:null },
+  { label:'Regulatory', id:'regulatory', children:null },
+  { label:'Governance', id:'governance', children:null },
   { label:'API Docs',   id:'api-docs',   children:null },
 ];
 
@@ -44,14 +45,15 @@ const FOOTER_LINKS = {
     { label:'Downloads',          id:'downloads' },
   ],
   Evidence: [
-    { label:'Clinical Validation',id:'clinical-validation' },
+    { label:'Clinical Evidence',  id:'clinical-evidence' },
+    { label:'AI Safety',          id:'ai-safety' },
     { label:'Research Portal',    id:'research' },
-    { label:'Regulatory Summary', id:'regulatory' },
-    { label:'Peer-Reviewed Papers',id:'research' },
-    { label:'Algorithm Audit',    id:'regulatory' },
+    { label:'Regulatory Timeline',id:'regulatory' },
+    { label:'Publications',       id:'publications' },
   ],
   Company: [
     { label:'About Us',           id:'about' },
+    { label:'Governance',         id:'governance' },
     { label:'Careers',            id:'careers' },
     { label:'Press',              id:'press' },
     { label:'Contact',            id:'contact' },
@@ -62,6 +64,7 @@ const FOOTER_LINKS = {
     { label:'Terms of Service',   id:'terms' },
     { label:'Cookie Policy',      id:'cookie-policy' },
     { label:'Security',           id:'security' },
+    { label:'Accessibility',      id:'accessibility' },
   ],
 };
 
@@ -218,10 +221,10 @@ export function PublicFooter({ onNavigate }: { onNavigate: (page: string) => voi
               <span style={{ fontSize:18, fontWeight:800, color:C.textHi, letterSpacing:'-0.5px' }}>SEWA XAI</span>
             </div>
             <p style={pStyle}>
-              Empowering clinicians with diagnostic intelligence. Deployed worldwide to detect life-threatening conditions in seconds with peer-reviewed accuracy and military-grade security.
+              Building the future of diagnostic intelligence. Engineering clinical AI to detect life-threatening conditions in seconds. (Currently in TRL 5 R&D validation).
             </p>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-              {['NHS DSPT','UK GDPR','HIPAA','EU AI ACT'].map(b => (
+              {['DCB0129','NHS INNOVATION'].map(b => (
                 <span key={b} style={{ padding:'4px 10px', background:C.bg2, border:`1px solid ${C.border}`, borderRadius:20, fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.02em' }}>{b}</span>
               ))}
             </div>

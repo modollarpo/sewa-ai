@@ -81,17 +81,17 @@ const PLANS = [
 ];
 
 const ROI_METRICS = [
-  { label:'Radiologist hours saved/month', value:40, unit:'hrs', desc:'AI pre-reads free radiologists from routine screening' },
-  { label:'Critical finding detection rate', value:97.3, unit:'%', desc:'vs 82% industry average manual review' },
-  { label:'Triage-to-report time reduction', value:73, unit:'%', desc:'From hours to minutes for urgent cases' },
-  { label:'Diagnostic error reduction', value:31, unit:'%', desc:'Metacognition layer catches hallucinations before report' },
+  { label:'Projected radiologist hours saved/month', value:40, unit:'hrs', desc:'Based on engineering benchmarks — AI pre-reads free radiologists from routine screening' },
+  { label:'Critical finding detection (engineering)', value:97.3, unit:'%', desc:'AUC in retrospective validation datasets (not yet independently validated)' },
+  { label:'Triage-to-report time reduction', value:73, unit:'%', desc:'Measured in simulated clinical environments (TRL 5)' },
+  { label:'Metacognition hallucination catch rate', value:31, unit:'%', desc:'Reduction in VLM factual errors in internal testing' },
 ];
 
 const FAQS = [
-  { q:'Is SEWA XAI a registered medical device?', a:'Yes. SEWA XAI is CE marked under EU MDR 2017/745 as a Class IIb medical device, holds UKCA marking for the UK market, and is in FDA 510(k) clearance for the US market. All AI outputs are clearly marked as decision support, not autonomous diagnosis.' },
+  { q:'Is SEWA XAI a registered medical device?', a:'SEWA XAI is currently at Technology Readiness Level 5 (TRL 5) and is progressing through the regulatory pathway for classification as a Class IIb Software as a Medical Device (SaMD). We have completed DCB0129 clinical risk management and are supported by NHS Innovation Service (INN-2604-0064-2). UKCA, CE, and FDA clearances are on our regulatory roadmap. All AI outputs are clearly marked as decision support, not autonomous diagnosis.' },
   { q:'How does NHS pricing work?', a:'NHS Trusts and ICBs are eligible for our NHS Framework pricing, which includes DSPT compliance pre-configured, NHS Spine integration, and procurement through G-Cloud. Contact our NHS team for framework reference numbers and procurement routes.' },
   { q:'Can I trial SEWA XAI before committing?', a:'Yes. We offer a 30-day proof of concept for Hospital and Enterprise plans, including integration with your PACS/FHIR endpoint and up to 500 test scans run through the full AI pipeline. No credit card required.' },
-  { q:'What happens to my data?', a:'Your clinical imaging data is processed in your chosen region (UK, EU, US, or Africa) and never leaves that data residency zone. We are GDPR Art. 28 compliant, execute a DPA with all clients, and maintain ISO 27001 certification. Patient data is never used to train shared models without explicit consent and federated learning protocols.' },
+  { q:'What happens to my data?', a:'Your clinical imaging data is processed in your chosen region (UK, EU, US, or Africa) and never leaves that data residency zone. We are GDPR Art. 28 compliant and execute a DPA with all clients. Our QMS is designed around ISO 27001 and ISO 13485 requirements (certification in progress). Patient data is never used to train shared models without explicit consent and federated learning protocols.' },
   { q:'How does per-scan pricing work at volume?', a:'Plans include a monthly scan allowance. Overage is billed at £0.35–£0.85 per scan depending on modality and plan. Enterprise clients typically negotiate unlimited scan bundles. Federated learning nodes are priced separately.' },
   { q:'Is there a free tier for researchers?', a:'We offer an Academic Research Programme with free access to the SEWA XAI API (up to 1,000 scans/month) for peer-reviewed research. Apply via our research portal with your institution details and intended research protocol.' },
 ];

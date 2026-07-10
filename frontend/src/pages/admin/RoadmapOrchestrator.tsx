@@ -17,15 +17,8 @@ const C = {
 
 export function RoadmapOrchestrator() {
   const [model, setModel] = useState<any>(null);
-  const [flNodes, setFlNodes] = useState<any[]>([
-    { id: 'node-lond-01', name: 'Royal London Hosp', samples: 450, status: 'ready' },
-    { id: 'node-lags-02', name: 'Lagos Univ Coll', samples: 620, status: 'ready' },
-    { id: 'node-nair-03', name: 'Nairobi National', samples: 380, status: 'ready' }
-  ]);
-  const [edgeDevices, setEdgeDevices] = useState<any[]>([
-    { id: 'edge-mob-01', name: 'Mobile Clinic Tablet (Taraba)', status: 'offline', lastHeartbeat: '2026-07-02T12:00:00Z', scans: 12 },
-    { id: 'edge-mob-02', name: 'Field Unit B (Turkana)', status: 'offline', lastHeartbeat: '2026-07-02T14:30:00Z', scans: 24 }
-  ]);
+  const [flNodes, setFlNodes] = useState<any[]>([]);
+  const [edgeDevices, setEdgeDevices] = useState<any[]>([]);
   const [zkLogs, setZkLogs] = useState<any[]>([]);
   const [fusionLogs, setFusionLogs] = useState<any[]>([]);
   const [aggregating, setAggregating] = useState(false);
@@ -33,7 +26,21 @@ export function RoadmapOrchestrator() {
 
   useEffect(() => {
     fetchGlobalModel();
+    fetchNodesAndDevices();
   }, []);
+
+  const fetchNodesAndDevices = async () => {
+    try {
+      const [flRes, edgeRes] = await Promise.all([
+        apiClient.get('/ai/federated/nodes'),
+        apiClient.get('/admin/edge/nodes')
+      ]);
+      setFlNodes(flRes.data?.nodes || []);
+      setEdgeDevices(edgeRes.data?.nodes || []);
+    } catch (e) {
+      console.error('Failed to load nodes and devices', e);
+    }
+  };
 
   const fetchGlobalModel = async () => {
     try {
@@ -46,21 +53,9 @@ export function RoadmapOrchestrator() {
 
   const runFederatedAggregation = async () => {
     setAggregating(true);
-    setMessage('Uploading gradients and starting FedAvg aggregation...');
+    setMessage('Starting central FedAvg aggregation with pending updates...');
     try {
-      // First simulate uploads from the active nodes
-      for (const node of flNodes) {
-        await apiClient.post('/federated/upload', {
-          nodeId: node.id,
-          weights: {
-            conv1: Array.from({ length: 5 }, () => parseFloat((Math.random() - 0.5).toFixed(4))),
-            dense1: Array.from({ length: 5 }, () => parseFloat((Math.random() - 0.5).toFixed(4)))
-          },
-          samples: node.samples
-        });
-      }
-
-      // Then trigger central aggregation
+      // Trigger central aggregation (Nodes themselves should have uploaded gradients)
       const res = await apiClient.post('/federated/aggregate');
       setModel(res.data.globalModel);
       setMessage(res.data.message);
@@ -72,31 +67,7 @@ export function RoadmapOrchestrator() {
   };
 
   const triggerEdgeSync = async (deviceId: string, scansCount: number) => {
-    // Generate simulated scans to push
-    const simulatedScans = Array.from({ length: scansCount }, (_, i) => ({
-      localId: `local-${deviceId}-${i}`,
-      patientMrn: `MRN-${Math.floor(100000 + Math.random() * 900000)}`,
-      patientSex: Math.random() > 0.5 ? 'M' : 'F',
-      patientDob: '1975-06-15',
-      modality: Math.random() > 0.4 ? 'CT' : 'XR',
-      bodyPart: 'Head',
-      priority: Math.random() > 0.8 ? 'STAT' : 'ROUTINE',
-      accessionNumber: `ACC-${Math.floor(1000000 + Math.random() * 9000000)}`,
-      dicomInstanceUid: `1.2.840.113619.2.${Math.floor(10000 + Math.random() * 90000)}`
-    }));
-
-    try {
-      const res = await apiClient.post('/edge-sync/sync', {
-        edgeDeviceId: deviceId,
-        scans: simulatedScans
-      });
-      
-      // Update local state
-      setEdgeDevices(prev => prev.map(d => d.id === deviceId ? { ...d, status: 'online', scans: 0 } : d));
-      alert(`Synchronized ${res.data.syncedCount} scans from Edge Device ${deviceId}. skipped: ${res.data.skippedCount}`);
-    } catch (e) {
-      console.error('Edge Sync failed', e);
-    }
+    alert('Edge sync must be initiated by the edge device in production. This dashboard only monitors status.');
   };
 
   const verifyZkConsent = async () => {
@@ -141,10 +112,7 @@ export function RoadmapOrchestrator() {
         return;
       }
 
-      const res = await apiClient.post(`/clinical-fusion/evaluate/${scanId}`, {
-        labs,
-        clinicalHistory
-      });
+      const res = await apiClient.post(`/clinical-fusion/evaluate/${scanId}`);
       setFusionLogs(prev => [res.data, ...prev]);
     } catch (e) {
       console.error('Fusion evaluation failed', e);

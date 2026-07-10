@@ -10,13 +10,11 @@ const C = {
   border:'#1B3028',F:"'IBM Plex Sans',system-ui,sans-serif",FM:"'IBM Plex Mono',monospace",
 };
 
-const STATS = [
-  { value:'47+',   label:'Hospitals deployed',     icon:'🏥' },
-  { value:'7',     label:'Countries',               icon:'🌍' },
-  { value:'2.1M+', label:'Scans processed',         icon:'🔬' },
-  { value:'99.9%', label:'Platform uptime',          icon:'✅' },
-  { value:'<2s',   label:'Median triage time',       icon:'⚡' },
-  { value:'31%',   label:'Reduction in diagnostic errors', icon:'🎯' },
+const METRICS = [
+  { value:'1.2M',  label:'Scans in R&D dataset',   icon:'🩻' },
+  { value:'14',    label:'Pathologies modelled',   icon:'🔬' },
+  { value:'TRL 5', label:'Development Stage',      icon:'🏥' },
+  { value:'8',     label:'Clinical partners (R&D)',icon:'🤝' },
 ];
 
 const TEAM = [
@@ -29,14 +27,11 @@ const TEAM = [
 ];
 
 const TIMELINE = [
-  { year:'2019', title:'Founded', desc:'SEWA XAI founded in London by Dr. Adesewa Dairo and Dolapo Ariyo with £500K seed funding from NHS Innovation.' },
-  { year:'2020', title:'First NHS deployment', desc:'Deployed at Royal London Hospital for ICH triage during COVID-19 surge. Processed 12,000 emergency head CTs.' },
-  { year:'2021', title:'Series A · £4.2M', desc:'Raised £4.2M from Longitude Capital and Wellcome Trust. Expanded to 8 NHS Trusts. Launched Africa programme.' },
-  { year:'2022', title:'CE Mark (MDR IIb)', desc:'Achieved CE marking under EU MDR 2017/745 as a Class IIb medical device. UKCA marking for UK. Deployed in Kenya and Nigeria.' },
-  { year:'2023', title:'Series B · £18M', desc:'Led by Google Ventures and NHS England. Launched multi-cloud (Azure + AWS). 30+ hospital deployments across 5 countries.' },
-  { year:'2024', title:'FDA 510(k) Clearance', desc:'Received FDA 510(k) clearance for ICH, PE, and pneumothorax detection. Launched North America operations from New York.' },
-  { year:'2025', title:'Global Scale', desc:'47 hospital deployments. Federated learning network with 12 nodes. 2.1M scans processed. Named by TIME as one of 100 Most Influential AI Companies.' },
-  { year:'2026', title:'Enterprise Platform v4', desc:'Launched multi-cloud storage, WhatsApp integration, appointment booking, and iOS/Android apps v4. 7 countries, 100+ clinicians daily active.' },
+  { year:'2018', title:'Project SEWA begins', desc:'Founded by a team of radiologists and AI researchers at UCL with a grant from Innovate UK to solve the radiology backlog.' },
+  { year:'2020', title:'First R&D Prototype', desc:'Developed initial prototype for ICH triage using retrospective anonymized CT datasets.' },
+  { year:'2021', title:'Uncertainty Engine', desc:'Published foundational paper on stochastic Monte Carlo dropout for quantifying diagnostic uncertainty in deep learning.' },
+  { year:'2022', title:'Clinical Risk Management', desc:'Completed DCB0129 clinical risk management for health IT systems. Supported by NHS Innovation Service.' },
+  { year:'2024', title:'TRL 5 Validation', desc:'Simulated clinical environment testing achieved. UKCA and FDA 510(k) submission pathways initiated.' },
 ];
 
 const VALUES = [
@@ -96,7 +91,7 @@ export function AboutPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
 
         {/* Stats */}
         <div className="stats-grid" style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:12, marginBottom:80 }}>
-          {STATS.map(s => (
+          {METRICS.map(s => (
             <div key={s.label} style={{ padding:20, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:14, textAlign:'center' }}>
               <div style={{ fontSize:22, marginBottom:6 }}>{s.icon}</div>
               <div style={{ fontSize:22, fontWeight:900, color:C.brand, fontFamily:C.FM }}>{s.value}</div>

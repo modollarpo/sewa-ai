@@ -179,7 +179,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 1</div>
             <h2 style={h2}>Executive Summary</h2>
             <p style={p}>SEWA XAI is an enterprise-grade diagnostic platform designed to alleviate radiologist shortages — currently 29% in the NHS — by providing sub-2-second triage for life-threatening conditions. Unlike point-solution AI, SEWA utilises a 4-Engine Safety Architecture to ensure clinical-grade reliability, explainability, and seamless integration into existing PACS/RIS workflows.</p>
-            <p style={p}>Deployed across 47 hospitals in 7 countries, SEWA XAI has processed over 2.1 million scans, achieving AUC-ROC &gt;0.95 across 14 pathology classes with an average door-to-alert time under 2 seconds for critical findings.</p>
+            <p style={p}>In retrospective simulated pre-clinical validation, SEWA XAI has processed over 1.2 million anonymised historical scans, achieving AUC-ROC &gt;0.95 across 14 pathology classes with an average inference time under 2 seconds for critical findings. (Note: These metrics reflect engineering benchmarks at TRL 5 and are subject to forthcoming independent clinical validation).</p>
             <div className="metric-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginTop:20 }}>
               <MetricCard value=">0.97" label="AUC-ROC (ICH)" color={C.critical}/>
               <MetricCard value="<2s"   label="Triage time"   color={C.amber}/>

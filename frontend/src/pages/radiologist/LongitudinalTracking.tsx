@@ -31,6 +31,21 @@ export function LongitudinalTracking({ onSelectScan }: { onSelectScan?: (scanId:
   const [loading, setLoading] = useState(false);
   const [selectedCurrentScan, setSelectedCurrentScan] = useState<Scan | null>(null);
   const [priorScan, setPriorScan] = useState<Scan | null>(null);
+  const [patients, setPatients] = useState<{id: string, name: string}[]>([]);
+
+  useEffect(() => {
+    // Fetch unique patients from recent scans
+    apiClient.get('/scans').then(res => {
+      const allScans = Array.isArray(res.data) ? res.data : (res.data?.scans || []);
+      const uniquePatients = new Map();
+      allScans.forEach((s: any) => {
+        if (s.patientId && s.patient) {
+          uniquePatients.set(s.patientId, `${s.patient.firstName} ${s.patient.lastName}`);
+        }
+      });
+      setPatients(Array.from(uniquePatients.entries()).map(([id, name]) => ({ id, name })));
+    }).catch(console.error);
+  }, []);
 
   const fetchScans = async (patientId: string) => {
     try {
@@ -83,23 +98,28 @@ export function LongitudinalTracking({ onSelectScan }: { onSelectScan?: (scanId:
           Select Patient
         </h3>
         <p style={{ margin: '0 0 16px', color: C.textMd, fontSize: 12 }}>
-          (In production: integrates with patient worklist)
+          Select a patient to view their longitudinal scan history:
         </p>
-        <button
-          onClick={() => {
-            // Demo: use first available patient id from scan store
-            const fakePatientId = 'demo-patient-123';
-            setSelectedPatientId(fakePatientId);
-            fetchScans(fakePatientId);
-          }}
-          style={{
-            padding: '10px 20px', background: C.brand, border: 'none',
-            borderRadius: 8, color: 'white', fontSize: 13, fontWeight: 700,
-            cursor: 'pointer'
-          }}
-        >
-          Load Demo Patient Scans
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {patients.length > 0 ? patients.map(p => (
+            <button
+              key={p.id}
+              onClick={() => {
+                setSelectedPatientId(p.id);
+                fetchScans(p.id);
+              }}
+              style={{
+                padding: '8px 16px', background: selectedPatientId === p.id ? C.brand : C.bg3, border: `1px solid ${selectedPatientId === p.id ? C.brand : C.border}`,
+                borderRadius: 8, color: selectedPatientId === p.id ? 'white' : C.textMd, fontSize: 13, fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              {p.name}
+            </button>
+          )) : (
+            <div style={{ fontSize: 13, color: C.textMd }}>No patients with scan history found.</div>
+          )}
+        </div>
       </div>
 
       {/* Scan Timeline */}

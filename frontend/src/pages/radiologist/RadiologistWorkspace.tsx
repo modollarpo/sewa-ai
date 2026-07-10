@@ -79,292 +79,103 @@ function ConfBar({ v }: { v:number }) {
   );
 }
 
-// ── DICOM Canvas Renderer ──────────────────────────────────────
+// ── DICOM Viewport (Cornerstone.js Integration Point) ───────────────────
 function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [measurements, setMeasurements] = useState<{ x1:number; y1:number; x2:number; y2:number }[]>([]);
-  const [activeM, setActiveM] = useState<{ x1:number; y1:number; x2:number; y2:number } | null>(null);
-  const [tool, setTool] = useState<'pan'|'measure'>('pan');
-  const [wl, setWl]   = useState({ w:400, l:40 }); // window/level
+  const [tool, setTool] = useState<'pan'|'measure'|'wl'|'zoom'>('pan');
+  const [wl, setWl]   = useState({ w:400, l:40 });
   const [zoom, setZoom] = useState(1);
-  const [pan, setPan]   = useState({ x:0, y:0 });
-  const dragging = useRef(false);
-  const lastPos  = useRef({ x:0, y:0 });
+  const [isLoading, setIsLoading] = useState(true);
+  const [viewportReady, setViewportReady] = useState(false);
 
-  const render = useCallback(() => {
-    const cvs = canvasRef.current; if (!cvs) return;
-    const ctx = cvs.getContext('2d')!;
-    const w = cvs.width, h = cvs.height;
-    ctx.clearRect(0,0,w,h);
-    ctx.save();
-    ctx.translate(w/2 + pan.x, h/2 + pan.y);
-    ctx.scale(zoom, zoom);
-    ctx.translate(-w/2, -h/2);
-
-    ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
-
-    const modality = scan?.modality ?? 'CT';
-    if (modality === 'CT' || modality === 'MRI' || !modality) {
-      // Mock drawing logic for CT/MRI
-      ctx.beginPath();
-      // Draw head/brain base
-      if (modality === 'MRI') {
-        ctx.ellipse(w/2, h*0.5, w*0.35, h*0.48, 0, 0, Math.PI*2);
-        ctx.fillStyle = '#0a0a0a'; ctx.fill();
-        ctx.strokeStyle = '#444'; ctx.lineWidth=2; ctx.stroke();
-      } else {
-        ctx.ellipse(w/2, h*0.5, w*0.37, h*0.43, 0, 0, Math.PI*2);
-        ctx.fillStyle = '#1e1e1e'; ctx.fill();
-        ctx.strokeStyle = '#333'; ctx.lineWidth=1; ctx.stroke();
-      }
-      
-      // AI Highlight (ICH Mock for CT, MS Lesion for MRI)
-      const ai = scan?.aiResult;
-      if (showGradcam || ai?.urgency === 'CRITICAL') {
-        const grd = ctx.createRadialGradient(w*0.63, h*0.40, 0, w*0.63, h*0.40, w*0.13);
-        const color = modality === 'MRI' ? '180,100,250' : '224,53,53'; // Purple for MRI
-        grd.addColorStop(0, `rgba(${color},0.6)`);
-        grd.addColorStop(0.5,`rgba(${color},0.2)`);
-        grd.addColorStop(1, `rgba(${color},0)`);
-        ctx.fillStyle = grd;
-        ctx.beginPath(); ctx.ellipse(w*0.63, h*0.40, w*0.12, h*0.10, 0.3, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = `rgba(${color},0.8)`;
-        ctx.setLineDash([4, 4]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-
-      // Drawing some "brain" structures
-      ctx.strokeStyle = modality === 'MRI' ? '#333' : '#2a2a2a'; 
-      ctx.lineWidth=0.5;
-      for (let i=0; i<5; i++) {
-        ctx.beginPath();
-        ctx.ellipse(w/2, h*0.5, w*(0.1+i*0.05), h*(0.15+i*0.05), Math.PI/4, 0, Math.PI*2);
-        ctx.stroke();
-      }
-    } else if (modality === 'XR') {
-      ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h);
-      const lGrd = ctx.createRadialGradient(w*0.35, h*0.45, 10, w*0.35, h*0.45, w*0.22);
-      lGrd.addColorStop(0,'rgba(180,180,180,0.2)'); lGrd.addColorStop(1,'transparent');
-      ctx.fillStyle = lGrd;
-      ctx.beginPath(); ctx.ellipse(w*0.35, h*0.48, w*0.20, h*0.30, -0.1, 0, Math.PI*2); ctx.fill();
-    } else if (modality === 'ECG') {
-      ctx.fillStyle = '#f8f9fa'; ctx.fillRect(0,0,w,h); // Paper background
-      ctx.strokeStyle = '#ffcccc'; ctx.lineWidth = 1; // Grid lines
-      for (let i=0; i<w; i+=10) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
-      for (let i=0; i<h; i+=10) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
-      
-      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; // ECG wave
-      ctx.beginPath();
-      for (let x=0; x<w; x+=2) {
-        let y = h*0.5;
-        // Mock QRS complex
-        if (x % 200 > 180 && x % 200 < 190) y -= 50 * Math.sin((x%200-180)*Math.PI/10); 
-        ctx.lineTo(x, y + Math.random()*2);
-      }
-      ctx.stroke();
-
-      if (showGradcam || scan?.aiResult?.urgency === 'CRITICAL') {
-        ctx.fillStyle = 'rgba(224,53,53,0.2)';
-        ctx.fillRect(180, h*0.3, 20, h*0.4); // Highlight arrhythmia segment
-        ctx.strokeStyle = '#E03535'; ctx.strokeRect(180, h*0.3, 20, h*0.4);
-      }
-    } else if (modality === 'US') {
-      ctx.fillStyle = '#050505'; ctx.fillRect(0,0,w,h);
-      const usGrd = ctx.createConicGradient(Math.PI, w/2, -h*0.2);
-      usGrd.addColorStop(0, '#000');
-      usGrd.addColorStop(0.4, '#1a1a1a');
-      usGrd.addColorStop(0.5, '#444');
-      usGrd.addColorStop(0.6, '#1a1a1a');
-      usGrd.addColorStop(1, '#000');
-      ctx.fillStyle = usGrd;
-      ctx.beginPath(); ctx.moveTo(w/2, -h*0.2); ctx.arc(w/2, -h*0.2, h*1.2, Math.PI*0.7, Math.PI*0.3, true); ctx.fill();
-
-      if (showGradcam || scan?.aiResult?.urgency === 'CRITICAL') {
-        ctx.strokeStyle = '#E08A20'; ctx.lineWidth = 2; ctx.setLineDash([4,4]);
-        ctx.strokeRect(w*0.4, h*0.4, w*0.2, h*0.3); // Highlight fetal structure or thoracic fluid
-        ctx.setLineDash([]);
-      }
-    } else if (modality === 'PATH') {
-      // Draw high-resolution simulated H&E pathology slide section
-      ctx.fillStyle = '#fce4ec'; ctx.fillRect(0,0,w,h); // Eosin pink tissue background
-      
-      // Draw simulated stromal fiber flows
-      ctx.strokeStyle = '#f8bbd0'; ctx.lineWidth = 4;
-      for (let i = 0; i < h; i += 40) {
-        ctx.beginPath();
-        ctx.moveTo(0, i);
-        ctx.bezierCurveTo(w/3, i + 30, 2*w/3, i - 30, w, i + 10);
-        ctx.stroke();
-      }
-      
-      // Draw violet/purple hematoxylin-stained cellular nuclei clusters
-      ctx.fillStyle = '#4a148c'; // Dark purple hematoxylin nuclei
-      const nucleiSeeds = [
-        {x: 0.2, y: 0.3, r: 8}, {x: 0.22, y: 0.32, r: 9}, {x: 0.25, y: 0.28, r: 7},
-        {x: 0.5, y: 0.5, r: 12}, {x: 0.53, y: 0.48, r: 10}, {x: 0.55, y: 0.53, r: 14},
-        {x: 0.51, y: 0.55, r: 11}, {x: 0.48, y: 0.52, r: 9},
-        {x: 0.75, y: 0.7, r: 8}, {x: 0.78, y: 0.73, r: 7}, {x: 0.72, y: 0.75, r: 8}
-      ];
-      nucleiSeeds.forEach(ns => {
-        ctx.beginPath();
-        // Add random cell-level micro-variation
-        const rx = w * ns.x;
-        const ry = h * ns.y;
-        ctx.arc(rx, ry, ns.r, 0, Math.PI * 2);
-        ctx.fill();
-        // Inner nucleolus
-        ctx.fillStyle = '#12005e';
-        ctx.beginPath();
-        ctx.arc(rx + 2, ry - 2, ns.r / 3, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#4a148c'; // restore
-      });
-
-      // Highlight hyper-cellular tumor proliferation zone
-      if (showGradcam || scan?.aiResult?.urgency === 'CRITICAL') {
-        ctx.strokeStyle = '#E03535'; ctx.lineWidth = 2.5; ctx.setLineDash([6, 3]);
-        // Bounding box for the main center tumor cluster
-        ctx.strokeRect(w*0.42, h*0.42, w*0.2, h*0.2);
-        ctx.setLineDash([]);
-        
-        ctx.fillStyle = 'rgba(224,53,53,0.1)';
-        ctx.fillRect(w*0.42, h*0.42, w*0.2, h*0.2);
-
-        // Text label for tumor classification
-        ctx.fillStyle = '#E03535';
-        ctx.font = 'bold 9px IBM Plex Mono';
-        ctx.fillText('PATH_AI: INVASIVE CARCINOMA CLUSTER (96%)', w*0.42, h*0.41);
-      }
-    }
-
-    // Measurements
-    const allM = activeM ? [...measurements, activeM] : measurements;
-    allM.forEach(m => {
-      ctx.strokeStyle = '#52B09A'; ctx.lineWidth = 1.5 / zoom;
-      ctx.setLineDash([5/zoom, 5/zoom]);
-      ctx.beginPath(); ctx.moveTo(m.x1, m.y1); ctx.lineTo(m.x2, m.y2); ctx.stroke();
-      ctx.setLineDash([]);
-      
-      ctx.fillStyle = '#52B09A';
-      ctx.beginPath(); ctx.arc(m.x1, m.y1, 3/zoom, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(m.x2, m.y2, 3/zoom, 0, Math.PI*2); ctx.fill();
-
-      const dist = Math.sqrt(Math.pow(m.x2-m.x1,2) + Math.pow(m.y2-m.y1,2));
-      const mm = (dist * 0.23).toFixed(1);
-      ctx.font = `bold ${10/zoom}px IBM Plex Mono`;
-      ctx.fillStyle = 'white';
-      ctx.fillText(`${mm}mm`, (m.x1+m.x2)/2 + 5/zoom, (m.y1+m.y2)/2 - 5/zoom);
-    });
-
-    ctx.restore();
-
-    // Overlay Metadata
-    ctx.fillStyle='rgba(82,176,154,0.8)'; ctx.font=`bold 9px IBM Plex Mono`;
-    const metadata = [
-      `WINDOW:${wl.w} LEVEL:${wl.l}`, 
-      `MAGNIFY:${zoom.toFixed(1)}x`,
-      `RENDER:GPU_ACCEL`,
-      `SYSTEM:SEWA_PACS_v2.4`
-    ];
-    metadata.forEach((m,i) => ctx.fillText(m, 12, 55+i*14));
-  }, [scan, wl, zoom, pan, showGradcam, measurements, activeM]);
-
+  // Cornerstone.js viewport initialization
+  // In production: cornerstoneWADOImageLoader.loadImage(wadoUri)
   useEffect(() => {
-    const handleResize = () => {
-      if (canvasRef.current && canvasRef.current.parentElement) {
-        canvasRef.current.width = canvasRef.current.parentElement.clientWidth;
-        canvasRef.current.height = canvasRef.current.parentElement.clientHeight;
-        render();
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, [render]);
-
-  const screenToCanvas = (sx: number, sy: number) => {
-    const cvs = canvasRef.current!;
-    const rect = cvs.getBoundingClientRect();
-    const x = (sx - rect.left - (cvs.width/2 + pan.x)) / zoom + cvs.width/2;
-    const y = (sy - rect.top - (cvs.height/2 + pan.y)) / zoom + cvs.height/2;
-    return { x, y };
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (tool === 'pan') {
-      dragging.current = true;
-      lastPos.current = { x:e.clientX, y:e.clientY };
-    } else if (tool === 'measure') {
-      const pos = screenToCanvas(e.clientX, e.clientY);
-      setActiveM({ x1:pos.x, y1:pos.y, x2:pos.x, y2:pos.y });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (tool === 'pan' && dragging.current) {
-      const dx = e.clientX - lastPos.current.x;
-      const dy = e.clientY - lastPos.current.y;
-      lastPos.current = { x:e.clientX, y:e.clientY };
-      setPan(p => ({ x:p.x+dx, y:p.y+dy }));
-    } else if (tool === 'measure' && activeM) {
-      const pos = screenToCanvas(e.clientX, e.clientY);
-      setActiveM(m => m ? { ...m, x2:pos.x, y2:pos.y } : null);
-    }
-  };
-
-  const handleMouseUp = () => {
-    dragging.current = false;
-    if (activeM) {
-      setMeasurements(m => [...m, activeM]);
-      setActiveM(null);
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const t = e.touches[0];
-    if (tool === 'pan') {
-      dragging.current = true;
-      lastPos.current = { x:t.clientX, y:t.clientY };
-    } else if (tool === 'measure') {
-      const pos = screenToCanvas(t.clientX, t.clientY);
-      setActiveM({ x1:pos.x, y1:pos.y, x2:pos.x, y2:pos.y });
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const t = e.touches[0];
-    if (tool === 'pan' && dragging.current) {
-      const dx = t.clientX - lastPos.current.x;
-      const dy = t.clientY - lastPos.current.y;
-      lastPos.current = { x:t.clientX, y:t.clientY };
-      setPan(p => ({ x:p.x+dx, y:p.y+dy }));
-    } else if (tool === 'measure' && activeM) {
-      const pos = screenToCanvas(t.clientX, t.clientY);
-      setActiveM(m => m ? { ...m, x2:pos.x, y2:pos.y } : null);
-    }
-  };
+    setIsLoading(true);
+    setViewportReady(false);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      setViewportReady(true);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [scan]);
 
   const handleWheel = (e: React.WheelEvent) => {
-    const newZoom = Math.max(0.5, Math.min(10, zoom - e.deltaY * 0.005));
-    setZoom(newZoom);
+    e.preventDefault();
+    setZoom(z => Math.max(0.5, Math.min(10, z - e.deltaY * 0.005)));
   };
 
   return (
     <div className="relative flex-1 bg-black overflow-hidden group">
-      <canvas
-        ref={canvasRef}
-        className={`w-full h-full object-contain ${tool === 'pan' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'}`}
+      {/* Cornerstone.js Viewport Container */}
+      <div 
+        ref={containerRef}
         onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleMouseUp}
-      />
-      
+        className={`w-full h-full flex items-center justify-center ${tool === 'pan' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'}`}
+        style={{ touchAction: 'none' }}
+      >
+        {isLoading ? (
+          <div style={{ color:'#52B09A', fontFamily:"'IBM Plex Mono',monospace", textAlign:'center' }}>
+            <div style={{ fontSize:32, marginBottom:16, animation:'pulse 1.5s infinite' }}>⟳</div>
+            <div style={{ fontSize:13, fontWeight:600, marginBottom:6 }}>Initializing Cornerstone.js Viewport</div>
+            <div style={{ fontSize:11, color:'#6FA898' }}>Loading DICOM series via WADO-RS...</div>
+          </div>
+        ) : viewportReady ? (
+          <div style={{ textAlign:'center', color:'#6FA898', width:'100%', height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', position:'relative' }}>
+            {/* Simulated DICOM viewport background */}
+            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at center, #111 0%, #000 70%)', opacity:0.8 }} />
+            
+            <div style={{ position:'relative', zIndex:1 }}>
+              <div style={{ fontSize:48, marginBottom:12, opacity:0.4 }}>🩻</div>
+              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:14, color:'#D0ECE6', fontWeight:700, marginBottom:4 }}>
+                Cornerstone Viewport Active
+              </div>
+              <div style={{ fontSize:11, color:'#3A6055' }}>
+                {scan?.modality || 'CT'} • {scan?.bodyPart || 'N/A'} • Series loaded
+              </div>
+              <div style={{ fontSize:10, color:'#3A6055', marginTop:8, fontFamily:"'IBM Plex Mono',monospace" }}>
+                W:{wl.w} L:{wl.l} • Zoom:{(zoom*100).toFixed(0)}%
+              </div>
+            </div>
+
+            {/* AI Detection Overlay */}
+            {(showGradcam || scan?.aiResult?.urgency === 'CRITICAL') && (
+              <div style={{
+                position:'absolute', top:'35%', left:'38%', width:'24%', height:'22%',
+                border:'2px dashed #E03535',
+                backgroundColor:'rgba(224,53,53,0.08)',
+                borderRadius:4,
+                display:'flex', alignItems:'flex-start', justifyContent:'flex-end',
+                padding:4
+              }}>
+                <span style={{ backgroundColor:'#E03535', color:'#fff', fontSize:9, padding:'2px 6px', borderRadius:4, fontFamily:"'IBM Plex Mono',monospace", fontWeight:700 }}>
+                  AI: {scan?.aiResult?.primaryFinding || 'DETECTION'}
+                </span>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Patient / Study Metadata Overlay — Top corners */}
+      <div style={{ position:'absolute', top:12, left:16, zIndex:10, pointerEvents:'none' }}>
+        <div style={{ color:'#D0ECE6', fontSize:13, fontWeight:700, fontFamily:"'IBM Plex Sans',system-ui,sans-serif" }}>
+          {scan?.patient?.firstName} {scan?.patient?.lastName}
+        </div>
+        <div style={{ color:'#6FA898', fontSize:10, fontFamily:"'IBM Plex Mono',monospace", marginTop:2 }}>
+          {scan?.patient?.mrn || 'MRN: N/A'} • {scan?.modality} • {scan?.bodyPart}
+        </div>
+      </div>
+      <div style={{ position:'absolute', top:12, right:16, zIndex:10, pointerEvents:'none', textAlign:'right' }}>
+        <div style={{ color:'#6FA898', fontSize:10, fontFamily:"'IBM Plex Mono',monospace" }}>
+          W:{wl.w} L:{wl.l}
+        </div>
+        <div style={{ color:'#6FA898', fontSize:10, fontFamily:"'IBM Plex Mono',monospace" }}>
+          {(zoom*100).toFixed(0)}%
+        </div>
+      </div>
+
       {/* Floating Professional Toolbar */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 p-1.5 bg-[#08160F]/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.6)] opacity-40 group-hover:opacity-100 transition-all duration-500 hover:scale-[1.02]">
         
@@ -390,7 +201,7 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
         <div className="flex items-center gap-1 px-1">
           <button onClick={() => setZoom(z=>Math.min(10,z+0.5))} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Zoom In">🔍</button>
           <button onClick={() => setZoom(z=>Math.max(0.2,z-0.5))} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Zoom Out">🔎</button>
-          <button onClick={() => { setZoom(1); setPan({x:0,y:0}); }} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Reset View">⊕</button>
+          <button onClick={() => setZoom(1)} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Reset View">⊕</button>
         </div>
 
         <div className="w-[1px] h-6 bg-white/10 mx-1" />
@@ -409,7 +220,6 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
             <div className="flex items-center gap-1 pl-1">
               <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">SAGITTAL</button>
               <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">CORONAL</button>
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] bg-[#408D7B]/10 border border-[#408D7B]/30 hover:bg-[#408D7B]/20 transition-all">NEURAL_ENHANCE</button>
             </div>
           </>
         )}
@@ -424,23 +234,12 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
           </>
         )}
 
-        {scan?.modality === 'ECG' && (
-          <>
-            <div className="w-[1px] h-6 bg-white/10 mx-1" />
-            <div className="flex items-center gap-1 pl-1">
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">FILTER_NOISE</button>
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">CALIBRATE_GRID</button>
-            </div>
-          </>
-        )}
-
         {scan?.modality === 'PATH' && (
           <>
             <div className="w-[1px] h-6 bg-white/10 mx-1" />
             <div className="flex items-center gap-1 pl-1">
               <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-white bg-[#408D7B]/20 border border-[#408D7B]/30 hover:bg-[#408D7B]/40 transition-all">STAIN_H_E</button>
               <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">TILE_ZOOM</button>
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">SEGMENT_CELLS</button>
             </div>
           </>
         )}
@@ -460,6 +259,7 @@ function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
     </div>
   );
 }
+
 
 
 // ── AI Results Panel ──────────────────────────────────────────

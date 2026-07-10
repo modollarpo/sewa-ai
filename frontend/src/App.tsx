@@ -55,6 +55,10 @@ import { TermsPage }                 from './pages/public/TermsPage';
 import { CookiePolicyPage }          from './pages/public/CookiePolicyPage';
 import { SecurityPage }              from './pages/public/SecurityPage';
 import { ClinicalValidationPage }    from './pages/public/ClinicalValidationPage';
+import { ClinicalEvidencePage }      from './pages/public/ClinicalEvidencePage';
+import { AISafetyPage }              from './pages/public/AISafetyPage';
+import { GovernancePage }            from './pages/public/GovernancePage';
+import { PublicationsPage }          from './pages/public/PublicationsPage';
 import { ResearchPortal }            from './pages/public/ResearchPortal';
 import { PartnerPortalPage }         from './pages/public/PartnerPortalPage';
 import { BlogPage }             from './pages/public/BlogPage';
@@ -316,7 +320,7 @@ export default function App() {
     const path = window.location.pathname;
     return (path === '/verify-email' || path.includes('verify-email')) ? p.get('token') : null;
   })();
-  const [publicPage,  setPublicPage]  = useState<'landing'|'login'|'register'|'onboarding'|'onboarding-specialist'|'solutions'|'research'|'regulatory'|'clinical-validation'|'pricing'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'pathology-ai'|'mammography-ai'|'retinal-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'|'training'>('landing');
+  const [publicPage,  setPublicPage]  = useState<'landing'|'login'|'register'|'onboarding'|'onboarding-specialist'|'solutions'|'research'|'regulatory'|'clinical-validation'|'clinical-evidence'|'ai-safety'|'governance'|'publications'|'pricing'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'pathology-ai'|'mammography-ai'|'retinal-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'|'training'>('landing');
 
   // Universal navigation handler for public site
   const navigate = (page: string) => {
@@ -440,6 +444,10 @@ export default function App() {
         {publicPage === 'cookie-policy'       && <CookiePolicyPage {...navProps} />}
         {publicPage === 'security'            && <SecurityPage {...navProps} />}
         {publicPage === 'clinical-validation' && <ClinicalValidationPage {...navProps} />}
+        {publicPage === 'clinical-evidence'   && <ClinicalEvidencePage {...navProps} />}
+        {publicPage === 'ai-safety'           && <AISafetyPage {...navProps} />}
+        {publicPage === 'governance'          && <GovernancePage {...navProps} />}
+        {publicPage === 'publications'        && <PublicationsPage {...navProps} />}
         {publicPage === 'research'            && <ResearchPortal {...navProps} />}
         {publicPage === 'partner-portal'      && <PartnerPortalPage {...navProps} />}
         {publicPage === 'whitepaper'          && <TechnicalWhitepaperPage {...navProps} />}
@@ -463,7 +471,7 @@ export default function App() {
         {publicPage === 'api-docs'           && <ApiDocsPage {...navProps} />}
         {publicPage === 'developers'         && <DevelopersPage {...navProps} />}
         {/* Fallback for unmapped routes */}
-        {!['landing','login','register','onboarding','onboarding-specialist','pricing','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','pathology-ai','mammography-ai','retinal-ai','regulatory','api-docs','developers','training'].includes(publicPage) && (
+        {!['landing','login','register','onboarding','onboarding-specialist','pricing','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','clinical-evidence','ai-safety','governance','publications','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','pathology-ai','mammography-ai','retinal-ai','regulatory','api-docs','developers','training'].includes(publicPage) && (
           <LandingPage onLogin={() => navigate('login')} onNavigate={navigate} />
         )}
         <CookieBanner onNavigate={navigate} />
