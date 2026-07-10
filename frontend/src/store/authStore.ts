@@ -30,6 +30,15 @@ interface RegisterPayload {
   role?: string;
 }
 
+interface SpecialistPayload {
+  email: string;
+  firstName: string;
+  lastName: string;
+  specialty: string;
+  licenseNumber: string;
+  bio?: string;
+}
+
 interface AuthStore {
   user: User | null;
   token: string | null;
@@ -40,7 +49,7 @@ interface AuthStore {
 
   login: (email: string, password: string, tenantSlug: string) => Promise<{ mfaRequired?: boolean; mfaChallenge?: string }>;
   register: (payload: RegisterPayload) => Promise<void>;
-  registerSpecialist: (payload: any) => Promise<string>;
+  registerSpecialist: (payload: SpecialistPayload) => Promise<string>;
   verifyMFA: (mfaChallenge: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;

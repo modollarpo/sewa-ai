@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { apiClient } from '../services/apiClient';
 
 interface AIResult { primaryFinding:string; urgency:string; confidence:number; gradcamUrl?:string; }
-interface Scan { id:string; modality:string; bodyPart:string; priority:string; status:string; receivedAt:string; aiResult?:AIResult; patient?:any; report?:any; }
+interface Scan { id:string; modality:string; bodyPart:string; priority:string; status:string; receivedAt:string; aiResult?:AIResult; patient?:Record<string, unknown>; report?:Record<string, unknown>; }
 
 interface ScanStore {
   scans: Scan[];

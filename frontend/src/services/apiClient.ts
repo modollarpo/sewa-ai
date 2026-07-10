@@ -5,6 +5,13 @@ import { useAuthStore } from '../store/authStore';
 
 const isProd = typeof window !== 'undefined' && 
   (window.location.hostname.includes('sewaxai.health') || window.location.hostname.includes('azurestaticapps.net'));
+
+declare global {
+  interface Window {
+    _tenantSlug?: string;
+  }
+}
+
 const BASE = isProd 
   ? 'https://api.sewaxai.health/api/v1' 
   : (import.meta.env.VITE_API_URL ?? '/api/v1');
@@ -25,7 +32,7 @@ apiClient.interceptors.request.use((cfg) => {
       cfg.headers['X-Tenant-ID'] = parts[0];
     } else {
       // Fallback: check localStorage or auth store if subdomain not present
-      const tenant = (window as any)._tenantSlug || 'royal-london';
+      const tenant = window._tenantSlug || 'royal-london';
       cfg.headers['X-Tenant-ID'] = tenant;
     }
   }
@@ -88,7 +95,7 @@ export async function createFeedback(data: {
   subject?: string;
   description: string;
   category?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }) {
   const res = await apiClient.post('/feedback', data);
   return res.data;
