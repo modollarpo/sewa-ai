@@ -62,15 +62,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '${{ env.NODE_VERSION }}', cache: yarn, cache-dependency-path: backend/yarn.lock }
-      - run: cd backend && yarn install --frozen-lockfile
-      - run: cd backend && npx prisma generate
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: npm, cache-dependency-path: backend/package-lock.json }
+      - run: cd backend && npm ci
+      - name: Generate Prisma Client
+        run: cd backend && npx prisma generate
         env:
           DATABASE_URL: postgresql://sewa:test@localhost:5432/sewa_test
-      - run: cd backend && npx prisma migrate deploy
+      - name: Run Prisma Migrations
+        run: cd backend && npx prisma migrate deploy
         env:
           DATABASE_URL: postgresql://sewa:test@localhost:5432/sewa_test
-      - run: cd backend && yarn test
+      - name: Backend Lint
+        run: cd backend && npm run lint
+      - name: Backend Tests
+        run: cd backend && npm test
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://sewa:test@localhost:5432/sewa_test
@@ -82,24 +87,31 @@ jobs:
           VLM_SERVICE_URL: http://localhost:8001
           UNCERTAINTY_SERVICE_URL: http://localhost:8002
           METACOGNITION_SERVICE_URL: http://localhost:8003
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backend-coverage
           path: backend/coverage/
 
+
 # ─────────────────────────────────────────────
 # 2. FRONTEND BUILD
 # ─────────────────────────────────────────────
   build-frontend:
-    name: Frontend Build
+    name: Frontend Build & Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '${{ env.NODE_VERSION }}', cache: npm, cache-dependency-path: frontend/package-lock.json }
       - run: cd frontend && npm ci
-      - run: cd frontend && npm run build
+      - name: Frontend Lint
+        run: cd frontend && npm run lint
+      - name: Frontend Tests
+        run: cd frontend && npm test
+      - name: Frontend Build
+        run: cd frontend && npm run build
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL || 'https://api.sewaxai.health/v1' }}
           VITE_SOCKET_URL: ${{ vars.VITE_SOCKET_URL || 'https://api.sewaxai.health' }}
