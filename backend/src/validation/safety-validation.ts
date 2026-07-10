@@ -45,8 +45,8 @@ async function runSafetyValidation() {
         // 2. Generate temporary scan entry
         const scanId = `SCAN-${uuidv4()}`;
 
-        let triagePass = true;
-        let vlmPass = true;
+        const triagePass = true;
+        const vlmPass = true;
         let metacogPass = true;
 
         try {

@@ -147,7 +147,7 @@ export async function createHubSpotDeal(deal: DealPayload): Promise<void> {
       await notifySlack(
         `💰 *New Closed Won Deal*\n*Tenant:* ${deal.tenantName}\n*Plan:* ${deal.plan.toUpperCase()}\n*Value:* ${deal.currency} ${deal.amountUSD}/month`
       );
-    } catch (_) {}
+    } catch (_) { /* Slack notification is non-critical; failure is silently ignored */ }
   }
 }
 

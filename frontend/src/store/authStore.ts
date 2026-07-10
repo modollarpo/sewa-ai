@@ -122,7 +122,7 @@ export const useAuthStore = create<AuthStore>()(
         try {
           const { refreshToken } = get();
           if (refreshToken) await apiClient.post('/auth/logout', { refreshToken });
-        } catch {}
+        } catch { /* Logout API call is best-effort; local state is cleared regardless */ }
         delete apiClient.defaults.headers.common['Authorization'];
         set({ user: null, token: null, refreshToken: null, isAuthenticated: false });
       },

@@ -27,6 +27,7 @@ export async function startScanQueueBridge() {
   // Create a dedicated connection for blocking commands
   const bridgeClient = redisClient.duplicate();
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
       // BRPOP: block until a job is available (ioredis signature: brpop(...keys, timeoutSeconds))
