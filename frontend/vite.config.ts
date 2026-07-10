@@ -63,10 +63,14 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          react:    ['react','react-dom'],
+          react:    ['react', 'react-dom'],
           charts:   ['recharts'],
           router:   ['react-router-dom'],
           query:    ['@tanstack/react-query'],
+          icons:    ['lucide-react'],
+          video:    ['remotion', '@remotion/player', '@remotion/renderer'],
+          forms:    ['react-hook-form', '@hookform/resolvers', 'zod'],
+          utils:    ['date-fns', 'axios', 'zustand', 'i18next', 'react-i18next'],
         },
       },
     },
