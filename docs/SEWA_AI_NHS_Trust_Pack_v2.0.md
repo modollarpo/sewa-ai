@@ -153,9 +153,9 @@ LIVE PRICING (sewaxai.health)
 
 | Tier | Monthly | Annual (15% off) | Scans/Month | Best For |
 |------|---------|------------------|-------------|----------|
-| Starter Clinic | £549 | £5,600 | Up to 500 | Independent clinics |
-| Hospital Pro | £2,199 | £22,430 | Up to 5,000 | NHS Trusts, DGHs |
-| Enterprise | Custom | Custom | Unlimited | NHS ICBs, national programmes |
+| Starter Clinic (Annual Only) | £549 | £459/mo (total £5,508) | Up to 500 | Independent clinics |
+| Hospital Pro | £2,199 | £1,899/mo (total £22,788) | Up to 5,000 | NHS Trusts, DGHs |
+| Enterprise | £4,999+ | £4,299+/mo | Unlimited | NHS ICBs, national programmes |
 
 NHS PROCUREMENT PATHWAY
 
@@ -168,7 +168,10 @@ NHS PROCUREMENT PATHWAY
 WHAT'S INCLUDED IN HOSPITAL PRO
 
 ✓ Full Four-Engine Pipeline (detection + uncertainty + metacognition + VLM)
+✓ Uncertainty Engine (confidence quantification)
+✓ Metacognition Engine (hallucination detection)
 ✓ Native PACS & HL7v2 integration
+✓ Automated referral routing & payments
 ✓ Grad-CAM & SHAP visual explainability
 ✓ WhatsApp, SMS & EHR critical alerts
 ✓ Multi-department / multi-site support
@@ -254,8 +257,8 @@ info@sewaxai.health · www.sewaxai.health
 | Field | Detail |
 |-------|--------|
 | Document ID | SEWA-AI-NHS-PACK-002 |
-| Version | 2.0 |
-| Date | 10 July 2026 |
+| Version | 2.1 |
+| Date | 11 July 2026 |
 | Author | Dolapo Ariyo, Founder & CEO |
 | Classification | CONFIDENTIAL — Not for distribution without written consent |
 | Next Review | Upon CI confirmation or shadow trial commencement |
