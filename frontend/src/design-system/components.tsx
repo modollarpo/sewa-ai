@@ -1269,3 +1269,358 @@ export function ConfidenceIndicator({ value, size = 'md', showLabel = true }: {
     </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────
+// REASONING TRACE — Step-by-step AI reasoning with evidence
+// ─────────────────────────────────────────────────────────────
+export interface ReasoningStep {
+  id: string;
+  title: string;
+  description: string;
+  confidence: number;
+  evidence?: string;
+  isExpanded?: boolean;
+}
+
+export function ReasoningTrace({ steps, title = 'AI Reasoning Trace' }: {
+  steps: ReasoningStep[];
+  title?: string;
+}) {
+  const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set());
+
+  const toggleStep = (id: string) => {
+    setExpandedSteps(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  return (
+    <div style={{
+      background: colors.bg2,
+      borderRadius: radius.lg,
+      border: `1px solid ${colors.bgBorder}`,
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        padding: '16px 20px',
+        borderBottom: `1px solid ${colors.bgBorder}`,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}>
+        <div style={{
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          background: colors.brand,
+          boxShadow: `0 0 8px ${colors.brand}`,
+        }} />
+        <span style={{
+          fontSize: typography.size.sm,
+          fontWeight: typography.weight.semibold,
+          color: colors.textHigh,
+          fontFamily: typography.fontBase,
+        }}>
+          {title}
+        </span>
+        <span style={{
+          fontSize: typography.size.xs,
+          color: colors.textLow,
+          fontFamily: typography.fontMono,
+          marginLeft: 'auto',
+        }}>
+          {steps.length} steps
+        </span>
+      </div>
+
+      <div style={{ padding: '12px 0' }}>
+        {steps.map((step, idx) => {
+          const isExpanded = expandedSteps.has(step.id);
+          const stepColor = step.confidence >= 0.85 ? colors.normal : step.confidence >= 0.65 ? colors.warning : colors.critical;
+
+          return (
+            <div key={step.id}>
+              <div
+                onClick={() => toggleStep(step.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 20px',
+                  cursor: 'pointer',
+                  background: isExpanded ? `${colors.brand}08` : 'transparent',
+                  transition: `background ${transitions.base}`,
+                }}
+              >
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  background: `${stepColor}20`,
+                  border: `1px solid ${stepColor}40`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: typography.size.xs,
+                  fontWeight: typography.weight.semibold,
+                  color: stepColor,
+                  fontFamily: typography.fontMono,
+                  flexShrink: 0,
+                }}>
+                  {idx + 1}
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: typography.size.sm,
+                    fontWeight: typography.weight.medium,
+                    color: colors.textHigh,
+                    fontFamily: typography.fontBase,
+                  }}>
+                    {step.title}
+                  </div>
+                </div>
+
+                <div style={{
+                  fontSize: typography.size.xs,
+                  fontFamily: typography.fontMono,
+                  color: stepColor,
+                  fontWeight: typography.weight.semibold,
+                }}>
+                  {Math.round(step.confidence * 100)}%
+                </div>
+
+                <svg
+                  width="12" height="12" viewBox="0 0 12 12"
+                  style={{
+                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: `transform ${transitions.base}`,
+                    color: colors.textLow,
+                    flexShrink: 0,
+                  }}
+                >
+                  <path d="M2 4L6 8L10 4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+
+              {isExpanded && (
+                <div style={{
+                  padding: '8px 20px 12px 56px',
+                  fontSize: typography.size.sm,
+                  color: colors.textMed,
+                  fontFamily: typography.fontBase,
+                  lineHeight: '1.6',
+                }}>
+                  <div>{step.description}</div>
+                  {step.evidence && (
+                    <div style={{
+                      marginTop: '8px',
+                      padding: '8px 12px',
+                      background: colors.bg1,
+                      borderRadius: radius.md,
+                      border: `1px solid ${colors.bgBorder}`,
+                      fontSize: typography.size.xs,
+                      fontFamily: typography.fontMono,
+                      color: colors.textLow,
+                      whiteSpace: 'pre-wrap',
+                    }}>
+                      {step.evidence}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {idx < steps.length - 1 && (
+                <div style={{
+                  width: '1px',
+                  height: '8px',
+                  background: colors.bgBorder,
+                  margin: '0 31px',
+                }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// LONGITUDINAL VIEW — Time-series charts and prior comparison
+// ─────────────────────────────────────────────────────────────
+export interface LongitudinalDataPoint {
+  date: string;
+  value: number;
+  label?: string;
+}
+
+export function LongitudinalView({ data, title = 'Longitudinal Analysis', unit = '', currentValue }: {
+  data: LongitudinalDataPoint[];
+  title?: string;
+  unit?: string;
+  currentValue?: number;
+}) {
+  const sorted = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const values = sorted.map(d => d.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const chartHeight = 120;
+  const chartWidth = 100;
+
+  const points = sorted.map((d, i) => {
+    const x = (i / (sorted.length - 1 || 1)) * chartWidth;
+    const y = chartHeight - ((d.value - min) / range) * chartHeight;
+    return `${x},${y}`;
+  }).join(' ');
+
+  const trend = sorted.length >= 2 ? sorted[sorted.length - 1].value - sorted[0].value : 0;
+  const trendPct = sorted[0].value !== 0 ? (trend / sorted[0].value) * 100 : 0;
+  const trendColor = trend > 0 ? colors.warning : trend < 0 ? colors.normal : colors.textLow;
+
+  return (
+    <div style={{
+      background: colors.bg2,
+      borderRadius: radius.lg,
+      border: `1px solid ${colors.bgBorder}`,
+      padding: '20px',
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '16px',
+      }}>
+        <span style={{
+          fontSize: typography.size.sm,
+          fontWeight: typography.weight.semibold,
+          color: colors.textHigh,
+          fontFamily: typography.fontBase,
+        }}>
+          {title}
+        </span>
+        {currentValue !== undefined && (
+          <div style={{
+            fontSize: typography.size.sm,
+            fontFamily: typography.fontMono,
+            color: colors.textHigh,
+            fontWeight: typography.weight.semibold,
+          }}>
+            Current: {currentValue}{unit}
+          </div>
+        )}
+      </div>
+
+      {/* SVG Chart */}
+      <div style={{
+        width: '100%',
+        height: `${chartHeight + 40}px`,
+        marginBottom: '12px',
+      }}>
+        <svg
+          viewBox={`0 -20 ${chartWidth} ${chartHeight + 40}`}
+          style={{ width: '100%', height: '100%' }}
+          preserveAspectRatio="none"
+        >
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map(pct => (
+            <line
+              key={pct}
+              x1="0" y1={chartHeight * pct}
+              x2={chartWidth} y2={chartHeight * pct}
+              stroke={colors.bgBorder}
+              strokeWidth="0.3"
+              strokeDasharray="2,2"
+            />
+          ))}
+
+          {/* Area fill */}
+          <polygon
+            points={`0,${chartHeight} ${points} ${chartWidth},${chartHeight}`}
+            fill={`${colors.brand}14`}
+          />
+
+          {/* Line */}
+          <polyline
+            points={points}
+            fill="none"
+            stroke={colors.brand}
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Data points */}
+          {sorted.map((d, i) => {
+            const x = (i / (sorted.length - 1 || 1)) * chartWidth;
+            const y = chartHeight - ((d.value - min) / range) * chartHeight;
+            return (
+              <circle
+                key={i}
+                cx={x} cy={y} r="2"
+                fill={colors.bg1}
+                stroke={colors.brand}
+                strokeWidth="1"
+              />
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Labels */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: typography.size.xs,
+        fontFamily: typography.fontMono,
+        color: colors.textLow,
+      }}>
+        <span>{sorted[0]?.date || '—'}</span>
+        <span style={{ color: trendColor, fontWeight: typography.weight.semibold }}>
+          {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trendPct).toFixed(1)}%
+        </span>
+        <span>{sorted[sorted.length - 1]?.date || '—'}</span>
+      </div>
+
+      {/* Summary stats */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '12px',
+        marginTop: '16px',
+        paddingTop: '16px',
+        borderTop: `1px solid ${colors.bgBorder}`,
+      }}>
+        {[
+          { label: 'Min', value: `${min}${unit}` },
+          { label: 'Max', value: `${max}${unit}` },
+          { label: 'Range', value: `${range.toFixed(1)}${unit}` },
+        ].map(stat => (
+          <div key={stat.label} style={{ textAlign: 'center' }}>
+            <div style={{
+              fontSize: typography.size.xs,
+              color: colors.textLow,
+              fontFamily: typography.fontBase,
+              marginBottom: '2px',
+            }}>
+              {stat.label}
+            </div>
+            <div style={{
+              fontSize: typography.size.sm,
+              fontWeight: typography.weight.semibold,
+              color: colors.textHigh,
+              fontFamily: typography.fontMono,
+            }}>
+              {stat.value}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

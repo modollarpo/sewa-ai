@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../services/apiClient';
 import { Activity, Microscope, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { ConfidenceIndicator, UncertaintyIndicator } from '../../design-system/components';
 
 const C = {
   bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
@@ -144,9 +145,19 @@ export function PeerReviewWorkspace() {
             <div style={{display:'flex', gap:32, marginBottom:40}}>
               {/* AI Original */}
               <div style={{flex:1, background:C.bg2, borderRadius:12, border:`1px solid ${C.border}`, padding:24, display:'flex', flexDirection:'column'}}>
-                <div style={{display:'flex', alignItems:'center', gap:8, color:C.textLo, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16}}>
-                  <Activity size={16} /> Original AI Triage
+                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16}}>
+                  <div style={{display:'flex', alignItems:'center', gap:8, color:C.textLo, fontSize:11, textTransform:'uppercase', letterSpacing:1}}>
+                    <Activity size={16} /> Original AI Triage
+                  </div>
+                  {activeScan.aiResult?.confidence && (
+                    <ConfidenceIndicator value={activeScan.aiResult.confidence} size="sm" />
+                  )}
                 </div>
+                {activeScan.aiResult?.confidence && (
+                  <div style={{marginBottom:12}}>
+                    <UncertaintyIndicator value={activeScan.aiResult.confidence} showLabel={true} />
+                  </div>
+                )}
                 <div style={{color:C.textHi, fontSize:14, lineHeight:1.6, flex:1, whiteSpace:'pre-wrap'}}>
                   {activeScan.aiResult?.reportText || activeScan.aiResult?.primaryFinding || 'No structured AI text available'}
                 </div>
