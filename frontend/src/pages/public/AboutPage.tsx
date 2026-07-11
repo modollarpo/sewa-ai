@@ -115,7 +115,7 @@ export function AboutPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
                 <div style={{ width: 52, height: 52, background: `linear-gradient(135deg,${colors.brand},${colors.brandDark})`, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800, color: 'white', marginBottom: spacing[3] }}>
                   {t.name.split(' ').map(w=>w[0]).slice(0,2).join('')}
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: colors.textHigh, marginBottom: spacing[0] }}>{t.name}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: colors.textHigh, marginBottom: 0 }}>{t.name}</div>
                 <div style={{ fontSize: 11, color: colors.brand, fontWeight: 600, marginBottom: spacing[2] }}>{t.role}</div>
                 <p style={{ fontSize: 12, color: colors.textLow, margin: `0 0 ${spacing[2]}`, lineHeight: 1.6 }}>{t.bg}</p>
                 <div style={{ fontSize: 11, color: colors.textMed }}>{t.region}</div>
@@ -124,7 +124,7 @@ export function AboutPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
           </div>
         </div>
 
-        <Card padding={`clamp(${spacing[5]}, 5vw, ${spacing[10]}`} style={{ 
+        <Card padding={`clamp(${spacing[5]}, 5vw, ${spacing[10]})`} style={{ 
           background: `${colors.brand}08`, 
           border: `1px solid ${colors.brand}30`,
           textAlign: 'center' 

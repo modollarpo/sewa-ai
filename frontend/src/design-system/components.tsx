@@ -474,10 +474,11 @@ export function StatCard({
 // CARD
 // ─────────────────────────────────────────────────────────────
 export function Card({
-  children, padding = '20px', style, onClick, hoverable
+  children, padding = '20px', style, onClick, hoverable, className
 }: {
   children: React.ReactNode; padding?: string | number;
   style?: React.CSSProperties; onClick?: () => void; hoverable?: boolean;
+  className?: string;
 }) {
   const [hovered, setHovered] = useState(false);
   const computePadding = (p: string | number) => {
@@ -488,6 +489,7 @@ export function Card({
   };
   return (
     <div
+      className={className}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
