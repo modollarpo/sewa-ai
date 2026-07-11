@@ -258,7 +258,7 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
               <div style={{ display:'flex', gap:spacing[2], flexWrap:'wrap', marginBottom:spacing[4] }}>
                 {item.badges.map(b => <Badge key={b} variant="default" style={{ fontSize:10, padding:'3px 9px' }}>{b}</Badge>)}
               </div>
-              <Button onClick={() => onNavigate(item.label === 'Africa Healthcare Programme' || item.label === 'Africa Healthcare Program' ? 'africa-pricing' : 'contact')} style={{ background:item.color }}>{item.cta} →</Button>
+              <Button onClick={() => onNavigate(item.label === 'Africa Healthcare Programme' || item.label === 'Africa Healthcare Program' ? 'africa-pricing' : 'nhs-procurement')} style={{ background:item.color }}>{item.cta} →</Button>
             </Card>
           ))}
         </div>
