@@ -296,7 +296,7 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
               {showDemoPanel && import.meta.env.MODE !== 'production' && (
                 <div className="mt-6 p-4 rounded-xl bg-[#0C1D17] border border-[#1B3028] space-y-3 animate-fade-in">
                   <h3 className="text-[10px] font-black text-[#6FA898] uppercase tracking-widest text-center mb-4">Demo Credentials (Ctrl+Shift+D)</h3>
-                  {[
+                    {[
                     { role: 'Superadmin', email: 'superadmin@sewaxai.health' },
                     { role: 'Radiologist', email: 'sarah.chen@royallondon.nhs.uk' },
                     { role: 'Patient', email: 'patient.smith@example.com' }
@@ -306,9 +306,7 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
                       type="button"
                       onClick={() => {
                         setEmail(acc.email);
-                        // Using a placeholder; user should still know the DB password or the admin should set it to 'password' for local dev.
-                        // Assuming the seed uses "password" locally or something the user sets.
-                        setPassword('SewaXAI2026!'); 
+                        setPassword('');
                       }}
                       className="w-full py-2 px-3 rounded-lg bg-[#08160F] hover:bg-[#111F1A] border border-[#1B3028] hover:border-[#408D7B]/50 flex justify-between items-center transition-colors text-left"
                     >
@@ -316,7 +314,7 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
                       <span className="text-[10px] text-[#3A6055]">{acc.email}</span>
                     </button>
                   ))}
-                  <p className="text-[9px] text-center text-[#E03535] mt-2">Note: You must still replace the password with whatever `SEED_ADMIN_PASSWORD` was set to during seed.</p>
+                  <p className="text-[9px] text-center text-[#E08A20] mt-2">Enter the password configured for this account during seed.</p>
                 </div>
               )}
             </form>

@@ -87,7 +87,6 @@ export function BillingDashboard() {
         window.location.href = res.data.paymentLink;
       } else {
         setStatus({ msg: `Successfully switched to ${plan} plan.`, type: 'ok' });
-        setTimeout(() => window.location.reload(), 1500);
       }
     } catch (err: any) {
       setStatus({ msg: `Upgrade failed: ${err.response?.data?.message || err.message}`, type: 'err' });

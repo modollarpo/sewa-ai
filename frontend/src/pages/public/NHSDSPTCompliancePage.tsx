@@ -43,7 +43,7 @@ const CATEGORIES = [
     title: 'Incident Management',
     icon: '🚨',
     items: [
-      { label: 'Incident response plan', status: 'done', link: '#', linkText: 'See runbook' },
+      { label: 'Incident response plan', status: 'done' },
       { label: '24/7 on-call rota', status: 'done' },
       { label: 'NHS trust incident reporting process', status: 'done' },
     ],
@@ -53,7 +53,7 @@ const CATEGORIES = [
     title: 'Business Continuity',
     icon: '🔄',
     items: [
-      { label: 'Disaster recovery plan', status: 'done', link: '#', linkText: 'See plan' },
+      { label: 'Disaster recovery plan', status: 'done' },
       { label: 'RTO < 4 hours', status: 'done' },
       { label: 'RPO < 15 minutes', status: 'done' },
     ],
@@ -119,8 +119,8 @@ export function NHSDSPTCompliancePage({ onNavigate }: { onNavigate: (page: strin
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: spacing[2] }}>
                     <span style={{ fontSize: 14, color: colors.normal, flexShrink: 0 }}>✓</span>
                     <span style={{ fontSize: 12, color: colors.textMed, flex: 1 }}>{item.label}</span>
-                    {item.link && (
-                      <a href={item.link} style={{ fontSize: 10, color: colors.brand, textDecoration: 'none', fontWeight: 600 }}>{item.linkText}</a>
+                    {(item as any).link && (
+                      <a href={(item as any).link} style={{ fontSize: 10, color: colors.brand, textDecoration: 'none', fontWeight: 600 }}>{(item as any).linkText}</a>
                     )}
                   </div>
                 ))}

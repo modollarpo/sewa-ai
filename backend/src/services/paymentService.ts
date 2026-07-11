@@ -527,7 +527,15 @@ export async function handlePaystackWebhook(body: any, signature: string) {
 
   if (body.event === 'charge.success') {
     const ref = body.data?.reference;
+    if (!ref) {
+      logger.warn('[Billing] Paystack webhook missing reference');
+      return;
+    }
     const payment = await prisma.payment.findFirst({ where: { externalId: ref } });
+    if (!payment) {
+      logger.warn(`[Billing] Paystack webhook: no payment found for ref ${ref}`);
+      return;
+    }
     await prisma.payment.updateMany({ where: { externalId: ref }, data: { status: 'succeeded' } });
 
     // Activate tenant plan
@@ -563,7 +571,15 @@ export async function handleFlutterwaveWebhook(body: any, secretHash: string) {
 
   if (body.event === 'charge.completed' && body.data?.status === 'successful') {
     const ref = body.data?.tx_ref;
+    if (!ref) {
+      logger.warn('[Billing] Flutterwave webhook missing tx_ref');
+      return;
+    }
     const payment = await prisma.payment.findFirst({ where: { externalId: ref } });
+    if (!payment) {
+      logger.warn(`[Billing] Flutterwave webhook: no payment found for ref ${ref}`);
+      return;
+    }
     await prisma.payment.updateMany({ where: { externalId: ref }, data: { status: 'succeeded' } });
 
     // ── Activate tenant plan (was MISSING — critical fix) ─────

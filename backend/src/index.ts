@@ -158,8 +158,12 @@ app.use(helmet({
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow if no origin (e.g. server-to-server or Postman)
-    if (!origin) return callback(null, true);
+    // Allow if no origin in development only (server-to-server, Postman)
+    if (!origin) {
+      if (config.NODE_ENV !== 'production') return callback(null, true);
+      logger.warn('[CORS] Blocked request with no origin header');
+      return callback(new Error('Origin required in production'));
+    }
 
     const allowedOrigins = config.CORS_ORIGINS;
     const isAllowed = allowedOrigins.some(o => o === origin) || 
@@ -179,8 +183,8 @@ app.use(cors({
 }));
 
 app.use(compression() as any);
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
 app.use(requestId);
 app.use(rateLimiter);
@@ -190,7 +194,10 @@ app.use(auditMiddleware);
 app.use('/admin/queues', authenticate, authorize('admin', 'superadmin'), serverAdapter.getRouter());
 
 // ── API Documentation (Swagger/OpenAPI) ───────────────────────
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// Only expose in development to prevent API surface reconnaissance
+if (config.NODE_ENV !== 'production') {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+}
 
 // ── Health ─────────────────────────────────────────────────────
 app.get('/health', async (_req, res) => {

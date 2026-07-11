@@ -10,7 +10,6 @@ import { createSubscription } from '../services/paymentService';
 async function run() {
   console.log('🚀 Starting Stripe Test Payment verification...');
   console.log('Stripe Key loaded:', !!process.env.STRIPE_SECRET_KEY);
-  console.log('Stripe Key prefix:', process.env.STRIPE_SECRET_KEY?.slice(0, 8));
 
   // 1. Create a temporary tenant to isolate this test run
   console.log('\n--- 1. Creating Test Tenant ---');

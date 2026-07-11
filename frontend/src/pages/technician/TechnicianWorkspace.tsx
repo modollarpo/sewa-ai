@@ -518,30 +518,56 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
               <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
                 <div className="p-6 bg-[#1DBF73]/5 border border-[#1DBF73]/20 rounded-3xl flex items-center justify-between shadow-lg">
                   <div className="flex items-center gap-4">
-                    <span className="w-3 h-3 rounded-full bg-[#1DBF73] animate-pulse shadow-[0_0_10px_#1DBF73]" />
+                    <span className={`w-3 h-3 rounded-full ${pacsHealth ? 'bg-[#1DBF73] animate-pulse shadow-[0_0_10px_#1DBF73]' : 'bg-[#E08A20]'}`} />
                     <div>
                       <h4 className="text-sm font-bold text-[#1DBF73]">PACS Integrated Master Node</h4>
-                      <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest">Sectra Enterprise PACS · High Availability Sync</p>
+                      <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest">
+                        {pacsHealthLoading ? 'Checking connectivity...' : pacsHealth ? 'Sectra Enterprise PACS · High Availability Sync' : 'PACS health check unavailable'}
+                      </p>
                     </div>
                   </div>
-                  <button className="px-4 py-2 rounded-xl bg-[#1DBF73]/10 text-[#1DBF73] border border-[#1DBF73]/20 text-[9px] font-black uppercase tracking-widest hover:bg-[#1DBF73]/20 transition-all">Mesh Sync</button>
+                  <button
+                    onClick={() => {
+                      setPacsHealthLoading(true);
+                      apiClient.get('/tenants/integrations/health')
+                        .then(r => setPacsHealth(r.data))
+                        .catch(() => setPacsHealth(null))
+                        .finally(() => setPacsHealthLoading(false));
+                    }}
+                    className="px-4 py-2 rounded-xl bg-[#1DBF73]/10 text-[#1DBF73] border border-[#1DBF73]/20 text-[9px] font-black uppercase tracking-widest hover:bg-[#1DBF73]/20 transition-all"
+                  >
+                    {pacsHealthLoading ? 'Refreshing...' : 'Mesh Sync'}
+                  </button>
                 </div>
 
                 <div className="grid gap-3">
-                  {[
-                    { name: 'Imaging Storage Node', type: 'BLOB', status: 'Online', lat: '42ms', icon: '☁️' },
-                    { name: 'FHIR R4 Gateway', type: 'EHR', status: 'Online', lat: '12ms', icon: '🏥' },
-                    { name: 'HL7v2 Message Broker', type: 'RIS', status: 'Online', lat: '5ms', icon: '📡' },
-                  ].map(node => (
-                    <div key={node.name} className="p-4 bg-[#0C1D17] border border-[#1B3028] rounded-2xl flex items-center gap-4 transition-all hover:bg-[#111F1A]">
-                      <div className="w-10 h-10 rounded-xl bg-[#08160F] flex items-center justify-center text-xl">{node.icon}</div>
-                      <div className="flex-1">
-                        <div className="text-xs font-bold text-[#D0ECE6]">{node.name}</div>
-                        <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest mt-0.5">{node.type} Protocol <span className="mx-1">•</span> Latency: {node.lat}</div>
+                  {pacsHealthLoading ? (
+                    <div className="p-6 text-center text-[#3A6055] text-xs font-bold uppercase tracking-widest">Loading integration status...</div>
+                  ) : pacsHealth ? (
+                    Object.entries(pacsHealth.services || pacsHealth).filter(([key]) => key !== 'overall').map(([key, svc]: [string, any]) => (
+                      <div key={key} className="p-4 bg-[#0C1D17] border border-[#1B3028] rounded-2xl flex items-center gap-4 transition-all hover:bg-[#111F1A]">
+                        <div className="w-10 h-10 rounded-xl bg-[#08160F] flex items-center justify-center text-xl">
+                          {key.includes('fhir') ? '🏥' : key.includes('hl7') ? '📡' : key.includes('pacs') || key.includes('dicom') ? '☁️' : '🔌'}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-xs font-bold text-[#D0ECE6]">{svc.name || key}</div>
+                          <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest mt-0.5">
+                            {svc.protocol || key.toUpperCase()} <span className="mx-1">•</span> {svc.latency ? `Latency: ${svc.latency}` : svc.status || 'Checked'}
+                          </div>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                          svc.healthy !== false ? 'bg-[#1DBF73]/10 text-[#1DBF73] border-[#1DBF73]/20' : 'bg-[#E03535]/10 text-[#E03535] border-[#E03535]/20'
+                        }`}>
+                          {svc.healthy !== false ? 'Active' : 'Down'}
+                        </span>
                       </div>
-                      <span className="px-2 py-0.5 rounded-full bg-[#1DBF73]/10 text-[#1DBF73] text-[8px] font-black uppercase tracking-widest border border-[#1DBF73]/20">Active</span>
+                    ))
+                  ) : (
+                    <div className="p-6 text-center bg-[#08160F] rounded-2xl border border-[#1B3028] border-dashed">
+                      <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest">Integration health unavailable</p>
+                      <p className="text-[9px] text-[#3A6055] mt-1">Backend may not be reachable</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             )}

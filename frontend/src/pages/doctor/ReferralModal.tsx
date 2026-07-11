@@ -9,24 +9,34 @@ const C = {
   border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif",
 };
 
-const HOSPITALS = [
-  { id: 'LUTH-01', name: 'Lagos University Teaching Hospital', region: 'Nigeria', type: 'Tertiary' },
-  { id: 'KNH-01', name: 'Kenyatta National Hospital', region: 'Kenya', type: 'Referral' },
-  { id: 'GUYS-01', name: 'Guys & St Thomas NHS Trust', region: 'UK', type: 'Specialist' },
-  { id: 'SEWA-SN', name: 'SEWA Specialist Network', region: 'Global', type: 'Private' },
-];
+interface Specialist {
+  id: string;
+  name: string;
+  specialty: string;
+  region?: string;
+  tenantId?: string;
+}
 
 export function ReferralModal({ scanId, onClose }: { scanId: string; onClose: () => void }) {
   const [selected, setSelected] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
+  const [specialists, setSpecialists] = useState<Specialist[]>([]);
+  const [fetchingSpecialists, setFetchingSpecialists] = useState(true);
+
+  useEffect(() => {
+    apiClient.get('/ai/referrals/specialists')
+      .then(res => setSpecialists(res.data?.specialists || []))
+      .catch(() => setSpecialists([]))
+      .finally(() => setFetchingSpecialists(false));
+  }, []);
 
   const handleSubmit = async () => {
     if (!selected) return;
     setLoading(true);
     try {
-      await apiClient.post('/referrals', { scanId, targetTenantId: selected, clinicalNote: note });
+      await apiClient.post('/ai/referrals', { scanId, specialistId: selected, clinicalNote: note });
       setStatus({ msg: 'Referral successfully dispatched.', type: 'ok' });
       setTimeout(() => onClose(), 1500);
     } catch (e) {
@@ -53,18 +63,24 @@ export function ReferralModal({ scanId, onClose }: { scanId: string; onClose: ()
         <div style={{ marginBottom:20 }}>
           <label style={{ display:'block', fontSize:11, fontWeight:700, color:C.textLo, marginBottom:8, textTransform:'uppercase' }}>Target Institution</label>
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            {HOSPITALS.map(h => (
-              <div 
-                key={h.id} 
-                onClick={() => setSelected(h.id)}
-                style={{ 
-                  padding:14, borderRadius:12, border:`1px solid ${selected === h.id ? C.brand : C.border}`, 
-                  background: selected === h.id ? `${C.brand}10` : C.bg2, cursor:'pointer' 
-                }}>
-                <div style={{ fontSize:14, fontWeight:700, color:C.textHi }}>{h.name}</div>
-                <div style={{ fontSize:11, color:C.textLo, marginTop:2 }}>{h.type} · {h.region}</div>
-              </div>
-            ))}
+            {fetchingSpecialists ? (
+              <div style={{ padding:14, textAlign:'center', color:C.textLo, fontSize:12 }}>Loading specialists...</div>
+            ) : specialists.length === 0 ? (
+              <div style={{ padding:14, textAlign:'center', color:C.textLo, fontSize:12 }}>No specialists available for referral</div>
+            ) : (
+              specialists.map(s => (
+                <div 
+                  key={s.id} 
+                  onClick={() => setSelected(s.id)}
+                  style={{ 
+                    padding:14, borderRadius:12, border:`1px solid ${selected === s.id ? C.brand : C.border}`, 
+                    background: selected === s.id ? `${C.brand}10` : C.bg2, cursor:'pointer' 
+                  }}>
+                  <div style={{ fontSize:14, fontWeight:700, color:C.textHi }}>{s.name}</div>
+                  <div style={{ fontSize:11, color:C.textLo, marginTop:2 }}>{s.specialty}{s.region ? ` · ${s.region}` : ''}</div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

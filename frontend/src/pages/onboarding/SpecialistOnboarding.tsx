@@ -152,12 +152,16 @@ export function SpecialistOnboarding() {
               <div className="pt-4 border-t border-[#1B3028]">
                 <p className="text-[10px] text-[#3A6055] font-black uppercase tracking-[0.2em] mb-4">African Regional Payouts</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => alert("Paystack Integration Coming Soon. Please use Stripe Connect for now.")} className="py-3 rounded-xl bg-[#0BA4DB]/10 border border-[#0BA4DB]/30 hover:bg-[#0BA4DB]/20 text-[#0BA4DB] text-[10px] font-black uppercase tracking-wider transition-all">
-                    Paystack
-                  </button>
-                  <button onClick={() => alert("Flutterwave Integration Coming Soon. Please use Stripe Connect for now.")} className="py-3 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/30 hover:bg-[#F5A623]/20 text-[#F5A623] text-[10px] font-black uppercase tracking-wider transition-all">
-                    Flutterwave
-                  </button>
+                  <div title="Paystack integration is under development. Use Stripe Connect for now." className="opacity-50 cursor-not-allowed">
+                    <button disabled className="w-full py-3 rounded-xl bg-[#0BA4DB]/10 border border-[#0BA4DB]/30 text-[#0BA4DB] text-[10px] font-black uppercase tracking-wider">
+                      Paystack
+                    </button>
+                  </div>
+                  <div title="Flutterwave integration is under development. Use Stripe Connect for now." className="opacity-50 cursor-not-allowed">
+                    <button disabled className="w-full py-3 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/30 text-[#F5A623] text-[10px] font-black uppercase tracking-wider">
+                      Flutterwave
+                    </button>
+                  </div>
                 </div>
               </div>
               

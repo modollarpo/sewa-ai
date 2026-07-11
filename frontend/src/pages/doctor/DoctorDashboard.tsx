@@ -283,7 +283,6 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
       if (type === 'confirm') {
         await apiClient.post(`/ai/validate/${scanId}`, { status: 'CONFIRMED' });
         onClose();
-        window.location.reload();
       } else if (type === 'explain') {
         setExplaining(true);
         const res = await apiClient.get(`/ai/explain/${scanId}`);
@@ -293,12 +292,10 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
         await apiClient.post(`/ai/validate/${scanId}`, { status: 'REJECTED', correctedFinding: payload });
         setCorrecting(false);
         onClose();
-        window.location.reload();
       } else if (type === 'escalate') {
         await apiClient.patch(`/scans/${scanId}/status`, { status: 'CRITICAL', auditReason: payload });
         setEscalating(false);
         onClose();
-        window.location.reload();
       }
     } catch (err: any) {
       setActionError(err.response?.data?.message || err.message || 'Action failed. Please try again.');

@@ -79,18 +79,9 @@ export function HospitalAdminDashboard() {
       ruleList.forEach((rule: any) => { t[rule.id] = rule.enabled ?? true; });
       setRuleToggles(t);
     }).catch(() => {
-      // Demo built-in rules when API unavailable
-      const demo = [
-        { id:'builtin-0', name:'Stroke Code Activation — LVO', description:'Activates stroke code when large vessel occlusion detected with high confidence', enabled:true, pathway:'stroke', conditionLogic:'AND', conditions:[{field:'finding',operator:'contains',value:'occlusion'},{field:'urgency',operator:'eq',value:'CRITICAL'},{field:'confidence',operator:'gte',value:0.85}], actions:[{type:'notify_role',target:'radiologist'},{type:'page_team',target:'stroke_response_team'},{type:'hl7_order',hl7Data:{orderCode:'CTA_HEAD_NECK',priority:'STAT'}}], cooldownMs:3600000 },
-        { id:'builtin-1', name:'ICH Critical Alert', description:'Pages neurosurgery on-call for intracranial haemorrhage', enabled:true, pathway:'stroke', conditionLogic:'AND', conditions:[{field:'finding',operator:'in',value:['ICH','intracranial hemorrhage']},{field:'urgency',operator:'eq',value:'CRITICAL'}], actions:[{type:'notify_role',target:'doctor'},{type:'notify_oncall',target:'neurosurgery'},{type:'escalate_priority',priority:'STAT'}], cooldownMs:1800000 },
-        { id:'builtin-2', name:'Pulmonary Embolism — Anticoagulation Alert', description:'Alerts emergency team for PE findings', enabled:true, pathway:'pe', conditionLogic:'AND', conditions:[{field:'finding',operator:'contains',value:'embolism'},{field:'urgency',operator:'in',value:['CRITICAL','URGENT']}], actions:[{type:'notify_role',target:'doctor'},{type:'notify_oncall',target:'cardiology'},{type:'hl7_order',hl7Data:{orderCode:'D_DIMER',priority:'STAT'}}], cooldownMs:1800000 },
-        { id:'builtin-3', name:'TB Suspected — Infection Control', description:'Triggers infection control protocol for TB findings', enabled:true, pathway:'tb', conditionLogic:'AND', conditions:[{field:'finding',operator:'contains',value:'TB'},{field:'confidence',operator:'gte',value:0.75}], actions:[{type:'notify_role',target:'doctor'},{type:'create_task',message:'Initiate TB isolation protocol'},{type:'hl7_order',hl7Data:{orderCode:'SPUTUM_CULTURE',priority:'URGENT'}}], cooldownMs:86400000 },
-        { id:'builtin-4', name:'Low AI Confidence — Flag for Second Opinion', description:'Routes uncertain cases to second opinion queue', enabled:true, conditionLogic:'AND', conditions:[{field:'confidence',operator:'lt',value:0.70},{field:'uncertainty',operator:'gte',value:0.25}], actions:[{type:'notify_role',target:'radiologist'},{type:'create_task',message:'Manual review: AI confidence below threshold'}], cooldownMs:300000 },
-      ];
-      setRules(demo);
-      const t: Record<string,boolean> = {};
-      demo.forEach((r: any) => { t[r.id] = r.enabled; });
-      setRuleToggles(t);
+      // No fallback mock data — display empty state when API unavailable
+      setRules([]);
+      setRuleToggles({});
     }).finally(() => setRulesLoading(false));
   }, [tab]);
   const [search, setSearch] = useState('');
@@ -771,7 +762,6 @@ export function HospitalAdminDashboard() {
                       await apiClient.patch(`/users/${selectedStaff.id}/role`, { role });
                       setStatus({ msg: 'Credentials updated successfully.', type: 'ok' });
                       setShowAddUser(false);
-                      setTimeout(() => window.location.reload(), 1500);
                     } catch(e: any) { setStatus({ msg: e.message, type: 'err' }); }
                   }} className="w-full py-4 rounded-xl bg-[#408D7B] text-white font-black uppercase tracking-widest text-xs shadow-lg transition-all active:scale-95">Commit Changes</button>
                 </div>
@@ -795,7 +785,6 @@ export function HospitalAdminDashboard() {
                         await apiClient.patch(`/users/${selectedStaff.id}/status`, { status: next });
                         setStatus({ msg: `Access ${next} successfully.`, type: 'ok' });
                         setShowAddUser(false);
-                        setTimeout(() => window.location.reload(), 1500);
                       } catch(e: any) { setStatus({ msg: e.message, type: 'err' }); }
                     }} className={`flex-1 py-3 rounded-xl font-bold text-white transition-all ${
                       selectedStaff.status === 'suspended' ? 'bg-[#1DBF73] hover:bg-[#1DBF73]/80' : 'bg-[#E03535] hover:bg-[#E03535]/80'

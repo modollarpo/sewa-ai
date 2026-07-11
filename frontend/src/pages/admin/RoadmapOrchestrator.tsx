@@ -67,7 +67,13 @@ export function RoadmapOrchestrator() {
   };
 
   const triggerEdgeSync = async (deviceId: string, scansCount: number) => {
-    alert('Edge sync must be initiated by the edge device in production. This dashboard only monitors status.');
+    try {
+      const res = await apiClient.post('/ai/edge/sync', { deviceId, scansCount });
+      setEdgeDevices(prev => prev.map(d => d.id === deviceId ? { ...d, lastSync: new Date().toISOString(), status: 'syncing' } : d));
+      setMessage(res.data?.message || `Edge sync initiated for ${deviceId}`);
+    } catch (e: any) {
+      setMessage(`Edge sync failed: ${e.response?.data?.message || e.message}`);
+    }
   };
 
   const verifyZkConsent = async () => {
@@ -77,33 +83,29 @@ export function RoadmapOrchestrator() {
       const res = await apiClient.post('/zk-consent/verify', {
         publicSignals: {
           mrnCommitment,
-          tenantIdHash: 'tenant-hash-01',
         }
       });
       setZkLogs(prev => [res.data, ...prev]);
-    } catch (e) {
-      console.error('ZK Verification failed', e);
+    } catch (e: any) {
+      setMessage(`ZK Verification failed: ${e.response?.data?.message || e.message}`);
     }
   };
 
   const triggerMultimodalFusion = async () => {
-    // We assume a head CT scan is running, evaluate risk adjusting variables
-    const labs = { troponin: 0.55, dDimer: 620, gcs: 7 };
-    const clinicalHistory = { onAnticoagulants: true, priorStroke: false };
-
     try {
-      // Retrieve first scan
+      // Retrieve first scan from worklist
       const scansRes = await apiClient.get('/scans');
       const scanId = scansRes.data?.scans?.[0]?.id;
       if (!scanId) {
-        alert('No active scans found to run Multimodal Fusion simulation');
+        setMessage('No active scans found to run Multimodal Fusion evaluation');
         return;
       }
 
       const res = await apiClient.post(`/clinical-fusion/evaluate/${scanId}`);
       setFusionLogs(prev => [res.data, ...prev]);
-    } catch (e) {
-      console.error('Fusion evaluation failed', e);
+      setMessage(res.data?.message || 'Clinical fusion evaluation completed');
+    } catch (e: any) {
+      setMessage(`Fusion evaluation failed: ${e.response?.data?.message || e.message}`);
     }
   };
 
