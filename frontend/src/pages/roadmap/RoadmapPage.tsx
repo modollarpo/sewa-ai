@@ -2,17 +2,7 @@
 // Public-facing internal product roadmap: Q1-Q4 2026, feature voting, release notes
 
 import React, { useState } from 'react';
-import { colors } from '../../design-system/tokens';
-
-const C = {
-  ...colors,
-  brandLt: colors.brandLight, brandDk: colors.brandDark,
-  textHi: colors.textHigh, textMd: colors.textMed, textLo: colors.textLow,
-  border: colors.bgBorder,
-  purple: '#8B5CF6', purpleBg: '#1A0A30', amber: '#F59E0B',
-  F: "'IBM Plex Sans',system-ui,sans-serif",
-  FM: "'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 type Status = 'shipped' | 'in_progress' | 'planned' | 'researching';
 type Category = 'ai' | 'clinical' | 'platform' | 'compliance' | 'mobile' | 'integrations';

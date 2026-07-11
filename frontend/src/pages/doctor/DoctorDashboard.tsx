@@ -6,22 +6,7 @@ import { apiClient, downloadReport } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { ConfidenceIndicator, UncertaintyIndicator, AIPredictionBadge, ReasoningTrace } from '../../design-system/components';
 import { Skeleton } from '../../components/ui/Skeleton';
-
-const C = {
-  bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
-  brand:'#408D7B',brandLt:'#52B09A',
-  critical:'#E03535',critBg:'#2A0A0A',critBorder:'#4A1515',
-  urgent:'#E08A20',urgBg:'#2A1800',
-  normal:'#1DBF73',normalBg:'#0A1F14',
-  info:'#2A6EF2',infoBg:'#0A1530',
-  textHi:'#D0ECE6',textMd:'#6FA898',textLo:'#3A6055',
-  border:'#1B3028',
-  bg0:'#050F0C',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-  fontBase:"'IBM Plex Sans', system-ui, sans-serif",
-  fontMono:"'IBM Plex Mono', monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 function UrgencyDot({ u }:{ u:string }) {
   const m:Record<string,string> = {CRITICAL:C.critical,URGENT:C.urgent,NORMAL:C.normal,ROUTINE:C.textLo};

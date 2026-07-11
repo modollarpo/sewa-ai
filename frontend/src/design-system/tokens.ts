@@ -167,3 +167,28 @@ export const regions = {
   za: { label: 'South Africa',   flag: '🇿🇦', currency: 'ZAR', compliance: 'POPIA' },
   in: { label: 'India',          flag: '🇮🇳', currency: 'INR', compliance: 'DPDP 2023' },
 } as const;
+
+// ── Dashboard compatibility layer ──────────────────────────────
+// Drop-in replacement for `const C = {...}` in dashboard files.
+// Usage: import { dashboardColors as C } from '../../design-system/tokens';
+export const dashboardColors = {
+  ...colors,
+  // Legacy aliases used by existing dashboards
+  bg0: colors.bg0, bg1: colors.bg1, bg2: colors.bg2, bg3: colors.bg3, bg4: colors.bg4,
+  brandLt: colors.brandLight, brandDk: colors.brandDark, brandMuted: colors.brandMuted,
+  critBg: colors.criticalBg, critMuted: colors.criticalMuted, critBorder: colors.criticalMuted,
+  urgBg: colors.urgentBg,
+  normalBg: colors.normalBg,
+  infoBg: colors.infoBg,
+  warningBg: colors.warningBg,
+  textHi: colors.textHigh, textMd: colors.textMed, textLo: colors.textLow, textInverse: colors.textInverse,
+  border: colors.bgBorder,
+  // Extended colours not in the base palette
+  purple: '#8B5CF6', purpleBg: '#1A0A30',
+  amber: '#F59E0B',
+  // Typography shortcuts
+  F: typography.fontBase,
+  FM: typography.fontMono,
+  fontBase: typography.fontBase,
+  fontMono: typography.fontMono,
+} as const;

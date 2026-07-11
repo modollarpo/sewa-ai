@@ -7,18 +7,7 @@ import { Skeleton } from '../../components/ui/Skeleton';
 import { apiClient } from '../../services/apiClient';
 import { AppointmentModal } from './AppointmentModal';
 
-const C = {
-  bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',
-  brand:'#408D7B',brandLt:'#52B09A',
-  critical:'#E03535',
-  urgent:'#E08A20',
-  normal:'#1DBF73',
-  info:'#2A6EF2',
-  textHi:'#D0ECE6',textMd:'#6FA898',textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 export function PatientPortal() {
   const { user } = useAuthStore();
@@ -72,8 +61,9 @@ export function PatientPortal() {
   };
 
   const tabStyle = (t:string):React.CSSProperties => ({
-    padding:'8px 16px',fontSize:12,fontWeight:tab===t?600:400,
-    color:tab===t?C.brand:C.textLo,background:'none',border:'none',
+    padding:'8px 16px',paddingBottom:12,marginBottom:-1,fontSize:12,
+    fontWeight:tab===t?600:400,
+    color:tab===t?C.textHi:C.textLo,background:'none',border:'none',
     borderBottom:`2px solid ${tab===t?C.brand:'transparent'}`,
     cursor:'pointer',fontFamily:C.F,whiteSpace:'nowrap',
   });
@@ -105,16 +95,13 @@ export function PatientPortal() {
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="max-w-5xl mx-auto flex items-center gap-1 p-1.5 bg-[#08160F] rounded-2xl border border-[#1B3028] mb-10 w-full md:w-fit overflow-x-auto scrollbar-none">
+      <nav className="max-w-5xl mx-auto flex items-center gap-1 mb-10 w-full md:w-fit overflow-x-auto scrollbar-none" style={{borderBottom:'1px solid #1B3028'}}>
         {['scans','appointments','progression','billing','account'].map(t => (
           <button 
             key={t} 
             onClick={() => setTab(t as any)}
-            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 whitespace-nowrap ${
-              tab === t 
-                ? 'bg-[#408D7B] text-white shadow-lg' 
-                : 'text-[#3A6055] hover:text-[#D0ECE6] hover:bg-[#111F1A]'
-            }`}
+            style={tabStyle(t)}
+            className="text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
           >
             <span>{t==='scans'?'🩻':t==='appointments'?'📅':t==='progression'?'📈':t==='billing'?'💳':'👤'}</span>
             {t}

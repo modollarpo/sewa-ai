@@ -6,19 +6,7 @@ import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Skeleton, StatSkeleton } from '../../components/ui/Skeleton';
 import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
-
-const C = {
-  bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
-  brand:'#408D7B',brandLt:'#52B09A',brandDk:'#2E6B5E',
-  critical:'#E03535',critBg:'#2A0A0A',
-  urgent:'#E08A20',urgBg:'#2A1800',
-  normal:'#1DBF73',normalBg:'#0A1F14',
-  info:'#2A6EF2',infoBg:'#0A1530',
-  textHi:'#D0ECE6',textMd:'#6FA898',textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 function StatusDot({ status }:{ status:string }) {
   const m:Record<string,string> = {connected:C.normal,warning:C.urgent,error:C.critical,active:C.normal,away:C.urgent,offline:C.textLo};
@@ -47,7 +35,7 @@ function StatCard({ label,value,sub,color=C.brand,icon }:{ label:string;value:st
     <div className="group p-5 bg-[#0C1D17] rounded-2xl border border-[#1B3028] hover:border-[#408D7B]/50 transition-all duration-300 shadow-lg hover:shadow-[#408D7B]/5">
       <div className="flex items-center justify-between mb-4">
         <span className="text-[10px] font-bold text-[#3A6055] uppercase tracking-[0.1em]">{label}</span>
-        <span className="text-xl opacity-20 group-hover:opacity-100 transition-opacity transform group-hover:scale-110 duration-300">{icon}</span>
+        <span className="text-xl opacity-100 transition-opacity transform group-hover:scale-110 duration-300">{icon}</span>
       </div>
       <div className="text-3xl font-black text-[#D0ECE6] font-mono leading-none mb-2">{value}</div>
       {sub && <div className="text-[10px] text-[#6FA898] font-medium flex items-center gap-1">
@@ -114,8 +102,8 @@ export function HospitalAdminDashboard() {
   }, []);
 
   const tabStyle = (t:string):React.CSSProperties => ({
-    padding:'8px 14px',fontSize:12,fontWeight:tab===t?600:400,
-    color:tab===t?C.brand:C.textLo,background:'none',border:'none',
+    padding:'8px 14px',paddingBottom:12,fontSize:12,fontWeight:tab===t?600:400,
+    color:tab===t?C.textHi:C.textLo,background:'none',border:'none',
     borderBottom:`2px solid ${tab===t?C.brand:'transparent'}`,
     marginBottom:'-1px',cursor:'pointer',fontFamily:C.F,
     display:'flex',alignItems:'center',gap:5,whiteSpace:'nowrap',
@@ -180,16 +168,12 @@ export function HospitalAdminDashboard() {
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="flex items-center gap-1 p-1 bg-[#08160F] rounded-2xl border border-[#1B3028] mb-8 w-full md:w-fit overflow-x-auto scrollbar-none">
+      <nav className="flex items-center gap-0 border-b border-[#1B3028] mb-8 w-full overflow-x-auto scrollbar-none">
         {(['overview','staff','integrations','billing','audit','rules'] as const).map(t => (
           <button 
             key={t} 
             onClick={() => setTab(t)}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
-              tab === t 
-                ? 'bg-[#408D7B] text-white shadow-lg' 
-                : 'text-[#3A6055] hover:text-[#D0ECE6] hover:bg-[#111F1A]'
-            }`}
+            style={tabStyle(t)}
           >
             <span>{t==='overview'?'📊':t==='staff'?'👥':t==='integrations'?'🔗':t==='billing'?'💳':t==='audit'?'🔒':'⚡'}</span>
             {t}
@@ -337,7 +321,7 @@ export function HospitalAdminDashboard() {
                             </span>
                           </td>
                           <td className="p-5">
-                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex gap-2 transition-opacity">
                               <button 
                                 onClick={() => { setSelectedStaff(s); setActionType('edit'); setShowAddUser(true); }}
                                 className="p-2 rounded-lg bg-[#111F1A] border border-[#1B3028] text-[#D0ECE6] hover:bg-[#408D7B] hover:border-[#408D7B] transition-all"

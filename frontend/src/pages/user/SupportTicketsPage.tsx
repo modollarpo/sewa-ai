@@ -4,13 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import { apiClient, getFeedback } from '../../services/apiClient';
 import { FeedbackModal } from '../../components/shared/FeedbackModal';
 
-const C = {
-  bg0:'#050F0C',bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',
-  brand:'#408D7B',brandDk:'#2E6B5E',
-  normal:'#1DBF73',info:'#2A6EF2',critical:'#E03535',urgent:'#E08A20',
-  textHi:'#D0ECE6',textMd:'#6FA898',textLo:'#3A6055',
-  border:'#1B3028',F:"'IBM Plex Sans',system-ui,sans-serif",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 const CATEGORIES = ['billing','technical','clinical','general','feature_request'];
 const PRIORITIES = ['low','medium','high','urgent'];

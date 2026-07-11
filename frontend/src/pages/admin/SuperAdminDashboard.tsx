@@ -5,20 +5,7 @@ import { useSuperAdminData } from '../../hooks/useDashboardData';
 import { Skeleton, StatSkeleton, TableRowSkeleton } from '../../components/ui/Skeleton';
 import { apiClient } from '../../services/apiClient';
 import { Tooltip } from '../../components/ui/Tooltip';
-
-const C = {
-  bg0:'#050F0C',bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
-  brand:'#408D7B',brandLt:'#52B09A',brandDk:'#2E6B5E',
-  critical:'#E03535',critBg:'#2A0A0A',
-  urgent:'#E08A20',urgBg:'#2A1800',
-  normal:'#1DBF73',normalBg:'#0A1F14',
-  info:'#2A6EF2',infoBg:'#0A1530',
-  purple:'#8B5CF6',purpleBg:'#1a0a30',
-  textHi:'#D0ECE6',textMd:'#6FA898',textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 const REGION_FLAGS:Record<string,string> = {uk:'🇬🇧',eu:'🇪🇺',us:'🇺🇸',ng:'🇳🇬',ke:'🇰🇪',za:'🇿🇦',in:'🇮🇳',gh:'🇬🇭'};
 
