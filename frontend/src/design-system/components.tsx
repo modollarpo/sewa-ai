@@ -103,15 +103,14 @@ Button.displayName = 'Button';
 // ─────────────────────────────────────────────────────────────
 type BadgeVariant = 'default' | 'brand' | 'critical' | 'urgent' | 'normal' | 'info' | 'warning';
 
-interface BadgeProps {
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
   children: React.ReactNode;
   dot?: boolean;
   size?: 'sm' | 'md';
-  style?: React.CSSProperties;
 }
 
-export function Badge({ variant = 'default', children, dot, size = 'sm', style }: BadgeProps) {
+export function Badge({ variant = 'default', children, dot, size = 'sm', style, ...props }: BadgeProps) {
   const variantMap: Record<BadgeVariant, React.CSSProperties> = {
     default:  { background: colors.bg3, color: colors.textMed, border: `1px solid ${colors.bgBorder}` },
     brand:    { background: `${colors.brand}20`, color: colors.brandLight, border: `1px solid ${colors.brand}40` },
@@ -141,7 +140,7 @@ export function Badge({ variant = 'default', children, dot, size = 'sm', style }
       letterSpacing:'0.02em',
       ...variantMap[variant],
       ...style,
-    }}>
+    }} {...props}>
       {dot && (
         <span style={{
           width: '5px', height: '5px',
@@ -473,13 +472,15 @@ export function StatCard({
 // ─────────────────────────────────────────────────────────────
 // CARD
 // ─────────────────────────────────────────────────────────────
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  padding?: string | number;
+  hoverable?: boolean;
+}
+
 export function Card({
-  children, padding = '20px', style, onClick, hoverable, className
-}: {
-  children: React.ReactNode; padding?: string | number;
-  style?: React.CSSProperties; onClick?: () => void; hoverable?: boolean;
-  className?: string;
-}) {
+  children, padding = '20px', style, onClick, hoverable, className, ...props
+}: CardProps) {
   const [hovered, setHovered] = useState(false);
   const computePadding = (p: string | number) => {
     if (typeof p === 'number') {
@@ -503,6 +504,7 @@ export function Card({
         boxShadow:    hovered && hoverable ? shadows.brand : shadows.sm,
         ...style,
       }}
+      {...props}
     >
       {children}
     </div>

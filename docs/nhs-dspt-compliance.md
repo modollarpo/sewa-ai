@@ -3,7 +3,7 @@
 ## 1. Governance
 - ✅ Data Protection Officer appointed
 - ✅ Privacy Impact Assessment (PIA) completed
-- ✅ IRAS form submitted
+- ✅ IRAS form submission in progress
 
 ## 2. Data Security
 - ✅ Encryption at rest (Azure Storage, Azure PostgreSQL)

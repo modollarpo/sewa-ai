@@ -111,6 +111,41 @@ const COMPARISON = [
   { feature:'Shortcuts / widgets',             ios:'✅', android:'✅', pwa:'Partial',          web:'❌' },
 ];
 
+const DOCUMENTS = [
+  {
+    title: 'NHS Trust Pack v2.0',
+    subtitle: 'Confidential dossier for NHS R&D committees and Medical Directors',
+    icon: '🏥',
+    filename: 'SEWA_AI_NHS_Trust_Pack_v2.0.pdf',
+    category: 'NHS Procurement',
+    date: '11 July 2026',
+  },
+  {
+    title: 'Master Dossier v2.0',
+    subtitle: 'Complete clinical, regulatory, and technical documentation',
+    icon: '📚',
+    filename: 'SEWA_AI_Master_Dossier_v2.0_Integrated.pdf',
+    category: 'Clinical & Regulatory',
+    date: 'July 2026',
+  },
+  {
+    title: 'Enterprise v2.0 Vision',
+    subtitle: 'Strategic vision for SEWA XAI platform',
+    icon: '🚀',
+    filename: 'SEWA_AI_Enterprise_v2.0_Vision.pdf',
+    category: 'Strategy',
+    date: 'July 2026',
+  },
+  {
+    title: 'NHS DSPT Compliance',
+    subtitle: 'Data Security and Protection Toolkit documentation',
+    icon: '🔐',
+    filename: 'nhs-dspt-compliance.pdf',
+    category: 'Security & Compliance',
+    date: 'July 2026',
+  },
+];
+
 export function DownloadsPage({ onNavigate }: { onNavigate: (page: string) => void }) {
   const [activeOS, setActiveOS] = useState<'chrome'|'safari'|'edge'>('chrome');
   const [isPWAInstallable, setIsPWAInstallable] = useState(false);
@@ -300,6 +335,37 @@ export function DownloadsPage({ onNavigate }: { onNavigate: (page: string) => vo
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Documentation Downloads */}
+        <section style={{ marginBottom:80 }}>
+          <div style={{ textAlign:'center', marginBottom:48 }}>
+            <h2 style={{ ...h2, fontSize:32, textAlign:'center' }}>Documentation & Downloads</h2>
+            <p style={{ ...p, maxWidth:600, margin:'12px auto 0', textAlign:'center' }}>
+              Download clinical, regulatory, and strategic documentation for SEWA XAI.
+            </p>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20 }}>
+            {DOCUMENTS.map(doc => (
+              <a key={doc.filename} href={`/docs/${doc.filename}`} download
+                style={{ display:'block', padding:24, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:16, textDecoration:'none', transition:'all 0.2s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.brand + '60'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border; }}
+              >
+                <div style={{ display:'flex', gap:16, alignItems:'start', marginBottom:12 }}>
+                  <div style={{ fontSize:32 }}>{doc.icon}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
+                      <div style={{ fontSize:16, fontWeight:800, color:C.textHi, fontFamily:C.F }}>{doc.title}</div>
+                      <div style={{ fontSize:10, padding:'3px 8px', background:`${C.brand}14`, color:C.brand, borderRadius:8, fontWeight:700, textTransform:'uppercase' }}>{doc.category}</div>
+                    </div>
+                    <div style={{ fontSize:12, color:C.textMd, marginBottom:8, fontFamily:C.F }}>{doc.subtitle}</div>
+                    <div style={{ fontSize:10, color:C.textLo, fontFamily:C.FM }}>Updated {doc.date}</div>
+                  </div>
+                </div>
+              </a>
+            ))}
           </div>
         </section>
 

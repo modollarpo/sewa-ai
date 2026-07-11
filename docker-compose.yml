@@ -163,9 +163,9 @@ services:
     networks: [sewa-net]
     ports:
       - "8001:8001"
+    env_file:
+      - ./ai-services/vlm-report/.env
     environment:
-      AZURE_OPENAI_ENDPOINT: "https://sewa-ai-production-openai-18104.openai.azure.com/"
-      AZURE_OPENAI_API_KEY:  "2c3aQcn1hWQtXH2jTJdYfzJea725lgxJ0hgCQc85GjkZPtpdjdAXJQQJ99CGACmepeSXJ3w3AAABACOGpPKq"
       AZURE_OPENAI_DEPLOYMENT: "gpt-54-mini"
       ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5000,http://localhost:5173"
     healthcheck:

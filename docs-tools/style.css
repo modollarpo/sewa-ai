@@ -1,0 +1,145 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+    color: #050F0C;
+    background-color: #ffffff;
+    line-height: 1.6;
+    padding: 0 40px;
+}
+
+/* Letterhead Header */
+.letterhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 3px solid #408D7B;
+    padding: 30px 0 20px;
+    margin-bottom: 40px;
+}
+
+.letterhead-left h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #408D7B;
+    margin-bottom: 4px;
+}
+
+.letterhead-left .tagline {
+    font-size: 13px;
+    color: #6FA898;
+    font-weight: 500;
+}
+
+.letterhead-right {
+    text-align: right;
+    font-size: 12px;
+    color: #3A6055;
+}
+
+.letterhead-right .company {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.letterhead-right .address, 
+.letterhead-right .contact {
+    margin-bottom: 2px;
+}
+
+/* Main Content */
+.content {
+    font-size: 14px;
+    color: #050F0C;
+}
+
+.content h1, 
+.content h2, 
+.content h3, 
+.content h4, 
+.content h5, 
+.content h6 {
+    color: #050F0C;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    margin-top: 24px;
+    margin-bottom: 12px;
+}
+
+.content h1 {
+    font-size: 24px;
+    color: #408D7B;
+    border-bottom: 1px solid #1B3028;
+    padding-bottom: 8px;
+}
+
+.content h2 {
+    font-size: 20px;
+}
+
+.content h3 {
+    font-size: 18px;
+}
+
+.content p {
+    margin-bottom: 12px;
+}
+
+.content ul, 
+.content ol {
+    margin-left: 24px;
+    margin-bottom: 12px;
+}
+
+.content li {
+    margin-bottom: 6px;
+}
+
+.content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+}
+
+.content th, 
+.content td {
+    border: 1px solid #1B3028;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.content th {
+    background-color: #E6F3EF;
+    color: #408D7B;
+    font-weight: 700;
+}
+
+.content code {
+    font-family: 'IBM Plex Mono', monospace;
+    background-color: #F3F7F6;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Footer */
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 40px;
+    right: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #1B3028;
+    font-size: 11px;
+    color: #3A6055;
+}
+
+.footer-left {
+    font-weight: 500;
+}
