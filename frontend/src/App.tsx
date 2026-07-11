@@ -83,6 +83,7 @@ import { RegulatoryPage }           from './pages/public/RegulatoryPage';
 import { DevelopersPage }           from './pages/public/DevelopersPage';
 import { AfricaPricingPage } from './pages/public/AfricaPricingPage';
 import { NHSProcurementPage } from './pages/public/NHSProcurementPage';
+import { SpecializedAI } from './pages/public/products/SpecializedAI';
 
 // Layout & components
 import { TopNav }                    from './components/layout/TopNav';
@@ -322,7 +323,7 @@ export default function App() {
     const path = window.location.pathname;
     return (path === '/verify-email' || path.includes('verify-email')) ? p.get('token') : null;
   })();
-  const [publicPage,  setPublicPage]  = useState<'landing'|'login'|'register'|'onboarding'|'onboarding-specialist'|'solutions'|'research'|'regulatory'|'clinical-validation'|'clinical-evidence'|'ai-safety'|'governance'|'publications'|'pricing'|'africa-pricing'|'nhs-procurement'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'pathology-ai'|'mammography-ai'|'retinal-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'|'training'>('landing');
+  const [publicPage,   setPublicPage]   = useState<'landing'|'login'|'register'|'onboarding'|'onboarding-specialist'|'solutions'|'research'|'regulatory'|'clinical-validation'|'clinical-evidence'|'ai-safety'|'governance'|'publications'|'pricing'|'africa-pricing'|'nhs-procurement'|'specialized-ai'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'pathology-ai'|'mammography-ai'|'retinal-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'|'training'>('landing');
 
   // Universal navigation handler for public site
   const navigate = (page: string) => {
@@ -439,6 +440,7 @@ export default function App() {
         {publicPage === 'pricing'             && <PricingPage {...navProps} />}
         {publicPage === 'africa-pricing'      && <AfricaPricingPage {...navProps} />}
         {publicPage === 'nhs-procurement'    && <NHSProcurementPage {...navProps} />}
+        {publicPage === 'specialized-ai'     && <SpecializedAI {...navProps} />}
         {publicPage === 'solutions'           && <SolutionsPage {...navProps} />}
         {publicPage === 'about'              && <AboutPage {...navProps} />}
         {publicPage === 'contact'             && <ContactPage {...navProps} />}
@@ -475,7 +477,7 @@ export default function App() {
         {publicPage === 'api-docs'           && <ApiDocsPage {...navProps} />}
         {publicPage === 'developers'         && <DevelopersPage {...navProps} />}
         {/* Fallback for unmapped routes */}
-        {!['landing','login','register','onboarding','onboarding-specialist','pricing','africa-pricing','nhs-procurement','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','clinical-evidence','ai-safety','governance','publications','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','pathology-ai','mammography-ai','retinal-ai','regulatory','api-docs','developers','training'].includes(publicPage) && (
+        {!['landing','login','register','onboarding','onboarding-specialist','pricing','africa-pricing','nhs-procurement','specialized-ai','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','clinical-evidence','ai-safety','governance','publications','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','pathology-ai','mammography-ai','retinal-ai','regulatory','api-docs','developers','training'].includes(publicPage) && (
           <LandingPage onLogin={() => navigate('login')} onNavigate={navigate} />
         )}
         <CookieBanner onNavigate={navigate} />
