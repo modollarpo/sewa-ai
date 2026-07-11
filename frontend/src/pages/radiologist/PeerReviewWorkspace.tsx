@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../services/apiClient';
 import { Activity, Microscope, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
-import { ConfidenceIndicator, UncertaintyIndicator } from '../../design-system/components';
+import { ConfidenceIndicator, UncertaintyIndicator, StatusBanner } from '../../design-system/components';
 
 import { dashboardColors as C } from '../../design-system/tokens';
 
@@ -65,16 +65,7 @@ export function PeerReviewWorkspace() {
   return (
     <div style={{flex:1, display:'flex', background:C.bg1, overflow:'hidden', fontFamily:C.F}}>
       
-      {status && (
-        <div style={{ position:'fixed', top:80, right:20, zIndex:1000, padding:'10px 16px', borderRadius:10,
-          display:'flex', alignItems:'center', gap:8, fontSize:12, fontWeight:600,
-          background: status.type==='ok' ? `${C.normal}14` : `${C.critical}14`,
-          border: `1px solid ${status.type==='ok' ? C.normal : C.critical}30`,
-          color: status.type==='ok' ? C.normal : C.critical, fontFamily:C.F, boxShadow:'0 4px 20px rgba(0,0,0,0.4)' }}>
-          <span>{status.type==='ok' ? '✓' : '⚠'} {status.msg}</span>
-          <button onClick={() => setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer', fontSize:14 }}>✕</button>
-        </div>
-      )}
+      <StatusBanner status={status} onClose={() => setStatus(null)} fixed />
       
       {/* Sidebar Queue */}
       <div style={{width: 350, borderRight:`1px solid ${C.border}`, display:'flex', flexDirection:'column', background:C.bg2}}>

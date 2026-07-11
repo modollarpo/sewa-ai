@@ -191,4 +191,4 @@ export const dashboardColors = {
   FM: typography.fontMono,
   fontBase: typography.fontBase,
   fontMono: typography.fontMono,
-} as const;
+};

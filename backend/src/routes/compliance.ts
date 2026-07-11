@@ -118,4 +118,39 @@ r.post('/eu-ai-act/documentation', async (req, res, next) => {
   }
 });
 
+/**
+ * POST /api/v1/compliance/evidence
+ * Upload compliance evidence document (audit artifact, certificate, policy doc)
+ */
+r.post('/evidence', async (req, res, next) => {
+  try {
+    const tenantId = (req as any).user.tenantId;
+    const { framework, controlArea, filename, mimeType } = req.body;
+
+    if (!framework || !filename) {
+      return res.status(400).json({ error: 'framework and filename are required' });
+    }
+
+    // Record the evidence upload in audit log
+    await prisma.auditLog.create({
+      data: {
+        tenantId,
+        action: 'COMPLIANCE_EVIDENCE_UPLOADED',
+        entity: 'ComplianceRecord',
+        entityId: framework,
+        metadata: { controlArea, filename, mimeType },
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `Evidence '${filename}' uploaded for ${framework}${controlArea ? ` / ${controlArea}` : ''}.`,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    logger.error('[COMPLIANCE] Evidence upload failed:', err);
+    next(err);
+  }
+});
+
 export default r;

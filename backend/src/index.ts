@@ -100,6 +100,7 @@ import zkConsentRoutes from './routes/zkConsent';
 import populationHealthRoutes from './routes/populationHealth';
 import naturalLanguageQueryRoutes from './routes/naturalLanguageQuery';
 import longitudinalRoutes from './routes/longitudinal';
+import pipelineRoutes     from './routes/pipeline';
 import { sendAppointmentReminders } from './routes/appointments/index';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 import { dlq } from './services/dlqService';
@@ -277,6 +278,7 @@ app.use(`${v1}/zk-consent`,     zkConsentRoutes);
 app.use(`${v1}/population-health`,populationHealthRoutes);
 app.use(`${v1}/nlq`,            naturalLanguageQueryRoutes);
 app.use(`${v1}/longitudinal`,   longitudinalRoutes);
+app.use(`${v1}/pipeline`,       pipelineRoutes);
 app.use(`${v1}`,                roadmapRoutes);
 
 app.use(errorHandler);

@@ -7,20 +7,42 @@
 
 /* ── SEWA Design Tokens ──────────────────────────────────────── */
 :root {
-  --sewa-bg-0:    #05100D;
-  --sewa-bg-1:    #091A15;
-  --sewa-bg-2:    #0D201A;
-  --sewa-bg-3:    #122820;
-  --sewa-teal:    #408D7B;
-  --sewa-teal-2:  #52B09A;
-  --sewa-red:     #C94444;
-  --sewa-red-lt:  #E86060;
-  --sewa-amber:   #D47820;
-  --sewa-amber-lt:#F09A40;
-  --sewa-text-hi: #D6EDE8;
-  --sewa-text-md: #5E9488;
-  --sewa-text-lo: #2E5048;
-  --sewa-border:  #1A3028;
+  /* Backgrounds */
+  --sewa-bg-0:    #050F0C;
+  --sewa-bg-1:    #08160F;
+  --sewa-bg-2:    #0C1D17;
+  --sewa-bg-3:    #111F1A;
+  --sewa-bg-4:    #162821;
+  --sewa-bg-border:#1B3028;
+  /* Brand */
+  --sewa-brand:      #408D7B;
+  --sewa-brand-dk:   #2E6B5E;
+  --sewa-brand-lt:   #52B09A;
+  --sewa-brand-muted:#1A3028;
+  /* Text */
+  --sewa-text-hi:  #D0ECE6;
+  --sewa-text-md:  #6FA898;
+  --sewa-text-lo:  #3A6055;
+  /* Severity */
+  --sewa-critical:      #E03535;
+  --sewa-critical-bg:   #2A0A0A;
+  --sewa-critical-muted:#4A1515;
+  --sewa-urgent:    #E08A20;
+  --sewa-urgent-bg: #2A1800;
+  --sewa-normal:    #1DBF73;
+  --sewa-normal-bg: #0A1F14;
+  /* Functional */
+  --sewa-info:      #2A6EF2;
+  --sewa-info-bg:   #0A1530;
+  --sewa-warning:   #FFB74D;
+  --sewa-warning-bg:#1F1200;
+  /* Legacy aliases (used by old component inline styles) */
+  --sewa-teal:    var(--sewa-brand);
+  --sewa-teal-2:  var(--sewa-brand-lt);
+  --sewa-red:     var(--sewa-critical);
+  --sewa-red-lt:  var(--sewa-critical);
+  --sewa-amber:   var(--sewa-urgent);
+  --sewa-amber-lt:var(--sewa-warning);
 }
 
 /* ── Base ─────────────────────────────────────────────────────── */
@@ -43,7 +65,7 @@ body {
 /* ── Scrollbars ───────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--sewa-bg-1); }
-::-webkit-scrollbar-thumb { background: var(--sewa-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--sewa-bg-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--sewa-text-lo); }
 
 /* ── Typography ──────────────────────────────────────────────── */
@@ -54,7 +76,7 @@ code, pre, .font-mono { font-family: 'IBM Plex Mono', 'SF Mono', 'Fira Code', 'R
 /* ── Form elements ────────────────────────────────────────────── */
 input, textarea, select {
   background-color: var(--sewa-bg-2);
-  border: 1px solid var(--sewa-border);
+  border: 1px solid var(--sewa-bg-border);
   border-radius: 8px;
   color: var(--sewa-text-hi);
   padding: 10px 12px;
@@ -63,7 +85,7 @@ input, textarea, select {
   outline: none;
 }
 input:focus, textarea:focus, select:focus {
-  border-color: var(--sewa-teal);
+  border-color: var(--sewa-brand);
   box-shadow: 0 0 0 2px rgba(64, 141, 123, 0.15);
 }
 input::placeholder, textarea::placeholder { color: var(--sewa-text-lo); }
@@ -83,28 +105,28 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   .sewa-card {
     @apply rounded-2xl border p-5;
     background-color: var(--sewa-bg-1);
-    border-color: var(--sewa-border);
+    border-color: var(--sewa-bg-border);
   }
   .sewa-btn-primary {
     @apply rounded-xl px-5 py-3 font-bold text-white text-sm;
-    background-color: var(--sewa-teal);
+    background-color: var(--sewa-brand);
   }
-  .sewa-btn-primary:hover { background-color: var(--sewa-teal-2); }
+  .sewa-btn-primary:hover { background-color: var(--sewa-brand-lt); }
 
   .sewa-btn-ghost {
     @apply rounded-xl px-5 py-3 font-bold text-sm border;
     color: var(--sewa-text-md);
-    border-color: var(--sewa-border);
+    border-color: var(--sewa-bg-border);
     background: transparent;
   }
   .sewa-label {
     @apply text-xs font-bold tracking-widest uppercase;
     color: var(--sewa-text-lo);
-    font-family: 'SF Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
   }
-  .urgency-critical { color: var(--sewa-red-lt); }
-  .urgency-urgent   { color: var(--sewa-amber-lt); }
-  .urgency-normal   { color: var(--sewa-teal-2); }
+  .urgency-critical { color: var(--sewa-critical); }
+  .urgency-urgent   { color: var(--sewa-urgent); }
+  .urgency-normal   { color: var(--sewa-normal); }
 }
 
 /* ── Animations ──────────────────────────────────────────────── */
@@ -152,7 +174,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   position: absolute;
   inset: -4px;
   border-radius: inherit;
-  border: 2px solid var(--sewa-red);
+  border: 2px solid var(--sewa-critical);
   animation: pulse-dot 1.5s ease-in-out infinite;
   pointer-events: none;
 }

@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
+import { idempotent } from '../middleware/idempotency';
 import { prisma } from '../config/database';
 import { AppError } from '../utils/AppError';
 
@@ -10,7 +11,7 @@ const router = Router();
  * Receives batched local scans from an Edge Node (tablet/offline gateway)
  */
 router.post('/sync',
-  authenticate, authorize('admin', 'superadmin', 'technician'),
+  authenticate, authorize('admin', 'superadmin', 'technician'), idempotent,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { edgeDeviceId, scans } = req.body;

@@ -11,7 +11,8 @@ import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { VoiceDictation, type StructuredReport } from '../../components/ui/VoiceDictation';
 import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
 import { PeerReviewWorkspace } from './PeerReviewWorkspace';
-import { ConfidenceIndicator, UncertaintyIndicator, ReasoningTrace } from '../../design-system/components';
+import { ConfidenceIndicator, UncertaintyIndicator, ReasoningTrace, StatusBanner, PipelineStatusCard } from '../../design-system/components';
+import { usePipelineStatus } from '../../hooks/usePipelineStatus';
 
 import { dashboardColors as C } from '../../design-system/tokens';
 
@@ -291,12 +292,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
 
   return (
     <div className="p-4 flex flex-col gap-5 animate-fade-in">
-      {actionError && (
-        <div className="flex items-center justify-between p-3 rounded-xl bg-[#2A0A0A]/40 border border-[#E03535]/30 text-[#E03535] text-xs font-bold">
-          <span>⚠ {actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-[#E03535] hover:text-white">✕</button>
-        </div>
-      )}
+      <StatusBanner status={actionError ? { msg: actionError, type: 'err' } : null} onClose={() => setActionError(null)} />
       {/* Finding Card */}
       <div className={`p-4 rounded-xl border transition-all duration-300 ${
         ai.urgency === 'CRITICAL' ? 'bg-[#2A0A0A]/40 border-[#E03535]/30' : 'bg-[#111F1A]/40 border-[#1B3028]'
@@ -603,7 +599,7 @@ function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, 
           originalText: original,
           correctedText: text,
           source
-        }).catch((e: unknown) => console.warn('[ACI Feedback] non-critical:', e));
+        }).catch(() => { /* ACI feedback non-critical */ });
       }
       originalAITextRef.current = null;
 
@@ -741,6 +737,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
   const [pendingOpinions, setPendingOpinions] = useState<any[]>([]);
+  const { pipeline } = usePipelineStatus(selected?.id || null);
 
   const fetchPendingOpinions = async () => {
     try {
@@ -806,17 +803,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
   if (isMobile) {
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
-        {status && (
-          <div style={{ 
-            padding:'10px 16px', background: status.type==='ok'?C.normalBg:C.critBg, 
-            borderBottom:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
-            display:'flex', justifyContent:'space-between', alignItems:'center',
-            color: status.type==='ok'?C.normal:C.critical, fontSize:11, fontWeight:600
-          }}>
-            <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
-            <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
-          </div>
-        )}
+        <StatusBanner status={status} onClose={() => setStatus(null)} />
         <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
           {tab === 'worklist' && (
             <div style={{ flex:1, display:'flex', flexDirection:'column', overflowY:'auto' }}>
@@ -871,18 +858,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
 
   return (
     <div className="flex flex-col h-screen bg-[#05100D] overflow-hidden font-sans text-[#D0ECE6]">
-      {/* Global Status Bar */}
-      {status && (
-        <div className={`px-5 py-2 flex justify-between items-center text-xs font-bold animate-fade-in ${
-          status.type === 'ok' ? 'bg-[#0A1F14] text-[#1DBF73] border-b border-[#1DBF73]/30' : 'bg-[#2A0A0A] text-[#E03535] border-b border-[#E03535]/30'
-        }`}>
-          <span className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${status.type === 'ok' ? 'bg-[#1DBF73] shadow-[0_0_8px_#1DBF73]' : 'bg-[#E03535] shadow-[0_0_8px_#E03535]'}`} />
-            {status.msg}
-          </span>
-          <button onClick={() => setStatus(null)} className="hover:opacity-70 transition-opacity">✕</button>
-        </div>
-      )}
+      <StatusBanner status={status} onClose={() => setStatus(null)} />
 
       {/* Main PACS Workspace */}
       <div className="flex flex-1 overflow-hidden">
@@ -1101,6 +1077,20 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
                   </div>
                   <AIResultsPanel scan={selected} onRequestVLM={handleRequestVLM} />
                 </div>
+
+                {/* Pipeline status (compact) */}
+                {pipeline && (
+                  <div className="px-3 py-2 border-b border-[#1B3028] bg-[#0C1D17]/50">
+                    <PipelineStatusCard
+                      stage={pipeline.stage}
+                      elapsedMs={pipeline.elapsedMs}
+                      stageTimings={pipeline.stageTimings}
+                      qualityFlags={pipeline.qualityFlags}
+                      errorMessage={pipeline.errorMessage}
+                      compact
+                    />
+                  </div>
+                )}
 
                 {/* Reporting section */}
                 <div className="flex-[0_0_55%] flex flex-col min-h-0 bg-[#050F0C]">

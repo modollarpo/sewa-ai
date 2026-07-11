@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
+import { StatusBanner } from '../../design-system/components';
 
 const C = {
   bg0:'#050F0C',bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',
@@ -233,17 +234,7 @@ export function PartnerPortalPage({ onNavigate }: { onNavigate:(p:string)=>void 
       {/* Data Room Portal */}
       {step === 'portal' && (
         <div style={{ maxWidth:1100, margin:'0 auto', padding:'100px 24px 80px' }}>
-          {status && (
-            <div style={{ 
-              padding:'12px 20px', background: status.type==='ok'?`${C.normal}10`:`${C.critical}10`, 
-              border:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
-              borderRadius:12, marginBottom:32, display:'flex', justifyContent:'space-between', alignItems:'center',
-              color: status.type==='ok'?C.normal:C.critical, fontSize:13, fontWeight:600
-            }}>
-              <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
-              <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer' }}>✕</button>
-            </div>
-          )}
+          <StatusBanner status={status} onClose={() => setStatus(null)} />
           {/* Portal header */}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:48 }}>
             <div>

@@ -299,7 +299,7 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
                     {[
                     { role: 'Superadmin', email: 'superadmin@sewaxai.health' },
                     { role: 'Radiologist', email: 'sarah.chen@royallondon.nhs.uk' },
-                    { role: 'Patient', email: 'patient.smith@example.com' }
+                    { role: 'Patient', email: 'patient.smith@nhs.uk' }
                   ].map(acc => (
                     <button
                       key={acc.email}

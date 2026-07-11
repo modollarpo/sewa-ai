@@ -199,7 +199,7 @@ r.post('/subscription/cancel',
 
 // ── GET /history — payment history ───────────────────────────
 r.get('/history',
-  authorize('admin', 'superadmin'),
+  authorize('admin', 'superadmin', 'patient'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page = '1', limit = '20' } = req.query as Record<string, string>;

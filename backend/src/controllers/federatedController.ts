@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
+import axios from 'axios';
 
 export const getNodes = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -34,7 +35,6 @@ export const triggerRound = async (req: Request, res: Response, next: NextFuncti
 
     // Ping Python server to trigger training
     try {
-      const axios = require('axios');
       await axios.post('http://localhost:8004/training/start', {
         num_rounds: 1,
         min_fit_clients: 1,
@@ -60,7 +60,6 @@ export const triggerRound = async (req: Request, res: Response, next: NextFuncti
     // Asynchronously poll the Python server for completion
     const pollInterval = setInterval(async () => {
       try {
-        const axios = require('axios');
         const statusRes = await axios.get('http://localhost:8004/status');
         const data = statusRes.data;
 

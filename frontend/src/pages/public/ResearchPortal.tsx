@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
+import { StatusBanner } from '../../design-system/components';
 
 const C = {
   bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A',
@@ -108,12 +109,7 @@ export function ResearchPortal({ onNavigate }: { onNavigate: (p: string) => void
 
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 24px 100px' }}>
 
-        {status && (
-          <div style={{ padding: 16, background: status.type==='ok'?`${C.normal}10`:C.bg3, border: `1px solid ${status.type==='ok'?C.normal:C.critical}40`, borderRadius: 12, color: status.type==='ok'?C.normal:C.critical, fontSize: 14, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>{status.msg}</span>
-            <button onClick={() => setStatus(null)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>✕</button>
-          </div>
-        )}
+        <StatusBanner status={status} onClose={() => setStatus(null)} />
         
         {/* PI Profile */}
         <div style={{ 

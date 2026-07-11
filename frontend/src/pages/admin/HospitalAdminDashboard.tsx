@@ -6,6 +6,7 @@ import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Skeleton, StatSkeleton } from '../../components/ui/Skeleton';
 import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
+import { StatusBanner } from '../../design-system/components';
 import { dashboardColors as C } from '../../design-system/tokens';
 
 function StatusDot({ status }:{ status:string }) {
@@ -112,16 +113,7 @@ export function HospitalAdminDashboard() {
   return (
     <div className="min-h-screen bg-[#05100D] p-4 lg:p-10 font-sans text-[#D0ECE6] animate-fade-in">
       
-      {/* Global Toast Notification */}
-      {status && (
-        <div className={`fixed top-6 right-6 z-[1000] px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-xl animate-slide-right flex items-center gap-4 ${
-          status.type === 'ok' ? 'bg-[#0A1F14]/90 border-[#1DBF73]/30 text-[#1DBF73]' : 'bg-[#2A0A0A]/90 border-[#E03535]/30 text-[#E03535]'
-        }`}>
-          <span className="text-lg">{status.type === 'ok' ? '✓' : '⚠'}</span>
-          <span className="text-sm font-bold">{status.msg}</span>
-          <button onClick={() => setStatus(null)} className="ml-4 opacity-50 hover:opacity-100 transition-opacity">✕</button>
-        </div>
-      )}
+      <StatusBanner status={status} onClose={() => setStatus(null)} fixed />
 
       {/* Hero Header Section */}
       <header className={`${isMobile ? 'flex-col items-start gap-4' : 'flex-row items-center justify-between'} flex gap-6 mb-10`}>

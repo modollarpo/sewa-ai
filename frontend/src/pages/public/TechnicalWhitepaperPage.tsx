@@ -42,7 +42,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'whitepaper' })
       });
-    } catch (e) { console.error('Lead capture failed'); }
+    } catch { /* Lead capture failed — non-critical */ }
     setTimeout(() => setEmailGate(false), 800);
   };
 

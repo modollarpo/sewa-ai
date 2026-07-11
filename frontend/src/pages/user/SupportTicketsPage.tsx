@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import { apiClient, getFeedback } from '../../services/apiClient';
 import { FeedbackModal } from '../../components/shared/FeedbackModal';
 
+import { StatusBanner } from '../../design-system/components';
 import { dashboardColors as C } from '../../design-system/tokens';
 
 const CATEGORIES = ['billing','technical','clinical','general','feature_request'];
@@ -121,15 +122,7 @@ export function SupportTicketsPage() {
           </div>
         </div>
 
-        {status && (
-          <div style={{ padding:'10px 16px', marginBottom:16, borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center',
-            background: status.type==='ok' ? `${C.normal}14` : `${C.critical}14`,
-            border: `1px solid ${status.type==='ok' ? C.normal : C.critical}30`,
-            color: status.type==='ok' ? C.normal : C.critical, fontSize:12, fontWeight:600, fontFamily:C.F }}>
-            <span>{status.type==='ok' ? '✓' : '⚠'} {status.msg}</span>
-            <button onClick={() => setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer', fontSize:14 }}>✕</button>
-          </div>
-        )}
+        <StatusBanner status={status} onClose={() => setStatus(null)} />
 
         {/* Tabs */}
         <div style={{ display:'flex', gap:8, marginBottom:24, borderBottom:`1px solid ${C.border}`, paddingBottom:4 }}>

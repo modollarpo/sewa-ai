@@ -30,8 +30,8 @@ router.post('/evaluate/:scanId',
       if (!scan) throw new AppError('Scan not found', 404);
 
       let urgency = scan.urgency || 'ROUTINE';
-      let originalUrgency = urgency;
-      let reasons: string[] = [];
+      const originalUrgency = urgency;
+      const reasons: string[] = [];
       let contextFactor = 1.0;
 
       if (labs) {

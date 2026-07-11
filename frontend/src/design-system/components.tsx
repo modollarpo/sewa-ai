@@ -912,6 +912,50 @@ export function Toast({ type = 'info', title, message, onClose, autoClose }: Toa
 }
 
 // ─────────────────────────────────────────────────────────────
+// STATUS BANNER — replaces duplicated ok/err inline toasts
+// ─────────────────────────────────────────────────────────────
+export interface StatusBannerStatus { msg: string; type: 'ok' | 'err' }
+
+interface StatusBannerProps {
+  status: StatusBannerStatus | null;
+  onClose?: () => void;
+  fixed?: boolean;
+}
+
+export function StatusBanner({ status, onClose, fixed }: StatusBannerProps) {
+  if (!status) return null;
+  const ok = status.type === 'ok';
+  const bg   = ok ? colors.normalBg   : colors.criticalBg;
+  const brd  = ok ? '#0D2A1A'         : colors.criticalMuted;
+  const fg   = ok ? colors.normal     : colors.critical;
+  const icon = ok ? '✓' : '⚠';
+
+  const wrapperStyle: React.CSSProperties = fixed
+    ? { position: 'fixed', top: 80, right: 20, zIndex: 1000 }
+    : {};
+
+  return (
+    <div style={wrapperStyle}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+        padding: '10px 16px', borderRadius: radius.md,
+        background: bg, border: `1px solid ${brd}`, borderLeft: `3px solid ${fg}`,
+        color: fg, fontSize: 12, fontWeight: 600, fontFamily: typography.fontBase,
+        boxShadow: shadows.md, animation: 'sewa-toastIn 200ms ease',
+      }}>
+        <span>{icon} {status.msg}</span>
+        {onClose && (
+          <button onClick={onClose} aria-label="Dismiss" style={{
+            background: 'none', border: 'none', color: 'inherit', cursor: 'pointer',
+            padding: 0, lineHeight: 1, fontSize: 14,
+          }}>✕</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
 // AI PREDICTION BADGE
 // ─────────────────────────────────────────────────────────────
 export function AIPredictionBadge({ prediction, confidence, size = 'md' }: {
@@ -1616,10 +1660,496 @@ export function LongitudinalView({ data, title = 'Longitudinal Analysis', unit =
               color: colors.textHigh,
               fontFamily: typography.fontMono,
             }}>
-              {stat.value}
+               {stat.value}
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// PIPELINE STATUS CARD
+// Real-time AI pipeline progress indicator with stage dots
+// ─────────────────────────────────────────────────────────────
+const PIPELINE_STAGES = [
+  { key: 'preprocessing', label: 'Preprocessing' },
+  { key: 'triage_uncertainty', label: 'Triage' },
+  { key: 'vlm', label: 'VLM Report' },
+  { key: 'metacognition', label: 'Metacognition' },
+] as const;
+
+interface PipelineStatusCardProps {
+  stage: string | null;
+  elapsedMs: number;
+  stageTimings?: Record<string, number>;
+  qualityFlags?: string[];
+  errorMessage?: string | null;
+  compact?: boolean;
+}
+
+export function PipelineStatusCard({ stage, elapsedMs, stageTimings, qualityFlags, errorMessage, compact }: PipelineStatusCardProps) {
+  const activeIdx = PIPELINE_STAGES.findIndex(s => s.key === stage);
+  const isTerminal = stage === 'complete' || stage === 'failed' || stage === 'human_review';
+  const elapsed = elapsedMs > 0 ? `${(elapsedMs / 1000).toFixed(1)}s` : '—';
+
+  if (compact) {
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '8px',
+        padding: '6px 10px', borderRadius: radius.sm,
+        background: isTerminal && stage !== 'complete' ? colors.criticalBg : colors.bg3,
+        border: `1px solid ${colors.bgBorder}`,
+        fontFamily: typography.fontMono, fontSize: typography.size.xs,
+      }}>
+        <div style={{
+          width: '6px', height: '6px', borderRadius: '50%',
+          background: stage === 'complete' ? colors.normal
+            : stage === 'failed' ? colors.critical
+            : stage === 'human_review' ? colors.urgent
+            : colors.brand,
+          animation: !isTerminal ? 'pipeline-pulse 1.2s ease-in-out infinite' : undefined,
+        }} />
+        <span style={{ color: colors.textMed }}>
+          {stage ? PIPELINE_STAGES.find(s => s.key === stage)?.label ?? stage : 'Queued'}
+        </span>
+        <span style={{ color: colors.textLow }}>{elapsed}</span>
+        {qualityFlags && qualityFlags.length > 0 && (
+          <span style={{ color: colors.warning }}>{qualityFlags.length} flag{qualityFlags.length > 1 ? 's' : ''}</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      padding: '16px', borderRadius: radius.md,
+      background: colors.bg2, border: `1px solid ${colors.bgBorder}`,
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: '14px',
+      }}>
+        <span style={{
+          fontSize: typography.size.sm, fontWeight: typography.weight.semibold,
+          color: colors.textHigh, fontFamily: typography.fontBase,
+          textTransform: 'uppercase' as const, letterSpacing: '0.05em',
+        }}>
+          AI Pipeline
+        </span>
+        <span style={{
+          fontSize: typography.size.xs, fontFamily: typography.fontMono,
+          color: stage === 'complete' ? colors.normal
+            : stage === 'failed' ? colors.critical
+            : colors.textMed,
+        }}>
+          {stage === 'complete' ? 'Complete' : stage === 'failed' ? 'Failed' : elapsed}
+        </span>
+      </div>
+
+      {/* Stage dots */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '14px' }}>
+        {PIPELINE_STAGES.map((s, i) => {
+          const isActive = stage === s.key;
+          const isDone = activeIdx > i || stage === 'complete';
+          const isFailed = stage === 'failed' && i === activeIdx;
+          return (
+            <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
+              <div style={{
+                width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
+                background: isFailed ? colors.critical : isDone ? colors.normal
+                  : isActive ? colors.brand : colors.bg4,
+                border: `2px solid ${isActive ? colors.brand : isDone ? colors.normal : colors.bgBorder}`,
+                animation: isActive ? 'pipeline-pulse 1.2s ease-in-out infinite' : undefined,
+              }} />
+              {i < PIPELINE_STAGES.length - 1 && (
+                <div style={{
+                  flex: 1, height: '2px',
+                  background: isDone ? colors.normal : colors.bg4,
+                }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Stage timings */}
+      {stageTimings && Object.keys(stageTimings).length > 0 && (
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: '8px',
+          paddingTop: '12px', borderTop: `1px solid ${colors.bgBorder}`,
+        }}>
+          {Object.entries(stageTimings).filter(([, v]) => typeof v === 'number').map(([k, v]) => (
+            <div key={k} style={{
+              padding: '3px 8px', borderRadius: radius.sm,
+              background: colors.bg3, fontSize: typography.size.xs,
+              fontFamily: typography.fontMono, color: colors.textLow,
+            }}>
+              {k}: {v}ms
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Quality flags */}
+      {qualityFlags && qualityFlags.length > 0 && (
+        <div style={{
+          marginTop: '10px', padding: '8px 10px', borderRadius: radius.sm,
+          background: colors.warningBg, border: `1px solid ${colors.warning}20`,
+          fontSize: typography.size.xs, color: colors.warning,
+          fontFamily: typography.fontBase,
+        }}>
+          Quality flags: {qualityFlags.join(', ')}
+        </div>
+      )}
+
+      {/* Error */}
+      {errorMessage && (
+        <div style={{
+          marginTop: '10px', padding: '8px 10px', borderRadius: radius.sm,
+          background: colors.criticalBg, border: `1px solid ${colors.critical}20`,
+          fontSize: typography.size.xs, color: colors.critical,
+          fontFamily: typography.fontMono,
+        }}>
+          {errorMessage}
+        </div>
+      )}
+
+      <style>{`@keyframes pipeline-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// FINDING CARD
+// Individual AI finding display with severity, confidence, location
+// ─────────────────────────────────────────────────────────────
+export interface Finding {
+  condition: string;
+  probability: number;
+  location?: string;
+  size?: string;
+  urgency?: 'CRITICAL' | 'URGENT' | 'NORMAL';
+  confidence?: number;
+}
+
+interface FindingCardProps {
+  finding: Finding;
+  compact?: boolean;
+}
+
+export function FindingCard({ finding, compact }: FindingCardProps) {
+  const urgencyColor = finding.urgency === 'CRITICAL' ? colors.critical
+    : finding.urgency === 'URGENT' ? colors.urgent
+    : colors.normal;
+
+  if (compact) {
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '8px',
+        padding: '6px 10px', borderRadius: radius.sm,
+        background: colors.bg3, border: `1px solid ${colors.bgBorder}`,
+      }}>
+        <div style={{
+          width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0,
+          background: urgencyColor,
+        }} />
+        <span style={{
+          fontSize: typography.size.xs, color: colors.textHigh,
+          fontFamily: typography.fontBase, flex: 1,
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>
+          {finding.condition}
+        </span>
+        <span style={{
+          fontSize: typography.size.xs, fontFamily: typography.fontMono,
+          color: colors.textLow,
+        }}>
+          {(finding.probability * 100).toFixed(0)}%
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      padding: '14px', borderRadius: radius.md,
+      background: colors.bg2, border: `1px solid ${colors.bgBorder}`,
+      borderLeft: `3px solid ${urgencyColor}`,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+        <div>
+          <div style={{
+            fontSize: typography.size.base, fontWeight: typography.weight.semibold,
+            color: colors.textHigh, fontFamily: typography.fontBase,
+            marginBottom: '4px',
+          }}>
+            {finding.condition}
+          </div>
+          {finding.location && (
+            <div style={{
+              fontSize: typography.size.xs, color: colors.textMed,
+              fontFamily: typography.fontBase,
+            }}>
+              {finding.location}{finding.size ? ` · ${finding.size}` : ''}
+            </div>
+          )}
+        </div>
+        <div style={{
+          padding: '3px 8px', borderRadius: radius.sm,
+          background: `${urgencyColor}15`, border: `1px solid ${urgencyColor}30`,
+          fontSize: typography.size.xs, fontFamily: typography.fontMono,
+          color: urgencyColor, fontWeight: typography.weight.semibold,
+        }}>
+          {finding.urgency ?? 'NORMAL'}
+        </div>
+      </div>
+      <div style={{
+        display: 'flex', gap: '12px', fontSize: typography.size.xs,
+        fontFamily: typography.fontMono, color: colors.textLow,
+      }}>
+        <span>Probability: {((finding.confidence ?? finding.probability) * 100).toFixed(1)}%</span>
+        {finding.probability >= 0.8 && <span style={{ color: colors.normal }}>High confidence</span>}
+        {finding.probability < 0.5 && <span style={{ color: colors.warning }}>Low confidence — verify</span>}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// PRIOR COMPARISON
+// Side-by-side comparison of current vs prior scan findings
+// ─────────────────────────────────────────────────────────────
+interface PriorScanData {
+  scanId: string;
+  date: string;
+  findings: Finding[];
+  urgency: string;
+  confidence: number;
+}
+
+interface PriorComparisonProps {
+  current: {
+    findings: Finding[];
+    urgency: string;
+    confidence: number;
+  };
+  prior: PriorScanData | null;
+  compact?: boolean;
+}
+
+export function PriorComparison({ current, prior, compact }: PriorComparisonProps) {
+  if (!prior) {
+    return (
+      <div style={{
+        padding: compact ? '8px 10px' : '14px',
+        borderRadius: radius.md,
+        background: colors.bg2, border: `1px solid ${colors.bgBorder}`,
+      }}>
+        <div style={{
+          fontSize: typography.size.xs, color: colors.textLow,
+          fontFamily: typography.fontBase,
+        }}>
+          No prior scans available for comparison
+        </div>
+      </div>
+    );
+  }
+
+  const currentPrimary = current.findings[0];
+  const priorPrimary = prior.findings[0];
+  const isProgressive = currentPrimary && priorPrimary &&
+    currentPrimary.condition === priorPrimary.condition &&
+    currentPrimary.probability > priorPrimary.probability;
+  const isResolved = currentPrimary && priorPrimary &&
+    currentPrimary.condition !== priorPrimary.condition;
+
+  const trendColor = isProgressive ? colors.critical : isResolved ? colors.normal : colors.textLow;
+  const trendLabel = isProgressive ? 'Progressive' : isResolved ? 'Resolved' : 'Stable';
+
+  if (compact) {
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '8px',
+        padding: '6px 10px', borderRadius: radius.sm,
+        background: colors.bg3, border: `1px solid ${colors.bgBorder}`,
+      }}>
+        <span style={{ fontSize: typography.size.xs, color: colors.textLow, fontFamily: typography.fontBase }}>
+          vs {new Date(prior.date).toLocaleDateString()}:
+        </span>
+        <span style={{
+          fontSize: typography.size.xs, fontFamily: typography.fontMono,
+          color: trendColor, fontWeight: typography.weight.semibold,
+        }}>
+          {trendLabel}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      padding: '14px', borderRadius: radius.md,
+      background: colors.bg2, border: `1px solid ${colors.bgBorder}`,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+        <span style={{
+          fontSize: typography.size.sm, fontWeight: typography.weight.semibold,
+          color: colors.textHigh, fontFamily: typography.fontBase,
+        }}>
+          Longitudinal Comparison
+        </span>
+        <span style={{
+          padding: '3px 8px', borderRadius: radius.sm,
+          background: `${trendColor}15`, border: `1px solid ${trendColor}30`,
+          fontSize: typography.size.xs, fontFamily: typography.fontMono,
+          color: trendColor, fontWeight: typography.weight.semibold,
+        }}>
+          {trendLabel}
+        </span>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        {/* Current */}
+        <div style={{
+          padding: '10px', borderRadius: radius.sm,
+          background: colors.bg3, border: `1px solid ${colors.bgBorder}`,
+        }}>
+          <div style={{ fontSize: typography.size.xs, color: colors.textLow, fontFamily: typography.fontBase, marginBottom: '6px' }}>
+            Current ({current.urgency})
+          </div>
+          {currentPrimary && (
+            <div style={{ fontSize: typography.size.sm, color: colors.textHigh, fontFamily: typography.fontBase }}>
+              {currentPrimary.condition}
+              <span style={{ marginLeft: '6px', fontFamily: typography.fontMono, color: colors.textMed }}>
+                {(currentPrimary.probability * 100).toFixed(0)}%
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Prior */}
+        <div style={{
+          padding: '10px', borderRadius: radius.sm,
+          background: colors.bg3, border: `1px solid ${colors.bgBorder}`,
+        }}>
+          <div style={{ fontSize: typography.size.xs, color: colors.textLow, fontFamily: typography.fontBase, marginBottom: '6px' }}>
+            Prior ({prior.urgency}) · {new Date(prior.date).toLocaleDateString()}
+          </div>
+          {priorPrimary && (
+            <div style={{ fontSize: typography.size.sm, color: colors.textHigh, fontFamily: typography.fontBase }}>
+              {priorPrimary.condition}
+              <span style={{ marginLeft: '6px', fontFamily: typography.fontMono, color: colors.textMed }}>
+                {(priorPrimary.probability * 100).toFixed(0)}%
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// CRITICAL ALERT (INLINE)
+// Inline urgent finding banner for embedding in dashboards
+// ─────────────────────────────────────────────────────────────
+interface CriticalAlertProps {
+  finding: string;
+  urgency: 'CRITICAL' | 'URGENT';
+  confidence?: number;
+  scanId?: string;
+  timestamp?: string;
+  onDismiss?: () => void;
+  compact?: boolean;
+}
+
+export function CriticalAlert({ finding, urgency, confidence, scanId, timestamp, onDismiss, compact }: CriticalAlertProps) {
+  const isStroke = finding.toLowerCase().includes('stroke') || finding.toLowerCase().includes('lvo');
+  const accent = isStroke ? '#8B5CF6' : urgency === 'CRITICAL' ? colors.critical : colors.urgent;
+  const bg = isStroke ? '#1a0a30' : urgency === 'CRITICAL' ? colors.criticalBg : colors.urgentBg;
+
+  if (compact) {
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '8px',
+        padding: '6px 10px', borderRadius: radius.sm,
+        background: bg, border: `1px solid ${accent}30`,
+      }}>
+        <div style={{
+          width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0,
+          background: accent, animation: 'pipeline-pulse 1.2s ease-in-out infinite',
+        }} />
+        <span style={{
+          fontSize: typography.size.xs, fontFamily: typography.fontMono,
+          color: accent, fontWeight: typography.weight.semibold,
+        }}>
+          {isStroke ? 'STROKE' : urgency}
+        </span>
+        <span style={{
+          fontSize: typography.size.xs, color: colors.textHigh,
+          fontFamily: typography.fontBase, flex: 1,
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>
+          {finding}
+        </span>
+        {onDismiss && (
+          <button onClick={onDismiss} style={{
+            background: 'none', border: 'none', color: accent,
+            cursor: 'pointer', fontSize: '12px', padding: '2px',
+          }}>✕</button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      padding: '12px 14px', borderRadius: radius.md,
+      background: bg, border: `1px solid ${accent}30`,
+      borderLeft: `3px solid ${accent}`,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            width: '8px', height: '8px', borderRadius: '50%',
+            background: accent, animation: 'pipeline-pulse 1.2s ease-in-out infinite',
+          }} />
+          <span style={{
+            padding: '2px 8px', borderRadius: radius.sm,
+            background: `${accent}20`, fontSize: typography.size.xs,
+            fontFamily: typography.fontMono, color: accent,
+            fontWeight: typography.weight.semibold,
+          }}>
+            {isStroke ? 'STROKE CODE' : urgency}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {timestamp && (
+            <span style={{ fontSize: typography.size.xs, color: colors.textLow, fontFamily: typography.fontMono }}>
+              {new Date(timestamp).toLocaleTimeString()}
+            </span>
+          )}
+          {onDismiss && (
+            <button onClick={onDismiss} style={{
+              background: 'none', border: 'none', color: accent,
+              cursor: 'pointer', fontSize: '14px', padding: '2px',
+            }}>✕</button>
+          )}
+        </div>
+      </div>
+      <div style={{
+        fontSize: typography.size.base, fontWeight: typography.weight.semibold,
+        color: colors.textHigh, fontFamily: typography.fontBase,
+        marginBottom: '4px',
+      }}>
+        {finding}
+      </div>
+      <div style={{ display: 'flex', gap: '12px', fontSize: typography.size.xs, fontFamily: typography.fontMono, color: colors.textLow }}>
+        {confidence != null && <span>Confidence: {(confidence * 100).toFixed(0)}%</span>}
+        {scanId && <span>Scan: #{scanId.slice(-8)}</span>}
       </div>
     </div>
   );

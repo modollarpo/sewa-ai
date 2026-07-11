@@ -84,6 +84,32 @@ r.post('/', authorize('superadmin'), validate(TenantOnboardSchema), async (req, 
 });
 
 /**
+ * PATCH /api/v1/tenants/:id
+ * SuperAdmin: update any tenant (plan, status, supportedModalities, etc.)
+ */
+r.patch('/:id', authorize('superadmin'), async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { plan, status, name, region, currency } = req.body;
+
+    const updateData: Record<string, unknown> = {};
+    if (plan)     updateData.plan = plan;
+    if (status)   updateData.status = status;
+    if (name)     updateData.name = name;
+    if (region)   updateData.region = region;
+    if (currency) updateData.currency = currency;
+
+    const updated = await prisma.tenant.update({
+      where: { id },
+      data: updateData,
+      select: { id: true, name: true, slug: true, plan: true, status: true, region: true, currency: true },
+    });
+
+    return res.json({ message: 'Tenant updated.', tenant: updated });
+  } catch (err) { next(err); }
+});
+
+/**
  * POST /api/v1/tenants/integrations/pacs/echo
  * C1 fix: Tests DICOM C-ECHO reachability via TCP socket to the configured PACS host.
  */

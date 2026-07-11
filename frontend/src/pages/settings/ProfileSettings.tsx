@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { apiClient } from '../../services/apiClient';
+import { StatusBanner } from '../../design-system/components';
 
 export function ProfileSettings() {
   const { user } = useAuthStore();
@@ -125,14 +126,7 @@ export function ProfileSettings() {
         <p className="text-[#6FA898] mt-2 font-medium">Configure clinical identity, triage routing, and node security.</p>
       </div>
 
-      {status && (
-        <div className={`mb-8 p-4 rounded-2xl border flex items-center justify-between text-xs font-black uppercase tracking-widest ${
-          status.type === 'ok' ? 'bg-[#1DBF73]/10 border-[#1DBF73]/20 text-[#1DBF73]' : 'bg-[#E03535]/10 border-[#E03535]/20 text-[#E03535]'
-        }`}>
-          <span>{status.type === 'ok' ? '✓' : '⚠'} {status.msg}</span>
-          <button onClick={() => setStatus(null)} className="opacity-50 hover:opacity-100">✕</button>
-        </div>
-      )}
+      <StatusBanner status={status} onClose={() => setStatus(null)} />
 
       <div className="flex flex-col md:flex-row gap-12">
         

@@ -2,18 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../services/apiClient';
 import { Activity, Settings2, Bell, Zap, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
-const C = {
-  bg1:'#08160F',bg2:'#0C1D17',bg3:'#111F1A',bg4:'#162821',
-  brand:'#408D7B',brandLt:'#52B09A',
-  critical:'#E03535',critBg:'#2A0A0A',
-  urgent:'#E08A20',
-  normal:'#1DBF73',normalBg:'#0A1F14',
-  info:'#2A6EF2',
-  textHi:'#D0ECE6',textMd:'#6FA898',textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 export function ClinicalRulesDashboard() {
   const [rules, setRules] = useState<any[]>([]);
@@ -34,8 +23,8 @@ export function ClinicalRulesDashboard() {
       ]);
       setRules(rRes.data?.rules || []);
       setStrokeCodes(sRes.data?.codes || []);
-    } catch (e) {
-      console.error('Failed to load rules engine data', e);
+    } catch {
+      // Rules engine data load failed — UI shows empty state
     } finally {
       setLoading(false);
     }
@@ -45,8 +34,8 @@ export function ClinicalRulesDashboard() {
     try {
       await apiClient.post(`/stroke-codes/${codeId}/resolve`, { outcome: 'Resolved by Admin' });
       fetchData(); // refresh list
-    } catch (e) {
-      console.error('Failed to resolve code', e);
+    } catch {
+      // Stroke code resolve failed — non-critical
     }
   };
 

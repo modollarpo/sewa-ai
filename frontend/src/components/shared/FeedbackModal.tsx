@@ -2,14 +2,7 @@ import React, { useState } from 'react';
 import { createFeedback } from '../../services/apiClient';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 
-const C = {
-  bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A',
-  brand:'#408D7B', brandLt:'#52B09A',
-  textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 const FEEDBACK_TYPES = ['feature_request', 'bug_report', 'satisfaction', 'usability', 'general'];
 const CATEGORIES = ['radiologist_ui', 'ai_accuracy', 'mobile_app', 'billing', 'integration', 'other'];

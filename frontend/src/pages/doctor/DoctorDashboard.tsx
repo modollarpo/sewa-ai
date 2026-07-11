@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useDoctorData } from '../../hooks/useDashboardData';
 import { apiClient, downloadReport } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
-import { ConfidenceIndicator, UncertaintyIndicator, AIPredictionBadge, ReasoningTrace } from '../../design-system/components';
+import { ConfidenceIndicator, UncertaintyIndicator, AIPredictionBadge, ReasoningTrace, StatusBanner, PipelineStatusCard } from '../../design-system/components';
+import { usePipelineStatus } from '../../hooks/usePipelineStatus';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { dashboardColors as C } from '../../design-system/tokens';
 
@@ -260,6 +261,7 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
   
   const urgency = patient.urgency || patient.lastScan?.urgency || 'ROUTINE';
   const scanId = patient.scanId || patient.id;
+  const { pipeline } = usePipelineStatus(scanId || null);
 
   const handleAction = async (type: string, payload?: any) => {
     if (!scanId || busy) return;
@@ -309,11 +311,16 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
       </div>
 
       <div className="p-8 space-y-8 max-w-4xl">
-        {actionError && (
-          <div className="p-4 rounded-xl bg-[#2A0A0A] border border-[#E03535]/30 text-[#E03535] text-xs font-bold flex justify-between items-center animate-shake">
-            <span>⚠ {actionError}</span>
-            <button onClick={() => setActionError(null)}>✕</button>
-          </div>
+        <StatusBanner status={actionError ? { msg: actionError, type: 'err' } : null} onClose={() => setActionError(null)} />
+
+        {pipeline && (pipeline.stage !== 'complete' || pipeline.elapsedMs > 0) && (
+          <PipelineStatusCard
+            stage={pipeline.stage}
+            elapsedMs={pipeline.elapsedMs}
+            stageTimings={pipeline.stageTimings}
+            qualityFlags={pipeline.qualityFlags}
+            errorMessage={pipeline.errorMessage}
+          />
         )}
 
         {explanation && (

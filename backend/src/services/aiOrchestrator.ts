@@ -33,6 +33,75 @@ import { strokeCodeService, type StrokeCodeType } from './roadmap/strokeCodeServ
 
 const axios = createAxiosInstance();
 
+// ── Pipeline Stage Tracking ─────────────────────────────────────────────
+export type PipelineStage =
+  | 'preprocessing'
+  | 'triage_uncertainty'
+  | 'vlm'
+  | 'metacognition'
+  | 'human_review'
+  | 'complete'
+  | 'failed';
+
+const PIPELINE_TERMINAL_STAGES: readonly PipelineStage[] = ['complete', 'failed', 'human_review'];
+
+interface StageTimings {
+  triage?: number;
+  uncertainty?: number;
+  vlm?: number;
+  metacog?: number;
+  fhir?: number;
+  longitudinal?: number;
+  pathology?: number;
+  quality?: number;
+  total?: number;
+}
+
+interface PipelineMetadata {
+  stageTimings: StageTimings;
+  qualityFlags: string[];
+  retryCount: number;
+  backend: string;
+  consentBlocked?: boolean;
+}
+
+/**
+ * Emit real-time pipeline stage progress via Socket.IO and persist to Scan record.
+ * Every stage transition is both emitted to clients AND written to the database,
+ * so the pipeline status API can reconstruct the full timeline from DB alone.
+ */
+async function emitStageProgress(
+  scanId: string,
+  tenantId: string,
+  stage: PipelineStage,
+  meta: Partial<PipelineMetadata> = {},
+): Promise<void> {
+  const updateData: Record<string, unknown> = { pipelineStage: stage };
+
+  if (stage === 'preprocessing') {
+    updateData.pipelineStartedAt = new Date();
+    updateData.status = 'processing';
+  } else if (PIPELINE_TERMINAL_STAGES.includes(stage)) {
+    updateData.pipelineCompletedAt = new Date();
+    if (stage === 'complete') updateData.status = 'ai_complete';
+    if (stage === 'failed') updateData.status = 'failed';
+    if (stage === 'human_review') updateData.status = 'pending_review';
+  }
+
+  if (Object.keys(meta).length > 0) {
+    updateData.pipelineMetadata = meta as any;
+  }
+
+  await prisma.scan.update({ where: { id: scanId }, data: updateData }).catch(() => {});
+
+  io.to(`tenant:${tenantId}`).emit('pipeline:stage', {
+    scanId,
+    stage,
+    timestamp: new Date().toISOString(),
+    ...meta,
+  });
+}
+
 // ── Service URLs — CPU-only endpoints (same pods, just no GPU flag needed) ──
 const TRIAGE_URL        = config.AI_SERVICE_URL;
 const UNCERTAINTY_URL   = config.UNCERTAINTY_SERVICE_URL;
@@ -142,6 +211,11 @@ async function safePOST<T>(
 // ── Main pipeline ─────────────────────────────────────────────────────────
 export async function runAIPipeline(scanId: string, tenantId: string): Promise<void> {
   const pipelineStart = Date.now();
+  const stageTimings: StageTimings = {};
+  const qualityFlags: string[] = [];
+  const retryCount = 0;
+  let aiBackend = 'unknown';
+
   logger.info(`[AI Pipeline] ▶ ${scanId} | CPU-ONNX-INT8 pipeline`);
 
   try {
@@ -150,9 +224,16 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       include: { patient: { include: { user: true } }, tenant: true },
     });
 
+    // ── Stage 0: PREPROCESSING ──────────────────────────────────────────────
+    await emitStageProgress(scanId, tenantId, 'preprocessing');
+
+    // ── Quality assessment ──────────────────────────────────────────────────
+    // Check for obvious quality issues before running expensive AI inference
+    if (scan.fileSize && scan.fileSize < 1024) {
+      qualityFlags.push('SUSPICIOUSLY_SMALL_FILE');
+    }
+
     // ── GDPR / NHS DSPT: Consent Gate ─────────────────────────────────────
-    // AI processing is only permitted if the patient has given explicit consent.
-    // If consentAI is explicitly false, halt pipeline and flag for human review.
     if (scan.patient && scan.patient.consentAI === false) {
       logger.warn(`[AI Pipeline] CONSENT_BLOCKED: scan ${scanId} — patient has consentAI=false. Routing to human review.`);
       await prisma.scan.update({
@@ -167,7 +248,10 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       io.to(`tenant:${tenantId}`).emit('scan:review_required', {
         scanId, reason: 'consent_not_given', urgency: 'ROUTINE',
       });
-      return; // Exit pipeline — no AI processing
+      await emitStageProgress(scanId, tenantId, 'human_review', {
+        stageTimings, qualityFlags, retryCount, backend: aiBackend, consentBlocked: true,
+      });
+      return;
     }
     // ──────────────────────────────────────────────────────────────────────
 
@@ -319,6 +403,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     // Combined latency = max(triage_ms, uncertainty_ms) instead of their sum.
     // Budget: ~500-900ms for both (vs ~1400ms sequential)
     // ──────────────────────────────────────────────────────────────────────
+    await emitStageProgress(scanId, tenantId, 'triage_uncertainty');
     const stage1Start = Date.now();
 
     const [triage, uncertainty] = await Promise.all([
@@ -358,10 +443,14 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       `[Stage 1] ${scanId} | triage=${triage.inferenceMs}ms uncertainty=${uncertainty.inferenceMs}ms ` +
       `| parallel_wall=${stage1Ms}ms | backend=${triage.backend ?? 'unknown'}`
     );
+    stageTimings.triage = triage.inferenceMs;
+    stageTimings.uncertainty = uncertainty.inferenceMs;
+    aiBackend = triage.backend ?? 'unknown';
 
     // ──────────────────────────────────────────────────────────────────────
     // STAGE 2: VLM Report — template-based on CPU, ~30ms
     // ──────────────────────────────────────────────────────────────────────
+    await emitStageProgress(scanId, tenantId, 'vlm');
     const reportLanguage = ((scan.tenant as any)?.reportLanguage ?? 'en') as SupportedLanguage;
     const vlmSystemPrompt = buildVLMSystemPrompt(reportLanguage);
     const localizedUrgency = translateUrgency(triage.urgency, reportLanguage);
@@ -390,10 +479,12 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       VLM_TIMEOUT,
     );
     logger.info(`[VLM] ${scanId}: report in ${vlm.inferenceMs}ms`);
+    stageTimings.vlm = vlm.inferenceMs;
 
     // ──────────────────────────────────────────────────────────────────────
     // STAGE 3: Metacognition — rule-based, ~50ms on CPU (pure Python, no model)
     // ──────────────────────────────────────────────────────────────────────
+    await emitStageProgress(scanId, tenantId, 'metacognition');
     const metacog = await safePOST<MetacognitionResult>(
       `${METACOGNITION_URL}/metacognition/evaluate`,
       {
@@ -417,6 +508,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       `[Metacognition] ${scanId}: safe_to_alert=${metacog.layer9_safe_to_alert} ` +
       `hallucination_risk=${metacog.layer8_hallucination_risk.toFixed(3)} ms=${metacog.inferenceMs}`
     );
+    stageTimings.metacog = metacog.inferenceMs;
 
     const doorToAlertMs = Date.now() - pipelineStart;
 
@@ -525,16 +617,30 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       });
     }
 
+    stageTimings.total = Date.now() - pipelineStart;
+    const terminalStage: PipelineStage = !metacog.layer9_safe_to_alert || uncertainty.highUncertaintyFlag
+      ? 'human_review'
+      : 'complete';
+    await emitStageProgress(scanId, tenantId, terminalStage, {
+      stageTimings,
+      qualityFlags,
+      retryCount,
+      backend: aiBackend,
+    });
+
     logger.info(
       `[AI Pipeline] ✓ ${scanId} | door-to-alert=${doorToAlertMs}ms | ` +
-      `stage1=${stage1Ms}ms | backend=${triage.backend ?? 'unknown'}`
+      `stage1=${stage1Ms}ms | backend=${aiBackend} | total=${stageTimings.total}ms`
     );
 
   } catch (err: any) {
     logger.error(`[AI Pipeline] ✗ ${scanId} FAILED: ${err.message}`, { stack: err.stack });
-    await prisma.scan.update({
-      where: { id: scanId },
-      data: { status: 'failed', errorMessage: err.message },
+    stageTimings.total = Date.now() - pipelineStart;
+    await emitStageProgress(scanId, tenantId, 'failed', {
+      stageTimings,
+      qualityFlags,
+      retryCount,
+      backend: aiBackend,
     }).catch(() => {});
     // BG1/BG2: Push to DLQ for automatic retry with exponential backoff
     await dlq.enqueue(scanId, tenantId, err.message, 0).catch(() => {});

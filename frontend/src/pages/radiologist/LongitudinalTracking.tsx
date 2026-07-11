@@ -2,17 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../services/apiClient';
 
-const C = {
-  bg1: '#08160F', bg2: '#0C1D17', bg3: '#111F1A',
-  brand: '#408D7B', brandLt: '#52B09A',
-  normal: '#1DBF73', normalBg: '#0A1F14',
-  urgent: '#E08A20', urgBg: '#2A1800',
-  critical: '#E03535', critBg: '#2A0A0A',
-  textHi: '#D0ECE6', textMd: '#6FA898', textLo: '#3A6055',
-  border: '#1B3028',
-  F: "'IBM Plex Sans',system-ui,sans-serif",
-  FM: "'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 interface Scan {
   id: string;
@@ -45,7 +35,7 @@ export function LongitudinalTracking({ onSelectScan }: { onSelectScan?: (scanId:
         }
       });
       setPatients(Array.from(uniquePatients.entries()).map(([id, name]) => ({ id, name })));
-    }).catch(console.error);
+    }).catch(() => { /* patient list unavailable */ });
   }, []);
 
   const fetchScans = async (patientId: string) => {
@@ -53,8 +43,8 @@ export function LongitudinalTracking({ onSelectScan }: { onSelectScan?: (scanId:
       setLoading(true);
       const res = await apiClient.get(`/longitudinal/patient/${patientId}`);
       setScans(res.data);
-    } catch (e) {
-      console.error('[LONGITUDINAL] Failed to load scans:', e);
+    } catch {
+      // Longitudinal scans load failed — UI shows empty state
     } finally {
       setLoading(false);
     }
@@ -70,8 +60,8 @@ export function LongitudinalTracking({ onSelectScan }: { onSelectScan?: (scanId:
       } else {
         setPriorScan(null);
       }
-    } catch (e) {
-      console.error('[LONGITUDINAL] Failed to load prior:', e);
+    } catch {
+      // Prior scan load failed — non-critical
     }
   };
 

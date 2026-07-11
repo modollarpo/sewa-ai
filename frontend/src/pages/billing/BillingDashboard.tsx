@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useBillingData } from '../../hooks/useDashboardData';
 import { useAuthStore } from '../../store/authStore';
 import { apiClient } from '../../services/apiClient';
+import { StatusBanner } from '../../design-system/components';
 
 const PLANS: Record<string, {
   label:string; price:string; currency:string; period:string;
@@ -122,14 +123,7 @@ export function BillingDashboard() {
       <main className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin">
         <div className="max-w-6xl mx-auto space-y-8">
           
-          {status && (
-            <div className={`p-4 rounded-2xl border flex items-center justify-between text-xs font-black uppercase tracking-widest animate-fade-in ${
-              status.type === 'ok' ? 'bg-[#1DBF73]/10 border-[#1DBF73]/20 text-[#1DBF73]' : 'bg-[#E03535]/10 border-[#E03535]/20 text-[#E03535]'
-            }`}>
-              <span>{status.type === 'ok' ? '✓' : '⚠'} {status.msg}</span>
-              <button onClick={() => setStatus(null)}>✕</button>
-            </div>
-          )}
+          <StatusBanner status={status} onClose={() => setStatus(null)} />
 
           {/* Plan Banner */}
           <div className={`${isMobile ? 'p-6' : 'p-8'} bg-[#408D7B]/5 border border-[#408D7B]/30 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden shadow-2xl`}>

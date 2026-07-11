@@ -236,6 +236,16 @@ model Scan {
   requiresHumanReview Boolean @default(false)
   humanReviewReason   String? // METACOGNITION_FAIL | HIGH_UNCERTAINTY | MANUAL
 
+  // Pipeline orchestration (Phase 1 of architectural redesign)
+  pipelineStage      String?  // preprocessing | triage_uncertainty | vlm | metacognition | human_review | complete | failed
+  pipelineStartedAt  DateTime? // set when scan enters the AI pipeline
+  pipelineCompletedAt DateTime? // set when pipeline reaches terminal state
+  pipelineMetadata   Json?    // { stageTimings: { triage: 320, vlm: 28, metacog: 15 }, qualityFlags: [], retryCount: 0 }
+
+  // Image quality assessment (preprocessing stage)
+  qualityScore  Float?  // 0-1 image quality score (motion, noise, positioning)
+  qualityFlags  String[] // MOTION_ARTIFACT | NOISE | LOW_DOSE | POOR_POSITIONING | OUT_OF_FIELD
+
   aiResult                AIResult?
   report                  Report?
   annotations             Annotation[]
@@ -250,6 +260,7 @@ model Scan {
   @@index([patientId])
   @@index([urgency])
   @@index([requiresHumanReview])
+  @@index([pipelineStage])
 }
 
 // ── AI RESULTS (Triage Engine output) ────────────────────────
@@ -288,6 +299,7 @@ model AIResult {
   hallucinationRisk   Float?
   selfEvalNotes       String?
   icd10Codes          String? // Feature 17: Billing/Coding integration
+  metacognitionScore  Float?  // 0-1 composite metacognition quality score
 
   // Raw Output & Metadata
   rawJson             Json? // Full inference payload from AI provider

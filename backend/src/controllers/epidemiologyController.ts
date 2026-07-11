@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { config } from '../config/env';
+import axios from 'axios';
 
 export const getHeatmaps = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -34,8 +35,6 @@ export const getAnomalies = async (req: Request, res: Response, next: NextFuncti
     
     let anomalies = [];
     try {
-      // Import axios if not at top of file, we can require it locally to be safe, or assume it's imported (wait, let's just require it)
-      const axios = require('axios');
       const gptRes = await axios.post(gptUrl, {
         messages: [
           { role: 'system', content: 'You are an AI Epidemiologist. Analyze the following disease case counts over the last 7 days. Return ONLY a JSON array of anomaly objects formatted strictly as: [{"region":"string", "disease":"string", "baselineWeeklyExpected":number, "actualCount":number, "percentageIncrease":number, "status":"warning"|"critical"}]. Only include regions with significant outbreaks (anomalies). Do not output markdown code blocks, just raw JSON.' },

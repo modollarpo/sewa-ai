@@ -3,12 +3,7 @@
 // © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
-const C = {
-  bg0: '#050F0C', bg1: '#08160F', bg2: '#0C1D17',
-  critical: '#E03535', brand: '#408D7B', brandLt: '#52B09A',
-  textHi: '#D0ECE6', textMd: '#6FA898', textLo: '#3A6055',
-  border: '#1B3028', F: "'IBM Plex Sans',system-ui,sans-serif",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 interface Props { children: ReactNode; name?: string; }
 interface State { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null; }

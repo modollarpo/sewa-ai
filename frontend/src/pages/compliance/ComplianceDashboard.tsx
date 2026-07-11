@@ -5,6 +5,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useComplianceData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
+import { StatusBanner } from '../../design-system/components';
 import { dashboardColors as C } from '../../design-system/tokens';
 
 interface Framework {
@@ -300,17 +301,7 @@ export function ComplianceDashboard() {
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
 
         {/* Status Notification */}
-        {status && (
-          <div style={{ 
-            padding:'10px 20px', background: status.type==='ok'?C.normalBg:C.critBg, 
-            borderBottom:`1px solid ${status.type==='ok'?C.normal:C.critical}40`,
-            display:'flex', justifyContent:'space-between', alignItems:'center',
-            color: status.type==='ok'?C.normal:C.critical, fontSize:12, fontWeight:600
-          }}>
-            <span>{status.type==='ok'?'✓':'⚠'} {status.msg}</span>
-            <button onClick={()=>setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer', fontSize:16 }}>✕</button>
-          </div>
-        )}
+        <StatusBanner status={status} onClose={() => setStatus(null)} />
 
         {/* Framework header */}
         <div style={{ padding: isMobile ? '16px' : '16px 20px', borderBottom:`1px solid ${C.border}`, flexShrink:0 }}>

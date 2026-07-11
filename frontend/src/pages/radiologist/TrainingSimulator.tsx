@@ -4,15 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { apiClient } from '../../services/apiClient';
 
-const C = {
-  bg1: '#08160F', bg2: '#0C1D17', bg3: '#111F1A',
-  brand: '#408D7B', brandLt: '#52B09A',
-  normal: '#1DBF73', urgent: '#E08A20', critical: '#E03535',
-  textHi: '#D0ECE6', textMd: '#6FA898', textLo: '#3A6055',
-  border: '#1B3028',
-  F: "'IBM Plex Sans',system-ui,sans-serif",
-  FM: "'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from '../../design-system/tokens';
 
 interface Case {
   id: string;
@@ -122,8 +114,8 @@ export function TrainingSimulator() {
             <h3 style={{ fontSize: 16, color: C.textHi, margin: '0 0 16px' }}>What is your primary diagnosis?</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {currentCase.options.map(opt => {
-                let bgColor = C.bg3;
-                let borderColor = C.border;
+                let bgColor: string = C.bg3;
+                let borderColor: string = C.border;
                 if (showResult) {
                   if (opt === currentCase.groundTruth) {
                     bgColor = `${C.normal}20`;

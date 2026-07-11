@@ -41,6 +41,8 @@ import { ProfileSettings }         from './pages/settings/ProfileSettings';
 import { SupportTicketsPage }   from './pages/user/SupportTicketsPage';
 import { PatientProfile }            from './pages/patient/PatientProfile';
 import { RoadmapOrchestrator }       from './pages/admin/RoadmapOrchestrator';
+import { EuAiActPortal }             from './pages/admin/EuAiActPortal';
+import { LongitudinalTracking }      from './pages/radiologist/LongitudinalTracking';
 
 // Public pages
 import { LandingPage }               from './pages/public/LandingPage';
@@ -95,13 +97,7 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { socketService }             from './services/socketService';
 
 // ── Design tokens ─────────────────────────────────────────────
-const C = {
-  bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', bg3: '#111F1A',
-  brand:'#408D7B', normal:'#1DBF73',
-  textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055', border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
-};
+import { dashboardColors as C } from './design-system/tokens';
 
 // ── Sub-nav configs ────────────────────────────────────────────
 const ADMIN_NAV = [
@@ -116,6 +112,8 @@ const ADMIN_NAV = [
   { id:'onboarding',        labelKey:'onboarding' as TranslationKey,         icon:<Rocket size={16}/> },
   { id:'roadmap',           labelKey:'roadmap' as TranslationKey,            icon:<Map size={16}/> },
   { id:'advanced-orchestrator', labelKey:'advancedOrchestration' as TranslationKey, icon:<Network size={16}/> },
+  { id:'eu-ai-act', labelKey:'euAiAct' as TranslationKey, icon:<Lock size={16}/> },
+  { id:'longitudinal', labelKey:'longitudinalTracking' as TranslationKey, icon:<Activity size={16}/> },
 ] as const;
 
 const SUPER_NAV = [
@@ -548,6 +546,8 @@ export default function App() {
           {adminPage === 'onboarding'        && <ErrorBoundary name="Onboarding"><OnboardingWizard /></ErrorBoundary>}
           {adminPage === 'roadmap'           && <ErrorBoundary name="Roadmap"><RoadmapPage /></ErrorBoundary>}
           {adminPage === 'advanced-orchestrator' && <ErrorBoundary name="Advanced Orchestration"><RoadmapOrchestrator /></ErrorBoundary>}
+          {adminPage === 'eu-ai-act'            && <ErrorBoundary name="EU AI Act Portal"><EuAiActPortal /></ErrorBoundary>}
+          {adminPage === 'longitudinal'          && <ErrorBoundary name="Longitudinal Tracking"><LongitudinalTracking /></ErrorBoundary>}
         </div>
       </div>
     );

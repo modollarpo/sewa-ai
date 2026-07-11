@@ -69,34 +69,6 @@ router.post('/stroke-codes/:codeId/resolve',
 );
 
 // ── Population Health ────────────────────────────────────────
-/** GET /api/v1/population-health/surveillance */
-router.get('/population-health/surveillance',
-  authenticate, authorize('admin', 'superadmin'),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { region, granularity = 'week', startDate, endDate } = req.query as any;
-      const series = await populationHealthService.getDiseaseSurveillance({
-        region,
-        granularity,
-        startDate: startDate ? new Date(startDate) : undefined,
-        endDate:   endDate   ? new Date(endDate)   : undefined,
-      });
-      res.json({ series, count: series.length });
-    } catch (err) { next(err); }
-  }
-);
-
-/** GET /api/v1/population-health/outbreaks */
-router.get('/population-health/outbreaks',
-  authenticate, authorize('admin', 'superadmin'),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const signals = await populationHealthService.detectOutbreaks(req.query.region as string);
-      res.json({ signals, alerts: signals.filter(s => s.severity === 'alert').length });
-    } catch (err) { next(err); }
-  }
-);
-
 /** GET /api/v1/population-health/map/:condition */
 router.get('/population-health/map/:condition',
   authenticate, authorize('admin', 'superadmin'),
@@ -141,29 +113,6 @@ router.post('/referrals/search',
         aiResult ?? {},
       );
       res.json({ matches, total: matches.length });
-    } catch (err) { next(err); }
-  }
-);
-
-/** POST /api/v1/referrals — create a referral to a specialist */
-router.post('/referrals',
-  authenticate, authorize('radiologist', 'doctor'),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { scanId, specialistId, speciality, reason, priority = 'ROUTINE', allowCrossBorder = true, aiResult } = req.body;
-      const { tenantId, id: userId } = req.user!;
-      if (!scanId || !specialistId) throw new AppError('scanId and specialistId required', 400);
-
-      // Security Gap: verify scan belongs to this tenant
-      const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
-      if (!scan) throw new AppError('Scan not found in this institution', 404);
-
-      const result = await referralNetworkService.createReferral(
-        { scanId, speciality, reason, priority, allowCrossBorder, requestingUserId: userId, tenantId, aiSummary: aiResult?.primaryFinding ?? '' },
-        specialistId,
-        aiResult ?? {},
-      );
-      res.status(201).json(result);
     } catch (err) { next(err); }
   }
 );

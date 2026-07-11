@@ -256,7 +256,7 @@ export function useHospitalAdminData() {
 
   const { data: integRes, isLoading: integLoading } = useQuery({
     queryKey: ['hospital-integrations'],
-    queryFn: () => apiClient.get('/admin/integrations'),
+    queryFn: () => apiClient.get('/tenants/integrations'),
   });
 
   return {
