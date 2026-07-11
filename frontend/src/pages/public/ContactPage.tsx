@@ -11,10 +11,10 @@ const C = {
 };
 
 const REGIONS_CONTACT = [
-  { region:'🇬🇧 United Kingdom', email:'uk@sewaxai.health', phone:'+44 20 7946 0000', team:'NHS & UK Enterprise', hours:'Mon–Fri 08:00–18:00 GMT' },
-  { region:'🇪🇺 European Union', email:'eu@sewaxai.health',  phone:'+31 20 000 0000',  team:'EU MDR & Clinical Team',hours:'Mon–Fri 09:00–18:00 CET' },
-  { region:'🇺🇸 North America',  email:'us@sewaxai.health',  phone:'+1 212 000 0000',  team:'US Sales & FDA',        hours:'Mon–Fri 09:00–18:00 EST' },
-  { region:'🌍 Africa',          email:'africa@sewaxai.health',phone:'+234 1 000 0000',team:'Africa Programme',      hours:'Mon–Fri 08:00–17:00 WAT' },
+  { region:'🇬🇧 United Kingdom', email:'uk@sewaxai.health', phone:'+44 20 7946 0000', whatsapp:'+44 7700 900000', team:'NHS & UK Enterprise', hours:'Mon–Fri 08:00–18:00 GMT' },
+  { region:'🇪🇺 European Union', email:'eu@sewaxai.health',  phone:'+31 20 000 0000',  whatsapp:'+31 6 0000 0000', team:'EU MDR & Clinical Team', hours:'Mon–Fri 09:00–18:00 CET' },
+  { region:'🇺🇸 North America',  email:'us@sewaxai.health',  phone:'+1 212 000 0000',  whatsapp:'+1 212 000 0000', team:'US Sales & FDA', hours:'Mon–Fri 09:00–18:00 EST' },
+  { region:'🌍 Africa',          email:'africa@sewaxai.health', phone:'+234 1 000 0000', whatsapp:'+234 800 000 0000', team:'Africa Programme', hours:'Mon–Fri 08:00–17:00 WAT' },
 ];
 
 const INQUIRY_TYPES = [
@@ -44,7 +44,7 @@ export function ContactPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k: string, v: string | boolean) => setForm(f => ({ ...f, [k]: v }));
 
   const handleSubmit = async () => {
     if (!form.firstName || !form.email || !form.org || !form.consent) return;
@@ -59,7 +59,7 @@ export function ContactPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
           interest: { ...form }
         })
       });
-    } catch (e) { console.error('Contact lead capture failed'); }
+    } catch { /* Contact lead capture failed - non-blocking */ }
     setSubmitted(true);
     setSubmitting(false);
   };
@@ -134,7 +134,7 @@ export function ContactPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             {[['firstName','First name *'],['lastName','Last name']].map(([k,l]) => (
               <div key={k}>
                 <label style={lbl}>{l}</label>
-                <input value={(form as any)[k]} onChange={e => set(k, e.target.value)} style={inp} placeholder={k==='firstName'?'Sarah':'Chen'}/>
+                <input value={form[k as keyof typeof form] as string} onChange={e => set(k, e.target.value)} style={inp} placeholder={k==='firstName'?'Sarah':'Chen'}/>
               </div>
             ))}
           </div>
@@ -210,7 +210,8 @@ export function ContactPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
                 <div style={{ fontSize:13, fontWeight:700, color:C.textHi, marginBottom:4 }}>{r.region}</div>
                 <div style={{ fontSize:11, color:C.textLo, marginBottom:8 }}>{r.team} · {r.hours}</div>
                 <a href={`mailto:${r.email}`} style={{ display:'block', fontSize:12, color:C.brand, textDecoration:'none', marginBottom:2 }}>✉️ {r.email}</a>
-                <a href={`tel:${r.phone.replace(/ /g,'')}`} style={{ fontSize:12, color:C.textMd, textDecoration:'none' }}>📞 {r.phone}</a>
+                <a href={`tel:${r.phone.replace(/ /g,'')}`} style={{ display:'block', fontSize:12, color:C.textMd, textDecoration:'none', marginBottom:2 }}>📞 {r.phone}</a>
+                <a href={`https://wa.me/${r.whatsapp.replace(/[^0-9]/g,'')}`} target="_blank" rel="noopener noreferrer" style={{ display:'block', fontSize:12, color:C.normal, textDecoration:'none' }}>💬 WhatsApp</a>
               </div>
             ))}
           </div>

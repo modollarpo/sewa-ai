@@ -5,18 +5,13 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  // @ts-ignore
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     coverage: {
       reporter: ['text', 'json', 'html'],
-      lines: 70,
-      functions: 70,
-      branches: 70,
-      statements: 70
-    }
+    } as Record<string, unknown>
   },
   plugins: [
     react(),

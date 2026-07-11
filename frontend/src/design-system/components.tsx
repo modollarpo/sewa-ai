@@ -910,3 +910,362 @@ export function Toast({ type = 'info', title, message, onClose, autoClose }: Toa
     </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────
+// AI PREDICTION BADGE
+// ─────────────────────────────────────────────────────────────
+export function AIPredictionBadge({ prediction, confidence, size = 'md' }: {
+  prediction: string;
+  confidence: number;
+  size?: 'sm' | 'md' | 'lg';
+}) {
+  const pct = Math.round(confidence * 100);
+  const color = pct >= 85 ? colors.normal : pct >= 65 ? colors.warning : colors.critical;
+  const bgColor = pct >= 85 ? colors.normalBg : pct >= 65 ? colors.warningBg : colors.criticalBg;
+  const borderColor = pct >= 85 ? '#0D2A1A' : pct >= 65 ? '#2A1800' : colors.criticalMuted;
+  
+  const sizeStyles = {
+    sm: { padding: '2px 8px', fontSize: typography.size.xs },
+    md: { padding: '4px 12px', fontSize: typography.size.sm },
+    lg: { padding: '6px 16px', fontSize: typography.size.base },
+  };
+
+  return (
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: sizeStyles[size].padding,
+      borderRadius: radius.full,
+      fontSize: sizeStyles[size].fontSize,
+      fontWeight: typography.weight.semibold,
+      fontFamily: typography.fontBase,
+      background: bgColor,
+      color: color,
+      border: `1px solid ${borderColor}`,
+    }}>
+      <span style={{
+        width: '6px',
+        height: '6px',
+        borderRadius: '50%',
+        background: color,
+        boxShadow: `0 0 4px ${color}`,
+      }} />
+      {prediction}
+      <span style={{ 
+        fontSize: typography.size.xs,
+        fontFamily: typography.fontMono,
+        opacity: 0.8,
+      }}>
+        {pct}%
+      </span>
+    </span>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// UNCERTAINTY INDICATOR
+// ─────────────────────────────────────────────────────────────
+export function UncertaintyIndicator({ value, showLabel = true }: {
+  value: number;
+  showLabel?: boolean;
+}) {
+  const pct = Math.round(value * 100);
+  const level = pct >= 85 ? 'High' : pct >= 65 ? 'Moderate' : 'High Uncertainty';
+  const color = pct >= 85 ? colors.normal : pct >= 65 ? colors.warning : colors.critical;
+  const bgColor = pct >= 85 ? colors.normalBg : pct >= 65 ? colors.warningBg : colors.criticalBg;
+  const borderColor = pct >= 85 ? '#0D2A1A' : pct >= 65 ? '#2A1800' : colors.criticalMuted;
+  
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{
+        width: '32px',
+        height: '32px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: bgColor,
+        border: `2px solid ${borderColor}`,
+        boxShadow: `0 0 8px ${color}40`,
+      }}>
+        <span style={{
+          width: '12px',
+          height: '12px',
+          borderRadius: '50%',
+          background: color,
+          boxShadow: `0 0 6px ${color}`,
+        }} />
+      </div>
+      {showLabel && (
+        <div>
+          <div style={{
+            fontSize: typography.size.sm,
+            fontWeight: typography.weight.semibold,
+            color: colors.textHigh,
+            fontFamily: typography.fontBase,
+          }}>
+            {level}
+          </div>
+          <div style={{
+            fontSize: typography.size.xs,
+            color: colors.textLow,
+            fontFamily: typography.fontMono,
+          }}>
+            {pct}% confidence
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// CLINICAL CARD
+// ─────────────────────────────────────────────────────────────
+export function ClinicalCard({ 
+  title, 
+  patientId, 
+  urgency, 
+  confidence, 
+  findings, 
+  actions, 
+  children 
+}: {
+  title: string;
+  patientId?: string;
+  urgency?: string;
+  confidence?: number;
+  findings?: string[];
+  actions?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  const urgencyStyle = urgencyStyles[(urgency || 'ROUTINE').toUpperCase() as keyof typeof urgencyStyles] || urgencyStyles.ROUTINE;
+  
+  return (
+    <div style={{
+      background: colors.bg2,
+      border: `1px solid ${colors.bgBorder}`,
+      borderRadius: radius.xl,
+      padding: '20px',
+      boxShadow: shadows.sm,
+      transition: `all ${transitions.base}`,
+    }}>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        marginBottom: '16px',
+        paddingBottom: '12px',
+        borderBottom: `1px solid ${colors.bgBorder}`,
+      }}>
+        <div>
+          <h3 style={{
+            margin: 0,
+            fontSize: typography.size.lg,
+            fontWeight: typography.weight.semibold,
+            color: colors.textHigh,
+            fontFamily: typography.fontBase,
+          }}>
+            {title}
+          </h3>
+          {patientId && (
+            <div style={{
+              fontSize: typography.size.xs,
+              color: colors.textLow,
+              fontFamily: typography.fontMono,
+              marginTop: '4px',
+            }}>
+              ID: {patientId}
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {urgency && <UrgencyPill urgency={urgency} />}
+          {confidence !== undefined && <ConfidenceBar value={confidence} size="sm" />}
+        </div>
+      </div>
+      
+      {findings && findings.length > 0 && (
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{
+            fontSize: typography.size.xs,
+            fontWeight: typography.weight.semibold,
+            color: colors.textMed,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            marginBottom: '8px',
+          }}>
+            AI Findings
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {findings.map((finding, idx) => (
+              <div key={idx} style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px',
+                fontSize: typography.size.sm,
+                color: colors.textHigh,
+                lineHeight: typography.lineHeight.relaxed,
+              }}>
+                <span style={{ color: colors.brand, flexShrink: 0 }}>•</span>
+                {finding}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {children}
+      
+      {actions && (
+        <div style={{ 
+          marginTop: '16px', 
+          paddingTop: '12px',
+          borderTop: `1px solid ${colors.bgBorder}`,
+          display: 'flex',
+          gap: '8px',
+          flexWrap: 'wrap',
+        }}>
+          {actions}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// HEATMAP OVERLAY
+// ─────────────────────────────────────────────────────────────
+export function HeatmapOverlay({ 
+  data, 
+  width = 400, 
+  height = 300, 
+  opacity = 0.6 
+}: {
+  data: { x: number; y: number; intensity: number }[];
+  width?: number;
+  height?: number;
+  opacity?: number;
+}) {
+  const maxIntensity = Math.max(...data.map(d => d.intensity));
+  
+  return (
+    <div style={{
+      position: 'relative',
+      width: `${width}px`,
+      height: `${height}px`,
+      borderRadius: radius.md,
+      overflow: 'hidden',
+      background: colors.bg3,
+    }}>
+      <svg 
+        width={width} 
+        height={height} 
+        style={{ position: 'absolute', top: 0, left: 0 }}
+      >
+        <defs>
+          <radialGradient id="heatmapGradient">
+            <stop offset="0%" stopColor={colors.critical} stopOpacity={opacity} />
+            <stop offset="50%" stopColor={colors.warning} stopOpacity={opacity * 0.6} />
+            <stop offset="100%" stopColor={colors.normal} stopOpacity={0} />
+          </radialGradient>
+        </defs>
+        {data.map((point, idx) => {
+          const normalizedIntensity = point.intensity / maxIntensity;
+          const radius = 20 + normalizedIntensity * 40;
+          return (
+            <circle
+              key={idx}
+              cx={point.x}
+              cy={point.y}
+              r={radius}
+              fill="url(#heatmapGradient)"
+              opacity={normalizedIntensity}
+            />
+          );
+        })}
+      </svg>
+      <div style={{
+        position: 'absolute',
+        bottom: '8px',
+        right: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '4px 8px',
+        background: `${colors.bg0}CC`,
+        borderRadius: radius.sm,
+        fontSize: typography.size.xs,
+        color: colors.textLow,
+      }}>
+        <span>Low</span>
+        <div style={{
+          width: '40px',
+          height: '6px',
+          borderRadius: radius.full,
+          background: `linear-gradient(90deg, ${colors.normal}, ${colors.warning}, ${colors.critical})`,
+        }} />
+        <span>High</span>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// CONFIDENCE INDICATOR (Standardized)
+// ─────────────────────────────────────────────────────────────
+export function ConfidenceIndicator({ value, size = 'md', showLabel = true }: {
+  value: number;
+  size?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
+}) {
+  const pct = Math.round(value * 100);
+  const level = pct >= 85 ? 'High' : pct >= 65 ? 'Moderate' : 'High Uncertainty';
+  const color = pct >= 85 ? colors.normal : pct >= 65 ? colors.warning : colors.critical;
+  
+  const sizeConfig = {
+    sm: { dot: 8, text: typography.size.xs, padding: '2px 6px' },
+    md: { dot: 12, text: typography.size.sm, padding: '4px 8px' },
+    lg: { dot: 16, text: typography.size.base, padding: '6px 12px' },
+  };
+  
+  const config = sizeConfig[size];
+  
+  return (
+    <div style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: config.padding,
+      borderRadius: radius.full,
+      background: `${color}14`,
+      border: `1px solid ${color}30`,
+    }}>
+      <div style={{
+        width: `${config.dot}px`,
+        height: `${config.dot}px`,
+        borderRadius: '50%',
+        background: color,
+        boxShadow: `0 0 4px ${color}`,
+      }} />
+      {showLabel && (
+        <span style={{
+          fontSize: config.text,
+          fontWeight: typography.weight.semibold,
+          color: colors.textHigh,
+          fontFamily: typography.fontBase,
+        }}>
+          {level}
+        </span>
+      )}
+      <span style={{
+        fontSize: typography.size.xs,
+        fontFamily: typography.fontMono,
+        color: colors.textLow,
+      }}>
+        {pct}%
+      </span>
+    </div>
+  );
+}

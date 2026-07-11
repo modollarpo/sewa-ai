@@ -273,7 +273,7 @@ export function AppointmentsPage() {
       await apiClient.patch(`/appointments/${cancelId}`, { status:'cancelled', cancelReason:'Cancelled by user' });
       setCancelId(null);
       loadCalendar(); loadList();
-    } catch {}
+    } catch { /* Best-effort cancellation */ }
   };
 
   const downloadIcal = (id: string) => {

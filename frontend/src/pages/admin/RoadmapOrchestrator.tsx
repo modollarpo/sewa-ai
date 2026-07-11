@@ -71,25 +71,13 @@ export function RoadmapOrchestrator() {
   };
 
   const verifyZkConsent = async () => {
-    // Generate valid mock zk-SNARK Groth16 pairing proof components
-    // pairingInput = pi_a + pi_b + pi_c
-    const pi_a = ["12093810293810", "48203810238120"];
-    const pi_b = [["92038102", "19238102"], ["293810293", "293810238"]];
-    const pi_c = ["2938102938", "102938102"];
-    const pairingInput = pi_a.join('') + pi_b.map(arr => arr.join('')).join('') + pi_c.join('');
-    
-    // Deterministic signature simulation hash
-    const proofHash = pairingInput.slice(0, 16); // Simulate computed hash signature prefix
-
     const mrnCommitment = `commitment-${crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : Math.random().toString(36).slice(2, 10)}`;
 
     try {
       const res = await apiClient.post('/zk-consent/verify', {
-        proof: { pi_a, pi_b, pi_c },
         publicSignals: {
           mrnCommitment,
           tenantIdHash: 'tenant-hash-01',
-          proofHash
         }
       });
       setZkLogs(prev => [res.data, ...prev]);

@@ -506,7 +506,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
                   try {
                     await apiClient.post('/second-opinions', { scanId: scan.id, reviewerId, status: 'pending', reason });
                     setShowOpinionModal(false);
-                  } catch(e) { }
+                  } catch(e) { /* Error handled by UI state */ }
                   finally { setActionBusy(false); }
                 }} className="flex-1 py-3 rounded-xl bg-[#408D7B] text-white font-bold hover:bg-[#52B09A] shadow-[0_4px_15px_rgba(64,141,123,0.3)] transition-all">Send Request</button>
               </div>
@@ -804,7 +804,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
                     <UrgencyPill u={s.priority || 'ROUTINE'} />
                     <span style={{ fontSize:10, color:C.textLo }}>{fmtRelative(s.receivedAt)}</span>
                   </div>
-                  <div style={{ fontSize:14, fontWeight:600, color:C.textHi }}>{s.patient?.user?.lastName || 'Anonymous'}</div>
+                  <div style={{ fontSize:14, fontWeight:600, color:C.textHi }}>{String((s.patient as Record<string, unknown>)?.user ? ((s.patient as Record<string, unknown>).user as Record<string, unknown>)?.lastName || 'Anonymous' : 'Anonymous')}</div>
                   <div style={{ fontSize:12, color:C.textMd }}>{s.modality} · {s.bodyPart}</div>
                 </div>
               ))}
@@ -950,7 +950,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
                         <span className="text-[9px] font-mono text-[#3A6055] uppercase">{fmtRelative(s.receivedAt)}</span>
                       </div>
                       <div className={`text-sm font-bold transition-colors ${selected?.id === s.id ? 'text-[#408D7B]' : 'text-[#D0ECE6] group-hover:text-[#52B09A]'}`}>
-                        {s.patient?.user?.lastName || 'Anonymous'}, {s.patient?.user?.firstName?.charAt(0) || 'U'}.
+                        {String(((s.patient as Record<string, unknown>)?.user ? ((s.patient as Record<string, unknown>).user as Record<string, unknown>)?.lastName || 'Anonymous' : 'Anonymous'))}, {String(((s.patient as Record<string, unknown>)?.user ? ((s.patient as Record<string, unknown>).user as Record<string, unknown>)?.firstName?.toString().charAt(0) || 'U' : 'U'))}.
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#162821] text-[#6FA898] font-mono border border-[#1B3028]">

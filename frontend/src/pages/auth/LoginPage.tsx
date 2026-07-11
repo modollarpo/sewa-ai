@@ -143,7 +143,6 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
         else if (domain === 'luth.edu.ng') tenantSlug = 'luth-lagos';
         else if (domain === 'knh.go.ke') tenantSlug = 'kenyatta-nh';
         else if (domain === 'sewaxai.health') tenantSlug = 'royal-london';
-        else if (domain === 'example.com') tenantSlug = 'royal-london';
         else {
           tenantSlug = 'royal-london'; // Global fallback
         }

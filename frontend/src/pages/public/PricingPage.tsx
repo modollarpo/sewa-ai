@@ -14,7 +14,7 @@ const REGIONS = [
 const PLANS = [
   {
     id:'starter', name:'Starter Clinic', badge:'Annual Only',
-    prices:{ uk:{ monthly:549,annual:459 }, eu:{ monthly:609,annual:519 }, us:{ monthly:649,annual:549 }, africa:{ monthly:169,annual:139 } },
+    prices:{ uk:{ monthly:0,annual:459 }, eu:{ monthly:0,annual:519 }, us:{ monthly:0,annual:549 }, africa:{ monthly:0,annual:139 } },
     tagline:'For independent clinics and outpatient imaging centres',
     scans:'Up to 500 AI scans/month',
     users:'Up to 10 clinicians',
@@ -57,21 +57,22 @@ const PLANS = [
     id:'enterprise', name:'Enterprise', badge:'NHS & Large Health Systems',
     prices:{ uk:{ monthly:4999,annual:4299 }, eu:{ monthly:5499,annual:4699 }, us:{ monthly:5999,annual:5199 }, africa:{ monthly:1499,annual:1299 } },
     tagline:'Starting from £4,999/month — for NHS Integrated Care Boards and national health programmes',
-    scans:'Unlimited scans',
-    users:'Unlimited users',
+    scans:'Unlimited AI scans',
+    users:'Unlimited clinicians',
     color: colors.warning,
     features:[
       'Everything in Hospital Pro',
+      'Unlimited AI scans across all modalities',
+      'Dedicated single-tenant Azure/AWS infrastructure',
       'Federated learning (privacy-preserving AI)',
       'Custom Vision-Language Model fine-tuning',
       'On-premise & hybrid edge deployment options',
       'Data residency guarantees (in-country execution)',
-      'Dedicated single-tenant Azure/AWS infrastructure',
       'White-label portal & bespoke integrations',
-      'Regulatory submission support (MDR/510k)',
+      'Regulatory submission support (MDR/510k/FDA)',
       '24/7 dedicated clinical engineering support',
       '99.99% critical infrastructure SLA',
-      'Option for outcome-based pricing pilot',
+      'Outcome-based pricing pilot option',
     ],
   },
 ];
@@ -162,7 +163,7 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
               <button key={b} onClick={() => setBilling(b)} style={{
                 padding:`${spacing[2]} ${spacing[4]}`, borderRadius:7, border:'none', cursor:'pointer', fontFamily:typography.fontBase, fontSize:11,
                 background:billing===b?colors.brand:'transparent', color:billing===b?'white':colors.textLow, fontWeight:billing===b?700:400,
-              }}>{b === 'annual' ? 'Annual (save 15%)' : 'Monthly'}</button>
+              }}>{b === 'annual' ? 'Annual (save 15%)' : 'Monthly (Not available for Starter)'}</button>
             ))}
           </div>
         </div>
@@ -175,6 +176,7 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             const planBilling = plan.id === 'starter' ? 'annual' : billing;
             const price = plan.prices[region as keyof typeof plan.prices][planBilling];
             const isPopular = plan.id === 'hospital';
+            const isAnnualOnly = plan.id === 'starter';
             return (
               <Card key={plan.id} padding={spacing[7]} hoverable={isPopular} style={{
                 background: isPopular ? `linear-gradient(180deg,${colors.bg3},${colors.bg2})` : colors.bg2,
@@ -203,9 +205,14 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
                       <span style={{ fontSize:12, color:colors.textLow }}>/month</span>
                     </>
                   )}
-                    {(plan.id === 'starter' || (billing === 'annual' && price > 0)) && (
-                    <div style={{ fontSize:10, color: plan.id === 'starter' ? plan.color : colors.normal, marginTop:spacing[1] }}>
-                      {plan.id === 'starter' ? 'Annual-only plan · 15% saving vs monthly' : 'Billed annually · 15% saving'}
+                    {isAnnualOnly && (
+                    <div style={{ fontSize:10, color: plan.color, marginTop:spacing[1] }}>
+                      Annual-only plan · 15% saving vs monthly
+                    </div>
+                  )}
+                    {!isAnnualOnly && billing === 'annual' && price > 0 && (
+                    <div style={{ fontSize:10, color: colors.normal, marginTop:spacing[1] }}>
+                      Billed annually · 15% saving
                     </div>
                   )}
                   </div>
@@ -226,6 +233,11 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
                 }} style={{ marginBottom:spacing[6] }}>
                   {plan.id === 'enterprise' ? 'Contact Enterprise Team' : 'Start Free Trial'}
                 </Button>
+                {isAnnualOnly && (
+                  <div style={{ fontSize:10, color:colors.textLow, textAlign:'center', marginTop:spacing[2] }}>
+                    Annual commitment required · 15% saving vs monthly
+                  </div>
+                )}
 
                 <div style={{ flex:1 }}>
                   {plan.features.map(f => (

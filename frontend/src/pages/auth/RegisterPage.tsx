@@ -48,8 +48,7 @@ export function RegisterPage({ onLogin, onInstitutionalOnboarding }: { onLogin:(
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
-          password: form.password,
-          speciality: form.speciality,
+          specialty: form.speciality,
           licenseNumber: form.licenseNumber
         });
         setLocalSuccess(`Specialist account created! Redirecting you to Stripe Connect...`);

@@ -22,6 +22,9 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-96.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72.png" />
 
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://sewaxai.health" />
+
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="SEWA XAI — From Hours to Seconds" />
@@ -29,18 +32,23 @@
   <meta property="og:image" content="https://sewaxai.health/og-image.png" />
   <meta property="og:url" content="https://sewaxai.health" />
   <meta property="og:site_name" content="SEWA XAI" />
+  <meta property="og:locale" content="en_GB" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="SEWA XAI — Clinical Intelligence Platform" />
   <meta name="twitter:description" content="AI-powered medical imaging triage in under 2 seconds. NHS-certified." />
   <meta name="twitter:image" content="https://sewaxai.health/og-image.png" />
+  <meta name="twitter:site" content="@sewaxai" />
 
   <!-- DNS Prefetch -->
   <link rel="dns-prefetch" href="//api.sewaxai.health" />
   <link rel="preconnect" href="https://api.sewaxai.health" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Sitemap -->
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
   <!-- Fonts -->
   <link rel="preload" as="style"
@@ -58,20 +66,69 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "SEWA XAI",
-    "description": "AI-powered clinical diagnostic intelligence platform",
+    "@type": "MedicalWebPage",
+    "name": "SEWA XAI — Clinical Intelligence Platform",
+    "description": "AI-powered medical imaging triage and reporting. Detect ICH, PE, stroke and 14 conditions in under 2 seconds.",
     "url": "https://sewaxai.health",
-    "applicationCategory": "HealthApplication",
-    "operatingSystem": "Web, iOS, Android",
-    "offers": { "@type": "Offer", "price": "499", "priceCurrency": "GBP" },
-    "author": {
+    "lastReviewed": "2026-07-01",
+    "reviewedBy": {
       "@type": "Organization",
-      "name": "Storegrill Inc Ltd",
-      "url": "https://sewaxai.health",
-      "address": { "@type": "PostalAddress", "addressLocality": "Coventry", "addressCountry": "GB" }
+      "name": "SEWA XAI Clinical Safety Team"
     },
-    "medicalSpecialty": ["Radiology", "Neurology", "Cardiology", "Pulmonology"]
+    "mainEntity": {
+      "@type": "SoftwareApplication",
+      "name": "SEWA XAI",
+      "description": "AI-powered clinical diagnostic intelligence platform for medical imaging triage",
+      "url": "https://sewaxai.health",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "AggregateOffer",
+        "lowPrice": "459",
+        "highPrice": "4999",
+        "priceCurrency": "GBP",
+        "offerCount": "3"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Storegrill Inc Ltd",
+        "url": "https://sewaxai.health",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Coventry",
+          "addressRegion": "West Midlands",
+          "addressCountry": "GB"
+        }
+      },
+      "medicalSpecialty": ["Radiology", "Neurology", "Cardiology", "Pulmonology"],
+      "featureList": [
+        "AI-powered CT/X-ray triage",
+        "Uncertainty quantification",
+        "Metacognition hallucination detection",
+        "Federated learning",
+        "FHIR R4 compliant APIs"
+      ]
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Storegrill Inc Ltd",
+    "url": "https://sewaxai.health",
+    "logo": "https://sewaxai.health/logo-master.svg",
+    "sameAs": [
+      "https://twitter.com/sewaxai",
+      "https://linkedin.com/company/sewaxai"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+44-20-7946-0958",
+      "contactType": "sales",
+      "areaServed": ["GB", "EU", "US", "KE", "NG", "GH"],
+      "availableLanguage": ["English"]
+    }
   }
   </script>
 
@@ -81,6 +138,9 @@
     html{-webkit-text-size-adjust:100%}
     body{margin:0;padding:0;background:#050F0C;color:#D0ECE6;font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
     #root{min-height:100vh;display:flex;flex-direction:column}
+    /* Skip link for WCAG accessibility */
+    .skip-link{position:absolute;top:-40px;left:0;background:#408D7B;color:white;padding:8px 16px;z-index:10000;text-decoration:none;font-weight:700;font-size:14px;border-radius:0 0 8px 0;transition:top 0.3s}
+    .skip-link:focus{top:0}
     /* Loading spinner */
     .sewa-splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#050F0C;z-index:9999;flex-direction:column;gap:16px;transition:opacity .3s}
     .sewa-splash.hidden{opacity:0;pointer-events:none}
@@ -90,6 +150,9 @@
   </style>
 </head>
 <body>
+  <!-- Skip to content for WCAG accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
   <!-- Loading splash (hidden once React mounts) -->
   <div class="sewa-splash" id="splash">
     <div class="sewa-ring"></div>

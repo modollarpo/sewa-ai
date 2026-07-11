@@ -56,7 +56,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
       <PublicNav activePage="landing" onNavigate={onNavigate} />
 
       {/* Hero Section */}
-      <section className="relative min-h-[95vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 overflow-hidden">
+      <main id="main-content" className="relative min-h-[95vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 overflow-hidden">
         
         {/* Immersive Background */}
         <div className="absolute inset-0 pointer-events-none">
@@ -136,7 +136,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             </div>
           ))}
         </div>
-      </section>
+      </main>
 
       {/* Compliance Ribbon */}
       <section className="relative z-20 py-12 bg-[#08160F] border-y border-[#1B3028] overflow-hidden group/compliance">
@@ -163,7 +163,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((f, i) => (
+          {FEATURES.map((f) => (
             <div 
               key={f.id}
               onClick={() => onNavigate(f.id)}
@@ -226,6 +226,119 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
                  <div className="text-[#E03535] text-xs font-mono">Uncertainty: 0.02 (Low)</div>
                </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Regulatory Journey Section */}
+      <section className="relative py-32 bg-[#05100D] border-y border-[#1B3028]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-20">
+            <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em] mb-4">Regulatory Pathway</div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-[#D0ECE6] mb-6">Clearing the Path for<br/>Clinical AI Adoption</h2>
+            <p className="text-[#6FA898] max-w-2xl mx-auto font-medium">A structured regulatory journey from innovation to validated clinical deployment, aligned with global health authority requirements.</p>
+          </div>
+
+          {/* Timeline */}
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#408D7B] via-[#1B3028] to-transparent hidden md:block" />
+            
+            <div className="space-y-12 md:space-y-0">
+              {[
+                { phase:'Phase 1', title:'Innovation & Design', status:'Completed', statusColor:'#1DBF73', 
+                  items:['DCB0129 Clinical Risk Management', 'IEC 62304 Software Lifecycle', 'ISO 14971 Risk Management', 'NHS Innovation Service (INN-2604-0064-2)'],
+                  side:'left' },
+                { phase:'Phase 2', title:'Technical Validation', status:'In Progress', statusColor:'#408D7B',
+                  items:['Engineering validation (TRL 5)', 'Prospective validation datasets', 'Multi-site performance testing', 'NICE Evidence Standards alignment'],
+                  side:'right' },
+                { phase:'Phase 3', title:'Regulatory Submission', status:'Planned', statusColor:'#6FA898',
+                  items:['UKCA Class IIb SaMD submission', 'CE marking (EU MDR 2017/745)', 'FDA 510(k) pre-submission', 'MHRA regulatory engagement'],
+                  side:'left' },
+                { phase:'Phase 4', title:'Clinical Deployment', status:'Planned', statusColor:'#3A6055',
+                  items:['NHS framework onboarding (G-Cloud 14)', 'Post-market surveillance (PMS)', 'Clinical performance monitoring', 'Continuous regulatory compliance'],
+                  side:'right' },
+              ].map((item, i) => (
+                <div key={i} className={`relative flex flex-col md:flex-row items-center gap-8 md:gap-16 ${item.side === 'right' ? 'md:flex-row-reverse' : ''} mb-16`}>
+                  {/* Timeline dot */}
+                  <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-2 border-[#05100D] z-10 hidden md:block" style={{ background:item.statusColor }} />
+                  
+                  {/* Content */}
+                  <div className={`md:w-1/2 ${item.side === 'right' ? 'md:text-right' : ''}`}>
+                    <div className="text-[10px] font-black uppercase tracking-[0.3em] mb-2" style={{ color:item.statusColor }}>{item.phase}</div>
+                    <h3 className="text-2xl font-black text-[#D0ECE6] mb-3">{item.title}</h3>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border mb-4" style={{ borderColor:`${item.statusColor}40`, background:`${item.statusColor}10` }}>
+                      <span className="w-2 h-2 rounded-full" style={{ background:item.statusColor }} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color:item.statusColor }}>{item.status}</span>
+                    </div>
+                    <div className="space-y-2">
+                      {item.items.map((itm, j) => (
+                        <div key={j} className={`flex items-center gap-3 text-sm text-[#6FA898] ${item.side === 'right' ? 'md:justify-end' : ''}`}>
+                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background:`${item.statusColor}60` }} />
+                          {itm}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Spacer for other side */}
+                  <div className="hidden md:block md:w-1/2" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Regulatory Certifications */}
+          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon:'🏥', label:'NHS Innovation Service', desc:'INN-2604-0064-2' },
+              { icon:'🛡️', label:'DCB0129', desc:'Clinical Safety' },
+              { icon:'📋', label:'IEC 62304', desc:'Software Lifecycle' },
+              { icon:'🔒', label:'ISO 14971', desc:'Risk Management' },
+            ].map(c => (
+              <div key={c.label} className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-2xl text-center group hover:border-[#408D7B]/30 transition-all">
+                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">{c.icon}</div>
+                <div className="text-xs font-black text-[#D0ECE6] uppercase tracking-tight">{c.label}</div>
+                <div className="text-[9px] text-[#3A6055] mt-1">{c.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Customer Trust & Testimonials */}
+      <section className="relative py-24 bg-[#08160F] border-y border-[#1B3028]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em] mb-4">Trusted By</div>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-[#D0ECE6]">Healthcare Leaders Partnering with SEWA</h2>
+          </div>
+          
+          {/* Placeholder for customer logos - will be replaced with real logos */}
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-40 mb-16">
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="w-32 h-12 bg-[#0C1D17] border border-[#1B3028] rounded-xl flex items-center justify-center">
+                <div className="text-[9px] text-[#3A6055] font-mono">PARTNER {i}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Testimonial Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { quote:'SEWA XAI has transformed our emergency department triage workflow. Critical findings are now flagged within seconds, not hours.', author:'Dr. Amina Okafor', role:'Chief Radiologist', org:'Lagos University Teaching Hospital', flag:'🇳🇬' },
+              { quote:'The uncertainty quantification is exactly what we needed. We can trust the AI outputs because it tells us when it is unsure.', author:'Prof. James Okello', role:'Head of Radiology', org:'Kenyatta National Hospital', flag:'🇰🇪' },
+              { quote:'Federated learning means we can contribute to global AI improvement without compromising patient data sovereignty.', author:'Dr. Sarah Mensah', role:'Medical Director', org:'Korle Bu Teaching Hospital', flag:'🇬🇭' },
+            ].map((t, i) => (
+              <div key={i} className="p-8 bg-[#0C1D17] border border-[#1B3028] rounded-2xl hover:border-[#408D7B]/30 transition-all">
+                <div className="text-2xl mb-4">{t.flag}</div>
+                <p className="text-sm text-[#6FA898] leading-relaxed font-medium mb-6 italic">"{t.quote}"</p>
+                <div>
+                  <div className="text-xs font-bold text-[#D0ECE6]">{t.author}</div>
+                  <div className="text-[10px] text-[#3A6055]">{t.role} — {t.org}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

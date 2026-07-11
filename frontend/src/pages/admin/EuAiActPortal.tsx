@@ -3,9 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../services/apiClient';
 
 const C = {
-  bg1: '#08160F', bg2: '#0C1D17', bg3: '#111F1A',
+  bg1: '#08160F', bg2: '#0C1D17', bg3: '#111F1A', bg4: '#162821',
   brand: '#408D7B', brandLt: '#52B09A',
-  normal: '#1DBF73', urgent: '#E08A20', critical: '#E03535',
+  normal: '#1DBF73', normalBg: '#0A1F14',
+  urgent: '#E08A20', urgBg: '#2A1800',
+  critical: '#E03535', critBg: '#2A0A0A',
   textHi: '#D0ECE6', textMd: '#6FA898', textLo: '#3A6055',
   border: '#1B3028',
   F: "'IBM Plex Sans',system-ui,sans-serif",

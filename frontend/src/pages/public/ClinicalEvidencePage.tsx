@@ -21,9 +21,9 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: spacing[5] }}>
           <Card padding={spacing[8]}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: colors.textHigh, margin: `0 0 ${spacing[3]}` }}>Engineering Validation (TRL 5)</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: colors.textHigh, margin: `0 0 ${spacing[3]}` }}>Engineering Validation (TRL 5)</h2>
             <p style={{ color: colors.textMed, lineHeight: 1.8, margin: 0 }}>
-              Our AI models (Triage, Uncertainty, and Metacognition) have been validated in simulated clinical environments using diverse datasets. We achieve an AUC &gt; 0.95 in detecting critical findings in engineering benchmarks.
+              Our AI models (Triage, Uncertainty, and Metacognition) have been validated in simulated clinical environments using diverse datasets. We achieve an AUC &gt; 0.95 in detecting critical findings in engineering benchmarks.
             </p>
           </Card>
           

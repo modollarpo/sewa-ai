@@ -88,7 +88,7 @@ export const DocsPage: React.FC<{ onNavigate: (p: string) => void }> = ({ onNavi
                   <Button variant="secondary">{doc.action.label} →</Button>
                 </a>
               ) : (
-                <Button variant="secondary" onClick={() => doc.action.onClick(onNavigate)}>
+                <Button variant="secondary" onClick={() => doc.action.onClick?.(onNavigate)}>
                   {doc.action.label} →
                 </Button>
               )}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { api } from '../../lib/api';
-import { useAuthStore } from '../../store/useAuthStore';
+import { apiClient } from '../../services/apiClient';
+import { useAuthStore } from '../../store/authStore';
 
 interface VoiceDictationProps {
   onTranscriptionComplete: (text: string) => void;
@@ -57,7 +57,7 @@ export function VoiceDictation({ onTranscriptionComplete, isRecordingMode = fals
       reader.onloadend = async () => {
         const base64Audio = reader.result?.toString().split(',')[1];
         
-        const response = await api.post('/api/ai/ambient-dictation', { audioData: base64Audio });
+        const response = await apiClient.post('/ai/ambient-dictation', { audioData: base64Audio });
         
         setTranscription(response.data.transcription);
         onTranscriptionComplete(response.data.transcription);

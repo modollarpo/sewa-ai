@@ -40,7 +40,6 @@ import { ReferralNetwork }           from './pages/referral/ReferralNetwork';
 import { ProfileSettings }         from './pages/settings/ProfileSettings';
 import { SupportTicketsPage }   from './pages/user/SupportTicketsPage';
 import { PatientProfile }            from './pages/patient/PatientProfile';
-import { ClinicalRulesDashboard }    from './pages/admin/ClinicalRulesDashboard';
 import { RoadmapOrchestrator }       from './pages/admin/RoadmapOrchestrator';
 
 // Public pages
@@ -85,13 +84,13 @@ import { AfricaPricingPage } from './pages/public/AfricaPricingPage';
 import { NHSProcurementPage } from './pages/public/NHSProcurementPage';
 import { SpecializedAI } from './pages/public/products/SpecializedAI';
 import { NHSDSPTCompliancePage } from './pages/public/NHSDSPTCompliancePage';
+import { TrustCenterPage } from './pages/public/TrustCenterPage';
 
 // Layout & components
 import { TopNav }                    from './components/layout/TopNav';
 import { CriticalAlertBanner }       from './components/ui/CriticalAlertBanner';
 import { NotificationPanel }         from './components/ui/NotificationPanel';
 import { CookieBanner }              from './components/public/CookieBanner';
-import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { socketService }             from './services/socketService';
 
@@ -291,8 +290,8 @@ export default function App() {
   const { user, token, isAuthenticated, logout }  = useAuthStore();
   const { criticalAlerts, fetchWorklist } = useScanStore();
   const { notifications, markRead }       = useNotificationStore();
-  const { lang, region, setLang, setRegion } = useSettingsStore();
-  const { tenantSlug, isLoaded }          = useTenant();
+  const { region, setLang, setRegion } = useSettingsStore();
+  const { isLoaded }                   = useTenant();
   const { isRTL }                         = useTranslation();
 
   const [notifOpen,   setNotifOpen]   = useState(false);
@@ -324,13 +323,13 @@ export default function App() {
     const path = window.location.pathname;
     return (path === '/verify-email' || path.includes('verify-email')) ? p.get('token') : null;
   })();
-  const [publicPage,   setPublicPage]   = useState<'landing'|'login'|'register'|'onboarding'|'onboarding-specialist'|'solutions'|'research'|'regulatory'|'clinical-validation'|'clinical-evidence'|'ai-safety'|'governance'|'publications'|'pricing'|'africa-pricing'|'nhs-procurement'|'specialized-ai'|'nhs-dspt-compliance'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'pathology-ai'|'mammography-ai'|'retinal-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'|'training'>('landing');
+  const [publicPage,   setPublicPage]   = useState<'landing'|'login'|'register'|'onboarding'|'onboarding-specialist'|'solutions'|'research'|'regulatory'|'clinical-validation'|'clinical-evidence'|'ai-safety'|'governance'|'publications'|'pricing'|'africa-pricing'|'nhs-procurement'|'specialized-ai'|'nhs-dspt-compliance'|'api-docs'|'about'|'contact'|'careers'|'press'|'status'|'privacy-policy'|'terms'|'cookie-policy'|'security'|'accessibility'|'downloads'|'triage-ai'|'uncertainty-ai'|'vision-language-ai'|'metacognition-ai'|'explainable-ai'|'pathology-ai'|'mammography-ai'|'retinal-ai'|'partner-portal'|'whitepaper'|'blog'|'sitemap'|'docs'|'changelog'|'developers'|'training'|'trust'>('landing');
 
   // Universal navigation handler for public site
   const navigate = (page: string) => {
     if (page === 'login') { setPublicPage('login'); return; }
     if (page === 'register') { setPublicPage('register'); return; }
-    setPublicPage(page as any);
+    setPublicPage(page as typeof publicPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -356,7 +355,7 @@ export default function App() {
           }, 800);
         }
       });
-      (window as any).__sewa_hide_splash?.();
+      (window as unknown as { __sewa_hide_splash?: () => void }).__sewa_hide_splash?.();
     };
     hide();
   }, [isLoaded]);
@@ -366,7 +365,7 @@ export default function App() {
     if (!isAuthenticated || !token || !user) return;
     socketService.connect(token, user.tenantId);
 
-    socketService.on('ai:result', (data: any) => {
+    socketService.on('ai:result', (data: { urgency: string; primaryFinding: string; scanId: string; confidence: number }) => {
       useScanStore.getState().handleAIResult(data);
       if (data.urgency === 'CRITICAL' || data.urgency === 'URGENT') {
         useNotificationStore.getState().addNotification({
@@ -379,16 +378,16 @@ export default function App() {
       }
     });
     socketService.on('scan:new',     () => fetchWorklist());
-    socketService.on('scan:updated', (d: any) => useScanStore.getState().updateScanStatus(d.scanId, d.status));
+    socketService.on('scan:updated', (d: { scanId: string; status: string }) => useScanStore.getState().updateScanStatus(d.scanId, d.status));
 
     return () => socketService.disconnect();
-  }, [isAuthenticated, token, user]);
+  }, [isAuthenticated, token, user, fetchWorklist]);
 
   // Sync region/lang from user profile
   useEffect(() => {
     if (user?.region)   setRegion(user.region);
     if (user?.language) setLang(user.language);
-  }, [user]);
+  }, [user, setLang, setRegion]);
 
   if (!isLoaded) return null; // Or a high-fidelity spinner
 
@@ -478,8 +477,9 @@ export default function App() {
         {publicPage === 'regulatory'         && <RegulatoryPage {...navProps} />}
         {publicPage === 'api-docs'           && <ApiDocsPage {...navProps} />}
         {publicPage === 'developers'         && <DevelopersPage {...navProps} />}
+        {publicPage === 'trust'              && <TrustCenterPage {...navProps} />}
         {/* Fallback for unmapped routes */}
-        {!['landing','login','register','onboarding','onboarding-specialist','pricing','africa-pricing','nhs-procurement','specialized-ai','nhs-dspt-compliance','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','clinical-evidence','ai-safety','governance','publications','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','pathology-ai','mammography-ai','retinal-ai','regulatory','api-docs','developers','training'].includes(publicPage) && (
+        {!['landing','login','register','onboarding','onboarding-specialist','pricing','africa-pricing','nhs-procurement','specialized-ai','nhs-dspt-compliance','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','clinical-evidence','ai-safety','governance','publications','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','pathology-ai','mammography-ai','retinal-ai','regulatory','api-docs','developers','training','trust'].includes(publicPage) && (
           <LandingPage onLogin={() => navigate('login')} onNavigate={navigate} />
         )}
         <CookieBanner onNavigate={navigate} />
@@ -496,10 +496,10 @@ export default function App() {
   // ── Content resolver ─────────────────────────────────────────
   const renderContent = () => {
 
-    if (publicPage === 'training' as any) {
+    if (publicPage === 'training') {
       return (
         <div>
-          <button onClick={() => setPublicPage('workspace' as any)} style={{ margin:'20px 20px 0', padding:'8px 16px', background:C.bg3, border:`1px solid ${C.border}`, color:C.textMd, borderRadius:8, cursor:'pointer', fontFamily: C.F }}>← Back to Workspace</button>
+          <button onClick={() => setPublicPage('landing')} style={{ margin:'20px 20px 0', padding:'8px 16px', background:C.bg3, border:`1px solid ${C.border}`, color:C.textMd, borderRadius:8, cursor:'pointer', fontFamily: C.F }}>← Back to Workspace</button>
           <TrainingSimulator />
         </div>
       );

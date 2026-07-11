@@ -91,12 +91,6 @@ export function HospitalAdminDashboard() {
       const t: Record<string,boolean> = {};
       demo.forEach((r: any) => { t[r.id] = r.enabled; });
       setRuleToggles(t);
-      // Mock recent trigger history
-      setRuleHistory([
-        { ruleName:'Stroke Code Activation — LVO', ts: new Date(Date.now()-3600000).toISOString(), actions:'notify_role:radiologist, page_team:stroke_response_team, hl7_order:CTA_HEAD_NECK', scanId:'scan_a1b2c3' },
-        { ruleName:'ICH Critical Alert', ts: new Date(Date.now()-7200000).toISOString(), actions:'notify_role:doctor, notify_oncall:neurosurgery, escalate_priority:STAT', scanId:'scan_d4e5f6' },
-        { ruleName:'Low AI Confidence — Flag for Second Opinion', ts: new Date(Date.now()-1800000).toISOString(), actions:'notify_role:radiologist, create_task', scanId:'scan_g7h8i9' },
-      ]);
     }).finally(() => setRulesLoading(false));
   }, [tab]);
   const [search, setSearch] = useState('');
