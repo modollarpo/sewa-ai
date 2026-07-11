@@ -62,7 +62,7 @@ export function HospitalAdminDashboard() {
   const { user } = useAuthStore();
   const { stats, staff, audit, integrations, loading } = useHospitalAdminData();
   const [tab, setTab] = useState<'overview'|'staff'|'integrations'|'billing'|'audit'|'rules'>('overview');
-  const [rules, setRules] = useState<any[]>([]);
+  const [rules, setRules] = useState<Array<{id:string;name:string;enabled:boolean;pathway?:string;conditions?:Array<{field:string;operator:string;value:string|number}>;conditionLogic?:string;description?:string;actions?:Array<{type:string;target?:string}>;cooldownMs:number}>>([]);
   const [rulesLoading, setRulesLoading] = useState(false);
   const [ruleToggles, setRuleToggles] = useState<Record<string,boolean>>({});
   const [ruleHistory, setRuleHistory] = useState<Array<{ruleName:string;ts:string;actions:string;scanId:string}>>([]);
@@ -74,9 +74,8 @@ export function HospitalAdminDashboard() {
     apiClient.get('/rules').then(r => {
       const ruleList = r.data.rules || [];
       setRules(ruleList);
-      // Initialise toggle state from rule.enabled
       const t: Record<string,boolean> = {};
-      ruleList.forEach((rule: any) => { t[rule.id] = rule.enabled ?? true; });
+      ruleList.forEach((rule:{id:string;enabled?:boolean}) => { t[rule.id] = rule.enabled ?? true; });
       setRuleToggles(t);
     }).catch(() => {
       // No fallback mock data — display empty state when API unavailable
@@ -87,7 +86,7 @@ export function HospitalAdminDashboard() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
-  const filteredStaff = useMemo(() => (staff || []).filter((s:any) => 
+  const filteredStaff = useMemo(() => (staff || []).filter((s:{firstName?:string;lastName?:string;email?:string;role?:string}) => 
     !search || 
     `${s.firstName} ${s.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
     s.email?.toLowerCase().includes(search.toLowerCase()) ||
@@ -95,10 +94,10 @@ export function HospitalAdminDashboard() {
   ), [staff, search]);
   const [showAddUser, setShowAddUser] = useState(false);
   const [showPlatformTour, setShowPlatformTour] = useState(false);
-  const [invoices, setInvoices]       = useState<any[]>([]);
+  const [invoices, setInvoices]       = useState<Array<{id:string;createdAt:string;currency:string;amount:number}>>([]);
   const [pacsStatus, setPacsStatus]   = useState<'idle'|'loading'|'ok'|'fail'>('idle');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [selectedStaff, setSelectedStaff] = useState<any>(null);
+  const [selectedStaff, setSelectedStaff] = useState<{id:string;firstName?:string;lastName?:string;email?:string;role?:string;status?:string} | null>(null);
   const [actionType, setActionType] = useState<'invite'|'edit'|'suspend'|null>(null);
 
   useEffect(() => {
@@ -269,7 +268,7 @@ export function HospitalAdminDashboard() {
             
             {isMobile ? (
               <div className="flex flex-col gap-4">
-                {filteredStaff.map((s:any) => (
+                {filteredStaff.map((s:{id:string;firstName?:string;lastName?:string;email?:string;role?:string;status?:string}) => (
                   <div key={s.id} className="p-5 bg-[#0C1D17] border border-[#1B3028] rounded-2xl shadow-lg">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -309,7 +308,7 @@ export function HospitalAdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#1B3028]">
-                      {filteredStaff.map((s:any)=>(
+                      {filteredStaff.map((s:{id:string;firstName?:string;lastName?:string;email?:string;role?:string;status?:string})=>(
                         <tr key={s.id} className="hover:bg-[#111F1A]/50 transition-colors group">
                           <td className="p-5">
                             <div className="flex items-center gap-3">
@@ -323,7 +322,7 @@ export function HospitalAdminDashboard() {
                             </div>
                           </td>
                           <td className="p-5">
-                            <RoleBadge role={s.role}/>
+                            <RoleBadge role={s.role ?? 'unknown'}/>
                           </td>
                           <td className="p-5">
                             <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
@@ -395,9 +394,10 @@ export function HospitalAdminDashboard() {
                         const r = await apiClient.post('/admin/integrations/pacs/echo');
                         setPacsStatus('ok');
                         setStatus({ msg: r.data.message || 'PACS handshake successful.', type: 'ok' });
-                      } catch (err: any) {
+                      } catch (err: unknown) {
                         setPacsStatus('fail');
-                        setStatus({ msg: err.response?.data?.message || 'PACS unreachable.', type: 'err' });
+                        const msg = err instanceof Error ? err.message : 'PACS unreachable.';
+                        setStatus({ msg: (err as {response?:{data?:{message?:string}}}).response?.data?.message || msg, type: 'err' });
                       }
                     }}
                     className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-3 ${
@@ -492,7 +492,7 @@ export function HospitalAdminDashboard() {
                   <tbody className="divide-y divide-[#1B3028]">
                     {invoices.length === 0 ? (
                       <tr><td colSpan={5} className="p-12 text-center text-[#3A6055] italic">No historical invoices found.</td></tr>
-                    ) : invoices.map((inv:any) => (
+                    ) : invoices.map((inv:{id:string;createdAt:string;currency:string;amount:number}) => (
                       <tr key={inv.id} className="hover:bg-white/5 transition-colors">
                         <td className="p-5 text-[11px] font-bold text-[#D0ECE6]">{new Date(inv.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</td>
                         <td className="p-5 text-[10px] font-mono text-[#3A6055]">{inv.id.slice(0,16)}...</td>
@@ -539,7 +539,7 @@ export function HospitalAdminDashboard() {
                     Array(8).fill(0).map((_,i)=>(<tr key={i}><td colSpan={5} className="p-5"><Skeleton width="100%" height={20}/></td></tr>))
                   ) : audit.length === 0 ? (
                     <tr><td colSpan={5} className="p-12 text-center text-[#3A6055] italic">System audit logs are currently clear.</td></tr>
-                  ) : audit.map((log:any)=>(
+                  ) : audit.map((log:{id:string;action:string;entity?:string;entityId?:string;userId?:string;ipAddress?:string;createdAt:string})=>(
                     <tr key={log.id} className="hover:bg-white/5 transition-colors">
                       <td className="p-5 text-xs font-black text-[#D0ECE6]">{log.action}</td>
                       <td className="p-5">
@@ -582,12 +582,12 @@ export function HospitalAdminDashboard() {
               <div className="flex flex-col gap-4">{Array(4).fill(0).map((_,i)=>(<div key={i} className="h-28 bg-[#0C1D17] rounded-2xl border border-[#1B3028] animate-pulse" />))}</div>
             ) : (
               <div className="flex flex-col gap-4">
-                {rules.map((rule: any) => {
+                {rules.map((rule) => {
                   const enabled = ruleToggles[rule.id] ?? rule.enabled;
                   const pathwayColor: Record<string,string> = { stroke:C.critical, pe:C.urgent, tb:C.brand };
-                  const pc = pathwayColor[rule.pathway] ?? C.textMd;
-                  const conditionFields = rule.conditions?.map((c:any)=>`${c.field} ${c.operator} ${JSON.stringify(c.value)}`).join(` ${rule.conditionLogic} `) || '';
-                  const actionSummary = rule.actions?.map((a:any)=>a.type).join(', ') || '';
+                  const pc = (rule.pathway ? pathwayColor[rule.pathway] : undefined) ?? C.textMd;
+const conditionFields = rule.conditions?.map((c:{field:string;operator:string;value:string|number})=>`${c.field} ${c.operator} ${JSON.stringify(c.value)}`).join(` ${rule.conditionLogic} `) || '';
+const actionSummary = rule.actions?.map((a:{type:string})=>a.type).join(', ') || '';
 
                   return (
                     <div key={rule.id} className={`p-6 bg-[#0C1D17] border rounded-2xl shadow-lg transition-all duration-300 ${enabled ? 'border-[#1B3028] hover:border-[#408D7B]/40' : 'border-[#1B3028] opacity-50'}`}>
@@ -638,7 +638,7 @@ export function HospitalAdminDashboard() {
                             <div className="p-3 bg-[#08160F] rounded-xl border border-[#1B3028]">
                               <div className="text-[9px] font-black text-[#3A6055] uppercase tracking-widest mb-2">THEN Actions ({rule.actions?.length || 0})</div>
                               <div className="flex flex-wrap gap-1">
-                                {rule.actions?.map((a:any, i:number) => (
+                                {rule.actions?.map((a:{type:string;target?:string}, i:number) => (
                                   <span key={i} style={{ fontSize:9, padding:'1px 6px', borderRadius:10, background:`${C.brand}14`, color:C.brand, border:`1px solid ${C.brand}25`, fontWeight:600 }}>
                                     {a.type.replace(/_/g,' ')}{a.target ? `: ${a.target}` : ''}
                                   </span>
@@ -724,7 +724,7 @@ export function HospitalAdminDashboard() {
                     await apiClient.post('/users/invite', Object.fromEntries(d));
                     setStatus({ msg: 'Authorization invitation dispatched.', type: 'ok' });
                     setShowAddUser(false);
-                  } catch(err: any) { setStatus({ msg: err.response?.data?.message || 'Authorization failed.', type: 'err' }); }
+                  } catch(err: unknown) { const msg = err instanceof Error ? err.message : 'Authorization failed.'; setStatus({ msg: (err as {response?:{data?:{message?:string}}}).response?.data?.message || msg, type: 'err' }); }
                 }} className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-[#3A6055] uppercase tracking-[0.2em]">NHS Clinical Email</label>
@@ -762,7 +762,7 @@ export function HospitalAdminDashboard() {
                       await apiClient.patch(`/users/${selectedStaff.id}/role`, { role });
                       setStatus({ msg: 'Credentials updated successfully.', type: 'ok' });
                       setShowAddUser(false);
-                    } catch(e: any) { setStatus({ msg: e.message, type: 'err' }); }
+                    } catch(e: unknown) { const msg = e instanceof Error ? e.message : 'Action failed.'; setStatus({ msg, type: 'err' }); }
                   }} className="w-full py-4 rounded-xl bg-[#408D7B] text-white font-black uppercase tracking-widest text-xs shadow-lg transition-all active:scale-95">Commit Changes</button>
                 </div>
               )}
@@ -785,7 +785,7 @@ export function HospitalAdminDashboard() {
                         await apiClient.patch(`/users/${selectedStaff.id}/status`, { status: next });
                         setStatus({ msg: `Access ${next} successfully.`, type: 'ok' });
                         setShowAddUser(false);
-                      } catch(e: any) { setStatus({ msg: e.message, type: 'err' }); }
+} catch(e: unknown) { const msg = e instanceof Error ? e.message : 'Update failed.'; setStatus({ msg, type: 'err' }); }
                     }} className={`flex-1 py-3 rounded-xl font-bold text-white transition-all ${
                       selectedStaff.status === 'suspended' ? 'bg-[#1DBF73] hover:bg-[#1DBF73]/80' : 'bg-[#E03535] hover:bg-[#E03535]/80'
                     }`}>

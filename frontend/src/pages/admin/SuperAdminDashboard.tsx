@@ -22,6 +22,70 @@ const C = {
 
 const REGION_FLAGS:Record<string,string> = {uk:'🇬🇧',eu:'🇪🇺',us:'🇺🇸',ng:'🇳🇬',ke:'🇰🇪',za:'🇿🇦',in:'🇮🇳',gh:'🇬🇭'};
 
+interface AiModel {
+  id?: string;
+  version?: string;
+  type?: string;
+  trafficPct?: number;
+  traffic?: string;
+  deployedAt?: string;
+  deployed?: string;
+  status?: string;
+  accuracy?: number;
+  _avg?: { confidence?: number };
+  _count?: { id?: number };
+}
+
+interface FailedScan {
+  id?: string;
+  status: string;
+  modality?: string;
+  bodyPart?: string;
+  errorMessage?: string;
+  updatedAt?: string;
+}
+
+interface FederatedNode {
+  id: string;
+  tenantId: string;
+  tenant?: { name?: string; region?: string };
+  totalScansContributed: number;
+}
+
+interface FederatedRound {
+  id: string;
+  roundNumber: number;
+  status: string;
+  accuracy?: number;
+}
+
+interface EdgeDevice {
+  id: string;
+  deviceId: string;
+  tenantId: string;
+  tenant?: { name?: string };
+  region?: string;
+  status: string;
+  storageUsedMB: number;
+  totalSyncedScans: number;
+  lastHeartbeat: string;
+}
+
+interface Tenant {
+  id?: string;
+  name?: string;
+  region?: string;
+  plan?: string;
+  status?: string;
+  supportedModalities?: string[];
+}
+
+interface HealthService {
+  name: string;
+  status: string;
+  latency?: number;
+}
+
 
 function BigStat({ label,value,sub,color=C.textHi,icon }:{ label:string;value:string|number;sub?:string;color?:string;icon?:string }) {
   return (
@@ -74,22 +138,22 @@ function GlobeMap({ data }: { data: { region: string, count: number }[] }) {
 }
 
 export function SuperAdminDashboard() {
-  const { stats, tenants, regionalStats, health, audit, telemetry, loading, error } = useSuperAdminData();
+  const { stats, tenants, regionalStats, health, audit, telemetry, loading, error: _error } = useSuperAdminData();
   const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'diagnostics'|'federated'|'billing'|'edge'>('overview');
   const [tenantSearch, setTenantSearch] = useState('');
   const [showProvision, setShowProvision] = useState(false);
   const [logLimit, setLogLimit] = useState(50);
 
   // A8: Fetch AI models from real API instead of hardcoded constant
-  const [aiModels, setAiModels]           = useState<any[]>([]);
+  const [aiModels, setAiModels]           = useState<AiModel[]>([]);
   const [aiModelsLoading, setAiModelsLoading] = useState(false);
   const [dlqDepth, setDlqDepth]           = useState<number|null>(null);
-  const [failedScans, setFailedScans]     = useState<any[]>([]);
+  const [failedScans, setFailedScans]     = useState<FailedScan[]>([]);
   const [diagLoading, setDiagLoading]     = useState(false);
-  const [fedNodes, setFedNodes]           = useState<any[]>([]);
-  const [fedRounds, setFedRounds]         = useState<any[]>([]);
+  const [fedNodes, setFedNodes]           = useState<FederatedNode[]>([]);
+  const [fedRounds, setFedRounds]         = useState<FederatedRound[]>([]);
   const [fedLoading, setFedLoading]       = useState(false);
-  const [edgeDevices, setEdgeDevices]     = useState<any[]>([]);
+  const [edgeDevices, setEdgeDevices]     = useState<EdgeDevice[]>([]);
   const [edgeLoading, setEdgeLoading]     = useState(false);
 
   useEffect(() => {
@@ -109,7 +173,7 @@ export function SuperAdminDashboard() {
     ]).then(([dlqRes, scanRes]) => {
       setDlqDepth(dlqRes.data?.depth ?? 0);
       const raw = scanRes.data?.scans ?? (Array.isArray(scanRes.data) ? scanRes.data : []);
-      setFailedScans(raw.filter((s:any) => s.status === 'failed').slice(0, 20));
+      setFailedScans(raw.filter((s: FailedScan) => s.status === 'failed').slice(0, 20));
     }).finally(() => setDiagLoading(false));
   }, [tab]);
 
@@ -159,7 +223,7 @@ export function SuperAdminDashboard() {
     display:'flex',alignItems:'center',gap:5,
   });
 
-  const filteredTenants = useMemo(() => tenants.filter((t:any)=>!tenantSearch||(t.name||'').toLowerCase().includes(tenantSearch.toLowerCase())||(t.region||'').includes(tenantSearch)), [tenants, tenantSearch]);
+  const filteredTenants = useMemo(() => tenants.filter((t:Tenant)=>!tenantSearch||(t.name||'').toLowerCase().includes(tenantSearch.toLowerCase())||(t.region||'').includes(tenantSearch)), [tenants, tenantSearch]);
 
   const [adminStatus, setAdminStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
   const [showTrainingConfirm, setShowTrainingConfirm] = useState(false);
@@ -257,7 +321,7 @@ export function SuperAdminDashboard() {
                   <tr><td colSpan={5} style={{padding:32,textAlign:'center',color:C.textLo,fontSize:12}}>
                     {tenantSearch ? `No tenants matching "${tenantSearch}"` : 'No tenants provisioned yet.'}
                   </td></tr>
-                ) : filteredTenants.map((t:any, i:number)=>(
+                ) : filteredTenants.map((t:Tenant, i:number)=>(
                   <tr key={i} style={{borderTop:`1px solid ${C.border}`}}>
                     <td style={{padding:'12px 12px',fontSize:12,color:C.textHi}}>{t.name}</td>
                     <td style={{padding:'12px 12px',fontSize:10,color:C.textMd}}>{t.region}</td>
@@ -317,7 +381,7 @@ export function SuperAdminDashboard() {
             <div style={{padding:40,textAlign:'center',color:C.textLo,fontSize:12}}>
               No AI models registered. Use the A/B test panel to register and promote models.
             </div>
-          ) : aiModels.map((m:any)=>(
+          ) : aiModels.map((m:AiModel)=>(
             <div key={m.version || m.id} style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
                 <div>
@@ -373,7 +437,7 @@ export function SuperAdminDashboard() {
           </div>
           <div style={{padding:16,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
             <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:10}}>AI Service Status</div>
-            {loading ? <div style={{fontSize:12,color:C.textLo}}>Loading...</div> : health?.map((svc:any)=>(
+            {loading ? <div style={{fontSize:12,color:C.textLo}}>Loading...</div> : health?.map((svc:HealthService)=>(
               <div key={svc.name} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:`1px solid ${C.border}`}}>
                 <span style={{fontSize:12,color:C.textHi}}>{svc.name}</span>
                 <span style={{fontSize:11,color:svc.status==='healthy'?C.normal:C.critical,fontFamily:C.FM}}>{svc.status} {svc.latency?`${svc.latency}ms`:''}</span>
@@ -407,7 +471,7 @@ export function SuperAdminDashboard() {
               <div style={{fontSize:12,color:C.textLo}}>Loading...</div>
             ) : failedScans.length === 0 ? (
               <div style={{padding:20,textAlign:'center',color:C.normal,fontSize:12}}>✓ No failed scans in queue.</div>
-            ) : failedScans.map((s:any) => (
+            ) : failedScans.map((s: FailedScan) => (
               <div key={s.id} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:`1px solid ${C.border}`}}>
                 <div>
                   <div style={{fontSize:12,color:C.textHi,fontFamily:C.FM}}>{s.id?.slice(0,12)}...</div>
@@ -505,8 +569,9 @@ export function SuperAdminDashboard() {
                 try {
                   await apiClient.post('/ai/federated/train');
                   setAdminStatus({ msg: 'Federated training round initiated.', type:'ok' });
-                } catch(e: any) {
-                  setAdminStatus({ msg: `Training trigger failed: ${e.response?.data?.error || e.message}`, type:'err' });
+                } catch(e: unknown) {
+                  const msg = e instanceof Error ? e.message : String(e);
+                  setAdminStatus({ msg: `Training trigger failed: ${msg}`, type:'err' });
                 }
               }} style={{flex:1,padding:12,background:C.info,color:'white',border:'none',borderRadius:10,fontWeight:700,cursor:'pointer'}}>Initiate Round</button>
             </div>
@@ -574,8 +639,9 @@ export function SuperAdminDashboard() {
                 await apiClient.post('/tenants', Object.fromEntries(d));
                 setAdminStatus({ msg: 'Tenant provisioned successfully.', type:'ok' });
                 setShowProvision(false);
-              } catch(err:any) { 
-                setAdminStatus({ msg: `Provisioning failed: ${err.message}`, type:'err' });
+              } catch(err: unknown) { 
+                const msg = err instanceof Error ? err.message : 'Operation failed';
+                setAdminStatus({ msg: `Provisioning failed: ${msg}`, type:'err' });
               }
             }} style={{display:'flex',flexDirection:'column',gap:14}}>
               <div><label style={{fontSize:11,color:C.textLo,display:'block',marginBottom:4}}>INSTITUTION NAME</label>

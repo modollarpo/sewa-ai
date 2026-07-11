@@ -268,6 +268,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
   const [actionBusy, setActionBusy] = useState(false);
   const [showReel, setShowReel] = useState(false);
   const [showOpinionModal, setShowOpinionModal] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const ai = scan?.aiResult;
   
   const handleAction = async (type: string) => {
@@ -280,7 +281,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
         await apiClient.post(`/scans/${scan.id}/notify`);
       }
     } catch (err) {
-      console.error('[Radiologist] Action failed:', err);
+      setActionError('Action failed. Please try again.');
     } finally {
       setActionBusy(false);
     }
@@ -304,6 +305,12 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
 
   return (
     <div className="p-4 flex flex-col gap-5 animate-fade-in">
+      {actionError && (
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[#2A0A0A]/40 border border-[#E03535]/30 text-[#E03535] text-xs font-bold">
+          <span>⚠ {actionError}</span>
+          <button onClick={() => setActionError(null)} className="text-[#E03535] hover:text-white">✕</button>
+        </div>
+      )}
       {/* Finding Card */}
       <div className={`p-4 rounded-xl border transition-all duration-300 ${
         ai.urgency === 'CRITICAL' ? 'bg-[#2A0A0A]/40 border-[#E03535]/30' : 'bg-[#111F1A]/40 border-[#1B3028]'
@@ -473,7 +480,7 @@ function AIResultsPanel({ scan, onRequestVLM }: { scan:any; onRequestVLM:()=>voi
             try {
               await apiClient.post(`/ai/icd10/${scan.id}`);
               onRequestVLM(); 
-            } catch(e) { console.error('[Radiologist] ICD-10 failed'); }
+            } catch(e) { setActionError('ICD-10 coding failed.'); }
             finally { setActionBusy(false); }
           }}
           className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#111F1A] border border-[#1B3028] text-[#408D7B] text-[10px] font-bold uppercase tracking-wide hover:bg-[#408D7B] hover:text-white transition-all active:scale-95"
@@ -617,7 +624,6 @@ function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, 
       onSign();
       setStatus({ msg: 'Diagnostic report signed and released to EHR.', type: 'ok' });
     } catch (err) {
-      console.error('Sign failed:', err);
       setStatus({ msg: 'Failed to authorize report release.', type: 'err' });
     } finally {
       setBusy(false);
@@ -755,7 +761,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
       const data = await (await import('../../services/apiClient')).getPendingSecondOpinions();
       setPendingOpinions(data);
     } catch (e) {
-      console.error('[SEWA] Failed to load pending second opinions:', e);
+      setStatus({ msg: 'Failed to load pending reviews.', type: 'err' });
     }
   };
 
@@ -941,7 +947,6 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
                             setStatus({ msg: data.summary, type: 'err' });
                           }
                         } catch (err: any) {
-                          console.error('[NLQ] Failed:', err);
                           setStatus({ msg: 'Query failed: ' + (err.response?.data?.message || err.message), type: 'err' });
                         }
                       }

@@ -81,6 +81,7 @@ export function SupportTicketsPage() {
   const [newTicket, setNewTicket] = useState({
     subject:'', description:'', category:'general', priority:'medium', tags:[] as string[]
   });
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
   const isAdmin = ['admin','superadmin'].includes(user?.role || '');
 
@@ -90,7 +91,7 @@ export function SupportTicketsPage() {
       if (ticketStatusFilter) params.set('status', ticketStatusFilter);
       const res = await apiClient.get(`/support/tickets?${params.toString()}`);
       setTickets(res.data);
-    } catch (e) { console.error('Failed to fetch tickets', e); }
+    } catch (e) { setStatus({ msg: 'Failed to load tickets.', type: 'err' }); }
     setLoadingTickets(false);
   };
 
@@ -98,7 +99,7 @@ export function SupportTicketsPage() {
     try {
       const data = await getFeedback({ status: feedbackStatusFilter });
       setFeedback(data);
-    } catch (e) { console.error('Failed to fetch feedback', e); }
+    } catch (e) { setStatus({ msg: 'Failed to load feedback.', type: 'err' }); }
     setLoadingFeedback(false);
   };
 
@@ -112,7 +113,7 @@ export function SupportTicketsPage() {
       setShowCreateTicket(false);
       setNewTicket({ subject:'', description:'', category:'general', priority:'medium', tags:[] });
       fetchTickets();
-    } catch (e) { console.error('Failed to create ticket', e); }
+    } catch (e) { setStatus({ msg: 'Failed to create ticket.', type: 'err' }); }
   };
 
   return (
@@ -125,6 +126,16 @@ export function SupportTicketsPage() {
             <p style={{ fontSize:13, color:C.textMd, margin:'6px 0 0' }}>Submit support requests and share product feedback</p>
           </div>
         </div>
+
+        {status && (
+          <div style={{ padding:'10px 16px', marginBottom:16, borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center',
+            background: status.type==='ok' ? `${C.normal}14` : `${C.critical}14`,
+            border: `1px solid ${status.type==='ok' ? C.normal : C.critical}30`,
+            color: status.type==='ok' ? C.normal : C.critical, fontSize:12, fontWeight:600, fontFamily:C.F }}>
+            <span>{status.type==='ok' ? '✓' : '⚠'} {status.msg}</span>
+            <button onClick={() => setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer', fontSize:14 }}>✕</button>
+          </div>
+        )}
 
         {/* Tabs */}
         <div style={{ display:'flex', gap:8, marginBottom:24, borderBottom:`1px solid ${C.border}`, paddingBottom:4 }}>

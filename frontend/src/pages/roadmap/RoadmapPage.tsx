@@ -2,19 +2,16 @@
 // Public-facing internal product roadmap: Q1-Q4 2026, feature voting, release notes
 
 import React, { useState } from 'react';
+import { colors } from '../../design-system/tokens';
 
 const C = {
-  bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
-  brand:'#408D7B', brandLt:'#52B09A', brandDk:'#2E6B5E',
-  critical:'#E03535', urgent:'#E08A20',
-  normal:'#1DBF73',   normalBg:'#0A1F14',
-  info:'#2A6EF2',     infoBg:'#0A1530',
-  purple:'#8B5CF6',   purpleBg:'#1A0A30',
-  amber:'#F59E0B',
-  textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
+  ...colors,
+  brandLt: colors.brandLight, brandDk: colors.brandDark,
+  textHi: colors.textHigh, textMd: colors.textMed, textLo: colors.textLow,
+  border: colors.bgBorder,
+  purple: '#8B5CF6', purpleBg: '#1A0A30', amber: '#F59E0B',
+  F: "'IBM Plex Sans',system-ui,sans-serif",
+  FM: "'IBM Plex Mono',monospace",
 };
 
 type Status = 'shipped' | 'in_progress' | 'planned' | 'researching';

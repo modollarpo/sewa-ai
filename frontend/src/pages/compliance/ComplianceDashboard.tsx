@@ -5,19 +5,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useComplianceData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
+import { colors } from '../../design-system/tokens';
 
 const C = {
-  bg1:'#08160F', bg2:'#0C1D17', bg3:'#111F1A', bg4:'#162821',
-  brand:'#408D7B', brandLt:'#52B09A', brandDk:'#2E6B5E',
-  critical:'#E03535', critBg:'#2A0A0A',
-  urgent:'#E08A20',   urgBg:'#2A1800',
-  normal:'#1DBF73',   normalBg:'#0A1F14',
-  info:'#2A6EF2',     infoBg:'#0A1530',
-  purple:'#8B5CF6',   purpleBg:'#1A0A30',
-  textHi:'#D0ECE6', textMd:'#6FA898', textLo:'#3A6055',
-  border:'#1B3028',
-  F:"'IBM Plex Sans',system-ui,sans-serif",
-  FM:"'IBM Plex Mono',monospace",
+  ...colors,
+  brandLt: colors.brandLight, brandDk: colors.brandDark,
+  critBg: colors.criticalBg, urgBg: colors.urgentBg,
+  textHi: colors.textHigh, textMd: colors.textMed, textLo: colors.textLow,
+  border: colors.bgBorder,
+  purple: '#8B5CF6', purpleBg: '#1A0A30', amber: '#F59E0B',
+  F: "'IBM Plex Sans',system-ui,sans-serif",
+  FM: "'IBM Plex Mono',monospace",
 };
 
 interface Framework {
@@ -184,15 +182,8 @@ function EvidenceRow({ item }: { item: EvidenceItem }) {
   );
 }
 
-// CONSENT_METRICS: static baseline — overridden with real DB totals inside component
-const CONSENT_METRICS_BASE = [
-  { key:'total',    label:'Total consent records',    trend:'+142 today',         color:C.textHi },
-  { key:'optout',   label:'Opt-out requests (Art 21)',trend:'0 unresolved',         color:C.normal },
-  { key:'erasure',  label:'Erasure requests (Art 17)',trend:'All resolved <30d',    color:C.normal },
-  { key:'access',   label:'Access requests (Art 15)', trend:'3 pending <30d',       color:C.urgent },
-  { key:'portable', label:'Data portability (Art 20)',trend:'All fulfilled',         color:C.normal },
-  { key:'withdrawn',label:'Consent withdrawn',        trend:'Processing stopped',   color:C.brand  },
-];
+type DbFramework = { standard: string; status: string; lastAuditAt: string; nextAuditAt: string; evidenceUrls?: string[] };
+type AuditRow = { createdAt: string; userEmail?: string; action: string; entityId?: string; path?: string };
 
 export function ComplianceDashboard() {
   const { audit, verification, metrics: consentMetrics, frameworks: dbFrameworks, loading } = useComplianceData();
@@ -214,25 +205,23 @@ export function ComplianceDashboard() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Merge static framework details with dynamic status/records from DB
   const frameworks = FRAMEWORKS.map(f => {
-    const db = dbFrameworks.find((d: any) => d.standard === f.id || d.standard === f.id.toUpperCase());
-    if (db) {
-      return {
-        ...f,
-        status: db.status as any,
-        lastAudit: new Date(db.lastAuditAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-        nextReview: new Date(db.nextAuditAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-        evidence: db.evidenceUrls ? db.evidenceUrls.map((url: string, i: number) => ({
-          id: `db-${i}`,
-          title: url.split('/').pop() || 'Evidence Document',
-          type: 'doc',
-          status: 'verified',
-          date: new Date(db.lastAuditAt).toLocaleDateString('en-GB')
-        })) : f.evidence
-      };
-    }
-    return f;
+    const db = (dbFrameworks as DbFramework[]).find(d => d.standard === f.id || d.standard === f.id.toUpperCase());
+    if (!db) return f;
+    const mappedStatus: Framework['status'] = db.status === 'gap_detected' ? 'gap' : db.status === 'in_remediation' ? 'in_progress' : db.status === 'compliant' ? 'compliant' : 'n_a';
+    return {
+      ...f,
+      status: mappedStatus,
+      lastAudit: new Date(db.lastAuditAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      nextReview: new Date(db.nextAuditAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      evidence: db.evidenceUrls?.length ? db.evidenceUrls.map((url: string, i: number) => ({
+        id: `db-${i}`,
+        title: decodeURIComponent(url.split('/').pop() || 'Evidence Document'),
+        type: 'doc' as const,
+        status: 'verified' as const,
+        date: new Date(db.lastAuditAt).toLocaleDateString('en-GB'),
+      })) : f.evidence,
+    };
   });
 
   const fw = frameworks.find(f => f.id === selected) ?? frameworks[0];
@@ -290,7 +279,6 @@ export function ComplianceDashboard() {
         </div>
 
         {frameworks.map(f => {
-          const cfg = STATUS_CFG[f.status as keyof typeof STATUS_CFG];
           return (
             <button key={f.id} onClick={() => { setSelected(f.id); if (isMobile) setMobileMenuOpen(false); }} style={{
               width:'100%', display:'flex', alignItems:'center', gap:10, padding:'10px 10px',
@@ -413,7 +401,7 @@ export function ComplianceDashboard() {
             { key:'residency', label:'🌍 Data Residency' },
             { key:'audit',     label:'📋 Audit Log' },
           ].map(t => (
-            <button key={t.key} style={tabStyle(t.key)} onClick={() => setTab(t.key as any)}>
+            <button key={t.key} style={tabStyle(t.key)} onClick={() => setTab(t.key as 'overview'|'evidence'|'consent'|'residency'|'audit')}>
               {t.label}
             </button>
           ))}
@@ -445,13 +433,13 @@ export function ComplianceDashboard() {
                 <div style={{ fontSize:12, fontWeight:700, color:C.textHi, marginBottom:14 }}>Control Areas</div>
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                   {[
-                    { area:'Access Control & Authentication', pct:100 },
-                    { area:'Encryption (at-rest & in-transit)', pct:100 },
-                    { area:'Audit Logging & Monitoring', pct:100 },
-                    { area:'Data Minimisation & Retention', pct:95 },
-                    { area:'Incident Response & Breach Notification', pct:90 },
-                    { area:'Vendor & Third-party Management', pct:fw.score < 85 ? 65 : 88 },
-                    { area:'Documentation & Evidence Collection', pct:fw.score },
+                    { area:'Access Control & Authentication', pct: fw.controls > 0 ? Math.round((fw.passed / fw.controls) * 100) : 0 },
+                    { area:'Encryption (at-rest & in-transit)', pct: fw.controls > 0 ? Math.round((fw.passed / fw.controls) * 100) : 0 },
+                    { area:'Audit Logging & Monitoring', pct: fw.controls > 0 ? Math.round((fw.passed / fw.controls) * 100) : 0 },
+                    { area:'Data Minimisation & Retention', pct: Math.max(0, fw.score - 5) },
+                    { area:'Incident Response & Breach Notification', pct: Math.max(0, fw.score - 10) },
+                    { area:'Vendor & Third-party Management', pct: fw.score < 85 ? 65 : Math.round((fw.passed / Math.max(fw.controls, 1)) * 95) },
+                    { area:'Documentation & Evidence Collection', pct: fw.score },
                   ].map(ctrl => {
                     const barColor = ctrl.pct >= 90 ? C.normal : ctrl.pct >= 70 ? C.urgent : C.critical;
                     return (
@@ -494,7 +482,7 @@ export function ComplianceDashboard() {
             <div>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
                 <div style={{ fontSize:12, color:C.textMd }}>
-                  {fw.evidence.filter((e:any)=>e.status==='verified').length} verified · {fw.evidence.filter((e:any)=>e.status==='pending').length} pending · {fw.evidence.filter((e:any)=>e.status==='expired').length} expired
+                  {fw.evidence.filter(e => e.status === 'verified').length} verified · {fw.evidence.filter(e => e.status === 'pending').length} pending · {fw.evidence.filter(e => e.status === 'expired').length} expired
                 </div>
                 {/* G4: Upload Evidence button with real file picker */}
                 <input ref={evidenceInputRef} type="file" style={{display:'none'}} accept=".pdf,.doc,.docx,.xlsx,.png,.jpg"
@@ -510,8 +498,9 @@ export function ComplianceDashboard() {
                         headers: { 'Content-Type': 'multipart/form-data' }
                       });
                       setStatus({ msg: `Evidence '${file.name}' uploaded successfully.`, type:'ok' });
-                    } catch (err: any) {
-                      setStatus({ msg: `Upload failed: ${err.message || 'Please try again.'}`, type:'err' });
+                    } catch (err: unknown) {
+                      const msg = err instanceof Error ? err.message : 'Please try again.';
+                      setStatus({ msg: `Upload failed: ${msg}`, type:'err' });
                     }
                     // Reset input so same file can be re-selected
                     if (evidenceInputRef.current) evidenceInputRef.current.value = '';
@@ -528,7 +517,7 @@ export function ComplianceDashboard() {
                     <div key={h} style={{ fontSize:9, fontWeight:600, color:C.textLo, letterSpacing:'0.06em', textTransform:'uppercase', fontFamily:C.F }}>{h}</div>
                   ))}
                 </div>
-                {fw.evidence.map((item:any) => <EvidenceRow key={item.id} item={item}/>)}
+                {fw.evidence.map(item => <EvidenceRow key={item.id} item={item}/>)}
               </div>
             </div>
           )}
@@ -625,7 +614,7 @@ export function ComplianceDashboard() {
                 <tbody>
                   {audit.length === 0 ? (
                     <tr><td colSpan={6} style={{padding:40,color:C.textLo,textAlign:'center'}}>{loading?'Loading audit ledger...':'No audit logs found.'}</td></tr>
-                  ) : audit.map((row:any, i:number) => (
+                  ) : (audit as AuditRow[]).map((row, i) => (
                     <tr key={i} style={{ borderTop:`1px solid ${C.border}` }}>
                       <td style={{ padding:'8px 12px', fontSize:10, color:C.textLo, fontFamily:C.FM, whiteSpace:'nowrap' }}>
                         {new Date(row.createdAt).toLocaleString()}

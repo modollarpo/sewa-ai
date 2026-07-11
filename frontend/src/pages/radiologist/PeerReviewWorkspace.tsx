@@ -21,6 +21,7 @@ export function PeerReviewWorkspace() {
   const [loading, setLoading] = useState(true);
   const [activeScan, setActiveScan] = useState<any | null>(null);
   const [groundTruth, setGroundTruth] = useState('');
+  const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
 
   useEffect(() => {
     fetchQueue();
@@ -35,7 +36,7 @@ export function PeerReviewWorkspace() {
         setActiveScan(res.data.queue[0]);
       }
     } catch (e) {
-      console.error('Failed to load queue', e);
+      setStatus({ msg: 'Failed to load review queue.', type: 'err' });
     } finally {
       setLoading(false);
     }
@@ -60,7 +61,7 @@ export function PeerReviewWorkspace() {
       setActiveScan(null);
       setGroundTruth('');
     } catch (e) {
-      console.error('Failed to submit peer review', e);
+      setStatus({ msg: 'Failed to submit peer review.', type: 'err' });
     }
   };
 
@@ -74,6 +75,17 @@ export function PeerReviewWorkspace() {
 
   return (
     <div style={{flex:1, display:'flex', background:C.bg1, overflow:'hidden', fontFamily:C.F}}>
+      
+      {status && (
+        <div style={{ position:'fixed', top:80, right:20, zIndex:1000, padding:'10px 16px', borderRadius:10,
+          display:'flex', alignItems:'center', gap:8, fontSize:12, fontWeight:600,
+          background: status.type==='ok' ? `${C.normal}14` : `${C.critical}14`,
+          border: `1px solid ${status.type==='ok' ? C.normal : C.critical}30`,
+          color: status.type==='ok' ? C.normal : C.critical, fontFamily:C.F, boxShadow:'0 4px 20px rgba(0,0,0,0.4)' }}>
+          <span>{status.type==='ok' ? '✓' : '⚠'} {status.msg}</span>
+          <button onClick={() => setStatus(null)} style={{ background:'none', border:'none', color:'inherit', cursor:'pointer', fontSize:14 }}>✕</button>
+        </div>
+      )}
       
       {/* Sidebar Queue */}
       <div style={{width: 350, borderRight:`1px solid ${C.border}`, display:'flex', flexDirection:'column', background:C.bg2}}>
