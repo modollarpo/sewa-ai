@@ -36,6 +36,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: triage
         securityContext:
@@ -46,6 +48,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-triage:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
@@ -115,6 +119,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: vlm-report
         securityContext:
@@ -125,6 +131,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-vlm:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
@@ -204,6 +212,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: pathology
         securityContext:
@@ -214,6 +224,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-pathology:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
@@ -283,6 +295,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: uncertainty
         securityContext:
@@ -293,6 +307,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-uncertainty:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
@@ -362,6 +378,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: federated
         securityContext:
@@ -372,6 +390,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-federated:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
@@ -441,6 +461,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: continuous
         securityContext:
@@ -451,6 +473,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-continuous:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
@@ -520,6 +544,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: metacognition
         securityContext:
@@ -530,6 +556,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-metacognition:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
@@ -599,6 +627,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: mammography
         securityContext:
@@ -609,6 +639,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-mammography:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
@@ -678,6 +710,8 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: models
+        emptyDir: {}
       containers:
       - name: retinal
         securityContext:
@@ -688,6 +722,8 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+        - name: models
+          mountPath: /models
         image: "sewaaiproductionacr.azurecr.io/sewa-ai-retinal:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
