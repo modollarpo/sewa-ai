@@ -42,6 +42,20 @@ export function ReferralNetwork() {
   const [submitMsg, setSubmitMsg]   = useState<{ type: 'ok'|'err'; msg: string }|null>(null);
 
   useEffect(() => {
+    if (!showNewModal) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowNewModal(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showNewModal]);
+
+  useEffect(() => {
+    if (!selectedRef) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedRef(null); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [selectedRef]);
+
+  useEffect(() => {
     const r = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', r);
     return () => window.removeEventListener('resize', r);
@@ -358,10 +372,10 @@ export function ReferralNetwork() {
 
       {/* NEW REFERRAL MODAL */}
       {showNewModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: 20 }}>
+        <div role="dialog" aria-modal="true" aria-labelledby="new-referral-modal-title" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: 20 }}>
           <div style={{ background: C.bg2, padding: 24, borderRadius: 16, width: '100%', maxWidth: 480, border: `1px solid ${C.border}`, boxShadow: '0 24px 64px rgba(0,0,0,0.8)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ margin: 0, color: C.textHi, fontSize: 16, fontWeight: 700 }}>New Specialist Referral</h3>
+              <h3 id="new-referral-modal-title" style={{ margin: 0, color: C.textHi, fontSize: 16, fontWeight: 700 }}>New Specialist Referral</h3>
               <button onClick={() => { setShowNewModal(false); setSubmitMsg(null); }} style={{ background: 'none', border: 'none', color: C.textLo, cursor: 'pointer', fontSize: 18 }}>✕</button>
             </div>
 
@@ -439,10 +453,10 @@ export function ReferralNetwork() {
 
       {/* REFERRAL DETAIL MODAL */}
       {selectedRef && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: 20 }}>
+        <div role="dialog" aria-modal="true" aria-labelledby="ref-detail-modal-title" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: 20 }}>
           <div style={{ background: C.bg2, padding: 24, borderRadius: 16, width: '100%', maxWidth: 520, border: `1px solid ${C.border}`, boxShadow: '0 24px 64px rgba(0,0,0,0.8)', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ margin: 0, color: C.textHi, fontSize: 16, fontWeight: 700 }}>Referral #{selectedRef.id.substring(0, 8)}</h3>
+              <h3 id="ref-detail-modal-title" style={{ margin: 0, color: C.textHi, fontSize: 16, fontWeight: 700 }}>Referral #{selectedRef.id.substring(0, 8)}</h3>
               <button onClick={() => setSelectedRef(null)} style={{ background: 'none', border: 'none', color: C.textLo, cursor: 'pointer', fontSize: 18 }}>✕</button>
             </div>
 

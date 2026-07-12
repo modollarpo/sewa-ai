@@ -27,6 +27,13 @@ export function QrScannerModal({
     return () => stopScanner();
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
   const startScanner = async () => {
     try {
       setError('');
@@ -72,7 +79,7 @@ export function QrScannerModal({
   if (!isOpen) return null;
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-labelledby="qr-scanner-title" style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex',
       alignItems: 'center', justifyContent: 'center', zIndex: 1000,
     }} onClick={onClose}>
@@ -81,7 +88,7 @@ export function QrScannerModal({
         width: '100%', maxWidth: 480, padding: 24,
       }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: C.textHi, fontFamily: C.F }}>
+          <h2 id="qr-scanner-title" style={{ margin: 0, fontSize: 18, fontWeight: 800, color: C.textHi, fontFamily: C.F }}>
             {title}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: C.textMd, cursor: 'pointer', fontSize: 18 }}>✕</button>

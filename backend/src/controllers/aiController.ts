@@ -367,7 +367,7 @@ export const ambientDictation = async (req: Request, res: Response, next: NextFu
       try {
         const endpoint = config.AZURE_OPENAI_ENDPOINT.endsWith('/') ? config.AZURE_OPENAI_ENDPOINT : `${config.AZURE_OPENAI_ENDPOINT}/`;
         const whisperDeployment = config.AZURE_OPENAI_WHISPER_DEPLOYMENT || 'whisper';
-        const transcriptionUrl = `${endpoint}openai/deployments/${whisperDeployment}/audio/transcriptions?api-version=2024-02-15-preview`;
+        const transcriptionUrl = `${endpoint}openai/deployments/${whisperDeployment}/audio/transcriptions?api-version=2025-01-01-preview`;
         const formData = new FormData();
         formData.append('file', audioBuffer, { filename: 'audio.webm', contentType: 'audio/webm' });
         const whisperRes = await axios.post(transcriptionUrl, formData, {
@@ -387,34 +387,47 @@ export const ambientDictation = async (req: Request, res: Response, next: NextFu
     }
 
     // 2. Clinical Term Extraction via Azure OpenAI GPT
-    const gptEndpoint = config.AZURE_OPENAI_ENDPOINT?.endsWith('/') ? config.AZURE_OPENAI_ENDPOINT : `${config.AZURE_OPENAI_ENDPOINT}/`;
-    const gptDeployment = config.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-54-mini';
-    const gptUrl = `${gptEndpoint}openai/deployments/${gptDeployment}/chat/completions?api-version=2024-02-15-preview`;
-    
     let extractedTerms = [];
-    try {
-      const gptRes = await axios.post(gptUrl, {
-        messages: [
-          { role: 'system', content: 'You are a clinical NLP extractor. Extract key terms from the following transcription. Return ONLY a JSON array with objects formatted as { "term": string, "category": "Symptom" | "Finding" | "Diagnosis" }.' },
-          { role: 'user', content: transcription }
-        ],
-        temperature: 0.1
-      }, {
-        headers: { 'api-key': config.AZURE_OPENAI_API_KEY }
-      });
-      
-      const content = gptRes.data.choices[0].message.content;
-      const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
-      extractedTerms = JSON.parse(jsonStr);
-    } catch (gptErr: any) {
-      logger.error(`Azure OpenAI GPT Extraction Error: ${gptErr.message}`);
-      // Fallback
+    if (!config.AZURE_OPENAI_API_KEY || !config.AZURE_OPENAI_ENDPOINT) {
+      logger.warn('[ACI] No Azure OpenAI credentials, returning fallback terms.');
       extractedTerms = [
         { term: "persistent cough", category: "Symptom" },
         { term: "shortness of breath", category: "Symptom" },
         { term: "bilateral opacities", category: "Finding" },
         { term: "viral pneumonia", category: "Diagnosis" }
       ];
+    } else {
+      const gptEndpoint = config.AZURE_OPENAI_ENDPOINT.endsWith('/') ? config.AZURE_OPENAI_ENDPOINT : `${config.AZURE_OPENAI_ENDPOINT}/`;
+      const gptDeployment = config.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-54-mini';
+      const gptUrl = `${gptEndpoint}openai/deployments/${gptDeployment}/chat/completions?api-version=2025-01-01-preview`;
+
+      try {
+        const gptRes = await axios.post(gptUrl, {
+          messages: [
+            { role: 'system', content: 'You are a clinical NLP extractor. Extract key terms from the following transcription. Return ONLY a JSON array with objects formatted as { "term": string, "category": "Symptom" | "Finding" | "Diagnosis" }.' },
+            { role: 'user', content: transcription }
+          ],
+          temperature: 0.1
+        }, {
+          headers: { 'api-key': config.AZURE_OPENAI_API_KEY },
+          timeout: 15000
+        });
+
+        const usage = gptRes.data?.usage;
+        if (usage) logger.info(`[ACI] GPT tokens — prompt: ${usage.prompt_tokens}, completion: ${usage.completion_tokens}, total: ${usage.total_tokens}`);
+
+        const content = gptRes.data.choices[0].message.content;
+        const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
+        extractedTerms = JSON.parse(jsonStr);
+      } catch (gptErr: any) {
+        logger.error(`[ACI] Azure OpenAI GPT Extraction Error: ${gptErr.message}`);
+        extractedTerms = [
+          { term: "persistent cough", category: "Symptom" },
+          { term: "shortness of breath", category: "Symptom" },
+          { term: "bilateral opacities", category: "Finding" },
+          { term: "viral pneumonia", category: "Diagnosis" }
+        ];
+      }
     }
     
     res.json({

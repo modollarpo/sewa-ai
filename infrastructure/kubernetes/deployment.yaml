@@ -101,7 +101,7 @@ data:
   # AI service URLs — AKS internal DNS
   AI_SERVICE_URL:                "http://sewa-ai-triage:8000"
   VLM_SERVICE_URL:               "http://sewa-ai-vlm:8001"
-  UNCERTAINTY_SERVICE_URL:       "http://sewa-ai-uncertainty:8002"
+  UNCERTAINTY_SERVICE_URL:       "http://sewa-ai-uncertainty:8009"
   METACOGNITION_SERVICE_URL:     "http://sewa-ai-metacognition:8003"
   FL_SERVICE_URL:                "http://sewa-ai-federated:8004"
   CL_SERVICE_URL:                "http://sewa-ai-continuous:8005"
@@ -495,7 +495,7 @@ spec:
           image: ACR_LOGIN_SERVER/sewa-ai/ai-uncertainty:IMAGE_TAG
           imagePullPolicy: Always
           ports:
-            - containerPort: 8002
+            - containerPort: 8009
           envFrom:
             - configMapRef:
                 name: sewa-config
@@ -507,7 +507,7 @@ spec:
             requests: { cpu: "1000m", memory: "4Gi", nvidia.com/gpu: "1" }
             limits:   { cpu: "2000m", memory: "8Gi", nvidia.com/gpu: "1" }
           livenessProbe:
-            httpGet: { path: /health, port: 8002 }
+            httpGet: { path: /health, port: 8009 }
             initialDelaySeconds: 60
             periodSeconds: 20
 
@@ -521,8 +521,8 @@ spec:
   selector:
     app: sewa-ai-uncertainty
   ports:
-    - port: 8002
-      targetPort: 8002
+    - port: 8009
+      targetPort: 8009
 
 ---
 # ╔══════════════════════════════════════════════════════════╗

@@ -27,6 +27,12 @@ export function ReferralModal({ scanId, onClose }: { scanId: string; onClose: ()
       .finally(() => setFetchingSpecialists(false));
   }, []);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   const handleSubmit = async () => {
     if (!selected) return;
     setLoading(true);
@@ -42,10 +48,10 @@ export function ReferralModal({ scanId, onClose }: { scanId: string; onClose: ()
   };
 
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:3000, background:'rgba(5,15,12,0.9)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:20, fontFamily:C.F }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="referral-title" onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position:'fixed', inset:0, zIndex:3000, background:'rgba(5,15,12,0.9)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:20, fontFamily:C.F }}>
       <div style={{ width:'100%', maxWidth:480, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:24, padding:32 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
-          <h2 style={{ margin:0, fontSize:20, fontWeight:800, color:C.textHi }}>Refer Out Case</h2>
+          <h2 id="referral-title" style={{ margin:0, fontSize:20, fontWeight:800, color:C.textHi }}>Refer Out Case</h2>
           <button onClick={onClose} style={{ background:'none', border:'none', color:C.textLo, fontSize:20, cursor:'pointer' }}>✕</button>
         </div>
 

@@ -27,6 +27,13 @@ export function ProfileSettings() {
   ];
 
   useEffect(() => {
+    if (!showPasswordModal) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowPasswordModal(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showPasswordModal]);
+
+  useEffect(() => {
     // Fetch tenant settings to load current report language
     apiClient.get('/tenants/me').then((res: any) => {
       if (res.data?.reportLanguage) setReportLanguage(res.data.reportLanguage);
@@ -334,11 +341,11 @@ export function ProfileSettings() {
 
       {/* Password Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#05100D]/90 backdrop-blur-sm animate-fade-in">
+        <div role="dialog" aria-modal="true" aria-labelledby="password-modal-title" className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#05100D]/90 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-md bg-[#08160F] border border-[#1B3028] rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#408D7B]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
             
-            <h3 className="text-2xl font-black text-[#D0ECE6] tracking-tighter mb-8">Rotate Access Password</h3>
+            <h3 id="password-modal-title" className="text-2xl font-black text-[#D0ECE6] tracking-tighter mb-8">Rotate Access Password</h3>
             
             <div className="space-y-5">
               <div className="space-y-2">

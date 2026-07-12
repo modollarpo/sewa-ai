@@ -249,7 +249,7 @@ function StatusBar({ region, role }: { region:string; role:string }) {
   }, []);
 
   return (
-    <footer style={{
+    <footer role="status" aria-live="polite" aria-label="System status" style={{
       position:'fixed', bottom:0, left:0, right:0, height:24, zIndex:50,
       background:C.bg2, borderTop:`1px solid ${C.border}`,
       display:'flex', alignItems:'center', gap:8, padding:'0 12px', overflow:'hidden',
@@ -577,6 +577,8 @@ export default function App() {
   return (
     <div style={{ minHeight:'100vh', background:C.bg0, fontFamily:C.F }} dir={isRTL ? 'rtl' : 'ltr'}>
 
+      <a href="#main-content" className="sewa-sr-only">Skip to main content</a>
+
       {/* STAT / CRITICAL alert banner — above everything */}
       {criticalAlerts.length > 0 && (
         <CriticalAlertBanner alerts={criticalAlerts} />
@@ -605,7 +607,7 @@ export default function App() {
       )}
 
       {/* Main content area */}
-      <main style={fullbleed ? {} : { maxWidth:1440, margin:'0 auto' }}>
+      <main id="main-content" style={fullbleed ? {} : { maxWidth:1440, margin:'0 auto' }}>
         {settingsPage ? (
           <div>
             <button onClick={()=>setSettingsPage(false)} style={{ margin:'20px', padding:'8px 16px', background:C.bg3, border:`1px solid ${C.border}`, color:C.textMd, borderRadius:8, cursor:'pointer' }}>← Back to Dashboard</button>

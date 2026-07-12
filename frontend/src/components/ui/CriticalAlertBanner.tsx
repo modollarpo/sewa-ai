@@ -56,7 +56,7 @@ export function CriticalAlertBanner({ alerts }: Props) {
       : { bg: C.urgBg,    border: C.urgBorder,   accent: C.urgent };
 
   return (
-    <div style={{
+    <div role="alert" aria-live="assertive" style={{
       position:'sticky', top:0, zIndex:300,
       background: colors.bg,
       borderBottom: `2px solid ${colors.accent}`,

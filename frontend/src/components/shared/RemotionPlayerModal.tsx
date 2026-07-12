@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import '../../remotion-env.d.ts';
 
 import { Player } from '@remotion/player';
@@ -13,6 +13,13 @@ interface RemotionPlayerModalProps {
 }
 
 export function RemotionPlayerModal({ isOpen, onClose, composition, inputProps, title }: RemotionPlayerModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   // Get composition config (fps, duration) or use defaults
@@ -28,6 +35,7 @@ export function RemotionPlayerModal({ isOpen, onClose, composition, inputProps, 
 
   return (
     <div 
+      role="dialog" aria-modal="true" aria-labelledby="remotion-player-title"
       style={{
         position: 'fixed',
         inset: 0,
@@ -62,7 +70,7 @@ export function RemotionPlayerModal({ isOpen, onClose, composition, inputProps, 
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-[#1B3028] bg-[#08160F]/80 backdrop-blur-md">
           <div className="flex items-center gap-3 md:gap-4">
             <div className="w-2 h-2 rounded-full bg-[#408D7B] animate-pulse" />
-            <h3 className="text-[10px] md:text-sm font-black text-[#D0ECE6] uppercase tracking-[0.2em]">{title}</h3>
+            <h3 id="remotion-player-title" className="text-[10px] md:text-sm font-black text-[#D0ECE6] uppercase tracking-[0.2em]">{title}</h3>
           </div>
           <button 
             onClick={onClose}

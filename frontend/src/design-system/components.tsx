@@ -2,8 +2,23 @@
 // Atomic component library — every UI primitive used across SEWA.
 // All components use inline styles tied to design tokens for portability.
 
-import React, { useState, forwardRef } from 'react';
+import React, { useState, useRef, useEffect, forwardRef } from 'react';
 import { colors, typography, radius, shadows, transitions, urgencyStyles } from './tokens';
+
+// ── Global focus-visible styles ──────────────────────────────
+if (typeof document !== 'undefined' && !document.getElementById('sewa-a11y-focus')) {
+  const s = document.createElement('style');
+  s.id = 'sewa-a11y-focus';
+  s.textContent = `
+    button:focus-visible, a:focus-visible, [role="switch"]:focus-visible, [role="tab"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid ${colors.brand};
+      outline-offset: 2px;
+    }
+    .sewa-sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+    .sewa-sr-only:focus { position:fixed;width:auto;height:auto;padding:8px 16px;margin:0;z-index:9999;background:${colors.brand};color:${colors.textInverse};font-size:14px;font-weight:600;top:8px;left:8px;border-radius:8px;clip:auto;white-space:normal; }
+  `;
+  document.head.appendChild(s);
+}
 
 // ── cn helper (no clsx dependency) ────────────────────────────
 export function cn(...classes: (string | undefined | false | null)[]): string {
@@ -40,7 +55,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       transition:     `all ${transitions.base}`,
       whiteSpace:     'nowrap',
       width:          fullWidth ? '100%' : undefined,
-      outline:        'none',
+      outline:        '2px solid transparent',
+      outlineOffset:  '2px',
       letterSpacing:  '0.01em',
     };
 
@@ -362,11 +378,20 @@ export function Toggle({ checked, onChange, label, size = 'md' }: {
   const w = size === 'sm' ? 28 : 36;
   const h = size === 'sm' ? 16 : 20;
   const knob = size === 'sm' ? 10 : 14;
+  const labelId = useRef(`toggle-${Math.random().toString(36).slice(2, 8)}`).current;
 
   return (
-    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
       <div
+        role="switch"
+        aria-checked={checked}
+        aria-labelledby={label ? labelId : undefined}
+        aria-label={!label ? 'Toggle' : undefined}
+        tabIndex={0}
         onClick={() => onChange(!checked)}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(!checked); }
+        }}
         style={{
           width:        `${w}px`,
           height:       `${h}px`,
@@ -377,9 +402,10 @@ export function Toggle({ checked, onChange, label, size = 'md' }: {
           transition:   `background ${transitions.base}`,
           flexShrink:   0,
           boxShadow:    checked ? shadows.brand : 'none',
+          cursor:       'pointer',
         }}
       >
-        <div style={{
+        <div aria-hidden="true" style={{
           position:   'absolute',
           top:        `${(h - knob) / 2 - 1}px`,
           left:       checked ? `${w - knob - 3}px` : '2px',
@@ -392,11 +418,11 @@ export function Toggle({ checked, onChange, label, size = 'md' }: {
         }} />
       </div>
       {label && (
-        <span style={{ fontSize: typography.size.sm, color: colors.textMed, fontFamily: typography.fontBase }}>
+        <span id={labelId} style={{ fontSize: typography.size.sm, color: colors.textMed, fontFamily: typography.fontBase }}>
           {label}
         </span>
       )}
-    </label>
+    </span>
   );
 }
 
@@ -591,11 +617,24 @@ export function Tabs({ tabs, active, onChange }: {
   onChange: (id: string) => void;
 }) {
   return (
-    <div style={{ display: 'flex', gap: '2px', borderBottom: `1px solid ${colors.bgBorder}` }}>
+    <div role="tablist" aria-label="Navigation" style={{ display: 'flex', gap: '2px', borderBottom: `1px solid ${colors.bgBorder}` }}>
       {tabs.map(tab => (
         <button
           key={tab.id}
+          role="tab"
+          id={`tab-${tab.id}`}
+          aria-selected={tab.id === active}
+          tabIndex={tab.id === active ? 0 : -1}
           onClick={() => onChange(tab.id)}
+          onKeyDown={e => {
+            const idx = tabs.findIndex(t => t.id === active);
+            let next: number | null = null;
+            if (e.key === 'ArrowRight') next = (idx + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') next = (idx - 1 + tabs.length) % tabs.length;
+            else if (e.key === 'Home') next = 0;
+            else if (e.key === 'End') next = tabs.length - 1;
+            if (next !== null) { e.preventDefault(); onChange(tabs[next].id); }
+          }}
           style={{
             padding:      '10px 16px',
             fontSize:     typography.size.sm,
@@ -700,6 +739,39 @@ export function Modal({ open, onClose, title, children, width = 560 }: {
   open: boolean; onClose: () => void; title: string;
   children: React.ReactNode; width?: number;
 }) {
+  const trapRef = useRef<HTMLDivElement>(null);
+  const prevRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    prevRef.current = document.activeElement as HTMLElement;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); onClose(); }
+    };
+    document.addEventListener('keydown', onKey);
+    requestAnimationFrame(() => {
+      trapRef.current?.querySelector<HTMLElement>('button,[href],input,[tabindex]:not([tabindex="-1"])')?.focus();
+    });
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      prevRef.current?.focus();
+    };
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open || !trapRef.current) return;
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const nodes = trapRef.current!.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])');
+      if (!nodes.length) return;
+      const first = nodes[0], last = nodes[nodes.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', trap);
+    return () => document.removeEventListener('keydown', trap);
+  }, [open]);
+
   if (!open) return null;
   return (
     <div style={{
@@ -710,19 +782,22 @@ export function Modal({ open, onClose, title, children, width = 560 }: {
       animation: 'sewa-fadeIn 150ms ease',
     }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
     >
       <style>{`@keyframes sewa-fadeIn { from { opacity:0; } to { opacity:1; } }`}</style>
-      <div style={{
-        width: '100%', maxWidth: `${width}px`,
-        background: colors.bg2,
-        border: `1px solid ${colors.bgBorder}`,
-        borderRadius: radius['2xl'],
-        boxShadow: shadows.lg,
-        animation: 'sewa-slideUp 200ms ease',
-      }}>
+      <div
+        ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        style={{
+          width: '100%', maxWidth: `${width}px`,
+          background: colors.bg2,
+          border: `1px solid ${colors.bgBorder}`,
+          borderRadius: radius['2xl'],
+          boxShadow: shadows.lg,
+          animation: 'sewa-slideUp 200ms ease',
+        }}
+      >
         <style>{`@keyframes sewa-slideUp { from { transform:translateY(12px); opacity:0; } to { transform:translateY(0); opacity:1; } }`}</style>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px 16px', borderBottom: `1px solid ${colors.bgBorder}` }}>
           <h2 id="modal-title" style={{ margin: 0, fontSize: typography.size.xl, fontWeight: typography.weight.semibold, color: colors.textHigh, fontFamily: typography.fontBase }}>{title}</h2>

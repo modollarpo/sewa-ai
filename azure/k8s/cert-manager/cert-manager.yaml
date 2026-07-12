@@ -26,5 +26,5 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - api.sewa-ai.com  # Replace with your domain
-  - www.sewa-ai.com
+  - api.production.sewaxai.health
+  - production.sewaxai.health

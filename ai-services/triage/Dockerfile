@@ -54,7 +54,7 @@ COPY . .
 
 
 # Model cache directory (populated via AKS PVC in production)
-RUN mkdir -p /models && chmod 777 /models
+RUN mkdir -p /models && chmod 755 /models
 
 # Non-root user
 RUN adduser --disabled-password --gecos '' aiuser \

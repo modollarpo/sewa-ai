@@ -33,7 +33,7 @@ COPY --from=builder /install /usr/local
 COPY . .
 
 
-RUN mkdir -p /models && chmod 777 /models
+RUN mkdir -p /models && chmod 755 /models
 RUN adduser --disabled-password --gecos '' aiuser \
     && chown -R aiuser:aiuser /app /models
 USER aiuser

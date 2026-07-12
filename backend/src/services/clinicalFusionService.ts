@@ -69,7 +69,7 @@ export async function fuseClinicalData(patientId: string, scanId: string, tenant
     }
 
     const endpoint = config.AZURE_OPENAI_ENDPOINT.endsWith('/') ? config.AZURE_OPENAI_ENDPOINT : `${config.AZURE_OPENAI_ENDPOINT}/`;
-    const url = `${endpoint}openai/deployments/${config.AZURE_OPENAI_DEPLOYMENT_NAME}/chat/completions?api-version=2024-02-15-preview`;
+    const url = `${endpoint}openai/deployments/${config.AZURE_OPENAI_DEPLOYMENT_NAME}/chat/completions?api-version=2025-01-01-preview`;
 
     const response = await axios.post(url, {
       messages: [

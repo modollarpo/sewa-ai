@@ -4,9 +4,14 @@
 # Requirements: Docker 24+, 4 CPU cores, 4GB RAM, 64GB disk
 # © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
+x-sewa-common:
+  sewa-edge-tag: &sewa-edge-tag ${SEWA_EDGE_TAG:-prod-20260712-113620}
+
 services:
   sewa-edge:
-    image: sewaregistry.azurecr.io/sewa-edge:latest
+    # Pin the image tag via SEWA_EDGE_TAG env var or accept the default below.
+    # To override: SEWA_EDGE_TAG=prod-20260713-090000 docker compose up -d
+    image: sewaregistry.azurecr.io/sewa-edge:${SEWA_EDGE_TAG:-prod-20260712-113620}
     # For local development, build from source instead:
     # build:
     #   context: .

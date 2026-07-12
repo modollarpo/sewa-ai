@@ -25,10 +25,21 @@ spec:
         app: sewa-triage
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: triage
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-triage:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -50,6 +61,12 @@ spec:
             port: 8000
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 90
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -81,10 +98,21 @@ spec:
         app: sewa-vlm-report
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: vlm-report
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-vlm:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -97,7 +125,10 @@ spec:
             cpu: "1000m"
         env:
         - name: AZURE_OPENAI_API_KEY
-          value: "2c3aQcn1hWQtXH2jTJdYfzJea725lgxJ0hgCQc85GjkZPtpdjdAXJQQJ99CGACmepeSXJ3w3AAABACOGpPKq"
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets
+              key: AZURE_OPENAI_API_KEY
         - name: AZURE_OPENAI_ENDPOINT
           value: "https://sewa-ai-production-openai-18104.openai.azure.com/"
         - name: AZURE_OPENAI_DEPLOYMENT
@@ -113,6 +144,12 @@ spec:
             port: 8001
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -144,10 +181,21 @@ spec:
         app: sewa-pathology
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: pathology
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-pathology:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -169,6 +217,12 @@ spec:
             port: 8002
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 90
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -200,10 +254,21 @@ spec:
         app: sewa-uncertainty
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: uncertainty
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-uncertainty:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -225,6 +290,12 @@ spec:
             port: 8009
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8009
+          initialDelaySeconds: 90
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -256,10 +327,21 @@ spec:
         app: sewa-federated
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: federated
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-federated:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -281,6 +363,12 @@ spec:
             port: 8004
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 60
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -312,10 +400,21 @@ spec:
         app: sewa-continuous
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: continuous
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-continuous:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -337,6 +436,12 @@ spec:
             port: 8005
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8005
+          initialDelaySeconds: 60
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -368,10 +473,21 @@ spec:
         app: sewa-metacognition
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: metacognition
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-metacognition:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -393,6 +509,12 @@ spec:
             port: 8003
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8003
+          initialDelaySeconds: 30
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -424,10 +546,21 @@ spec:
         app: sewa-mammography
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: mammography
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-mammography:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -449,6 +582,12 @@ spec:
             port: 8007
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8007
+          initialDelaySeconds: 90
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -480,10 +619,21 @@ spec:
         app: sewa-retinal
     spec:
       serviceAccountName: sewa-ai-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: retinal
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-ai-retinal:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -505,6 +655,12 @@ spec:
             port: 8008
           initialDelaySeconds: 60
           periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8008
+          initialDelaySeconds: 90
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service

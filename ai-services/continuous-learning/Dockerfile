@@ -1,25 +1,30 @@
 # SEWA XAI — ai-services/continuous-learning/Dockerfile
-FROM python:3.11-slim AS base
+# Multi-stage build for smaller, more secure image
+
+# ── Stage 1: Build ─────────────────────────────────────────────
+FROM python:3.11-slim AS builder
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 
-# System deps for OpenCV, PyDICOM
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# Copy source
+# ── Stage 2: Runtime ──────────────────────────────────────────
+FROM python:3.11-slim AS runtime
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+
+COPY --from=builder /install /usr/local
 COPY . .
 
-# Create model cache dir
-RUN mkdir -p /models && chmod 777 /models
+RUN mkdir -p /models && chmod 755 /models
 
-# Non-root user
-RUN adduser --disabled-password --gecos '' aiuser && chown -R aiuser:aiuser /app
+RUN adduser --disabled-password --gecos '' aiuser \
+    && chown -R aiuser:aiuser /app /models
 USER aiuser
 
 EXPOSE 8005

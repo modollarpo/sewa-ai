@@ -21,7 +21,7 @@ scrape_configs:
 
   - job_name: ai-uncertainty
     static_configs:
-      - targets: ['ai-uncertainty:8002']
+      - targets: ['sewa-ai-uncertainty:8009']
     metrics_path: /metrics
 
   - job_name: ai-vlm

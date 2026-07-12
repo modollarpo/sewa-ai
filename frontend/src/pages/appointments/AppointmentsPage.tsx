@@ -89,14 +89,14 @@ function BookModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#05100D]/90 backdrop-blur-sm animate-fade-in">
+    <div role="dialog" aria-modal="true" aria-labelledby="book-modal-title" className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#05100D]/90 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-xl bg-[#08160F] border border-[#1B3028] rounded-[2.5rem] overflow-hidden shadow-2xl relative">
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#408D7B]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
         
         {/* Header */}
         <div className="px-8 py-6 border-b border-[#1B3028] flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-black text-[#D0ECE6] tracking-tight">Clinical Dispatch</h3>
+            <h3 id="book-modal-title" className="text-xl font-black text-[#D0ECE6] tracking-tight">Clinical Dispatch</h3>
             <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest mt-1">
               {step === 'details' ? 'Node Initiation' : step === 'slots' ? 'Protocol Timing' : 'Final Validation'}
             </p>
@@ -264,6 +264,13 @@ export function AppointmentsPage() {
   }, []);
 
   useEffect(() => { loadCalendar(); loadList(); }, [loadCalendar, loadList]);
+
+  useEffect(() => {
+    if (!showBook) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowBook(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showBook]);
 
   const [cancelId, setCancelId] = useState<string | null>(null);
 

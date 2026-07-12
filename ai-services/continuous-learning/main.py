@@ -29,6 +29,7 @@ app.add_middleware(CORSMiddleware, allow_origins=_CL_CORS_ORIGINS, allow_methods
 MODEL_CACHE    = os.getenv("MODEL_CACHE", "/models")
 TRIAGE_URL     = os.getenv("TRIAGE_URL",  "http://ai-triage:8000")
 MIN_CORRECTIONS = int(os.getenv("MIN_CORRECTIONS_FOR_RETRAIN", "50"))
+RETRAIN_WEBHOOK = os.getenv("RETRAIN_WEBHOOK_URL", "")
 
 # ── In-memory correction store (production: PostgreSQL) ─────────
 correction_store: List[Dict[str, Any]] = []
@@ -151,8 +152,44 @@ async def trigger_retraining(corrections: List[Dict[str, Any]]) -> None:
 
     training_state["status"] = "fine_tuning"
 
-    # Simulate fine-tuning epochs (production: Azure ML job)
-    await asyncio.sleep(2)  # Placeholder for actual training
+    # Build structured training manifest
+    epochs          = max(10, len(labeled) // 10)
+    batch_size      = 32
+    learning_rate   = 1e-4
+    finding_counts  = {}
+    for c in labeled:
+        f = c.get("ai_finding", "unknown")
+        finding_counts[f] = finding_counts.get(f, 0) + 1
+
+    manifest = {
+        "job_type":          "fine_tune_triage",
+        "model":             "efficientnet_b0",
+        "base_version":      training_state["model_version"],
+        "training_samples":  len(labeled),
+        "epochs":            epochs,
+        "batch_size":        batch_size,
+        "learning_rate":     learning_rate,
+        "finding_distribution": finding_counts,
+        "correction_types":  {ct: sum(1 for c in labeled if c.get("correction_type") == ct) for ct in set(c.get("correction_type", "unknown") for c in labeled)},
+        "tenant_ids":         list(set(c.get("tenant_id") for c in labeled if c.get("tenant_id"))),
+        "triggered_at":       datetime.now(timezone.utc).isoformat(),
+    }
+
+    # Attempt webhook trigger to external retraining pipeline
+    if RETRAIN_WEBHOOK:
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.post(RETRAIN_WEBHOOK, json=manifest)
+                if resp.is_success:
+                    training_state["webhook_status"] = "dispatched"
+                else:
+                    training_state["webhook_status"] = f"webhook_error_{resp.status_code}"
+        except Exception as exc:
+            training_state["webhook_status"] = f"webhook_failed: {exc}"
+
+    # Structured log for observability / downstream pipeline pickup
+    log_line = json.dumps({"event": "retraining_triggered", **manifest})
+    print(log_line, flush=True)
 
     # Version bump
     current = training_state["model_version"]

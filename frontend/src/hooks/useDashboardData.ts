@@ -186,7 +186,7 @@ export function useTechnicianData() {
     async function fetch() {
       try {
         // Fallback to empty if worklist is 404/empty
-        const worklistRes = await apiClient.get('/scans/technician/worklist').catch(() => ({ data: [] }));
+        const worklistRes = await apiClient.get('/scans').catch(() => ({ data: [] }));
         setData({
           worklist: worklistRes.data,
           recentUploads: worklistRes.data.slice(0, 5),

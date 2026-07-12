@@ -35,6 +35,13 @@ export function SecondOpinionModal({ isOpen, onClose, scanId, reportId }: Second
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -59,7 +66,7 @@ export function SecondOpinionModal({ isOpen, onClose, scanId, reportId }: Second
   }
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-labelledby="second-opinion-title" style={{
       position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', display:'flex',
       alignItems:'center', justifyContent:'center', zIndex:1000,
     }} onClick={onClose}>
@@ -68,7 +75,7 @@ export function SecondOpinionModal({ isOpen, onClose, scanId, reportId }: Second
         width:'100%', maxWidth:600, padding:24, maxHeight:'90vh', overflowY:'auto',
       }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-          <h3 style={{ margin:0, fontSize:20, fontWeight:800, color:C.textHi, fontFamily:C.F }}>Request Second Opinion</h3>
+          <h3 id="second-opinion-title" style={{ margin:0, fontSize:20, fontWeight:800, color:C.textHi, fontFamily:C.F }}>Request Second Opinion</h3>
           <button onClick={onClose} style={{ background:'none', border:'none', color:C.textMd, cursor:'pointer', fontSize:20 }}>×</button>
         </div>
         {success ? (

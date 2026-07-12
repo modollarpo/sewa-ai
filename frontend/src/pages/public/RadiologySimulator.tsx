@@ -22,7 +22,7 @@ export function RadiologySimulator({ onClose }: { onClose: () => void }) {
   const [gameState, setGameState] = useState<'playing' | 'finished'>('playing');
 
   useEffect(() => {
-    apiClient.get('/training/student-cases')
+    apiClient.get('/training/cases')
       .then(res => {
         setCases(res.data);
         setLoading(false);

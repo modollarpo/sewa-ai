@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createFeedback } from '../../services/apiClient';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 
@@ -21,6 +21,13 @@ export function FeedbackModal({ isOpen, onClose, onSubmitted }: Props) {
   const [score, setScore] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +62,7 @@ export function FeedbackModal({ isOpen, onClose, onSubmitted }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div onClick={onClose} style={{
+    <div role="dialog" aria-modal="true" aria-labelledby="feedback-title" onClick={onClose} style={{
       position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
       background:'rgba(0,0,0,0.7)', zIndex: 2000,
       padding:'16px',
@@ -81,7 +88,7 @@ export function FeedbackModal({ isOpen, onClose, onSubmitted }: Props) {
         ) : (
           <>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px' }}>
-              <h2 style={{ fontSize:'18px', fontWeight:900, color:C.textHi, margin:0, fontFamily:C.F }}>
+              <h2 id="feedback-title" style={{ fontSize:'18px', fontWeight:900, color:C.textHi, margin:0, fontFamily:C.F }}>
                 Feedback
               </h2>
               <button onClick={onClose} style={{ background:'none', border:'none', color:C.textLo, fontSize:'20px', cursor:'pointer', padding:0 }}>✕</button>

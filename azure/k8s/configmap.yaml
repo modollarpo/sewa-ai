@@ -71,3 +71,6 @@ data:
   # ── Deployment ─────────────────────────────────────────────────
   DEPLOY_TARGET:        "azure"
   EDGE_SYNC_ENABLED:    "false"
+
+  # ── Azure Key Vault ────────────────────────────────────────────
+  KEY_VAULT_URI:        "https://sewa-ai-kv.vault.azure.net"

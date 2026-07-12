@@ -108,6 +108,8 @@ const UNCERTAINTY_URL   = config.UNCERTAINTY_SERVICE_URL;
 const VLM_URL           = config.VLM_SERVICE_URL;
 const METACOGNITION_URL = config.METACOGNITION_SERVICE_URL;
 const PATHOLOGY_URL     = config.PATHOLOGY_SERVICE_URL;   // Digital Pathology WSI service
+const MAMMOGRAPHY_URL   = config.MAMMOGRAPHY_SERVICE_URL; // Mammography MG service
+const RETINAL_URL       = config.RETINAL_SERVICE_URL;     // Retinal RET service
 
 // CPU services are slower — generous timeouts, but within 2-4s SLA budget
 const SVC_TIMEOUT  = { timeout: 8_000  };   // per AI service call (8s generous ceiling)
@@ -173,6 +175,37 @@ export interface PathologyResult {
   recommendation:  string;
 }
 
+export interface MammographyResult {
+  scan_id: string;
+  primary_finding: string;
+  snomed_code: string;
+  urgency: string;
+  confidence: number;
+  birads_category: string | null;
+  laterality: string;
+  view: string;
+  all_findings: Array<{ condition: string; probability: number }>;
+  inference_ms: number;
+  model_version: string;
+  backend: string;
+  recommendation: string;
+}
+
+export interface RetinalResult {
+  scan_id: string;
+  primary_finding: string;
+  snomed_code: string;
+  urgency: string;
+  confidence: number;
+  dr_grade: string | null;
+  eye: string;
+  all_findings: Array<{ condition: string; probability: number }>;
+  inference_ms: number;
+  model_version: string;
+  backend: string;
+  recommendation: string;
+}
+
 // ── Safe HTTP wrapper ────────────────────────────────────────────────────
 /**
  * POST with timeout-aware error handling.
@@ -207,6 +240,33 @@ async function safePOST<T>(
 }
 
 // No mock/fallback logic in production builds — failures route to DLQ for retries
+
+// ── System user resolver ─────────────────────────────────────────────────
+// Ensures a SYSTEM user exists in the DB so Report.authorId FK constraints
+// aren't violated when the pipeline auto-generates reports.
+const systemUserIdCache = new Map<string, string>();
+
+async function ensureSystemUser(tenantId: string): Promise<string> {
+  const cached = systemUserIdCache.get(tenantId);
+  if (cached) return cached;
+
+  const user = await prisma.user.upsert({
+    where:  { id: 'SYSTEM' },
+    update: { tenantId },
+    create: {
+      id:           'SYSTEM',
+      tenantId,
+      email:        'system@sewaxai.health',
+      passwordHash: 'SYSTEM-USER-NO-LOGIN',
+      firstName:    'System',
+      lastName:     'User',
+      role:         'system',
+    },
+  });
+
+  systemUserIdCache.set(tenantId, user.id);
+  return user.id;
+}
 
 // ── Main pipeline ─────────────────────────────────────────────────────────
 export async function runAIPipeline(scanId: string, tenantId: string): Promise<void> {
@@ -337,7 +397,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       await prisma.report.create({
         data: {
           scanId, tenantId,
-          authorId:       'SYSTEM',
+          authorId:       await ensureSystemUser(tenantId),
           findings:       pathResult.recommendation,
           impression:     pathAIResult.vlmImpression ?? pathResult.primary_finding,
           technique:      `Digital pathology tile classification — ${pathResult.tissue_type} tissue. H&E stain normalisation (Macenko SVD). ONNX INT8 patch-level inference.`,
@@ -394,6 +454,197 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
 
       logger.info(`[AI Pipeline] ✓ PATH pipeline complete: ${scanId} | ${Date.now() - pipelineStart}ms total`);
       return;  // PATH pipeline exits here — does not continue to imaging triage stages
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // MAMMOGRAPHY FAST-TRACK: MG modality routes to dedicated breast imaging
+    // ──────────────────────────────────────────────────────────────────────
+    if (scan.modality === 'MG') {
+      logger.info(`[AI Pipeline] MG modality detected — routing to mammography engine: ${scanId}`);
+      const mgResult = await safePOST<MammographyResult>(
+        `${MAMMOGRAPHY_URL}/mammography/predict`,
+        {
+          scan_id:       scanId,
+          storage_url:   scan.storageUrl,
+          laterality:    'LEFT',
+          view:          'CC',
+          model_version: 'v1.0.0',
+        },
+        { timeout: 15_000 },
+      );
+      logger.info(`[Mammography] ${scanId}: ${mgResult.primary_finding} | BI-RADS=${mgResult.birads_category} | ${mgResult.inference_ms}ms`);
+
+      const mgAIResult = await prisma.aIResult.create({
+        data: {
+          tenantId, scanId,
+          primaryFinding:      mgResult.primary_finding,
+          urgency:             mgResult.urgency === 'CRITICAL' ? 'CRITICAL' : mgResult.urgency === 'URGENT' ? 'URGENT' : 'NORMAL',
+          confidence:          mgResult.confidence,
+          uncertaintyScore:    0,
+          metacognitionFlags:  [],
+          summary:             mgResult.primary_finding,
+          epistemicUncertainty: 0,
+          aleatoricUncertainty: 0,
+          rawJson: { mammography: mgResult, pipeline: { service: 'sewa-mammography', backend: mgResult.backend } } as any,
+          modelId:             `sewa-mg-onnx-int8-${mgResult.model_version}`,
+          clinicalContext,
+          longitudinalContext,
+          vlmFindings:         mgResult.recommendation,
+          vlmImpression:       `${mgResult.primary_finding} (BI-RADS: ${mgResult.birads_category ?? 'N/A'})` +
+                                ` — ${(mgResult.confidence * 100).toFixed(0)}% confidence`,
+        },
+      });
+
+      await prisma.report.create({
+        data: {
+          scanId, tenantId,
+          authorId:       await ensureSystemUser(tenantId),
+          findings:       mgResult.recommendation,
+          impression:     mgResult.primary_finding,
+          technique:      `Mammogram — ${mgResult.view} view, ${mgResult.laterality} breast. ONNX INT8 inference.`,
+          recommendation: mgResult.recommendation,
+          content:        [
+            `TECHNIQUE: Mammogram. ${mgResult.view} view, ${mgResult.laterality} breast.`,
+            `FINDINGS: ${mgResult.primary_finding} (confidence: ${(mgResult.confidence * 100).toFixed(0)}%).`,
+            mgResult.birads_category ? `BI-RADS: ${mgResult.birads_category}.` : '',
+            `SNOMED: ${mgResult.snomed_code}.`,
+            `\nRECOMMENDATION: ${mgResult.recommendation}`,
+          ].filter(Boolean).join('\n'),
+          summary:        `${mgResult.primary_finding} — BI-RADS ${mgResult.birads_category ?? 'N/A'}`,
+          status:         'draft',
+        },
+      });
+
+      await prisma.scan.update({
+        where: { id: scanId },
+        data: {
+          status:              'ai_complete',
+          urgency:             mgResult.urgency,
+          requiresHumanReview: mgResult.urgency !== 'NORMAL',
+          humanReviewReason:   mgResult.urgency !== 'NORMAL' ? 'MAMMOGRAPHY_ESCALATION' : null,
+        },
+      });
+
+      await auditLog({
+        tenantId, userId: 'SYSTEM', action: 'AI_RESULT_CREATED',
+        entity: 'AIResult', entityId: mgAIResult.id,
+        metadata: { scanId, modality: 'MG', finding: mgResult.primary_finding, urgency: mgResult.urgency },
+      });
+
+      if (mgResult.urgency === 'URGENT' || mgResult.urgency === 'CRITICAL') {
+        await alertService.dispatch({
+          tenantId, scanId, aiResultId: mgAIResult.id,
+          urgency: mgResult.urgency as 'URGENT' | 'CRITICAL',
+          primaryFinding: mgResult.primary_finding,
+          confidence: mgResult.confidence,
+          doorToAlertMs: Date.now() - pipelineStart,
+        }).catch(err => logger.error(`[Mammography] Alert dispatch failed: ${err.message}`));
+      }
+
+      io.to(`tenant:${tenantId}`).emit('scan:ai_complete', {
+        scanId, urgency: mgResult.urgency,
+        finding: mgResult.primary_finding,
+        confidence: mgResult.confidence,
+        modality: 'MG',
+      });
+
+      logger.info(`[AI Pipeline] ✓ MG pipeline complete: ${scanId} | ${Date.now() - pipelineStart}ms total`);
+      return;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // RETINAL FAST-TRACK: RET modality routes to dedicated retinal imaging
+    // ──────────────────────────────────────────────────────────────────────
+    if (scan.modality === 'RET') {
+      logger.info(`[AI Pipeline] RET modality detected — routing to retinal engine: ${scanId}`);
+      const retResult = await safePOST<RetinalResult>(
+        `${RETINAL_URL}/retinal/predict`,
+        {
+          scan_id:       scanId,
+          storage_url:   scan.storageUrl,
+          eye:           'RIGHT',
+          model_version: 'v1.0.0',
+        },
+        { timeout: 15_000 },
+      );
+      logger.info(`[Retinal] ${scanId}: ${retResult.primary_finding} | DR_grade=${retResult.dr_grade ?? 'N/A'} | ${retResult.inference_ms}ms`);
+
+      const retAIResult = await prisma.aIResult.create({
+        data: {
+          tenantId, scanId,
+          primaryFinding:      retResult.primary_finding,
+          urgency:             retResult.urgency === 'CRITICAL' ? 'CRITICAL' : retResult.urgency === 'URGENT' ? 'URGENT' : 'NORMAL',
+          confidence:          retResult.confidence,
+          uncertaintyScore:    0,
+          metacognitionFlags:  [],
+          summary:             retResult.primary_finding,
+          epistemicUncertainty: 0,
+          aleatoricUncertainty: 0,
+          rawJson: { retinal: retResult, pipeline: { service: 'sewa-retinal', backend: retResult.backend } } as any,
+          modelId:             `sewa-ret-onnx-int8-${retResult.model_version}`,
+          clinicalContext,
+          longitudinalContext,
+          vlmFindings:         retResult.recommendation,
+          vlmImpression:       `${retResult.primary_finding} (DR grade: ${retResult.dr_grade ?? 'N/A'})` +
+                                ` — ${(retResult.confidence * 100).toFixed(0)}% confidence`,
+        },
+      });
+
+      await prisma.report.create({
+        data: {
+          scanId, tenantId,
+          authorId:       await ensureSystemUser(tenantId),
+          findings:       retResult.recommendation,
+          impression:     retResult.primary_finding,
+          technique:      `Retinal fundus photography — ${retResult.eye} eye. ONNX INT8 inference.`,
+          recommendation: retResult.recommendation,
+          content:        [
+            `TECHNIQUE: Retinal fundus photography. ${retResult.eye} eye.`,
+            `FINDINGS: ${retResult.primary_finding} (confidence: ${(retResult.confidence * 100).toFixed(0)}%).`,
+            retResult.dr_grade ? `DR GRADE: ${retResult.dr_grade}.` : '',
+            `SNOMED: ${retResult.snomed_code}.`,
+            `\nRECOMMENDATION: ${retResult.recommendation}`,
+          ].filter(Boolean).join('\n'),
+          summary:        `${retResult.primary_finding} — DR ${retResult.dr_grade ?? 'N/A'}`,
+          status:         'draft',
+        },
+      });
+
+      await prisma.scan.update({
+        where: { id: scanId },
+        data: {
+          status:              'ai_complete',
+          urgency:             retResult.urgency,
+          requiresHumanReview: retResult.urgency !== 'NORMAL',
+          humanReviewReason:   retResult.urgency !== 'NORMAL' ? 'RETINAL_ESCALATION' : null,
+        },
+      });
+
+      await auditLog({
+        tenantId, userId: 'SYSTEM', action: 'AI_RESULT_CREATED',
+        entity: 'AIResult', entityId: retAIResult.id,
+        metadata: { scanId, modality: 'RET', finding: retResult.primary_finding, urgency: retResult.urgency },
+      });
+
+      if (retResult.urgency === 'URGENT' || retResult.urgency === 'CRITICAL') {
+        await alertService.dispatch({
+          tenantId, scanId, aiResultId: retAIResult.id,
+          urgency: retResult.urgency as 'URGENT' | 'CRITICAL',
+          primaryFinding: retResult.primary_finding,
+          confidence: retResult.confidence,
+          doorToAlertMs: Date.now() - pipelineStart,
+        }).catch(err => logger.error(`[Retinal] Alert dispatch failed: ${err.message}`));
+      }
+
+      io.to(`tenant:${tenantId}`).emit('scan:ai_complete', {
+        scanId, urgency: retResult.urgency,
+        finding: retResult.primary_finding,
+        confidence: retResult.confidence,
+        modality: 'RET',
+      });
+
+      logger.info(`[AI Pipeline] ✓ RET pipeline complete: ${scanId} | ${Date.now() - pipelineStart}ms total`);
+      return;
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -552,7 +803,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     await prisma.report.create({
       data: {
         scanId, tenantId,
-        authorId: 'SYSTEM',
+        authorId: await ensureSystemUser(tenantId),
         findings: vlm.findings,
         impression: vlm.impression,
         technique: vlm.technique,

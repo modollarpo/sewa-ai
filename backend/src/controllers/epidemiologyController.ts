@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { config } from '../config/env';
+import { logger } from '../utils/logger';
 import axios from 'axios';
 
 export const getHeatmaps = async (req: Request, res: Response, next: NextFunction) => {
@@ -26,12 +27,27 @@ export const getAnomalies = async (req: Request, res: Response, next: NextFuncti
     const recentEvents = await prisma.epidemiologyEvent.groupBy({
       by: ['region', 'disease'],
       _count: { id: true },
-      where: { detectedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } // last 7 days
+      where: { detectedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }
     });
 
-    const endpoint = config.AZURE_OPENAI_ENDPOINT?.endsWith('/') ? config.AZURE_OPENAI_ENDPOINT : `${config.AZURE_OPENAI_ENDPOINT}/`;
+    if (!config.AZURE_OPENAI_API_KEY || !config.AZURE_OPENAI_ENDPOINT) {
+      logger.warn('[EPI] No Azure OpenAI credentials, returning threshold-based anomalies.');
+      const anomalies = recentEvents
+        .filter(e => e._count.id > 15)
+        .map(e => ({
+          region: e.region,
+          disease: e.disease,
+          baselineWeeklyExpected: Math.floor(e._count.id * 0.6),
+          actualCount: e._count.id,
+          percentageIncrease: Math.floor(((e._count.id - (e._count.id * 0.6)) / (e._count.id * 0.6)) * 100),
+          status: e._count.id > 40 ? 'critical' : 'warning'
+        }));
+      return res.json(anomalies);
+    }
+
+    const endpoint = config.AZURE_OPENAI_ENDPOINT.endsWith('/') ? config.AZURE_OPENAI_ENDPOINT : `${config.AZURE_OPENAI_ENDPOINT}/`;
     const gptDeployment = config.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-54-mini';
-    const gptUrl = `${endpoint}openai/deployments/${gptDeployment}/chat/completions?api-version=2024-02-15-preview`;
+    const gptUrl = `${endpoint}openai/deployments/${gptDeployment}/chat/completions?api-version=2025-01-01-preview`;
     
     let anomalies = [];
     try {
@@ -42,20 +58,24 @@ export const getAnomalies = async (req: Request, res: Response, next: NextFuncti
         ],
         temperature: 0.2
       }, {
-        headers: { 'api-key': config.AZURE_OPENAI_API_KEY }
+        headers: { 'api-key': config.AZURE_OPENAI_API_KEY },
+        timeout: 15000
       });
       
+      const usage = gptRes.data?.usage;
+      if (usage) logger.info(`[EPI] GPT tokens — prompt: ${usage.prompt_tokens}, completion: ${usage.completion_tokens}, total: ${usage.total_tokens}`);
+
       const content = gptRes.data.choices[0].message.content;
       const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
       anomalies = JSON.parse(jsonStr);
     } catch (err: any) {
-      // Fallback
+      logger.error(`[EPI] Azure OpenAI GPT anomaly detection failed: ${err.message}, falling back to threshold heuristic.`);
       anomalies = recentEvents
-        .filter(e => e._count.id > 15) // arbitrary threshold
+        .filter(e => e._count.id > 15)
         .map(e => ({
           region: e.region,
           disease: e.disease,
-          baselineWeeklyExpected: Math.floor(e._count.id * 0.6), // mock baseline
+          baselineWeeklyExpected: Math.floor(e._count.id * 0.6),
           actualCount: e._count.id,
           percentageIncrease: Math.floor(((e._count.id - (e._count.id * 0.6)) / (e._count.id * 0.6)) * 100),
           status: e._count.id > 40 ? 'critical' : 'warning'

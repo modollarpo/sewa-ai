@@ -44,7 +44,6 @@ async def load_dicom_from_url(url: str) -> np.ndarray:
     arr = np.frombuffer(raw, dtype=np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_GRAYSCALE)
     if img is None:
-        # Last resort: random noise array (for testing)
-        return np.random.randint(0, 255, (512, 512), dtype=np.uint8).astype(np.float32)
+        raise ValueError("Failed to decode image data — DICOM/NIfTI parse returned None")
 
     return img.astype(np.float32)

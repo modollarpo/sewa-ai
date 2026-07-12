@@ -25,10 +25,21 @@ spec:
       annotations:
         azure.workload.identity/inject-proxy-sidecar: "true"  # For network isolation
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
       containers:
       - name: backend
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         image: "{{CONTAINER_REGISTRY}}/sewa-backend:{{IMAGE_TAG}}"
         imagePullPolicy: Always
         ports:
@@ -39,7 +50,7 @@ spec:
           value: "production"
         - name: PORT
           value: "3000"
-        - name: KEY_VAULT_URI
+        - name: AZURE_KEY_VAULT_URI
           valueFrom:
             configMapKeyRef:
               name: sewa-config
@@ -106,14 +117,20 @@ spec:
           value: "http://sewa-retinal:8008"
         # ── Azure OpenAI ──────────────────────────────────────────────
         - name: AZURE_OPENAI_API_KEY
-          value: "2c3aQcn1hWQtXH2jTJdYfzJea725lgxJ0hgCQc85GjkZPtpdjdAXJQQJ99CGACmepeSXJ3w3AAABACOGpPKq"
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-openai-api-key
         - name: AZURE_OPENAI_ENDPOINT
           value: "https://sewa-ai-production-openai-18104.openai.azure.com/"
         - name: AZURE_OPENAI_DEPLOYMENT_NAME
           value: "gpt-54-mini"
         # ── Azure AI Speech (ACI Voice Dictation — F0 Free Tier) ─────
         - name: AZURE_SPEECH_KEY
-          value: "Fr80QwOXSmi8oBVKAzdiSZNYTT3Le9yWqH8TXIwcTXNcGLFCxlNZJQQJ99CGACmepeSXJ3w3AAAYACOGDTNo"
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-speech-key
         - name: AZURE_SPEECH_REGION
           value: "uksouth"
         - name: AZURE_STORAGE_CONTAINER

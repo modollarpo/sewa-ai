@@ -185,7 +185,7 @@ Keep it professional, clinical, and concise. Do not include introductory or conc
                         {"role": "system", "content": "You are a professional medical AI assistant."},
                         {"role": "user", "content": prompt}
                     ],
-                    timeout=5.0, # Strict timeout for clinical UX
+                    timeout=20.0, # Extended timeout for complex clinical prompts
                     temperature=0.1,
                     max_tokens=800
                 )

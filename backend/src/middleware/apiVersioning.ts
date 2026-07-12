@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 
 const SUPPORTED_VERSIONS = ['v1', 'v2'] as const;
 type ApiVersion = typeof SUPPORTED_VERSIONS[number];
@@ -23,7 +23,6 @@ export function apiVersioning(req: Request, res: Response, next: NextFunction): 
 }
 
 export function createVersionedRouter(version: ApiVersion) {
-  const express = require('express') as typeof import('express');
   const router = express.Router();
 
   router.use((req: Request, _res: Response, next: NextFunction) => {

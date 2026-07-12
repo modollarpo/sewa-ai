@@ -1,4 +1,98 @@
 ---
+# Allow all egress to DNS (kube-system)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: sewa-ai
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+---
+# Allow all egress within sewa-ai namespace (inter-service + Redis)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-namespace-egress
+  namespace: sewa-ai
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector: {}
+    ports:
+    - port: 6379
+      protocol: TCP
+    - port: 3000
+      protocol: TCP
+    - port: 8000
+      protocol: TCP
+    - port: 8001
+      protocol: TCP
+    - port: 8002
+      protocol: TCP
+    - port: 8003
+      protocol: TCP
+    - port: 8004
+      protocol: TCP
+    - port: 8005
+      protocol: TCP
+    - port: 8006
+      protocol: TCP
+    - port: 8007
+      protocol: TCP
+    - port: 8008
+      protocol: TCP
+    - port: 8009
+      protocol: TCP
+---
+# Allow egress to external (Azure OpenAI, Azure services)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-egress
+  namespace: sewa-ai
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+---
+# Allow egress to internal cluster services (ACR, monitoring, etc.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-cluster-internal-egress
+  namespace: sewa-ai
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/8
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
