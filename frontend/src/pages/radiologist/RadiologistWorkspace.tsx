@@ -11,6 +11,7 @@ import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { VoiceDictation, type StructuredReport } from '../../components/ui/VoiceDictation';
 import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
 import { PeerReviewWorkspace } from './PeerReviewWorkspace';
+import { DicomViewport } from '../../components/radiologist/DicomViewport';
 import { ConfidenceIndicator, UncertaintyIndicator, ReasoningTrace, StatusBanner, PipelineStatusCard } from '../../design-system/components';
 import { usePipelineStatus } from '../../hooks/usePipelineStatus';
 
@@ -66,188 +67,6 @@ function ConfBar({ v }: { v:number }) {
     </div>
   );
 }
-
-// ── DICOM Viewport (Cornerstone.js Integration Point) ───────────────────
-function DicomViewer({ scan, showGradcam }: { scan:any; showGradcam:boolean }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [measurements, setMeasurements] = useState<{ x1:number; y1:number; x2:number; y2:number }[]>([]);
-  const [tool, setTool] = useState<'pan'|'measure'|'wl'|'zoom'>('pan');
-  const [wl, setWl]   = useState({ w:400, l:40 });
-  const [zoom, setZoom] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [viewportReady, setViewportReady] = useState(false);
-
-  // Cornerstone.js viewport initialization
-  // In production: cornerstoneWADOImageLoader.loadImage(wadoUri)
-  useEffect(() => {
-    setIsLoading(true);
-    setViewportReady(false);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setViewportReady(true);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [scan]);
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    setZoom(z => Math.max(0.5, Math.min(10, z - e.deltaY * 0.005)));
-  };
-
-  return (
-    <div className="relative flex-1 bg-black overflow-hidden group">
-      {/* Cornerstone.js Viewport Container */}
-      <div 
-        ref={containerRef}
-        onWheel={handleWheel}
-        className={`w-full h-full flex items-center justify-center ${tool === 'pan' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'}`}
-        style={{ touchAction: 'none' }}
-      >
-        {isLoading ? (
-          <div style={{ color:'#52B09A', fontFamily:"'IBM Plex Mono',monospace", textAlign:'center' }}>
-            <div style={{ fontSize:32, marginBottom:16, animation:'pulse 1.5s infinite' }}>⟳</div>
-            <div style={{ fontSize:13, fontWeight:600, marginBottom:6 }}>Initializing Cornerstone.js Viewport</div>
-            <div style={{ fontSize:11, color:'#6FA898' }}>Loading DICOM series via WADO-RS...</div>
-          </div>
-        ) : viewportReady ? (
-          <div style={{ textAlign:'center', color:'#6FA898', width:'100%', height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', position:'relative' }}>
-            {/* Simulated DICOM viewport background */}
-            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at center, #111 0%, #000 70%)', opacity:0.8 }} />
-            
-            <div style={{ position:'relative', zIndex:1 }}>
-              <div style={{ fontSize:48, marginBottom:12, opacity:0.4 }}>🩻</div>
-              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:14, color:'#D0ECE6', fontWeight:700, marginBottom:4 }}>
-                Cornerstone Viewport Active
-              </div>
-              <div style={{ fontSize:11, color:'#3A6055' }}>
-                {scan?.modality || 'CT'} • {scan?.bodyPart || 'N/A'} • Series loaded
-              </div>
-              <div style={{ fontSize:10, color:'#3A6055', marginTop:8, fontFamily:"'IBM Plex Mono',monospace" }}>
-                W:{wl.w} L:{wl.l} • Zoom:{(zoom*100).toFixed(0)}%
-              </div>
-            </div>
-
-            {/* AI Detection Overlay */}
-            {(showGradcam || scan?.aiResult?.urgency === 'CRITICAL') && (
-              <div style={{
-                position:'absolute', top:'35%', left:'38%', width:'24%', height:'22%',
-                border:'2px dashed #E03535',
-                backgroundColor:'rgba(224,53,53,0.08)',
-                borderRadius:4,
-                display:'flex', alignItems:'flex-start', justifyContent:'flex-end',
-                padding:4
-              }}>
-                <span style={{ backgroundColor:'#E03535', color:'#fff', fontSize:9, padding:'2px 6px', borderRadius:4, fontFamily:"'IBM Plex Mono',monospace", fontWeight:700 }}>
-                  AI: {scan?.aiResult?.primaryFinding || 'DETECTION'}
-                </span>
-              </div>
-            )}
-          </div>
-        ) : null}
-      </div>
-
-      {/* Patient / Study Metadata Overlay — Top corners */}
-      <div style={{ position:'absolute', top:12, left:16, zIndex:10, pointerEvents:'none' }}>
-        <div style={{ color:'#D0ECE6', fontSize:13, fontWeight:700, fontFamily:"'IBM Plex Sans',system-ui,sans-serif" }}>
-          {scan?.patient?.firstName} {scan?.patient?.lastName}
-        </div>
-        <div style={{ color:'#6FA898', fontSize:10, fontFamily:"'IBM Plex Mono',monospace", marginTop:2 }}>
-          {scan?.patient?.mrn || 'MRN: N/A'} • {scan?.modality} • {scan?.bodyPart}
-        </div>
-      </div>
-      <div style={{ position:'absolute', top:12, right:16, zIndex:10, pointerEvents:'none', textAlign:'right' }}>
-        <div style={{ color:'#6FA898', fontSize:10, fontFamily:"'IBM Plex Mono',monospace" }}>
-          W:{wl.w} L:{wl.l}
-        </div>
-        <div style={{ color:'#6FA898', fontSize:10, fontFamily:"'IBM Plex Mono',monospace" }}>
-          {(zoom*100).toFixed(0)}%
-        </div>
-      </div>
-
-      {/* Floating Professional Toolbar */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 p-1.5 bg-[#08160F]/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.6)] opacity-40 group-hover:opacity-100 transition-all duration-500 hover:scale-[1.02]">
-        
-        {/* Tool Selectors */}
-        <div className="flex items-center gap-1 pr-2 border-r border-white/10">
-          <button 
-            onClick={() => setTool('pan')} 
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${tool === 'pan' ? 'bg-[#408D7B] text-white shadow-[0_0_15px_rgba(64,141,123,0.4)]' : 'text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5'}`}
-            title="Pan & Zoom (P)"
-          >
-            <span className="text-lg">🖐️</span>
-          </button>
-          <button 
-            onClick={() => setTool('measure')} 
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${tool === 'measure' ? 'bg-[#408D7B] text-white shadow-[0_0_15px_rgba(64,141,123,0.4)]' : 'text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5'}`}
-            title="Caliper Measurement (M)"
-          >
-            <span className="text-lg">📏</span>
-          </button>
-        </div>
-
-        {/* View Controls */}
-        <div className="flex items-center gap-1 px-1">
-          <button onClick={() => setZoom(z=>Math.min(10,z+0.5))} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Zoom In">🔍</button>
-          <button onClick={() => setZoom(z=>Math.max(0.2,z-0.5))} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Zoom Out">🔎</button>
-          <button onClick={() => setZoom(1)} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Reset View">⊕</button>
-        </div>
-
-        <div className="w-[1px] h-6 bg-white/10 mx-1" />
-
-        {/* Window/Level Presets */}
-        <div className="flex items-center gap-1 pl-1">
-          <button onClick={() => setWl({w:400, l:40})} className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5 transition-all">BRAIN</button>
-          <button onClick={() => setWl({w:1500, l:450})} className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5 transition-all">BONE</button>
-          <button onClick={() => setWl({w:350, l:40})} className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#3A6055] hover:text-[#D0ECE6] hover:bg-white/5 transition-all">SOFT</button>
-        </div>
-
-        {/* Modality Specific Controls */}
-        {scan?.modality === 'MRI' && (
-          <>
-            <div className="w-[1px] h-6 bg-white/10 mx-1" />
-            <div className="flex items-center gap-1 pl-1">
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">SAGITTAL</button>
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">CORONAL</button>
-            </div>
-          </>
-        )}
-
-        {scan?.modality === 'US' && (
-          <>
-            <div className="w-[1px] h-6 bg-white/10 mx-1" />
-            <div className="flex items-center gap-1 pl-1">
-              <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6FA898] hover:text-white hover:bg-white/5 transition-all" title="Play Video">▶️</button>
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">DOPPLER</button>
-            </div>
-          </>
-        )}
-
-        {scan?.modality === 'PATH' && (
-          <>
-            <div className="w-[1px] h-6 bg-white/10 mx-1" />
-            <div className="flex items-center gap-1 pl-1">
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-white bg-[#408D7B]/20 border border-[#408D7B]/30 hover:bg-[#408D7B]/40 transition-all">STAIN_H_E</button>
-              <button className="px-2 py-1.5 rounded-lg text-[9px] font-bold text-[#6FA898] hover:text-white hover:bg-[#408D7B]/20 transition-all">TILE_ZOOM</button>
-            </div>
-          </>
-        )}
-
-        {measurements.length > 0 && (
-          <>
-            <div className="w-[1px] h-6 bg-white/10 mx-1" />
-            <button 
-              onClick={() => setMeasurements([])} 
-              className="px-3 py-1.5 rounded-lg bg-[#E03535]/10 border border-[#E03535]/20 text-[#E03535] text-[9px] font-bold uppercase tracking-wider hover:bg-[#E03535] hover:text-white transition-all"
-            >
-              Clear
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 
 
 // ── AI Results Panel ──────────────────────────────────────────
@@ -823,7 +642,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
               ))}
             </div>
           )}
-          {tab === 'viewer' && <DicomViewer scan={selected} showGradcam={showGradcam} />}
+          {tab === 'viewer' && <DicomViewport storageUrl={selected?.storageUrl} modality={selected?.modality} showGradcam={showGradcam} findings={selected?.aiResult?.findings} />}
           {tab === 'report' && (
             <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
               <div style={{ flex:'0 0 40%', overflowY:'auto', borderBottom:`1px solid ${C.border}` }}>
@@ -1062,7 +881,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
 
               {/* Actual Canvas Viewer */}
               <div className="flex-1 flex flex-col w-full h-full pt-10">
-                <DicomViewer scan={selected} showGradcam={showGradcam} />
+                <DicomViewport storageUrl={selected?.storageUrl} modality={selected?.modality} showGradcam={showGradcam} findings={selected?.aiResult?.findings} />
               </div>
             </main>
 

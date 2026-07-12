@@ -8,6 +8,7 @@ import { auditLog } from '../utils/audit';
 import { AppError } from '../utils/AppError';
 import { io } from '../index';
 import { generateClinicalPDF } from '../services/reportGenerationService';
+import { snapshotReportVersion } from '../services/reportVersionService';
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
 
@@ -70,6 +71,8 @@ export async function updateReport(req: Request, res: Response, next: NextFuncti
     if (!existing) throw new AppError('Report not found', 404);
     if (existing.status === 'approved') throw new AppError('Cannot modify a signed report. An addendum must be created instead.', 403);
 
+    await snapshotReportVersion(id, userId, 'Pre-edit snapshot');
+
     const report = await prisma.report.update({
       where: { id },
       data: { technique, findings, impression, recommendation, fullText, editedByHuman: true, status: 'draft' },
@@ -89,6 +92,8 @@ export async function signReport(req: Request, res: Response, next: NextFunction
     const report = await prisma.report.findFirst({ where: { id, tenantId }, include: { scan: { include: { patient: { include: { user: true } }, tenant: true } } } });
     if (!report) throw new AppError('Report not found', 404);
     if (report.status === 'approved') throw new AppError('Report already signed', 409);
+
+    await snapshotReportVersion(id, userId, 'Signed version');
 
     const signed = await prisma.report.update({
       where: { id },

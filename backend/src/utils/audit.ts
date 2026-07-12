@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { prisma } from '../utils/prismaClient';
 import { io } from '../index';
 import { logger } from './logger';
+import { sealAuditBlock } from '../services/merkleBlockService';
 
 // G2: Validate AUDIT_PRIVATE_KEY at module load time.
 // In production this key must come from Azure Key Vault via the sewa-secrets AKS secret.
@@ -75,6 +76,12 @@ export async function auditLog(entry: AuditEntry): Promise<void> {
       io.to(`tenant:${entry.tenantId}`).emit('audit:new', log);
     }
     io.to('role:superadmin').emit('audit:new', log);
+
+    // Auto-seal merkle block when threshold is reached
+    const unsealedCount = await prisma.auditLog.count({ where: { blockIndex: null } });
+    if (unsealedCount >= 50) {
+      sealAuditBlock().catch(e => logger.warn(`[Audit] Auto-seal failed: ${e.message}`));
+    }
   } catch (e: any) {
     logger.error(`[Audit] Failed to write audit log: ${e.message}`);
   }

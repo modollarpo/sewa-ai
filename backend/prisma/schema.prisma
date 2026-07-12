@@ -380,6 +380,7 @@ model Report {
   pdfUrl String? // URL to the generated clinical PDF/HTML report
 
   secondOpinions SecondOpinion[]
+  versions       ReportVersion[]
 
   @@index([tenantId])
   @@index([status])
@@ -1001,6 +1002,8 @@ model FederatedRound {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
+  mlValidations       MlModelValidation[]
+
   @@index([status])
 }
 
@@ -1254,4 +1257,95 @@ model ExplainabilityReport {
 
   @@index([scanId])
   @@index([tenantId])
+}
+
+// ── REPORT VERSIONS (Audit trail for every report edit) ──────
+model ReportVersion {
+  id            String   @id @default(uuid())
+  reportId      String
+  report        Report   @relation(fields: [reportId], references: [id])
+  version       Int
+  technique     String?
+  findings      String
+  impression    String
+  recommendation String?
+  fullText      String?
+  editedBy      String
+  changeNote    String?
+  sha256Hash    String
+  createdAt     DateTime @default(now())
+
+  @@unique([reportId, version])
+  @@index([reportId])
+  @@index([createdAt])
+}
+
+// ── AUDIT BLOCKS (Merkle tree batching for Confidential Ledger) ─
+model AuditBlock {
+  id                String   @id @default(uuid())
+  blockIndex        Int      @unique
+  merkleRoot        String
+  entryCount        Int
+  entryIds          String[] // ordered list of AuditLog IDs in this block
+  previousBlockHash String?
+  blockHash         String
+  committed         Boolean  @default(false)
+  ledgerTxId        String?
+  ledgerReceipt     Json?
+  createdAt         DateTime @default(now())
+
+  @@index([blockIndex])
+  @@index([committed])
+}
+
+// ── MLOPS: MODEL VALIDATION & DEPLOYMENT PIPELINE ──────────────
+model MlModelValidation {
+  id                  String   @id @default(uuid())
+  federatedRoundId    String?
+  federatedRound      FederatedRound? @relation(fields: [federatedRoundId], references: [id])
+  modelType           String   // triage | uncertainty | vlm | metacognition
+  modelVersion        String
+  previousVersion     String?
+  validationDataset   String   // internal | holdout | clinical
+  accuracy            Float?
+  precision           Float?
+  recall              Float?
+  f1Score             Float?
+  auroc               Float?
+  loss                Float?
+  sampleSize          Int
+  passed              Boolean  @default(false)
+  metricsJson         Json?
+  validatedBy         String?  // user ID or 'automated'
+  validatedAt         DateTime @default(now())
+  ocrImageUrl         String?  // screenshot of validation report
+  createdAt           DateTime @default(now())
+
+  deploymentTrigger   MlDeploymentTrigger?
+
+  @@index([federatedRoundId])
+  @@index([modelType, modelVersion])
+  @@index([passed])
+}
+
+model MlDeploymentTrigger {
+  id              String   @id @default(uuid())
+  validationId    String   @unique
+  validation      MlModelValidation @relation(fields: [validationId], references: [id])
+  modelType       String
+  modelVersion    String
+  sourceImage     String   // ACR image URL to deploy
+  targetService   String   // k8s deployment name
+  status          String   @default("pending") // pending | deploying | deployed | failed | rolled_back
+  triggerMetadata Json?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  rollbackAt      DateTime?
+  rollbackReason  String?
+  k8sJobName      String?
+  k8sJobNamespace String   @default("sewa-ai")
+  createdAt       DateTime @default(now())
+
+  @@index([status])
+  @@index([modelType])
 }

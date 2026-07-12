@@ -12,12 +12,17 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@cornerstonejs/core": "^2.19.16",
+    "@cornerstonejs/dicom-image-loader": "^2.19.16",
+    "@cornerstonejs/tools": "^2.19.16",
     "@hookform/resolvers": "^3.3.4",
+    "@icr/polyseg-wasm": "^0.4.0",
     "@remotion/player": "^4.0.0",
     "@remotion/renderer": "^4.0.0",
     "@tanstack/react-query": "^5.20.5",
     "axios": "^1.6.7",
     "date-fns": "^3.3.1",
+    "dicom-parser": "^1.8.21",
     "i18next": "^23.10.0",
     "lucide-react": "^0.341.0",
     "otplib": "^12.0.1",
@@ -53,6 +58,8 @@
     "typescript": "^5.3.3",
     "vite": "^5.4.11",
     "vite-plugin-pwa": "^0.19.8",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0",
     "vitest": "^2.1.9"
   }
 }

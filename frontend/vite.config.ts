@@ -18,7 +18,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
-      manifest: false, // using our own /public/manifest.json
+      manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/index.html',
@@ -52,6 +52,7 @@ export default defineConfig({
     strictPort: true,
     proxy: { '/api': { target: 'http://localhost:5000', changeOrigin: true, ws: true } },
   },
+  worker: { format: 'es' },
   build: {
     outDir: 'dist',
     sourcemap: true,
@@ -64,6 +65,7 @@ export default defineConfig({
           query:    ['@tanstack/react-query'],
           icons:    ['lucide-react'],
           video:    ['remotion', '@remotion/player', '@remotion/renderer'],
+          cornerstone: ['@cornerstonejs/core', '@cornerstonejs/tools', '@cornerstonejs/dicom-image-loader', 'dicom-parser'],
           forms:    ['react-hook-form', '@hookform/resolvers', 'zod'],
           utils:    ['date-fns', 'axios', 'zustand', 'i18next', 'react-i18next'],
         },

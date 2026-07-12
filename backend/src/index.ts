@@ -101,6 +101,8 @@ import populationHealthRoutes from './routes/populationHealth';
 import naturalLanguageQueryRoutes from './routes/naturalLanguageQuery';
 import longitudinalRoutes from './routes/longitudinal';
 import pipelineRoutes     from './routes/pipeline';
+import versionRoutes     from './routes/versions';
+import mlopsRoutes       from './routes/mlops';
 import v2Router           from './routes/v2Router';
 import { apiVersioning } from './middleware/apiVersioning';
 import { startMetricFlush, stopMetricFlush } from './services/observabilityService';
@@ -283,6 +285,8 @@ app.use(`${v1}/nlq`,            naturalLanguageQueryRoutes);
 app.use(`${v1}/longitudinal`,   longitudinalRoutes);
 app.use(`${v1}/pipeline`,       pipelineRoutes);
 app.use(`${v1}`,                roadmapRoutes);
+app.use(`${v1}/versions`,       versionRoutes);
+app.use(`${v1}/mlops`,          mlopsRoutes);
 
 // ── API v2 Routes ─────────────────────────────────────────────────
 app.use(apiVersioning);
@@ -352,6 +356,18 @@ async function bootstrap() {
     // Start metric flush for observability
     startMetricFlush();
     logger.info('[Observability] Metric flush worker started (every 30s)');
+
+    // Merkle block sealer — every 5 minutes
+    setInterval(async () => {
+      try {
+        const { sealAuditBlock } = await import('./services/merkleBlockService');
+        const hash = await sealAuditBlock();
+        if (hash) logger.debug(`[Cron] Auto-sealed audit block`);
+      } catch (e: any) {
+        logger.error('[Cron] Merkle block seal failed:', e.message);
+      }
+    }, 5 * 60 * 1000);
+    logger.info('[Cron] Merkle block sealer started (every 5 min)');
 
     // Start scan AI pipeline worker
     const workerConcurrency = parseInt(process.env.SCAN_WORKER_CONCURRENCY || '10', 10);
