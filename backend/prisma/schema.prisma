@@ -80,6 +80,7 @@ model Tenant {
   customerFeedbacks       CustomerFeedback[]
   federatedNodes          FederatedNode[]
   edgeDevices             EdgeDevice[]
+  edgeSites               EdgeSite[]
   longitudinalRecords     LongitudinalRecord[]
 
   @@index([region])
@@ -253,6 +254,7 @@ model Scan {
   clinicalValidation      ClinicalValidation?
   modelPerformanceMetrics ModelPerformanceMetric[]
   longitudinalRecords     LongitudinalRecord[]
+  edgePreProcessing       EdgePreProcessing?
 
   @@index([tenantId])
   @@index([status])
@@ -381,7 +383,92 @@ model Report {
 
   @@index([tenantId])
   @@index([status])
-  @@index([authorId])
+}
+
+// ── FEDERATED LEARNING V2 ─────────────────────────────────────────────
+
+model FederatedWeightUpload {
+  id               String   @id @default(uuid())
+  nodeId           String
+  roundId          String
+  weightsHash      String
+  weightsBlobUrl   String?
+  sampleCount      Int
+  localLoss        Float?
+  localAccuracy    Float?
+  gradientNorm     Float?
+  dpEpsilonUsed    Float
+  dpDelta          Float   @default(0.00001)
+  clipNorm         Float   @default(1.0)
+  signatureValid   Boolean @default(false)
+  accepted         Boolean @default(false)
+  rejectionReason  String?
+  uploadedAt       DateTime @default(now())
+  processedAt      DateTime?
+
+  @@index([nodeId])
+  @@index([roundId])
+  @@index([uploadedAt])
+}
+
+model FederatedModelVersion {
+  id                 String   @id @default(uuid())
+  version            String   @unique
+  roundId            String?
+  weightsBlobUrl     String
+  weightsHash        String
+  accuracy           Float?
+  loss               Float?
+  participatingNodes String[]
+  totalDataVolume    Int
+  globalEpsilon      Float?
+  status             String   @default("production")
+  deployedAt         DateTime @default(now())
+  rolledBackAt       DateTime?
+  rollbackReason     String?
+  metadata           Json?
+  createdAt          DateTime @default(now())
+
+  @@index([version])
+  @@index([status])
+}
+
+model FederatedTrustAudit {
+  id               String   @id @default(uuid())
+  nodeId           String
+  event            String
+  previousScore    Float?
+  newScore         Float?
+  reason           String   @db.Text
+  triggeredBy      String?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+
+  @@index([nodeId])
+  @@index([event])
+  @@index([createdAt])
+}
+
+model FLBenchmark {
+  id                 String   @id @default(uuid())
+  roundId            String
+  nodeId             String
+  tenantId           String
+  localAccuracy      Float
+  localF1            Float?
+  localAuroc         Float?
+  localPrecision     Float?
+  localRecall        Float?
+  inferenceLatencyMs Int?
+  samplesUsed        Int
+  modalityBreakdown  Json?
+  accuracyDelta      Float?
+  rankAmongNodes     Int?
+  createdAt          DateTime @default(now())
+
+  @@index([roundId])
+  @@index([nodeId])
+  @@index([tenantId])
 }
 
 // ── ACI FEEDBACK (Ambient Clinical Intelligence loop) ────────
@@ -798,8 +885,8 @@ model AIModelVersion {
 
 model ModelPerformanceMetric {
   id             String         @id @default(uuid())
-  modelVersionId String
-  modelVersion   AIModelVersion @relation(fields: [modelVersionId], references: [id])
+  modelVersionId String?
+  modelVersion   AIModelVersion? @relation(fields: [modelVersionId], references: [id])
   tenantId       String
   tenant         Tenant         @relation(fields: [tenantId], references: [id])
   scanId         String?
@@ -873,6 +960,19 @@ model FederatedNode {
   totalScansContributed Int      @default(0)
   computeCapacity       String   @default("medium") // low | medium | high
   lastSyncAt            DateTime @default(now())
+  nodePublicKey         String?
+  nodeEndpoint          String?
+  trustScore            Float    @default(50)
+  trustFactors          Json?
+  dpBudgetTotal         Float    @default(10.0)
+  dpBudgetUsed          Float    @default(0)
+  dpBudgetResetAt       DateTime?
+  roundsParticipated    Int      @default(0)
+  roundsMissed          Int      @default(0)
+  lastWeightsHash       String?
+  avgGradientNorm       Float?
+  quarantineReason      String?
+  quarantinedAt         DateTime?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
@@ -881,16 +981,25 @@ model FederatedNode {
 }
 
 model FederatedRound {
-  id                 String   @id @default(uuid())
-  roundNumber        Int      @unique
-  status             String   @default("in_progress") // pending | in_progress | completed | failed
-  participatingNodes Int      @default(0)
-  totalDataVolume    Int      @default(0) // total scans used in this round
-  epochLoss          Float?
-  accuracy           Float?
-  aggregatedAt       DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                    String   @id @default(uuid())
+  roundNumber           Int      @unique
+  status                String   @default("in_progress") // pending | in_progress | completed | failed
+  participatingNodes    Int      @default(0)
+  totalDataVolume       Int      @default(0) // total scans used in this round
+  epochLoss             Float?
+  accuracy              Float?
+  aggregatedModelVersion String?
+  globalEpsilon         Float?
+  avgTrustScore         Float?
+  minTrustThreshold     Float   @default(60)
+  dpNoiseMultiplier     Float?
+  weightsSnapshotsUrl   String?
+  failedNodeIds         String[]
+  rejectedUploads       Int     @default(0)
+  durationMs            Int?
+  aggregatedAt          DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@index([status])
 }
@@ -967,4 +1076,182 @@ model LongitudinalRecord {
   @@index([tenantId])
   @@index([patientId])
   @@index([scanId])
+}
+
+// ── EDGE AI PRE-PROCESSING ─────────────────────────────────────────────
+
+model EdgePreProcessing {
+  id                    String   @id @default(uuid())
+  scanId                String   @unique
+  scan                  Scan     @relation(fields: [scanId], references: [id])
+  edgeDeviceId          String
+  siteId                String
+
+  qualityScore          Float?
+  qualityFlags          String[]
+  blurScore             Float?
+  noiseEstimate         Float?
+  motionArtifact        Boolean  @default(false)
+
+  urgencyHint           String?
+  urgencyConfidence     Float?
+  urgencyMethod         String?
+
+  anonymizationVersion  String?
+  anonymizationComplete Boolean  @default(false)
+  phiStrippedTags       String[]
+
+  metadataExtracted     Json?
+  processingMs          Int?
+
+  qualityModelVersion   String?
+  triageModelVersion    String?
+  edgeSoftwareVersion   String?
+
+  offlineQueued         Boolean  @default(false)
+  syncedAt              DateTime?
+
+  createdAt             DateTime @default(now())
+
+  @@index([edgeDeviceId])
+  @@index([siteId])
+  @@index([urgencyHint])
+}
+
+model EdgeSite {
+  id                    String   @id @default(uuid())
+  tenantId              String
+  tenant                Tenant   @relation(fields: [tenantId], references: [id])
+  siteId                String   @unique
+  siteName              String
+  region                String   @default("uk")
+
+  supportedModalities   String[] @default(["CT", "XR"])
+  hasGpu                Boolean  @default(false)
+  hasLocalRedis         Boolean  @default(false)
+
+  enabledFeatures       String[] @default(["quality_assessment", "anonymization"])
+  maxOfflineQueueSizeMB Int      @default(5000)
+  heartbeatIntervalSec  Int      @default(30)
+
+  status                String   @default("active")
+  lastHeartbeat         DateTime @default(now())
+  totalDevices          Int      @default(0)
+  totalScansProcessed   Int      @default(0)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+// ── META COGNITION / SELF-AUDIT LAYER ───────────────────────────────────
+
+model MetacognitionAuditLog {
+  id                             String   @id @default(uuid())
+  scanId                         String
+  tenantId                       String
+  aiResultId                     String
+
+  layer1ModalityPlausibility     String
+  layer1Detail                   Json?
+  layer2UrgencyConsistency       String
+  layer2Detail                   Json?
+  layer3ConfidenceFloor          String
+  layer3Detail                   Json?
+  layer4SHAPCoherence            String
+  layer5UncertaintyConflict      String
+  layer6ReportConcordance        String
+  layer7DemographicPlausibility  String
+  layer8HallucinationRisk        Float
+  layer9SafeToAlert              Boolean
+
+  contradictionDetected          Boolean  @default(false)
+  contradictionType              String?
+  contradictionSeverity          String?
+  contradictionDetail            Json?
+  vlmSemanticSimilarity          Float?
+
+  clinicalRulesPassed            Int      @default(0)
+  clinicalRulesFailed            Int      @default(0)
+  clinicalRuleViolations         Json?
+
+  brierScore                     Float?
+  calibrationBin                 String?
+
+  explainabilityReportUrl        String?
+  reasoningChain                 Json?
+
+  overallDecision                String
+  decisionConfidence             Float
+  decisionReasoning              String   @db.Text
+
+  createdAt                      DateTime @default(now())
+
+  @@index([scanId])
+  @@index([tenantId])
+  @@index([overallDecision])
+  @@index([contradictionDetected])
+  @@index([createdAt])
+}
+
+model CalibrationRecord {
+  id                 String   @id @default(uuid())
+  tenantId           String?
+  modality           String?
+  modelVersion       String?
+  predictedConfidence Float
+  actualOutcome      Boolean
+  confidenceBin      String
+  scanId             String?
+  aiResultId         String?
+  createdAt          DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([modality])
+  @@index([confidenceBin])
+  @@index([createdAt])
+}
+
+model CalibrationSummary {
+  id               String   @id @default(uuid())
+  tenantId         String?
+  modality         String?
+  modelVersion     String?
+  windowStart      DateTime
+  windowEnd        DateTime
+  sampleCount      Int
+  eceBin02         Float?
+  eceBin24         Float?
+  eceBin46         Float?
+  eceBin68         Float?
+  eceBin810        Float?
+  eceOverall       Float
+  brierScore       Float
+  eceTrend         String?
+  driftDetected    Boolean  @default(false)
+  driftAction      String?
+  createdAt        DateTime @default(now())
+
+  @@index([tenantId, modality])
+  @@index([windowStart])
+}
+
+model ExplainabilityReport {
+  id               String   @id @default(uuid())
+  scanId           String   @unique
+  tenantId         String
+  aiResultId       String
+  reasoningSteps   Json
+  shapNarrative    String?  @db.Text
+  gradCamRegions   Json?
+  summaryText      String   @db.Text
+  contradictionText String? @db.Text
+  reportBlobUrl    String?
+  reportFormat     String   @default("json")
+  createdAt        DateTime @default(now())
+
+  @@index([scanId])
+  @@index([tenantId])
 }

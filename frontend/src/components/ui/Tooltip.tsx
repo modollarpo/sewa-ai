@@ -20,7 +20,6 @@ interface TooltipProps {
 
 export function Tooltip({ content, children, position = 'top', maxWidth = 280, clinical = false, delay = 200 }: TooltipProps) {
   const [visible, setVisible] = useState(false);
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const tooltipId = useId();
   const anchorRef = useRef<HTMLSpanElement>(null);

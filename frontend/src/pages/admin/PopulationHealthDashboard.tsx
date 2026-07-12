@@ -27,7 +27,7 @@ export function PopulationHealthDashboard() {
   const [anomalies, setAnomalies] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(30);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 

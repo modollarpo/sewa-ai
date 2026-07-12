@@ -105,7 +105,6 @@ export function LoginPage({ onNavigate }: { onNavigate: (p: string) => void }) {
   const [mfaChallenge, setMfaChallenge] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showDemoPanel, setShowDemoPanel] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
   const [localError, setLocalError] = useState('');
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);

@@ -66,7 +66,7 @@ export function BillingDashboard() {
   const [tab, setTab] = useState<'overview'|'plans'|'payment'|'history'>('overview');
   const [interval, setInterval] = useState<'monthly'|'annual'>('annual');
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string|null>(null);
+  const [_selectedPlan, setSelectedPlan] = useState<string|null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   React.useEffect(() => {

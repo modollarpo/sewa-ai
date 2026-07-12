@@ -101,6 +101,9 @@ import populationHealthRoutes from './routes/populationHealth';
 import naturalLanguageQueryRoutes from './routes/naturalLanguageQuery';
 import longitudinalRoutes from './routes/longitudinal';
 import pipelineRoutes     from './routes/pipeline';
+import v2Router           from './routes/v2Router';
+import { apiVersioning } from './middleware/apiVersioning';
+import { startMetricFlush, stopMetricFlush } from './services/observabilityService';
 import { sendAppointmentReminders } from './routes/appointments/index';
 import { escalateOverdueReferrals } from './services/roadmap/referralNetworkService';
 import { dlq } from './services/dlqService';
@@ -281,6 +284,10 @@ app.use(`${v1}/longitudinal`,   longitudinalRoutes);
 app.use(`${v1}/pipeline`,       pipelineRoutes);
 app.use(`${v1}`,                roadmapRoutes);
 
+// ── API v2 Routes ─────────────────────────────────────────────────
+app.use(apiVersioning);
+app.use('/api/v2',               v2Router);
+
 app.use(errorHandler);
 
 // ── Startup ────────────────────────────────────────────────────
@@ -342,6 +349,10 @@ async function bootstrap() {
     }, 60 * 60 * 1000);
     logger.info('[Cron] Dunning process started (hourly)');
 
+    // Start metric flush for observability
+    startMetricFlush();
+    logger.info('[Observability] Metric flush worker started (every 30s)');
+
     // Start scan AI pipeline worker
     const workerConcurrency = parseInt(process.env.SCAN_WORKER_CONCURRENCY || '10', 10);
     startScanWorker(workerConcurrency);
@@ -359,6 +370,7 @@ async function bootstrap() {
 
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received — graceful shutdown');
+  stopMetricFlush();
   await prisma.$disconnect();
   await redisClient.quit();
   process.exit(0);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../services/apiClient';
-import { Network, Server, ShieldCheck, Database, RefreshCw, Cpu, Activity, AlertCircle } from 'lucide-react';
+import { Network, Server, ShieldCheck, RefreshCw, Cpu, Activity } from 'lucide-react';
 
 import { dashboardColors as C } from '../../design-system/tokens';
 

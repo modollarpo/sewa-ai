@@ -52,7 +52,7 @@ export function AIPerformanceDashboard() {
   const totalInferences = aggregates?.totalCount ?? metrics.length ?? 0;
 
   // P6: Live last-updated timestamp
-  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [_lastUpdated, setLastUpdated] = useState(new Date());
   const [secsAgo, setSecsAgo]         = useState(0);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

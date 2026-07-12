@@ -31,7 +31,7 @@ function RoleBadge({ role }:{ role:string }) {
   );
 }
 
-function StatCard({ label,value,sub,color=C.brand,icon }:{ label:string;value:string|number;sub?:string;color?:string;icon?:string }) {
+function StatCard({ label,value,sub,icon }:{ label:string;value:string|number;sub?:string;color?:string;icon?:string }) {
   return (
     <div className="group p-5 bg-[#0C1D17] rounded-2xl border border-[#1B3028] hover:border-[#408D7B]/50 transition-all duration-300 shadow-lg hover:shadow-[#408D7B]/5">
       <div className="flex items-center justify-between mb-4">
@@ -54,7 +54,7 @@ export function HospitalAdminDashboard() {
   const [rules, setRules] = useState<Array<{id:string;name:string;enabled:boolean;pathway?:string;conditions?:Array<{field:string;operator:string;value:string|number}>;conditionLogic?:string;description?:string;actions?:Array<{type:string;target?:string}>;cooldownMs:number}>>([]);
   const [rulesLoading, setRulesLoading] = useState(false);
   const [ruleToggles, setRuleToggles] = useState<Record<string,boolean>>({});
-  const [ruleHistory, setRuleHistory] = useState<Array<{ruleName:string;ts:string;actions:string;scanId:string}>>([]);
+  const [ruleHistory] = useState<Array<{ruleName:string;ts:string;actions:string;scanId:string}>>([]);
 
   // Fetch clinical rules when tab opened
   React.useEffect(() => {
@@ -563,8 +563,6 @@ export function HospitalAdminDashboard() {
                   const pathwayColor: Record<string,string> = { stroke:C.critical, pe:C.urgent, tb:C.brand };
                   const pc = (rule.pathway ? pathwayColor[rule.pathway] : undefined) ?? C.textMd;
 const conditionFields = rule.conditions?.map((c:{field:string;operator:string;value:string|number})=>`${c.field} ${c.operator} ${JSON.stringify(c.value)}`).join(` ${rule.conditionLogic} `) || '';
-const actionSummary = rule.actions?.map((a:{type:string})=>a.type).join(', ') || '';
-
                   return (
                     <div key={rule.id} className={`p-6 bg-[#0C1D17] border rounded-2xl shadow-lg transition-all duration-300 ${enabled ? 'border-[#1B3028] hover:border-[#408D7B]/40' : 'border-[#1B3028] opacity-50'}`}>
                       <div className="flex items-start gap-4">
@@ -778,11 +776,3 @@ const actionSummary = rule.actions?.map((a:{type:string})=>a.type).join(', ') ||
   );
 
 }
-
-const modalInputStyle = {
-  width:'100%',background:C.bg3,border:`1px solid ${C.border}`,borderRadius:10,padding:'12px',color:C.textHi,fontSize:14,boxSizing:'border-box',fontFamily:C.F
-} as React.CSSProperties;
-
-const modalBtnStyle = {
-  marginTop:8,padding:'12px',background:C.brand,color:'white',border:'none',borderRadius:10,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:C.F
-} as React.CSSProperties;

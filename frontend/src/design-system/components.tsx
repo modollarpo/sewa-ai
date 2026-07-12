@@ -1084,8 +1084,6 @@ export function ClinicalCard({
   actions?: React.ReactNode;
   children?: React.ReactNode;
 }) {
-  const urgencyStyle = urgencyStyles[(urgency || 'ROUTINE').toUpperCase() as keyof typeof urgencyStyles] || urgencyStyles.ROUTINE;
-  
   return (
     <div style={{
       background: colors.bg2,

@@ -1,13 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { apiClient } from '../../services/apiClient';
-import { useAuthStore } from '../../store/authStore';
 
 interface VoiceDictationProps {
   onTranscriptionComplete: (text: string) => void;
   isRecordingMode?: boolean;
 }
 
-export function VoiceDictation({ onTranscriptionComplete, isRecordingMode = false }: VoiceDictationProps) {
+export function VoiceDictation({ onTranscriptionComplete }: VoiceDictationProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);

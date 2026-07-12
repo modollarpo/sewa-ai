@@ -124,4 +124,118 @@ router.post('/sync',
   }
 );
 
+// ── Edge AI Pre-processed Scan Ingestion ──────────────────────────────
+router.post('/preprocessed', async (req, res) => {
+  try {
+    const { scans, edgeDeviceId, siteId } = req.body;
+    if (!Array.isArray(scans) || scans.length === 0) {
+      return res.status(400).json({ error: 'scans array is required' });
+    }
+
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    const { EdgeAIBridge } = await import('../services/edgeAIBridge');
+    const bridge = new EdgeAIBridge(prisma);
+
+    const result = await bridge.batchProcess(
+      scans.map((s: Record<string, unknown>) => ({
+        scanId: s.scanId as string,
+        siteId: (s.siteId as string) || siteId as string,
+        tenantId: (req as any).tenantId || 'default',
+        edgeDeviceId: edgeDeviceId as string,
+        modality: (s.modality as string) || 'Unknown',
+        bodyPart: s.bodyPart as string | undefined,
+        storageUrl: s.storageUrl as string | undefined,
+        priority: s.priority as string | undefined,
+        edgePreProcessing: (s.edgePreProcessing as Record<string, unknown>) || {},
+        offlineQueued: s.offlineQueued as boolean | undefined,
+      }))
+    );
+
+    await prisma.$disconnect();
+
+    return res.json({
+      message: 'Edge pre-processed scans accepted',
+      acceptedCount: result.accepted,
+      rejectedCount: result.rejected,
+      scanIds: result.scanIds,
+    });
+  } catch (err) {
+    console.error('[EdgeSync] preprocessed error:', err);
+    return res.status(500).json({ error: 'Failed to process edge scans' });
+  }
+});
+
+// ── Edge Site Configuration ───────────────────────────────────────────
+router.get('/config', async (req, res) => {
+  try {
+    const siteId = req.query.siteId as string;
+    if (!siteId) {
+      return res.status(400).json({ error: 'siteId query param required' });
+    }
+
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    const site = await prisma.edgeSite.findUnique({
+      where: { siteId },
+    });
+
+    await prisma.$disconnect();
+
+    if (!site) {
+      return res.status(404).json({ error: 'Site not found' });
+    }
+
+    return res.json({
+      siteId: site.siteId,
+      supportedModalities: site.supportedModalities,
+      enabledFeatures: site.enabledFeatures,
+      maxOfflineQueueSizeMB: site.maxOfflineQueueSizeMB,
+      heartbeatIntervalSec: site.heartbeatIntervalSec,
+      aiModels: {
+        quality: { version: '1.0.0', sha256: 'pending' },
+        triage: { version: '1.0.0', sha256: 'pending' },
+      },
+    });
+  } catch (err) {
+    console.error('[EdgeSync] config error:', err);
+    return res.status(500).json({ error: 'Failed to fetch site config' });
+  }
+});
+
+// ── Edge Sync Status ──────────────────────────────────────────────────
+router.get('/status/:siteId', async (req, res) => {
+  try {
+    const { siteId } = req.params;
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    const site = await prisma.edgeSite.findUnique({
+      where: { siteId },
+    });
+
+    const recentScans = await prisma.edgePreProcessing.count({
+      where: {
+        siteId,
+        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      },
+    });
+
+    await prisma.$disconnect();
+
+    return res.json({
+      siteId,
+      status: site?.status ?? 'unknown',
+      totalScansProcessed: site?.totalScansProcessed ?? 0,
+      scansLast24h: recentScans,
+      lastHeartbeat: site?.lastHeartbeat?.toISOString() ?? null,
+      totalDevices: site?.totalDevices ?? 0,
+    });
+  } catch (err) {
+    console.error('[EdgeSync] status error:', err);
+    return res.status(500).json({ error: 'Failed to fetch sync status' });
+  }
+});
+
 export default router;

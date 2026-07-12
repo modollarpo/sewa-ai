@@ -20,7 +20,6 @@ export function QrScannerModal({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>('');
   const [manualInput, setManualInput] = useState('');
-  const [scanning, setScanning] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;

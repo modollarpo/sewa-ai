@@ -237,7 +237,7 @@ function BookModal({
 
 // ── Main page ──────────────────────────────────────────────────
 export function AppointmentsPage() {
-  const { doctors, patients, loading: usersLoading } = useAppointmentData();
+  const { doctors, patients } = useAppointmentData();
   const [view, setView]               = useState<'calendar'|'list'>('calendar');
   const [year, setYear]               = useState(new Date().getFullYear());
   const [month, setMonth]             = useState(new Date().getMonth() + 1);
@@ -245,7 +245,7 @@ export function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [showBook, setShowBook]       = useState(false);
   const [selected, setSelected]       = useState<Appointment | null>(null);
-  const [dataLoading, setDataLoading] = useState(false);
+  const [_dataLoading, setDataLoading] = useState(false);
 
   const loadCalendar = useCallback(async () => {
     setDataLoading(true);

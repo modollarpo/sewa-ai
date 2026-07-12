@@ -2,12 +2,8 @@
 // Global platform management: tenants, AI, deployments, compliance, billing, logs
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSuperAdminData } from '../../hooks/useDashboardData';
-import { Skeleton, StatSkeleton, TableRowSkeleton } from '../../components/ui/Skeleton';
 import { apiClient } from '../../services/apiClient';
-import { Tooltip } from '../../components/ui/Tooltip';
 import { dashboardColors as C } from '../../design-system/tokens';
-
-const REGION_FLAGS:Record<string,string> = {uk:'🇬🇧',eu:'🇪🇺',us:'🇺🇸',ng:'🇳🇬',ke:'🇰🇪',za:'🇿🇦',in:'🇮🇳',gh:'🇬🇭'};
 
 interface AiModel {
   id?: string;
@@ -125,11 +121,10 @@ function GlobeMap({ data }: { data: { region: string, count: number }[] }) {
 }
 
 export function SuperAdminDashboard() {
-  const { stats, tenants, regionalStats, health, audit, telemetry, loading, error: _error } = useSuperAdminData();
+  const { stats, tenants, regionalStats, health, telemetry, loading, error: _error } = useSuperAdminData();
   const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'diagnostics'|'federated'|'billing'|'edge'>('overview');
   const [tenantSearch, setTenantSearch] = useState('');
   const [showProvision, setShowProvision] = useState(false);
-  const [logLimit, setLogLimit] = useState(50);
 
   // A8: Fetch AI models from real API instead of hardcoded constant
   const [aiModels, setAiModels]           = useState<AiModel[]>([]);
@@ -139,9 +134,9 @@ export function SuperAdminDashboard() {
   const [diagLoading, setDiagLoading]     = useState(false);
   const [fedNodes, setFedNodes]           = useState<FederatedNode[]>([]);
   const [fedRounds, setFedRounds]         = useState<FederatedRound[]>([]);
-  const [fedLoading, setFedLoading]       = useState(false);
+  const [_fedLoading, setFedLoading]       = useState(false);
   const [edgeDevices, setEdgeDevices]     = useState<EdgeDevice[]>([]);
-  const [edgeLoading, setEdgeLoading]     = useState(false);
+  const [_edgeLoading, setEdgeLoading]     = useState(false);
 
   useEffect(() => {
     setAiModelsLoading(true);
