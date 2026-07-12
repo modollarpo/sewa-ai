@@ -163,10 +163,10 @@ app.use(helmet({
 app.use(cors({
   origin: (origin, callback) => {
     // Allow if no origin in development only (server-to-server, Postman)
+    // Also allow no-origin for health probes (Kubernetes liveness/readiness)
     if (!origin) {
       if (config.NODE_ENV !== 'production') return callback(null, true);
-      logger.warn('[CORS] Blocked request with no origin header');
-      return callback(new Error('Origin required in production'));
+      return callback(null, true);
     }
 
     const allowedOrigins = config.CORS_ORIGINS;
