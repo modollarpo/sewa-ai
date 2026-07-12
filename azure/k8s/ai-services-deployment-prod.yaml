@@ -33,6 +33,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: triage
         securityContext:
@@ -40,7 +43,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-triage:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-triage:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -106,6 +112,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: vlm-report
         securityContext:
@@ -113,7 +122,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-vlm:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-vlm:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8001
@@ -189,6 +201,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: pathology
         securityContext:
@@ -196,7 +211,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-pathology:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-pathology:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8002
@@ -262,6 +280,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: uncertainty
         securityContext:
@@ -269,7 +290,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-uncertainty:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-uncertainty:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8009
@@ -335,6 +359,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: federated
         securityContext:
@@ -342,7 +369,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-federated:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-federated:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8004
@@ -408,6 +438,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: continuous
         securityContext:
@@ -415,7 +448,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-continuous:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-continuous:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8005
@@ -481,6 +517,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: metacognition
         securityContext:
@@ -488,7 +527,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-metacognition:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-metacognition:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8003
@@ -554,6 +596,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: mammography
         securityContext:
@@ -561,7 +606,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-mammography:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-mammography:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8007
@@ -627,6 +675,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: retinal
         securityContext:
@@ -634,7 +685,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-ai-retinal:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-retinal:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8008

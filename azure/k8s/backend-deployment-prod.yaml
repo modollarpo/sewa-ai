@@ -33,6 +33,9 @@ spec:
           type: RuntimeDefault
       imagePullSecrets:
       - name: acr-secret
+      volumes:
+      - name: tmp
+        emptyDir: {}
       containers:
       - name: backend
         securityContext:
@@ -40,7 +43,10 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop: ["ALL"]
-        image: "{{CONTAINER_REGISTRY}}/sewa-backend:{{IMAGE_TAG}}"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        image: "sewaaiproductionacr.azurecr.io/sewa-backend:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
