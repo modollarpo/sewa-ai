@@ -310,7 +310,7 @@ jobs:
           kubectl set image deployment/sewa-backend   sewa-backend=sewaaiproductionacr.azurecr.io/sewa-backend:staging-${SHORT_SHA}   -n sewa-ai
           kubectl set image deployment/sewa-frontend  sewa-frontend=sewaaiproductionacr.azurecr.io/sewa-frontend:staging-${SHORT_SHA}  -n sewa-ai
           kubectl set image deployment/sewa-ai-triage sewa-ai-triage=sewaaiproductionacr.azurecr.io/sewa-ai-triage:staging-${SHORT_SHA} -n sewa-ai
-          kubectl set image deployment/sewa-ai-vlm    sewa-ai-vlm=sewaaiproductionacr.azurecr.io/sewa-ai-vlm:staging-${SHORT_SHA}      -n sewa-ai
+           kubectl set image deployment/sewa-ai-vlm-report sewa-ai-vlm-report=sewaaiproductionacr.azurecr.io/sewa-ai-vlm-report:staging-${SHORT_SHA} -n sewa-ai
           kubectl rollout status deployment/sewa-backend -n sewa-ai --timeout=300s
       - name: Run smoke tests
         run: |
@@ -347,9 +347,9 @@ jobs:
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
           TAG="main-${SHORT_SHA}"
-          SERVICES="backend frontend ai-triage ai-vlm ai-uncertainty ai-metacognition ai-federated ai-continuous ai-pathology ai-mammography ai-retinal"
-          for svc in $SERVICES; do
-            kubectl set image deployment/sewa-${svc} sewa-${svc}=sewaaiproductionacr.azurecr.io/sewa-${svc}:${TAG} -n sewa-ai
+          declare -A IMAGES=(["backend"]="sewa-backend" ["frontend"]="sewa-frontend" ["ai-triage"]="sewa-ai-triage" ["ai-vlm"]="sewa-ai-vlm-report" ["ai-uncertainty"]="sewa-ai-uncertainty" ["ai-metacognition"]="sewa-ai-metacognition" ["ai-federated"]="sewa-ai-federated" ["ai-continuous"]="sewa-ai-continuous" ["ai-pathology"]="sewa-ai-pathology" ["ai-mammography"]="sewa-ai-mammography" ["ai-retinal"]="sewa-ai-retinal")
+          for svc in "${!IMAGES[@]}"; do
+            kubectl set image deployment/${IMAGES[$svc]} ${IMAGES[$svc]}=sewaaiproductionacr.azurecr.io/${IMAGES[$svc]}:${TAG} -n sewa-ai
           done
           kubectl rollout status deployment/sewa-backend   -n sewa-ai --timeout=600s
           kubectl rollout status deployment/sewa-frontend  -n sewa-ai --timeout=300s

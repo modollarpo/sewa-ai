@@ -369,6 +369,37 @@ async function bootstrap() {
     }, 5 * 60 * 1000);
     logger.info('[Cron] Merkle block sealer started (every 5 min)');
 
+    // Confidential Ledger committer — every 15 minutes
+    setInterval(async () => {
+      try {
+        const { commitAllPendingBlocks } = await import('./services/confidentialLedgerService');
+        await commitAllPendingBlocks();
+      } catch (e: any) {
+        logger.error('[Cron] Ledger commit failed:', e.message);
+      }
+    }, 15 * 60 * 1000);
+    logger.info('[Cron] Confidential Ledger committer started (every 15 min)');
+
+    // MLOps auto-validator — every 30 minutes
+    setInterval(async () => {
+      try {
+        const { prisma } = await import('./config/database');
+        const { validateFederatedRound } = await import('./services/mlopsPipelineService');
+        const completedRounds = await prisma.federatedRound.findMany({
+          where: { status: 'completed', mlValidations: { none: {} } },
+          select: { id: true, roundNumber: true },
+          take: 5,
+        });
+        for (const round of completedRounds) {
+          logger.info(`[Cron] Auto-validating federated round ${round.roundNumber}`);
+          await validateFederatedRound(round.id);
+        }
+      } catch (e: any) {
+        logger.error('[Cron] MLOps auto-validation failed:', e.message);
+      }
+    }, 30 * 60 * 1000);
+    logger.info('[Cron] MLOps auto-validator started (every 30 min)');
+
     // Start scan AI pipeline worker
     const workerConcurrency = parseInt(process.env.SCAN_WORKER_CONCURRENCY || '10', 10);
     startScanWorker(workerConcurrency);
