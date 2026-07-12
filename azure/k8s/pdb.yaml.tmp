@@ -1,0 +1,87 @@
+﻿# SEWA XAI â€” Pod Disruption Budgets
+# Ensures rolling updates and node drain never takes all replicas offline.
+# Clinical SLA: at least 1 AI inference pod MUST remain running at all times.
+---
+# Triage â€” primary AI pathway (min 1 always available)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-triage-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-triage
+---
+# Uncertainty â€” clinical safety gate (min 1 always available)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-uncertainty-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-uncertainty
+---
+# VLM Report â€” report generation (min 1 always available)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-vlm-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-vlm-report
+---
+# Metacognition (min 1 always available)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-metacognition-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-metacognition
+---
+# Backend API (min 2 always available for HA)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-backend-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: sewa-backend
+---
+# DICOM Ingestion (min 1 always available â€” PACS continuity)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-dicom-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-dicom-ingestion
+---
+# Frontend (min 1 always available)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sewa-frontend-pdb
+  namespace: sewa-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sewa-frontend
