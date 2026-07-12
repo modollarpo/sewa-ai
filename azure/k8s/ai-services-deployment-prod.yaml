@@ -133,7 +133,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-vlm:prod-20260712-113620"
+        image: "sewaaiproductionacr.azurecr.io/sewa-ai-vlm-report:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8001
