@@ -200,19 +200,20 @@ jobs:
             context: backend
           - name: frontend
             context: frontend
-          - name: ai-triage
-            context: ai-services/triage
-            dockerfile: ai-services/triage/Dockerfile
-          - name: ai-vlm
-            context: ai-services/vlm-report
-          - name: ai-uncertainty
-            context: ai-services/uncertainty
-          - name: ai-metacognition
-            context: ai-services/metacognition
           - name: ai-federated
             context: ai-services/federated-learning
           - name: ai-continuous
             context: ai-services/continuous-learning
+          - name: pathology
+            context: ai-services/pathology
+          - name: mammography
+            context: ai-services/mammography
+          - name: retinal
+            context: ai-services/retinal
+          - name: edge
+            context: edge
+          - name: dicom-ingestion-go
+            context: services/dicom-ingestion-go
 
     steps:
       - name: Checkout
@@ -350,7 +351,7 @@ jobs:
 
       - name: Wait for rollout — AI services
         run: |
-          for svc in sewa-triage sewa-vlm-report sewa-uncertainty sewa-metacognition sewa-federated sewa-continuous; do
+          for svc in sewa-triage sewa-vlm-report sewa-uncertainty sewa-metacognition sewa-federated sewa-continuous sewa-pathology sewa-mammography sewa-retinal; do
             echo "Waiting for $svc..."
             kubectl rollout status deployment/$svc \
               --namespace sewa-ai --timeout=300s || echo "⚠ $svc timeout"
@@ -384,7 +385,7 @@ jobs:
         if: failure()
         run: |
           echo "❌ Deployment failed — rolling back all deployments"
-          for dep in sewa-backend sewa-triage sewa-vlm-report sewa-uncertainty sewa-metacognition sewa-federated sewa-continuous; do
+          for dep in sewa-backend sewa-triage sewa-vlm-report sewa-uncertainty sewa-metacognition sewa-federated sewa-continuous sewa-pathology sewa-mammography sewa-retinal; do
             kubectl rollout undo deployment/$dep --namespace sewa-ai || true
           done
 

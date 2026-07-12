@@ -1,5 +1,5 @@
 // SEWA XAI — App.tsx (COMPLETE — all pages wired, full public routing)
-// Routes: Public site (10 pages) → Login → 11 role workspaces with sub-navigation
+// Routes: Public site (~45 pages) → Login → 11 role workspaces with sub-navigation
 // Socket.IO real-time, critical alert banner, notification panel, cookie banner
 
 import React, { useState, useEffect } from 'react';
@@ -56,6 +56,7 @@ import { TermsPage }                 from './pages/public/TermsPage';
 import { CookiePolicyPage }          from './pages/public/CookiePolicyPage';
 import { SecurityPage }              from './pages/public/SecurityPage';
 import { ClinicalValidationPage }    from './pages/public/ClinicalValidationPage';
+import { ClinicalRulesDashboard }    from './pages/admin/ClinicalRulesDashboard';
 import { ClinicalEvidencePage }      from './pages/public/ClinicalEvidencePage';
 import { AISafetyPage }              from './pages/public/AISafetyPage';
 import { GovernancePage }            from './pages/public/GovernancePage';
@@ -547,6 +548,7 @@ export default function App() {
           {adminPage === 'roadmap'           && <ErrorBoundary name="Roadmap"><RoadmapPage /></ErrorBoundary>}
           {adminPage === 'advanced-orchestrator' && <ErrorBoundary name="Advanced Orchestration"><RoadmapOrchestrator /></ErrorBoundary>}
           {adminPage === 'eu-ai-act'            && <ErrorBoundary name="EU AI Act Portal"><EuAiActPortal /></ErrorBoundary>}
+          {adminPage === 'clinical-rules'        && <ErrorBoundary name="Clinical Rules"><ClinicalRulesDashboard /></ErrorBoundary>}
           {adminPage === 'longitudinal'          && <ErrorBoundary name="Longitudinal Tracking"><LongitudinalTracking /></ErrorBoundary>}
         </div>
       </div>

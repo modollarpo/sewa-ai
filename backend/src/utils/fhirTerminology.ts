@@ -24,15 +24,24 @@ export async function validateCode(
   system: string = TERMINOLOGY_SYSTEMS.SNOMED_CT
 ): Promise<boolean> {
   try {
-    // Try NHS Terminology Service if configured
     if (config.NHS_TERMINOLOGY_URL && config.NHS_TERMINOLOGY_API_KEY) {
       logger.debug(`[Terminology] Validating code ${code} in system ${system} via NHS Terminology Service`);
-      // This is a placeholder for the actual API call
-      // The NHS Terminology Service API details should be updated to match the real service
-      return true;
+      const res = await axios.get(`${config.NHS_TERMINOLOGY_URL}/validate`, {
+        params: { code, system },
+        headers: { 'api-key': config.NHS_TERMINOLOGY_API_KEY },
+        timeout: 10000,
+      });
+      return res.data?.valid === true;
     }
-    // Fallback to placeholder
-    logger.debug(`[Terminology] Validating code ${code} in system ${system} (placeholder)`);
+    logger.debug(`[Terminology] Validating code ${code} in system ${system} (using FHIR $validate-code)`);
+    if (config.FHIR_BASE_URL) {
+      const res = await axios.get(`${config.FHIR_BASE_URL}/CodeSystem/$validate-code`, {
+        params: { code, system, url: system },
+        timeout: 10000,
+      });
+      return res.data?.parameter?.some((p: any) => p.name === 'result' && p.valueBoolean === true) ?? false;
+    }
+    logger.warn('[Terminology] No terminology service configured — skipping validation');
     return true;
   } catch (err) {
     logger.warn(`[Terminology] Code validation failed: ${err}`);
@@ -46,32 +55,51 @@ export async function validateCode(
  * @param system The terminology system
  * @returns Promise of display string or null
  */
+const PLACEHOLDER_MAPPINGS: Record<string, Record<string, string>> = {
+  [TERMINOLOGY_SYSTEMS.SNOMED_CT]: {
+    '65172008': 'Intracerebral hemorrhage',
+    '422504002': 'Ischemic stroke',
+    '722138006': 'Acute subdural hematoma',
+    '230690007': 'Cerebrovascular accident',
+  },
+  [TERMINOLOGY_SYSTEMS.LOINC]: {
+    '18748-4': 'Diagnostic imaging study',
+    '55104-3': 'CT Head WO contrast',
+    '55106-8': 'CT Head W contrast',
+  },
+  [TERMINOLOGY_SYSTEMS.DICOM]: {
+    '121181': 'Detected',
+    '121182': 'Not detected',
+  },
+};
+
 export async function lookupCode(
   code: string,
   system: string = TERMINOLOGY_SYSTEMS.SNOMED_CT
 ): Promise<string | null> {
   try {
-    // Try NHS Terminology Service if configured
     if (config.NHS_TERMINOLOGY_URL && config.NHS_TERMINOLOGY_API_KEY) {
       logger.debug(`[Terminology] Looking up code ${code} in system ${system} via NHS Terminology Service`);
-      // This is a placeholder for the actual API call
-      return null;
+      const res = await axios.get(`${config.NHS_TERMINOLOGY_URL}/lookup`, {
+        params: { code, system },
+        headers: { 'api-key': config.NHS_TERMINOLOGY_API_KEY },
+        timeout: 10000,
+      });
+      return res.data?.display ?? null;
     }
-    // Fallback to placeholder mappings
-    logger.debug(`[Terminology] Looking up code ${code} in system ${system} (placeholder)`);
-    const placeholderMappings: Record<string, Record<string, string>> = {
-      [TERMINOLOGY_SYSTEMS.SNOMED_CT]: {
-        '65172008': 'Intracerebral hemorrhage',
-        '422504002': 'Ischemic stroke'
-      },
-      [TERMINOLOGY_SYSTEMS.LOINC]: {
-        '18748-4': 'Diagnostic imaging study'
-      }
-    };
-    return placeholderMappings[system]?.[code] || null;
+    logger.debug(`[Terminology] Looking up code ${code} in system ${system} (using FHIR)`);
+    if (config.FHIR_BASE_URL) {
+      const res = await axios.get(`${config.FHIR_BASE_URL}/CodeSystem/$lookup`, {
+        params: { code, system },
+        timeout: 10000,
+      });
+      const display = res.data?.parameter?.find((p: any) => p.name === 'display');
+      return display?.valueString ?? PLACEHOLDER_MAPPINGS[system]?.[code] ?? null;
+    }
+    return PLACEHOLDER_MAPPINGS[system]?.[code] ?? null;
   } catch (err) {
     logger.warn(`[Terminology] Code lookup failed: ${err}`);
-    return null;
+    return PLACEHOLDER_MAPPINGS[system]?.[code] ?? null;
   }
 }
 
@@ -89,7 +117,15 @@ export async function translateCode(
 ): Promise<string | null> {
   try {
     logger.debug(`[Terminology] Translating ${code} from ${sourceSystem} to ${targetSystem}`);
-    // Placeholder - no translation logic yet
+    if (config.FHIR_BASE_URL) {
+      const res = await axios.get(`${config.FHIR_BASE_URL}/ConceptMap/$translate`, {
+        params: { code, system: sourceSystem, target: targetSystem },
+        timeout: 10000,
+      });
+      const match = res.data?.parameter?.find((p: any) => p.name === 'match');
+      return match?.valueCoding?.code ?? null;
+    }
+    logger.warn('[Terminology] No FHIR endpoint configured for code translation');
     return null;
   } catch (err) {
     logger.warn(`[Terminology] Code translation failed: ${err}`);
