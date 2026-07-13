@@ -6,8 +6,8 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding SEWA XAI database (JS)...');
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) throw new Error("ADMIN_PASSWORD environment variable is required to seed database safely.");
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!adminPassword) throw new Error("SEED_ADMIN_PASSWORD environment variable is required to seed database safely.");
   const HASH = await bcrypt.hash(adminPassword, 12);
 
   // Tenants
