@@ -1,0 +1,21 @@
+# SEWA XAI — ai-services/triage/pyrefly.toml
+# Pyrefly config for the TRIAGE service.
+# Sets search_path so that local imports resolve correctly:
+#   - "."             → resolves: utils.*, model
+#   - "../shared"     → resolves: cpu_inference_engine
+# This overrides the parent ai-services/pyrefly.toml for files in this directory.
+
+[pyrefly]
+python_interpreter = "c:/sewa_extract/.venv/Scripts/python.exe"
+ignore_missing_imports = true
+
+search_path = [
+  "c:/sewa_extract/sewa-ai/ai-services/triage",
+  "c:/sewa_extract/sewa-ai/ai-services/shared",
+]
+
+project_excludes = ["**/__pycache__/**", "**/*.pyc"]
+
+[pyrefly.errors]
+missing-import = "hide"
+import-cycle   = "hide"

@@ -127,6 +127,80 @@ services:
 
   # ── AI Services ──────────────────────────────────────────────
 
+  ai-triage:
+    build:
+      context: ./ai-services/triage
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [sewa-net]
+    ports:
+      - "8000:8000"
+    volumes:
+      - model-cache:/models
+    environment:
+      MODEL_CACHE:         /models
+      MODEL_VERSION:       v2.4.1
+      VCPU_COUNT:          "4"
+      MAX_BATCH_SIZE:      "2"
+      MAX_BATCH_WAIT_MS:   "50"
+      OMP_NUM_THREADS:     "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS:     "1"
+      AZURE_STORAGE_URL:   ""
+      ALLOWED_ORIGINS:     "http://localhost:3000,http://localhost:5000,http://localhost:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
+  ai-vlm:
+    build:
+      context: ./ai-services/vlm-report
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [sewa-net]
+    ports:
+      - "8001:8001"
+    environment:
+      AZURE_OPENAI_DEPLOYMENT: "gpt-54-mini"
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5000,http://localhost:5173"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+
+  ai-uncertainty:
+    build:
+      context: ./ai-services/uncertainty
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [sewa-net]
+    ports:
+      - "8009:8009"
+    volumes:
+      - model-cache:/models
+    environment:
+      MODEL_CACHE:          /models
+      MODEL_VERSION:        v2.4.1
+      MC_DROPOUT_PASSES:    "10"
+      MC_NOISE_STD:         "0.05"
+      VCPU_COUNT:           "4"
+      OMP_NUM_THREADS:      "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS:      "1"
+      AZURE_STORAGE_URL:    ""
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5000,http://localhost:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8009/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
   ai-pathology:
     build:
       context: ./ai-services/pathology
@@ -209,6 +283,23 @@ services:
       interval: 30s
       timeout: 10s
       start_period: 90s
+      retries: 3
+
+  ai-metacognition:
+    build:
+      context: ./ai-services/metacognition
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [sewa-net]
+    ports:
+      - "8003:8003"
+    environment:
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5000,http://localhost:5173"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
       retries: 3
 
   ai-federated:

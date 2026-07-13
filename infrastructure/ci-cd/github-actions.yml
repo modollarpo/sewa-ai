@@ -200,6 +200,14 @@ jobs:
             context: backend
           - name: frontend
             context: frontend
+          - name: ai-triage
+            context: ai-services/triage
+          - name: ai-vlm
+            context: ai-services/vlm-report
+          - name: ai-uncertainty
+            context: ai-services/uncertainty
+          - name: ai-metacognition
+            context: ai-services/metacognition
           - name: ai-federated
             context: ai-services/federated-learning
           - name: ai-continuous

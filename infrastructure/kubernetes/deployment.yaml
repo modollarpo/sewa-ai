@@ -5,6 +5,8 @@
 #   backend, frontend, ai-triage, ai-vlm, ai-uncertainty,
 #   ai-metacognition, ai-federated-learning, ai-continuous-learning,
 #   pathology, mammography, retinal, edge, dicom-ingestion-go
+# Note: ai-triage, ai-vlm, ai-uncertainty, ai-metacognition are CPU/ONNX recalibrated
+#   (originally GPU, switched to CPU due to cost; GPU config retained for future switch-back)
 #
 # Features:
 #   - Azure Key Vault CSI SecretProviderClass (no plaintext secrets in k8s)
