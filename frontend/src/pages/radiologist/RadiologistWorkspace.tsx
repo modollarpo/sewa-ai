@@ -642,7 +642,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
               ))}
             </div>
           )}
-          {tab === 'viewer' && <DicomViewport storageUrl={selected?.storageUrl} modality={selected?.modality} showGradcam={showGradcam} findings={selected?.aiResult?.findings} />}
+          {tab === 'viewer' && <DicomViewport scanId={selected?.id} storageUrl={selected?.storageUrl} modality={selected?.modality} showGradcam={showGradcam} findings={selected?.aiResult?.findings} />}
           {tab === 'report' && (
             <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
               <div style={{ flex:'0 0 40%', overflowY:'auto', borderBottom:`1px solid ${C.border}` }}>
@@ -881,7 +881,7 @@ function WorkspaceContent({ onNavigate }: { onNavigate: (p:string)=>void }) {
 
               {/* Actual Canvas Viewer */}
               <div className="flex-1 flex flex-col w-full h-full pt-10">
-                <DicomViewport storageUrl={selected?.storageUrl} modality={selected?.modality} showGradcam={showGradcam} findings={selected?.aiResult?.findings} />
+                <DicomViewport scanId={selected?.id} storageUrl={selected?.storageUrl} modality={selected?.modality} showGradcam={showGradcam} findings={selected?.aiResult?.findings} />
               </div>
             </main>
 

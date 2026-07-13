@@ -13,19 +13,19 @@ vi.mock('../services/apiClient', () => ({
 
 describe('LoginPage', () => {
   it('renders email and password fields', () => {
-    render(<BrowserRouter><LoginPage /></BrowserRouter>);
+    render(<BrowserRouter><LoginPage onNavigate={vi.fn()} /></BrowserRouter>);
     expect(screen.getByPlaceholderText(/doctor@hospital/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/••••/)).toBeInTheDocument();
   });
 
   it('renders submit button', () => {
-    render(<BrowserRouter><LoginPage /></BrowserRouter>);
+    render(<BrowserRouter><LoginPage onNavigate={vi.fn()} /></BrowserRouter>);
     const btn = screen.getByRole('button', { name: /initiate/i });
     expect(btn).toBeInTheDocument();
   });
 
   it('shows onboarding link', () => {
-    render(<BrowserRouter><LoginPage /></BrowserRouter>);
+    render(<BrowserRouter><LoginPage onNavigate={vi.fn()} /></BrowserRouter>);
     expect(screen.getByText(/request onboarding/i)).toBeInTheDocument();
   });
 });

@@ -12,7 +12,9 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 
 COPY --from=builder /install /usr/local
-COPY . .
+ARG CACHE_BUST=dev
+RUN echo "cachebust-$CACHE_BUST"
+COPY main.py .
 
 RUN adduser --disabled-password --gecos '' aiuser \
     && chown -R aiuser:aiuser /app

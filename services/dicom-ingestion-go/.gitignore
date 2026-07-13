@@ -1,0 +1,20 @@
+# Compiled binary
+dicom-ingestion
+dicom-ingestion.exe
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dev data
+/data/
+
+# Env files
+.env
+.env.local

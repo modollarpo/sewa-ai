@@ -12,8 +12,10 @@ import asyncio
 import hashlib
 import time
 import logging
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any, Union
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 import numpy as np
 import torch
@@ -74,15 +76,37 @@ app = FastAPI(title="SEWA XAI — Federated Learning Coordinator", version="1.0.
 _FL_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://sewa-backend:5000,http://localhost:3000,http://localhost:5000").split(",")
 app.add_middleware(CORSMiddleware, allow_origins=_FL_CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 
-# ── In-memory round state ───────────────────────────────────────
+# ── Persistent round state ────────────────────────────────────
+STATE_FILE = os.getenv("FL_STATE_FILE", "/data/fl_state.json")
+
+def _load_state() -> Dict[str, Any]:
+    try:
+        path = Path(STATE_FILE)
+        if path.exists():
+            with open(path) as f:
+                return json.load(f)
+    except Exception as e:
+        logger.warning(f"Failed to load FL state: {e}")
+    return {}
+
+def _save_state(state: Dict[str, Any]) -> None:
+    try:
+        path = Path(STATE_FILE)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w") as f:
+            json.dump(state, f, indent=2, default=str)
+    except Exception as e:
+        logger.warning(f"Failed to save FL state: {e}")
+
+_persisted = _load_state()
 round_state: Dict[str, Any] = {
-    "current_round": 0,
-    "total_rounds":  NUM_ROUNDS,
-    "active_clients": [],
-    "round_history":  [],
-    "global_accuracy": 0.0,
-    "privacy_budget_spent": 0.0,
-    "status": "idle",
+    "current_round": _persisted.get("current_round", 0),
+    "total_rounds":  _persisted.get("total_rounds", NUM_ROUNDS),
+    "active_clients": _persisted.get("active_clients", []),
+    "round_history":  _persisted.get("round_history", []),
+    "global_accuracy": _persisted.get("global_accuracy", 0.0),
+    "privacy_budget_spent": _persisted.get("privacy_budget_spent", 0.0),
+    "status": _persisted.get("status", "idle"),
 }
 
 
@@ -232,6 +256,7 @@ class SEWAFedStrategy(FedAvg):
                 "timestamp":   datetime.now(timezone.utc).isoformat(),
                 "avg_epsilon": sum(epsilons)/len(epsilons) if epsilons else 0,
             })
+            _save_state(round_state)
 
         return aggregated_parameters, aggregated_metrics
 
@@ -246,6 +271,7 @@ class SEWAFedStrategy(FedAvg):
             accs = [float(r.metrics.get("accuracy", 0)) * r.num_examples for _, r in results]
             total = sum(r.num_examples for _, r in results)
             round_state["global_accuracy"] = sum(accs) / max(total, 1)
+            _save_state(round_state)
         return loss_aggregated, metrics
 
 
@@ -278,6 +304,7 @@ async def start_training(config: TrainingConfig, background_tasks: BackgroundTas
     round_state["status"] = "starting"
     round_state["total_rounds"] = config.num_rounds
     round_state["round_history"] = []
+    _save_state(round_state)
 
     strategy = SEWAFedStrategy(
         fraction_fit=1.0,
@@ -312,11 +339,13 @@ async def _run_fl_server(strategy: SEWAFedStrategy, num_rounds: int) -> None:
         t0 = time.time()
         await loop.run_in_executor(None, _start_server)
         round_state["status"] = "completed"
+        _save_state(round_state)
         FL_TRAINING_DURATION.observe(time.time() - t0)
         FL_ROUNDS_TOTAL.labels(status="completed").inc()
         logger.info(f"Federated training completed: {num_rounds} rounds in {time.time()-t0:.1f}s")
     except Exception as e:
         round_state["status"] = f"error: {str(e)}"
+        _save_state(round_state)
         FL_ROUNDS_TOTAL.labels(status="error").inc()
         logger.error(f"Federated training failed: {e}")
 
@@ -335,6 +364,35 @@ async def privacy_budget() -> Dict[str, Any]:
         "compliant_with":  ["GDPR Article 25", "HIPAA Safe Harbour", "NHS DSPT"],
     }
 
+
+# ── Input models for admin endpoints ────────────────────────────
+class ShadowLoadRequest(BaseModel):
+    model_path: str = Field(..., min_length=1, max_length=500)
+    model_version: Optional[str] = Field(None, pattern=r"^v?[0-9]+\.[0-9]+\.[0-9]+$")
+
+@app.post("/admin/shadow/load")
+async def admin_shadow_load(req: ShadowLoadRequest) -> Dict[str, Any]:
+    """Load a shadow model for A/B evaluation with SSRF protection."""
+    parsed = urlparse(req.model_path)
+    if parsed.scheme:
+        blacklist = ("localhost", "127.0.0.1", "169.254.169.254", "::1", "metadata.google.internal")
+        if parsed.hostname in blacklist or (parsed.hostname and parsed.hostname.startswith("10.")):
+            logger.warning(f"[FL] SSRF attempt blocked on shadow load: {parsed.hostname}")
+            raise HTTPException(400, "SSRF protection active: hostname not allowed")
+    if parsed.scheme and parsed.scheme not in ("https", "azblob", "file"):
+        raise HTTPException(400, f"Scheme not allowed: {parsed.scheme}")
+
+    local_path = parsed.path if parsed.scheme else req.model_path
+    if not os.path.isfile(local_path):
+        if not parsed.scheme or parsed.scheme == "file":
+            raise HTTPException(400, f"Model file not found: {local_path}")
+
+    round_state["shadow_model"] = req.model_path
+    round_state["shadow_model_version"] = req.model_version or "unknown"
+    _save_state(round_state)
+    logger.info(f"[FL] Shadow model registered: {req.model_path} v{req.model_version}")
+    FL_REQUESTS_TOTAL.labels(endpoint="shadow_load", status="success").inc()
+    return {"status": "loaded", "model_path": req.model_path, "model_version": req.model_version}
 
 @app.get("/rounds/history")
 async def round_history() -> Dict[str, Any]:

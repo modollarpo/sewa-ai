@@ -121,7 +121,7 @@ function GlobeMap({ data }: { data: { region: string, count: number }[] }) {
 }
 
 export function SuperAdminDashboard() {
-  const { stats, tenants, regionalStats, health, telemetry, loading, error: _error } = useSuperAdminData();
+  const { stats, tenants, regionalStats, health, healthOverall, telemetry, loading, error: _error } = useSuperAdminData();
   const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'diagnostics'|'federated'|'billing'|'edge'>('overview');
   const [tenantSearch, setTenantSearch] = useState('');
   const [showProvision, setShowProvision] = useState(false);
@@ -418,7 +418,10 @@ export function SuperAdminDashboard() {
             </div>
           </div>
           <div style={{padding:16,background:C.bg2,borderRadius:14,border:`1px solid ${C.border}`}}>
-            <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:10}}>AI Service Status</div>
+            <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:10,display:'flex',alignItems:'center',gap:8}}>
+              AI Service Status
+              <span style={{fontSize:10,fontWeight:600,padding:'2px 8px',borderRadius:8,color:C.textHi,background: healthOverall==='healthy'?C.normal:healthOverall==='degraded'?C.urgent:C.critical}}>{healthOverall?.toUpperCase()}</span>
+            </div>
             {loading ? <div style={{fontSize:12,color:C.textLo}}>Loading...</div> : health?.map((svc:HealthService)=>(
               <div key={svc.name} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:`1px solid ${C.border}`}}>
                 <span style={{fontSize:12,color:C.textHi}}>{svc.name}</span>

@@ -177,7 +177,7 @@ jobs:
       - run: |
           kubectl set image deployment/sewa-backend sewa-backend=${{ env.ACR_LOGIN_SERVER }}/sewa-backend:${{ github.sha }} -n sewa-ai
           kubectl set image deployment/sewa-frontend sewa-frontend=${{ env.ACR_LOGIN_SERVER }}/sewa-frontend:${{ github.sha }} -n sewa-ai
-          kubectl set image deployment/sewa-ai-triage sewa-ai-triage=${{ env.ACR_LOGIN_SERVER }}/sewa-ai-triage:${{ github.sha }} -n sewa-ai
+          kubectl set image deployment/sewa-triage triage=${{ env.ACR_LOGIN_SERVER }}/sewa-ai-triage:${{ github.sha }} -n sewa-ai
           kubectl rollout status deployment/sewa-backend -n sewa-ai --timeout=300s
           kubectl rollout status deployment/sewa-frontend -n sewa-ai --timeout=300s
 

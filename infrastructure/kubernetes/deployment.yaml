@@ -102,12 +102,14 @@ data:
   APP_URL:                       "https://api.sewaxai.health"
   CORS_ORIGINS:                  "https://app.sewaxai.health,https://superadmin.sewaxai.health"
   # AI service URLs — AKS internal DNS
-  AI_SERVICE_URL:                "http://sewa-ai-triage:8000"
-  VLM_SERVICE_URL:               "http://sewa-ai-vlm:8001"
-  UNCERTAINTY_SERVICE_URL:       "http://sewa-ai-uncertainty:8009"
-  METACOGNITION_SERVICE_URL:     "http://sewa-ai-metacognition:8003"
-  FL_SERVICE_URL:                "http://sewa-ai-federated:8004"
-  CL_SERVICE_URL:                "http://sewa-ai-continuous:8005"
+  TRIAGE_URL:                    "http://sewa-triage:8000"
+  AI_SERVICE_URL:                "http://sewa-triage:8000"
+  VLM_SERVICE_URL:               "http://sewa-vlm-report:8001"
+  UNCERTAINTY_SERVICE_URL:       "http://sewa-uncertainty:8009"
+  METACOGNITION_SERVICE_URL:     "http://sewa-metacognition:8003"
+  FL_SERVICE_URL:                "http://sewa-federated:8004"
+  CL_SERVICE_URL:                "http://sewa-continuous:8005"
+  BACKEND_URL:                   "http://sewa-backend:3000"
   PATHOLOGY_SERVICE_URL:         "http://sewa-pathology:8002"
   MAMMOGRAPHY_SERVICE_URL:       "http://sewa-mammography:8007"
   RETINAL_SERVICE_URL:           "http://sewa-retinal:8008"
@@ -186,7 +188,7 @@ spec:
               secretProviderClass: sewa-keyvault-secrets
       containers:
         - name: backend
-          image: ACR_LOGIN_SERVER/sewa-ai/backend:IMAGE_TAG
+          image: ACR_LOGIN_SERVER/sewa-backend:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -286,7 +288,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ACR_LOGIN_SERVER/sewa-ai/frontend:IMAGE_TAG
+          image: ACR_LOGIN_SERVER/sewa-frontend:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -322,10 +324,10 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sewa-ai-triage
+  name: sewa-triage
   namespace: sewa-ai
   labels:
-    app: sewa-ai-triage
+    app: sewa-triage
 spec:
   replicas: 2
   strategy:
@@ -333,11 +335,11 @@ spec:
     rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
   selector:
     matchLabels:
-      app: sewa-ai-triage
+      app: sewa-triage
   template:
     metadata:
       labels:
-        app: sewa-ai-triage
+        app: sewa-triage
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
@@ -356,8 +358,8 @@ spec:
           persistentVolumeClaim:
             claimName: sewa-model-cache
       containers:
-        - name: ai-triage
-          image: ACR_LOGIN_SERVER/sewa-ai/ai-triage:IMAGE_TAG
+        - name: triage
+          image: ACR_LOGIN_SERVER/sewa-ai-triage:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
@@ -388,11 +390,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sewa-ai-triage
+  name: sewa-triage
   namespace: sewa-ai
 spec:
   selector:
-    app: sewa-ai-triage
+    app: sewa-triage
   ports:
     - port: 8000
       targetPort: 8000
@@ -404,19 +406,19 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sewa-ai-vlm
+  name: sewa-vlm-report
   namespace: sewa-ai
   labels:
-    app: sewa-ai-vlm
+    app: sewa-vlm-report
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: sewa-ai-vlm
+      app: sewa-vlm-report
   template:
     metadata:
       labels:
-        app: sewa-ai-vlm
+        app: sewa-vlm-report
     spec:
       nodeSelector:
         accelerator: nvidia-gpu
@@ -430,8 +432,8 @@ spec:
           persistentVolumeClaim:
             claimName: sewa-model-cache
       containers:
-        - name: ai-vlm
-          image: ACR_LOGIN_SERVER/sewa-ai/ai-vlm:IMAGE_TAG
+        - name: vlm-report
+          image: ACR_LOGIN_SERVER/sewa-ai-vlm-report:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8001
@@ -455,11 +457,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sewa-ai-vlm
+  name: sewa-vlm-report
   namespace: sewa-ai
 spec:
   selector:
-    app: sewa-ai-vlm
+    app: sewa-vlm-report
   ports:
     - port: 8001
       targetPort: 8001
@@ -471,19 +473,19 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sewa-ai-uncertainty
+  name: sewa-uncertainty
   namespace: sewa-ai
   labels:
-    app: sewa-ai-uncertainty
+    app: sewa-uncertainty
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: sewa-ai-uncertainty
+      app: sewa-uncertainty
   template:
     metadata:
       labels:
-        app: sewa-ai-uncertainty
+        app: sewa-uncertainty
     spec:
       nodeSelector:
         accelerator: nvidia-gpu
@@ -497,8 +499,8 @@ spec:
           persistentVolumeClaim:
             claimName: sewa-model-cache
       containers:
-        - name: ai-uncertainty
-          image: ACR_LOGIN_SERVER/sewa-ai/ai-uncertainty:IMAGE_TAG
+        - name: uncertainty
+          image: ACR_LOGIN_SERVER/sewa-ai-uncertainty:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8009
@@ -521,11 +523,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sewa-ai-uncertainty
+  name: sewa-uncertainty
   namespace: sewa-ai
 spec:
   selector:
-    app: sewa-ai-uncertainty
+    app: sewa-uncertainty
   ports:
     - port: 8009
       targetPort: 8009
@@ -537,23 +539,23 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sewa-ai-metacognition
+  name: sewa-metacognition
   namespace: sewa-ai
   labels:
-    app: sewa-ai-metacognition
+    app: sewa-metacognition
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: sewa-ai-metacognition
+      app: sewa-metacognition
   template:
     metadata:
       labels:
-        app: sewa-ai-metacognition
+        app: sewa-metacognition
     spec:
       containers:
-        - name: ai-metacognition
-          image: ACR_LOGIN_SERVER/sewa-ai/ai-metacognition:IMAGE_TAG
+        - name: metacognition
+          image: ACR_LOGIN_SERVER/sewa-ai-metacognition:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8003
@@ -572,11 +574,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sewa-ai-metacognition
+  name: sewa-metacognition
   namespace: sewa-ai
 spec:
   selector:
-    app: sewa-ai-metacognition
+    app: sewa-metacognition
   ports:
     - port: 8003
       targetPort: 8003
@@ -588,19 +590,19 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sewa-ai-federated
+  name: sewa-federated
   namespace: sewa-ai
   labels:
-    app: sewa-ai-federated
+    app: sewa-federated
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sewa-ai-federated
+      app: sewa-federated
   template:
     metadata:
       labels:
-        app: sewa-ai-federated
+        app: sewa-federated
     spec:
       # Prefer spot nodes for cost saving; fallback to system nodes
       affinity:
@@ -622,8 +624,8 @@ spec:
           persistentVolumeClaim:
             claimName: sewa-model-cache
       containers:
-        - name: ai-federated
-          image: ACR_LOGIN_SERVER/sewa-ai/ai-federated:IMAGE_TAG
+        - name: federated
+          image: ACR_LOGIN_SERVER/sewa-ai-federated:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8004
@@ -646,11 +648,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sewa-ai-federated
+  name: sewa-federated
   namespace: sewa-ai
 spec:
   selector:
-    app: sewa-ai-federated
+    app: sewa-federated
   ports:
     - port: 8004
       targetPort: 8004
@@ -662,27 +664,27 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sewa-ai-continuous
+  name: sewa-continuous
   namespace: sewa-ai
   labels:
-    app: sewa-ai-continuous
+    app: sewa-continuous
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sewa-ai-continuous
+      app: sewa-continuous
   template:
     metadata:
       labels:
-        app: sewa-ai-continuous
+        app: sewa-continuous
     spec:
       volumes:
         - name: model-cache
           persistentVolumeClaim:
             claimName: sewa-model-cache
       containers:
-        - name: ai-continuous
-          image: ACR_LOGIN_SERVER/sewa-ai/ai-continuous:IMAGE_TAG
+        - name: continuous
+          image: ACR_LOGIN_SERVER/sewa-ai-continuous:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8005
@@ -707,11 +709,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sewa-ai-continuous
+  name: sewa-continuous
   namespace: sewa-ai
 spec:
   selector:
-    app: sewa-ai-continuous
+    app: sewa-continuous
   ports:
     - port: 8005
       targetPort: 8005
@@ -743,7 +745,7 @@ spec:
             claimName: sewa-model-cache
       containers:
         - name: pathology
-          image: ACR_LOGIN_SERVER/sewa-ai/pathology:IMAGE_TAG
+          image: ACR_LOGIN_SERVER/sewa-ai-pathology:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8002
@@ -799,7 +801,7 @@ spec:
             claimName: sewa-model-cache
       containers:
         - name: mammography
-          image: ACR_LOGIN_SERVER/sewa-ai/mammography:IMAGE_TAG
+          image: ACR_LOGIN_SERVER/sewa-ai-mammography:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8007
@@ -855,7 +857,7 @@ spec:
             claimName: sewa-model-cache
       containers:
         - name: retinal
-          image: ACR_LOGIN_SERVER/sewa-ai/retinal:IMAGE_TAG
+          image: ACR_LOGIN_SERVER/sewa-ai-retinal:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8008
@@ -907,7 +909,7 @@ spec:
     spec:
       containers:
         - name: edge
-          image: ACR_LOGIN_SERVER/sewa-ai/edge:IMAGE_TAG
+          image: ACR_LOGIN_SERVER/sewa-edge:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -956,13 +958,54 @@ spec:
     spec:
       containers:
         - name: dicom-ingestion
-          image: ACR_LOGIN_SERVER/sewa-ai/dicom-ingestion-go:IMAGE_TAG
+          image: ACR_LOGIN_SERVER/sewa-ai-dicom-ingestion:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 11112
               name: dicom
             - containerPort: 8090
               name: http
+          env:
+            - name: AE_TITLE
+              value: "SEWA_INGESTION"
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-redis
+                  key: url
+            - name: DICOM_ANON_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-dicom
+                  key: anon-salt
+            - name: AZURE_STORAGE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-storage
+                  key: connection-string
+                  optional: true
+            - name: AZURE_STORAGE_ACCOUNT
+              value: "sewaaiproduction"
+            - name: AZURE_STORAGE_CONTAINER
+              value: "scans"
+            - name: TENANT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: sewa-config
+                  key: REGION
+                  optional: true
+            - name: DICOM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sewa-dicom
+                  key: api-key
+                  optional: true
+            - name: MAX_WORKERS
+              value: "20"
           resources:
             requests: { cpu: "250m", memory: "256Mi" }
             limits:   { cpu: "500m", memory: "512Mi" }
@@ -970,6 +1013,10 @@ spec:
             httpGet: { path: /health, port: 8090 }
             initialDelaySeconds: 10
             periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: /ready, port: 8090 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -1037,7 +1084,7 @@ metadata:
   namespace: sewa-ai
 spec:
   scaleTargetRef:
-    name: sewa-ai-triage
+    name: sewa-triage
   minReplicaCount: 1
   maxReplicaCount: 8
   pollingInterval: 15
@@ -1081,13 +1128,13 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: sewa-ai-triage-pdb
+  name: sewa-triage-pdb
   namespace: sewa-ai
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: sewa-ai-triage
+      app: sewa-triage
 
 ---
 apiVersion: policy/v1

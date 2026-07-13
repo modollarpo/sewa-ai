@@ -22,12 +22,18 @@ r.get('/health', async (req, res, next) => {
           const start = Date.now();
           const resp = await axios.get(`${s.url}/health`, { timeout: 3000 });
           const latency = Date.now() - start;
+          // A 503 (or non-2xx) from the service means it is degraded, even
+          // though the HTTP call itself succeeded. Trust the service's own
+          // reported status so false "healthy" readings stop masking outages.
+          const reported = (resp.data && resp.data.status) || null;
+          const degraded = resp.status >= 400 || reported === 'degraded' || reported === 'unhealthy';
           return {
             name: s.name,
-            status: 'healthy',
+            status: degraded ? 'degraded' : 'healthy',
             latency,
-            version: resp.data.version || 'v2.4.1',
-            backend: resp.data.backend || 'unknown'
+            version: resp.data.version || null,
+            backend: resp.data.backend || 'unknown',
+            errors: resp.data.errors || (degraded ? [reported || `http ${resp.status}`] : [])
           };
         } catch (err: any) {
           if (attempt === 0) {
@@ -59,7 +65,12 @@ r.get('/health', async (req, res, next) => {
 
     const results = await Promise.all(services.map(checkSingle));
 
-    res.json(results);
+    const degraded = results.filter((x: any) => x.status !== 'healthy');
+    const overall = degraded.length === 0 ? 'healthy'
+      : degraded.every((x: any) => x.status === 'unreachable') ? 'down'
+      : 'degraded';
+
+    res.json({ overall, services: results });
   } catch (err) { next(err); }
 });
 

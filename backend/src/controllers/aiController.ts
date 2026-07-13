@@ -203,6 +203,46 @@ export const startABTest = async (req: Request, res: Response, next: NextFunctio
   } catch (err) { next(err); }
 };
 
+export const clPromoteModel = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { modelVersion, modelType, modelPath, accuracy, trainingRunId } = req.body;
+    if (!modelVersion || !modelType) throw new AppError('modelVersion and modelType required', 400);
+
+    const existing = await prisma.aIModel.findFirst({ where: { version: modelVersion, type: modelType } });
+    if (existing) {
+      await prisma.aIModel.update({ where: { id: existing.id }, data: { modelPath, accuracy } });
+      res.json({ message: `Model ${modelVersion} already exists, updated path`, modelId: existing.id });
+      return;
+    }
+
+    const model = await prisma.aIModel.create({
+      data: {
+        name: `${modelType}-${modelVersion}`,
+        version: modelVersion,
+        type: modelType,
+        status: 'ab_test',
+        accuracy: accuracy ?? 0,
+        trafficPct: 5,
+        modelPath: modelPath ?? '',
+        isGlobal: true,
+      }
+    });
+
+    await prisma.aIModelVersion.create({
+      data: {
+        modelType,
+        version: modelVersion,
+        description: `CL auto-generated: ${trainingRunId || 'direct'}`,
+        active: false,
+        metadata: { source: 'continuous-learning', trainingRunId, promotedAt: new Date().toISOString() },
+      }
+    });
+
+    logger.info(`CL model registered: ${modelType} v${modelVersion} (id=${model.id})`);
+    res.json({ message: `Model ${modelVersion} registered`, modelId: model.id });
+  } catch (err) { next(err); }
+};
+
 export const promoteModel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;

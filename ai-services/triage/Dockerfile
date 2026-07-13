@@ -29,6 +29,12 @@ RUN pip install --prefix=/install \
 # ── Stage 2: Runtime ───────────────────────────────────────────
 FROM python:3.11-slim AS runtime
 
+# Cache-bust: placed as the FIRST runtime instruction so the entire stage
+# (including COPY . .) is rebuilt and source edits are never served from a
+# stale ACR quick-build layer cache.
+ARG CACHE_BUST=1
+RUN echo "triage build ${CACHE_BUST}"
+
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -49,8 +55,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Copy source
-COPY . .
+# Copy source (explicit paths — bulk 'COPY . .' hits a stale ACR quick-build layer cache)
+COPY main.py model.py /app/
+COPY shared /app/shared
+COPY utils /app/utils
 
 
 # Model cache directory (populated via AKS PVC in production)

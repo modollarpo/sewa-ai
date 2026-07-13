@@ -105,8 +105,8 @@ if (-not $webOnly) {
 
     # 3. Build & Push AI Services
     Write-Host "[3/6] Building AI Services via ACR Tasks..." -ForegroundColor Yellow
-    $AI_SERVICES = @{ "ai-triage"="triage"; "ai-uncertainty"="uncertainty"; "ai-vlm"="vlm-report"; "ai-metacognition"="metacognition"; "ai-federated"="federated-learning"; "ai-continuous"="continuous-learning"; "ai-pathology"="pathology"; "ai-mammography"="mammography"; "ai-retinal"="retinal" }
-    $EXTRA_SERVICES = @{ "edge"="edge"; "dicom-ingestion"="services/dicom-ingestion-go" }
+    $AI_SERVICES = @{ "ai-triage"="triage"; "ai-uncertainty"="uncertainty"; "ai-vlm-report"="vlm-report"; "ai-metacognition"="metacognition"; "ai-federated"="federated-learning"; "ai-continuous"="continuous-learning"; "ai-pathology"="pathology"; "ai-mammography"="mammography"; "ai-retinal"="retinal" }
+    $EXTRA_SERVICES = @{ "edge"="edge"; "ai-dicom-ingestion"="services/dicom-ingestion-go" }
     foreach ($svc in $AI_SERVICES.Keys) {
         $dir = $AI_SERVICES[$svc]
         Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan
@@ -337,6 +337,7 @@ if (-not $webOnly) {
             kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260709000000_add_longitudinal_record 2>/dev/null; true"
             kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260712_add_report_version_audit_block_mlops 2>/dev/null; true"
             kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260713_add_federated_weight_upload_node_fields 2>/dev/null; true"
+            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260714_add_continuous_learning_models 2>/dev/null; true"
 
             # Run new migrations (safe after baseline)
             Write-Host " -> Deploying pending migrations..." -ForegroundColor Cyan

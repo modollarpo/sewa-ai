@@ -28,6 +28,7 @@ import cv2
 from PIL import Image
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import httpx
@@ -362,15 +363,25 @@ async def predict(req: RetinalPredictRequest) -> RetinalPredictResponse:
 
 @app.get("/health")
 async def health() -> Dict[str, Any]:
-    return {
-        "status": "healthy",
-        "service": "retinal-engine",
-        "version": "1.0.0",
-        "backend": "onnx-int8-cpu",
-        "models_loaded": registry.loaded_models,
-        "latency_stats": registry.get_latency_stats(MODEL_ID) if MODEL_ID in registry.loaded_models else {},
-        "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
-    }
+    model_loaded = MODEL_ID in registry.loaded_models
+    errors = []
+    if not model_loaded:
+        errors.append("model not loaded")
+    overall = "degraded" if errors else "healthy"
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "healthy" if model_loaded else "degraded",
+            "service": "retinal-engine",
+            "version": "1.0.0",
+            "backend": "onnx-int8-cpu",
+            "model_loaded": model_loaded,
+            "models_loaded": registry.loaded_models,
+            "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},
+            "errors": errors,
+            "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+        },
+    )
 
 
 @app.get("/metrics")

@@ -5,7 +5,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prismaClient';
 import { redisClient } from '../config/redis';
-import { uploadToStorage, deleteFromStorage } from '../services/storageService';
+import { uploadToStorage, deleteFromStorage, generateSasUrl, getBlobStream } from '../services/storageService';
 import { runAIPipeline } from '../services/aiService';
 import { enqueueScanProcessing } from '../services/scanQueue';
 import { createFHIRImagingStudy } from '../services/fhirService';
@@ -387,5 +387,40 @@ export async function notifyScan(req: Request, res: Response, next: NextFunction
     });
 
     res.json({ success: true, message: 'Referring physician notified via HL7/WhatsApp secure tunnel.' });
+  } catch (err) { next(err); }
+}
+
+// GET /api/v1/scans/:id/image-url — returns a time-limited SAS URL for the viewer
+export async function getScanImageUrl(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { tenantId } = req.user!;
+    const { id } = req.params;
+
+    const scan = await prisma.scan.findFirst({ where: { id, tenantId }, select: { id: true, storageUrl: true } });
+    if (!scan) throw new AppError('Scan not found', 404);
+    if (!scan.storageUrl) throw new AppError('No image stored for this scan', 404);
+
+    const sasUrl = await generateSasUrl(scan.storageUrl);
+    res.json({ scanId: id, url: sasUrl });
+  } catch (err) { next(err); }
+}
+
+// GET /api/v1/scans/:id/dicom — streams DICOM bytes through authenticated proxy
+export async function getScanDicom(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { tenantId } = req.user!;
+    const { id } = req.params;
+
+    const scan = await prisma.scan.findFirst({ where: { id, tenantId }, select: { id: true, storageUrl: true } });
+    if (!scan) throw new AppError('Scan not found', 404);
+    if (!scan.storageUrl) throw new AppError('No image stored for this scan', 404);
+
+    const blob = await getBlobStream(scan.storageUrl);
+    if (!blob) throw new AppError('Failed to read DICOM from storage', 502);
+
+    res.setHeader('Content-Type', blob.contentType || 'application/dicom');
+    res.setHeader('Content-Length', blob.contentLength);
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+    blob.stream.pipe(res);
   } catch (err) { next(err); }
 }

@@ -50,7 +50,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /install /usr/local
 
 # Copy source
-COPY . .
+ARG CACHE_BUST=dev
+RUN echo "cachebust-$CACHE_BUST"
+COPY main.py .
+COPY shared ./shared
 
 
 # Model cache directory (populated via AKS PVC in production)

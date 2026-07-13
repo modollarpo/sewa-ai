@@ -602,6 +602,93 @@ model Payment {
   @@index([provider])
 }
 
+// ── CONTINUOUS LEARNING: CORRECTIONS (Feature 7) ──────────────
+model Correction {
+  id              String   @id @default(uuid())
+  scanId          String
+  tenantId        String
+  radiologistId   String
+  aiFinding       String
+  aiUrgency       String
+  aiConfidence    Float
+  humanFinding    String
+  humanUrgency    String
+  correctionType  String   // finding_changed | urgency_downgraded | urgency_upgraded | false_positive | false_negative | confidence_wrong
+  modality        String   // CT | MRI | XR | US | MG
+  bodyPart        String
+  groundTruthLabel Int?
+  notes           String?
+  isCriticalMiss  Boolean  @default(false)
+  modelVersion    String?  // AI model version that produced the prediction
+  trainingUsed    Boolean  @default(false) // whether this correction was used in a training run
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tenantId, createdAt])
+  @@index([scanId])
+  @@index([correctionType])
+  @@index([trainingUsed])
+  @@map("corrections")
+}
+
+// ── CONTINUOUS LEARNING: TRAINING RUNS ─────────────────────────
+model TrainingRun {
+  id              String   @id @default(uuid())
+  modelType       String   // triage | uncertainty | vlm | metacognition
+  baseVersion     String   // e.g. "v2.4.1"
+  targetVersion   String   // e.g. "v2.4.2"
+  status          String   @default("pending") // pending | preparing | training | validating | deploying | completed | failed | rolled_back
+  trainingSamples Int      @default(0)
+  epochs          Int      @default(10)
+  batchSize       Int      @default(32)
+  learningRate    Float    @default(0.0001)
+  findingDistribution Json? // distribution of findings in training set
+  correctionTypes Json?    // breakdown of correction types used
+  tenantIds       String[] // tenants whose corrections were used
+  accuracy        Float?
+  precision       Float?
+  recall          Float?
+  f1Score         Float?
+  loss            Float?
+  modelPath       String?  // path to trained model artifact in blob storage
+  triggeredBy     String   // "auto_drift" | "auto_threshold" | "manual" | "federated"
+  driftSnapshot   Json?    // drift metrics at trigger time
+  errorMessage    String?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  rollbackAt      DateTime?
+  rollbackReason  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([modelType, status])
+  @@index([status])
+  @@index([createdAt])
+  @@map("training_runs")
+}
+
+// ── CONTINUOUS LEARNING: FEATURE DRIFT SNAPSHOT ────────────────
+model FeatureDriftSnapshot {
+  id              String   @id @default(uuid())
+  modelType       String   // triage | uncertainty | vlm | metacognition
+  modelVersion    String
+  baselineWindow  DateTime // start of baseline period
+  currentWindow   DateTime // start of current period
+  psi             Float    // Population Stability Index across all features
+  kappa           Float    // Cohen's Kappa
+  featureDists    Json?    // per-feature distribution comparison
+  modalityShift   Json?    // modality distribution change
+  bodyPartShift   Json?    // body part distribution change
+  severityShift   Json?    // urgency distribution change
+  driftDetected   Boolean  @default(false)
+  severity        String   @default("none") // none | low | medium | high | critical
+  createdAt       DateTime @default(now())
+
+  @@index([modelType, modelVersion, driftDetected])
+  @@index([createdAt])
+  @@map("feature_drift_snapshots")
+}
+
 // ── AI MODEL REGISTRY (Feature 7, 18) ─────────────────────────
 model AIModel {
   id         String   @id @default(uuid())

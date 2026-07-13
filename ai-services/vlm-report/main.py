@@ -10,11 +10,13 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
+from urllib.parse import urlparse
+import re
 
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 import uvicorn
 from openai import AsyncAzureOpenAI
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -35,8 +37,17 @@ REPORT_ERRORS = Counter("vlm_report_errors_total", "VLM report errors", ["reason
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5000").split(",")
 USE_AZURE_OPENAI = bool(os.getenv("AZURE_OPENAI_ENDPOINT"))
-AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "")
 AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
+
+# Security: log a warning if API key is in env var instead of Key Vault
+if AZURE_OPENAI_API_KEY:
+    if not os.getenv("AZURE_KEY_VAULT_URL"):
+        logger.warning(
+            "[VLM] AZURE_OPENAI_API_KEY found in env var. "
+            "Production must use Azure Key Vault CSI driver. "
+            "Set AZURE_KEY_VAULT_URL and mount secrets via secrets-store.csi.k8s.io."
+        )
 
 openai_client = None
 if USE_AZURE_OPENAI:
@@ -123,6 +134,16 @@ async def generate_report(req: VLMReportRequest) -> VLMReportResponse:
     start = time.time()
 
     try:
+        # SSRF protection on storage_url
+        if req.storage_url:
+            parsed = urlparse(req.storage_url)
+            if parsed.scheme and parsed.scheme != "https":
+                raise HTTPException(400, "storage_url must use HTTPS")
+            blacklist = ("localhost", "127.0.0.1", "169.254.169.254", "::1", "metadata.google.internal")
+            if parsed.hostname in blacklist or (parsed.hostname and (parsed.hostname.startswith("10.") or parsed.hostname.startswith("192.168."))):
+                logger.warning(f"[VLM] SSRF attempt blocked: {parsed.hostname}")
+                raise HTTPException(400, "SSRF protection active")
+
         technique_key = f"{req.modality}_{req.body_part}"
         technique = TECHNIQUE_TEMPLATES.get(technique_key,
             f"{req.modality} examination of {req.body_part.lower()}.")
@@ -175,16 +196,22 @@ Supplementary observations:
         
         if USE_AZURE_OPENAI and openai_client:
             try:
-                # Simple sanitization for prompt injection prevention
-                safe_finding = req.ai_finding.replace("{", "").replace("}", "").replace('"', "")
-                safe_indication = (req.clinical_indication or "None provided").replace("{", "").replace("}", "")
+                # Prompt injection hardening: strip special tokens, newlines, SQL-like syntax
+                _strip_chars = re.compile(r'[\{\}\[\]\(\)\\;:\'\"`|<>]')
+                _strip_newlines = re.compile(r'[\r\n]+')
+                safe_finding = _strip_newlines.sub(" ", _strip_chars.sub("", req.ai_finding))[:200]
+                safe_indication = _strip_newlines.sub(" ", _strip_chars.sub("", req.clinical_indication or "None provided"))[:500]
+                safe_urgency = _strip_chars.sub("", req.urgency)[:20]
+                safe_location = _strip_chars.sub("", req.location or "Not specified")[:100]
+                safe_modality = _strip_chars.sub("", req.modality)[:10]
+                safe_body_part = _strip_chars.sub("", req.body_part)[:50]
 
                 prompt = f"""You are an expert AI radiologist assistant. 
-Generate a structured radiology report for a {req.modality} of the {req.body_part}.
+Generate a structured radiology report for a {safe_modality} of the {safe_body_part}.
 Clinical indication: {safe_indication}
 AI Finding: {safe_finding} (Confidence: {req.confidence*100:.1f}%)
-Urgency: {req.urgency}
-Location: {req.location or 'Not specified'}
+Urgency: {safe_urgency}
+Location: {safe_location}
 
 The report must include these sections:
 TECHNIQUE
@@ -298,13 +325,21 @@ HL7 ORU message will be dispatched on signing.
 
 @app.get("/health")
 async def health() -> Dict[str, Any]:
-    return {
-        "status": "healthy",
-        "service": "vlm-report-generator",
-        "version": "1.8.0",
-        "backend": "azure-openai" if USE_AZURE_OPENAI else "cpu-template",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+    errors = []
+    if USE_AZURE_OPENAI and (openai_client is None or not AZURE_OPENAI_API_KEY):
+        errors.append("azure-openai enabled but missing endpoint/key")
+    overall = "degraded" if errors else "healthy"
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": overall,
+            "service": "vlm-report-generator",
+            "version": "1.8.0",
+            "backend": "azure-openai" if USE_AZURE_OPENAI else "cpu-template",
+            "errors": errors,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        },
+    )
 
 
 @app.get("/metrics")

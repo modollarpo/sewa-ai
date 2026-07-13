@@ -17,10 +17,10 @@ COPY . .
 
 # Build static binary (CGO disabled for truly static binary)
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-    -ldflags="-w -s -X main.Version=1.0.0 -X main.BuildTime=$(date -u +%Y%m%dT%H%M%SZ)" \
+    -ldflags="-w -s -X main.Version=$(cat version.txt 2>/dev/null || echo '2.0.0') -X main.BuildTime=$(date -u +%Y%m%dT%H%M%SZ)" \
     -trimpath \
     -o dicom-ingestion \
-    ./main.go
+    .
 
 # ── Stage 2: Runtime ────────────────────────────────────────────
 # Use debian-slim instead of distroless so wget is available for HEALTHCHECK

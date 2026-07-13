@@ -14,6 +14,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -61,10 +62,8 @@ func New(redisURL string, logger *zap.Logger) (*Client, error) {
 	opts.ReadTimeout = 5 * time.Second
 	opts.WriteTimeout = 5 * time.Second
 
-	// Azure Cache for Redis uses TLS (rediss://) — ensure TLS is configured
-	// go-redis parses rediss:// and sets TLSConfig automatically, but we pin ServerName
+	// Azure Cache for Redis uses TLS (rediss://) — pin ServerName, verify cert
 	if opts.TLSConfig != nil {
-		// Extract hostname from addr (addr is "host:port")
 		host := opts.Addr
 		if idx := len(opts.Addr) - 1; idx >= 0 {
 			for i := len(opts.Addr) - 1; i >= 0; i-- {
@@ -75,7 +74,9 @@ func New(redisURL string, logger *zap.Logger) (*Client, error) {
 			}
 		}
 		opts.TLSConfig.ServerName = host
-		opts.TLSConfig.InsecureSkipVerify = true
+		// InsecureSkipVerify is FALSE by default — Azure Redis uses well-known CAs
+		// Set REDIS_SKIP_VERIFY=true to disable (dev only, NOT for production)
+		opts.TLSConfig.InsecureSkipVerify = os.Getenv("REDIS_SKIP_VERIFY") == "true"
 	}
 
 	rdb := redis.NewClient(opts)

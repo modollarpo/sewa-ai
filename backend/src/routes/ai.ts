@@ -55,6 +55,7 @@ r.get('/models',           ctrl.getAIModels);
 r.get('/ab-test/metrics',  authorize('admin','superadmin'), ctrl.getABTestMetrics);
 r.post('/validate/:scanId',authorize('radiologist','doctor','admin','superadmin'), ctrl.validateResult);
 r.post('/ab-test/start',   authorize('superadmin'), ctrl.startABTest);
+r.post('/models/cl-promote',  ctrl.clPromoteModel);
 r.patch('/models/:id/promote', authorize('superadmin'), ctrl.promoteModel);
 
 // ── Referral Network ──────────────────────────────────────────

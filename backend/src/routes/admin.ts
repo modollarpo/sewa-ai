@@ -1,13 +1,50 @@
 // SEWA XAI — backend/src/routes/admin.ts
 import { Router } from 'express';
 import crypto from 'crypto';
+import axios from 'axios';
 import { authenticate, authorize } from '../middleware/auth';
 import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
+import { config } from '../config/env';
 import { dlq } from '../services/dlqService';
 
 const r = Router();
 r.use(authenticate, authorize('admin', 'superadmin'));
+
+/**
+ * Derive platform uptime from live AI-service health probes instead of a
+ * hardcoded constant. A service is "up" when it answers /health with a 2xx
+ * and reports status "healthy"; degraded (503) or unreachable counts against
+ * uptime. Returns a percentage string like "88.9%".
+ */
+const AI_HEALTH_TARGETS = [
+  config.AI_SERVICE_URL,
+  config.VLM_SERVICE_URL,
+  config.UNCERTAINTY_SERVICE_URL,
+  config.METACOGNITION_SERVICE_URL,
+  config.PATHOLOGY_SERVICE_URL,
+  config.MAMMOGRAPHY_SERVICE_URL,
+  config.RETINAL_SERVICE_URL,
+  config.FL_SERVICE_URL,
+  config.CL_SERVICE_URL,
+];
+
+async function computeAiUptime(): Promise<string> {
+  const results = await Promise.all(
+    AI_HEALTH_TARGETS.map(async (url) => {
+      try {
+        const resp = await axios.get(`${url}/health`, { timeout: 3000 });
+        const reported = resp.data?.status;
+        return resp.status < 400 && reported !== 'degraded' && reported !== 'unhealthy';
+      } catch {
+        return false;
+      }
+    })
+  );
+  const up = results.filter(Boolean).length;
+  const pct = (up / results.length) * 100;
+  return `${pct.toFixed(1)}%`;
+}
 
 /** GET /api/v1/admin/dashboard — aggregate stats for SuperAdmin + HospitalAdmin */
 r.get('/dashboard', async (req, res, next) => {
@@ -41,7 +78,7 @@ r.get('/dashboard', async (req, res, next) => {
       avgAIConfidence: 0,
       avgInferenceMs: 0,
       totalInferences: totalScans,
-      uptime: '99.99%'
+      uptime: await computeAiUptime()
     });
   } catch (err) { next(err); }
 });
@@ -124,7 +161,7 @@ r.get('/telemetry', async (req, res, next) => {
         totalPatients: patients,
         totalClinicians: users,
         activeNodes: activeNodes,
-        uptime: '99.99%'
+        uptime: await computeAiUptime()
       },
       infrastructure: {
         cpu: cpuSeed,

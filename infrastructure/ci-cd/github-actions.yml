@@ -198,30 +198,43 @@ jobs:
         service:
           - name: backend
             context: backend
+            prefix: sewa-
           - name: frontend
             context: frontend
-          - name: ai-triage
+            prefix: sewa-
+          - name: triage
             context: ai-services/triage
-          - name: ai-vlm
+            prefix: sewa-ai-
+          - name: vlm-report
             context: ai-services/vlm-report
-          - name: ai-uncertainty
+            prefix: sewa-ai-
+          - name: uncertainty
             context: ai-services/uncertainty
-          - name: ai-metacognition
+            prefix: sewa-ai-
+          - name: metacognition
             context: ai-services/metacognition
-          - name: ai-federated
+            prefix: sewa-ai-
+          - name: federated
             context: ai-services/federated-learning
-          - name: ai-continuous
+            prefix: sewa-ai-
+          - name: continuous
             context: ai-services/continuous-learning
+            prefix: sewa-ai-
           - name: pathology
             context: ai-services/pathology
+            prefix: sewa-ai-
           - name: mammography
             context: ai-services/mammography
+            prefix: sewa-ai-
           - name: retinal
             context: ai-services/retinal
+            prefix: sewa-ai-
           - name: edge
             context: edge
-          - name: dicom-ingestion-go
+            prefix: sewa-
+          - name: dicom-ingestion
             context: services/dicom-ingestion-go
+            prefix: sewa-ai-
 
     steps:
       - name: Checkout
@@ -248,8 +261,8 @@ jobs:
         run: |
           az acr build \
             --registry   ${{ env.ACR_LOGIN_SERVER }} \
-            --image      sewa-ai-${{ matrix.service.name }}:${{ env.IMAGE_TAG }} \
-            --image      sewa-ai-${{ matrix.service.name }}:${{ github.ref_name }}-latest \
+            --image      ${{ matrix.service.prefix }}${{ matrix.service.name }}:${{ env.IMAGE_TAG }} \
+            --image      ${{ matrix.service.prefix }}${{ matrix.service.name }}:${{ github.ref_name }}-latest \
             --file       ${{ matrix.service.context }}/Dockerfile \
             --build-arg  BUILD_TIMESTAMP=$(date +%Y%m%d-%H%M%S) \
             ${{ matrix.service.context }}/
@@ -258,7 +271,7 @@ jobs:
       - name: Trivy container scan — ${{ matrix.service.name }}
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.ACR_LOGIN_SERVER }}/sewa-ai-${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
+          image-ref: ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service.prefix }}${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
           severity:  CRITICAL
           exit-code: 0        # warn only — block on CRITICAL in prod deploy
         continue-on-error: true
@@ -331,7 +344,7 @@ jobs:
                 serviceAccountName: sewa-workload-sa
                 containers:
                   - name: migrate
-                    image: ${{ env.ACR_LOGIN_SERVER }}/sewa-ai-backend:${{ env.IMAGE_TAG }}
+                    image: ${{ env.ACR_LOGIN_SERVER }}/sewa-backend:${{ env.IMAGE_TAG }}
                     command: ["npx", "prisma", "migrate", "deploy"]
                     env:
                       - name: DATABASE_URL

@@ -77,33 +77,50 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   # Login to ACR
   az acr login --name "${ACR_LOGIN_SERVER%%.*}" || fail "ACR login failed"
 
-  SERVICES=(
-    "backend:backend"
-    "frontend:frontend"
-    "ai-triage:ai-services/triage"
-    "ai-vlm:ai-services/vlm-report"
-    "ai-uncertainty:ai-services/uncertainty"
-    "ai-metacognition:ai-services/metacognition"
-    "ai-federated:ai-services/federated-learning"
-    "ai-continuous:ai-services/continuous-learning"
+  declare -A IMAGE_MAP=(
+    ["backend"]="sewa-backend"
+    ["frontend"]="sewa-frontend"
+    ["ai-triage"]="sewa-ai-triage"
+    ["ai-vlm-report"]="sewa-ai-vlm-report"
+    ["ai-uncertainty"]="sewa-ai-uncertainty"
+    ["ai-metacognition"]="sewa-ai-metacognition"
+    ["ai-federated"]="sewa-ai-federated"
+    ["ai-continuous"]="sewa-ai-continuous"
+    ["ai-pathology"]="sewa-ai-pathology"
+    ["ai-mammography"]="sewa-ai-mammography"
+    ["ai-retinal"]="sewa-ai-retinal"
   )
 
-  for entry in "${SERVICES[@]}"; do
-    SVC="${entry%%:*}"
-    CTX="${entry##*:}"
-    IMG="${ACR_LOGIN_SERVER}/sewa-ai/${SVC}:${IMAGE_TAG}"
+  declare -A CTX_MAP=(
+    ["backend"]="backend"
+    ["frontend"]="frontend"
+    ["ai-triage"]="ai-services/triage"
+    ["ai-vlm-report"]="ai-services/vlm-report"
+    ["ai-uncertainty"]="ai-services/uncertainty"
+    ["ai-metacognition"]="ai-services/metacognition"
+    ["ai-federated"]="ai-services/federated-learning"
+    ["ai-continuous"]="ai-services/continuous-learning"
+    ["ai-pathology"]="ai-services/pathology"
+    ["ai-mammography"]="ai-services/mammography"
+    ["ai-retinal"]="ai-services/retinal"
+  )
+
+  for SVC in "${!IMAGE_MAP[@]}"; do
+    IMG_NAME="${IMAGE_MAP[$SVC]}"
+    CTX="${CTX_MAP[$SVC]}"
+    IMG="${ACR_LOGIN_SERVER}/${IMG_NAME}:${IMAGE_TAG}"
     echo "   🔨 Building $SVC → $IMG"
     docker build \
       --platform linux/amd64 \
       --file "${ROOT}/${CTX}/Dockerfile" \
       --tag "$IMG" \
-      --cache-from "${ACR_LOGIN_SERVER}/sewa-ai/${SVC}:latest" \
+      --cache-from "${ACR_LOGIN_SERVER}/${IMG_NAME}:latest" \
       --build-arg BUILDKIT_INLINE_CACHE=1 \
       "${ROOT}/${CTX}"
     docker push "$IMG"
     # Also tag as latest
-    docker tag "$IMG" "${ACR_LOGIN_SERVER}/sewa-ai/${SVC}:latest"
-    docker push "${ACR_LOGIN_SERVER}/sewa-ai/${SVC}:latest"
+    docker tag "$IMG" "${ACR_LOGIN_SERVER}/${IMG_NAME}:latest"
+    docker push "${ACR_LOGIN_SERVER}/${IMG_NAME}:latest"
     echo "   ✅ $SVC pushed"
   done
 else
@@ -139,7 +156,7 @@ ok "Kubernetes secrets synced"
 log "Step 5/8 — Running database migrations"
 kubectl run sewa-migrate \
   --namespace    sewa-ai \
-  --image        "${ACR_LOGIN_SERVER}/sewa-ai/backend:${IMAGE_TAG}" \
+  --image        "${ACR_LOGIN_SERVER}/sewa-backend:${IMAGE_TAG}" \
   --restart      Never \
   --rm \
   --attach \
@@ -161,10 +178,10 @@ sed "s|ACR_LOGIN_SERVER|${ACR_LOGIN_SERVER}|g; s|IMAGE_TAG|${IMAGE_TAG}|g" \
 DEPLOYMENTS=(
   "sewa-backend"
   "sewa-frontend"
-  "sewa-ai-triage"
-  "sewa-ai-vlm"
-  "sewa-ai-uncertainty"
-  "sewa-ai-metacognition"
+  "sewa-triage"
+  "sewa-vlm-report"
+  "sewa-uncertainty"
+  "sewa-metacognition"
 )
 
 for dep in "${DEPLOYMENTS[@]}"; do

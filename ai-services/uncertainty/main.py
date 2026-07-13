@@ -31,7 +31,7 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 import httpx
 import uvicorn
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
@@ -418,14 +418,29 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
 
 @app.get("/health")
 async def health() -> Dict[str, Any]:
-    return {
-        "status": "healthy", "service": "uncertainty-engine",
-        "version": "3.1.0", "backend": "onnx-cpu",
-        "mc_passes": MC_PASSES,
-        "models_loaded": registry.loaded_models,
-        "latency_stats": registry.get_latency_stats(MODEL_ID) if MODEL_ID in registry.loaded_models else {},
-        "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
-    }
+    model_loaded = MODEL_ID in registry.loaded_models
+    errors = []
+    if not model_loaded:
+        errors.append("model not loaded")
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "healthy" if model_loaded else "degraded",
+            "service": "uncertainty-engine",
+            "version": "3.1.0", "backend": "onnx-cpu",
+            "mc_passes": MC_PASSES,
+            "model_loaded": model_loaded,
+            "models_loaded": registry.loaded_models,
+            "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},
+            "errors": errors,
+            "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+        },
+    )
+
+
+@app.get("/metrics")
+async def prometheus_metrics() -> Response:
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":

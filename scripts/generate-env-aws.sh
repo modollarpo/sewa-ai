@@ -43,8 +43,8 @@ JWT_SECRET=$(openssl rand -base64 48)
 JWT_REFRESH_SECRET=$(openssl rand -base64 48)
 ENCRYPTION_KEY=$(openssl rand -hex 16)
 
-AI_SERVICE_URL=http://sewa-ai-triage:8000
-VLM_SERVICE_URL=http://sewa-ai-vlm:8001
+AI_SERVICE_URL=http://sewa-triage:8000
+VLM_SERVICE_URL=http://sewa-vlm-report:8001
 UNCERTAINTY_SERVICE_URL=http://sewa-ai-uncertainty:8002
 METACOGNITION_SERVICE_URL=http://sewa-ai-metacognition:8003
 FL_SERVICE_URL=http://sewa-ai-federated:8004

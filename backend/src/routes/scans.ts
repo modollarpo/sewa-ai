@@ -16,5 +16,7 @@ r.post('/sync-batch', ctrl.syncOfflineBatch);
 r.post('/demo',      ctrl.generateDemoScan);
 r.patch('/:id/status', authorize('radiologist','admin','superadmin'), ctrl.updateScanStatus);
 r.post('/:id/notify', authorize('radiologist','admin','superadmin'), ctrl.notifyScan);
+r.get('/:id/image-url', ctrl.getScanImageUrl);
+r.get('/:id/dicom',     ctrl.getScanDicom);
 r.delete('/:id',     authorize('admin','superadmin'), ctrl.deleteScan);
 export default r;

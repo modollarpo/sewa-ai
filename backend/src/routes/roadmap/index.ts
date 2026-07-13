@@ -142,7 +142,7 @@ router.get('/continuous-learning/metrics',
   }
 );
 
-/** POST /api/v1/continuous-learning/corrections — proxy to continuous learning service */
+/** POST /api/v1/continuous-learning/corrections — proxy to CL service */
 router.post('/continuous-learning/corrections',
   authenticate, authorize('radiologist'),
   async (req: Request, res: Response, next: NextFunction) => {
@@ -155,11 +155,112 @@ router.post('/continuous-learning/corrections',
         if (!scan) throw new AppError('Scan not found in this institution', 404);
       }
 
-      const response = await fetch(`${process.env.CL_SERVICE_URL ?? 'http://ai-continuous:8005'}/corrections`, {
+      const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
+      const response = await fetch(`${clUrl}/corrections`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ ...req.body, radiologist_id: userId }),
       });
+      const data = await response.json();
+      res.json(data);
+    } catch (err) { next(err); }
+  }
+);
+
+/** GET /api/v1/continuous-learning/corrections */
+router.get('/continuous-learning/corrections',
+  authenticate, authorize('admin', 'superadmin'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
+      const params = new URLSearchParams(req.query as any).toString();
+      const response = await fetch(`${clUrl}/corrections?${params}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (err) { next(err); }
+  }
+);
+
+/** POST /api/v1/continuous-learning/training/trigger */
+router.post('/continuous-learning/training/trigger',
+  authenticate, authorize('superadmin'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
+      const response = await fetch(`${clUrl}/training/trigger`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body),
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (err) { next(err); }
+  }
+);
+
+/** GET /api/v1/continuous-learning/training/status */
+router.get('/continuous-learning/training/status',
+  authenticate, authorize('admin', 'superadmin'),
+  async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
+      const response = await fetch(`${clUrl}/training/status`);
+      const data = await response.json();
+      res.json(data);
+    } catch (err) { next(err); }
+  }
+);
+
+/** GET /api/v1/continuous-learning/training/runs */
+router.get('/continuous-learning/training/runs',
+  authenticate, authorize('admin', 'superadmin'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
+      const params = new URLSearchParams(req.query as any).toString();
+      const response = await fetch(`${clUrl}/training/runs?${params}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (err) { next(err); }
+  }
+);
+
+/** GET /api/v1/continuous-learning/training/runs/:runId/corrections */
+router.get('/continuous-learning/training/runs/:runId/corrections',
+  authenticate, authorize('admin', 'superadmin'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
+      const response = await fetch(`${clUrl}/training/runs/${req.params.runId}/corrections`);
+      if (response.status === 404) throw new AppError('Training run not found', 404);
+      const data = await response.json();
+      res.json(data);
+    } catch (err) { next(err); }
+  }
+);
+
+/** GET /api/v1/continuous-learning/training/runs/:runId */
+router.get('/continuous-learning/training/runs/:runId',
+  authenticate, authorize('admin', 'superadmin'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
+      const response = await fetch(`${clUrl}/training/runs/${req.params.runId}`);
+      if (response.status === 404) throw new AppError('Training run not found', 404);
+      const data = await response.json();
+      res.json(data);
+    } catch (err) { next(err); }
+  }
+);
+
+/** GET /api/v1/continuous-learning/drift/snapshots */
+router.get('/continuous-learning/drift/snapshots',
+  authenticate, authorize('admin', 'superadmin'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
+      const params = new URLSearchParams(req.query as any).toString();
+      const response = await fetch(`${clUrl}/drift/snapshots?${params}`);
       const data = await response.json();
       res.json(data);
     } catch (err) { next(err); }

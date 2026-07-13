@@ -32,6 +32,7 @@ from PIL import Image
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 import httpx
 import uvicorn
@@ -446,27 +447,95 @@ def _estimate_midline(image: np.ndarray, finding: str) -> str:
 
 # ── Health + metrics ───────────────────────────────────────────
 @app.get("/health")
-async def health() -> Dict[str, Any]:
-    return {
-        "status": "healthy",
-        "service": "triage-engine",
-        "version": "2.4.1",
-        "backend": "onnx-int8-cpu",
-        "models_loaded": registry.loaded_models,
-        "latency_stats": registry.get_latency_stats(MODEL_ID) if MODEL_ID in registry.loaded_models else {},
-        "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
-    }
+async def health() -> JSONResponse:
+    model_loaded = MODEL_ID in registry.loaded_models
+    errors = []
+    if not model_loaded:
+        errors.append("model not loaded")
+    overall = "degraded" if errors else "healthy"
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": overall,
+            "service": "triage-engine",
+            "version": "2.4.1",
+            "backend": "onnx-int8-cpu",
+            "model_loaded": model_loaded,
+            "models_loaded": registry.loaded_models,
+            "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},
+            "errors": errors,
+        }
+    )
 
 
 @app.get("/metrics")
 async def metrics(request: Request):
     """Prometheus metrics endpoint for scraping."""
-    from fastapi.responses import Response
+    from fastapi.responses import JSONResponse, Response
 
     stats = registry.get_latency_stats(MODEL_ID) if MODEL_ID in registry.loaded_models else {}
-    # Update custom metrics from registry
-    # (In real usage, we'd track these with Prometheus directly, but this keeps compatibility)
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+# ╔══════════════════════════════════════════════════════════╗
+# ║  ADMIN — model hot-reload (called by CL service)          ║
+# ╚══════════════════════════════════════════════════════════╝
+@app.post("/admin/reload")
+async def admin_reload(payload: dict) -> Dict[str, Any]:
+    global MODEL_VERSION
+    """
+    Hot-reload the ONNX model without restarting the service.
+    Called by the Continuous Learning service after a fine-tuning run completes.
+    Accepts optional model_path override; otherwise resolves best model in MODEL_CACHE.
+    """
+    model_version = payload.get("model_version", MODEL_VERSION)
+    model_path_str = payload.get("model_path", "")
+
+    if model_path_str and Path(model_path_str).exists():
+        model_path = Path(model_path_str)
+    else:
+        # Resolve best available
+        cache = Path(MODEL_CACHE)
+        int8 = cache / f"triage_{model_version}_int8.onnx"
+        fp32 = cache / f"triage_{model_version}.onnx"
+        if int8.exists():
+            model_path = int8
+        elif fp32.exists():
+            model_path = fp32
+        else:
+            existing = sorted(cache.glob(f"triage_{model_version}*.onnx"))
+            if existing:
+                model_path = existing[-1]
+            else:
+                raise HTTPException(404, f"No model found for version {model_version}")
+
+    try:
+        # Unload old model
+        if MODEL_ID in registry.loaded_models:
+            registry.unload(MODEL_ID)
+            await asyncio.sleep(0.5)  # allow in-flight inferences to drain
+
+        # Load new model
+        model_path_str_resolved = str(model_path)
+        registry.load(MODEL_ID, model_path_str_resolved)
+        registry.warmup(MODEL_ID, INPUT_SHAPE, n=3)
+        MODEL_LOADED.set(1)
+
+        # Update global version
+        MODEL_VERSION = model_version
+        # Update model file paths
+        globals()["INT8_MODEL"] = MODEL_CACHE / f"triage_{model_version}_int8.onnx"
+        globals()["FP32_MODEL"] = MODEL_CACHE / f"triage_{model_version}.onnx"
+
+        logger.info(f"Model hot-reloaded: {model_version} from {model_path}")
+        return {
+            "status": "reloaded",
+            "model_version": model_version,
+            "model_path": model_path_str_resolved,
+        }
+    except Exception as e:
+        logger.error(f"Model reload failed: {e}", exc_info=True)
+        raise HTTPException(500, f"Model reload failed: {e}")
 
 
 if __name__ == "__main__":

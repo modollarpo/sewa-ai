@@ -2,15 +2,17 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { RenderingEngine, Enums } from '@cornerstonejs/core';
 import { ToolGroupManager, WindowLevelTool, PanTool, ZoomTool, LengthTool } from '@cornerstonejs/tools';
 import { initCornerstone } from '../../lib/cornerstoneConfig';
+import { apiClient } from '../../services/apiClient';
 
 type DicomViewportProps = {
+  scanId?: string;
   storageUrl?: string | null;
   modality?: string;
   showGradcam?: boolean;
   findings?: { x: number; y: number; width: number; height: number; label: string }[];
 };
 
-export function DicomViewport({ storageUrl, modality, showGradcam, findings }: DicomViewportProps) {
+export function DicomViewport({ scanId, storageUrl, modality, showGradcam, findings }: DicomViewportProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<'wl' | 'pan' | 'zoom' | 'measure'>('wl');
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +59,19 @@ export function DicomViewport({ storageUrl, modality, showGradcam, findings }: D
         engine.enableElement(viewportInput);
         const viewport = engine.getStackViewport('sewa-viewport');
 
-        if (storageUrl) {
-          const imageIds = [`wadouri:${storageUrl}`];
+        // Resolve DICOM URL through authenticated proxy (avoids public blob access)
+        let dicomUrl = storageUrl;
+        if (scanId) {
+          try {
+            const { data } = await apiClient.get(`/scans/${scanId}/image-url`);
+            if (data?.url) dicomUrl = data.url;
+          } catch {
+            // fall back to raw storageUrl if SAS endpoint fails
+          }
+        }
+
+        if (dicomUrl) {
+          const imageIds = [`wadouri:${dicomUrl}`];
           await viewport.setStack(imageIds);
           viewport.render();
         }

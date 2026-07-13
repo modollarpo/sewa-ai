@@ -27,7 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /install /usr/local
-COPY . .
+ARG CACHE_BUST=dev
+RUN echo "cachebust-$CACHE_BUST"
+COPY main.py mock_hospital_client.py ./
+COPY shared ./shared
 
 RUN mkdir -p /models && chmod 755 /models
 RUN adduser --disabled-password --gecos '' aiuser \

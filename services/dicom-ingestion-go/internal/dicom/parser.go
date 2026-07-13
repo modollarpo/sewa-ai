@@ -131,10 +131,11 @@ func Anonymise(p *ParsedDICOM, pseudoUID, tenantID string) ([]byte, error) {
 
 // GeneratePseudoUID creates a deterministic DICOM-compliant UID.
 // Same originalUID + tenantID always → same pseudoUID (referential integrity).
+// Requires DICOM_ANON_SALT env var (no default — will panic if missing to prevent data leak).
 func GeneratePseudoUID(originalUID, tenantID string) string {
 	salt := os.Getenv("DICOM_ANON_SALT")
 	if salt == "" {
-		salt = "sewa-ai-default-salt"
+		panic("DICOM_ANON_SALT environment variable is required — set it via Key Vault or K8s secret")
 	}
 	hash := sha256.Sum256([]byte(originalUID + tenantID + salt))
 	digits := numerify(hex.EncodeToString(hash[:])[:24])

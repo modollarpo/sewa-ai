@@ -11,6 +11,7 @@ package main
 
 import (
 	"context"
+	"crypto/subtle"
 	"fmt"
 	"net/http"
 	"os"
@@ -29,21 +30,33 @@ import (
 
 	dicomparser "github.com/sewa-ai/dicom-ingestion/internal/dicom"
 	"github.com/sewa-ai/dicom-ingestion/internal/queue"
+	"github.com/sewa-ai/dicom-ingestion/internal/storage"
+)
+
+// ldflags injected by Dockerfile
+var (
+	Version   = "2.0.0"
+	BuildTime = "unknown"
 )
 
 // ── Configuration ──────────────────────────────────────────────────────────
 type Config struct {
-	DicomPort       int
-	HTTPPort        int
-	RedisURL        string
-	DatabaseURL     string
-	StorageProvider string // azure | aws | gcp
-	StorageAccount  string
+	DicomPort        int
+	HTTPPort         int
+	RedisURL         string
+	StorageProvider  string // azure | local
+	StorageAccount   string
 	StorageContainer string
-	TenantID        string
-	AETTitle        string
-	MaxWorkers      int
-	Region          string
+	StorageConnStr   string
+	StorageLocalDir  string
+	TenantID         string
+	AETTitle         string
+	MaxWorkers       int
+	Region           string
+	APIKey           string
+	TLSCertFile      string
+	TLSKeyFile       string
+	AnonSalt         string
 }
 
 func loadConfig() Config {
@@ -51,22 +64,27 @@ func loadConfig() Config {
 		DicomPort:        envInt("DICOM_PORT", 11112),
 		HTTPPort:         envInt("HTTP_PORT", 8090),
 		RedisURL:         envStr("REDIS_URL", "redis://localhost:6379/0"),
-		DatabaseURL:      envStr("DATABASE_URL", ""),
 		StorageProvider:  envStr("STORAGE_PROVIDER", "azure"),
-		StorageAccount:   envStr("AZURE_STORAGE_ACCOUNT", "sewaaistorage"),
+		StorageAccount:   envStr("AZURE_STORAGE_ACCOUNT", ""),
 		StorageContainer: envStr("AZURE_STORAGE_CONTAINER", "scans"),
+		StorageConnStr:   envStr("AZURE_STORAGE_CONNECTION_STRING", ""),
+		StorageLocalDir:  envStr("STORAGE_LOCAL_DIR", "/data/scans"),
 		TenantID:         envStr("TENANT_ID", "default"),
 		AETTitle:         envStr("AE_TITLE", "SEWA_INGESTION"),
 		MaxWorkers:       envInt("MAX_WORKERS", 20),
 		Region:           envStr("REGION", "uk"),
+		APIKey:           envStr("DICOM_API_KEY", ""),
+		TLSCertFile:      envStr("TLS_CERT_FILE", ""),
+		TLSKeyFile:       envStr("TLS_KEY_FILE", ""),
+		AnonSalt:         envStr("DICOM_ANON_SALT", ""),
 	}
 }
 
 // ── Domain types ────────────────────────────────────────────────────────────
 type DICOMJob struct {
-	RawData   []byte
-	SourceAET string
-	TenantID  string
+	RawData    []byte
+	SourceAET  string
+	TenantID   string
 	ReceivedAt time.Time
 }
 
@@ -102,16 +120,35 @@ var (
 		Help:    "PHI anonymisation processing time",
 		Buckets: []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.25},
 	})
+	storageDuration = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name:    "sewa_dicom_storage_seconds",
+		Help:    "Cloud storage upload time",
+		Buckets: []float64{0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0},
+	})
+	cstoreConnections = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "sewa_dicom_cstore_connections",
+		Help: "Active C-STORE TCP connections",
+	})
+	cstoreReceivedTotal = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "sewa_dicom_cstore_received_total",
+		Help: "Total DICOM instances received via C-STORE protocol",
+	})
+	cstoreFailedTotal = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "sewa_dicom_cstore_failed_total",
+		Help: "Total DICOM C-STORE failures",
+	})
 )
 
 // ── Ingestion Service ───────────────────────────────────────────────────────
 type IngestionService struct {
-	cfg    Config
-	logger *zap.Logger
-	queue  chan *DICOMJob
-	redis  *queue.Client
-	wg     sync.WaitGroup
-	mu     sync.RWMutex
+	cfg     Config
+	logger  *zap.Logger
+	queue   chan *DICOMJob
+	redis   *queue.Client
+	storage *storage.Client
+	cstore  *dicomparser.CStoreSCP
+	wg      sync.WaitGroup
+	mu      sync.RWMutex
 	healthy bool
 }
 
@@ -121,6 +158,7 @@ func NewIngestionService(cfg Config, logger *zap.Logger, redisClient *queue.Clie
 		logger:  logger,
 		queue:   make(chan *DICOMJob, 500),
 		redis:   redisClient,
+		storage: storage.New(cfg.StorageProvider, cfg.StorageConnStr, cfg.StorageContainer, cfg.StorageAccount, cfg.StorageLocalDir),
 		healthy: true,
 	}
 }
@@ -131,7 +169,7 @@ func (s *IngestionService) getRedis() *queue.Client {
 	return s.redis
 }
 
-// Start launches the worker pool and a background Redis depth poller.
+// Start launches the worker pool, background Redis depth poller, and C-STORE listener.
 func (s *IngestionService) Start(ctx context.Context) {
 	for i := 0; i < s.cfg.MaxWorkers; i++ {
 		s.wg.Add(1)
@@ -154,6 +192,18 @@ func (s *IngestionService) Start(ctx context.Context) {
 			}
 		}
 	}()
+
+	// Start C-STORE DICOM listener on port 11112
+	cstoreAddr := fmt.Sprintf(":%d", s.cfg.DicomPort)
+	s.cstore = dicomparser.NewCStoreSCP(s.cfg.AETTitle, func(rawData []byte, sourceAET string) error {
+		cstoreReceivedTotal.Inc()
+		return s.Receive(rawData, sourceAET, s.cfg.TenantID)
+	})
+
+	if err := s.cstore.Start(cstoreAddr); err != nil {
+		s.logger.Fatal("C-STORE listener failed", zap.Error(err))
+	}
+	s.logger.Info("C-STORE DICOM listener started", zap.String("addr", cstoreAddr), zap.String("aeTitle", s.cfg.AETTitle))
 
 	s.logger.Info("SEWA DICOM Ingestion Service started",
 		zap.Int("workers", s.cfg.MaxWorkers),
@@ -210,7 +260,7 @@ func (s *IngestionService) worker(ctx context.Context, id int) {
 	}
 }
 
-// process: parse → anonymise → upload → queue
+// process: parse → validate → anonymise → upload → queue
 func (s *IngestionService) process(ctx context.Context, job *DICOMJob) error {
 	// ── 1. Parse DICOM ─────────────────────────────────────────────────────
 	parsed, err := dicomparser.Parse(job.RawData)
@@ -251,11 +301,16 @@ func (s *IngestionService) process(ctx context.Context, job *DICOMJob) error {
 
 	// ── 4. Upload to cloud storage ─────────────────────────────────────────
 	storageKey := fmt.Sprintf("%s/scans/%s/%s.dcm", job.TenantID, scanID, pseudoUID)
-	storageURL := buildStorageURL(s.cfg, storageKey)
+	storeStart := time.Now()
+	storageURL, err := s.storage.Upload(ctx, storageKey, anonBytes)
+	if err != nil {
+		// Log but don't fail — the AI pipeline can still process if blob is unavailable
+		s.logger.Warn("Storage upload failed, continuing with URL-only", zap.Error(err))
+		storageURL = buildStorageURL(s.cfg, storageKey)
+	}
+	storageDuration.Observe(time.Since(storeStart).Seconds())
 
-	// In production: upload anonBytes to Azure Blob / S3 / GCS here
-	// ctx-aware: azure.UploadBytes(ctx, s.cfg.StorageAccount, s.cfg.StorageContainer, storageKey, anonBytes)
-	s.logger.Info("Uploaded anonymised DICOM",
+	s.logger.Info("DICOM stored",
 		zap.String("scanId", scanID),
 		zap.String("url", storageURL),
 		zap.Int("bytes", len(anonBytes)),
@@ -288,7 +343,7 @@ func (s *IngestionService) process(ctx context.Context, job *DICOMJob) error {
 	return nil
 }
 
-// Shutdown drains in-flight jobs and closes the Redis pool.
+// Shutdown drains in-flight jobs, stops C-STORE listener, and closes the Redis pool.
 func (s *IngestionService) Shutdown() {
 	s.mu.Lock()
 	s.healthy = false
@@ -298,10 +353,30 @@ func (s *IngestionService) Shutdown() {
 	close(s.queue)
 	s.wg.Wait()
 
+	if s.cstore != nil {
+		s.cstore.Stop()
+		s.logger.Info("C-STORE listener stopped")
+	}
+
 	if err := s.getRedis().Close(); err != nil {
 		s.logger.Warn("Redis close error", zap.Error(err))
 	}
 	s.logger.Info("DICOM Ingestion Service shutdown complete")
+}
+
+// ── Auth middleware ────────────────────────────────────────────────────────
+func authMiddleware(apiKey string, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if apiKey != "" {
+			provided := r.Header.Get("X-API-Key")
+			if subtle.ConstantTimeCompare([]byte(apiKey), []byte(provided)) != 1 {
+				w.WriteHeader(http.StatusUnauthorized)
+				fmt.Fprint(w, `{"error":"unauthorized"}`)
+				return
+			}
+		}
+		next(w, r)
+	}
 }
 
 // ── HTTP server ─────────────────────────────────────────────────────────────
@@ -319,8 +394,8 @@ func startHTTPServer(cfg Config, svc *IngestionService) *http.Server {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"status":"healthy","service":"sewa-dicom-ingestion","region":"%s","aeTitle":"%s"}`,
-			cfg.Region, cfg.AETTitle)
+		fmt.Fprintf(w, `{"status":"healthy","service":"sewa-dicom-ingestion","region":"%s","aeTitle":"%s","version":"%s"}`,
+			cfg.Region, cfg.AETTitle, Version)
 	})
 
 	// Ready — Kubernetes readiness: only ready when Redis is reachable
@@ -348,7 +423,7 @@ func startHTTPServer(cfg Config, svc *IngestionService) *http.Server {
 	})
 
 	// Ingest — HTTP endpoint for non-C-STORE DICOM submission (testing / REST clients)
-	mux.HandleFunc("/ingest", func(w http.ResponseWriter, r *http.Request) {
+	ingestHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "POST only", http.StatusMethodNotAllowed)
 			return
@@ -376,7 +451,13 @@ func startHTTPServer(cfg Config, svc *IngestionService) *http.Server {
 		}
 		w.WriteHeader(http.StatusAccepted)
 		fmt.Fprint(w, `{"accepted":true}`)
-	})
+	}
+
+	if cfg.APIKey != "" {
+		mux.Handle("/ingest", authMiddleware(cfg.APIKey, ingestHandler))
+	} else {
+		mux.HandleFunc("/ingest", ingestHandler)
+	}
 
 	// Prometheus metrics
 	mux.Handle("/metrics", promhttp.Handler())
@@ -412,11 +493,10 @@ func validate(p *dicomparser.ParsedDICOM) error {
 }
 
 // priorityForModality maps DICOM modality codes to clinical priority tiers.
-// Rules engine in the AI backend can further escalate based on AI findings.
 func priorityForModality(modality string) string {
 	switch strings.ToUpper(modality) {
 	case "CT", "MR", "MRI", "PT":
-		return "URGENT"  // Advanced imaging — escalate for faster AI processing
+		return "URGENT"
 	case "XR", "CR", "DX":
 		return "ROUTINE"
 	case "US":
@@ -428,15 +508,11 @@ func priorityForModality(modality string) string {
 
 func buildStorageURL(cfg Config, key string) string {
 	switch cfg.StorageProvider {
-	case "aws":
-		bucket := envStr("AWS_S3_BUCKET_SCANS", "sewa-ai-scans")
-		return fmt.Sprintf("s3://%s/%s", bucket, key)
-	case "gcp":
-		bucket := envStr("GCP_BUCKET_SCANS", "sewa-ai-scans")
-		return fmt.Sprintf("gs://%s/%s", bucket, key)
-	default: // azure
+	case "azure":
 		return fmt.Sprintf("https://%s.blob.core.windows.net/%s/%s",
 			cfg.StorageAccount, cfg.StorageContainer, key)
+	default:
+		return fmt.Sprintf("file://%s/%s", cfg.StorageLocalDir, key)
 	}
 }
 
@@ -463,7 +539,15 @@ func main() {
 
 	cfg := loadConfig()
 
-	// ── Bootstrap services ──────────────────────────────────────────────────
+	// Validate required config
+	if cfg.AnonSalt == "" {
+		logger.Fatal("DICOM_ANON_SALT environment variable is required")
+	}
+	if cfg.StorageProvider == "azure" && cfg.StorageConnStr == "" && cfg.StorageAccount == "" {
+		logger.Warn("AZURE_STORAGE_CONNECTION_STRING not set — Azure uploads will fail")
+	}
+
+	// Bootstrap services
 	svc := NewIngestionService(cfg, logger, queue.NewNoOp(logger))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -477,7 +561,13 @@ func main() {
 			zap.String("healthPath", "/health"),
 			zap.String("ingestPath", "/ingest"),
 		)
-		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		var err error
+		if cfg.TLSCertFile != "" && cfg.TLSKeyFile != "" {
+			err = httpSrv.ListenAndServeTLS(cfg.TLSCertFile, cfg.TLSKeyFile)
+		} else {
+			err = httpSrv.ListenAndServe()
+		}
+		if err != nil && err != http.ErrServerClosed {
 			logger.Fatal("HTTP server error", zap.Error(err))
 		}
 	}()
@@ -511,9 +601,8 @@ func main() {
 
 	svc.Start(ctx)
 
-
 	logger.Info("SEWA XAI DICOM Ingestion Service ready",
-		zap.String("version", "2.0.0"),
+		zap.String("version", Version),
 		zap.String("ae_title", cfg.AETTitle),
 		zap.Int("dicom_port", cfg.DicomPort),
 		zap.Int("http_port", cfg.HTTPPort),
@@ -521,6 +610,8 @@ func main() {
 		zap.String("storage", cfg.StorageProvider),
 		zap.Int("workers", cfg.MaxWorkers),
 		zap.String("redis", cfg.RedisURL),
+		zap.Bool("tls_enabled", cfg.TLSCertFile != ""),
+		zap.Bool("auth_enabled", cfg.APIKey != ""),
 	)
 
 	// ── Graceful shutdown ───────────────────────────────────────────────────

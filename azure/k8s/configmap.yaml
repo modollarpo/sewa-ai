@@ -22,6 +22,7 @@ data:
   # ── AI Service endpoints (internal cluster DNS) ────────────────
   TRIAGE_URL:               "http://sewa-triage:8000"
   AI_SERVICE_URL:           "http://sewa-triage:8000"
+  BACKEND_URL:              "http://sewa-backend:3000"
   VLM_URL:                  "http://sewa-vlm-report:8001"
   VLM_SERVICE_URL:          "http://sewa-vlm-report:8001"
   UNCERTAINTY_URL:            "http://sewa-uncertainty:8009"
