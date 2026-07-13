@@ -1,32 +1,31 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('SEWA XAI - Clinical Workflow (E2E)', () => {
-  test('User can login, view dashboard, and simulate a scan upload', async ({ page }) => {
-    // 1. Visit Login Page
+test.describe('SEWA XAI — Clinical Workflow (E2E)', () => {
+  test('login page renders correctly', async ({ page }) => {
     await page.goto('/login');
-    
-    // Check title or basic element
+    await expect(page).toHaveTitle(/SEWA XAI/);
+    await expect(page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Log In")').first()).toBeAttached({ timeout: 5000 });
+  });
+
+  test('full login and dashboard navigation', async ({ page }) => {
+    const email = process.env.E2E_TEST_EMAIL || 'superadmin@sewaxai.health';
+    const password = process.env.E2E_TEST_PASSWORD;
+
+    test.skip(!password, 'E2E_TEST_PASSWORD not set — skipping authenticated tests');
+
+    await page.goto('/login');
     await expect(page).toHaveTitle(/SEWA XAI/);
 
-    // We won't actually login if the backend isn't seeded/running in this simple test,
-    // but in a real CI environment, we would do:
-    /*
-    await page.fill('input[type="email"]', 'admin@sewaxai.health');
-    await page.fill('input[type="password"]', process.env.ADMIN_PASSWORD || 'local_test_password');
-    await page.click('button[type="submit"]');
-    
-    // 2. Verify Dashboard
-    await expect(page).toHaveURL('/dashboard');
-    await expect(page.locator('text=Upload Scan')).toBeVisible();
+    // Fill login form
+    const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]').first();
+    const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
+    const submitBtn = page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Log In")').first();
 
-    // 3. Upload Scan
-    await page.click('text=Upload Scan');
-    await page.setInputFiles('input[type="file"]', 'fixtures/sample.dcm');
-    await page.click('button:has-text("Process")');
+    await emailInput.fill(email);
+    await passwordInput.fill(password);
+    await submitBtn.click();
 
-    // 4. Verify AI Triage Results
-    await expect(page.locator('.ai-impression')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('.ai-impression')).toContainText('Findings');
-    */
+    // Verify redirect to dashboard
+    await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
   });
 });
