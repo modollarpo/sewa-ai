@@ -182,6 +182,59 @@ async function main() {
     }
   });
 
+  // Initial federated learning seed
+  const flNode = await prisma.federatedNode.upsert({
+    where: { id: 'seed-node-royal-london' },
+    update: { status: 'active', lastSyncAt: new Date() },
+    create: {
+      id: 'seed-node-royal-london',
+      tenantId: rlTenant.id,
+      status: 'active',
+      totalScansContributed: 1,
+      trustScore: 85,
+      dpBudgetTotal: 10.0,
+      dpBudgetUsed: 0.1,
+      nodePublicKey: 'seed-public-key-royal-london',
+      nodeEndpoint: 'https://royal-london.fl.sewaxai.health/weights'
+    }
+  });
+
+  await prisma.federatedModelVersion.upsert({
+    where: { version: 'v1.0.0-seed' },
+    update: {},
+    create: {
+      version: 'v1.0.0-seed',
+      weightsBlobUrl: 'https://sewaaiproductionacr.azurecr.io/ai-triage:prod-20260712-113620',
+      weightsHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      accuracy: 0.93,
+      loss: 0.21,
+      participatingNodes: ['seed-node-royal-london'],
+      totalDataVolume: 1,
+      status: 'production',
+      globalEpsilon: 8.5
+    }
+  });
+
+  await prisma.federatedRound.upsert({
+    where: { roundNumber: 0 },
+    update: { status: 'completed' },
+    create: {
+      roundNumber: 0,
+      status: 'completed',
+      participatingNodes: 1,
+      totalDataVolume: 1,
+      epochLoss: 0.21,
+      accuracy: 0.93,
+      aggregatedModelVersion: 'v1.0.0-seed',
+      globalEpsilon: 8.5,
+      avgTrustScore: 85,
+      dpNoiseMultiplier: 0.5,
+      failedNodeIds: [],
+      durationMs: 1200,
+      aggregatedAt: new Date()
+    }
+  });
+
   console.log('✅ JS Seed complete!');
 }
 
