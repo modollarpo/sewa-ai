@@ -325,24 +325,24 @@ if (-not $webOnly) {
             # SAFE schema sync: `migrate deploy` only applies PENDING migrations (additive).
             # NEVER use `db push --accept-data-loss` on a live DB — it can DROP data.
             Write-Host " -> Syncing schema via safe 'prisma migrate deploy' in pod $POD..." -ForegroundColor Cyan
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate deploy --skip-generate"
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate deploy --skip-generate
             if ($LASTEXITCODE -ne 0) {
                 Write-Host " -> (Migration warning, continuing...)" -ForegroundColor Yellow
             }
 
             # Resolve migrations as applied so future migrate deploy doesn't fail
             Write-Host " -> Baselining migrations in pod $POD..." -ForegroundColor Cyan
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 0_init 2>/dev/null; true"
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260627000000_add_model_monitoring_and_feedback 2>/dev/null; true"
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260704000000_add_tenant_geo_and_contact_fields 2>/dev/null; true"
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260709000000_add_longitudinal_record 2>/dev/null; true"
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260712_add_report_version_audit_block_mlops 2>/dev/null; true"
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260713_add_federated_weight_upload_node_fields 2>/dev/null; true"
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260714_add_continuous_learning_models 2>/dev/null; true"
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate resolve --applied 0_init
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate resolve --applied 20260627000000_add_model_monitoring_and_feedback
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate resolve --applied 20260704000000_add_tenant_geo_and_contact_fields
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate resolve --applied 20260709000000_add_longitudinal_record
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate resolve --applied 20260712_add_report_version_audit_block_mlops
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate resolve --applied 20260713_add_federated_weight_upload_node_fields
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate resolve --applied 20260714_add_continuous_learning_models
 
             # Run new migrations (safe after baseline)
             Write-Host " -> Deploying pending migrations..." -ForegroundColor Cyan
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate deploy 2>/dev/null"
+            kubectl exec -n $NS $POD -c backend -- npx prisma migrate deploy
             if ($LASTEXITCODE -ne 0) {
                 Write-Host " -> (Migration deploy warning, continuing...)" -ForegroundColor Yellow
             }
@@ -351,7 +351,7 @@ if (-not $webOnly) {
             Write-Host " -> Seeding database via pod $POD..." -ForegroundColor Cyan
             $ADMIN_PASS = az keyvault secret show --vault-name "sewa-ai-production-kv" --name "sewa-admin-password" --query value -o tsv 2>$null
             if (-not $ADMIN_PASS) { $ADMIN_PASS = "DemoPassword123!" }
-            kubectl exec -n $NS $POD -c backend -- sh -c "SEED_ADMIN_PASSWORD='$ADMIN_PASS' npm run db:seed:js 2>/dev/null"
+            kubectl exec -n $NS $POD -c backend -- SEED_ADMIN_PASSWORD='$ADMIN_PASS' npm run db:seed:js
             if ($LASTEXITCODE -ne 0) {
                 Write-Host " -> (Seed warning, continuing...)" -ForegroundColor Yellow
             }
