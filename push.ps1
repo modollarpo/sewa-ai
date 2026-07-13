@@ -322,11 +322,12 @@ if (-not $webOnly) {
         if ($POD) {
             $POD = $POD -replace "^pod/", ""  # Remove "pod/" prefix if present
 
-            # Use db push (idempotent) instead of migrate deploy to handle non-empty production DB (P3005)
-            Write-Host " -> Syncing schema via 'prisma db push' in pod $POD..." -ForegroundColor Cyan
-            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma db push --skip-generate --accept-data-loss"
+            # SAFE schema sync: `migrate deploy` only applies PENDING migrations (additive).
+            # NEVER use `db push --accept-data-loss` on a live DB — it can DROP data.
+            Write-Host " -> Syncing schema via safe 'prisma migrate deploy' in pod $POD..." -ForegroundColor Cyan
+            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate deploy --skip-generate"
             if ($LASTEXITCODE -ne 0) {
-                Write-Host " -> (Schema sync warning, continuing...)" -ForegroundColor Yellow
+                Write-Host " -> (Migration warning, continuing...)" -ForegroundColor Yellow
             }
 
             # Resolve migrations as applied so future migrate deploy doesn't fail
