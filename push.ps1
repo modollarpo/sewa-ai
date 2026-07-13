@@ -106,6 +106,7 @@ if (-not $webOnly) {
     # 3. Build & Push AI Services
     Write-Host "[3/6] Building AI Services via ACR Tasks..." -ForegroundColor Yellow
     $AI_SERVICES = @{ "ai-triage"="triage"; "ai-uncertainty"="uncertainty"; "ai-vlm"="vlm-report"; "ai-metacognition"="metacognition"; "ai-federated"="federated-learning"; "ai-continuous"="continuous-learning"; "ai-pathology"="pathology"; "ai-mammography"="mammography"; "ai-retinal"="retinal" }
+    $EXTRA_SERVICES = @{ "edge"="edge"; "dicom-ingestion"="services/dicom-ingestion-go" }
     foreach ($svc in $AI_SERVICES.Keys) {
         $dir = $AI_SERVICES[$svc]
         Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan
@@ -124,6 +125,26 @@ if (-not $webOnly) {
         }
     }
     Out-Success "AI services build complete."
+
+    # Extra services (edge, dicom-ingestion)
+    foreach ($svc in $EXTRA_SERVICES.Keys) {
+        $dir = $EXTRA_SERVICES[$svc]
+        Write-Host " -> Building $svc (from $dir)..." -ForegroundColor Cyan
+        $svcImg = "sewa-$svc`:$IMAGE_TAG"
+        $svcLatest = "sewa-$svc`:latest"
+        try {
+            az acr build `
+                --registry $ACR_NAME `
+                --image $svcImg `
+                --image $svcLatest `
+                --file "$dir/Dockerfile" `
+                "$dir/" `
+                --output table
+        } catch {
+            Out-Error "Failed to build $svc`: $_"
+        }
+    }
+    Out-Success "Extra services build complete."
 
     # 3b. Build & Push Frontend (for AKS)
     Write-Host "[3b/6] Building Frontend for AKS..." -ForegroundColor Yellow
@@ -207,9 +228,8 @@ if (-not $webOnly) {
             if ($m.Name -eq "acr-secret.yaml") { continue }
             
             $content = Get-Content $m.FullName -Raw
-            $content = $content -replace "{{IMAGE_TAG}}", $IMAGE_TAG
-            $content = $content -replace "{{CONTAINER_REGISTRY}}", $ACR_SERVER
-            $content = $content -replace "{{ENV}}", "production"
+            # Replace hardcoded image tags (e.g. prod-20260712-113620) with the new timestamp
+            $content = $content -replace '(image:\s*"sewaaiproductionacr\.azurecr\.io/sewa-[^:]+:)(prod-[^"]+)"', "`$1$IMAGE_TAG`""
             
             $tmpPath = $m.FullName + ".tmp"
             $content | Out-File $tmpPath -Encoding utf8 -NoNewline
@@ -315,12 +335,21 @@ if (-not $webOnly) {
             kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260627000000_add_model_monitoring_and_feedback 2>/dev/null; true"
             kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260704000000_add_tenant_geo_and_contact_fields 2>/dev/null; true"
             kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260709000000_add_longitudinal_record 2>/dev/null; true"
+            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260712_add_report_version_audit_block_mlops 2>/dev/null; true"
+            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate resolve --applied 20260713_add_federated_weight_upload_node_fields 2>/dev/null; true"
 
-            # Seed with required ADMIN_PASSWORD (idempotent - seed.js upserts)
+            # Run new migrations (safe after baseline)
+            Write-Host " -> Deploying pending migrations..." -ForegroundColor Cyan
+            kubectl exec -n $NS $POD -c backend -- sh -c "npx prisma migrate deploy 2>/dev/null"
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host " -> (Migration deploy warning, continuing...)" -ForegroundColor Yellow
+            }
+
+            # Seed with required SEED_ADMIN_PASSWORD (idempotent - seed.js upserts)
             Write-Host " -> Seeding database via pod $POD..." -ForegroundColor Cyan
             $ADMIN_PASS = az keyvault secret show --vault-name "sewa-ai-production-kv" --name "sewa-admin-password" --query value -o tsv 2>$null
             if (-not $ADMIN_PASS) { $ADMIN_PASS = "DemoPassword123!" }
-            kubectl exec -n $NS $POD -c backend -- sh -c "ADMIN_PASSWORD='$ADMIN_PASS' npm run db:seed:js 2>/dev/null"
+            kubectl exec -n $NS $POD -c backend -- sh -c "SEED_ADMIN_PASSWORD='$ADMIN_PASS' npm run db:seed:js 2>/dev/null"
             if ($LASTEXITCODE -ne 0) {
                 Write-Host " -> (Seed warning, continuing...)" -ForegroundColor Yellow
             }
