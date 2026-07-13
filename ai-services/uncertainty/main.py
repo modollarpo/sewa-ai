@@ -29,10 +29,13 @@ from PIL import Image
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 import httpx
 import uvicorn
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from pythonjsonlogger import jsonlogger
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
 from cpu_inference_engine import registry, run_async # type: ignore
@@ -40,8 +43,18 @@ from cpu_inference_engine import registry, run_async # type: ignore
 from utils.dicom_loader import load_dicom_from_url
 from utils.preprocessing import preprocess_scan
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger("sewa-uncertainty")
+logger.setLevel(logging.INFO)
+_handler = logging.StreamHandler(sys.stdout)
+_handler.setFormatter(jsonlogger.JsonFormatter(
+    "%(asctime)s %(name)s %(levelname)s %(message)s %(module)s %(funcName)s %(lineno)d"
+))
+if not logger.handlers:
+    logger.addHandler(_handler)
+
+EXPLAIN_REQUESTS = Counter("uncertainty_explain_requests_total", "Uncertainty explain requests", ["status"])
+EXPLAIN_DURATION = Histogram("uncertainty_explain_duration_seconds", "Explain endpoint duration")
+EXPLAIN_ERRORS = Counter("uncertainty_explain_errors_total", "Uncertainty explain errors", ["reason"])
 
 # ── Configuration ──────────────────────────────────────────────
 MODEL_CACHE   = Path(os.getenv("MODEL_CACHE", "/models"))
@@ -370,8 +383,13 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
             f"Top attribution: '{shap_values[0].f}' ({shap_values[0].v:.1%})."
         )
 
+        EXPLAIN_DURATION.observe(time.perf_counter() - t0)
         ms = int((time.perf_counter() - t0) * 1000)
-        logger.info(f"[{req.scan_id}] epistemic={mc['epistemic']:.3f} aleatoric={mc['aleatoric']:.3f} ms={ms}")
+        logger.info(
+            f"[{req.scan_id}] epistemic={mc['epistemic']:.3f} aleatoric={mc['aleatoric']:.3f} ms={ms}",
+            extra={"scan_id": req.scan_id, "modality": req.modality, "body_part": req.body_part, "epistemic": mc["epistemic"], "aleatoric": mc["aleatoric"], "inference_ms": ms}
+        )
+        EXPLAIN_REQUESTS.labels(status="success").inc()
 
         return UncertaintyResponse(
             scan_id=req.scan_id,
@@ -390,7 +408,10 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
             backend="onnx-int8-cpu",
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
+        EXPLAIN_ERRORS.labels(reason="prediction_failure").inc()
         logger.error(f"[{req.scan_id}] Uncertainty failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 

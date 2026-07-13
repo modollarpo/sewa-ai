@@ -3,9 +3,11 @@
 # Captures radiologist corrections → fine-tuning pipeline → A/B deployment
 
 import os
+import sys
 import json
 import uuid
 import asyncio
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any, Union
 from enum import Enum
@@ -15,15 +17,35 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from pythonjsonlogger import jsonlogger
 import httpx
+
+# Structured JSON logging
+logger = logging.getLogger("sewa-cl")
+logger.setLevel(logging.INFO)
+_handler = logging.StreamHandler(sys.stdout)
+_handler.setFormatter(jsonlogger.JsonFormatter(
+    "%(asctime)s %(name)s %(levelname)s %(message)s %(module)s %(funcName)s %(lineno)d"
+))
+if not logger.handlers:
+    logger.addHandler(_handler)
+
+# Prometheus metrics
+CL_CORRECTIONS_TOTAL = Counter("cl_corrections_total", "Corrections submitted", ["correction_type"])
+CL_DRIFT_DETECTED = Counter("cl_drift_detected_total", "Drift detection triggers", [])
+CL_TRAINING_TRIGGERED = Counter("cl_training_triggered_total", "Retraining triggers", ["trigger"])
+CL_REQUESTS_TOTAL = Counter("cl_requests_total", "CL API requests", ["endpoint", "status"])
+CL_ERRORS_TOTAL = Counter("cl_errors_total", "CL errors", ["reason"])
 
 app = FastAPI(title="SEWA XAI — Continuous Learning Service", version="1.0.0")
 
-# Restrict CORS to trusted origins — configurable via env for AKS internal service mesh
-_CL_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://sewa-backend:5000").split(",")
+# CORS — allow backend + localhost for dev
+_CL_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://sewa-backend:5000,http://localhost:3000,http://localhost:5000").split(",")
 app.add_middleware(CORSMiddleware, allow_origins=_CL_CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 
 MODEL_CACHE    = os.getenv("MODEL_CACHE", "/models")
@@ -215,28 +237,45 @@ async def health() -> Dict[str, Any]:
 @app.post("/corrections")
 async def submit_correction(correction: CorrectionEvent, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """Radiologist submits a correction to an AI finding."""
-    record = correction.model_dump()
-    record["id"]         = str(uuid.uuid4())  # cryptographically random, not MD5
-    record["timestamp"]  = datetime.now(timezone.utc).isoformat()
-    record["is_critical_miss"] = (
-        correction.ai_urgency != "CRITICAL" and correction.human_urgency == "CRITICAL"
-    )
-    correction_store.append(record)
+    try:
+        record = correction.model_dump()
+        record["id"]         = str(uuid.uuid4())
+        record["timestamp"]  = datetime.now(timezone.utc).isoformat()
+        record["is_critical_miss"] = (
+            correction.ai_urgency != "CRITICAL" and correction.human_urgency == "CRITICAL"
+        )
+        correction_store.append(record)
+        CL_CORRECTIONS_TOTAL.labels(correction_type=correction.correction_type.value).inc()
 
-    # Recalculate drift metrics
-    drift = detect_drift(correction_store)
-    drift_metrics.update(drift)
+        # Recalculate drift metrics
+        drift = detect_drift(correction_store)
+        drift_metrics.update(drift)
 
-    # Auto-trigger retraining if enough corrections and drift detected
-    if len(correction_store) % MIN_CORRECTIONS == 0 or drift["drift_detected"]:
-        background_tasks.add_task(trigger_retraining, correction_store.copy())
+        # Auto-trigger retraining if enough corrections or drift detected
+        should_retrain = len(correction_store) % MIN_CORRECTIONS == 0 or drift["drift_detected"]
+        if should_retrain:
+            trigger = "threshold" if len(correction_store) % MIN_CORRECTIONS == 0 else "drift"
+            CL_TRAINING_TRIGGERED.labels(trigger=trigger).inc()
+            if drift["drift_detected"]:
+                CL_DRIFT_DETECTED.inc()
+            background_tasks.add_task(trigger_retraining, correction_store.copy())
 
-    return {
-        "correction_id":  record["id"],
-        "is_critical_miss": record["is_critical_miss"],
-        "drift_metrics":  drift_metrics,
-        "total_corrections": len(correction_store),
-    }
+        logger.info(
+            f"Correction recorded: {record['id']} | {correction.ai_finding} -> {correction.human_finding} | type={correction.correction_type.value}",
+            extra={"scan_id": correction.scan_id, "correction_type": correction.correction_type.value, "drift_detected": drift.get("drift_detected")}
+        )
+        CL_REQUESTS_TOTAL.labels(endpoint="corrections", status="success").inc()
+
+        return {
+            "correction_id":  record["id"],
+            "is_critical_miss": record["is_critical_miss"],
+            "drift_metrics":  drift_metrics,
+            "total_corrections": len(correction_store),
+        }
+    except Exception as e:
+        CL_ERRORS_TOTAL.labels(reason="correction_submit").inc()
+        logger.error(f"Failed to submit correction: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/metrics")
@@ -269,6 +308,7 @@ async def get_metrics() -> Dict[str, Any]:
 
 @app.get("/corrections")
 async def list_corrections(limit: int = 50, correction_type: Optional[str] = None) -> Dict[str, Any]:
+    CL_REQUESTS_TOTAL.labels(endpoint="corrections_list", status="success").inc()
     results = correction_store[-limit:]
     if correction_type:
         results = [c for c in results if c["correction_type"] == correction_type]
@@ -278,14 +318,24 @@ async def list_corrections(limit: int = 50, correction_type: Optional[str] = Non
 @app.post("/training/trigger")
 async def manual_retrain(background_tasks: BackgroundTasks) -> Dict[str, Any]:
     if training_state["status"] == "fine_tuning":
+        CL_REQUESTS_TOTAL.labels(endpoint="training_trigger", status="conflict").inc()
         raise HTTPException(409, "Training already running")
+    CL_TRAINING_TRIGGERED.labels(trigger="manual").inc()
+    CL_REQUESTS_TOTAL.labels(endpoint="training_trigger", status="success").inc()
     background_tasks.add_task(trigger_retraining, correction_store.copy())
+    logger.info(f"Manual retraining triggered with {len(correction_store)} corrections")
     return {"message": "Retraining triggered", "corrections_available": len(correction_store)}
 
 
 @app.get("/training/status")
 async def training_status() -> Dict[str, Any]:
+    CL_REQUESTS_TOTAL.labels(endpoint="training_status", status="success").inc()
     return training_state
+
+
+@app.get("/metrics")
+async def metrics() -> Response:
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":

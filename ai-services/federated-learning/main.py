@@ -5,11 +5,13 @@
 # Architecture: Hospitals train locally → encrypted gradient deltas → central aggregation
 
 import os
+import sys
 import io
 import json
 import asyncio
 import hashlib
 import time
+import logging
 from typing import Dict, List, Optional, Tuple, Any, Union
 from datetime import datetime, timezone
 
@@ -27,13 +29,33 @@ from flwr.common import ( # type: ignore
 )
 from flwr.server.strategy import FedAvg, FedProx # type: ignore
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from pythonjsonlogger import jsonlogger
 
 # Differential Privacy — add calibrated Gaussian noise to gradients
 from opacus import PrivacyEngine # type: ignore
 from opacus.validators import ModuleValidator # type: ignore
+
+# Structured JSON logging
+logger = logging.getLogger("sewa-fl")
+logger.setLevel(logging.INFO)
+_handler = logging.StreamHandler(sys.stdout)
+_handler.setFormatter(jsonlogger.JsonFormatter(
+    "%(asctime)s %(name)s %(levelname)s %(message)s %(module)s %(funcName)s %(lineno)d"
+))
+if not logger.handlers:
+    logger.addHandler(_handler)
+
+# Prometheus metrics
+FL_ROUNDS_TOTAL = Counter("fl_rounds_total", "Federated rounds completed", ["status"])
+FL_TRAINING_DURATION = Histogram("fl_training_duration_seconds", "FL training duration")
+FL_CLIENTS_ACTIVE = Gauge("fl_clients_active", "Active FL clients")
+FL_PRIVACY_BUDGET = Gauge("fl_privacy_budget_remaining", "Remaining DP epsilon budget")
+FL_REQUESTS_TOTAL = Counter("fl_requests_total", "FL API requests", ["endpoint", "status"])
 
 # ── Config ─────────────────────────────────────────────────────
 FL_SERVER_HOST    = os.getenv("FL_SERVER_HOST",    "0.0.0.0")
@@ -48,8 +70,8 @@ NUM_ROUNDS        = int(os.getenv("NUM_ROUNDS",          "10"))
 
 app = FastAPI(title="SEWA XAI — Federated Learning Coordinator", version="1.0.0")
 
-# Restrict CORS — internal AKS service, only backend should call this
-_FL_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://sewa-backend:5000").split(",")
+# CORS — allow backend + localhost for dev
+_FL_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://sewa-backend:5000,http://localhost:3000,http://localhost:5000").split(",")
 app.add_middleware(CORSMiddleware, allow_origins=_FL_CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 
 # ── In-memory round state ───────────────────────────────────────
@@ -241,12 +263,16 @@ async def health() -> Dict[str, Any]:
 
 @app.get("/status")
 async def get_status() -> Dict[str, Any]:
+    FL_CLIENTS_ACTIVE.set(len(round_state["active_clients"]))
+    FL_PRIVACY_BUDGET.set(max(0, DP_EPSILON - round_state["privacy_budget_spent"]))
+    FL_REQUESTS_TOTAL.labels(endpoint="status", status="success").inc()
     return round_state
 
 
 @app.post("/training/start")
 async def start_training(config: TrainingConfig, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     if round_state["status"] not in ["idle", "completed"]:
+        FL_REQUESTS_TOTAL.labels(endpoint="training_start", status="conflict").inc()
         raise HTTPException(409, "Training already in progress")
 
     round_state["status"] = "starting"
@@ -264,6 +290,8 @@ async def start_training(config: TrainingConfig, background_tasks: BackgroundTas
     )
 
     background_tasks.add_task(_run_fl_server, strategy, config.num_rounds)
+    logger.info(f"Federated training started: rounds={config.num_rounds}, min_clients={config.min_fit_clients}, dp_eps={config.dp_epsilon}")
+    FL_REQUESTS_TOTAL.labels(endpoint="training_start", status="success").inc()
     return {"message": "Federated training started", "config": config.model_dump()}
 
 
@@ -281,20 +309,27 @@ async def _run_fl_server(strategy: SEWAFedStrategy, num_rounds: int) -> None:
 
     loop = asyncio.get_event_loop()
     try:
-        # Run blocking Flower server in a thread pool so FastAPI event loop stays responsive
+        t0 = time.time()
         await loop.run_in_executor(None, _start_server)
         round_state["status"] = "completed"
+        FL_TRAINING_DURATION.observe(time.time() - t0)
+        FL_ROUNDS_TOTAL.labels(status="completed").inc()
+        logger.info(f"Federated training completed: {num_rounds} rounds in {time.time()-t0:.1f}s")
     except Exception as e:
         round_state["status"] = f"error: {str(e)}"
+        FL_ROUNDS_TOTAL.labels(status="error").inc()
+        logger.error(f"Federated training failed: {e}")
 
 
 @app.get("/privacy/budget")
 async def privacy_budget() -> Dict[str, Any]:
-    """Return current differential privacy budget consumption."""
+    FL_REQUESTS_TOTAL.labels(endpoint="privacy_budget", status="success").inc()
+    remaining = max(0, DP_EPSILON - round_state["privacy_budget_spent"])
+    FL_PRIVACY_BUDGET.set(remaining)
     return {
         "epsilon_budget":  DP_EPSILON,
         "epsilon_spent":   round_state["privacy_budget_spent"],
-        "epsilon_remaining": max(0, DP_EPSILON - round_state["privacy_budget_spent"]),
+        "epsilon_remaining": remaining,
         "delta":           DP_DELTA,
         "mechanism":       "Gaussian (Opacus)",
         "compliant_with":  ["GDPR Article 25", "HIPAA Safe Harbour", "NHS DSPT"],
@@ -303,7 +338,13 @@ async def privacy_budget() -> Dict[str, Any]:
 
 @app.get("/rounds/history")
 async def round_history() -> Dict[str, Any]:
+    FL_REQUESTS_TOTAL.labels(endpoint="rounds_history", status="success").inc()
     return {"rounds": round_state["round_history"], "global_accuracy": round_state["global_accuracy"]}
+
+
+@app.get("/metrics")
+async def metrics() -> Response:
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":

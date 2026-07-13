@@ -6,6 +6,7 @@
 # NHS DCB0129: This is the final safety gate before any clinical alert fires.
 
 import os
+import sys
 import time
 import logging
 from contextlib import asynccontextmanager
@@ -15,12 +16,25 @@ from enum import Enum
 
 import numpy as np
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 import uvicorn
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from pythonjsonlogger import jsonlogger
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger("sewa-metacognition")
+logger.setLevel(logging.INFO)
+_handler = logging.StreamHandler(sys.stdout)
+_handler.setFormatter(jsonlogger.JsonFormatter(
+    "%(asctime)s %(name)s %(levelname)s %(message)s %(module)s %(funcName)s %(lineno)d"
+))
+if not logger.handlers:
+    logger.addHandler(_handler)
+
+EVAL_REQUESTS = Counter("metacognition_eval_requests_total", "Metacognition evaluations", ["status", "urgency"])
+EVAL_DURATION = Histogram("metacognition_eval_duration_seconds", "Evaluation duration")
+EVAL_FAILURES = Counter("metacognition_eval_failures_total", "Evaluation failures", ["reason"])
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5000").split(",")
 
@@ -411,10 +425,17 @@ evaluator = MetacognitionEvaluator()
 # ─── Endpoints ────────────────────────────────────────────────
 @app.post("/metacognition/evaluate", response_model=MetacognitionResponse)
 async def evaluate(req: MetacognitionRequest) -> MetacognitionResponse:
+    t0 = time.time()
     try:
-        return evaluator.evaluate(req)
+        result = evaluator.evaluate(req)
+        EVAL_DURATION.observe(time.time() - t0)
+        EVAL_REQUESTS.labels(status="passed" if result.passed else "failed", urgency=req.urgency).inc()
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Metacognition error for {req.scan_id}: {e}")
+        EVAL_FAILURES.labels(reason="evaluation_error").inc()
+        logger.error(f"Metacognition error for {req.scan_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -448,12 +469,8 @@ async def health() -> Dict[str, Any]:
 
 
 @app.get("/metrics")
-async def metrics() -> Dict[str, Any]:
-    return {
-        "metacognition_rules": len(MODALITY_FINDING_MATRIX),
-        "urgency_map_entries": len(URGENCY_FINDING_MAP),
-        "backend": "cpu-rules",
-    }
+async def metrics() -> Response:
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@
 # CPU fallback: deterministic template engine (<30ms, clinical-grade structure).
 
 import os
+import sys
 import time
 import logging
 from contextlib import asynccontextmanager
@@ -11,13 +12,26 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 import uvicorn
 from openai import AsyncAzureOpenAI
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from pythonjsonlogger import jsonlogger
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger("sewa-vlm")
+logger.setLevel(logging.INFO)
+_handler = logging.StreamHandler(sys.stdout)
+_handler.setFormatter(jsonlogger.JsonFormatter(
+    "%(asctime)s %(name)s %(levelname)s %(message)s %(module)s %(funcName)s %(lineno)d"
+))
+if not logger.handlers:
+    logger.addHandler(_handler)
+
+REPORTS_TOTAL = Counter("vlm_reports_total", "VLM reports generated", ["backend", "urgency"])
+REPORT_DURATION = Histogram("vlm_report_duration_seconds", "Report generation duration", ["backend"])
+REPORT_ERRORS = Counter("vlm_report_errors_total", "VLM report errors", ["reason"])
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5000").split(",")
 USE_AZURE_OPENAI = bool(os.getenv("AZURE_OPENAI_ENDPOINT"))
@@ -210,6 +224,8 @@ FHIR DiagnosticReport will be created on approval.
 HL7 ORU message will be dispatched on signing.
 {'='*60}"""
                 
+                REPORT_DURATION.labels(backend="azure-openai").observe((time.time() - start))
+                REPORTS_TOTAL.labels(backend="azure-openai", urgency=req.urgency).inc()
                 return VLMReportResponse(
                     scan_id=req.scan_id,
                     technique=technique,
@@ -221,6 +237,7 @@ HL7 ORU message will be dispatched on signing.
                     generation_ms=int((time.time() - start) * 1000),
                 )
             except Exception as e:
+                REPORT_ERRORS.labels(reason="azure_openai_fallback").inc()
                 logger.warning(f"[VLM] Azure OpenAI failed, falling back to template: {e}")
 
         # Fallback CPU template mode (runs if Azure is disabled OR failed)
@@ -253,8 +270,13 @@ FHIR DiagnosticReport will be created on approval.
 HL7 ORU message will be dispatched on signing.
 {'='*60}"""
 
+        REPORT_DURATION.labels(backend="cpu-template").observe((time.time() - start))
+        REPORTS_TOTAL.labels(backend="cpu-template", urgency=req.urgency).inc()
         generation_ms = int((time.time() - start) * 1000)
-        logger.info(f"VLM report generated for {req.scan_id} in {generation_ms}ms")
+        logger.info(
+            f"VLM report generated for {req.scan_id} in {generation_ms}ms",
+            extra={"scan_id": req.scan_id, "modality": req.modality, "body_part": req.body_part, "generation_ms": generation_ms}
+        )
 
         return VLMReportResponse(
             scan_id=req.scan_id,
@@ -267,8 +289,11 @@ HL7 ORU message will be dispatched on signing.
             generation_ms=generation_ms,
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"VLM generation failed for {req.scan_id}: {e}")
+        REPORT_ERRORS.labels(reason="generation_failure").inc()
+        logger.error(f"VLM generation failed for {req.scan_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")
@@ -283,11 +308,8 @@ async def health() -> Dict[str, Any]:
 
 
 @app.get("/metrics")
-async def metrics() -> Dict[str, Any]:
-    return {
-        "vlm_backend": "azure-openai" if USE_AZURE_OPENAI else "cpu-template",
-        "azure_openai_enabled": USE_AZURE_OPENAI,
-    }
+async def metrics() -> Response:
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":

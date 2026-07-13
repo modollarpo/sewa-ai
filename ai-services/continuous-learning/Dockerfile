@@ -30,4 +30,4 @@ USER aiuser
 EXPOSE 8005
 HEALTHCHECK --interval=30s --timeout=15s --start-period=120s \
   CMD wget -qO- http://localhost:8005/health || exit 1
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8005", "--workers", "2"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8005", "--workers", "2", "--loop", "uvloop", "--no-access-log"]
