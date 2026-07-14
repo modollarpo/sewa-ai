@@ -71,9 +71,46 @@ MC_PASSES     = int(os.getenv("MC_DROPOUT_PASSES", "10"))
 AZURE_STORAGE_URL = os.getenv("AZURE_STORAGE_URL", "")
 
 
+def _create_demo_onnx() -> Path:
+    """Create a tiny demo ONNX model for development/CI/first-boot (no real weights).
+
+    Mirrors ai-services/pathology/main.py. Lets the service stay healthy until a
+    real trained weights file is placed in MODEL_CACHE (/models).
+    """
+    try:
+        import onnx
+        from onnx import helper, TensorProto
+
+        MODEL_CACHE.mkdir(parents=True, exist_ok=True)
+        demo_path = FP32_MODEL
+        n_classes = 10  # triage default (model.py num_classes=10)
+        X = helper.make_tensor_value_info("image", TensorProto.FLOAT, [None, 3, 224, 224])
+        Y = helper.make_tensor_value_info("logits", TensorProto.FLOAT, [None, n_classes])
+        W_data = np.random.randn(n_classes, 3 * 224 * 224).astype(np.float32) * 0.01
+        W = helper.make_tensor("W", TensorProto.FLOAT, W_data.shape, W_data.flatten().tolist())
+        flat = helper.make_node("Flatten", ["image"], ["flat"], axis=1)
+        gemm = helper.make_node("Gemm", ["flat", "W"], ["logits"], transB=1)
+        graph = helper.make_graph([flat, gemm], "uncertainty_demo", [X], [Y], initializer=[W])
+        model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 13)])
+        model.ir_version = 8  # onnxruntime in image supports max IR 9
+        onnx.save(model, str(demo_path))
+        logger.info(f"[Uncertainty] Demo ONNX written: {demo_path}")
+        return demo_path
+    except ImportError:
+        logger.error("[Uncertainty] onnx package not installed — cannot create demo model")
+        raise
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     model_path = INT8_MODEL if INT8_MODEL.exists() else FP32_MODEL
+    if not model_path.exists():
+        # First-boot: auto-generate a structural demo ONNX so the service stays healthy
+        # until a real trained weights file is supplied in MODEL_CACHE (/models).
+        try:
+            model_path = _create_demo_onnx()
+        except Exception as e:  # noqa: BLE001 - best-effort fallback only
+            logger.error(f"[Uncertainty] demo model generation failed: {e}")
     if model_path.exists():
         registry.load(MODEL_ID, str(model_path))
         registry.warmup(MODEL_ID, INPUT_SHAPE, n=3)

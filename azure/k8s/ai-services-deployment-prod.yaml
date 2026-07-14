@@ -37,7 +37,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       nodeSelector:
         nodepool: ai
       tolerations:
@@ -128,7 +131,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       containers:
       - name: vlm-report
         securityContext:
@@ -221,7 +227,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       nodeSelector:
         nodepool: ai
       tolerations:
@@ -312,7 +321,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       containers:
       - name: uncertainty
         securityContext:
@@ -395,7 +407,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       containers:
       - name: federated
         securityContext:
@@ -478,7 +493,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       containers:
       - name: continuous
         securityContext:
@@ -561,7 +579,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       containers:
       - name: metacognition
         securityContext:
@@ -644,7 +665,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       nodeSelector:
         nodepool: ai
       tolerations:
@@ -735,7 +759,10 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: models
-        emptyDir: {}
+        azureFile:
+          secretName: azure-model-file-secret
+          shareName: models
+          readOnly: true
       nodeSelector:
         nodepool: ai
       tolerations:
