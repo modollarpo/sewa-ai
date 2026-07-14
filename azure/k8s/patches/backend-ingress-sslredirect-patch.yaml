@@ -1,0 +1,8 @@
+# Merge-patch applied by push.ps1 after manifest deploy.
+# Locks the backend ingress to NOT force SSL redirect, because Azure Front Door
+# terminates TLS at the edge and forwards to this origin; a 308 redirect would
+# break the Front Door -> origin hop. Apply with:
+#   kubectl patch ingress sewa-backend-ingress -n sewa-ai --patch-file <this> --type merge
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"

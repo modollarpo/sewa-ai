@@ -253,6 +253,24 @@ if (-not $webOnly) {
     } catch {
         Out-Error "Manifest deployment failed: $_"
     }
+
+    # 4c. Apply ingress merge-patches (e.g. lock ssl-redirect off for Front Door origin)
+    try {
+        $patchFiles = Get-ChildItem "azure/k8s/patches/*.yaml" -ErrorAction SilentlyContinue
+        if ($patchFiles) {
+            Write-Host " -> Applying ingress patches..." -ForegroundColor Cyan
+            foreach ($pf in $patchFiles) {
+                try {
+                    kubectl patch ingress sewa-backend-ingress -n $NS --patch-file $pf.FullName --type merge 2>&1 | Out-Null
+                    Write-Host "   [OK] applied $($pf.Name)" -ForegroundColor Green
+                } catch {
+                    Write-Host "   [WARN] patch $($pf.Name) failed (ingress may not exist yet): $_" -ForegroundColor Yellow
+                }
+            }
+        }
+    } catch {
+        Write-Host "   [WARN] ingress patch step skipped: $_" -ForegroundColor Yellow
+    }
 }
 
 # 5. Frontend - Azure Static Web Apps
