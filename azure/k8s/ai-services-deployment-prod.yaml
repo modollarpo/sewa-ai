@@ -38,6 +38,13 @@ spec:
         emptyDir: {}
       - name: models
         emptyDir: {}
+      nodeSelector:
+        nodepool: ai
+      tolerations:
+      - key: workload
+        operator: Equal
+        value: ai
+        effect: NoSchedule
       containers:
       - name: triage
         securityContext:
@@ -57,9 +64,10 @@ spec:
         resources:
           limits:
             memory: "6Gi"
+            cpu: "2000m"
           requests:
             memory: "2Gi"
-            cpu: "1000m"
+            cpu: "2000m"
         envFrom:
         - configMapRef:
             name: sewa-config
@@ -214,6 +222,13 @@ spec:
         emptyDir: {}
       - name: models
         emptyDir: {}
+      nodeSelector:
+        nodepool: ai
+      tolerations:
+      - key: workload
+        operator: Equal
+        value: ai
+        effect: NoSchedule
       containers:
       - name: pathology
         securityContext:
@@ -233,9 +248,10 @@ spec:
         resources:
           limits:
             memory: "8Gi"
+            cpu: "2000m"
           requests:
             memory: "2Gi"
-            cpu: "1000m"
+            cpu: "2000m"
         envFrom:
         - configMapRef:
             name: sewa-config
@@ -629,6 +645,13 @@ spec:
         emptyDir: {}
       - name: models
         emptyDir: {}
+      nodeSelector:
+        nodepool: ai
+      tolerations:
+      - key: workload
+        operator: Equal
+        value: ai
+        effect: NoSchedule
       containers:
       - name: mammography
         securityContext:
@@ -648,9 +671,10 @@ spec:
         resources:
           limits:
             memory: "8Gi"
+            cpu: "2000m"
           requests:
             memory: "2Gi"
-            cpu: "1000m"
+            cpu: "2000m"
         envFrom:
         - configMapRef:
             name: sewa-config
@@ -712,6 +736,13 @@ spec:
         emptyDir: {}
       - name: models
         emptyDir: {}
+      nodeSelector:
+        nodepool: ai
+      tolerations:
+      - key: workload
+        operator: Equal
+        value: ai
+        effect: NoSchedule
       containers:
       - name: retinal
         securityContext:
@@ -731,9 +762,10 @@ spec:
         resources:
           limits:
             memory: "8Gi"
+            cpu: "2000m"
           requests:
             memory: "2Gi"
-            cpu: "1000m"
+            cpu: "2000m"
         envFrom:
         - configMapRef:
             name: sewa-config
