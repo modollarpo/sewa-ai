@@ -1,0 +1,115 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: redis-auth
+  namespace: sewa-ai
+spec:
+  secretTargetRef:
+  - parameter: password
+    name: sewa-secrets
+    key: REDIS_PASSWORD
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: sewa-backend-so
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    name: sewa-backend
+  minReplicaCount: 3
+  maxReplicaCount: 12
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+  - type: redis
+    metadata:
+      address: sewa-redis.sewa-ai.svc.cluster.local:6379
+      listName: bull:scan-ai-pipeline:wait
+      listLength: "5"
+    authenticationRef:
+      name: redis-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: sewa-triage-so
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    name: sewa-triage
+  minReplicaCount: 2
+  maxReplicaCount: 8
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+  - type: redis
+    metadata:
+      address: sewa-redis.sewa-ai.svc.cluster.local:6379
+      listName: bull:scan-ai-pipeline:wait
+      listLength: "5"
+    authenticationRef:
+      name: redis-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: sewa-pathology-so
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    name: sewa-pathology
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+  - type: redis
+    metadata:
+      address: sewa-redis.sewa-ai.svc.cluster.local:6379
+      listName: bull:scan-ai-pipeline:wait
+      listLength: "5"
+    authenticationRef:
+      name: redis-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: sewa-mammography-so
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    name: sewa-mammography
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+  - type: redis
+    metadata:
+      address: sewa-redis.sewa-ai.svc.cluster.local:6379
+      listName: bull:scan-ai-pipeline:wait
+      listLength: "5"
+    authenticationRef:
+      name: redis-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: sewa-retinal-so
+  namespace: sewa-ai
+spec:
+  scaleTargetRef:
+    name: sewa-retinal
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+  - type: redis
+    metadata:
+      address: sewa-redis.sewa-ai.svc.cluster.local:6379
+      listName: bull:scan-ai-pipeline:wait
+      listLength: "5"
+    authenticationRef:
+      name: redis-auth
