@@ -68,8 +68,8 @@ spec:
               key: sewa-database-url
         - name: REDIS_URL
           valueFrom:
-            configMapKeyRef:
-              name: sewa-config
+            secretKeyRef:
+              name: sewa-redis-url
               key: REDIS_URL
         - name: JWT_SECRET
           valueFrom:
