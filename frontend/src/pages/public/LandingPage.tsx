@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ClinicalDemoModal } from '../../components/public/ClinicalDemoModal';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
+import { ConfidenceIndicator, UncertaintyIndicator } from '../../design-system/components';
 
 const FEATURES = [
   { id:'triage-ai',          icon:'⚡', title:'Triage in Seconds', desc:'EfficientNet-B4 deep learning detects ICH, PE, pneumothorax, TB and stroke with AUC > 0.95 in under 2 seconds.', tag:'Triage Engine' },
@@ -221,10 +222,10 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
                  <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
                  <div className="text-[#408D7B] font-mono text-sm">[ Grad-CAM / SHAP Visualization Placeholder ]</div>
                </div>
-               <div className="mt-6 flex justify-between items-center px-4">
-                 <div className="text-[#6FA898] text-xs font-mono">Confidence: 97.4%</div>
-                 <div className="text-[#E03535] text-xs font-mono">Uncertainty: 0.02 (Low)</div>
-               </div>
+                <div className="mt-6 flex items-center gap-4 px-4">
+                  <ConfidenceIndicator value={0.974} size="sm" />
+                  <UncertaintyIndicator value={0.98} showLabel={true} />
+                </div>
             </div>
           </div>
         </div>
@@ -314,11 +315,23 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             <h2 className="text-3xl md:text-4xl font-black tracking-tight text-[#D0ECE6]">Healthcare Leaders Partnering with SEWA</h2>
           </div>
           
-          {/* Placeholder for customer logos - will be replaced with real logos */}
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-40 mb-16">
-            {[1,2,3,4,5].map(i => (
-              <div key={i} className="w-32 h-12 bg-[#0C1D17] border border-[#1B3028] rounded-xl flex items-center justify-center">
-                <div className="text-[9px] text-[#3A6055] font-mono">PARTNER {i}</div>
+          {/* Partner logos */}
+          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10 mb-16">
+            {[
+              { name:'NHS', sub:'England', color:'#005EB8' },
+              { name:'NIHR', sub:'National Institute for Health and Care Research', color:'#005EB8' },
+              { name:'NHS Innovation Service', sub:'Innovation.nhs.uk', color:'#330066' },
+              { name:'VerIQ UK', sub:'Healthcare Intelligence', color:'#408D7B' },
+              { name:'MedConnect', sub:'Digital Health', color:'#2A6EF2' },
+            ].map(p => (
+              <div key={p.name} className="group flex items-center gap-3 px-5 py-3 bg-[#0C1D17]/60 border border-[#1B3028] rounded-xl hover:border-[#408D7B]/30 hover:bg-[#0C1D17] transition-all">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black" style={{ background:`${p.color}20`, color:p.color }}>
+                  {p.name.split(/\s+/).map(w => w[0]).join('').slice(0,2)}
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold text-[#D0ECE6] group-hover:text-[#408D7B] transition-colors">{p.name}</div>
+                  <div className="text-[8px] text-[#3A6055] uppercase tracking-widest">{p.sub}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -394,7 +407,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             Join the clinical validation network to partner with SEWA on our pre-clinical R&D phase.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
             <input 
               type="email" 
               value={demoEmail}
@@ -406,6 +419,17 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
               Request Access
             </button>
           </div>
+          <div className="flex items-center gap-4 justify-center">
+            <div className="h-px w-16 bg-[#1B3028] hidden sm:block" />
+            <span className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest">or</span>
+            <div className="h-px w-16 bg-[#1B3028] hidden sm:block" />
+          </div>
+          <button 
+            onClick={() => setShowDemo(true)}
+            className="mt-6 px-12 py-5 rounded-2xl border-2 border-[#408D7B] text-[#408D7B] hover:bg-[#408D7B] hover:text-white text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95"
+          >
+            Book a Live Demo
+          </button>
         </div>
       </section>
 

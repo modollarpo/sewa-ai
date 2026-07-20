@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../../services/apiClient';
 
 import { dashboardColors as C } from '../../design-system/tokens';
+import { ConfidenceIndicator } from '../../design-system/components';
 
 const DISEASE_COLORS: Record<string, string> = {
   'Tuberculosis': '#E08A20',
@@ -307,7 +308,9 @@ export function PopulationHealthDashboard() {
                     <td style={{ padding: '10px 16px', fontSize: 11 }}>
                       <span style={{ padding: '2px 8px', borderRadius: 8, background: e.severity === 'High' ? `${C.critical}20` : `${C.urgent}20`, color: e.severity === 'High' ? C.critical : C.urgent, fontWeight: 600 }}>{e.severity}</span>
                     </td>
-                    <td style={{ padding: '10px 16px', fontSize: 12, color: C.textMd, fontFamily: C.FM }}>{(e.confidenceScore * 100).toFixed(1)}%</td>
+                    <td style={{ padding: '10px 16px' }}>
+                      <ConfidenceIndicator value={e.confidenceScore} size="sm" showLabel={false} />
+                    </td>
                     <td style={{ padding: '10px 16px', fontSize: 11 }}>
                       <span style={{ padding: '2px 7px', borderRadius: 6, background: e.scanOrigin === 'edge' ? `${C.urgent}20` : `${C.brand}20`, color: e.scanOrigin === 'edge' ? C.urgent : C.brand, fontSize: 10 }}>
                         {e.scanOrigin === 'edge' ? '📡 Edge' : '☁️ Cloud'}

@@ -309,6 +309,8 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
             all_findings=results[:5],
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(
             f"[Triage] Prediction failed for {req.scan_id}: {e}",

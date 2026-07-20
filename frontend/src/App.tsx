@@ -96,6 +96,7 @@ import { NotificationPanel }         from './components/ui/NotificationPanel';
 import { CookieBanner }              from './components/public/CookieBanner';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { socketService }             from './services/socketService';
+import { analytics }                 from './services/analytics';
 
 // ── Design tokens ─────────────────────────────────────────────
 import { dashboardColors as C } from './design-system/tokens';
@@ -330,6 +331,7 @@ export default function App() {
     if (page === 'register') { setPublicPage('register'); return; }
     setPublicPage(page as typeof publicPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    analytics.pageView(`/public/${page}`, `SEWA XAI - ${page}`);
   };
 
   useEffect(() => {
@@ -338,6 +340,11 @@ export default function App() {
     else if (path === '/onboarding/specialist') setPublicPage('onboarding-specialist');
     else if (path === '/register') setPublicPage('register');
     else if (path === '/login') setPublicPage('login');
+  }, []);
+
+  useEffect(() => {
+    analytics.init();
+    analytics.consentDenied();
   }, []);
 
   useEffect(() => {

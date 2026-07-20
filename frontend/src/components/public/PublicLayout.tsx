@@ -4,6 +4,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { colors, typography } from '../../design-system/tokens';
+import { useSettingsStore } from '../../store/settingsStore';
+
+const LANGUAGES = [
+  { code: 'en', label: 'EN', name: 'English' },
+  { code: 'fr', label: 'FR', name: 'Français' },
+  { code: 'sw', label: 'SW', name: 'Kiswahili' },
+  { code: 'yo', label: 'YO', name: 'Yorùbá' },
+  { code: 'ar', label: 'AR', name: 'العربية' },
+] as const;
 
 const NAV_LINKS = [
   { label:'Solutions',  id:'solutions', children:[
@@ -74,11 +83,16 @@ export function PublicNav({ activePage, onNavigate }: { activePage: string; onNa
   const [scrolled,   setScrolled]   = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [activeDD,   setActiveDD]   = useState<string|null>(null);
+  const [langOpen,   setLangOpen]   = useState(false);
+  const { lang, setLang } = useSettingsStore();
+  const currentLang = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', fn);
-    return () => window.removeEventListener('scroll', fn);
+    const closeLang = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest('button')) setLangOpen(false); };
+    window.addEventListener('click', closeLang);
+    return () => { window.removeEventListener('scroll', fn); window.removeEventListener('click', closeLang); };
   }, []);
 
   return (
@@ -158,6 +172,26 @@ export function PublicNav({ activePage, onNavigate }: { activePage: string; onNa
           ))}
         </div>
 
+        {/* Language selector */}
+        <div style={{ position:'relative', flexShrink:0 }}>
+          <button onClick={() => setLangOpen(o => !o)}
+            style={{ padding:'6px 10px', background:'none', border:`1px solid ${colors.bgBorder}`, borderRadius:7, color:colors.textMed, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:typography.fontBase, display:'flex', alignItems:'center', gap:4 }}>
+            {currentLang.label}
+            <span style={{ fontSize:9, opacity:0.6 }}>▾</span>
+          </button>
+          {langOpen && (
+            <div style={{ position:'absolute', top:'100%', right:0, marginTop:6, background:colors.bg2, border:`1px solid ${colors.bgBorder}`, borderRadius:10, padding:4, boxShadow:'0 12px 24px rgba(0,0,0,0.4)', zIndex:100, minWidth:140 }}>
+              {LANGUAGES.map(l => (
+                <button key={l.code} onClick={() => { setLang(l.code); setLangOpen(false); }}
+                  style={{ display:'block', width:'100%', padding:'8px 12px', textAlign:'left', background: lang === l.code ? `${colors.brand}15` : 'none', border:'none', borderRadius:7, color: lang === l.code ? colors.brand : colors.textMed, fontSize:12, fontWeight: lang === l.code ? 700 : 500, cursor:'pointer', fontFamily:typography.fontBase }}>
+                  <span style={{ marginRight:8 }}>{l.label}</span>
+                  <span style={{ color: colors.textLow }}>{l.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* CTA buttons */}
         <div className="nav-cta" style={{ display:'flex', gap:8, flexShrink:0, width:'auto', maxWidth:260, justifyContent:'flex-end' }}>
           <button onClick={() => onNavigate('login')} style={{ padding:'7px 16px', background:'none', border:`1px solid ${colors.bgBorder}`, borderRadius:8, color:colors.textMed, fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:typography.fontBase }}>
@@ -195,7 +229,18 @@ export function PublicNav({ activePage, onNavigate }: { activePage: string; onNa
               ))}
             </div>
           ))}
-          <div style={{ display:'flex', gap:10, marginTop:24 }}>
+          <div style={{ marginTop:20, paddingTop:16, borderTop:`1px solid ${colors.bgBorder}` }}>
+            <div style={{ fontSize:11, color:colors.textLow, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:10 }}>Language</div>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+              {LANGUAGES.map(l => (
+                <button key={l.code} onClick={() => { setLang(l.code); setMenuOpen(false); }}
+                  style={{ padding:'6px 12px', borderRadius:8, background: lang === l.code ? `${colors.brand}20` : colors.bg3, border:`1px solid ${lang === l.code ? colors.brand + '40' : colors.bgBorder}`, color: lang === l.code ? colors.brand : colors.textMed, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:typography.fontBase }}>
+                  {l.label} {l.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:10, marginTop:16 }}>
             <button onClick={() => { onNavigate('login'); setMenuOpen(false); }} style={{ flex:1, padding:'12px 0', background:colors.bg3, border:`1px solid ${colors.bgBorder}`, borderRadius:10, color:colors.textMed, fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:typography.fontBase }}>Sign In</button>
             <button onClick={() => { onNavigate('contact'); setMenuOpen(false); }} style={{ flex:1, padding:'12px 0', background:colors.brand, border:'none', borderRadius:10, color:'white', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:typography.fontBase }}>Request Demo</button>
           </div>

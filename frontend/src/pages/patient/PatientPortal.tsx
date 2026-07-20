@@ -6,6 +6,7 @@ import { usePatientData, usePatientAppointments } from '../../hooks/useDashboard
 import { Skeleton } from '../../components/ui/Skeleton';
 import { apiClient } from '../../services/apiClient';
 import { AppointmentModal } from './AppointmentModal';
+import { ConfidenceIndicator } from '../../design-system/components';
 
 import { dashboardColors as C } from '../../design-system/tokens';
 
@@ -140,9 +141,7 @@ export function PatientPortal() {
                     <span className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest">Analysis Verified</span>
                   </div>
                   {s.aiResult?.confidence && (
-                    <div className="text-[10px] font-mono text-[#408D7B]">
-                      ACCURACY: {Math.round(s.aiResult.confidence * 100)}%
-                    </div>
+                    <ConfidenceIndicator value={s.aiResult.confidence} size="sm" />
                   )}
                 </div>
               </div>

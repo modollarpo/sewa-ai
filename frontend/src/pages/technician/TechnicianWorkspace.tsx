@@ -6,6 +6,7 @@ import { apiClient } from '../../services/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { QrScannerModal } from '../../components/shared/QrScannerModal';
+import { ConfidenceIndicator } from '../../design-system/components';
 
 interface UploadJob {
   id: string;
@@ -301,8 +302,9 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
                 {job.urgency && <UrgencyPill u={job.urgency} />}
               </div>
               {job.finding && (
-                <div className="mt-2 text-[10px] text-[#6FA898] italic line-clamp-1 border-t border-[#1B3028] pt-1">
-                  AI: {job.finding}
+                <div className="mt-2 flex items-center justify-between border-t border-[#1B3028] pt-1">
+                  <span className="text-[10px] text-[#6FA898] italic line-clamp-1 flex-1">AI: {job.finding}</span>
+                  {job.confidence != null && <ConfidenceIndicator value={job.confidence} size="sm" showLabel={false} />}
                 </div>
               )}
             </div>

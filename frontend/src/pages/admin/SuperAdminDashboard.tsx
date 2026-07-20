@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSuperAdminData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 import { dashboardColors as C } from '../../design-system/tokens';
+import { ConfidenceIndicator } from '../../design-system/components';
 
 interface AiModel {
   id?: string;
@@ -391,6 +392,20 @@ export function SuperAdminDashboard() {
                     <div style={{fontSize:14,fontWeight:700,color:C.textHi,fontFamily:C.FM}}>{s.v}</div>
                   </div>
                 ))}
+              </div>
+              <div style={{display:'flex',gap:12,marginTop:8}}>
+                {m.accuracy != null && (
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:9,color:C.textLo,marginBottom:4}}>ACCURACY</div>
+                    <ConfidenceIndicator value={Number(m.accuracy) / 100} size="sm" />
+                  </div>
+                )}
+                {m._avg?.confidence != null && (
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:9,color:C.textLo,marginBottom:4}}>CONFIDENCE</div>
+                    <ConfidenceIndicator value={m._avg.confidence} size="sm" />
+                  </div>
+                )}
               </div>
             </div>
           ))}

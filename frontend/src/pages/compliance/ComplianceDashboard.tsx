@@ -29,6 +29,7 @@ interface EvidenceItem {
   type: 'doc' | 'test' | 'cert' | 'policy';
   status: 'verified' | 'pending' | 'expired';
   date: string;
+  url?: string;
 }
 
 const FRAMEWORKS: Framework[] = [
@@ -63,41 +64,82 @@ const FRAMEWORKS: Framework[] = [
   },
   {
     id: 'nhs', name: 'NHS DSPT 2024-25', flag: '🇬🇧', region: 'United Kingdom',
-    status: 'compliant', score: 100, lastAudit: '01 Mar 2026', nextReview: '30 Jun 2026',
-    controls: 42, passed: 42,
+    status: 'in_progress', score: 75, lastAudit: '01 Mar 2026', nextReview: '30 Jun 2027',
+    controls: 42, passed: 32,
     evidence: [
       { id:'n1', title:'IG training completion — 100% staff',         type:'cert',   status:'verified', date:'15 Feb 2026' },
       { id:'n2', title:'Data flow mapping — NHS data assets',         type:'doc',    status:'verified', date:'20 Feb 2026' },
       { id:'n3', title:'Penetration test — external CREST-certified', type:'test',   status:'verified', date:'26 Apr 2026' },
       { id:'n4', title:'Cyber Essentials Plus certification',          type:'cert',   status:'verified', date:'26 Apr 2026' },
       { id:'n5', title:'Data Security Policy v3.1',                   type:'policy', status:'verified', date:'01 Feb 2026' },
+      { id:'n6', title:'SEWA-AI-DOC-04 — Clinical Risk Management File (DCB0129)', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/04_Clinical_Risk_Management.pdf' },
+      { id:'n7', title:'SEWA-AI-DOC-11 — Regulation-Readiness Assessment', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/11_Regulation_Readiness_Assessment.pdf' },
     ],
-    gaps: [],
+    gaps: [
+      'NHS clinical validation / Chief Investigator pending (per SEWA-AI-DOC-11)',
+      'Prospective clinical investigation not yet approved (REC/HRA/MHRA)',
+    ],
   },
   {
     id: 'mdr', name: 'EU MDR Annex IIb — Class IIb SaMD', flag: '🔬', region: 'European Union',
-    status: 'compliant', score: 100, lastAudit: '01 Feb 2026', nextReview: '01 Aug 2026',
-    controls: 61, passed: 61,
+    status: 'in_progress', score: 55, lastAudit: '01 Jul 2026', nextReview: '01 Aug 2027',
+    controls: 61, passed: 34,
     evidence: [
-      { id:'m1', title:'Clinical Evaluation Report (CER) v2.1',      type:'doc',  status:'verified', date:'15 Jan 2026' },
-      { id:'m2', title:'Post-Market Clinical Follow-Up (PMCF) plan', type:'doc',  status:'verified', date:'20 Jan 2026' },
-      { id:'m3', title:'ISO 14971 Risk Management file',             type:'doc',  status:'verified', date:'10 Jan 2026' },
-      { id:'m4', title:'IEC 62304 Software Lifecycle documentation', type:'doc',  status:'verified', date:'26 Apr 2026' },
-      { id:'m5', title:'Notified Body (NB) audit — TÜV SÜD',        type:'cert', status:'verified', date:'26 Apr 2026' },
+      { id:'m1', title:'Clinical Evaluation Report (CER)', type:'doc', status:'pending', date:'—',
+        url:'/docs/clinical-dossier/11_Regulation_Readiness_Assessment.pdf' },
+      { id:'m2', title:'Post-Market Clinical Follow-Up (PMCF) plan', type:'doc', status:'pending', date:'—' },
+      { id:'m3', title:'SEWA-AI-DOC-05 — Risk Management File (ISO 14971)', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/05_Risk_Management.pdf' },
+      { id:'m4', title:'SEWA-AI-DOC-06 — Software Lifecycle File (IEC 62304)', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/06_Software_Lifecycle.pdf' },
+      { id:'m5', title:'SEWA-AI-DOC-04 — Clinical Risk Management File (DCB0129)', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/04_Clinical_Risk_Management.pdf' },
+      { id:'m6', title:'SEWA-AI-DOC-07 — Usability Engineering File (IEC 62366-1)', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/07_Usability_Engineering.pdf' },
+      { id:'m7', title:'SEWA-AI-DOC-00 — Cover, Governance & Document Register', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/00_Cover_and_Governance.pdf' },
+      { id:'m8', title:'SEWA-AI-DOC-01 — Regulatory Strategy & Conformity Assessment', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/01_Regulatory_Strategy.pdf' },
+      { id:'m9', title:'SEWA-AI-DOC-02 — Clinical Investigation Plan (Prospective Validation)', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/02_Clinical_Investigation_Plan.pdf' },
+      { id:'m10', title:'SEWA-AI-DOC-03 — Statistical Analysis Plan', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/03_Statistical_Analysis_Plan.pdf' },
+      { id:'m11', title:'SEWA-AI-DOC-08 — NICE Evidence Standards Alignment', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/08_NICE_Evidence_Alignment.pdf' },
+      { id:'m12', title:'SEWA-AI-DOC-09 — Future Services Pipeline (Pathology/Mammography/Retinal — PLANNED)', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/09_Future_Services_Pipeline.pdf' },
+      { id:'m13', title:'SEWA-AI-DOC-10 — PPIE & Health Inequalities', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/10_PPIE_Health_Inequalities.pdf' },
+      { id:'m14', title:'SEWA-AI-DOC-11 — Regulation-Readiness Assessment', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/11_Regulation_Readiness_Assessment.pdf' },
+      { id:'m15', title:'Notified Body (UK Approved Body) audit', type:'cert', status:'pending', date:'—' },
+      { id:'m16', title:'UKCA Class IIb / EU MDR CE Mark', type:'cert', status:'pending', date:'—' },
     ],
-    gaps: [],
+    gaps: [
+      'Independent clinical validation not yet run — prospective study pending REC/HRA/MHRA approval (SEWA-AI-DOC-11)',
+      'Chief Investigator (NHS/University consultant radiologist) not yet appointed — HRA mandatory blocker',
+      'ISO 13485 QMS not yet implemented; UKCA/CE marking not obtained',
+      'Pathology / Mammography / Retinal AI are planned future modules only — no current clinical claims',
+    ],
   },
   {
     id: 'fda', name: 'FDA 510(k) — AI/ML SaMD', flag: '💊', region: 'North America',
-    status: 'compliant', score: 100, lastAudit: '26 Apr 2026', nextReview: 'Q3 2026',
-    controls: 48, passed: 48,
+    status: 'in_progress', score: 40, lastAudit: '01 Jul 2026', nextReview: 'Q3 2027',
+    controls: 48, passed: 19,
     evidence: [
-      { id:'f1', title:'Predetermined Change Control Plan (PCCP)',    type:'doc',  status:'verified', date:'01 Feb 2026' },
-      { id:'f2', title:'SaMD Pre-Sub meeting — FDA response',        type:'doc',  status:'verified', date:'15 Feb 2026' },
-      { id:'f3', title:'Algorithm performance validation dataset',   type:'test', status:'verified', date:'26 Apr 2026' },
-      { id:'f4', title:'De Novo classification request',             type:'doc',  status:'verified', date:'26 Apr 2026' },
+      { id:'f1', title:'Predetermined Change Control Plan (PCCP)',    type:'doc',  status:'pending', date:'—' },
+      { id:'f2', title:'SaMD Pre-Sub meeting — FDA response',        type:'doc',  status:'pending', date:'—' },
+      { id:'f3', title:'Algorithm performance validation dataset',   type:'test', status:'pending', date:'—' },
+      { id:'f4', title:'510(k) pre-submission package',              type:'doc',  status:'pending', date:'—' },
+      { id:'f5', title:'SEWA-AI-DOC-11 — Regulation-Readiness Assessment', type:'doc', status:'verified', date:'Jul 2026',
+        url:'/docs/clinical-dossier/11_Regulation_Readiness_Assessment.pdf' },
     ],
-    gaps: [],
+    gaps: [
+      'FDA 510(k) pre-submission planned Q3 2027 — no submission made',
+      'Independent clinical validation required before any submission',
+    ],
   },
   {
     id: 'euaiact', name: 'EU AI Act — High-Risk AI System', flag: '🤖', region: 'European Union',
@@ -162,10 +204,18 @@ function EvidenceRow({ item }: { item: EvidenceItem }) {
     : item.status === 'pending'
       ? { color:C.urgent, label:'⏳ Pending' }
       : { color:C.critical, label:'⚠ Expired' };
+  const titleNode = item.url ? (
+    <a href={item.url} target="_blank" rel="noopener noreferrer"
+       style={{ flex:1, fontSize:12, color:C.textHi, fontFamily:C.F, textDecoration:'none', borderBottom:`1px dotted ${C.brand}` }}>
+      {item.title}
+    </a>
+  ) : (
+    <span style={{ flex:1, fontSize:12, color:C.textHi, fontFamily:C.F }}>{item.title}</span>
+  );
   return (
     <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', borderBottom:`1px solid ${C.border}` }}>
       <span style={{ fontSize:14, flexShrink:0 }}>{TYPE_ICONS[item.type]}</span>
-      <span style={{ flex:1, fontSize:12, color:C.textHi, fontFamily:C.F }}>{item.title}</span>
+      {titleNode}
       <span style={{ fontSize:10, color:C.textLo, fontFamily:C.FM, flexShrink:0, minWidth:120, textAlign:'right' }}>{item.date}</span>
       <span style={{ fontSize:10, fontWeight:600, color:st.color, minWidth:80, textAlign:'right', fontFamily:C.F }}>{st.label}</span>
     </div>
@@ -198,10 +248,12 @@ export function ComplianceDashboard() {
   const frameworks = FRAMEWORKS.map(f => {
     const db = (dbFrameworks as DbFramework[]).find(d => d.standard === f.id || d.standard === f.id.toUpperCase());
     if (!db) return f;
-    const mappedStatus: Framework['status'] = db.status === 'gap_detected' ? 'gap' : db.status === 'in_remediation' ? 'in_progress' : db.status === 'compliant' ? 'compliant' : 'n_a';
+    // Curated static statuses (gdpr/mdr/fda/nhs/...) are the honest source of truth
+    // for the device's regulatory posture; DB records only supplement audit dates
+    // and any new evidence URLs, so stale/over-optimistic DB rows can never override
+    // the deliberately honest in_progress/gap framing (per DOC-09 discipline).
     return {
       ...f,
-      status: mappedStatus,
       lastAudit: new Date(db.lastAuditAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       nextReview: new Date(db.nextAuditAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       evidence: db.evidenceUrls?.length ? db.evidenceUrls.map((url: string, i: number) => ({
