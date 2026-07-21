@@ -1,0 +1,188 @@
+# This manifest creates the enhanced Clinical AI Verification Service.
+# Based on the main SEWA backend architecture with enhanced security and compliance.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clinical-verification
+  namespace: sewa-ai
+  labels:
+    app: sewa-backend
+    service: clinical-verification
+    version: "2.4.1"
+    compliance: "HIPAA-GDPR-UKCA"
+    ai-engine: "confidence-scorer"
+    audit-enabled: "true"
+    container: "clinical-audit-service"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sewa-backend
+      service: clinical-verification
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: sewa-backend
+        service: clinical-verification
+        version: "2.4.1"
+        compliance: "HIPAA-GDPR-UKCA"
+        ai-engine: "confidence-scorer"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "3001"
+    spec:
+      containers:
+        - name: clinical-verification
+          image: sewaaiproductionacr.azurecr.io/sewa-backend:prod-latest-clinical
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3001
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sewaaiproduction-secret
+                  key: DATABASE_URL
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sewaaiproduction-secret
+                  key: POSTGRES_PASSWORD
+            - name: SERVER_PORT
+              value: "3001"
+            - name: AUDITING_ENABLED
+              value: "true"
+            - name: COMPLIANCE_THRESHOLD
+              value: "0.95"
+            - name: RISK_ASSESSMENT_ENGINE
+              value: "enhanced"
+            - name: ENCRYPTED_STORAGE
+              value: "enabled"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: logs
+              mountPath: /logs
+              readOnly: false
+      volumes:
+        - name: logs
+          emptyDir: {}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      terminationGracePeriodSeconds: 30
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clinical-verification
+  namespace: sewa-ai
+  labels:
+    app: sewa-backend
+    service: clinical-verification
+    version: "2.4.1"
+spec:
+  selector:
+    app: sewa-backend
+    service: clinical-verification
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001
+      protocol: TCP
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: clinical-verification-ingress
+  namespace: sewa-ai
+  labels:
+    app: sewa-backend
+    service: clinical-verification
+    version: "2.4.1"
+  annotations:
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rewrite-target: "/$2"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - clinical-verification.sewaxai.health
+      secretName: clinical-verification-tls
+  rules:
+    - host: clinical-verification.sewaxai.health
+      http:
+        paths:
+          - path: /api/v1/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: clinical-verification
+                port:
+                  number: 3001
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: clinical-verification-tls
+  namespace: sewa-ai
+type: kubernetes.io/tls
+stringData:
+  tls.crt: |
+    MOCK_TLS_CERTIFICATE_FOR_TESTING_ONLY
+  tls.key: |
+    MOCK_TLS_KEY_FOR_TESTING_ONLY
