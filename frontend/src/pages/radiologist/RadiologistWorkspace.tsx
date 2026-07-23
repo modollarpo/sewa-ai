@@ -475,6 +475,8 @@ function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, 
             onTranscript={handleTranscript}
             onStructuredReport={handleStructuredReport}
             lang={lang}
+            scanId={scan?.id}
+            enterprise={true}
           />
         </div>
       )}
@@ -487,6 +489,8 @@ function ReportEditor({ scan, onSign, setStatus }: { scan:any, onSign:()=>void, 
               onStructuredReport={handleStructuredReport}
               lang={lang}
               compact
+              scanId={scan?.id}
+              enterprise={true}
             />
             <button
               onClick={() => setAciOpen(o => !o)}

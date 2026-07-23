@@ -34,6 +34,7 @@ const LANGS = [
   { key:'de', label:'DE', supported: false },
   { key:'es', label:'ES', supported: false },
   { key:'pt', label:'PT', supported: false },
+  { key:'it', label:'IT', supported: false },
 ];
 const ROLE_LABELS: Record<string,string> = {
   radiologist:'Radiologist', doctor:'Physician', admin:'Hospital Admin',

@@ -61,6 +61,35 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-07-23)
+
+### ✅ Completed
+- **Enterprise services deployed to AKS** — Voice-transcription (custom FastAPI) + LibreTranslate running 1/1 in namespace `sewa-ai`
+- **Network policies created** — `voice-transcription-policy` + `translation-policy` for ingress/egress
+- **Backend service clients created** — `translationService.ts` + `voiceTranscriptionService.ts` with circuit-breaker pattern
+- **New API endpoints** — `/api/v1/ai/translate`, `/ai/detect-language`, `/ai/languages`, `/ai/enterprise-transcribe`
+- **Frontend integration** — `ui/VoiceDictation.tsx` enhanced with enterprise transcription path (MediaRecorder → backend Azure Speech); `RadiologistWorkspace.tsx` now passes `scanId` + `enterprise=true`
+- **Frontend API helpers** — `translateText()`, `detectLanguage()`, `listLanguages()`, `enterpriseTranscribe()` in `apiClient.ts`
+- **Config updated** — `env.ts` now has `TRANSLATION_SERVICE_URL`, `VOICE_TRANSCRIPTION_SERVICE_URL`
+- **Security fix** — Azure Speech key no longer leaked via `/health` endpoint
+- **Bug fixes** — Pydantic v2 `regex`→`pattern`, missing `BaseModel`/`base64` imports, Prometheus worker conflict
+- **VLM pipeline wired to LibreTranslate** — `vlmLanguageService.ts` now has `translateReportContent()` that translates VLM report body (technique/findings/impression/recommendation) after generation; `aiOrchestrator.ts` calls it for non-English report languages
+- **Backend Docker image rebuilt & pushed** — `sewa-backend:prod-20260723` → ACR (build `db1dc`, includes VLM translation, service clients, AI controller endpoints)
+- **Frontend Docker image rebuilt & pushed** — `sewa-frontend:prod-20260723` → ACR (build `db1de`, includes enterprise dictation in ui/VoiceDictation + RadiologistWorkspace)
+- **Deployment manifest files updated** — `backend-deployment-prod.yaml` and `frontend-deployment.yaml` reference new images
+- **Deploy script created** — `azure/k8s/deploy-update.ps1` one-command deploy
+
+### 🔜 Next
+- **Apply updated manifests to AKS** (blocked — cluster API endpoint unreachable from this machine; run `.\azure\k8s\deploy-update.ps1` from authorized network or Azure Cloud Shell)
+
+### Architecture
+```
+Frontend → apiClient.ts → Backend (Express) → aiController.ts → Translation/Voice services → AKS microservices
+                                                                  ↓
+                                                             LibreTranslate (port 8080)
+                                                             Voice-Transcription (port 8000)
+```
+
 ## ⚠️ Critical Constraints
 - **Zero Secrets**: Never commit `.env` or sensitive JSON keys.
 - **Dependencies**: Explain any new library additions in the chat first.

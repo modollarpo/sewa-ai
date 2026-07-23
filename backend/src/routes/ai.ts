@@ -21,6 +21,12 @@ r.use(authenticate);
 // ── AI Operations ─────────────────────────────────────────────
 r.post('/triage/:scanId', authorize('admin','superadmin','radiologist'), ctrl.triggerTriage);
 r.post('/ambient-dictation', authorize('admin','superadmin','radiologist', 'doctor'), ctrl.ambientDictation);
+r.post('/enterprise-transcribe', authorize('admin','superadmin','radiologist', 'doctor'), ctrl.enterpriseTranscribe);
+
+// ── Translation Services ───────────────────────────────────────
+r.post('/translate',      authenticate, ctrl.translateText);
+r.post('/detect-language', authenticate, ctrl.detectLanguage);
+r.get('/languages',        authenticate, ctrl.listLanguages);
 
 // Standard VLM (Full report)
 r.post('/vlm/:scanId',    authorize('admin','superadmin','radiologist'), ctrl.streamVLMReport); // Switched to streaming by default for better UX

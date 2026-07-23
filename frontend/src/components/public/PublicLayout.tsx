@@ -9,9 +9,14 @@ import { useSettingsStore } from '../../store/settingsStore';
 const LANGUAGES = [
   { code: 'en', label: 'EN', name: 'English' },
   { code: 'fr', label: 'FR', name: 'Français' },
+  { code: 'ar', label: 'AR', name: 'العربية' },
   { code: 'sw', label: 'SW', name: 'Kiswahili' },
   { code: 'yo', label: 'YO', name: 'Yorùbá' },
-  { code: 'ar', label: 'AR', name: 'العربية' },
+  { code: 'hi', label: 'HI', name: 'हिन्दी' },
+  { code: 'pt', label: 'PT', name: 'Português' },
+  { code: 'de', label: 'DE', name: 'Deutsch' },
+  { code: 'es', label: 'ES', name: 'Español' },
+  { code: 'it', label: 'IT', name: 'Italiano' },
 ] as const;
 
 const NAV_LINKS = [

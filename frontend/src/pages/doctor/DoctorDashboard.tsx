@@ -254,6 +254,8 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
   const [showSecondOpinion, setShowSecondOpinion] = useState(false);
   const [explaining, setExplaining] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
+  const [gradcamUrl, setGradcamUrl] = useState<string | null>(null);
+  const [shapValues, setShapValues] = useState<Record<string, number> | null>(null);
   const [correcting, setCorrecting] = useState(false);
   const [escalating, setEscalating] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -274,6 +276,13 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
         setExplaining(true);
         const res = await apiClient.get(`/ai/explain/${scanId}`);
         setExplanation(res.data.explanation);
+        // Store Grad-CAM and SHAP data if available from the AI result
+        // The AI service stores gradCamUrl and shapValues in the aIResult table
+        const aiRes = await apiClient.get(`/ai/result/${scanId}`);
+        if (aiRes.data) {
+          setGradcamUrl(aiRes.data.gradCamUrl || null);
+          setShapValues(aiRes.data.shapValues || null);
+        }
         setExplaining(false);
       } else if (type === 'correct') {
         await apiClient.post(`/ai/validate/${scanId}`, { status: 'REJECTED', correctedFinding: payload });
@@ -328,6 +337,55 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
             <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.2em] mb-3">AI Clinical Interpretation (Patient-Facing)</div>
             <p className="text-[#D0ECE6] leading-relaxed text-sm italic font-medium">"{explanation}"</p>
             <button onClick={() => setExplanation(null)} className="absolute top-4 right-4 text-[#408D7B] opacity-40 group-hover:opacity-100 transition-opacity">✕</button>
+          </div>
+        )}
+
+        {/* Grad-CAM / SHAP Visualization */}
+        {(gradcamUrl || shapValues) && (
+          <div className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-3xl space-y-6 shadow-xl">
+            <h3 className="text-[10px] font-black text-[#3A6055] uppercase tracking-[0.3em]">AI Explainability Visualization</h3>
+            
+            {gradcamUrl && (
+              <div className="space-y-3">
+                <div className="text-[9px] font-bold text-[#3A6055] uppercase mb-1">Grad-CAM Heatmap (Pixel-Level Attention)</div>
+                <div className="relative aspect-video bg-[#08160F] rounded-xl border border-[#1B3028] overflow-hidden">
+                  <img 
+                    src={gradcamUrl} 
+                    alt="Grad-CAM Heatmap" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-3 left-3 bg-[#05100D]/90 px-3 py-1.5 rounded-lg text-xs font-mono text-[#408D7B]">
+                    Grad-CAM Overlay • Right-click to save
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {shapValues && Object.keys(shapValues).length > 0 && (
+              <div className="space-y-3">
+                <div className="text-[9px] font-bold text-[#3A6055] uppercase mb-1">SHAP Feature Attribution (Per Clinical Variable)</div>
+                <div className="space-y-2">
+                  {Object.entries(shapValues).map(([feature, value]) => (
+                    <div key={feature} className="flex items-center gap-3 p-3 bg-[#08160F] rounded-xl border border-[#1B3028]">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium text-[#D0ECE6] truncate">{feature}</div>
+                        <div className="w-full h-2 bg-[#05100D] rounded-full overflow-hidden mt-1">
+                          <div 
+                            className="h-full bg-gradient-to-r from-[#1DBF73] via-[#408D7B] to-[#E08A20] rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(value * 100, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-[#408D7B] w-12 text-right">{value.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-[#1B3028] text-xs text-[#3A6055]">
+              <p><strong>Interpretation:</strong> The Grad-CAM heatmap shows which image regions most influenced the AI's decision. SHAP values indicate the relative contribution of each clinical feature to the prediction. Higher values = stronger influence.</p>
+            </div>
           </div>
         )}
 

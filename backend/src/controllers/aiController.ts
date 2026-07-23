@@ -5,6 +5,8 @@ import { prisma } from '../utils/prismaClient';
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
 import { triggerAITriage, generateVLMReport, generateICDCodes } from '../services/aiService';
+import { translationService } from '../services/translationService';
+import { voiceTranscriptionService } from '../services/voiceTranscriptionService';
 import { AppError } from '../utils/AppError';
 
 const AI_SERVICE_URLS: Record<string, string> = {
@@ -347,6 +349,8 @@ export const getExplanation = async (req: Request, res: Response, next: NextFunc
     const vlm      = (result as any).vlmFindings ?? '';
     const modality = (result as any).scan?.modality ?? 'scan';
     const bodyPart = (result as any).scan?.bodyPart ?? 'area';
+    const gradcamUrl = (result as any).gradcamUrl ?? null;
+    const shapValues = (result as any).shapValues ?? null;
 
     let urgencyText = 'Our clinical team has been informed and will review your results soon.';
     if (urgency === 'CRITICAL') {
@@ -364,7 +368,14 @@ export const getExplanation = async (req: Request, res: Response, next: NextFunc
       + ` ${urgencyText}`
       + vlmText;
 
-    res.json({ explanation, finding, urgency, confidence: conf });
+    res.json({ 
+      explanation, 
+      finding, 
+      urgency, 
+      confidence: conf,
+      gradcamUrl,
+      shapValues
+    });
   } catch (err) { next(err); }
 };
 
@@ -475,5 +486,50 @@ export const ambientDictation = async (req: Request, res: Response, next: NextFu
       confidence: 0.95,
       extractedTerms
     });
+  } catch (err) { next(err); }
+};
+
+export const translateText = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { text, source, target } = req.body;
+    if (!text || !target) {
+      throw new AppError('Missing required fields: text, target', 400);
+    }
+    const result = await translationService.translateText(text, source || 'en', target);
+    res.json(result);
+  } catch (err) { next(err); }
+};
+
+export const detectLanguage = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { text } = req.body;
+    if (!text) throw new AppError('Missing required field: text', 400);
+    const result = await translationService.detectLanguage(text);
+    res.json(result);
+  } catch (err) { next(err); }
+};
+
+export const listLanguages = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await translationService.listLanguages();
+    res.json(result);
+  } catch (err) { next(err); }
+};
+
+export const enterpriseTranscribe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { audioData, scanId, language, audioFormat } = req.body;
+    const { tenantId } = req.user!;
+    if (!audioData || !scanId) {
+      throw new AppError('Missing required fields: audioData, scanId', 400);
+    }
+    const result = await voiceTranscriptionService.transcribeAudio({
+      audio_data: audioData,
+      scan_id: scanId,
+      tenant_id: tenantId,
+      language: language || 'en',
+      audio_format: audioFormat || 'webm'
+    });
+    res.json(result);
   } catch (err) { next(err); }
 };

@@ -205,6 +205,10 @@ export const config = {
   AZURE_OPENAI_ENDPOINT: optional('AZURE_OPENAI_ENDPOINT'),
   AZURE_OPENAI_DEPLOYMENT_NAME: optional('AZURE_OPENAI_DEPLOYMENT_NAME', 'gpt-54-mini'),
   AZURE_OPENAI_WHISPER_DEPLOYMENT: optional('AZURE_OPENAI_WHISPER_DEPLOYMENT', 'whisper'),
+  // ── Enterprise AI Services (deployed on AKS) ────────────────
+  TRANSLATION_SERVICE_URL:     optional('TRANSLATION_SERVICE_URL',     IS_AZURE ? 'http://translation.sewa-ai:8080'       : 'http://localhost:8080'),
+  VOICE_TRANSCRIPTION_SERVICE_URL: optional('VOICE_TRANSCRIPTION_SERVICE_URL', IS_AZURE ? 'http://voice-transcription.sewa-ai:8000' : 'http://localhost:8000'),
+
   // ── Azure AI Speech (real-time transcription, F0 free tier) ──
   AZURE_SPEECH_KEY: optional('AZURE_SPEECH_KEY'),
   AZURE_SPEECH_REGION: optional('AZURE_SPEECH_REGION', 'uksouth'),

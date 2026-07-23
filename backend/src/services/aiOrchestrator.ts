@@ -27,7 +27,7 @@ import * as fhirService from './fhirService';
 import * as longitudinalService from './longitudinalService';
 import { dlq } from './dlqService';
 import { createAxiosInstance } from '../utils/axiosInstance';
-import { buildVLMSystemPrompt, translateUrgency, type SupportedLanguage } from './vlmLanguageService';
+import { buildVLMSystemPrompt, translateReportContent, translateUrgency, type SupportedLanguage } from './vlmLanguageService';
 import { clinicalRulesEngine } from './roadmap/clinicalRulesEngine';
 import { strokeCodeService, type StrokeCodeType } from './roadmap/strokeCodeService';
 
@@ -390,6 +390,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           vlmImpression:       `${pathResult.primary_finding} (${(pathResult.confidence * 100).toFixed(0)}% confidence)` +
                                 (pathResult.gleason_grade ? `. ${pathResult.gleason_grade}.` : '') +
                                 (pathResult.ki67_estimate != null ? ` Ki67 index: ${(pathResult.ki67_estimate * 100).toFixed(0)}%.` : ''),
+          gradcamUrl: (pathResult as any).gradCamUrl,
+          shapValues: (pathResult as any).shapValues,
         },
       });
 
@@ -492,6 +494,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           vlmFindings:         mgResult.recommendation,
           vlmImpression:       `${mgResult.primary_finding} (BI-RADS: ${mgResult.birads_category ?? 'N/A'})` +
                                 ` — ${(mgResult.confidence * 100).toFixed(0)}% confidence`,
+          gradcamUrl: (mgResult as any).gradCamUrl,
+          shapValues: (mgResult as any).shapValues,
         },
       });
 
@@ -587,6 +591,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           vlmFindings:         retResult.recommendation,
           vlmImpression:       `${retResult.primary_finding} (DR grade: ${retResult.dr_grade ?? 'N/A'})` +
                                 ` — ${(retResult.confidence * 100).toFixed(0)}% confidence`,
+          gradcamUrl: (retResult as any).gradCamUrl,
+          shapValues: (retResult as any).shapValues,
         },
       });
 
@@ -732,6 +738,19 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     logger.info(`[VLM] ${scanId}: report in ${vlm.inferenceMs}ms`);
     stageTimings.vlm = vlm.inferenceMs;
 
+    // ── Post-process: translate report content if VLM returned English ────
+    if (reportLanguage !== 'en') {
+      const translated = await translateReportContent(
+        { technique: vlm.technique, findings: vlm.findings, impression: vlm.impression, recommendation: vlm.recommendation },
+        reportLanguage,
+      );
+      vlm.technique      = translated.technique;
+      vlm.findings       = translated.findings;
+      vlm.impression     = translated.impression;
+      vlm.recommendation = translated.recommendation;
+      vlm.language       = reportLanguage;
+    }
+
     // ──────────────────────────────────────────────────────────────────────
     // STAGE 3: Metacognition — rule-based, ~50ms on CPU (pure Python, no model)
     // ──────────────────────────────────────────────────────────────────────
@@ -797,6 +816,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         longitudinalContext,
         vlmFindings:   vlm.findings,
         vlmImpression: vlm.impression,
+        gradcamUrl: triage.gradCamUrl,
+        shapValues: triage.shapValues,
       },
     });
 

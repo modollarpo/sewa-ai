@@ -142,6 +142,46 @@ const URGENCY_TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = 
   ar: { CRITICAL: 'حرج',       URGENT: 'عاجل',    NORMAL: 'طبيعي',    ROUTINE: 'روتيني'   },
 };
 
+// ── LibreTranslate-backed translation ────────────────────────────────────
+import { translationService } from './translationService';
+import { logger } from '../utils/logger';
+
+export interface ReportContent {
+  technique: string;
+  findings: string;
+  impression: string;
+  recommendation: string;
+}
+
+/**
+ * Translates VLM report content to the target language using LibreTranslate.
+ * Falls back to original content on any error.
+ */
+export async function translateReportContent(
+  content: ReportContent,
+  targetLang: string,
+  sourceLang: string = 'en',
+): Promise<ReportContent> {
+  if (targetLang === sourceLang || !targetLang || targetLang === 'en') return content;
+
+  const lang = (targetLang as SupportedLanguage) in SUPPORTED_LANGUAGES ? targetLang : 'en';
+  if (lang === 'en') return content;
+
+  const translated: ReportContent = { ...content };
+
+  for (const field of ['technique', 'findings', 'impression', 'recommendation'] as const) {
+    if (!content[field]) continue;
+    try {
+      const result = await translationService.translateText(content[field], sourceLang, lang);
+      translated[field] = result.translatedText;
+    } catch (err) {
+      logger.warn(`[vlmLanguageService] translateReportContent.${field} failed: ${err}`);
+    }
+  }
+
+  return translated;
+}
+
 // ── Public API ───────────────────────────────────────────────────────────
 
 /**

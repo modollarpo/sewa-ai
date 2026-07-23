@@ -242,10 +242,53 @@ app.get('/health', async (_req, res) => {
     services: { 
       database: dbOk, 
       redis: redisOk, 
-      triage_ai: triageOk,
+triage_ai: triageOk,
       socket: io.engine.clientsCount 
     },
   });
+});
+
+// ── Public Service Status (for status.sewaxai.health page - no auth required) ──
+app.get('/api/v1/status/services', async (_req, res) => {
+  const timeoutPromise = new Promise<false>((resolve) => setTimeout(() => resolve(false), 6000));
+  const safeCheck = (p: Promise<any>) => Promise.race([p, timeoutPromise]);
+
+  const services = [
+    { name: 'API', url: `${config.APP_URL}/health`, group: 'Core' },
+    { name: 'Triage Engine', url: `${config.AI_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'Uncertainty Engine', url: `${config.UNCERTAINTY_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'VLM Report Generator', url: `${config.VLM_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'Metacognition Engine', url: `${config.METACOGNITION_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'Explainability (XAI)', url: `${config.UNCERTAINTY_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'Pathology Engine', url: `${config.PATHOLOGY_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'Mammography Engine', url: `${config.MAMMOGRAPHY_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'Retinal Engine', url: `${config.RETINAL_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'Federated Learning Orchestrator', url: `${config.FL_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'Continuous Learning Engine', url: `${config.CL_SERVICE_URL}/health`, group: 'AI Pipeline' },
+    { name: 'FHIR R4 Interface', url: `${config.APP_URL}/api/v1/fhir/health`, group: 'Integrations' },
+    { name: 'Database (PostgreSQL)', url: `${config.APP_URL}/health`, group: 'Infrastructure' },
+    { name: 'Cache (Redis)', url: `${config.APP_URL}/health`, group: 'Infrastructure' },
+  ];
+
+  const results = await Promise.allSettled(
+    services.map(async (svc) => {
+      try {
+        const r = await fetch(svc.url, { method: 'GET', signal: AbortSignal.timeout(6000) });
+        if (r.ok) {
+          const data = await r.json().catch(() => ({}));
+          const svcStatus = data?.status ?? 'operational';
+          return { name: svc.name, group: svc.group, status: (svcStatus === 'operational' || svcStatus === 'healthy') ? 'operational' : svcStatus === 'degraded' ? 'degraded' : 'down' };
+        } else {
+          return { name: svc.name, group: svc.group, status: 'degraded' };
+        }
+      } catch {
+        return { name: svc.name, group: svc.group, status: 'down' };
+      }
+    })
+  );
+
+  const servicesStatus = results.map(r => r.status === 'fulfilled' ? r.value : { name: 'Unknown', group: 'Unknown', status: 'down' });
+  res.json({ services: servicesStatus, timestamp: new Date().toISOString() });
 });
 
 // ── API Routes ─────────────────────────────────────────────────

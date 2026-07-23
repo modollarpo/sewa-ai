@@ -217,16 +217,87 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
                 </div>
               </div>
             </div>
-            <div className="lg:w-1/2 bg-[#08160F] p-8 rounded-[2rem] border border-[#1B3028] shadow-2xl">
-               <div className="aspect-video bg-[#0C1D17] rounded-xl border border-[#1B3028] flex items-center justify-center relative overflow-hidden">
-                 <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-                 <div className="text-[#408D7B] font-mono text-sm">[ Grad-CAM / SHAP Visualization Placeholder ]</div>
-               </div>
-                <div className="mt-6 flex items-center gap-4 px-4">
-                  <ConfidenceIndicator value={0.974} size="sm" />
-                  <UncertaintyIndicator value={0.98} showLabel={true} />
+<div className="lg:w-1/2 bg-[#08160F] p-8 rounded-[2rem] border border-[#1B3028] shadow-2xl">
+                <div className="aspect-video bg-[#0C1D17] rounded-xl border border-[#1B3028] flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+                  <svg viewBox="0 0 600 340" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                      <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="8" />
+                      </filter>
+                      <radialGradient id="heatmapCore" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#FF0000" stopOpacity="0.9" />
+                        <stop offset="30%" stopColor="#FF4000" stopOpacity="0.7" />
+                        <stop offset="60%" stopColor="#FFD700" stopOpacity="0.5" />
+                        <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+                      </radialGradient>
+                      <linearGradient id="brainBase" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#0A1A14" />
+                        <stop offset="50%" stopColor="#0C1D17" />
+                        <stop offset="100%" stopColor="#08160F" />
+                      </linearGradient>
+                    </defs>
+                    
+                    {/* Base brain MRI silhouette */}
+                    <ellipse cx="300" cy="170" rx="220" ry="140" fill="url(#brainBase)" stroke="#1B3028" strokeWidth="3" filter="url(#blur)" />
+                    <ellipse cx="300" cy="170" rx="210" ry="130" fill="none" stroke="#1B3028" strokeWidth="1.5" opacity="0.6" />
+                    
+                    {/* Ventricle / sulci hints */}
+                    <ellipse cx="260" cy="140" rx="35" ry="25" fill="none" stroke="#1B3028" strokeWidth="1" opacity="0.4" />
+                    <ellipse cx="340" cy="140" rx="35" ry="25" fill="none" stroke="#1B3028" strokeWidth="1" opacity="0.4" />
+                    <path d="M220 180 Q250 160 280 170" fill="none" stroke="#1B3028" strokeWidth="1" opacity="0.3" />
+                    <path d="M320 170 Q350 160 380 170" fill="none" stroke="#1B3028" strokeWidth="1" opacity="0.3" />
+                    
+                    {/* Grad-CAM Heatmap Overlay - right frontal region */}
+                    <ellipse cx="360" cy="130" rx="55" ry="45" fill="url(#heatmapCore)" filter="url(#blur)" opacity="0.85" />
+                    <ellipse cx="360" cy="130" rx="65" ry="55" fill="url(#heatmapCore)" filter="url(#blur)" opacity="0.4" />
+                    <ellipse cx="360" cy="130" rx="80" ry="70" fill="url(#heatmapCore)" filter="url(#blur)" opacity="0.15" />
+                    
+                    {/* Secondary attention region */}
+                    <ellipse cx="220" cy="200" rx="25" ry="20" fill="url(#heatmapCore)" filter="url(#blur)" opacity="0.3" />
+                    
+                    {/* Attention indicator lines */}
+                    <line x1="360" y1="50" x2="360" y2="80" stroke="#FF4000" strokeWidth="2" strokeDasharray="8,4" opacity="0.8" />
+                    <text x="360" y="40" textAnchor="middle" fill="#FFD700" fontSize="11" fontWeight="bold" fontFamily="monospace">HIGHEST ATTENTION</text>
+                    
+                    <line x1="220" y1="280" x2="220" y2="310" stroke="#FFD700" strokeWidth="1.5" strokeDasharray="6,6" opacity="0.6" />
+                    <text x="220" y="320" textAnchor="middle" fill="#FFD700" fontSize="9" fontWeight="600" fontFamily="monospace" opacity="0.7">SECONDARY</text>
+                    
+                    {/* Color legend */}
+                    <g transform="translate(40, 240)">
+                      <rect x="0" y="0" width="140" height="60" rx="6" fill="#08160F" stroke="#1B3028" strokeWidth="1" opacity="0.95" />
+                      <text x="70" y="14" textAnchor="middle" fill="#D0ECE6" fontSize="10" fontWeight="bold" fontFamily="monospace">ATTENTION MAP</text>
+<linearGradient id="legendGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0" />
+                          <stop offset="20%" stopColor="#FFD700" stopOpacity="0.3" />
+                          <stop offset="50%" stopColor="#FF4000" stopOpacity="0.6" />
+                          <stop offset="100%" stopColor="#FF0000" stopOpacity="0.9" />
+                      </linearGradient>
+                      <rect x="20" y="20" width="12" height="30" fill="url(#legendGrad)" />
+                      <text x="10" y="55" textAnchor="middle" fill="#6FA898" fontSize="7" fontFamily="monospace">LOW</text>
+                      <text x="36" y="55" textAnchor="middle" fill="#FFD700" fontSize="7" fontWeight="bold" fontFamily="monospace">HIGH</text>
+                    </g>
+                    
+                    {/* SHAP feature bars - bottom right */}
+                    <g transform="translate(420, 200)">
+                      <rect x="0" y="0" width="140" height="110" rx="6" fill="#08160F" stroke="#1B3028" strokeWidth="1" opacity="0.9" />
+                      <text x="70" y="16" textAnchor="middle" fill="#408D7B" fontSize="9" fontWeight="bold" fontFamily="monospace">SHAP VALUES</text>
+                      <g fontSize="8" fontFamily="monospace" fill="#6FA898">
+                        <text x="10" y="34">Texture variance ████████████ 0.31</text>
+                        <text x="10" y="48">Edge density    ██████████   0.27</text>
+                        <text x="10" y="62">Intensity skew  ████████     0.22</text>
+                        <text x="10" y="76">Symmetry dev.   ██████       0.18</text>
+                        <text x="10" y="90">Ventricle size  ████         0.14</text>
+                      </g>
+                      <text x="130" y="100" textAnchor="end" fill="#408D7B" fontSize="7" fontFamily="monospace">Σ = 1.12</text>
+                    </g>
+                  </svg>
                 </div>
-            </div>
+                 <div className="mt-6 flex items-center gap-4 px-4">
+                   <ConfidenceIndicator value={0.974} size="sm" />
+                   <UncertaintyIndicator value={0.98} showLabel={true} />
+                 </div>
+             </div>
           </div>
         </div>
       </section>

@@ -143,3 +143,25 @@ export async function updateSecondOpinion(id: string, data: {
   return res.data;
 }
 
+// ── Enterprise Translation ─────────────────────────────────────
+export async function translateText(text: string, target: string, source?: string) {
+  const res = await apiClient.post('/ai/translate', { text, target, source });
+  return res.data;
+}
+
+export async function detectLanguage(text: string) {
+  const res = await apiClient.post('/ai/detect-language', { text });
+  return res.data;
+}
+
+export async function listLanguages() {
+  const res = await apiClient.get('/ai/languages');
+  return res.data;
+}
+
+// ── Enterprise Voice Transcription ──────────────────────────────
+export async function enterpriseTranscribe(audioData: string, scanId: string, language?: string) {
+  const res = await apiClient.post('/ai/enterprise-transcribe', { audioData, scanId, language });
+  return res.data;
+}
+

@@ -12,6 +12,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+import { enterpriseTranscribe } from '../../services/apiClient';
 import { dashboardColors as C } from '../../design-system/tokens';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
@@ -27,6 +28,8 @@ interface VoiceDictationProps {
   onStructuredReport?: (report: StructuredReport) => void;
   lang?: string;
   compact?: boolean;  // true = minimal button for header toolbar
+  scanId?: string;    // required for enterprise transcription
+  enterprise?: boolean; // use backend enterprise transcription instead of browser Speech API
 }
 
 // ── Section routing keywords ──────────────────────────────────────────────────
@@ -100,18 +103,92 @@ function SectionBadge({ section }: { section: keyof StructuredReport }) {
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
-export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US', compact = false }: VoiceDictationProps) {
+export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US', compact = false, scanId, enterprise = false }: VoiceDictationProps) {
   const [isListening, setIsListening] = useState(false);
   const [report, setReport] = useState<StructuredReport>({ technique: '', findings: '', impression: '', recommendation: '' });
   const [interim, setInterim] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [log, setLog] = useState<Array<{ text: string; section: keyof StructuredReport; ts: string }>>([]);
   const [expanded, setExpanded] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const logEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize speech recognition
+  // ── Helper: classify enterprise transcription result ────────────────────
+  const processTranscriptionResult = useCallback((text: string) => {
+    const section = classifySentence(text);
+    const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    setReport(prev => {
+      const updated = {
+        ...prev,
+        [section]: prev[section] ? `${prev[section]} ${text}` : text,
+      };
+      onStructuredReport?.(updated);
+      return updated;
+    });
+    setLog(prev => [...prev, { text, section, ts }]);
+    onTranscript?.(text);
+  }, [onStructuredReport, onTranscript]);
+
+  // ── Enterprise: MediaRecorder → backend transcription ──────────────────
+  const startEnterpriseRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+
+      recorder.onstop = async () => {
+        setIsProcessing(true);
+        try {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = async () => {
+            const base64Audio = reader.result?.toString().split(',')[1];
+            if (!base64Audio) return;
+            const result = await enterpriseTranscribe(base64Audio, scanId!);
+            processTranscriptionResult(result.transcription);
+          };
+        } catch (err: any) {
+          setErrorMsg(err.message || 'Enterprise transcription failed');
+          setTimeout(() => setErrorMsg(''), 4000);
+        } finally {
+          setIsProcessing(false);
+        }
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsListening(true);
+      setExpanded(true);
+      setErrorMsg('');
+    } catch {
+      setErrorMsg('Microphone access denied.');
+      setTimeout(() => setErrorMsg(''), 4000);
+    }
+  }, [scanId, processTranscriptionResult]);
+
+  const stopEnterpriseRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isListening) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+      setIsListening(false);
+      setInterim('');
+    }
+  }, [isListening]);
+
+  // Initialize speech recognition (browser Speech API — used when enterprise mode is off)
   useEffect(() => {
+    if (enterprise) return; // skip SpeechRecognition in enterprise mode
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
@@ -137,25 +214,7 @@ export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US
       setInterim(interimText);
 
       if (finalText.trim()) {
-        const text = finalText.trim();
-        const section = classifySentence(text);
-        const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-        // Append to structured report
-        setReport(prev => {
-          const updated = {
-            ...prev,
-            [section]: prev[section] ? `${prev[section]} ${text}` : text,
-          };
-          onStructuredReport?.(updated);
-          return updated;
-        });
-
-        // Add to transcript log
-        setLog(prev => [...prev, { text, section, ts }]);
-
-        // Legacy callback
-        onTranscript?.(text);
+        processTranscriptionResult(finalText.trim());
       }
     };
 
@@ -176,7 +235,7 @@ export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US
     };
 
     recognitionRef.current = rec;
-  }, [lang]);
+  }, [lang, enterprise, processTranscriptionResult]);
 
   // Auto-scroll log
   useEffect(() => {
@@ -184,6 +243,21 @@ export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US
   }, [log]);
 
   const toggle = useCallback(() => {
+    if (enterprise) {
+      if (!scanId) {
+        setErrorMsg('No scan selected for enterprise transcription.');
+        setTimeout(() => setErrorMsg(''), 4000);
+        return;
+      }
+      if (isListening) {
+        stopEnterpriseRecording();
+      } else {
+        startEnterpriseRecording();
+      }
+      return;
+    }
+
+    // Browser Speech API mode
     if (!recognitionRef.current) {
       setErrorMsg('Speech recognition not supported in this browser. Use Chrome or Edge.');
       setTimeout(() => setErrorMsg(''), 4000);
@@ -201,7 +275,7 @@ export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US
         recognitionRef.current = null; // reset so next call recreates
       }
     }
-  }, [isListening]);
+  }, [isListening, enterprise, scanId, startEnterpriseRecording, stopEnterpriseRecording]);
 
   const clearAll = () => {
     setReport({ technique: '', findings: '', impression: '', recommendation: '' });
@@ -238,9 +312,9 @@ export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US
             <>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.critical, animation: 'aci-pulse 1s infinite' }} />
               <Waveform active={true} />
-              ACI Active
+              {isProcessing ? 'Transcribing...' : enterprise ? 'Enterprise ●' : 'ACI Active'}
             </>
-          ) : '🎙 Ambient Scribe'}
+          ) : enterprise ? '🎙 Enterprise Scribe' : '🎙 Ambient Scribe'}
           <style>{`@keyframes aci-pulse{0%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0.5}100%{transform:scale(1);opacity:1}}`}</style>
         </button>
       </div>
@@ -262,18 +336,28 @@ export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US
         display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
         background: C.bg2, borderBottom: `1px solid ${C.border}`,
       }}>
-        <Waveform active={isListening} />
+        <Waveform active={isListening && !enterprise} />
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 10, fontWeight: 800, color: isListening ? C.critical : C.brand, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            {isListening ? '● RECORDING — Ambient Clinical Intelligence' : '🎙 Ambient Scribe (ACI)'}
+            {isProcessing ? '⟳ TRANSCRIBING...'
+              : isListening && enterprise ? '● RECORDING — Enterprise Transcription'
+              : isListening ? '● RECORDING — Ambient Clinical Intelligence'
+              : enterprise ? '🎙 Enterprise Scribe'
+              : '🎙 Ambient Scribe (ACI)'}
           </div>
-          {isListening && interim && (
+          {isListening && interim && !enterprise && (
             <div style={{ fontSize: 10, color: C.textMd, fontStyle: 'italic', marginTop: 2, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               "{interim}"
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          {scanId && (
+            <label style={{ fontSize: 8, color: enterprise ? C.brand : C.textLo, display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer', userSelect: 'none' }}>
+              <input type="checkbox" checked={enterprise} onChange={() => {}} style={{ pointerEvents: 'none' }} />
+              Enterprise
+            </label>
+          )}
           {log.length > 0 && (
             <button onClick={clearAll} title="Clear all transcripts" style={{
               padding: '3px 8px', fontSize: 9, borderRadius: 6, cursor: 'pointer', fontWeight: 600,
@@ -283,15 +367,17 @@ export function VoiceDictation({ onTranscript, onStructuredReport, lang = 'en-US
           )}
           <button
             onClick={toggle}
+            disabled={isProcessing}
             style={{
               padding: '4px 12px', borderRadius: 20, border: `1px solid ${isListening ? `${C.critical}60` : `${C.brand}40`}`,
               background: isListening ? `${C.critical}18` : `${C.brand}18`,
               color: isListening ? C.critical : C.brand,
-              fontSize: 10, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.04em',
+              fontSize: 10, fontWeight: 800, cursor: isProcessing ? 'not-allowed' : 'pointer', letterSpacing: '0.04em',
+              opacity: isProcessing ? 0.5 : 1,
               transition: 'all 0.2s ease',
             }}
           >
-            {isListening ? '⏹ Stop' : '● Record'}
+            {isProcessing ? '...' : isListening ? '⏹ Stop' : '● Record'}
           </button>
         </div>
       </div>
