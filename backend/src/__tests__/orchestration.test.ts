@@ -69,13 +69,14 @@ describe('AI Orchestration Pipeline — Integration', () => {
       where:  { id: TENANT_ID },
       update: {},
       create: {
-        id:        TENANT_ID,
-        name:      'Test Clinic',
-        slug:      'test-clinic-orch',
-        subdomain: 'test-clinic-orch',
-        region:    'uk',
-        currency:  'GBP',
-        plan:      'hospital',
+        id:             TENANT_ID,
+        name:           'Test Clinic',
+        slug:           'test-clinic-orch',
+        subdomain:      'test-clinic-orch',
+        region:         'uk',
+        currency:       'GBP',
+        plan:           'hospital',
+        stripeAccountId: 'acct_test_123',
       },
     });
 

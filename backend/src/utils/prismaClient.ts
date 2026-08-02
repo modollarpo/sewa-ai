@@ -33,8 +33,9 @@ export const prisma = basePrisma.$extends({
           }
           
           // Enforce Postgres RLS at the database layer using a connection-bound transaction
+          // Use $executeRaw with proper parameter binding
           const [, result] = await basePrisma.$transaction([
-            basePrisma.$executeRawUnsafe(`SET LOCAL app.current_tenant_id = $1`, tenantId as string),
+            basePrisma.$executeRaw`SET LOCAL app.current_tenant_id = ${tenantId}`,
             query(anyArgs)
           ]);
           return result;

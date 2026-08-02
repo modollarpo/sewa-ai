@@ -20,7 +20,8 @@ describe('Enterprise Full Tenant Isolation (RLS) — All Models', () => {
         subdomain: 'tenantafull',
         region: 'uk',
         currency: 'GBP',
-        plan: 'enterprise'
+        plan: 'enterprise',
+        stripeAccountId: 'acct_test_tenant_a'
       }
     });
     tenantB = await prisma.tenant.create({
@@ -31,7 +32,8 @@ describe('Enterprise Full Tenant Isolation (RLS) — All Models', () => {
         subdomain: 'tenantbfull',
         region: 'ng',
         currency: 'NGN',
-        plan: 'enterprise'
+        plan: 'enterprise',
+        stripeAccountId: 'acct_test_tenant_b'
       }
     });
 
