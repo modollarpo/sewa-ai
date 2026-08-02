@@ -1,4 +1,3 @@
-# services/clinical-verification/package.json
 {
   "name": "sewa-backend-services-clinical-verification",
   "version": "2.4.1",

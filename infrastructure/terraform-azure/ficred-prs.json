@@ -1,0 +1,7 @@
+{
+  "name": "github-prs",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:modollarpo/sewa-ai:pull_request",
+  "audiences": ["api://AzureADTokenExchange"],
+  "description": "GitHub Actions - pull requests"
+}
