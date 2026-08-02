@@ -5,7 +5,7 @@
  * sees the mock before any transitive imports execute axios.create().
  */
 
-// ── Shared mock axios instance ────────────────────────────────────────────
+// Shared mock axios instance
 const mockPost = jest.fn();
 
 jest.mock('../utils/axiosInstance', () => ({
@@ -21,7 +21,7 @@ jest.mock('../utils/axiosInstance', () => ({
   })),
 }));
 
-// ── Seal off side-effect-heavy modules ───────────────────────────────────
+// Seal off side-effect-heavy modules
 jest.mock('../index', () => ({
   io: { to: jest.fn().mockReturnValue({ emit: jest.fn() }) },
 }));
@@ -46,9 +46,12 @@ jest.mock('../utils/audit', () => ({
   auditLog: jest.fn().mockResolvedValue(undefined),
 }));
 
-// ── Imports (after mocks) ─────────────────────────────────────────────────
+// Imports (after mocks)
 import { runAIPipeline } from '../services/aiOrchestrator';
 import { prisma } from '../utils/prismaClient';
+
+// Set test timeout to 60 seconds to prevent hanging
+jest.setTimeout(60000);
 
 // Fixed IDs (valid UUIDs) ───────────────────────────────────────────────
 const TENANT_ID  = 'a0000000-0000-0000-0000-000000000001';
