@@ -4,73 +4,76 @@ import { BrowserRouter } from 'react-router-dom';
 import { I18nProvider } from '../i18n/I18nContext';
 import App from '../App';
 import { useAuthStore } from '../store/authStore';
+import { vi } from 'vitest';
 
-jest.mock('../services/apiClient', () => ({
+vi.mock('../services/apiClient', () => ({
   apiClient: {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
-jest.mock('../services/socketService', () => ({
+vi.mock('../services/socketService', () => ({
   socketService: {
-    connect: jest.fn(),
-    disconnect: jest.fn(),
-    on: jest.fn(),
-    emit: jest.fn(),
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    on: vi.fn(),
+    emit: vi.fn(),
   },
 }));
 
-jest.mock('../hooks/useTenant', () => ({
+vi.mock('../hooks/useTenant', () => ({
   useTenant: () => ({ isLoaded: true }),
 }));
 
-jest.mock('../store/scanStore', () => ({
+vi.mock('../store/scanStore', () => ({
   useScanStore: Object.assign(
-    jest.fn(() => ({
+    vi.fn(() => ({
       criticalAlerts: [],
-      fetchWorklist: jest.fn(),
-      handleAIResult: jest.fn(),
-      updateScanStatus: jest.fn(),
+      fetchWorklist: vi.fn(),
+      handleAIResult: vi.fn(),
+      updateScanStatus: vi.fn(),
     })),
-    { getState: jest.fn(() => ({
-      handleAIResult: jest.fn(),
-      updateScanStatus: jest.fn(),
-      fetchWorklist: jest.fn(),
-    })) }
+    {
+      getState: vi.fn(() => ({
+        handleAIResult: vi.fn(),
+        updateScanStatus: vi.fn(),
+        fetchWorklist: vi.fn(),
+      })),
+    }
   ),
 }));
 
-jest.mock('../store/notificationStore', () => ({
-  useNotificationStore: jest.fn(() => ({
+vi.mock('../store/notificationStore', () => ({
+  useNotificationStore: vi.fn(() => ({
     notifications: [],
-    addNotification: jest.fn(),
-    markRead: jest.fn(),
+    addNotification: vi.fn(),
+    markRead: vi.fn(),
   })),
 }));
 
-jest.mock('../store/settingsStore', () => ({
-  useSettingsStore: jest.fn(() => ({
+vi.mock('../store/settingsStore', () => ({
+  useSettingsStore: vi.fn(() => ({
     region: 'UK',
     lang: 'en',
-    setLang: jest.fn(),
-    setRegion: jest.fn(),
+    setLang: vi.fn(),
+    setRegion: vi.fn(),
   })),
 }));
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   })),
 });
 
