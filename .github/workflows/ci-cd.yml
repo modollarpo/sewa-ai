@@ -74,7 +74,7 @@ jobs:
         working-directory: backend
       - run: npx prisma migrate deploy
         working-directory: backend
-      - run: npm test -- --passWithNoTests
+      - run: npm test -- --passWithNoTests --forceExit
         working-directory: backend
 
   # ── Frontend Checks ──

@@ -72,7 +72,7 @@ describe('Enterprise Tenant Isolation (RLS)', () => {
 
   afterAll(async () => {
     // Clean up
-    await prisma.$executeRawUnsafe(`SET LOCAL app.current_tenant_id = ''`); // reset session
+    await prisma.$executeRaw`SELECT set_config('app.current_tenant_id', '', true)`; // reset session
     await prisma.scan.deleteMany({ where: { id: scanA.id } });
     await prisma.patient.deleteMany({ where: { tenantId: tenantA.id } });
     await prisma.user.deleteMany({ where: { tenantId: tenantA.id } });

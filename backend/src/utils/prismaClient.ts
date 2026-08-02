@@ -33,9 +33,10 @@ export const prisma = basePrisma.$extends({
           }
           
           // Enforce Postgres RLS at the database layer using a connection-bound transaction
-          // Use $executeRaw with proper parameter binding
+          // Postgres does not allow bind parameters in SET LOCAL — use set_config() instead,
+          // which accepts parameters and sets the value for the current transaction.
           const [, result] = await basePrisma.$transaction([
-            basePrisma.$executeRaw`SET LOCAL app.current_tenant_id = ${tenantId}`,
+            basePrisma.$executeRaw`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`,
             query(anyArgs)
           ]);
           return result;
