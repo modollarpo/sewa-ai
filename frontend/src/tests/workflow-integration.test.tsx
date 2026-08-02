@@ -1,6 +1,5 @@
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from 'react-router-dom';
 import { I18nProvider } from '../i18n/I18nContext';
 import App from '../App';
 import { useAuthStore } from '../store/authStore';
@@ -86,13 +85,11 @@ const createTestClient = () => new QueryClient({
 
 function TestApp({ userData }: { userData?: any }) {
   return (
-    <BrowserRouter>
-      <I18nProvider>
-        <QueryClientProvider client={createTestClient()}>
-          <App />
-        </QueryClientProvider>
-      </I18nProvider>
-    </BrowserRouter>
+    <I18nProvider>
+      <QueryClientProvider client={createTestClient()}>
+        <App />
+      </QueryClientProvider>
+    </I18nProvider>
   );
 }
 
