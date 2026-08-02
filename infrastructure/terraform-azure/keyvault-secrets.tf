@@ -42,15 +42,6 @@ resource "azurerm_key_vault_secret" "db_password" {
   depends_on   = [azurerm_key_vault_access_policy.deployer]
 }
 
-# ── Redis Secret ───────────────────────────────────────────────
-resource "azurerm_key_vault_secret" "redis_url" {
-  name         = "sewa-redis-url"
-  value        = "rediss://:${azurerm_redis_cache.redis.primary_access_key}@${azurerm_redis_cache.redis.hostname}:6380/0"
-  key_vault_id = azurerm_key_vault.main.id
-  tags         = { category = "cache" }
-  depends_on   = [azurerm_key_vault_access_policy.deployer]
-}
-
 # ── JWT Secrets ────────────────────────────────────────────────
 resource "azurerm_key_vault_secret" "jwt_secret" {
   name         = "sewa-jwt-secret"
@@ -178,8 +169,8 @@ resource "azuread_service_principal" "fhir_client" {
 }
 
 resource "azuread_application_password" "fhir_client" {
-  application_id  = azuread_application.fhir_client.id
-  display_name    = "sewa-ai-fhir-secret"
+  application_id    = azuread_application.fhir_client.id
+  display_name      = "sewa-ai-fhir-secret"
   end_date_relative = "17520h" # 2 years
 }
 

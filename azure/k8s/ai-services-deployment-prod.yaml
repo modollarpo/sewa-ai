@@ -60,7 +60,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-triage:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-triage:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -147,7 +147,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-vlm-report:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-vlm-report:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8001
@@ -250,7 +250,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-pathology:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-pathology:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8002
@@ -337,7 +337,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-uncertainty:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-uncertainty:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8009
@@ -423,7 +423,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-federated:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-federated:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8004
@@ -509,7 +509,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-continuous:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-continuous:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8005
@@ -595,7 +595,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-metacognition:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-metacognition:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8003
@@ -688,7 +688,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-mammography:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-mammography:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8007
@@ -782,7 +782,7 @@ spec:
           mountPath: /tmp
         - name: models
           mountPath: /models
-        image: "sewaaiproductionacr.azurecr.io/sewa-ai-retinal:prod-20260712-113620"
+        image: "sewaaieuprodacr.azurecr.io/sewa-ai-retinal:prod-20260712-113620"
         imagePullPolicy: Always
         ports:
         - containerPort: 8008

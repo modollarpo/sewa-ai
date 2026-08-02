@@ -25,9 +25,9 @@ GITHUB_ORG=""
 GITHUB_REPO="sewa-ai"
 ENV_NAME="production"
 APP_NAME="sewa-ai-github-actions"
-RESOURCE_GROUP="sewa-ai-production-rg"
-ACR_NAME="sewaaiproductionacr"
-AKS_NAME="sewa-ai-production-aks"
+RESOURCE_GROUP="sewa-ai-prod-rg"
+ACR_NAME="sewaaieuprodacr"
+AKS_NAME="sewa-ai-prod-eu-aks"
 
 # ── Parse flags ───────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do

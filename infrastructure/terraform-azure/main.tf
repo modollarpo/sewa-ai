@@ -4,10 +4,9 @@
 # Resources provisioned:
 #   - Resource Group
 #   - VNet + Subnets + NSGs + Private DNS  (see networking.tf)
-#   - AKS (system + GPU + spot node pools)
+#   - AKS (system + AI + spot node pools)
 #   - Azure Container Registry Premium
 #   - PostgreSQL 15 Flexible Server (private, ZoneRedundant HA, geo-backup)
-#   - Azure Cache for Redis 7 Premium (private)
 #   - Azure Healthcare FHIR R4 Service
 #   - Azure Blob Storage (DICOM — GRS, 7-year lifecycle)
 #   - Azure Service Bus Premium (triage queue + HL7 queue + notifications queue)
@@ -28,16 +27,13 @@ terraform {
   required_version = ">= 1.6.0"
   required_providers {
     azurerm = { source = "hashicorp/azurerm", version = "~> 3.85" }
-    azuread = { source = "hashicorp/azuread",  version = "~> 2.47" }
-    random  = { source = "hashicorp/random",   version = "~> 3.6"  }
+    azuread = { source = "hashicorp/azuread", version = "~> 2.47" }
+    random  = { source = "hashicorp/random", version = "~> 3.6" }
   }
 
-  # Remote state — bootstrapped by scripts/bootstrap-tfstate.sh
-  backend "azurerm" {
-    resource_group_name  = "sewa-ai-tfstate-rg"
-    storage_account_name = "sewaaitfstate"
-    container_name       = "tfstate"
-    key                  = "sewa-ai.tfstate"
+  # Local state for initial deployment; migrate to remote backend after first apply
+  backend "local" {
+    path = "terraform.tfstate"
   }
 }
 
@@ -56,12 +52,14 @@ provider "azurerm" {
 data "azurerm_client_config" "current" {}
 
 locals {
-  name     = "sewa-ai"
-  env      = var.environment
-  location = var.azure_region
+  name      = "sewa-ai"
+  env       = "prod"
+  location  = var.azure_region
+  base      = "${local.name}-${local.env}-${var.region_code}" # e.g. sewa-ai-prod-eu
+  shortbase = "sewaai${var.region_code}${local.env}"          # e.g. sewaaieuprod (alnum only)
   tags = {
     Project    = "SEWA-AI"
-    Env        = var.environment
+    Env        = "prod"
     Region     = var.region_code
     Compliance = "HIPAA GDPR NHS-DSPT ISO-13485 EU-AI-Act"
     ManagedBy  = "Terraform"
@@ -81,14 +79,26 @@ resource "azurerm_resource_group" "main" {
 # AZURE CONTAINER REGISTRY
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_container_registry" "acr" {
-  name                          = "sewaai${local.env}acr"
+  name                          = "${local.shortbase}acr"
   resource_group_name           = azurerm_resource_group.main.name
   location                      = local.location
   sku                           = "Premium"
   admin_enabled                 = false
-  public_network_access_enabled = false
+  public_network_access_enabled = true
   zone_redundancy_enabled       = true
   tags                          = local.tags
+
+  network_rule_set {
+    default_action = "Deny"
+    ip_rule {
+      action   = "Allow"
+      ip_range = "102.89.76.191/32"
+    }
+    virtual_network {
+      action    = "Allow"
+      subnet_id = azurerm_subnet.aks.id
+    }
+  }
 
   georeplications {
     location                = var.azure_region == "uksouth" ? "westeurope" : "uksouth"
@@ -108,10 +118,10 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 # AKS CLUSTER
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_kubernetes_cluster" "aks" {
-  name                              = "${local.name}-${local.env}-aks"
+  name                              = "${local.base}-aks"
   location                          = local.location
   resource_group_name               = azurerm_resource_group.main.name
-  dns_prefix                        = "${local.name}-${local.env}"
+  dns_prefix                        = local.base
   kubernetes_version                = var.kubernetes_version
   role_based_access_control_enabled = true
   oidc_issuer_enabled               = true
@@ -131,7 +141,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     max_count                   = 10
     vnet_subnet_id              = azurerm_subnet.aks.id
     temporary_name_for_rotation = "systemtemp"
-    node_labels = { "role" = "system", "workload" = "backend" }
+    node_labels                 = { "role" = "system", "workload" = "backend" }
   }
 
   identity { type = "SystemAssigned" }
@@ -168,27 +178,26 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
-# GPU node pool — AI inference (EfficientNet-B4, VLM, MC-Dropout)
-resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
-  name                  = "gpupool"
+# AI node pool — CPU/ONNX INT8 inference (EfficientNet-B4, VLM, MC-Dropout)
+resource "azurerm_kubernetes_cluster_node_pool" "ai" {
+  name                  = "aipool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
-  vm_size               = var.aks_gpu_vm_size
+  vm_size               = var.aks_ai_vm_size
   node_count            = 2
   enable_auto_scaling   = true
-  min_count             = 1
+  min_count             = 2
   max_count             = 8
   vnet_subnet_id        = azurerm_subnet.aks.id
   os_disk_size_gb       = 256
   tags                  = local.tags
-  node_labels = { "accelerator" = "nvidia-gpu", "role" = "ai-inference" }
-  node_taints = ["nvidia.com/gpu=true:NoSchedule"]
+  node_labels           = { "nodepool" = "ai", "role" = "ai-inference" }
 }
 
 # Spot pool — federated learning training (80% cost saving)
 resource "azurerm_kubernetes_cluster_node_pool" "spot" {
   name                  = "spotpool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
-  vm_size               = "Standard_D8s_v3"
+  vm_size               = "Standard_D8s_v5"
   priority              = "Spot"
   eviction_policy       = "Delete"
   spot_max_price        = -1
@@ -198,15 +207,15 @@ resource "azurerm_kubernetes_cluster_node_pool" "spot" {
   max_count             = 20
   vnet_subnet_id        = azurerm_subnet.aks.id
   tags                  = local.tags
-  node_labels = { "role" = "batch-training", "workload" = "federated-learning" }
-  node_taints = ["kubernetes.azure.com/scalesetpriority=spot:NoSchedule"]
+  node_labels           = { "role" = "batch-training", "workload" = "federated-learning" }
+  node_taints           = ["kubernetes.azure.com/scalesetpriority=spot:NoSchedule"]
 }
 
 # ─────────────────────────────────────────────────────────────────
 # POSTGRESQL 15 FLEXIBLE SERVER
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_postgresql_flexible_server" "db" {
-  name                          = "${local.name}-${local.env}-pg"
+  name                          = "${local.base}-pg"
   resource_group_name           = azurerm_resource_group.main.name
   location                      = local.location
   version                       = "15"
@@ -256,48 +265,17 @@ resource "azurerm_postgresql_flexible_server_database" "sewa" {
 }
 
 # ─────────────────────────────────────────────────────────────────
-# AZURE CACHE FOR REDIS 7 PREMIUM
-# ─────────────────────────────────────────────────────────────────
-resource "azurerm_redis_cache" "redis" {
-  name                          = "${local.name}-${local.env}-redis"
-  location                      = local.location
-  resource_group_name           = azurerm_resource_group.main.name
-  capacity                      = var.redis_capacity
-  family                        = "P"
-  sku_name                      = "Premium"
-  enable_non_ssl_port           = false
-  minimum_tls_version           = "1.2"
-  redis_version                 = "7"
-  subnet_id                     = azurerm_subnet.redis.id
-  public_network_access_enabled = false
-  tags                          = local.tags
-
-  redis_configuration {
-    enable_authentication         = true
-    maxmemory_policy              = "allkeys-lru"
-    rdb_backup_enabled            = true
-    rdb_backup_frequency          = 60
-    rdb_backup_max_snapshot_count = 1
-  }
-
-  patch_schedule {
-    day_of_week    = "Sunday"
-    start_hour_utc = 2
-  }
-}
-
-# ─────────────────────────────────────────────────────────────────
 # AZURE HEALTHCARE API — FHIR R4
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_healthcare_workspace" "fhir" {
-  name                = "${local.name}-${local.env}-hw"
+  name                = "${local.shortbase}hw"
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
   tags                = local.tags
 }
 
 resource "azurerm_healthcare_fhir_service" "fhir" {
-  name                = "${local.name}-${local.env}-fhir"
+  name                = "${local.shortbase}hfrsvc"
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
   workspace_id        = azurerm_healthcare_workspace.fhir.id
@@ -306,7 +284,7 @@ resource "azurerm_healthcare_fhir_service" "fhir" {
 
   authentication {
     authority = "https://login.microsoftonline.com/${data.azurerm_client_config.current.tenant_id}"
-    audience  = "https://${local.name}-${local.env}-fhir.fhir.azurehealthcareapis.com"
+    audience  = "https://${local.shortbase}hfrsvc.fhir.azurehealthcareapis.com"
   }
 
   cors {
@@ -321,20 +299,27 @@ resource "azurerm_healthcare_fhir_service" "fhir" {
 # AZURE BLOB STORAGE — DICOM + GRADCAM + REPORTS
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_storage_account" "dicom" {
-  name                            = "sewaai${local.env}dicom"
+  name                            = "${local.shortbase}dicom"
   resource_group_name             = azurerm_resource_group.main.name
   location                        = local.location
   account_tier                    = "Standard"
   account_replication_type        = "GRS"
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
-  public_network_access_enabled   = false
+  public_network_access_enabled   = true
   tags                            = local.tags
+
+  network_rules {
+    default_action             = "Deny"
+    bypass                     = ["AzureServices"]
+    ip_rules                   = var.allowed_ips
+    virtual_network_subnet_ids = [azurerm_subnet.aks.id]
+  }
 
   blob_properties {
     versioning_enabled  = true
     change_feed_enabled = true
-    delete_retention_policy      { days = 30 }
+    delete_retention_policy { days = 30 }
     container_delete_retention_policy { days = 30 }
   }
 }
@@ -376,7 +361,7 @@ resource "azurerm_storage_container" "reports" {
 # AZURE SERVICE BUS PREMIUM
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_servicebus_namespace" "main" {
-  name                         = "${local.name}-${local.env}-sb"
+  name                         = "${local.base}-bus"
   location                     = local.location
   resource_group_name          = azurerm_resource_group.main.name
   sku                          = "Premium"
@@ -387,34 +372,34 @@ resource "azurerm_servicebus_namespace" "main" {
 }
 
 resource "azurerm_servicebus_queue" "triage" {
-  name         = "sewa-scan-triage"
-  namespace_id = azurerm_servicebus_namespace.main.id
+  name                                 = "sewa-scan-triage"
+  namespace_id                         = azurerm_servicebus_namespace.main.id
   max_delivery_count                   = 10
   dead_lettering_on_message_expiration = true
-  message_ttl                          = "P7D"
+  default_message_ttl                  = "P7D"
   lock_duration                        = "PT5M"
 }
 
 resource "azurerm_servicebus_queue" "hl7" {
-  name         = "sewa-hl7-messages"
-  namespace_id = azurerm_servicebus_namespace.main.id
+  name                                 = "sewa-hl7-messages"
+  namespace_id                         = azurerm_servicebus_namespace.main.id
   max_delivery_count                   = 5
   dead_lettering_on_message_expiration = true
-  message_ttl                          = "P3D"
+  default_message_ttl                  = "P3D"
 }
 
 resource "azurerm_servicebus_queue" "notifications" {
-  name         = "sewa-notifications"
-  namespace_id = azurerm_servicebus_namespace.main.id
-  max_delivery_count = 3
-  message_ttl        = "PT1H"
+  name                = "sewa-notifications"
+  namespace_id        = azurerm_servicebus_namespace.main.id
+  max_delivery_count  = 3
+  default_message_ttl = "PT1H"
 }
 
 # ─────────────────────────────────────────────────────────────────
 # AZURE KEY VAULT PREMIUM
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_key_vault" "main" {
-  name                          = "${local.name}-${local.env}-kv"
+  name                          = "${local.base}-kv"
   location                      = local.location
   resource_group_name           = azurerm_resource_group.main.name
   tenant_id                     = data.azurerm_client_config.current.tenant_id
@@ -422,7 +407,7 @@ resource "azurerm_key_vault" "main" {
   purge_protection_enabled      = true
   soft_delete_retention_days    = 90
   enable_rbac_authorization     = false
-  public_network_access_enabled = false
+  public_network_access_enabled = true
   tags                          = local.tags
 
   network_acls {
@@ -437,7 +422,7 @@ resource "azurerm_key_vault" "main" {
 # AZURE FRONT DOOR PREMIUM + WAF
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_cdn_frontdoor_profile" "main" {
-  name                = "${local.name}-${local.env}-afd"
+  name                = "${local.base}-afd"
   resource_group_name = azurerm_resource_group.main.name
   sku_name            = "Premium_AzureFrontDoor"
   tags                = local.tags
@@ -492,7 +477,7 @@ resource "azurerm_cdn_frontdoor_security_policy" "waf" {
 # AZURE SIGNALR PREMIUM — WebSocket / Socket.IO
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_signalr_service" "main" {
-  name                = "${local.name}-${local.env}-signalr"
+  name                = "${local.base}-signalr"
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
   tags                = local.tags
@@ -513,7 +498,7 @@ resource "azurerm_signalr_service" "main" {
 # LOG ANALYTICS + PROMETHEUS + GRAFANA
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_log_analytics_workspace" "main" {
-  name                = "${local.name}-${local.env}-law"
+  name                = "${local.base}-law"
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
   sku                 = "PerGB2018"
@@ -522,32 +507,17 @@ resource "azurerm_log_analytics_workspace" "main" {
 }
 
 resource "azurerm_monitor_workspace" "prometheus" {
-  name                = "${local.name}-${local.env}-prometheus"
+  name                = "${local.base}-prometheus"
   resource_group_name = azurerm_resource_group.main.name
   location            = local.location
   tags                = local.tags
-}
-
-resource "azurerm_dashboard_grafana" "main" {
-  name                              = "${local.name}-${local.env}-grafana"
-  resource_group_name               = azurerm_resource_group.main.name
-  location                          = local.location
-  grafana_major_version             = 10
-  api_key_enabled                   = true
-  deterministic_outbound_ip_enabled = true
-  public_network_access_enabled     = true
-  tags                              = local.tags
-
-  azure_monitor_workspace_integrations {
-    resource_id = azurerm_monitor_workspace.prometheus.id
-  }
 }
 
 # ─────────────────────────────────────────────────────────────────
 # AZURE CONFIDENTIAL LEDGER — HIPAA blockchain audit trail
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_confidential_ledger" "audit" {
-  name                = "${local.name}-${local.env}-ledger"
+  name                = "${local.base}-ledger"
   resource_group_name = azurerm_resource_group.main.name
   location            = local.location
   ledger_type         = "Public"

@@ -14,8 +14,9 @@ variable "environment" {
 variable "azure_region" {
   description = "Primary Azure region for all resources"
   type        = string
-  default     = "uksouth"
+  default     = "swedencentral"
   # Options:
+  #   swedencentral     → EU (GDPR, EU AI Act, MDR)
   #   uksouth            → UK (NHS DSPT, GDPR)
   #   westeurope         → EU (GDPR, EU AI Act, MDR)
   #   eastus             → North America (HIPAA, FDA 510k)
@@ -56,14 +57,7 @@ variable "db_sku" {
 variable "db_storage_mb" {
   description = "PostgreSQL storage in MB"
   type        = number
-  default     = 131072  # 128 GB
-}
-
-# ── Redis ──────────────────────────────────────────────────────
-variable "redis_capacity" {
-  description = "Redis cache capacity (Premium tier: 1=6GB, 2=13GB, 3=26GB)"
-  type        = number
-  default     = 1
+  default     = 131072 # 128 GB
 }
 
 # ── AKS ───────────────────────────────────────────────────────
@@ -79,12 +73,11 @@ variable "aks_system_vm_size" {
   default     = "Standard_D4s_v3"
 }
 
-variable "aks_gpu_vm_size" {
-  description = "VM size for AKS GPU nodes (AI inference)"
+variable "aks_ai_vm_size" {
+  description = "VM size for AKS AI node pool (CPU/ONNX INT8 inference)"
   type        = string
-  default     = "Standard_NC4as_T4_v3"  # NVIDIA T4 — cost-effective for inference
-  # Standard_NC6s_v3  → NVIDIA V100 (higher perf, higher cost)
-  # Standard_NC4as_T4_v3 → NVIDIA T4 (recommended for SEWA)
+  default     = "Standard_D8ds_v5" # Ice Lake — AVX-512/VNNI, optimal for INT8
+  # Standard_D8ds_v5 → CPU/ONNX INT8 inference (recommended for SEWA, no GPU needed)
 }
 
 variable "kubernetes_version" {

@@ -3,7 +3,7 @@
 
 # Backend Workload Identity
 resource "azurerm_user_assigned_identity" "backend" {
-  name                = "${local.name}-${local.env}-backend-identity"
+  name                = "${local.base}-backend-identity"
   resource_group_name = azurerm_resource_group.main.name
   location            = local.location
   tags                = local.tags
@@ -11,7 +11,7 @@ resource "azurerm_user_assigned_identity" "backend" {
 
 # AI Services Workload Identity
 resource "azurerm_user_assigned_identity" "ai_services" {
-  name                = "${local.name}-${local.env}-ai-identity"
+  name                = "${local.base}-ai-identity"
   resource_group_name = azurerm_resource_group.main.name
   location            = local.location
   tags                = local.tags
@@ -19,7 +19,7 @@ resource "azurerm_user_assigned_identity" "ai_services" {
 
 # Federated identity credentials for Kubernetes service accounts
 resource "azurerm_federated_identity_credential" "backend" {
-  name                = "${local.name}-backend-sa"
+  name                = "${local.base}-backend-sa"
   resource_group_name = azurerm_resource_group.main.name
   parent_id           = azurerm_user_assigned_identity.backend.id
   audience            = ["api://AzureADTokenExchange"]
@@ -28,7 +28,7 @@ resource "azurerm_federated_identity_credential" "backend" {
 }
 
 resource "azurerm_federated_identity_credential" "ai_services" {
-  name                = "${local.name}-ai-sa"
+  name                = "${local.base}-ai-sa"
   resource_group_name = azurerm_resource_group.main.name
   parent_id           = azurerm_user_assigned_identity.ai_services.id
   audience            = ["api://AzureADTokenExchange"]

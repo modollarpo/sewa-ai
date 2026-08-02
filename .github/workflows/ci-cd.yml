@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -12,8 +13,8 @@ permissions:
   packages: write
 
 env:
-  ACR_NAME: sewaaiproductionacr
-  ACR_LOGIN_SERVER: sewaaiproductionacr.azurecr.io
+  ACR_NAME: sewaaieuprodacr
+  ACR_LOGIN_SERVER: sewaaieuprodacr.azurecr.io
   AZURE_SUBSCRIPTION: 15178061-4b15-46ed-9c4a-38ce0b485428
 
 jobs:
@@ -193,7 +194,7 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION }}
-      - run: az aks get-credentials --resource-group sewa-ai-production-rg --name sewa-ai-production-aks --overwrite-existing
+      - run: az aks get-credentials --resource-group sewa-ai-prod-rg --name sewa-ai-prod-eu-aks --overwrite-existing
       - run: |
           kubectl set image deployment/sewa-backend sewa-backend=${{ env.ACR_LOGIN_SERVER }}/sewa-backend:${{ github.sha }} -n sewa-ai
           kubectl set image deployment/sewa-frontend sewa-frontend=${{ env.ACR_LOGIN_SERVER }}/sewa-frontend:${{ github.sha }} -n sewa-ai

@@ -23,7 +23,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: triage
-        image: sewaaiproductionacr.azurecr.io/sewa-triage:latest
+        image: sewaaieuprodacr.azurecr.io/sewa-triage:latest
         ports:
         - containerPort: 8000
         resources:
@@ -74,7 +74,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: vlm-report
-        image: sewaaiproductionacr.azurecr.io/sewa-vlm-report:latest
+        image: sewaaieuprodacr.azurecr.io/sewa-vlm-report:latest
         ports:
         - containerPort: 8001
         resources:
@@ -119,7 +119,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: uncertainty
-        image: sewaaiproductionacr.azurecr.io/sewa-uncertainty:latest
+        image: sewaaieuprodacr.azurecr.io/sewa-uncertainty:latest
         ports:
         - containerPort: 8002
         resources:
@@ -158,7 +158,7 @@ spec:
     spec:
       containers:
       - name: metacognition
-        image: sewaaiproductionacr.azurecr.io/sewa-metacognition:latest
+        image: sewaaieuprodacr.azurecr.io/sewa-metacognition:latest
         ports:
         - containerPort: 8003
         resources:
@@ -197,7 +197,7 @@ spec:
     spec:
       containers:
       - name: federated-learning
-        image: sewaaiproductionacr.azurecr.io/sewa-federated-learning:latest
+        image: sewaaieuprodacr.azurecr.io/sewa-federated-learning:latest
         ports:
         - containerPort: 8004
         env:

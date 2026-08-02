@@ -74,4 +74,4 @@ data:
   EDGE_SYNC_ENABLED:    "false"
 
   # ── Azure Key Vault ────────────────────────────────────────────
-  KEY_VAULT_URI:        "https://sewa-ai-kv.vault.azure.net"
+  KEY_VAULT_URI:        "https://sewa-ai-prod-eu-kv.vault.azure.net"

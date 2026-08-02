@@ -62,23 +62,6 @@ output "database_url" {
   sensitive   = true
 }
 
-# ── Redis ──────────────────────────────────────────────────────
-output "redis_hostname" {
-  description = "Redis cache hostname"
-  value       = azurerm_redis_cache.redis.hostname
-}
-
-output "redis_ssl_port" {
-  description = "Redis SSL port"
-  value       = azurerm_redis_cache.redis.ssl_port
-}
-
-output "redis_url" {
-  description = "Full REDIS_URL connection string (sensitive)"
-  value       = "rediss://:${azurerm_redis_cache.redis.primary_access_key}@${azurerm_redis_cache.redis.hostname}:${azurerm_redis_cache.redis.ssl_port}/0"
-  sensitive   = true
-}
-
 # ── FHIR ──────────────────────────────────────────────────────
 output "fhir_endpoint" {
   description = "Azure Healthcare FHIR R4 endpoint URL"
@@ -156,7 +139,7 @@ output "frontdoor_endpoint" {
 # ── Deployment summary ─────────────────────────────────────────
 output "deployment_summary" {
   description = "Human-readable deployment summary"
-  value = <<-EOT
+  value       = <<-EOT
     ╔══════════════════════════════════════════════════════════════╗
     ║           SEWA XAI — Azure Deployment Complete                ║
     ╠══════════════════════════════════════════════════════════════╣
@@ -167,7 +150,6 @@ output "deployment_summary" {
     ║  AKS Cluster  : ${azurerm_kubernetes_cluster.aks.name}
     ║  ACR Registry : ${azurerm_container_registry.acr.login_server}
     ║  PostgreSQL   : ${azurerm_postgresql_flexible_server.db.fqdn}
-    ║  Redis        : ${azurerm_redis_cache.redis.hostname}
     ║  Key Vault    : ${azurerm_key_vault.main.vault_uri}
     ╠══════════════════════════════════════════════════════════════╣
     ║  Next: run scripts/generate-env-azure.sh to build .env      ║

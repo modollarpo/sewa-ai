@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: voice-transcription
-        image: sewaaiproductionacr.azurecr.io/sewa-voice-transcription:prod-20260723
+        image: sewaaieuprodacr.azurecr.io/sewa-voice-transcription:prod-20260723
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

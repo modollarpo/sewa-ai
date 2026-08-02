@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: sewaaiproductionacr.azurecr.io/sewa-backend:fix-payment-init-4
+        image: sewaaieuprodacr.azurecr.io/sewa-backend:fix-payment-init-4
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

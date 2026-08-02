@@ -5,6 +5,7 @@ on:
     branches: [main, staging]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,7 +14,7 @@ concurrency:
 env:
   NODE_VERSION: '22'
   PYTHON_VERSION: '3.11'
-  REGISTRY: sewaaiproductionacr.azurecr.io
+  REGISTRY: sewaaieuprodacr.azurecr.io
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
@@ -250,7 +251,7 @@ jobs:
       - name: Login to Azure ACR
         uses: azure/docker-login@v1
         with:
-          login-server: sewaaiproductionacr.azurecr.io
+          login-server: sewaaieuprodacr.azurecr.io
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
@@ -272,10 +273,10 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: |
-            sewaaiproductionacr.azurecr.io/sewa-${{ matrix.service }}:${{ steps.tag.outputs.tag }}
-            sewaaiproductionacr.azurecr.io/sewa-${{ matrix.service }}:${{ steps.tag.outputs.latest }}
-          cache-from: type=registry,ref=sewaaiproductionacr.azurecr.io/sewa-${{ matrix.service }}:cache
-          cache-to:   type=registry,ref=sewaaiproductionacr.azurecr.io/sewa-${{ matrix.service }}:cache,mode=max
+            sewaaieuprodacr.azurecr.io/sewa-${{ matrix.service }}:${{ steps.tag.outputs.tag }}
+            sewaaieuprodacr.azurecr.io/sewa-${{ matrix.service }}:${{ steps.tag.outputs.latest }}
+          cache-from: type=registry,ref=sewaaieuprodacr.azurecr.io/sewa-${{ matrix.service }}:cache
+          cache-to:   type=registry,ref=sewaaieuprodacr.azurecr.io/sewa-${{ matrix.service }}:cache,mode=max
 
 # ─────────────────────────────────────────────
 # 6. DEPLOY — STAGING
@@ -307,10 +308,10 @@ jobs:
       - name: Deploy to AKS
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
-          kubectl set image deployment/sewa-backend  sewa-backend=sewaaiproductionacr.azurecr.io/sewa-backend:staging-${SHORT_SHA}  -n sewa-ai
-          kubectl set image deployment/sewa-frontend sewa-frontend=sewaaiproductionacr.azurecr.io/sewa-frontend:staging-${SHORT_SHA} -n sewa-ai
-          kubectl set image deployment/sewa-triage   triage=sewaaiproductionacr.azurecr.io/sewa-ai-triage:staging-${SHORT_SHA}      -n sewa-ai
-          kubectl set image deployment/sewa-vlm-report vlm-report=sewaaiproductionacr.azurecr.io/sewa-ai-vlm-report:staging-${SHORT_SHA} -n sewa-ai
+          kubectl set image deployment/sewa-backend  sewa-backend=sewaaieuprodacr.azurecr.io/sewa-backend:staging-${SHORT_SHA}  -n sewa-ai
+          kubectl set image deployment/sewa-frontend sewa-frontend=sewaaieuprodacr.azurecr.io/sewa-frontend:staging-${SHORT_SHA} -n sewa-ai
+          kubectl set image deployment/sewa-triage   triage=sewaaieuprodacr.azurecr.io/sewa-ai-triage:staging-${SHORT_SHA}      -n sewa-ai
+          kubectl set image deployment/sewa-vlm-report vlm-report=sewaaieuprodacr.azurecr.io/sewa-ai-vlm-report:staging-${SHORT_SHA} -n sewa-ai
           kubectl rollout status deployment/sewa-backend -n sewa-ai --timeout=300s
       - name: Run smoke tests
         run: |
@@ -339,7 +340,7 @@ jobs:
       - name: Install kubelogin (for AAD-enabled clusters)
         uses: azure/setup-kubelogin@v1
       - name: Set AKS context
-        run: az aks get-credentials --resource-group sewa-ai-production-rg --name sewa-ai-production-aks --overwrite-existing
+        run: az aks get-credentials --resource-group sewa-ai-prod-rg --name sewa-ai-prod-eu-aks --overwrite-existing
       - name: Configure kubelogin to use service principal
         run: |
           kubelogin convert-kubeconfig -l azurecli
@@ -351,7 +352,7 @@ jobs:
           for entry in "${DEPLOY[@]}"; do
             DEP_NAME="${entry%%:*}"
             IMG_NAME="${entry##*:}"
-            kubectl set image deployment/${DEP_NAME} ${DEP_NAME}=sewaaiproductionacr.azurecr.io/${IMG_NAME}:${TAG} -n sewa-ai
+            kubectl set image deployment/${DEP_NAME} ${DEP_NAME}=sewaaieuprodacr.azurecr.io/${IMG_NAME}:${TAG} -n sewa-ai
           done
           kubectl rollout status deployment/sewa-backend   -n sewa-ai --timeout=600s
           kubectl rollout status deployment/sewa-frontend  -n sewa-ai --timeout=300s
@@ -396,8 +397,8 @@ jobs:
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
           SERVICES="backend frontend ai-triage ai-vlm-report ai-uncertainty ai-metacognition"
           for svc in $SERVICES; do
-            docker pull sewaaiproductionacr.azurecr.io/sewa-${svc}:main-${SHORT_SHA}
-            docker tag  sewaaiproductionacr.azurecr.io/sewa-${svc}:main-${SHORT_SHA} \
+            docker pull sewaaieuprodacr.azurecr.io/sewa-${svc}:main-${SHORT_SHA}
+            docker tag  sewaaieuprodacr.azurecr.io/sewa-${svc}:main-${SHORT_SHA} \
                         ${{ steps.ecr-login.outputs.registry }}/sewa-${svc}:main-${SHORT_SHA}
             docker push ${{ steps.ecr-login.outputs.registry }}/sewa-${svc}:main-${SHORT_SHA}
           done
@@ -441,8 +442,8 @@ jobs:
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
           SERVICES="backend frontend ai-triage ai-vlm-report ai-uncertainty ai-metacognition"
           for svc in $SERVICES; do
-            docker pull sewaaiproductionacr.azurecr.io/sewa-${svc}:main-${SHORT_SHA}
-            docker tag  sewaaiproductionacr.azurecr.io/sewa-${svc}:main-${SHORT_SHA} \
+            docker pull sewaaieuprodacr.azurecr.io/sewa-${svc}:main-${SHORT_SHA}
+            docker tag  sewaaieuprodacr.azurecr.io/sewa-${svc}:main-${SHORT_SHA} \
                         europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/sewa/sewa-${svc}:main-${SHORT_SHA}
             docker push europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/sewa/sewa-${svc}:main-${SHORT_SHA}
           done
@@ -478,7 +479,7 @@ jobs:
       - name: Install kubelogin (for AAD-enabled clusters)
         uses: azure/setup-kubelogin@v1
       - name: Set AKS context
-        run: az aks get-credentials --resource-group sewa-ai-production-rg --name sewa-ai-production-aks --overwrite-existing
+        run: az aks get-credentials --resource-group sewa-ai-prod-rg --name sewa-ai-prod-eu-aks --overwrite-existing
       - name: Configure kubelogin to use service principal
         run: |
           kubelogin convert-kubeconfig -l azurecli

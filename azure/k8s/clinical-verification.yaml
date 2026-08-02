@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: clinical-verification
-          image: sewaaiproductionacr.azurecr.io/sewa-backend:prod-latest-clinical
+          image: sewaaieuprodacr.azurecr.io/sewa-backend:prod-latest-clinical
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

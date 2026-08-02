@@ -61,33 +61,36 @@ Perform a self-review before submitting any code:
 
 ---
 
-## 📋 Work State (2026-07-23)
+## 📋 Work State (2026-08-02 — swedencentral rebuild)
 
 ### ✅ Completed
-- **Enterprise services deployed to AKS** — Voice-transcription (custom FastAPI) + LibreTranslate running 1/1 in namespace `sewa-ai`
-- **Network policies created** — `voice-transcription-policy` + `translation-policy` for ingress/egress
-- **Backend service clients created** — `translationService.ts` + `voiceTranscriptionService.ts` with circuit-breaker pattern
-- **New API endpoints** — `/api/v1/ai/translate`, `/ai/detect-language`, `/ai/languages`, `/ai/enterprise-transcribe`
-- **Frontend integration** — `ui/VoiceDictation.tsx` enhanced with enterprise transcription path (MediaRecorder → backend Azure Speech); `RadiologistWorkspace.tsx` now passes `scanId` + `enterprise=true`
-- **Frontend API helpers** — `translateText()`, `detectLanguage()`, `listLanguages()`, `enterpriseTranscribe()` in `apiClient.ts`
-- **Config updated** — `env.ts` now has `TRANSLATION_SERVICE_URL`, `VOICE_TRANSCRIPTION_SERVICE_URL`
-- **Security fix** — Azure Speech key no longer leaked via `/health` endpoint
-- **Bug fixes** — Pydantic v2 `regex`→`pattern`, missing `BaseModel`/`base64` imports, Prometheus worker conflict
-- **VLM pipeline wired to LibreTranslate** — `vlmLanguageService.ts` now has `translateReportContent()` that translates VLM report body (technique/findings/impression/recommendation) after generation; `aiOrchestrator.ts` calls it for non-English report languages
-- **Backend Docker image rebuilt & pushed** — `sewa-backend:prod-20260723` → ACR (build `db1dc`, includes VLM translation, service clients, AI controller endpoints)
-- **Frontend Docker image rebuilt & pushed** — `sewa-frontend:prod-20260723` → ACR (build `db1de`, includes enterprise dictation in ui/VoiceDictation + RadiologistWorkspace)
-- **Deployment manifest files updated** — `backend-deployment-prod.yaml` and `frontend-deployment.yaml` reference new images
-- **Deploy script created** — `azure/k8s/deploy-update.ps1` one-command deploy
+- **uksouth stack fully destroyed** — all 55 resources removed; RG `sewa-ai-prod-rg` deleted
+- **swedencentral stack rebuilt** — 48 resources created with region-suffixed names to avoid global-name collisions (KV purge protection blocks reuse of `sewa-ai-prod-kv` for 90 days)
+- **New globally-unique names**: ACR `sewaaieuprodacr`, KV `sewa-ai-prod-eu-kv`, storage `sewaaieuproddicom`, ServiceBus `sewa-ai-prod-eu-bus`, SignalR `sewa-ai-prod-eu-signalr`, FrontDoor `sewa-ai-prod-eu-afd`, Ledger `sewa-ai-prod-eu-ledger`, PG `sewa-ai-prod-eu-pg`, FHIR `sewaaieuprodhw`/`sewaaieuprodhfrsvc`, AKS `sewa-ai-prod-eu-aks`
+- **AKS cluster** `sewa-ai-prod-eu-aks` running k8s 1.35.6 in swedencentral with 3 node pools:
+  - `system`: 3× `Standard_D4s_v5` (backend/frontend/redis)
+  - `aipool`: `Standard_D8ds_v5` (Ice Lake AVX-512/VNNI, INT8 optimal), label `nodepool: ai`, min 2 max 8 — hosts triage/pathology/mammography/retinal + VLM/uncertainty/metacognition/federated/continuous
+  - `spotpool`: `Standard_D8s_v5`, priority Spot, min 0 max 20 — federated learning
+- **No GPU pool** — platform is all CPU/ONNX-INT8; VLM calls Azure OpenAI GPT-4o API; voice uses Azure Speech + OpenAI Whisper API
+- **All PaaS services** verified available in swedencentral and created: PG flexible (ZoneRedundant HA + geo-backup), FHIR R4, Storage (GRS, 7yr lifecycle, 3 containers: scans/gradcam/reports), ServiceBus Premium (3 queues), SignalR Premium, Key Vault Premium (purge protection), Log Analytics, Prometheus workspace, Confidential Ledger (co-located swedencentral), FrontDoor Premium + WAF, ACR Premium (zone redundancy + geo-replication to uksouth for UK DR)
+- **Network fixes preserved**: KV/storage/ACR network_rules with deployer IP `102.89.76.188/30` (aligned /30), storage public network enabled, ACR IP rule + VNet subnet access
+- **k8s manifests updated** (`azure/k8s/`): all image refs `sewaaiproductionacr` → `sewaaieuprodacr.azurecr.io`, all RG/AKS/KV names updated to new stack
+- **CI/CD workflows updated** (`.github/workflows/deploy.yml`, `.github/workflows/ci-cd.yml`, `scripts/setup-github-oidc.sh`): new ACR name, new RG, new AKS cluster
+- **ACR admin enabled** for image push; ACR Premium with zone redundancy + geo-replication to uksouth
+- **Terraform state** at `infrastructure/terraform-azure/terraform.tfstate` — 48 resources, all swedencentral
+- **Sensitive values** in `terraform.tfvars`: db_admin_password `S3wa@I2026!Pr0d#Db`, app_url `https://api.sewaxai.health`, CORS origins, firebase `sewa-ai-prod`, SendGrid SMTP, placeholders for JWT/Stripe/Paystack/Flutterwave/MPESA
 
 ### 🔜 Next
-- **Apply updated manifests to AKS** (blocked — cluster API endpoint unreachable from this machine; run `.\azure\k8s\deploy-update.ps1` from authorized network or Azure Cloud Shell)
+- **Build/push images to new ACR** (`sewaaieuprodacr.azurecr.io`): `sewa-backend:prod-20260723`, `sewa-frontend:prod-20260723`, and all AI service images — `az acr build` or GitHub Actions (Docker Desktop not running locally; `az` commands hang from this machine — use Azure Cloud Shell or CI/CD)
+- **Deploy k8s manifests** to `sewa-ai-prod-eu-aks`: `kubectl apply -f azure/k8s/` — deployer user lacks cluster-admin; use admin kubeconfig or a cluster-admin service principal
+- **Verify deployment**: pods running, endpoints healthy, ACR pull working from AKS nodes
 
 ### Architecture
 ```
-Frontend → apiClient.ts → Backend (Express) → aiController.ts → Translation/Voice services → AKS microservices
+Frontend → apiClient.ts → Backend (Express) → aiController.ts → Translation/Voice services → AKS microservices (swedencentral)
                                                                   ↓
-                                                             LibreTranslate (port 8080)
-                                                             Voice-Transcription (port 8000)
+                                                             Azure OpenAI GPT-4o (VLM)
+                                                             Azure Speech + Whisper (voice)
 ```
 
 ## ⚠️ Critical Constraints
@@ -95,3 +98,4 @@ Frontend → apiClient.ts → Backend (Express) → aiController.ts → Translat
 - **Dependencies**: Explain any new library additions in the chat first.
 - **Context**: If a file exceeds 300 lines, suggest a refactor/split.
 - **Communication**: Summarize changes and ACR results after every task.
+- **Network**: `az`/`docker` commands hang from this machine — use Azure Cloud Shell or CI/CD for ACR build/push and AKS admin operations.

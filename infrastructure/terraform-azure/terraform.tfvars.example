@@ -9,8 +9,8 @@
 
 # ── Deployment ─────────────────────────────────────────────────
 environment  = "production"   # production | staging | dev
-azure_region = "uksouth"      # uksouth | westeurope | eastus | southafricanorth | centralindia
-region_code  = "uk"           # uk | eu | us | ng | ke | za | gh | in
+azure_region = "swedencentral" # swedencentral | uksouth | westeurope | eastus | southafricanorth | centralindia
+region_code  = "eu"           # uk | eu | us | ng | ke | za | gh | in
 
 # ── App ────────────────────────────────────────────────────────
 app_url      = "https://api.sewaxai.health"
@@ -24,9 +24,9 @@ db_sku            = "GP_Standard_D4s_v3"       # GP_Standard_D2s_v3 for staging
 
 # ── AKS ────────────────────────────────────────────────────────
 aks_system_node_count = 3
-aks_system_vm_size    = "Standard_D4s_v3"
-aks_gpu_vm_size       = "Standard_NC4as_T4_v3"
-kubernetes_version    = "1.28.5"
+aks_system_vm_size    = "Standard_D4s_v5"
+aks_ai_vm_size        = "Standard_D8ds_v5"
+kubernetes_version    = "1.35.6"
 
 # ── Networking ─────────────────────────────────────────────────
 vnet_address_space = "10.10.0.0/16"

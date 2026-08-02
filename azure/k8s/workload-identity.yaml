@@ -36,7 +36,7 @@ spec:
     usePodIdentity: "false"
     useVMManagedIdentity: "false"
     clientID: "ffb48448-dbbf-431b-8a1b-c263b3cf0cf1"
-    keyvaultName: "sewa-ai-production-kv"
+    keyvaultName: "sewa-ai-prod-eu-kv"
     tenantId: "cbe60f81-8bd5-4435-9199-cd97cfa950af"
     objects: |
       array:

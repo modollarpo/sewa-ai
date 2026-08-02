@@ -42,7 +42,7 @@ spec:
               app: sewa-dicom-ingestion
       containers:
         - name: dicom-ingestion
-          image: sewaaiproductionacr.azurecr.io/sewa-ai-dicom-ingestion:production-latest
+          image: sewaaieuprodacr.azurecr.io/sewa-ai-dicom-ingestion:production-latest
           ports:
             - name: dicom
               containerPort: 11112

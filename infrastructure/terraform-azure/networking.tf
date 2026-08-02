@@ -3,7 +3,7 @@
 
 # ── Virtual Network ────────────────────────────────────────────
 resource "azurerm_virtual_network" "main" {
-  name                = "${local.name}-${local.env}-vnet"
+  name                = "${local.base}-vnet"
   address_space       = [var.vnet_address_space]
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
@@ -16,7 +16,7 @@ resource "azurerm_subnet" "aks" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.10.1.0/24"]
-  service_endpoints    = ["Microsoft.KeyVault", "Microsoft.Storage", "Microsoft.ServiceBus"]
+  service_endpoints    = ["Microsoft.KeyVault", "Microsoft.Storage", "Microsoft.ServiceBus", "Microsoft.ContainerRegistry"]
 }
 
 resource "azurerm_subnet" "db" {
@@ -34,24 +34,17 @@ resource "azurerm_subnet" "db" {
   }
 }
 
-resource "azurerm_subnet" "redis" {
-  name                 = "redis-subnet"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.10.3.0/24"]
-}
-
 resource "azurerm_subnet" "private_endpoints" {
-  name                 = "private-endpoints-subnet"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.10.4.0/24"]
+  name                                      = "private-endpoints-subnet"
+  resource_group_name                       = azurerm_resource_group.main.name
+  virtual_network_name                      = azurerm_virtual_network.main.name
+  address_prefixes                          = ["10.10.4.0/24"]
   private_endpoint_network_policies_enabled = false
 }
 
 # ── Network Security Groups ────────────────────────────────────
 resource "azurerm_network_security_group" "aks" {
-  name                = "${local.name}-${local.env}-aks-nsg"
+  name                = "${local.base}-aks-nsg"
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
   tags                = local.tags
@@ -88,7 +81,7 @@ resource "azurerm_subnet_network_security_group_association" "aks" {
 
 # ── Private DNS Zones ──────────────────────────────────────────
 resource "azurerm_private_dns_zone" "db" {
-  name                = "${local.name}-${local.env}-pg.private.postgres.database.azure.com"
+  name                = "${local.base}-pg.private.postgres.database.azure.com"
   resource_group_name = azurerm_resource_group.main.name
   tags                = local.tags
 }
@@ -146,7 +139,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "servicebus" {
 
 # ── Private Endpoint — Blob Storage ───────────────────────────
 resource "azurerm_private_endpoint" "blob" {
-  name                = "${local.name}-${local.env}-blob-pe"
+  name                = "${local.base}-blob-pe"
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
   subnet_id           = azurerm_subnet.private_endpoints.id
@@ -167,7 +160,7 @@ resource "azurerm_private_endpoint" "blob" {
 
 # ── Private Endpoint — Key Vault ──────────────────────────────
 resource "azurerm_private_endpoint" "keyvault" {
-  name                = "${local.name}-${local.env}-kv-pe"
+  name                = "${local.base}-kv-pe"
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
   subnet_id           = azurerm_subnet.private_endpoints.id

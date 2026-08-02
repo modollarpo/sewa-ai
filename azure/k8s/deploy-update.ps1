@@ -3,8 +3,8 @@
 # © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 param(
-  [string]$ResourceGroup = "sewa-ai-production-rg",
-  [string]$ClusterName  = "sewa-ai-production-aks",
+  [string]$ResourceGroup = "sewa-ai-prod-rg",
+  [string]$ClusterName  = "sewa-ai-prod-eu-aks",
   [string]$Namespace    = "sewa-ai"
 )
 

@@ -34,7 +34,7 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
-        image: "sewaaiproductionacr.azurecr.io/sewa-frontend:prod-20260723"
+        image: "sewaaieuprodacr.azurecr.io/sewa-frontend:prod-20260723"
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
