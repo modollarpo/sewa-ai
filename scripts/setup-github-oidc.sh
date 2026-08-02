@@ -28,6 +28,7 @@ APP_NAME="sewa-ai-github-actions"
 RESOURCE_GROUP="sewa-ai-prod-rg"
 ACR_NAME="sewaaieuprodacr"
 AKS_NAME="sewa-ai-prod-eu-aks"
+KV_NAME="sewa-ai-prod-eu-kv"
 
 # ── Parse flags ───────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -111,19 +112,19 @@ if [[ -n "$ACR_RESOURCE_ID" ]]; then
   echo "   ✅ AcrPush → ACR"
 fi
 
-# Azure Kubernetes Service Cluster User — get credentials + deploy
+# Azure Kubernetes Service Cluster Admin — get credentials + deploy manifests
 if [[ -n "$AKS_RESOURCE_ID" ]]; then
   az role assignment create \
     --assignee    "$SP_OBJECT_ID" \
-    --role        "Azure Kubernetes Service Cluster User Role" \
+    --role        "Azure Kubernetes Service Cluster Admin Role" \
     --scope       "$AKS_RESOURCE_ID" \
-    --output      none 2>/dev/null || echo "   ℹ️  AKS role already assigned"
-  echo "   ✅ AKS Cluster User → AKS"
+    --output      none 2>/dev/null || echo "   ℹ️  AKS admin role already assigned"
+  echo "   ✅ AKS Cluster Admin → AKS"
 fi
 
 # Key Vault Secrets User — read secrets during deploy
 KV_RESOURCE_ID=$(az keyvault show \
-  --name "${APP_NAME%-github-actions}-kv" \
+  --name "$KV_NAME" \
   --resource-group "$RESOURCE_GROUP" \
   --query id -o tsv 2>/dev/null || echo "")
 

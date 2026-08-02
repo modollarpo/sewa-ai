@@ -15,7 +15,7 @@ permissions:
 env:
   ACR_NAME: sewaaieuprodacr
   ACR_LOGIN_SERVER: sewaaieuprodacr.azurecr.io
-  AZURE_SUBSCRIPTION: 15178061-4b15-46ed-9c4a-38ce0b485428
+  AZURE_SUBSCRIPTION: a14702a0-439b-42f5-b31a-8b898adfa965
 
 jobs:
   # ── Backend Checks ──
