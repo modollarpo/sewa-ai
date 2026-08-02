@@ -1,29 +1,32 @@
-# SEWA AI — Clinical Research & Regulatory Validation Dossier
+# ![SEWA AI](../assets/logo-horizontal.svg)
 
-**Smart Early Warning Assistant · a Storegrill Inc Ltd company · No. 14581073**
+<div class="cover">
+  <img src="../assets/logo-horizontal.svg" alt="SEWA AI" />
+  <h1>Clinical Research & Regulatory Validation Dossier</h1>
+  <p class="subtitle">Smart Early Warning Assistant · SaMD Class IIb · TRL 5</p>
+  <p class="meta">
+    <strong>Sponsor:</strong> Storegrill Inc Ltd (Companies House No. 14581073)<br/>
+    <strong>Registered Address:</strong> 18 Hampshire Close, Binley, Coventry, CV3 2FP, England<br/>
+    <strong>Email:</strong> info@sewaxai.health · <strong>Web:</strong> www.sewaxai.health<br/>
+    <strong>Chief Investigator:</strong> Dolapo Olaitan Ariyo (Founder, MD & CTO) · ORCID 0009-0006-0163-2538<br/>
+    <strong>NHS Innovation Service ID:</strong> INN-2604-0064-2<br/>
+    <strong>UKIPO Patent:</strong> GB2609706.3 (filed 25 April 2026 · WIPO DAS 53DA)<br/>
+    <strong>IRAS Project ID:</strong> 372596 — Data-Only Research Framework<br/>
+    <strong>DPIA Reference:</strong> DPIA-001 (GDPR Art. 35, v1.0, March 2026)<br/>
+    <strong>Device Classification:</strong> SaMD Class IIb — UK MDR 2002 / EU MDR 2017/745 Rule 11<br/>
+    <strong>Document Set Version:</strong> v1.0 — July 2026
+  </p>
+  <p class="classification">OFFICIAL-SENSITIVE</p>
+</div>
 
-| | |
-|---|---|
-| Sponsor | Storegrill Inc Ltd (Companies House No. 14581073) |
-| Registered Address | 18 Hampshire Close, Binley, Coventry, CV3 2FP, England |
-| Contact | info@sewaxai.health · www.sewaxai.health |
-| Chief Investigator | Dolapo Olaitan Ariyo (Founder, MD & CTO) · ORCID 0009-0006-0163-2538 |
-| NHS Innovation Service ID | INN-2604-0064-2 |
-| UKIPO Patent | GB2609706.3 (filed 25 April 2026 · WIPO DAS 53DA) |
-| IRAS Project ID | 372596 — Data-Only Research Framework |
-| DPIA Reference | DPIA-001 (GDPR Art. 35, v1.0, March 2026) |
-| Device Classification | SaMD **Class IIb** — UK MDR 2002 / EU MDR 2017/745 Rule 11 |
-| Technology Readiness | TRL 5 — core platform developed; internal engineering & functional testing complete |
-| Document Set Version | v1.0 — July 2026 |
-
----
-
+<!-- ============================================================ -->
 ## Purpose of This Dossier
+<!-- ============================================================ -->
 
 This dossier consolidates the clinical research, validation and regulatory documentation required to
 support the path of **SEWA AI** — a sovereign multi-engine Vision-Language Model (VLM) system for
-automated diagnostic radiology triage — from a Technology Readiness Level (TRL) 5 engineering
-platform to a regulated Software as a Medical Device (SaMD).
+automated diagnostic radiology triage — from Technology Readiness Level (TRL) 5 engineering
+platform to regulated Software as a Medical Device (SaMD).
 
 It assembles, in a single coherent evidence package:
 
@@ -42,12 +45,19 @@ It assembles, in a single coherent evidence package:
 > NHS clinical validation is the immediate next stage of development and is the subject of the study
 > described in this dossier.
 
----
-
+<!-- ============================================================ -->
 ## Document Register
+<!-- ============================================================ -->
+
+<div class="callout-note">
+  <strong>Document Status Key:</strong>
+  <span class="badge badge-approved">Approved</span>
+  <span class="badge badge-review">Under Review</span>
+  <span class="badge badge-draft">Draft</span>
+</div>
 
 | Ref | Document | Status |
-|---|---|---|
+|-----|----------|--------|
 | SEWA-AI-DOC-00 | Cover, Governance & Document Register (this file) | Issued v1.0 |
 | SEWA-AI-DOC-01 | Regulatory Strategy & Conformity Assessment (Phases 1–3) | Issued v1.0 |
 | SEWA-AI-DOC-02 | Clinical Investigation Plan — Prospective Validation | Issued v1.0 |
@@ -58,25 +68,80 @@ It assembles, in a single coherent evidence package:
 | SEWA-AI-DOC-07 | Usability Engineering File (IEC 62366-1) | Issued v1.0 |
 | SEWA-AI-DOC-08 | NICE Evidence Standards Alignment | Issued v1.0 |
 | SEWA-AI-DOC-09 | Future Services Pipeline (Pathology / Mammography / Retinal — PLANNED) | Issued v1.0 |
-| SEWA-AI-DOC-10 | PPIE & Health Inequalities | Issued v1.0 |
-| SEWA-AI-DOC-11 | Regulation-Readiness Assessment | Issued v1.0 |
+| SEWA-AI-DOC-10 | PPIE & Health Inequalities Assessment | Issued v1.0 |
+| SEWA-AI-DOC-11 | Regulation Readiness Assessment (outstanding-evidence tracker) | Issued v1.0 |
+| SEWA-AI-DOC-12 | Internal Engineering Verification Report | Issued v1.0 |
+| SEWA-AI-DOC-13 | Evidence Index & Bibliography | Issued v1.0 |
+
+<!-- ============================================================ -->
+## Governance Framework
+<!-- ============================================================ -->
+
+This dossier is governed by the following quality management framework:
+
+<table>
+  <thead>
+    <tr>
+      <th>Domain</th>
+      <th>Standard / Regulation</th>
+      <th>Accountable Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Clinical Risk Management</td>
+      <td>DCB0129 (NHS DSP Toolkit) + ISO 14971:2019</td>
+      <td>Chief Clinical Safety Officer</td>
+    </tr>
+    <tr>
+      <td>Software Lifecycle</td>
+      <td>IEC 62304:2006 + Amd.1</td>
+      <td>Head of Software Engineering</td>
+    </tr>
+    <tr>
+      <td>Usability Engineering</td>
+      <td>IEC 62366-1:2015 + Amd.1</td>
+      <td>Head of UX / Human Factors</td>
+    </tr>
+    <tr>
+      <td>Data Protection</td>
+      <td>UK GDPR + Data Protection Act 2018</td>
+      <td>Data Protection Officer (DPO)</td>
+    </tr>
+    <tr>
+      <td>Information Governance</td>
+      <td>NHS DSP Toolkit (IGSoDN)</td>
+      <td>Caldicott Guardian / SIRO</td>
+    </tr>
+    <tr>
+      <td>Clinical Safety</td>
+      <td>DCB0160 (Clinical Safety Officer)</td>
+      <td>Qualified CSO</td>
+    </tr>
+  </tbody>
+</table>
+
+### Key Governance Contacts
+
+| Role | Name / Organisation | Contact |
+|------|-------------------|---------|
+| Data Protection Officer | TBC — NHS Trust Partner | dpo@sewaxai.health |
+| Caldicott Guardian | TBC — NHS Trust Partner | caldicott@sewaxai.health |
+| Clinical Safety Officer | TBC — NHS Trust Partner | cso@sewaxai.health |
+
+<!-- ============================================================ -->
+## Change History
+<!-- ============================================================ -->
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| v0.1 | 2026-03-01 | D. Ariyo | Initial draft — regulatory strategy outline |
+| v0.2 | 2026-04-15 | D. Ariyo | Full dossier structure with 13 documents |
+| v0.3 | 2026-06-01 | D. Ariyo | IRAS submission integration, NICE alignment |
+| v1.0 | 2026-07-23 | D. Ariyo | First issue — complete regulatory submission pack |
 
 ---
 
-## Version History
-
-| Version | Date | Author | Summary of change |
-|---|---|---|---|
-| 0.1 | May 2026 | D. Ariyo | Initial assembly from IRAS protocol v4.0 and Master Dossier v2.0 |
-| 1.0 | Jul 2026 | D. Ariyo | First consolidated clinical & regulatory dossier; future-services reframed as planned; readiness assessment added |
-
----
-
-## Classification & Distribution
-
-**CONFIDENTIAL — Not for distribution without written consent of Storegrill Inc Ltd.**
-Contains commercially sensitive information and a pending UK patent application (GB2609706.3).
-
-© 2026 SEWA AI — a Storegrill Inc Ltd company · No. 14581073 ·
-18 Hampshire Close, Binley, Coventry, CV3 2FP · info@sewaxai.health ·
-*from hours, to seconds.*
+<div class="page-footer">
+  SEWA AI — Confidential · © Storegrill Inc Ltd 2026 · Document Ref: SEWA-AI-DOC-00 v1.0
+</div>

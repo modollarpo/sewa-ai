@@ -305,6 +305,10 @@ export class AIClinicalVerificationService {
       },
     };
 
-    return this.createAuditLogForClinicalAction(auditLog);
+    await this.createAuditLogForClinicalAction(auditLog);
+    return {
+      compliancePassed: confidenceResult.thresholdExceeded !== false,
+      auditId: auditLog.id,
+    };
   }
 }

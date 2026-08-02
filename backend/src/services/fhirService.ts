@@ -697,61 +697,132 @@ export async function cancelFHIRBulkExport(pollingUrl: string): Promise<boolean>
 }
 
   // ── NHS PDS (Patient Demographic Service) ─────────────────────────────────
-/**
- * Search NHS PDS for a patient using NHS Number
- * @param nhsNumber The NHS Number to search for
- * @returns Promise of the Patient resource or null
- */
-export async function searchNhsPdsByNhsNumber(nhsNumber: string): Promise<Patient | null> {
-  if (!config.NHS_PDS_URL || !config.NHS_PDS_API_KEY) {
-    logger.warn('[FHIR] NHS PDS not configured');
-    return null;
-  }
-  if (!validateNhsNumber(nhsNumber)) {
-    logger.warn(`[FHIR] Invalid NHS Number: ${nhsNumber}`);
-    return null;
-  }
-  try {
-    const res = await axios.get(`${config.NHS_PDS_URL}/Patient`, {
-      params: { identifier: `https://fhir.nhs.uk/Id/nhs-number|${nhsNumber}` },
-      headers: {
-        'Authorization': `Bearer ${config.NHS_PDS_API_KEY}`,
-        'Accept': 'application/fhir+json'
-      }
+// Production-ready PDS client with:
+//   - OAuth2 client credentials flow for NHS API access
+//   - Exponential backoff retry for transient failures
+//   - NHS Number validation before lookup
+//   - Structured error reporting instead of null returns
+
+interface PdsSearchResult {
+  patient: Patient;
+  source: 'pds' | 'cache';
+}
+
+interface PdsError {
+  code: string;
+  message: string;
+  retryable: boolean;
+  httpStatus?: number;
+}
+
+async function getNhsOAuthToken(): Promise<string> {
+  if (!config.NHS_CIS2_CLIENT_ID || !config.NHS_CIS2_CLIENT_SECRET) {
+    throw new PdsServiceError({
+      code: 'PDS_CONFIG',
+      message: 'NHS PDS OAuth2 client credentials not configured',
+      retryable: false,
     });
-    // Get first matching patient
-    if (res.data.resourceType === 'Bundle' && res.data.entry?.length > 0) {
-      return res.data.entry[0].resource;
+  }
+  const tokenRes = await axios.post(
+    `${config.NHS_CIS2_ISSUER}/token`,
+    new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: config.NHS_CIS2_CLIENT_ID,
+      client_secret: config.NHS_CIS2_CLIENT_SECRET,
+      scope: 'https://fhir.nhs.uk/pds-patient-search',
+    }),
+    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+  );
+  return tokenRes.data.access_token;
+}
+
+let pdsAccessToken: string | null = null;
+let pdsTokenExpiry = 0;
+
+async function getPdsAccessToken(): Promise<string> {
+  if (pdsAccessToken && Date.now() < pdsTokenExpiry) return pdsAccessToken;
+  pdsAccessToken = await getNhsOAuthToken();
+  pdsTokenExpiry = Date.now() + 3300000;
+  return pdsAccessToken;
+}
+
+function pdsRequestConfig(): Promise<Record<string, string>> {
+  return getPdsAccessToken().then(token => ({
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/fhir+json',
+    'NHSD-Session-URID': 'SEWA_XAI',
+    'X-Request-Id': `sewa-pds-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  }));
+}
+
+async function pdsRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
+  let lastError: any;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      lastError = err;
+      if (attempt < maxRetries - 1) {
+        const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+        logger.warn(`[FHIR PDS] Retry ${attempt + 1}/${maxRetries} after ${delay}ms: ${err.message}`);
+        await new Promise(r => setTimeout(r, delay));
+      }
     }
-    return null;
-  } catch (err: any) {
-    logger.warn(`[FHIR] Failed to search NHS PDS: ${err.message}`);
-    return null;
+  }
+  throw lastError;
+}
+
+class PdsServiceError extends Error {
+  public code: string;
+  public retryable: boolean;
+  public httpStatus?: number;
+
+  constructor(err: PdsError) {
+    super(err.message);
+    this.name = 'PdsServiceError';
+    this.code = err.code;
+    this.retryable = err.retryable;
+    this.httpStatus = err.httpStatus;
   }
 }
 
-/**
- * Retrieve a patient from NHS PDS by their logical ID
- * @param pdsPatientId The PDS patient ID
- * @returns Promise of the Patient resource or null
- */
-export async function getNhsPdsPatient(pdsPatientId: string): Promise<Patient | null> {
-  if (!config.NHS_PDS_URL || !config.NHS_PDS_API_KEY) {
-    logger.warn('[FHIR] NHS PDS not configured');
-    return null;
-  }
-  try {
-    const res = await axios.get(`${config.NHS_PDS_URL}/Patient/${pdsPatientId}`, {
-      headers: {
-        'Authorization': `Bearer ${config.NHS_PDS_API_KEY}`,
-        'Accept': 'application/fhir+json'
-      }
+export async function searchNhsPdsByNhsNumber(nhsNumber: string): Promise<PdsSearchResult> {
+  if (!validateNhsNumber(nhsNumber)) {
+    throw new PdsServiceError({
+      code: 'INVALID_NHS_NUMBER',
+      message: `NHS Number ${nhsNumber} failed Modulus 11 validation`,
+      retryable: false,
     });
-    return res.data;
-  } catch (err: any) {
-    logger.warn(`[FHIR] Failed to get NHS PDS patient: ${err.message}`);
-    return null;
   }
+
+  return pdsRetry(async () => {
+    const headers = await pdsRequestConfig();
+    const res = await axios.get(`${config.NHS_PDS_URL}/Patient`, {
+      params: { identifier: `https://fhir.nhs.uk/Id/nhs-number|${nhsNumber}` },
+      headers,
+      timeout: 15000,
+    });
+
+    if (res.data.resourceType === 'Bundle' && res.data.entry?.length > 0) {
+      return { patient: res.data.entry[0].resource as Patient, source: 'pds' };
+    }
+    throw new PdsServiceError({
+      code: 'PDS_NOT_FOUND',
+      message: `No patient found for NHS Number ${nhsNumber}`,
+      retryable: false,
+    });
+  });
+}
+
+export async function getNhsPdsPatient(pdsPatientId: string): Promise<PdsSearchResult> {
+  return pdsRetry(async () => {
+    const headers = await pdsRequestConfig();
+    const res = await axios.get(`${config.NHS_PDS_URL}/Patient/${pdsPatientId}`, {
+      headers,
+      timeout: 15000,
+    });
+    return { patient: res.data as Patient, source: 'pds' };
+  });
 }
 
 // ── Health check ─────────────────────────────────────────────────────────

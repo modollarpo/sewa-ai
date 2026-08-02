@@ -75,6 +75,25 @@ if (-not $webOnly) {
 Test-AzureAuthentication
 Out-Success "All pre-requisites verified."
 
+# Pre-deployment: Backup .env.azure with timestamp (always preserve live keys)
+$envAzurePath = "backend\.env.azure"
+if (Test-Path $envAzurePath) {
+    $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $backupName = ".env.azure.OLD_SECRETS_$stamp"
+    Copy-Item -Path $envAzurePath -Destination "backend\$backupName" -ErrorAction SilentlyContinue
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "  [BACKUP] Preserved -> backend\$backupName" -ForegroundColor DarkGreen
+    }
+    # Keep only last 5 backups to avoid clutter
+    $backups = Get-ChildItem backend\*.env.azure.OLD_SECRETS_* -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending
+    if ($backups -and $backups.Count -gt 5) {
+        $backups | Select-Object -Skip 5 | Remove-Item -Force -ErrorAction SilentlyContinue
+    }
+} else {
+    Write-Host "  [INFO] No backend\.env.azure to back up" -ForegroundColor DarkGray
+}
+
 if (-not $webOnly) {
     # 1. Commit changes
     Write-Host "[1/6] Committing local changes..." -ForegroundColor Yellow

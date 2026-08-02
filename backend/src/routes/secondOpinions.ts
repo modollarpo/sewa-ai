@@ -72,7 +72,7 @@ r.patch('/:id', async (req, res, next) => {
       where: { id: req.params.id },
       include: { scan: { select: { tenantId: true } } }
     });
-    if (!opinion || (opinion.scan as any)?.tenantId !== tenantId) {
+    if (!opinion || opinion.scan?.tenantId !== tenantId) {
       throw new AppError('Second opinion not found in this institution', 404);
     }
     // Only the assigned reviewer or an admin can update the opinion

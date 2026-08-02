@@ -116,7 +116,7 @@ function ScheduleView() {
   );
 }
 
-export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>void }) {
+export function TechnicianWorkspace({ onNavigate, tab: initialTab }: { onNavigate?: (p:string)=>void; tab?: string }) {
   const { user } = useAuthStore();
   const { worklist, loading: listLoading } = useTechnicianData();
   const [jobs, setJobs] = useState<UploadJob[]>([]);
@@ -126,7 +126,7 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [formError, setFormError] = useState('');
-  const [tab, setTab] = useState<'upload'|'queue'|'schedule'|'pacs'>('upload');
+  const [tab, setTab] = useState<'upload'|'queue'|'schedule'|'pacs'|'stats'>((initialTab as any) || 'upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [feedback, setFeedback] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
   const [pacsHealth, setPacsHealth] = useState<any>(null);
@@ -568,6 +568,66 @@ export function TechnicianWorkspace({ onNavigate }: { onNavigate?: (p:string)=>v
                     <div className="p-6 text-center bg-[#08160F] rounded-2xl border border-[#1B3028] border-dashed">
                       <p className="text-[10px] text-[#3A6055] font-bold uppercase tracking-widest">Integration health unavailable</p>
                       <p className="text-[9px] text-[#3A6055] mt-1">Backend may not be reachable</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* STATS / ANALYTICS TAB */}
+            {tab === 'stats' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: 'Total Scans Processed', value: jobs.length, color: '#408D7B', icon: '🩻' },
+                    { label: 'Completed', value: jobs.filter(j => j.status === 'ai_complete').length, color: '#1DBF73', icon: '✅' },
+                    { label: 'In Progress', value: jobs.filter(j => j.status === 'uploading' || j.status === 'processing').length, color: '#E08A20', icon: '⏳' },
+                    { label: 'Failed', value: jobs.filter(j => j.status === 'error').length, color: '#E03535', icon: '❌' },
+                  ].map(s => (
+                    <div key={s.label} className="p-5 bg-[#0C1D17] rounded-2xl border border-[#1B3028]">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[9px] font-black text-[#3A6055] uppercase tracking-widest">{s.label}</span>
+                        <span className="text-lg">{s.icon}</span>
+                      </div>
+                      <div className="text-2xl font-black font-mono" style={{ color: s.color }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-6 bg-[#0C1D17] rounded-2xl border border-[#1B3028]">
+                  <h3 className="text-sm font-black text-[#D0ECE6] uppercase tracking-widest mb-4">Throughput by Modality</h3>
+                  <div className="space-y-3">
+                    {['CT', 'MRI', 'XR', 'US', 'MG'].map(mod => {
+                      const count = jobs.filter(j => j.modality === mod).length;
+                      const maxCount = Math.max(1, ...['CT', 'MRI', 'XR', 'US', 'MG'].map(m => jobs.filter(j => j.modality === m).length));
+                      return (
+                        <div key={mod} className="flex items-center gap-4">
+                          <span className="text-[11px] font-black text-[#D0ECE6] w-10">{mod}</span>
+                          <div className="flex-1 h-3 bg-[#111F1A] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#408D7B] rounded-full transition-all duration-500" style={{ width: `${(count / maxCount) * 100}%` }} />
+                          </div>
+                          <span className="text-[10px] font-mono text-[#3A6055] w-8 text-right">{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="p-6 bg-[#0C1D17] rounded-2xl border border-[#1B3028]">
+                  <h3 className="text-sm font-black text-[#D0ECE6] uppercase tracking-widest mb-4">Recent AI Findings</h3>
+                  {jobs.filter(j => j.finding).slice(0, 10).length === 0 ? (
+                    <div className="py-8 text-center text-[#3A6055] text-xs font-bold uppercase tracking-widest">No AI findings yet</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {jobs.filter(j => j.finding).slice(0, 10).map(j => (
+                        <div key={j.id} className="flex items-center justify-between p-3 bg-[#111F1A] rounded-xl border border-[#1B3028]">
+                          <div className="flex items-center gap-3">
+                            <span className={`w-2 h-2 rounded-full ${j.urgency === 'CRITICAL' ? 'bg-[#E03535]' : j.urgency === 'URGENT' ? 'bg-[#E08A20]' : 'bg-[#1DBF73]'}`} />
+                            <span className="text-[11px] text-[#D0ECE6]">{j.finding}</span>
+                          </div>
+                          <span className="text-[9px] font-mono text-[#3A6055]">{j.modality} · {j.bodyPart}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

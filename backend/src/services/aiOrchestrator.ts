@@ -126,6 +126,7 @@ export interface TriageResult {
   shapValues?: Record<string, number>;
   inferenceMs: number;
   backend?: string;   // "onnx-int8" | "onnx-fp32" | "demo"
+  location?: string;
 }
 
 export interface UncertaintyResult {
@@ -173,6 +174,8 @@ export interface PathologyResult {
   model_version:   string;
   backend:         string;
   recommendation:  string;
+  gradCamUrl?:     string;
+  shapValues?:     Record<string, number>;
 }
 
 export interface MammographyResult {
@@ -189,6 +192,8 @@ export interface MammographyResult {
   model_version: string;
   backend: string;
   recommendation: string;
+  gradCamUrl?: string;
+  shapValues?: Record<string, number>;
 }
 
 export interface RetinalResult {
@@ -204,6 +209,8 @@ export interface RetinalResult {
   model_version: string;
   backend: string;
   recommendation: string;
+  gradCamUrl?: string;
+  shapValues?: Record<string, number>;
 }
 
 // ── Safe HTTP wrapper ────────────────────────────────────────────────────
@@ -316,7 +323,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     // ──────────────────────────────────────────────────────────────────────
 
     const patientAge = scan.patient?.dateOfBirth ? _getAge(scan.patient.dateOfBirth) : null;
-    const patientSex = (scan.patient as any)?.sex ?? null;
+    const patientSex = scan.patient?.sex ?? null;
 
     // ── 0. Fetch FHIR Clinical Context (Feature 7) ────────────────────────
     let clinicalContext = '';
@@ -390,8 +397,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           vlmImpression:       `${pathResult.primary_finding} (${(pathResult.confidence * 100).toFixed(0)}% confidence)` +
                                 (pathResult.gleason_grade ? `. ${pathResult.gleason_grade}.` : '') +
                                 (pathResult.ki67_estimate != null ? ` Ki67 index: ${(pathResult.ki67_estimate * 100).toFixed(0)}%.` : ''),
-          gradcamUrl: (pathResult as any).gradCamUrl,
-          shapValues: (pathResult as any).shapValues,
+          gradcamUrl: pathResult.gradCamUrl,
+          shapValues: pathResult.shapValues,
         },
       });
 
@@ -494,8 +501,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           vlmFindings:         mgResult.recommendation,
           vlmImpression:       `${mgResult.primary_finding} (BI-RADS: ${mgResult.birads_category ?? 'N/A'})` +
                                 ` — ${(mgResult.confidence * 100).toFixed(0)}% confidence`,
-          gradcamUrl: (mgResult as any).gradCamUrl,
-          shapValues: (mgResult as any).shapValues,
+          gradcamUrl: mgResult.gradCamUrl,
+          shapValues: mgResult.shapValues,
         },
       });
 
@@ -591,8 +598,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           vlmFindings:         retResult.recommendation,
           vlmImpression:       `${retResult.primary_finding} (DR grade: ${retResult.dr_grade ?? 'N/A'})` +
                                 ` — ${(retResult.confidence * 100).toFixed(0)}% confidence`,
-          gradcamUrl: (retResult as any).gradCamUrl,
-          shapValues: (retResult as any).shapValues,
+          gradcamUrl: retResult.gradCamUrl,
+          shapValues: retResult.shapValues,
         },
       });
 
@@ -708,7 +715,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     // STAGE 2: VLM Report — template-based on CPU, ~30ms
     // ──────────────────────────────────────────────────────────────────────
     await emitStageProgress(scanId, tenantId, 'vlm');
-    const reportLanguage = ((scan.tenant as any)?.reportLanguage ?? 'en') as SupportedLanguage;
+    const reportLanguage = (scan.tenant?.reportLanguage ?? 'en') as SupportedLanguage;
     const vlmSystemPrompt = buildVLMSystemPrompt(reportLanguage);
     const localizedUrgency = translateUrgency(triage.urgency, reportLanguage);
 

@@ -121,9 +121,9 @@ function GlobeMap({ data }: { data: { region: string, count: number }[] }) {
   );
 }
 
-export function SuperAdminDashboard() {
+export function SuperAdminDashboard({ tab: initialTab }: { tab?: string } = {}) {
   const { stats, tenants, regionalStats, health, healthOverall, telemetry, loading, error: _error } = useSuperAdminData();
-  const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'diagnostics'|'federated'|'billing'|'edge'>('overview');
+  const [tab, setTab] = useState<'overview'|'tenants'|'aimodels'|'deployments'|'diagnostics'|'federated'|'billing'|'edge'>((initialTab as any) || 'overview');
   const [tenantSearch, setTenantSearch] = useState('');
   const [showProvision, setShowProvision] = useState(false);
 

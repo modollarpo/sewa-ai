@@ -5,14 +5,22 @@ import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
 import { prisma } from '../utils/prismaClient';
 import { config } from '../config/env';
+import type { JwtPayload } from 'jsonwebtoken';
 
 const JWT_SECRET = config.JWT_SECRET;
+
+interface SocketTokenPayload extends JwtPayload {
+  tenantId: string;
+  id: string;
+  role: string;
+}
+
 export function setupSocketIO(io: Server) {
   io.use((socket, next) => {
     try {
       const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
       if (!token) return next(new Error('No token'));
-      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      const decoded = jwt.verify(token, JWT_SECRET) as SocketTokenPayload;
       socket.data.user = decoded;
       next();
     } catch { next(new Error('Invalid token')); }

@@ -39,7 +39,8 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [resolvedLang, isRTL]);
 
   const t = (key: TranslationKey): string => {
-    return translations[resolvedLang]?.[key] || translations.en[key] || key;
+    const dict = translations as Record<string, Record<string, string>>;
+    return dict[resolvedLang]?.[key] || dict.en[key] || key;
   };
 
   return (

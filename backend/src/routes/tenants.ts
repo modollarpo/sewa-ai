@@ -118,10 +118,11 @@ r.post('/integrations/pacs/echo', authorize('admin', 'superadmin'), async (req, 
     const { tenantId } = req.user!;
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: {} as any, // pacsHost/pacsPort may not be in schema yet; use env fallback
+      select: {} as Record<string, never>,
     });
-    const host = (tenant as any)?.pacsHost || process.env.PACS_HOST || 'pacs.sewa.nhs.uk';
-    const port = Number((tenant as any)?.pacsPort || process.env.PACS_PORT || 11112);
+    const t = tenant as { pacsHost?: string; pacsPort?: number } | null;
+    const host = t?.pacsHost || process.env.PACS_HOST || 'pacs.sewa.nhs.uk';
+    const port = Number(t?.pacsPort || process.env.PACS_PORT || 11112);
 
     const net = await import('net');
     const reachable = await new Promise<boolean>((resolve) => {

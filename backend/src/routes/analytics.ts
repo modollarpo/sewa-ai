@@ -152,9 +152,9 @@ r.get('/referral-network', async (req, res, next) => {
     });
 
     const network: Record<string, { from:string, to:string, count:number }> = {};
-    flows.forEach((f: any) => {
-      const from = (f as any).referringDoctor?.tenant?.name;
-      const to = (f as any).tenant?.name;
+    flows.forEach((f) => {
+      const from = f.referringDoctor?.tenant?.name;
+      const to = f.tenant?.name;
       if (from && to && from !== to) {
         const key = `${from}->${to}`;
         if (!network[key]) network[key] = { from, to, count: 0 };

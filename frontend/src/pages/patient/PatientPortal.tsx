@@ -1,6 +1,6 @@
 // SEWA XAI — PatientPortal.tsx
-// Patient-facing results portal: scan history, AI insights, appointments, billing
-import React, { useState, useEffect } from 'react';
+// Patient-facing results portal: scan history, AI insights, appointments, billing, messaging
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { usePatientData, usePatientAppointments } from '../../hooks/useDashboardData';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -14,7 +14,13 @@ export function PatientPortal() {
   const { user } = useAuthStore();
   const { scans, loading: scansLoading } = usePatientData();
   const { appointments, loading: apptsLoading } = usePatientAppointments();
-  const [tab, setTab] = useState<'scans'|'appointments'|'progression'|'consent'|'access'|'account'|'billing'>('scans');
+  const [tab, setTab] = useState<'scans'|'appointments'|'progression'|'consent'|'access'|'account'|'billing'|'messages'>('scans');
+  const [messages, setMessages] = useState<any[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [sendingMsg, setSendingMsg] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showBooking, setShowBooking] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -34,6 +40,54 @@ export function PatientPortal() {
       .catch(() => setPayments([]))
       .finally(() => setPaymentsLoading(false));
   }, [tab]);
+
+  useEffect(() => {
+    if (tab !== 'messages') return;
+    setMessagesLoading(true);
+    apiClient.get('/messages?role=patient')
+      .then(r => setMessages(Array.isArray(r.data) ? r.data : (r.data?.messages || [])))
+      .catch(() => setMessages([]))
+      .finally(() => setMessagesLoading(false));
+  }, [tab]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
+    setSendingMsg(true);
+    try {
+      const res = await apiClient.post('/messages', {
+        content: newMessage.trim(),
+        recipientRole: 'doctor',
+      });
+      setMessages(prev => [...prev, res.data.message || res.data]);
+      setNewMessage('');
+    } catch {
+      setStatus({ msg: 'Failed to send message.', type: 'err' });
+    } finally {
+      setSendingMsg(false);
+    }
+  };
+
+  const handleDownloadPdf = async (scanId: string) => {
+    setDownloadingPdf(scanId);
+    try {
+      const res = await apiClient.get(`/reports/${scanId}/pdf`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `report-${scanId.slice(0, 8)}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setStatus({ msg: 'Report downloaded successfully.', type: 'ok' });
+    } catch {
+      setStatus({ msg: 'Report download failed.', type: 'err' });
+    } finally {
+      setDownloadingPdf(null);
+    }
+  };
 
   const handlePasswordChange = async () => {
     if (!passForm.currentPassword || !passForm.newPassword) {
@@ -97,14 +151,14 @@ export function PatientPortal() {
 
       {/* Navigation Tabs */}
       <nav className="max-w-5xl mx-auto flex items-center gap-1 mb-10 w-full md:w-fit overflow-x-auto scrollbar-none" style={{borderBottom:'1px solid #1B3028'}}>
-        {['scans','appointments','progression','billing','account'].map(t => (
+        {['scans','appointments','progression','messages','billing','account'].map(t => (
           <button 
             key={t} 
             onClick={() => setTab(t as any)}
             style={tabStyle(t)}
             className="text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
           >
-            <span>{t==='scans'?'🩻':t==='appointments'?'📅':t==='progression'?'📈':t==='billing'?'💳':'👤'}</span>
+            <span>{t==='scans'?'🩻':t==='appointments'?'📅':t==='progression'?'📈':t==='messages'?'💬':t==='billing'?'💳':'👤'}</span>
             {t}
           </button>
         ))}
@@ -140,9 +194,20 @@ export function PatientPortal() {
                     <div className="w-2 h-2 rounded-full bg-[#1DBF73] animate-pulse" />
                     <span className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest">Analysis Verified</span>
                   </div>
-                  {s.aiResult?.confidence && (
-                    <ConfidenceIndicator value={s.aiResult.confidence} size="sm" />
-                  )}
+                  <div className="flex items-center gap-3">
+                    {s.reportReady && (
+                      <button
+                        onClick={() => handleDownloadPdf(s.id)}
+                        disabled={downloadingPdf === s.id}
+                        className="px-3 py-1.5 rounded-lg bg-[#408D7B]/10 text-[#408D7B] border border-[#408D7B]/20 text-[8px] font-black uppercase tracking-widest hover:bg-[#408D7B]/20 transition-all disabled:opacity-50"
+                      >
+                        {downloadingPdf === s.id ? '...' : '📄 PDF'}
+                      </button>
+                    )}
+                    {s.aiResult?.confidence && (
+                      <ConfidenceIndicator value={s.aiResult.confidence} size="sm" />
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -281,6 +346,74 @@ export function PatientPortal() {
               </p>
               <div className="inline-flex items-center gap-2 text-[9px] font-mono text-[#408D7B] uppercase tracking-widest">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#408D7B]" /> HIPAA Compliant Node
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tab==='messages' && (
+          <div className="p-6 bg-[#0C1D17] rounded-3xl border border-[#1B3028] shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-black text-[#D0ECE6] uppercase">Secure Messages</h3>
+                <p className="text-xs text-[#3A6055] mt-1 font-medium">Encrypted communication with your care team.</p>
+              </div>
+              <span className="text-[10px] font-mono text-[#408D7B] uppercase font-bold">{messages.length} messages</span>
+            </div>
+
+            <div className="h-[400px] flex flex-col border border-[#1B3028] rounded-2xl overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#050F0C]">
+                {messagesLoading ? (
+                  <div className="flex items-center justify-center h-full text-[#3A6055] text-xs font-bold uppercase tracking-widest">Loading messages...</div>
+                ) : messages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <div className="text-3xl mb-3 opacity-30">💬</div>
+                    <p className="text-[#3A6055] text-xs font-bold uppercase tracking-widest">No messages yet</p>
+                    <p className="text-[#3A6055] text-[10px] mt-1">Your care team will message you here.</p>
+                  </div>
+                ) : (
+                  messages.map((msg: any, i: number) => (
+                    <div key={msg.id || i} className={`flex ${msg.fromPatient ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] p-4 rounded-2xl ${
+                        msg.fromPatient
+                          ? 'bg-[#408D7B]/20 border border-[#408D7B]/30 rounded-br-md'
+                          : 'bg-[#111F1A] border border-[#1B3028] rounded-bl-md'
+                      }`}>
+                        <p className="text-sm text-[#D0ECE6]">{msg.content || msg.text}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className={`text-[8px] font-mono ${msg.fromPatient ? 'text-[#408D7B]' : 'text-[#3A6055]'}`}>
+                            {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
+                          </span>
+                          {msg.fromPatient && <span className="text-[8px] text-[#408D7B]">✓</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <div className="p-4 border-t border-[#1B3028] bg-[#08160F]">
+                <div className="flex gap-3">
+                  <input
+                    value={newMessage}
+                    onChange={e => setNewMessage(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
+                    placeholder="Type your message..."
+                    className="flex-1 bg-[#050F0C] border border-[#1B3028] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#408D7B] transition-colors text-[#D0ECE6]"
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={sendingMsg || !newMessage.trim()}
+                    className="px-6 py-3 rounded-xl bg-[#408D7B] hover:bg-[#52B09A] text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-30 disabled:grayscale flex items-center gap-2"
+                  >
+                    {sendingMsg ? (
+                      <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    ) : (
+                      'Send'
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

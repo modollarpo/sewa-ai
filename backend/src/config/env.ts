@@ -77,6 +77,19 @@ export const config = {
   JWT_SECRET:           required('JWT_SECRET'),
   JWT_REFRESH_SECRET:   required('JWT_REFRESH_SECRET'),
   ENCRYPTION_KEY:       required('ENCRYPTION_KEY'),
+  NHS_CIS2_ENABLED:     optional('NHS_CIS2_ENABLED', 'false') === 'true',
+  NHS_CIS2_ISSUER:      optional('NHS_CIS2_ISSUER', 'https://auth.cis2.nhs.uk'),
+  NHS_CIS2_CLIENT_ID:   optional('NHS_CIS2_CLIENT_ID'),
+  NHS_CIS2_CLIENT_SECRET: optional('NHS_CIS2_CLIENT_SECRET'),
+
+  // ── Research / Study Mode ─────────────────────────────────────
+  RESEARCH_MODE_ENABLED: optional('RESEARCH_MODE_ENABLED', 'false') === 'true',
+  STUDY_ID:              optional('STUDY_ID'),
+  BLIND_RADIOLOGIST:     optional('BLIND_RADIOLOGIST', 'true') === 'true',
+
+  // ── Governance Contacts ───────────────────────────────────────
+  CALDICOTT_GUARDIAN_EMAIL: optional('CALDICOTT_GUARDIAN_EMAIL'),
+  DPO_EMAIL:                optional('DPO_EMAIL', 'dpo@sewaxai.health'),
 
   // ── AI Services ──────────────────────────────────────────────
   // Local: http://localhost:8000 … 8005

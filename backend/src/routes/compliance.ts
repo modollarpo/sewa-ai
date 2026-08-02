@@ -17,7 +17,7 @@ r.use(authenticate, authorize('admin', 'superadmin'));
  */
 r.get('/frameworks', async (req, res, next) => {
   try {
-    const tenantId = (req as any).user.tenantId;
+    const tenantId = req.user!.tenantId;
     const records = await prisma.complianceRecord.findMany({
       where: { tenantId }
     });
@@ -30,7 +30,7 @@ r.get('/frameworks', async (req, res, next) => {
  */
 r.get('/consent-metrics', async (req, res, next) => {
   try {
-    const tenantId = (req as any).user.tenantId;
+    const tenantId = req.user!.tenantId;
     
     // In a real app, these would count Patient records with specific consent flags
     const [total, aiConsent, researchConsent, optOuts] = await Promise.all([
@@ -56,7 +56,7 @@ r.get('/consent-metrics', async (req, res, next) => {
  */
 r.get('/report', async (req, res, next) => {
   try {
-    const tenantId = (req as any).user.tenantId;
+    const tenantId = req.user!.tenantId;
     const framework = (req.query.framework as string) || 'NHS DSPT';
     const report = await generateComplianceReport(tenantId, framework);
     res.json(report);
@@ -85,7 +85,7 @@ r.get('/eu-ai-act/models', async (req, res, next) => {
 // Get EU AI Act registration summary
 r.get('/eu-ai-act/summary', async (req, res, next) => {
   try {
-    const tenantId = (req as any).user.tenantId;
+    const tenantId = req.user!.tenantId;
     const total = EU_AI_ACT_MODELS.length;
     const highRisk = EU_AI_ACT_MODELS.filter(m => m.riskCategory === 'HIGH').length;
     const mediumRisk = EU_AI_ACT_MODELS.filter(m => m.riskCategory === 'MEDIUM').length;
@@ -124,7 +124,7 @@ r.post('/eu-ai-act/documentation', async (req, res, next) => {
  */
 r.post('/evidence', async (req, res, next) => {
   try {
-    const tenantId = (req as any).user.tenantId;
+    const tenantId = req.user!.tenantId;
     const { framework, controlArea, filename, mimeType } = req.body;
 
     if (!framework || !filename) {

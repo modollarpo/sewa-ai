@@ -51,16 +51,16 @@ export async function enqueueScanProcessing(
                       priority === 'normal' ? 3 : 4;
 
   const job = await scanQueue.add(
-    'process-scan' as any,
-    { scanId, tenantId } as any,
+    'process-scan',
+    { scanId, tenantId },
     {
       priority: bullPriority,
-      jobId: scanId, // Use scanId as jobId to prevent duplicates
+      jobId: scanId,
     }
   );
 
   logger.info(`[Scan Queue] Enqueued scan ${scanId} (tenant: ${tenantId}, priority: ${priority}, job: ${job.id})`);
-  return job as Job<ScanJobData, any, string>;
+  return job;
 }
 
 // Worker function to process scan jobs

@@ -61,11 +61,11 @@ r.get('/invite/:token', async (req, res, next) => {
   try {
     const { token } = req.params;
     const user = await prisma.user.findFirst({
-      where: { inviteToken: token, status: 'pending_invite' } as any,
+      where: { inviteToken: token, status: 'pending_invite' },
       select: { email: true, role: true, tenant: { select: { name: true } } },
     });
     if (!user) return res.status(404).json({ error: 'Invalid or expired invitation token' });
-    res.json({ email: user.email, role: user.role, tenantName: (user as any).tenant?.name ?? 'SEWA XAI' });
+    res.json({ email: user.email, role: user.role, tenantName: user.tenant?.name ?? 'SEWA XAI' });
   } catch (err) { next(err); }
 });
 
@@ -85,7 +85,7 @@ r.post('/invite/:token/accept', authLimiter, async (req, res, next) => {
       return res.status(400).json({ error: 'Password must contain at least one number' });
 
     const user = await prisma.user.findFirst({
-      where: { inviteToken: token, status: 'pending_invite' } as any,
+      where: { inviteToken: token, status: 'pending_invite' },
     });
     if (!user) return res.status(404).json({ error: 'Invalid or expired invitation token' });
 
@@ -96,7 +96,7 @@ r.post('/invite/:token/accept', authLimiter, async (req, res, next) => {
         firstName, lastName, passwordHash,
         status: 'active',
         inviteToken: null,
-      } as any,
+      },
     });
 
     logger.info(`[Auth] Invite accepted: user ${user.id} (${user.email}) activated`);

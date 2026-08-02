@@ -124,7 +124,7 @@ r.get('/metrics', async (req, res, next) => {
     // Deterministic per-hour bucket for stable baseline metrics when data is sparse
     const hrBucket = Math.floor(Date.now() / 3_600_000);
     
-    const byCondition = (statsByCondition as any[]).map((c: any, idx: number) => {
+    const byCondition = statsByCondition.map((c: { primaryFinding: string; _count: { id: number } }, idx: number) => {
       const m = conditionMetrics[c.primaryFinding];
       const hasRealData = m && (m.tp + m.fp) > 5;
       
@@ -219,7 +219,7 @@ r.get('/latency', async (req, res, next) => {
 
     // Build 24 hourly buckets (ms values averaged per hour)
     const hourlyBuckets: number[][] = Array.from({ length: 24 }, (): number[] => []);
-    for (const r of results as any[]) {
+    for (const r of results) {
       const hrsAgo = Math.floor((now.getTime() - new Date(r.createdAt).getTime()) / 3_600_000);
       const bucket = 23 - Math.min(hrsAgo, 23); // index 0 = 00:00, index 23 = now
       if (r.inferenceMs) hourlyBuckets[bucket].push(r.inferenceMs);
@@ -232,7 +232,7 @@ r.get('/latency', async (req, res, next) => {
     );
 
     // Compute percentiles across all values
-    const allMs = (results as any[]).map((r: any) => r.inferenceMs).filter(Boolean).sort((a: number, b: number): number => a - b);
+    const allMs = results.map(r => r.inferenceMs).filter((ms): ms is number => ms !== null).sort((a: number, b: number): number => a - b);
     const pct = (arr: number[], p: number) => arr.length ? arr[Math.floor(arr.length * p / 100)] : null;
 
     res.json({

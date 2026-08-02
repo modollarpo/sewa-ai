@@ -151,7 +151,7 @@ class AlertService {
 
     // ── Save alert record ────────────────────────────────────────────────
     await prisma.notification.createMany({
-      data: (users as any[]).map(u => ({
+      data: users.map(u => ({
         userId: u.id, tenantId, type: urgency === 'CRITICAL' ? 'CRITICAL_ALERT' : 'URGENT_ALERT',
         title: `${urgency}: ${primaryFinding}`,
         message: `Confidence ${(confidence * 100).toFixed(0)}% · Door-to-alert ${doorToAlertMs}ms`,

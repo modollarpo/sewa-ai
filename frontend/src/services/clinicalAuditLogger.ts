@@ -1,6 +1,16 @@
 // services/clinicalAuditLogger.ts
 import { apiClient } from './apiClient';
-import { apiClient as externalApiClient } from 'axios';
+import axios from 'axios';
+
+export type ClinicalActionType =
+  | 'AI_ANALYSIS_COMPLETED'
+  | 'CONFIDENCE_VERIFICATION'
+  | 'CLINICAL_CONFIRMATION'
+  | 'SECOND_OPINION_REQUESTED'
+  | 'PATIENT_CONSENT_OBTAINED'
+  | 'ENCRYPTION_APPLIED'
+  | 'DATA_ACCESS_LOGGED'
+  | 'AUDIT_EXPORT_GENERATED';
 
 export interface ClinicalActionLog {
   id: string;
@@ -17,19 +27,10 @@ export interface ClinicalActionLog {
   clinicalVerification?: 'CONFIRMED' | 'PENDING' | 'REJECTED' | 'MONITORING';
   outcome?: string;
   regulatoryCompliance?: ComplianceStatus;
-  auditTrail?: string;
+  auditTrail?: string[];
   metadata?: Record<string, any>;
-}
-
-export interface ClinicalActionType {
-  AI_ANALYSIS_COMPLETED: string;
-  CONFIDENCE_VERIFICATION: string;
-  CLINICAL_CONFIRMATION: string;
-  SECOND_OPINION_REQUESTED: string;
-  PATIENT_CONSENT_OBTAINED: string;
-  ENCRYPTION_APPLIED: string;
-  DATA_ACCESS_LOGGED: string;
-  AUDIT_EXPORT_GENERATED: string;
+  userAgent?: string;
+  ipAddress?: string;
 }
 
 export interface ComplianceStatus {
@@ -63,6 +64,8 @@ export interface EncryptionAuditLog {
   dataAtRest: boolean;
   dataInTransit: boolean;
 }
+
+type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 
 export class ClinicalAuditLogger {
   private static instance: ClinicalAuditLogger;
@@ -212,12 +215,13 @@ export class ClinicalAuditLogger {
   }
 
   private async enrichClinicalAction(action: ClinicalActionLog): Promise<ClinicalActionLog> {
+    const ip = await this.getCurrentIP();
     const enriched: ClinicalActionLog = {
       ...action,
       id: action.id || `audit_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       timestamp: action.timestamp || new Date(),
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
-      ipAddress: await this.getCurrentIP(),
+      ipAddress: ip,
       auditTrail: [],
       regulatoryCompliance: {
         gdpr: 'COMPLIANT',
@@ -227,7 +231,7 @@ export class ClinicalAuditLogger {
         lastChecked: new Date(),
         nextReview: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       },
-    }
+    };
 
     return enriched;
   }
@@ -256,7 +260,7 @@ export class ClinicalAuditLogger {
 
   private async getCurrentIP(): Promise<string> {
     try {
-      const response = await externalApiClient.get('https://ipapi.co/json/');
+      const response = await axios.get('https://ipapi.co/json/');
       return response.data.ip;
     } catch {
       return '192.0.2.1'; // Fallback IP for testing

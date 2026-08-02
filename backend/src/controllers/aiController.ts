@@ -343,14 +343,14 @@ export const getExplanation = async (req: Request, res: Response, next: NextFunc
     });
     if (!result) throw new AppError('AI result not found or access denied', 404);
 
-    const urgency  = (result as any).urgency  ?? 'NORMAL';
+    const urgency  = result.urgency ?? 'NORMAL';
     const finding  = result.primaryFinding ?? 'No significant findings';
-    const conf     = result.confidence ? Math.round((result as any).confidence * 100) : null;
-    const vlm      = (result as any).vlmFindings ?? '';
-    const modality = (result as any).scan?.modality ?? 'scan';
-    const bodyPart = (result as any).scan?.bodyPart ?? 'area';
-    const gradcamUrl = (result as any).gradcamUrl ?? null;
-    const shapValues = (result as any).shapValues ?? null;
+    const conf     = result.confidence ? Math.round(result.confidence * 100) : null;
+    const vlm      = result.vlmFindings ?? '';
+    const modality = result.scan?.modality ?? 'scan';
+    const bodyPart = result.scan?.bodyPart ?? 'area';
+    const gradcamUrl = result.gradcamUrl ?? null;
+    const shapValues = result.shapValues ?? null;
 
     let urgencyText = 'Our clinical team has been informed and will review your results soon.';
     if (urgency === 'CRITICAL') {

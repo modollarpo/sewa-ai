@@ -41,8 +41,8 @@ export async function validateCode(
       });
       return res.data?.parameter?.some((p: any) => p.name === 'result' && p.valueBoolean === true) ?? false;
     }
-    logger.warn('[Terminology] No terminology service configured — skipping validation');
-    return true;
+    logger.error('[Terminology] No terminology service configured — cannot validate codes in clinical production');
+    return false;
   } catch (err) {
     logger.warn(`[Terminology] Code validation failed: ${err}`);
     return false;

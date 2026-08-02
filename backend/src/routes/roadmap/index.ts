@@ -173,7 +173,7 @@ router.get('/continuous-learning/corrections',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
-      const params = new URLSearchParams(req.query as any).toString();
+      const params = new URLSearchParams(req.query as Record<string, string>).toString();
       const response = await fetch(`${clUrl}/corrections?${params}`);
       const data = await response.json();
       res.json(data);
@@ -217,7 +217,7 @@ router.get('/continuous-learning/training/runs',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
-      const params = new URLSearchParams(req.query as any).toString();
+      const params = new URLSearchParams(req.query as Record<string, string>).toString();
       const response = await fetch(`${clUrl}/training/runs?${params}`);
       const data = await response.json();
       res.json(data);
@@ -259,7 +259,7 @@ router.get('/continuous-learning/drift/snapshots',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const clUrl = process.env.CL_SERVICE_URL ?? 'http://sewa-continuous:8005';
-      const params = new URLSearchParams(req.query as any).toString();
+      const params = new URLSearchParams(req.query as Record<string, string>).toString();
       const response = await fetch(`${clUrl}/drift/snapshots?${params}`);
       const data = await response.json();
       res.json(data);

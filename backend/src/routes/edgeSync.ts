@@ -49,7 +49,9 @@ router.post('/sync',
             OR: [
               { accessionNumber: edgeScan.accessionNumber },
               { dicomInstanceUid: edgeScan.dicomInstanceUid }
-            ].filter(cond => cond.accessionNumber || cond.dicomInstanceUid) as any
+            ].filter((cond): cond is { accessionNumber: string } | { dicomInstanceUid: string } =>
+              !!(cond.accessionNumber || cond.dicomInstanceUid)
+            )
           }
         });
 
@@ -141,7 +143,7 @@ router.post('/preprocessed', async (req, res) => {
       scans.map((s: Record<string, unknown>) => ({
         scanId: s.scanId as string,
         siteId: (s.siteId as string) || siteId as string,
-        tenantId: (req as any).tenantId || 'default',
+        tenantId: req.user?.tenantId || 'default',
         edgeDeviceId: edgeDeviceId as string,
         modality: (s.modality as string) || 'Unknown',
         bodyPart: s.bodyPart as string | undefined,

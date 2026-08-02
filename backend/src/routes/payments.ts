@@ -275,13 +275,15 @@ r.get('/invoices/:id/pdf',
       });
       if (!payment) throw new AppError('Invoice not found', 404);
 
-      // 2. Try Stripe hosted PDF first (if payment was via Stripe)
-      if ((payment as any).stripeInvoiceId) {
+      // 2. Try Stripe hosted PDF first (if payment has a stored invoice ID in metadata)
+      const metadata = payment.metadata as Record<string, unknown> | null;
+      const stripeInvoiceId = metadata?.stripeInvoiceId as string | undefined;
+      if (stripeInvoiceId) {
         try {
           const Stripe = (await import('stripe')).default;
           const { config: cfg } = await import('../config/env');
           const stripe = new Stripe(cfg.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' });
-          const inv = await stripe.invoices.retrieve((payment as any).stripeInvoiceId);
+          const inv = await stripe.invoices.retrieve(stripeInvoiceId);
           if (inv.invoice_pdf) {
             return res.redirect(302, inv.invoice_pdf);
           }
@@ -308,7 +310,7 @@ r.get('/invoices/:id/pdf',
          .text('INVOICE', 400, 50, { align: 'right' });
       doc.fontSize(10).font('Helvetica').fillColor('#333')
          .text(`Invoice #: ${id}`, 400, 80, { align: 'right' })
-         .text(`Date: ${new Date((payment as any).createdAt).toLocaleDateString('en-GB')}`, 400, 92, { align: 'right' });
+         .text(`Date: ${new Date(payment.createdAt).toLocaleDateString('en-GB')}`, 400, 92, { align: 'right' });
 
       doc.moveTo(50, 120).lineTo(545, 120).stroke('#E0E0E0');
 
@@ -339,7 +341,7 @@ r.get('/invoices/:id/pdf',
       doc.moveTo(50, 300).lineTo(545, 300).stroke('#E0E0E0');
 
       // Status badge
-      const status = (payment as any).status ?? 'PAID';
+      const status = payment.status ?? 'PAID';
       doc.fontSize(12).font('Helvetica-Bold')
          .fillColor(status === 'PAID' ? '#1DBF73' : '#E08A20')
          .text(`Status: ${status}`, 50, 320);

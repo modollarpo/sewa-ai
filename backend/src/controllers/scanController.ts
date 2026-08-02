@@ -125,7 +125,7 @@ export async function uploadScan(req: Request, res: Response, next: NextFunction
     }
 
     // Enqueue AI Triage Engine job (Feature 3)
-    enqueueScanProcessing(scan.id, tenantId, priority.toLowerCase() as any).catch(err => {
+    enqueueScanProcessing(scan.id, tenantId, priority.toLowerCase() as 'low' | 'normal' | 'high' | 'critical').catch(err => {
       logger.error(`[Scan] AI Triage enqueue failed: ${err.message}`);
     });
 
