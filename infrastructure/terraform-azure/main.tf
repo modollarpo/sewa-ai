@@ -88,16 +88,11 @@ resource "azurerm_container_registry" "acr" {
   zone_redundancy_enabled       = true
   tags                          = local.tags
 
+  # GitHub Actions hosted runners push via OIDC — they use variable
+  # public IPs, so the ACR must accept public access. Authentication is
+  # still enforced via AAD/OIDC tokens (admin_enabled = false).
   network_rule_set {
-    default_action = "Deny"
-    ip_rule {
-      action   = "Allow"
-      ip_range = "102.89.76.191/32"
-    }
-    virtual_network {
-      action    = "Allow"
-      subnet_id = azurerm_subnet.aks.id
-    }
+    default_action = "Allow"
   }
 
   georeplications {
