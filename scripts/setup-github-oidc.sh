@@ -112,14 +112,15 @@ if [[ -n "$ACR_RESOURCE_ID" ]]; then
   echo "   ✅ AcrPush → ACR"
 fi
 
-# Azure Kubernetes Service Cluster Admin — get credentials + deploy manifests
+# Azure Kubernetes Service RBAC Cluster Admin — get credentials + deploy manifests
+# (Cluster uses Azure RBAC for Kubernetes authorization — requires the RBAC role family)
 if [[ -n "$AKS_RESOURCE_ID" ]]; then
   az role assignment create \
     --assignee    "$SP_OBJECT_ID" \
-    --role        "Azure Kubernetes Service Cluster Admin Role" \
+    --role        "Azure Kubernetes Service RBAC Cluster Admin" \
     --scope       "$AKS_RESOURCE_ID" \
-    --output      none 2>/dev/null || echo "   ℹ️  AKS admin role already assigned"
-  echo "   ✅ AKS Cluster Admin → AKS"
+    --output      none 2>/dev/null || echo "   ℹ️  AKS RBAC admin role already assigned"
+  echo "   ✅ AKS RBAC Cluster Admin → AKS"
 fi
 
 # Key Vault Secrets User — read secrets during deploy
