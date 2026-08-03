@@ -301,7 +301,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION }}
       - name: Install kubelogin (for AAD-enabled clusters)
-        uses: azure/setup-kubelogin@v1
+        uses: azure/use-kubelogin@v1
       - name: Set AKS context
         run: az aks get-credentials --resource-group sewa-ai-prod-rg --name sewa-ai-prod-eu-aks --overwrite-existing
       - name: Configure kubelogin to use service principal
@@ -342,7 +342,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION }}
       - name: Install kubelogin (for AAD-enabled clusters)
-        uses: azure/setup-kubelogin@v1
+        uses: azure/use-kubelogin@v1
       - name: Set AKS context
         run: az aks get-credentials --resource-group sewa-ai-prod-rg --name sewa-ai-prod-eu-aks --overwrite-existing
       - name: Configure kubelogin to use service principal
@@ -483,7 +483,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION }}
       - name: Install kubelogin (for AAD-enabled clusters)
-        uses: azure/setup-kubelogin@v1
+        uses: azure/use-kubelogin@v1
       - name: Set AKS context
         run: az aks get-credentials --resource-group sewa-ai-prod-rg --name sewa-ai-prod-eu-aks --overwrite-existing
       - name: Configure kubelogin to use service principal
