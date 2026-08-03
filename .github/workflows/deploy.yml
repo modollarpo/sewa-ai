@@ -309,11 +309,21 @@ jobs:
       - name: Configure kubelogin to use service principal
         run: |
           kubelogin convert-kubeconfig -l azurecli
+      - name: Apply manifests
+        run: |
+          kubectl apply -f azure/k8s/namespace.yaml
+          kubectl apply -f azure/k8s/configmap.yaml
+          kubectl apply -f azure/k8s/workload-identity.yaml || true
+          kubectl apply -f azure/k8s/backend-deployment-prod.yaml
+          kubectl apply -f azure/k8s/frontend-deployment.yaml
+          kubectl apply -f azure/k8s/ai-services-deployment-prod.yaml
+          kubectl apply -f azure/k8s/redis-deployment.yaml
+          kubectl apply -f azure/k8s/ingress.yaml || true
       - name: Deploy to AKS
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
-          kubectl set image deployment/sewa-backend  sewa-backend=sewaaieuprodacr.azurecr.io/sewa-backend:staging-${SHORT_SHA}  -n sewa-ai
-          kubectl set image deployment/sewa-frontend sewa-frontend=sewaaieuprodacr.azurecr.io/sewa-frontend:staging-${SHORT_SHA} -n sewa-ai
+          kubectl set image deployment/sewa-backend  backend=sewaaieuprodacr.azurecr.io/sewa-backend:staging-${SHORT_SHA}  -n sewa-ai
+          kubectl set image deployment/sewa-frontend frontend=sewaaieuprodacr.azurecr.io/sewa-frontend:staging-${SHORT_SHA} -n sewa-ai
           kubectl set image deployment/sewa-triage   triage=sewaaieuprodacr.azurecr.io/sewa-ai-triage:staging-${SHORT_SHA}      -n sewa-ai
           kubectl set image deployment/sewa-vlm-report vlm-report=sewaaieuprodacr.azurecr.io/sewa-ai-vlm-report:staging-${SHORT_SHA} -n sewa-ai
           kubectl rollout status deployment/sewa-backend -n sewa-ai --timeout=300s
@@ -352,15 +362,37 @@ jobs:
       - name: Configure kubelogin to use service principal
         run: |
           kubelogin convert-kubeconfig -l azurecli
+      - name: Apply manifests
+        run: |
+          kubectl apply -f azure/k8s/namespace.yaml
+          kubectl apply -f azure/k8s/configmap.yaml
+          kubectl apply -f azure/k8s/workload-identity.yaml || true
+          kubectl apply -f azure/k8s/backend-deployment-prod.yaml
+          kubectl apply -f azure/k8s/frontend-deployment.yaml
+          kubectl apply -f azure/k8s/ai-services-deployment-prod.yaml
+          kubectl apply -f azure/k8s/redis-deployment.yaml
+          kubectl apply -f azure/k8s/ingress.yaml || true
       - name: Rolling deploy — all services
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
           TAG="main-${SHORT_SHA}"
-          declare -A DEPLOY=(["backend"]="sewa-backend:sewa-backend" ["frontend"]="sewa-frontend:sewa-frontend" ["triage"]="sewa-triage:sewa-ai-triage" ["vlm-report"]="sewa-vlm-report:sewa-ai-vlm-report" ["uncertainty"]="sewa-uncertainty:sewa-ai-uncertainty" ["metacognition"]="sewa-metacognition:sewa-ai-metacognition" ["federated"]="sewa-federated:sewa-ai-federated" ["continuous"]="sewa-continuous:sewa-ai-continuous" ["pathology"]="sewa-pathology:sewa-ai-pathology" ["mammography"]="sewa-mammography:sewa-ai-mammography" ["retinal"]="sewa-retinal:sewa-ai-retinal")
-          for entry in "${DEPLOY[@]}"; do
-            DEP_NAME="${entry%%:*}"
-            IMG_NAME="${entry##*:}"
-            kubectl set image deployment/${DEP_NAME} ${DEP_NAME}=sewaaieuprodacr.azurecr.io/${IMG_NAME}:${TAG} -n sewa-ai
+          declare -A DEPLOY
+          DEPLOY[sewa-backend]="backend:sewa-backend"
+          DEPLOY[sewa-frontend]="frontend:sewa-frontend"
+          DEPLOY[sewa-triage]="triage:sewa-ai-triage"
+          DEPLOY[sewa-vlm-report]="vlm-report:sewa-ai-vlm-report"
+          DEPLOY[sewa-uncertainty]="uncertainty:sewa-ai-uncertainty"
+          DEPLOY[sewa-metacognition]="metacognition:sewa-ai-metacognition"
+          DEPLOY[sewa-federated]="federated:sewa-ai-federated"
+          DEPLOY[sewa-continuous]="continuous:sewa-ai-continuous"
+          DEPLOY[sewa-pathology]="pathology:sewa-ai-pathology"
+          DEPLOY[sewa-mammography]="mammography:sewa-ai-mammography"
+          DEPLOY[sewa-retinal]="retinal:sewa-ai-retinal"
+          for dep in "${!DEPLOY[@]}"; do
+            PAIR="${DEPLOY[$dep]}"
+            CONTAINER="${PAIR%%:*}"
+            IMG="${PAIR##*:}"
+            kubectl set image deployment/${dep} ${CONTAINER}=sewaaieuprodacr.azurecr.io/${IMG}:${TAG} -n sewa-ai
           done
           kubectl rollout status deployment/sewa-backend   -n sewa-ai --timeout=600s
           kubectl rollout status deployment/sewa-frontend  -n sewa-ai --timeout=300s
