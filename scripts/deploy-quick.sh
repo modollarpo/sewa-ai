@@ -66,6 +66,15 @@ if ! kubectl cluster-info --context "${AKS_CLUSTER}" &>/dev/null; then
     --name "${AKS_CLUSTER}" --overwrite-existing
 fi
 
+# Safety guard: verify the current kubectl context targets SEWA production.
+CURRENT_CTX=$(kubectl config current-context 2>/dev/null || echo "unknown")
+if [ "${CURRENT_CTX}" != "${AKS_CLUSTER}" ]; then
+  warn "Current context is '${CURRENT_CTX}' — switching to '${AKS_CLUSTER}'..."
+  kubectl config use-context "${AKS_CLUSTER}" >/dev/null || \
+    die "Could not switch context to ${AKS_CLUSTER}. Aborting to avoid deploying to the wrong cluster."
+fi
+info "Using context: ${CURRENT_CTX}"
+
 # Services to update (deployment:container:acr_image)
 declare -A SERVICE_IMAGES=(
   ["sewa-backend"]="backend:sewa-backend"
