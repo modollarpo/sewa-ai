@@ -24,19 +24,20 @@ LOCATION="swedencentral"
 NAMESPACE="sewa-ai"
 KUBECONFIG_PATH="${HOME}/.kube/config"
 
-# Image services (deployment:container:acr_image)
+# Image services (deployment:container:acr_image:dockerfile_path)
+# Deployment/container names match live cluster (kubectl get deploy -n sewa-ai).
 SERVICES=(
-  "backend:backend:sewa-backend"
-  "frontend:frontend:sewa-frontend"
-  "ai-triage:triage:sewa-ai-triage"
-  "ai-vlm-report:vlm-report:sewa-ai-vlm-report"
-  "ai-uncertainty:uncertainty:sewa-ai-uncertainty"
-  "ai-metacognition:metacognition:sewa-ai-metacognition"
-  "ai-federated:federated:sewa-ai-federated"
-  "ai-continuous:continuous:sewa-ai-continuous"
-  "ai-pathology:pathology:sewa-ai-pathology"
-  "ai-mammography:mammography:sewa-ai-mammography"
-  "ai-retinal:retinal:sewa-ai-retinal"
+  "sewa-backend:backend:sewa-backend:backend/Dockerfile"
+  "sewa-frontend:frontend:sewa-frontend:frontend/Dockerfile"
+  "sewa-triage:triage:sewa-ai-triage:ai-services/triage/Dockerfile"
+  "sewa-vlm-report:vlm-report:sewa-ai-vlm-report:ai-services/vlm-report/Dockerfile"
+  "sewa-uncertainty:uncertainty:sewa-ai-uncertainty:ai-services/uncertainty/Dockerfile"
+  "sewa-metacognition:metacognition:sewa-ai-metacognition:ai-services/metacognition/Dockerfile"
+  "sewa-federated:federated:sewa-ai-federated:ai-services/federated-learning/Dockerfile"
+  "sewa-continuous:continuous:sewa-ai-continuous:ai-services/continuous-learning/Dockerfile"
+  "sewa-pathology:pathology:sewa-ai-pathology:ai-services/pathology/Dockerfile"
+  "sewa-mammography:mammography:sewa-ai-mammography:ai-services/mammography/Dockerfile"
+  "sewa-retinal:retinal:sewa-ai-retinal:ai-services/retinal/Dockerfile"
 )
 
 # ── Helpers ────────────────────────────────────────────────────────────
@@ -111,17 +112,18 @@ info "Image tag: ${IMAGE_TAG}"
 info "=== Step 1: Build and push Docker images via ACR ==="
 
 for svc in "${SERVICES[@]}"; do
-  IFS=':' read -r svc_name container_name img_name <<< "$svc"
-  info "Building ${img_name}:${IMAGE_TAG} via ACR..."
+  IFS=':' read -r deploy_name container_name img_name dockerfile_path <<< "$svc"
+  build_dir="$(dirname "${dockerfile_path}")"
+  info "Building ${img_name}:${IMAGE_TAG} via ACR (ctx=${build_dir})..."
   az acr build \
     --registry "${ACR_NAME}" \
     --image "${img_name}:${IMAGE_TAG}" \
-    --file "${svc_name}/Dockerfile" \
+    --file Dockerfile \
     --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
     --build-arg VCS_REF="${SHA}" \
     --build-arg VERSION="${IMAGE_TAG}" \
-    "." 2>&1 | tail -5 || \
-    warn "ACR build failed for ${svc_name} — continuing"
+    "${build_dir}" 2>&1 | tail -5 || \
+    warn "ACR build failed for ${deploy_name} — continuing"
 done
 
 # ── Step 2: Apply K8s manifests ───────────────────────────────────────
