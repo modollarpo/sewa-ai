@@ -25,7 +25,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: backup-verify
-            image: "sewaaieuprodacr.azurecr.io/sewa-backend:prod-20260712-084421"
+            image: "sewaaieuprodacr.azurecr.io/sewa-backend:main-c61bf1a9"
             imagePullPolicy: Always
             command:
             - /bin/sh

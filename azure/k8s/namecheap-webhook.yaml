@@ -1,0 +1,234 @@
+---
+# SEWA XAI — Namecheap DNS-01 webhook for cert-manager
+# Rendered from github.com/Softyy/cert-manager-webhook-namecheap helm chart
+# (groupName acme.namecheap.com, image ghcr.io/softyy/cert-manager-webhook-namecheap:0.1.3)
+# Installs the webhook APIService so cert-manager can solve DNS-01 TXT
+# challenges via the Namecheap API (used to issue *.sewaxai.health).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-manager-webhook-namecheap
+  namespace: cert-manager
+---
+# apiserver reads the requestheader CA from kube-system configmaps
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cert-manager-webhook-namecheap:webhook-authentication-reader
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager-webhook-namecheap
+    namespace: cert-manager
+---
+# apiserver gets the auth-delegator role to delegate auth decisions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-webhook-namecheap:auth-delegator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager-webhook-namecheap
+    namespace: cert-manager
+---
+# Allow the webhook to read secrets referenced by issuers
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cert-manager-webhook-namecheap:secret-reader
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-webhook-namecheap:secret-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-webhook-namecheap:secret-reader
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager-webhook-namecheap
+    namespace: cert-manager
+---
+# Grant cert-manager permission to validate using our apiserver
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cert-manager-webhook-namecheap:domain-solver
+rules:
+  - apiGroups:
+      - acme.namecheap.com
+    resources:
+      - '*'
+    verbs:
+      - 'create'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-webhook-namecheap:domain-solver
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-webhook-namecheap:domain-solver
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager
+    namespace: cert-manager
+---
+# Self-signed issuer for the webhook serving certificate
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: cert-manager-webhook-namecheap-selfsign
+  namespace: cert-manager
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cert-manager-webhook-namecheap-ca
+  namespace: cert-manager
+spec:
+  secretName: cert-manager-webhook-namecheap-ca
+  duration: 43800h # 5y
+  issuerRef:
+    name: cert-manager-webhook-namecheap-selfsign
+  commonName: ca.cert-manager-webhook-namecheap.cert-manager
+  isCA: true
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: cert-manager-webhook-namecheap-ca
+  namespace: cert-manager
+spec:
+  ca:
+    secretName: cert-manager-webhook-namecheap-ca
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cert-manager-webhook-namecheap-webhook-tls
+  namespace: cert-manager
+spec:
+  secretName: cert-manager-webhook-namecheap-webhook-tls
+  duration: 8760h # 1y
+  issuerRef:
+    name: cert-manager-webhook-namecheap-ca
+  dnsNames:
+    - cert-manager-webhook-namecheap
+    - cert-manager-webhook-namecheap.cert-manager
+    - cert-manager-webhook-namecheap.cert-manager.svc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook-namecheap
+  namespace: cert-manager
+  labels:
+    app: cert-manager-webhook-namecheap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cert-manager-webhook-namecheap
+  template:
+    metadata:
+      labels:
+        app: cert-manager-webhook-namecheap
+    spec:
+      serviceAccountName: cert-manager-webhook-namecheap
+      containers:
+        - name: namecheap
+          image: "ghcr.io/softyy/cert-manager-webhook-namecheap:0.1.3"
+          imagePullPolicy: Always
+          args:
+            - --tls-cert-file=/tls/tls.crt
+            - --tls-private-key-file=/tls/tls.key
+          env:
+            - name: GROUP_NAME
+              value: acme.namecheap.com
+          ports:
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /healthz
+              port: https
+          readinessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /healthz
+              port: https
+          volumeMounts:
+            - name: certs
+              mountPath: /tls
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: certs
+          secret:
+            secretName: cert-manager-webhook-namecheap-webhook-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cert-manager-webhook-namecheap
+  namespace: cert-manager
+  labels:
+    app: cert-manager-webhook-namecheap
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      targetPort: https
+      protocol: TCP
+      name: https
+  selector:
+    app: cert-manager-webhook-namecheap
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.acme.namecheap.com
+  annotations:
+    cert-manager.io/inject-ca-from: "cert-manager/cert-manager-webhook-namecheap-webhook-tls"
+spec:
+  group: acme.namecheap.com
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  service:
+    name: cert-manager-webhook-namecheap
+    namespace: cert-manager
+  version: v1alpha1

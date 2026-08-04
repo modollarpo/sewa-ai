@@ -25,6 +25,9 @@ resource "azurerm_key_vault_access_policy" "deployer" {
 }
 
 # ── Database Secret ────────────────────────────────────────────
+# NOTE: Secret values are seeded out-of-band (azure/scripts/seed-keyvault.ps1)
+# and lifecycle-protected so `terraform apply` can NEVER overwrite a live value
+# with a tfvars placeholder. Only the resource's existence is managed here.
 resource "azurerm_key_vault_secret" "db_url" {
   name         = "sewa-database-url"
   value        = "postgresql://${var.db_admin_user}:${var.db_admin_password}@${azurerm_postgresql_flexible_server.db.fqdn}:5432/sewa_ai?sslmode=require"
@@ -32,6 +35,10 @@ resource "azurerm_key_vault_secret" "db_url" {
   tags         = { category = "database" }
 
   depends_on = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "db_password" {
@@ -40,6 +47,10 @@ resource "azurerm_key_vault_secret" "db_password" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "database" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # ── JWT Secrets ────────────────────────────────────────────────
@@ -49,6 +60,10 @@ resource "azurerm_key_vault_secret" "jwt_secret" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "auth" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "jwt_refresh_secret" {
@@ -57,6 +72,10 @@ resource "azurerm_key_vault_secret" "jwt_refresh_secret" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "auth" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "encryption_key" {
@@ -65,6 +84,10 @@ resource "azurerm_key_vault_secret" "encryption_key" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "auth" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # ── Azure Storage ──────────────────────────────────────────────
@@ -74,6 +97,10 @@ resource "azurerm_key_vault_secret" "storage_connection" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "storage" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # ── Payments ───────────────────────────────────────────────────
@@ -83,47 +110,10 @@ resource "azurerm_key_vault_secret" "stripe_secret" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "payments" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
-}
 
-resource "azurerm_key_vault_secret" "paystack_secret" {
-  name         = "sewa-paystack-secret-key"
-  value        = var.paystack_secret_key
-  key_vault_id = azurerm_key_vault.main.id
-  tags         = { category = "payments" }
-  depends_on   = [azurerm_key_vault_access_policy.deployer]
-}
-
-resource "azurerm_key_vault_secret" "flutterwave_secret" {
-  name         = "sewa-flutterwave-secret-key"
-  value        = var.flutterwave_secret_key
-  key_vault_id = azurerm_key_vault.main.id
-  tags         = { category = "payments" }
-  depends_on   = [azurerm_key_vault_access_policy.deployer]
-}
-
-resource "azurerm_key_vault_secret" "mpesa_consumer_key" {
-  name         = "sewa-mpesa-consumer-key"
-  value        = var.mpesa_consumer_key
-  key_vault_id = azurerm_key_vault.main.id
-  tags         = { category = "payments" }
-  depends_on   = [azurerm_key_vault_access_policy.deployer]
-}
-
-resource "azurerm_key_vault_secret" "mpesa_consumer_secret" {
-  name         = "sewa-mpesa-consumer-secret"
-  value        = var.mpesa_consumer_secret
-  key_vault_id = azurerm_key_vault.main.id
-  tags         = { category = "payments" }
-  depends_on   = [azurerm_key_vault_access_policy.deployer]
-}
-
-# ── Firebase / FCM ─────────────────────────────────────────────
-resource "azurerm_key_vault_secret" "firebase_private_key" {
-  name         = "sewa-firebase-private-key"
-  value        = var.firebase_private_key
-  key_vault_id = azurerm_key_vault.main.id
-  tags         = { category = "notifications" }
-  depends_on   = [azurerm_key_vault_access_policy.deployer]
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # ── Email ──────────────────────────────────────────────────────
@@ -133,15 +123,10 @@ resource "azurerm_key_vault_secret" "smtp_pass" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "email" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
-}
 
-# ── Monitoring ─────────────────────────────────────────────────
-resource "azurerm_key_vault_secret" "sentry_dsn" {
-  name         = "sewa-sentry-dsn"
-  value        = var.sentry_dsn
-  key_vault_id = azurerm_key_vault.main.id
-  tags         = { category = "monitoring" }
-  depends_on   = [azurerm_key_vault_access_policy.deployer]
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # ── FHIR Service Principal (App Registration) ─────────────────
@@ -193,6 +178,10 @@ resource "azurerm_key_vault_secret" "fhir_client_id" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "fhir" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "fhir_client_secret" {
@@ -201,6 +190,10 @@ resource "azurerm_key_vault_secret" "fhir_client_secret" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "fhir" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "fhir_base_url" {
@@ -209,6 +202,10 @@ resource "azurerm_key_vault_secret" "fhir_base_url" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "fhir" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "fhir_tenant_id" {
@@ -217,13 +214,12 @@ resource "azurerm_key_vault_secret" "fhir_tenant_id" {
   key_vault_id = azurerm_key_vault.main.id
   tags         = { category = "fhir" }
   depends_on   = [azurerm_key_vault_access_policy.deployer]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
-# ── SendGrid API Key ──────────────────────────────────────────
-resource "azurerm_key_vault_secret" "sendgrid_api_key" {
-  name         = "sewa-sendgrid-api-key"
-  value        = var.sendgrid_api_key
-  key_vault_id = azurerm_key_vault.main.id
-  tags         = { category = "email" }
-  depends_on   = [azurerm_key_vault_access_policy.deployer]
-}
+# ── SendGrid API Key (deferred — no live key yet) ──────────────
+# Add back once SendGrid is onboarded with a real API key.
+

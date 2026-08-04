@@ -312,6 +312,9 @@ jobs:
       - name: Apply manifests
         run: |
           kubectl apply -f azure/k8s/namespace.yaml
+          kubectl apply -f azure/k8s/cert-manager-issuer.yaml || true
+          kubectl apply -f azure/k8s/namecheap-webhook.yaml || true
+          kubectl apply -f azure/k8s/namecheap-issuer.yaml || true
           kubectl apply -f azure/k8s/configmap.yaml
           kubectl apply -f azure/k8s/workload-identity.yaml || true
           kubectl apply -f azure/k8s/backend-deployment-prod.yaml
@@ -319,6 +322,12 @@ jobs:
           kubectl apply -f azure/k8s/ai-services-deployment-prod.yaml
           kubectl apply -f azure/k8s/redis-deployment.yaml
           kubectl apply -f azure/k8s/ingress.yaml || true
+      - name: Provision Kubernetes secrets from Key Vault
+        run: |
+          bash azure/scripts/provision-k8s-secrets.sh
+        env:
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
       - name: Deploy to AKS
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
@@ -365,6 +374,9 @@ jobs:
       - name: Apply manifests
         run: |
           kubectl apply -f azure/k8s/namespace.yaml
+          kubectl apply -f azure/k8s/cert-manager-issuer.yaml || true
+          kubectl apply -f azure/k8s/namecheap-webhook.yaml || true
+          kubectl apply -f azure/k8s/namecheap-issuer.yaml || true
           kubectl apply -f azure/k8s/configmap.yaml
           kubectl apply -f azure/k8s/workload-identity.yaml || true
           kubectl apply -f azure/k8s/backend-deployment-prod.yaml
@@ -372,6 +384,12 @@ jobs:
           kubectl apply -f azure/k8s/ai-services-deployment-prod.yaml
           kubectl apply -f azure/k8s/redis-deployment.yaml
           kubectl apply -f azure/k8s/ingress.yaml || true
+      - name: Provision Kubernetes secrets from Key Vault
+        run: |
+          bash azure/scripts/provision-k8s-secrets.sh
+        env:
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
       - name: Rolling deploy — all services
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)

@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations:
-    azure.workload.identity/client-id: "ffb48448-dbbf-431b-8a1b-c263b3cf0cf1"
+    azure.workload.identity/client-id: "33e84b8c-6e89-4ea2-8473-f1e037710c4c"
   name: sewa-backend-sa
   namespace: sewa-ai
 ---
@@ -30,14 +30,20 @@ spec:
       objectName: sewa-storage-connection-string
     - key: sewa-fhir-tenant-id
       objectName: sewa-fhir-tenant-id
+    - key: sewa-openai-api-key
+      objectName: sewa-openai-api-key
+    - key: sewa-speech-key
+      objectName: sewa-speech-key
+    - key: sewa-appinsights-connection-string
+      objectName: sewa-appinsights-connection-string
     secretName: sewa-secrets-store
     type: Opaque
   parameters:
     usePodIdentity: "false"
     useVMManagedIdentity: "false"
-    clientID: "ffb48448-dbbf-431b-8a1b-c263b3cf0cf1"
+    clientID: "33e84b8c-6e89-4ea2-8473-f1e037710c4c"
     keyvaultName: "sewa-ai-prod-eu-kv"
-    tenantId: "cbe60f81-8bd5-4435-9199-cd97cfa950af"
+    tenantId: "96cb1af7-f1d4-4a65-ab32-2d641c985725"
     objects: |
       array:
         - |
@@ -60,4 +66,13 @@ spec:
           objectType: secret
         - |
           objectName: sewa-fhir-tenant-id
+          objectType: secret
+        - |
+          objectName: sewa-openai-api-key
+          objectType: secret
+        - |
+          objectName: sewa-speech-key
+          objectType: secret
+        - |
+          objectName: sewa-appinsights-connection-string
           objectType: secret

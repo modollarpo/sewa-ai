@@ -56,6 +56,10 @@ resource "azurerm_role_assignment" "backend_storage_blob_data_contributor" {
   role_definition_name             = "Storage Blob Data Contributor"
   scope                            = azurerm_storage_account.dicom.id
   skip_service_principal_aad_check = true
+
+  lifecycle {
+    ignore_changes = [skip_service_principal_aad_check]
+  }
 }
 
 resource "azurerm_role_assignment" "ai_services_storage_blob_data_contributor" {
@@ -63,4 +67,8 @@ resource "azurerm_role_assignment" "ai_services_storage_blob_data_contributor" {
   role_definition_name             = "Storage Blob Data Contributor"
   scope                            = azurerm_storage_account.dicom.id
   skip_service_principal_aad_check = true
+
+  lifecycle {
+    ignore_changes = [skip_service_principal_aad_check]
+  }
 }

@@ -10,12 +10,59 @@ import { ConfidenceIndicator } from '../../design-system/components';
 
 import { dashboardColors as C } from '../../design-system/tokens';
 
+type PortalTab = 'scans'|'appointments'|'progression'|'consent'|'access'|'account'|'billing'|'messages';
+
+interface PortalScan {
+  id: string;
+  modality?: string;
+  bodyPart?: string;
+  status?: string;
+  receivedAt?: string;
+  createdAt?: string;
+  reportReady?: boolean;
+  aiSummary?: string;
+  aiResult?: {
+    summary?: string;
+    confidence?: number;
+    primaryFinding?: string;
+    urgency?: string;
+  };
+}
+
+interface PortalAppointment {
+  id: string;
+  type: string;
+  scheduledDate: string;
+  status?: string;
+}
+
+interface PortalPayment {
+  id?: string;
+  planName?: string;
+  createdAt?: string;
+  date?: string;
+  currency?: string;
+  amount?: number;
+  amountDisplay?: string;
+  status?: string;
+}
+
+interface PortalMessage {
+  id?: string;
+  fromRole?: string;
+  fromPatient?: boolean;
+  body?: string;
+  content?: string;
+  text?: string;
+  createdAt?: string;
+}
+
 export function PatientPortal() {
   const { user } = useAuthStore();
   const { scans, loading: scansLoading } = usePatientData();
   const { appointments, loading: apptsLoading } = usePatientAppointments();
-  const [tab, setTab] = useState<'scans'|'appointments'|'progression'|'consent'|'access'|'account'|'billing'|'messages'>('scans');
-  const [messages, setMessages] = useState<any[]>([]);
+  const [tab, setTab] = useState<PortalTab>('scans');
+  const [messages, setMessages] = useState<PortalMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [sendingMsg, setSendingMsg] = useState(false);
@@ -26,7 +73,7 @@ export function PatientPortal() {
   const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [isChangingPass, setIsChangingPass] = useState(false);
   const [status, setStatus] = useState<{ msg:string; type:'ok'|'err' } | null>(null);
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<PortalPayment[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
 
   useEffect(() => {
@@ -74,7 +121,7 @@ export function PatientPortal() {
   const handleDownloadPdf = async (scanId: string) => {
     setDownloadingPdf(scanId);
     try {
-      const res = await apiClient.get(`/reports/${scanId}/pdf`, { responseType: 'blob' });
+      const res = await apiClient.get(`/reports/${scanId}/download`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const a = document.createElement('a');
       a.href = url;
@@ -108,8 +155,9 @@ export function PatientPortal() {
       setStatus({ msg: 'Password updated successfully.', type: 'ok' });
       setTimeout(() => { setShowPasswordModal(false); setStatus(null); }, 1500);
       setPassForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err: any) {
-      setStatus({ msg: err.response?.data?.message || 'Password update failed.', type: 'err' });
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message;
+      setStatus({ msg: message || 'Password update failed.', type: 'err' });
     } finally {
       setIsChangingPass(false);
     }
@@ -151,10 +199,10 @@ export function PatientPortal() {
 
       {/* Navigation Tabs */}
       <nav className="max-w-5xl mx-auto flex items-center gap-1 mb-10 w-full md:w-fit overflow-x-auto scrollbar-none" style={{borderBottom:'1px solid #1B3028'}}>
-        {['scans','appointments','progression','messages','billing','account'].map(t => (
+        {(['scans','appointments','progression','messages','billing','account'] as PortalTab[]).map(t => (
           <button 
             key={t} 
-            onClick={() => setTab(t as any)}
+            onClick={() => setTab(t)}
             style={tabStyle(t)}
             className="text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
           >
@@ -174,7 +222,7 @@ export function PatientPortal() {
                 <div className="text-4xl opacity-20">📂</div>
                 <p className="text-[#3A6055] font-medium uppercase tracking-widest text-xs">No diagnostic records found</p>
               </div>
-            ) : scans.map((s:any)=>(
+            ) : scans.map((s: PortalScan)=>(
               <div key={s.id} className="group p-6 bg-[#0C1D17] rounded-3xl border border-[#1B3028] hover:border-[#408D7B]/50 transition-all duration-500 shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-6 opacity-5 text-6xl group-hover:opacity-10 transition-opacity">🩻</div>
                 <div className="flex justify-between items-start mb-6">
@@ -183,7 +231,7 @@ export function PatientPortal() {
                     <h3 className="text-xl font-black text-[#D0ECE6] uppercase">{s.bodyPart}</h3>
                   </div>
                   <span className="text-[10px] font-bold text-[#3A6055] bg-[#050F0C] px-3 py-1 rounded-full border border-[#1B3028]">
-                    {new Date(s.receivedAt || s.createdAt).toLocaleDateString()}
+                    {new Date(s.receivedAt || s.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
                 <p className="text-sm text-[#6FA898] leading-relaxed mb-6 font-medium">
@@ -226,7 +274,7 @@ export function PatientPortal() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {appointments.map((a:any)=>(
+                {appointments.map((a: PortalAppointment)=>(
                   <div key={a.id} className="p-6 bg-[#0C1D17] rounded-2xl border border-[#1B3028] flex items-center gap-6">
                     <div className="w-14 h-14 rounded-2xl bg-[#111F1A] border border-[#1B3028] flex items-center justify-center text-2xl">📅</div>
                     <div>
@@ -265,12 +313,12 @@ export function PatientPortal() {
               </div>
             ) : (
               <div className="relative pl-8 border-l border-[#1B3028] ml-4 space-y-12">
-                {scans.map((s:any, i:number) => (
+                {scans.map((s: PortalScan, i:number) => (
                   <div key={s.id} className="relative group animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
                     <div className={`absolute -left-[41px] top-1 w-4 h-4 rounded-full border-4 border-[#0C1D17] shadow-xl transition-all group-hover:scale-125 ${
                       s.aiResult?.urgency === 'CRITICAL' ? 'bg-[#E03535]' : 'bg-[#408D7B]'
                     }`} />
-                    <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest mb-1">{new Date(s.receivedAt || s.createdAt).toLocaleDateString('en-GB', { month:'long', day:'numeric', year:'numeric' })}</div>
+                    <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest mb-1">{new Date(s.receivedAt || s.createdAt || Date.now()).toLocaleDateString('en-GB', { month:'long', day:'numeric', year:'numeric' })}</div>
                     <div className="text-lg font-black text-[#D0ECE6] tracking-tight">{s.aiResult?.primaryFinding || 'Routine Diagnostic Event'}</div>
                     <div className="flex items-center gap-4 mt-3">
                       <span className="text-[10px] font-mono bg-[#111F1A] px-2 py-1 rounded border border-[#1B3028] text-[#6FA898]">ID_{s.id.substring(0,8)}</span>
@@ -292,7 +340,7 @@ export function PatientPortal() {
               <div className="p-12 text-center italic text-[#3A6055] text-sm">No payment history found.</div>
             ) : (
               <div className="space-y-4">
-                {payments.map((p:any, i:number) => (
+                {payments.map((p: PortalPayment, i:number) => (
                   <div key={p.id ?? i} className="flex justify-between items-center p-6 bg-[#111F1A] rounded-2xl border border-[#1B3028] transition-all hover:border-[#408D7B]/30 group">
                     <div className="flex items-center gap-5">
                       <div className="w-10 h-10 rounded-xl bg-[#08160F] flex items-center justify-center text-lg grayscale group-hover:grayscale-0 transition-all">💳</div>
@@ -372,19 +420,19 @@ export function PatientPortal() {
                     <p className="text-[#3A6055] text-[10px] mt-1">Your care team will message you here.</p>
                   </div>
                 ) : (
-                  messages.map((msg: any, i: number) => (
-                    <div key={msg.id || i} className={`flex ${msg.fromPatient ? 'justify-end' : 'justify-start'}`}>
+                  messages.map((msg: PortalMessage, i: number) => (
+                    <div key={msg.id || i} className={`flex ${msg.fromRole === 'patient' || msg.fromPatient ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[80%] p-4 rounded-2xl ${
-                        msg.fromPatient
+                        msg.fromRole === 'patient' || msg.fromPatient
                           ? 'bg-[#408D7B]/20 border border-[#408D7B]/30 rounded-br-md'
                           : 'bg-[#111F1A] border border-[#1B3028] rounded-bl-md'
                       }`}>
-                        <p className="text-sm text-[#D0ECE6]">{msg.content || msg.text}</p>
+                        <p className="text-sm text-[#D0ECE6]">{msg.body || msg.content || msg.text}</p>
                         <div className="flex items-center gap-2 mt-2">
-                          <span className={`text-[8px] font-mono ${msg.fromPatient ? 'text-[#408D7B]' : 'text-[#3A6055]'}`}>
+                          <span className={`text-[8px] font-mono ${msg.fromRole === 'patient' || msg.fromPatient ? 'text-[#408D7B]' : 'text-[#3A6055]'}`}>
                             {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
                           </span>
-                          {msg.fromPatient && <span className="text-[8px] text-[#408D7B]">✓</span>}
+                          {(msg.fromRole === 'patient' || msg.fromPatient) && <span className="text-[8px] text-[#408D7B]">✓</span>}
                         </div>
                       </div>
                     </div>
@@ -475,7 +523,3 @@ export function PatientPortal() {
 
 }
 
-const inputStyle = {
-  width:'100%', padding:10, background:'#111F1A', border:'1px solid #1B3028',
-  borderRadius:8, color:'#D0ECE6', fontSize:13, outline:'none', marginBottom:12
-};

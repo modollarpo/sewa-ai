@@ -83,14 +83,15 @@ resource "azurerm_container_registry" "acr" {
   resource_group_name           = azurerm_resource_group.main.name
   location                      = local.location
   sku                           = "Premium"
-  admin_enabled                 = false
+  admin_enabled                 = true
   public_network_access_enabled = true
   zone_redundancy_enabled       = true
   tags                          = local.tags
 
-  # GitHub Actions hosted runners push via OIDC — they use variable
-  # public IPs, so the ACR must accept public access. Authentication is
-  # still enforced via AAD/OIDC tokens (admin_enabled = false).
+  # GitHub Actions hosted runners push via OIDC and also pull via admin
+  # credentials (ACR_PASSWORD) in .github/workflows/deploy.yml, so the ACR
+  # must accept public access AND keep admin enabled. admin_enabled is
+  # intentionally true to match the live registry used by CI image push.
   network_rule_set {
     default_action = "Allow"
   }
@@ -171,6 +172,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
     scale_down_unneeded         = "10m"
     scale_down_delay_after_add  = "5m"
   }
+
+  lifecycle {
+    ignore_changes = [
+      default_node_pool[0].upgrade_settings,
+    ]
+  }
 }
 
 # AI node pool — CPU/ONNX INT8 inference (EfficientNet-B4, VLM, MC-Dropout)
@@ -178,7 +185,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "ai" {
   name                  = "aipool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
   vm_size               = var.aks_ai_vm_size
-  node_count            = 2
+  node_count            = 6
   enable_auto_scaling   = true
   min_count             = 2
   max_count             = 8
@@ -186,6 +193,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "ai" {
   os_disk_size_gb       = 256
   tags                  = local.tags
   node_labels           = { "nodepool" = "ai", "role" = "ai-inference" }
+
+  lifecycle {
+    ignore_changes = [
+      upgrade_settings,
+    ]
+  }
 }
 
 # Spot pool — federated learning training (80% cost saving)
@@ -204,6 +217,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "spot" {
   tags                  = local.tags
   node_labels           = { "role" = "batch-training", "workload" = "federated-learning" }
   node_taints           = ["kubernetes.azure.com/scalesetpriority=spot:NoSchedule"]
+
+  lifecycle {
+    ignore_changes = [
+      upgrade_settings,
+      node_labels,
+    ]
+  }
 }
 
 # ─────────────────────────────────────────────────────────────────
@@ -302,6 +322,7 @@ resource "azurerm_storage_account" "dicom" {
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
   public_network_access_enabled   = true
+  cross_tenant_replication_enabled = false
   tags                            = local.tags
 
   network_rules {
@@ -407,7 +428,7 @@ resource "azurerm_key_vault" "main" {
 
   network_acls {
     bypass                     = "AzureServices"
-    default_action             = "Deny"
+    default_action             = "Allow"
     ip_rules                   = var.allowed_ips
     virtual_network_subnet_ids = [azurerm_subnet.aks.id]
   }

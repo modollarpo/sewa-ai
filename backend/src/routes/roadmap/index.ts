@@ -56,7 +56,7 @@ router.get('/stroke-codes',
 
 /** POST /api/v1/stroke-codes/:codeId/resolve — resolve an active stroke code */
 router.post('/stroke-codes/:codeId/resolve',
-  authenticate, authorize('doctor', 'radiologist'),
+  authenticate, authorize('doctor', 'radiologist', 'admin', 'superadmin'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { outcome } = req.body;

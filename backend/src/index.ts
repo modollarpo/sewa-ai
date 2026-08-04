@@ -103,6 +103,7 @@ import longitudinalRoutes from './routes/longitudinal';
 import pipelineRoutes     from './routes/pipeline';
 import versionRoutes     from './routes/versions';
 import mlopsRoutes       from './routes/mlops';
+import messageRoutes     from './routes/messages';
 import v2Router           from './routes/v2Router';
 import { apiVersioning } from './middleware/apiVersioning';
 import { startMetricFlush, stopMetricFlush } from './services/observabilityService';
@@ -250,9 +251,6 @@ triage_ai: triageOk,
 
 // ── Public Service Status (for status.sewaxai.health page - no auth required) ──
 app.get('/api/v1/status/services', async (_req, res) => {
-  const timeoutPromise = new Promise<false>((resolve) => setTimeout(() => resolve(false), 6000));
-  const safeCheck = (p: Promise<any>) => Promise.race([p, timeoutPromise]);
-
   const services = [
     { name: 'API', url: `${config.APP_URL}/health`, group: 'Core' },
     { name: 'Triage Engine', url: `${config.AI_SERVICE_URL}/health`, group: 'AI Pipeline' },
@@ -330,6 +328,7 @@ app.use(`${v1}/pipeline`,       pipelineRoutes);
 app.use(`${v1}`,                roadmapRoutes);
 app.use(`${v1}/versions`,       versionRoutes);
 app.use(`${v1}/mlops`,          mlopsRoutes);
+app.use(`${v1}/messages`,       messageRoutes);
 
 // ── API v2 Routes ─────────────────────────────────────────────────
 app.use(apiVersioning);

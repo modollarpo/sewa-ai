@@ -25,6 +25,7 @@ spec:
       annotations:
         azure.workload.identity/inject-proxy-sidecar: "true"  # For network isolation
     spec:
+      serviceAccountName: sewa-backend-sa
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -36,6 +37,12 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      - name: kv-secrets
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: sewa-azure-kv
       containers:
       - name: backend
         securityContext:
@@ -46,7 +53,9 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
-        image: "sewaaieuprodacr.azurecr.io/sewa-backend:prod-20260723"
+        - name: kv-secrets
+          mountPath: /mnt/secrets
+        image: "sewaaieuprodacr.azurecr.io/sewa-backend:main-c61bf1a9"
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -61,6 +70,11 @@ spec:
             configMapKeyRef:
               name: sewa-config
               key: KEY_VAULT_URI
+        - name: APP_URL
+          valueFrom:
+            configMapKeyRef:
+              name: sewa-config
+              key: APP_URL
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
@@ -128,7 +142,7 @@ spec:
               name: sewa-secrets-store
               key: sewa-openai-api-key
         - name: AZURE_OPENAI_ENDPOINT
-          value: "https://sewa-ai-production-openai-18104.openai.azure.com/"
+          value: "https://sewa-ai-prod-eu-openai-abb49.openai.azure.com/"
         - name: AZURE_OPENAI_DEPLOYMENT_NAME
           value: "gpt-54-mini"
         # ── Azure AI Speech (ACI Voice Dictation — F0 Free Tier) ─────
@@ -138,7 +152,7 @@ spec:
               name: sewa-secrets-store
               key: sewa-speech-key
         - name: AZURE_SPEECH_REGION
-          value: "uksouth"
+          value: "swedencentral"
         - name: AZURE_STORAGE_CONTAINER
           value: "scans"
         - name: FHIR_TENANT_ID
@@ -146,6 +160,13 @@ spec:
             secretKeyRef:
               name: sewa-secrets-store
               key: sewa-fhir-tenant-id
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: sewa-secrets-store
+              key: sewa-appinsights-connection-string
+        - name: SENTRY_DSN
+          value: ""
         resources:
           requests:
             cpu: "500m"

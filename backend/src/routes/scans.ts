@@ -14,7 +14,7 @@ r.get('/:id',        ctrl.getScan);
 r.post('/upload',    uploadLimiter, enforceQuota, upload.single('file') as any, ctrl.uploadScan);
 r.post('/sync-batch', ctrl.syncOfflineBatch);
 r.post('/demo',      ctrl.generateDemoScan);
-r.patch('/:id/status', authorize('radiologist','admin','superadmin'), ctrl.updateScanStatus);
+r.patch('/:id/status', authorize('radiologist','doctor','admin','superadmin'), ctrl.updateScanStatus);
 r.post('/:id/notify', authorize('radiologist','admin','superadmin'), ctrl.notifyScan);
 r.get('/:id/image-url', ctrl.getScanImageUrl);
 r.get('/:id/dicom',     ctrl.getScanDicom);

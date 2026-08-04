@@ -1,0 +1,49 @@
+---
+# SEWA XAI — Namecheap DNS-01 ClusterIssuer + *.sewaxai.health wildcard cert
+# Requires the `namecheap-credentials` Secret in the cert-manager namespace
+# (keys: apiUser, username, apiKey) — created by
+# azure/scripts/provision-k8s-secrets.sh / manual kubectl, never committed.
+# clientIP must be whitelisted in the Namecheap API settings
+# (cluster egress IP: 4.166.226.214).
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: namecheap
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: info@sewaxai.health
+    privateKeySecretRef:
+      name: namecheap-issuer-account-key
+    solvers:
+      - dns01:
+          webhook:
+            groupName: acme.namecheap.com
+            solverName: namecheap
+            config:
+              apiUserSecretRef:
+                name: namecheap-credentials
+                key: apiUser
+              usernameSecretRef:
+                name: namecheap-credentials
+                key: username
+              clientIP: "4.166.226.214"
+              apiKeySecretRef:
+                name: namecheap-credentials
+                key: apiKey
+              useSandbox: false
+              ttl: 60
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: sewa-tls-wildcard
+  namespace: sewa-ai
+spec:
+  secretName: sewa-tls-wildcard
+  issuerRef:
+    name: namecheap
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.sewaxai.health"
+    - "sewaxai.health"
