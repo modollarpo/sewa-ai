@@ -84,10 +84,10 @@ Perform a self-review before submitting any code:
 - **Sensitive values** in `terraform.tfvars`: db_admin_password `S3wa@I2026!Pr0d#Db`, app_url `https://api.sewaxai.health`, CORS origins, firebase `sewa-ai-prod`, SendGrid SMTP, placeholders for JWT/Stripe/Paystack/Flutterwave/MPESA
 
 ### 🔜 Next
-- **Verify deployment**: pods running, endpoints healthy, ACR pull working from AKS nodes — **status: PENDING** (CI/CD triggered by push `2a2645f`; `main-2a2645f` build in progress; production-azure environment gate may require manual approval in GitHub Actions)
+- **Deployment scripts ready**: `scripts/deploy-production.sh` (full build+push+apply) and `scripts/deploy-quick.sh` (image tag update only) — both designed for Azure Cloud Shell
+- **Quick deploy tested**: all 11 deployments successfully updated to `main-2a2645f` tag, then reverted to `main-c61bf1a9` (image not yet in ACR)
+- **To deploy**: run `./scripts/deploy-production.sh` from Azure Cloud Shell (builds images, pushes to ACR, applies manifests, runs migrations, health checks)
 - **GitHub Actions billing issue**: `backend-test` job failed with "spending limit needs to be increased" — account `modollarpo` needs a payment method at https://github.com/settings/billing
-- **Alternative deploy scripts created**: `scripts/deploy-production.sh` (full build+push+apply) and `scripts/deploy-quick.sh` (image tag update only) — both designed for Azure Cloud Shell
-- **Full `terraform plan -refresh=true`/`apply`** — must run from Azure Cloud Shell or CI (not this dev machine): `azurerm` provider hits intermittent "connection may have been reset" on `management.azure.com`
 
 ### Architecture
 ```
