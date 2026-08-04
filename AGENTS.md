@@ -83,10 +83,16 @@ Perform a self-review before submitting any code:
 - **Terraform state** at `infrastructure/terraform-azure/terraform.tfstate` — 74 resources (see reconciled note above), all swedencentral
 - **Sensitive values** in `terraform.tfvars`: db_admin_password `S3wa@I2026!Pr0d#Db`, app_url `https://api.sewaxai.health`, CORS origins, firebase `sewa-ai-prod`, SendGrid SMTP, placeholders for JWT/Stripe/Paystack/Flutterwave/MPESA
 
+### ✅ Deployed (2026-08-04)
+- **All 4 production fixes LIVE on `main-2a2645f`**: `/messages` route mounted, `scans.ts` `doctor` role, roadmap resolve `admin`/`superadmin`, PatientPortal report download path.
+- **Deploy method (works from this Windows machine — no Docker needed)**: build via ACR cloud (`az acr build`) from within each service dir, then `kubectl set image`. Successfully used for this deployment.
+- **11 images built & pushed to `sewaaieuprodacr` as `main-2a2645f`** (ACR runs dt1–dtb all Succeeded). All 11 AKS deployments updated to the new tag; all pods Running; frontend `https://app.sewaxai.health` 200; backend `https://api.sewaxai.health/health` 200; `/api/v1/status/services` → all 14 services operational; `/api/v1/messages` returns 401 (route mounted, auth-gated, not 404).
+- **Prisma migrations**: all 9 applied via `npx prisma migrate deploy` in backend pod.
+- **Script fixes committed & pushed** (`c0dbad2`, `e200a3f`): `deploy-production.sh` now uses correct deployment names (`sewa-backend` etc.), per-service build contexts, and `cd`s into context dir because `az acr build` resolves `--file` relative to CWD.
+
 ### 🔜 Next
-- **Deployment scripts ready**: `scripts/deploy-production.sh` (full build+push+apply) and `scripts/deploy-quick.sh` (image tag update only) — both designed for Azure Cloud Shell
-- **Quick deploy tested**: all 11 deployments successfully updated to `main-2a2645f` tag, then reverted to `main-c61bf1a9` (image not yet in ACR)
-- **To deploy**: run `./scripts/deploy-production.sh` from Azure Cloud Shell (builds images, pushes to ACR, applies manifests, runs migrations, health checks)
+- **Deploy scripts**: `scripts/deploy-production.sh` (full build+push+apply) and `scripts/deploy-quick.sh` (image tag update only). Note `az acr build` log streaming crashes the WSL az CLI (colorama/Unicode) — use `--no-logs` and verify tag presence via `az acr repository show-tags`.
+- **To redeploy**: build images with `az acr build` from each service dir, then run `./scripts/deploy-quick.sh main-<sha>`.
 - **GitHub Actions billing issue**: `backend-test` job failed with "spending limit needs to be increased" — account `modollarpo` needs a payment method at https://github.com/settings/billing
 
 ### Architecture
