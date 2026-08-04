@@ -66,31 +66,31 @@ if ! kubectl cluster-info --context "${AKS_CLUSTER}" &>/dev/null; then
     --name "${AKS_CLUSTER}" --overwrite-existing
 fi
 
-# Services to update (deployment name : ACR image name)
+# Services to update (deployment:container:acr_image)
 declare -A SERVICE_IMAGES=(
-  ["sewa-backend"]="sewa-backend"
-  ["sewa-frontend"]="sewa-frontend"
-  ["sewa-triage"]="sewa-ai-triage"
-  ["sewa-vlm-report"]="sewa-ai-vlm-report"
-  ["sewa-uncertainty"]="sewa-ai-uncertainty"
-  ["sewa-metacognition"]="sewa-ai-metacognition"
-  ["sewa-federated"]="sewa-ai-federated"
-  ["sewa-continuous"]="sewa-ai-continuous"
-  ["sewa-pathology"]="sewa-ai-pathology"
-  ["sewa-mammography"]="sewa-ai-mammography"
-  ["sewa-retinal"]="sewa-ai-retinal"
+  ["sewa-backend"]="backend:sewa-backend"
+  ["sewa-frontend"]="frontend:sewa-frontend"
+  ["sewa-triage"]="triage:sewa-ai-triage"
+  ["sewa-vlm-report"]="vlm-report:sewa-ai-vlm-report"
+  ["sewa-uncertainty"]="uncertainty:sewa-ai-uncertainty"
+  ["sewa-metacognition"]="metacognition:sewa-ai-metacognition"
+  ["sewa-federated"]="federated:sewa-ai-federated"
+  ["sewa-continuous"]="continuous:sewa-ai-continuous"
+  ["sewa-pathology"]="pathology:sewa-ai-pathology"
+  ["sewa-mammography"]="mammography:sewa-ai-mammography"
+  ["sewa-retinal"]="retinal:sewa-ai-retinal"
 )
 
 info "=== Updating deployment images ==="
 for deploy_name in "${!SERVICE_IMAGES[@]}"; do
-  img_name="${SERVICE_IMAGES[$deploy_name]}"
+  IFS=':' read -r container_name img_name <<< "${SERVICE_IMAGES[$deploy_name]}"
   full_image="${ACR_SERVER}/${img_name}:${TAG}"
   if [ "$DRY_RUN" = true ]; then
-    info "[DRY RUN] deployment/${deploy_name} → ${full_image}"
+    info "[DRY RUN] deployment/${deploy_name} container=${container_name} → ${full_image}"
   else
-    info "Updating deployment/${deploy_name} → ${full_image}"
+    info "Updating deployment/${deploy_name} container=${container_name} → ${full_image}"
     kubectl set image "deployment/${deploy_name}" \
-      "${deploy_name}=${full_image}" \
+      "${container_name}=${full_image}" \
       -n "${NAMESPACE}" \
       --context "${AKS_CLUSTER}" || \
       warn "Failed to update ${deploy_name}"

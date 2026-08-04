@@ -24,19 +24,19 @@ LOCATION="swedencentral"
 NAMESPACE="sewa-ai"
 KUBECONFIG_PATH="${HOME}/.kube/config"
 
-# Image services (must match deploy.yml build matrix)
+# Image services (deployment:container:acr_image)
 SERVICES=(
-  "backend:sewa-backend"
-  "frontend:sewa-frontend"
-  "ai-triage:sewa-ai-triage"
-  "ai-vlm-report:sewa-ai-vlm-report"
-  "ai-uncertainty:sewa-ai-uncertainty"
-  "ai-metacognition:sewa-ai-metacognition"
-  "ai-federated:sewa-ai-federated"
-  "ai-continuous:sewa-ai-continuous"
-  "ai-pathology:sewa-ai-pathology"
-  "ai-mammography:sewa-ai-mammography"
-  "ai-retinal:sewa-ai-retinal"
+  "backend:backend:sewa-backend"
+  "frontend:frontend:sewa-frontend"
+  "ai-triage:triage:sewa-ai-triage"
+  "ai-vlm-report:vlm-report:sewa-ai-vlm-report"
+  "ai-uncertainty:uncertainty:sewa-ai-uncertainty"
+  "ai-metacognition:metacognition:sewa-ai-metacognition"
+  "ai-federated:federated:sewa-ai-federated"
+  "ai-continuous:continuous:sewa-ai-continuous"
+  "ai-pathology:pathology:sewa-ai-pathology"
+  "ai-mammography:mammography:sewa-ai-mammography"
+  "ai-retinal:retinal:sewa-ai-retinal"
 )
 
 # ── Helpers ────────────────────────────────────────────────────────────
@@ -107,41 +107,21 @@ fi
 IMAGE_TAG="main-${SHA}"
 info "Image tag: ${IMAGE_TAG}"
 
-# ── Step 1: Build and push Docker images ──────────────────────────────
-info "=== Step 1: Build and push Docker images ==="
+# ── Step 1: Build and push Docker images via ACR (cloud-native, no local Docker needed) ──
+info "=== Step 1: Build and push Docker images via ACR ==="
 
-# Option A: Use ACR Tasks (cloud-native build, no local Docker required)
-# Uncomment the block below if local Docker is unavailable:
-#
-# for svc in "${SERVICES[@]}"; do
-#   IFS=':' read -r svc_name img_name <<< "$svc"
-#   info "Building ${img_name}:${IMAGE_TAG} via ACR Task..."
-#   az acr task run \
-#     --name "build-${svc_name}" \
-#     --registry "${ACR_NAME}" \
-#     --image "${img_name}:${IMAGE_TAG}" \
-#     --context "https://github.com/modollarpo/sewa-ai.git#main" \
-#     --file "${svc_name}/Dockerfile" \
-#     --arg IMAGE_TAG="${IMAGE_TAG}" \
-#     --timeout 3600 || \
-#     warn "ACR Task build-${svc_name} failed — may need manual build"
-# done
-
-# Option B: Local Docker build + push (requires Docker daemon)
 for svc in "${SERVICES[@]}"; do
-  IFS=':' read -r svc_name img_name <<< "$svc"
-  info "Building ${img_name}:${IMAGE_TAG}..."
-  docker build -t "${ACR_SERVER}/${img_name}:${IMAGE_TAG}" \
-    -f "${svc_name}/Dockerfile" \
-    --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    --build-arg VCS_REF="${SHA}" \
-    --build-arg VERSION="${IMAGE_TAG}" \
-    "." 2>&1 | tail -3 || \
-    warn "Docker build failed for ${svc_name} — skipping"
-
-  info "Pushing ${img_name}:${IMAGE_TAG} to ACR..."
-  docker push "${ACR_SERVER}/${img_name}:${IMAGE_TAG}" || \
-    warn "Docker push failed for ${svc_name}"
+  IFS=':' read -r svc_name container_name img_name <<< "$svc"
+  info "Building ${img_name}:${IMAGE_TAG} via ACR..."
+  az acr build \
+    --registry "${ACR_NAME}" \
+    --image "${img_name}:${IMAGE_TAG}" \
+    --file "${svc_name}/Dockerfile" \
+    --arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg VCS_REF="${SHA}" \
+    --arg VERSION="${IMAGE_TAG}" \
+    "." 2>&1 | Select-Object -Last 5 || \
+    warn "ACR build failed for ${svc_name} — continuing"
 done
 
 # ── Step 2: Apply K8s manifests ───────────────────────────────────────
@@ -179,14 +159,14 @@ done
 info "=== Step 3: Update deployment images ==="
 
 for svc in "${SERVICES[@]}"; do
-  IFS=':' read -r deploy_name img_name <<< "$svc"
+  IFS=':' read -r deploy_name container_name img_name <<< "$svc"
   FULL_IMAGE="${ACR_SERVER}/${img_name}:${IMAGE_TAG}"
   if [ "$DRY_RUN" = true ]; then
-    info "[DRY RUN] Would set image: deployment/${deploy_name} → ${FULL_IMAGE}"
+    info "[DRY RUN] Would set image: deployment/${deploy_name} container=${container_name} → ${FULL_IMAGE}"
   else
-    info "Setting image: deployment/${deploy_name} → ${FULL_IMAGE}"
+    info "Setting image: deployment/${deploy_name} container=${container_name} → ${FULL_IMAGE}"
     kubectl set image "deployment/${deploy_name}" \
-      "${deploy_name}=${FULL_IMAGE}" \
+      "${container_name}=${FULL_IMAGE}" \
       -n "${NAMESPACE}" \
       --context "${AKS_CLUSTER}" || \
       warn "Failed to set image for ${deploy_name}"
@@ -198,7 +178,7 @@ info "=== Step 4: Wait for rollouts ==="
 
 ROLLOUT_TIMEOUT="600s"
 for svc in "${SERVICES[@]}"; do
-  IFS=':' read -r deploy_name _ <<< "$svc"
+  IFS=':' read -r deploy_name _ _ <<< "$svc"
   if [ "$DRY_RUN" = true ]; then
     info "[DRY RUN] Would wait for rollout: deployment/${deploy_name}"
   else
