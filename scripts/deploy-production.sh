@@ -120,21 +120,44 @@ info "Image tag: ${IMAGE_TAG}"
 # ── Step 1: Build and push Docker images via ACR (cloud-native, no local Docker needed) ──
 info "=== Step 1: Build and push Docker images via ACR ==="
 
+# Wait for an image tag to appear in ACR (polling). ACR builds run async,
+# so --no-logs returns before the image is pushed.
+wait_for_tag() {
+  local repo="$1" tag="$2" tries="${3:-60}" delay="${4:-15}"
+  for i in $(seq 1 "$tries"); do
+    if az acr repository show-tags --name "${ACR_NAME}" --repository "${repo}" \
+        --query "[? @ == '${tag}']" -o tsv 2>/dev/null | grep -q "${tag}"; then
+      return 0
+    fi
+    info "  waiting for ${repo}:${tag} (${i}/${tries}, ${delay}s)..."
+    sleep "$delay"
+  done
+  return 1
+}
+
 for svc in "${SERVICES[@]}"; do
   IFS=':' read -r deploy_name container_name img_name dockerfile_path <<< "$svc"
   build_dir="$(dirname "${dockerfile_path}")"
   info "Building ${img_name}:${IMAGE_TAG} via ACR (ctx=${build_dir})..."
   # az acr build resolves --file relative to CWD, so cd into the build context.
-  ( cd "${build_dir}" && \
-    az acr build \
+  # --no-logs avoids the WSL az CLI colorama/Unicode crash during log streaming.
+  if ( cd "${build_dir}" && \
+    az acr build --no-logs \
       --registry "${ACR_NAME}" \
       --image "${img_name}:${IMAGE_TAG}" \
       --file Dockerfile \
       --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
       --build-arg VCS_REF="${SHA}" \
       --build-arg VERSION="${IMAGE_TAG}" \
-      "." 2>&1 | tail -5 ) || \
+      "." ); then
+    if wait_for_tag "${img_name}" "${IMAGE_TAG}"; then
+      info "  ✅ ${img_name}:${IMAGE_TAG} pushed"
+    else
+      warn "Timed out waiting for ${img_name}:${IMAGE_TAG} — continuing"
+    fi
+  else
     warn "ACR build failed for ${deploy_name} — continuing"
+  fi
 done
 
 # ── Step 2: Apply K8s manifests ───────────────────────────────────────
