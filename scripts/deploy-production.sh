@@ -117,9 +117,9 @@ for svc in "${SERVICES[@]}"; do
     --registry "${ACR_NAME}" \
     --image "${img_name}:${IMAGE_TAG}" \
     --file "${svc_name}/Dockerfile" \
-    --arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    --arg VCS_REF="${SHA}" \
-    --arg VERSION="${IMAGE_TAG}" \
+    --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --build-arg VCS_REF="${SHA}" \
+    --build-arg VERSION="${IMAGE_TAG}" \
     "." 2>&1 | tail -5 || \
     warn "ACR build failed for ${svc_name} — continuing"
 done
