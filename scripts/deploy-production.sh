@@ -221,8 +221,8 @@ sleep 10  # Allow services to start
 
 HEALTH_ENDPOINTS=(
   "https://api.sewaxai.health/health"
-  "https://api.sewaxai.health/v1/ai/health"
-  "https://api.sewaxai.health/v1/status/services"
+  "https://api.sewaxai.health/api/v1/status/services"
+  "https://app.sewaxai.health"
 )
 
 ALL_HEALTHY=true

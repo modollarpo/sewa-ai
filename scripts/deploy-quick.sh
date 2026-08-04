@@ -113,7 +113,7 @@ done
 
 info "=== Health checks ==="
 sleep 5
-for endpoint in "https://api.sewaxai.health/health" "https://api.sewaxai.health/v1/ai/health"; do
+for endpoint in "https://api.sewaxai.health/health" "https://api.sewaxai.health/api/v1/status/services" "https://app.sewaxai.health"; do
   if [ "$DRY_RUN" = true ]; then
     info "[DRY RUN] Would curl: ${endpoint}"
   else
