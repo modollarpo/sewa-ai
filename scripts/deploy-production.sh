@@ -120,7 +120,7 @@ for svc in "${SERVICES[@]}"; do
     --arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
     --arg VCS_REF="${SHA}" \
     --arg VERSION="${IMAGE_TAG}" \
-    "." 2>&1 | Select-Object -Last 5 || \
+    "." 2>&1 | tail -5 || \
     warn "ACR build failed for ${svc_name} — continuing"
 done
 
