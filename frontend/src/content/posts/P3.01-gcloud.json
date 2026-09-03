@@ -1,0 +1,31 @@
+{
+  "id": "P3.01",
+  "title": "G-Cloud 14 for clinical AI: how NHS Trusts deploy SEWA in under 5 business days",
+  "subtitle": "No competitive tender required — here is how the procurement route works",
+  "excerpt": "NHS Trusts can deploy SEWA AI under G-Cloud 14 without a competitive tender, in under 5 business days. This post explains exactly how the route works, what it means for procurement teams, and what to check before signing.",
+  "content": "<h2>What G-Cloud 14 means for NHS procurement</h2>\n<p>NHS Trusts can deploy SEWA AI under G-Cloud 14 without a competitive tender, in under 5 business days. For procurement teams navigating tight timelines and mounting clinical backlogs, this is not a technical detail — it is the difference between adopting AI this year and waiting another procurement cycle.</p>\n<p>G-Cloud 14 is the UK government's digital marketplace framework, enabling public-sector organisations to procure cloud-based services from pre-approved suppliers. Being listed means SEWA has been assessed against the government's procurement and security standards, reducing the due-diligence burden on individual NHS Trusts.</p>\n",
+  "tags": [
+    "NHS",
+    "Regulatory"
+  ],
+  "author": "Dolapo Ariyo",
+  "readTime": "10 min",
+  "evidence": [
+    {
+      "class": "A",
+      "claim": "SEWA listed on G-Cloud 14; NHS Trusts can deploy in under 5 business days without competitive tender",
+      "source": "SEWA NHS Trust Pack v2.0"
+    },
+    {
+      "class": "A",
+      "claim": "NHS DSPT compliance; GDPR alignment",
+      "source": "SEWA NHS Trust Pack v2.0"
+    },
+    {
+      "class": "D",
+      "claim": "Procurement pathway designed for NHS speed requirements",
+      "source": "SEWA-AI-DOC-01"
+    }
+  ],
+  "cta": "Download the NHS Trust Pack →"
+}

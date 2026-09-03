@@ -1,0 +1,31 @@
+{
+  "id": "P3.02",
+  "title": "MHRA reforms and the UKCA pathway: where SEWA sits on the regulatory trajectory",
+  "subtitle": "The 22 July 2025 international-reliance package and the UKCA Class IIb route",
+  "excerpt": "MHRA's reform package introduced international reliance provisions and a streamlined UKCA marking route for innovative medical devices, including AI-based SaMD. For SEWA, the trajectory is clear.",
+  "content": "<h2>The UK regulatory trajectory</h2>\n<p>MHRA's 22 July 2025 reform package introduced international reliance provisions and a streamlined UKCA marking route for innovative medical devices, including AI-based software as a medical device. For SEWA, the trajectory is clear and the timeline is defined.</p>\n<p>SEWA classifies as Class IIb under UK MDR 2002 (as amended) and EU MDR 2017/745 Rule 11. The regulatory pathway runs through three phases: a prospective shadow trial (6 months, primary endpoint door-to-alert under 5 minutes), an NIHR EME application, and ultimately a UKCA Class IIb submission (planned Q2 2027). Each phase is designed to build the independent clinical validation that the market demands.</p>",
+  "tags": [
+    "NHS",
+    "Regulatory"
+  ],
+  "author": "Dolapo Ariyo",
+  "readTime": "12 min",
+  "evidence": [
+    {
+      "class": "A",
+      "claim": "MHRA 22 July 2025 international-reliance package; UKCA Class IIb route",
+      "source": "MHRA; SEWA-AI-DOC-01"
+    },
+    {
+      "class": "D",
+      "claim": "Shadow trial → NIHR EME → UKCA Class IIb (Q2 2027) pathway",
+      "source": "SEWA-AI-DOC-01"
+    },
+    {
+      "class": "A",
+      "claim": "SEWA classifies as Class IIb under UK MDR 2002 and EU MDR 2017/745 Rule 11",
+      "source": "SEWA-AI-DOC-01"
+    }
+  ],
+  "cta": "Read the regulatory strategy document →"
+}

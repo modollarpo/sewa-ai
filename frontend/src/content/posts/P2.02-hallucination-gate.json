@@ -1,0 +1,31 @@
+{
+  "id": "P2.02",
+  "title": "Why hallucination gates matter in clinical AI",
+  "subtitle": "Hallucinations are not a language-model problem alone. They are a patient-safety problem.",
+  "excerpt": "When a large language model invents a citation, the harm is reputational. When a clinical AI hallucinates a pulmonary embolism on a normal chest X-ray, the harm is a patient undergoing an unnecessary invasive procedure.",
+  "content": "<h2>Hallucination is a clinical safety problem</h2>\n<p>When a large language model invents a citation, the harm is reputational. When a clinical AI hallucinates a pulmonary embolism on a normal chest X-ray, the harm is a patient undergoing an unnecessary invasive procedure — or a radiologist losing trust in the entire category of AI assistance. Hallucination in clinical AI is not a technical curiosity; it is a patient-safety problem.</p>\n<p>A hallucination occurs when the system produces an output that is confidently presented as a finding but is not supported by the input data. Unlike a random error, a hallucination is plausible — it looks like a real finding, uses the correct medical terminology, and is often accompanied by a high confidence score.</p>\n",
+  "tags": [
+    "Clinical AI",
+    "Education"
+  ],
+  "author": "Dolapo Ariyo",
+  "readTime": "10 min",
+  "evidence": [
+    {
+      "class": "B",
+      "claim": "Pre-dispatch hallucination gate catches 96.3% of hallucinations (n=500)",
+      "source": "SEWA-AI-DOC-12"
+    },
+    {
+      "class": "A",
+      "claim": "Clinical AI hallucinations are a documented patient-safety concern",
+      "source": "MHRA AI Airlock; NHS AI Lab"
+    },
+    {
+      "class": "C",
+      "claim": "Hallucination gate designed to intercept false positives and negatives",
+      "source": "SEWA-AI-DOC-01"
+    }
+  ],
+  "cta": "See SEWA's Metacognition Engine in action →"
+}

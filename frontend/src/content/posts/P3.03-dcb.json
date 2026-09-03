@@ -1,0 +1,26 @@
+{
+  "id": "P3.03",
+  "title": "DCB0129, DCB0160 and NHS AI procurement: what every vendor must demonstrate",
+  "subtitle": "The DSPT, DTAC, and AI Diagnostic Fund are reshaping how the NHS evaluates and funds AI",
+  "excerpt": "NHS Digital Security and Trust (DCB0129) and the Data Security and Protection Toolkit (DCB0160) set the governance bar for any AI deployed in NHS England.",
+  "content": "<h2>The governance bar for NHS AI</h2>\n<p>NHS Digital Security and Trust (DCB0129) and the Data Security and Protection Toolkit (DCB0160) set the governance bar for any AI deployed in NHS England. Combined with the AI Diagnostic Fund and the Digital Technologies Assessment Checklist (DTAC), these frameworks define what procurement teams must see before adoption.</p>\n<p>For a clinical AI vendor, meeting these requirements means demonstrating cyber-resilience, data governance, clinical safety evidence, and a defined procurement pathway. SEWA's documentation pack addresses each checkpoint directly — from security architecture to data governance to clinical safety evidence — so that NHS procurement teams can evaluate SEWA against a standard they already understand.</p>",
+  "tags": [
+    "NHS",
+    "Regulatory"
+  ],
+  "author": "Dolapo Ariyo",
+  "readTime": "11 min",
+  "evidence": [
+    {
+      "class": "A",
+      "claim": "DCB0129, DCB0160, DTAC, and AI Diagnostic Fund govern NHS AI procurement",
+      "source": "NHS England; SEWA NHS Trust Pack v2.0"
+    },
+    {
+      "class": "D",
+      "claim": "SEWA documentation pack addresses each procurement checkpoint",
+      "source": "SEWA NHS Trust Pack v2.0"
+    }
+  ],
+  "cta": "Download the NHS Trust Pack →"
+}

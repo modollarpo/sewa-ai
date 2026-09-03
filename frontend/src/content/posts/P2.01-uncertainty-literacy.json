@@ -1,0 +1,31 @@
+{
+  "id": "P2.01",
+  "title": "Uncertainty quantification in medical AI: why a single confidence score is not enough",
+  "subtitle": "What aleatoric and epistemic uncertainty mean for patient safety",
+  "excerpt": "Nearly every clinical AI platform reports a confidence or accuracy metric. Few tell you when their model is uncertain. Understanding uncertainty quantification is the first step toward trusting clinical AI safely.",
+  "content": "<h2>The gap between confidence and certainty</h2>\n<p>Nearly every clinical AI platform reports a confidence or accuracy metric. A finding is flagged and accompanied by a number — often between 0 and 1. This score tells you how strongly the model's weights align with the label in its training data. It does not tell you whether the model is certain.</p>\n<p>This distinction matters enormously in clinical settings. A model that is 95% confident that a chest X-ray shows a large pleural effusion — and it does — is a reliable result. A model that is 60% confident that a scan shows a small pneumothorax at the lung apex — an area notoriously difficult to read — is a fundamentally different case. Yet both are often presented identically by platforms that report only a confidence score.</p>\n<p>Understanding this gap is the first step toward trusting clinical AI safely.</p>\n",
+  "tags": [
+    "Clinical AI",
+    "Education"
+  ],
+  "author": "Dolapo Ariyo",
+  "readTime": "11 min",
+  "evidence": [
+    {
+      "class": "A",
+      "claim": "Nearly every clinical AI platform reports a confidence score",
+      "source": "Industry observation"
+    },
+    {
+      "class": "B",
+      "claim": "SEWA uncertainty decomposition into aleatoric and epistemic components",
+      "source": "SEWA-AI-DOC-12"
+    },
+    {
+      "class": "C",
+      "claim": "Uncertainty quantification reduces alert fatigue and improves clinical safety",
+      "source": "SEWA clinical rationale"
+    }
+  ],
+  "cta": "Read how SEWA implements uncertainty quantification →"
+}
