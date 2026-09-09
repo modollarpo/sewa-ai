@@ -1,0 +1,6 @@
+Shareholder,Entity / Class,Shares Held,Ownership %,Vesting Schedule,Notes
+Dolapo Ariyo,Ordinary Shares (Founder),7,000,000,70.0%,"4-year vesting, 1-year cliff",Founder & CEO (Sole Inventor GB2609706.3)
+Early Angels / Advisors,Ordinary Shares,1,000,000,10.0%,Fully vested,Strategic advisory & early support
+ESOP (Option Pool),Unallocated Options,1,000,000,10.0%,Reserved for key hires (CMO, CSO, ML),Post-seed option pool
+Seed Investors (£650k),Preferred Shares (Seed),1,000,000,10.0%,Standard SEIS/EIS terms,Illustrative post-seed (at £5.85m pre-money / £6.5m post-money)
+Total,Authorized & Issued,10,000,000,100.0%,-,Storegrill Inc Ltd (Company No. 14581073)
