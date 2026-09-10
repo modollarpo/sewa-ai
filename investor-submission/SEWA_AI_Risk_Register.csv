@@ -1,0 +1,6 @@
+Risk ID,Category,Description,Likelihood,Impact,Current Mitigation,Planned Mitigation,Owner,Status
+R-01,Clinical,"False negative triage alert delaying critical haemorrhage intervention",Low,High,"9-layer metacognition gate and MC-Dropout uncertainty quantification","Prospective multi-centre NHS shadow trial validation",Clinical Lead,Active
+R-02,Regulatory,"Delay in UKCA Class IIb or MHRA approval for medical device software",Medium,High,"Engagement with NHS Innovation Service and HRA; DCB0129 complete","Appoint dedicated Clinical Safety Officer (CSO) upon seed close",Regulatory Lead,Active
+R-03,Technical,"Model performance degradation under local hospital DICOM scanner drift",Medium,Medium,"Normalisation pre-processing and automated drift monitoring",Federated learning privacy-preserving updates,AI Lead,Active
+R-04,Cybersecurity,"PHI egress or cloud data breach within NHS trust boundary",Low,High,"Azure UK South sovereign deployment with signed zero-egress declaration",Quarterly penetration testing (CHECK/CREST),DevOps Lead,Active
+R-05,Commercial,"Extended NHS procurement sales cycles exceeding runway estimates",High,Medium,"G-Cloud 14 and DTAC pre-mapped procurement routes; pilot validation",Establish framework agreements (ICS Framework, SBS),Commercial Lead,Active

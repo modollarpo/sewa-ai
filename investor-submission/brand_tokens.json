@@ -1,0 +1,15 @@
+{
+  "primary": "#408D7B",
+  "secondary": "#2E6B5E",
+  "accent": "#52B09A",
+  "background": "#050F0C",
+  "surface": "#0C1D17",
+  "text_primary": "#D0ECE6",
+  "text_secondary": "#6FA898",
+  "border": "#1B3028",
+  "success": "#1DBF73",
+  "warning": "#E08A20",
+  "danger": "#E03535",
+  "font_base": "IBM Plex Sans, Inter, system-ui, sans-serif",
+  "font_mono": "IBM Plex Mono, Fira Code, monospace"
+}

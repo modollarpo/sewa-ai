@@ -1,0 +1,11 @@
+claim_id,claim,category,source,evidence_type,verified_date,confidence,allowed_in_main_deck,allowed_in_appendix,wording_constraint,owner
+C-01,"Storegrill Inc Ltd registered in England & Wales (No. 14581073)",Corporate,Companies House,Verified,2026-05-01,High,Yes,Yes,"Exact company number and legal entity.",D. Ariyo
+C-02,"UK Patent Application GB2609706.3 filed March 2026",IP,UKIPO,Verified,2026-03-01,High,Yes,Yes,"Cite GB2609706.3 and sole inventor Dolapo Ariyo.",D. Ariyo
+C-03,"14,200 retrospective scans evaluated",Engineering,Internal Test Suites,Engineering Result,2026-05-01,High,Yes,Yes,"Clearly label as retrospective engineering evaluation, not clinical trial.",D. Ariyo
+C-04,"ICH AUC-ROC 0.972 on n=2,847 CT Head studies",Engineering,Validation Logs,Engineering Result,2026-05-01,High,Yes,Yes,"Cite sample size and evaluation metric.",D. Ariyo
+C-05,"NHS Innovation Service Registration Ref INN-2604-0064-2",Regulatory,NHS England,Verified,2026-05-01,High,Yes,Yes,"Cite active registration number.",D. Ariyo
+C-06,"HRA engagement with assessor Syeda Thorpe",Regulatory,HRA Correspondence,Verified,2026-05-01,High,Yes,Yes,"Describe as engaging, not approved.",D. Ariyo
+C-07,"DCB0129 Clinical Safety Case complete (SMP-001 + CRM-001)",Regulatory,Internal Safety Logs,Verified,2026-05-01,High,Yes,Yes,"State clinical safety case complete.",D. Ariyo
+C-08,"Median AI pipeline door-to-alert latency of 1.84 seconds",Engineering,Benchmark Suite,Engineering Result,2026-05-01,High,Yes,Yes,"Specify engineering environment and latency definition.",D. Ariyo
+C-09,"Year 1 ARR £120k scaling to £14.6m ARR in Year 5 (Base Case)",Financial,Financial Model,Forecast / Target,2026-05-01,Medium,Yes,Yes,"Label clearly as management base case projections.",D. Ariyo
+C-10,"£650k Seed Round with 18-month runway",Funding,Fundraising Strategy,Target,2026-05-01,High,Yes,Yes,"Describe as seed round target and use of funds plan.",D. Ariyo

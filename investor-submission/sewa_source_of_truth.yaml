@@ -1,0 +1,91 @@
+company:
+  name: "SEWA AI"
+  legal_entity: "Storegrill Inc Ltd"
+  companies_house_number: "14581073"
+  incorporation_date: "2023-01-10"
+  registered_address: "18 Hampshire Close, Binley, Coventry, CV3 2FP"
+  jurisdiction: "England & Wales"
+
+brand:
+  name: "SEWA AI / SEWA XAI"
+  primary_colour: "#408D7B"
+  secondary_colour: "#2E6B5E"
+  typography: "IBM Plex Sans / Inter"
+
+ownership:
+  current_verified:
+    - holder: "Dolapo Ariyo"
+      shares: 7500000
+      percentage: 75.0
+    - holder: "Blessing Tosin Tade"
+      shares: 2500000
+      percentage: 25.0
+  proposed_seed_scenario:
+    investment: £650000
+    pre_money_valuation: £5850000
+    post_money_valuation: £6500000
+    allocation:
+      dolapo_ariyo: 60.0
+      blessing_tosin_tade: 20.0
+      esop_pool: 10.0
+      seed_investors: 10.0
+
+team:
+  founder:
+    name: "Dolapo Ariyo"
+    role: "Founder & CEO"
+    commitment: "Full-time operator leading product, technology, IP, clinical research planning, regulatory preparation, NHS engagement, fundraising, and commercial execution."
+    inventor_of: "UK Patent Application GB2609706.3"
+  advisor:
+    name: "Andrew Metcalfe"
+    role: "Strategic Clinical Research Advisor"
+    focus: "Clinical investigation strategy, NHS research pathways, evidence generation, health technology evaluation, trial design."
+
+ip:
+  patent_application: "GB2609706.3"
+  filing_date: "March 2026"
+  title: "Sovereign Multi-Engine Clinical AI Platform for Automated Diagnostic Triage and Safety Assurance"
+  claims_count: 10
+  fto_search: "Completed April 2026 — no blocking prior art identified in 4 comparator patent families"
+  software_copyright: "~82,200 lines of original code under CDPA 1988"
+
+validation:
+  retrospective_engineering_evaluation:
+    scans_evaluated: 14200
+    metrics:
+      ich_auc_roc: 0.972
+      pe_auc_roc: 0.961
+      stroke_lvo_auc_roc: 0.958
+      pneumothorax_auc_roc: 0.979
+      tb_africa_auc_roc: 0.944
+      cohens_kappa_ai_vs_rad1: 0.87
+  clinical_pathway:
+    nhs_innovation_service: "Registered — Ref: INN-2604-0064-2"
+    hra_engagement: "Engaging — Assessor Syeda Thorpe (May 2026)"
+    safety_case: "DCB0129 complete (SMP-001 + CRM-001)"
+    iras_application: "In progress"
+    shadow_trial_protocol: "Ready (non-interventional service evaluation)"
+
+competition:
+  benchmarks:
+    - "Harrison.ai / Annalise"
+    - "Aidoc"
+    - "Viz.ai"
+    - "Qure.ai"
+  methodology: "Evidence-aware feature matrix avoiding unsupported absolute claims."
+
+market:
+  tam: "$22B global medical imaging AI market by 2030"
+  sam: "£4.1B addressable acute radiology triage & reporting market"
+  som: "£28M initial NHS acute trust beachhead"
+
+financials:
+  arr_projections:
+    year_1: £120000
+    year_2: £820000
+    year_3: £3400000
+    year_4: £7100000
+    year_5: £14600000
+  seed_ask: £650000
+  runway: "18 months"
+  ebitda_positive: "Year 3 H2"
