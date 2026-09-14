@@ -422,6 +422,7 @@ jobs:
       - name: Notify Slack on success
         if: success()
         uses: slackapi/slack-github-action@v1.26.0
+        continue-on-error: true
         with:
           payload: |
             { "text": "✅ SEWA AI deployed to production — ${{ github.sha }} by ${{ github.actor }}" }
