@@ -435,7 +435,7 @@ jobs:
     name: Deploy to Production (AWS EKS)
     runs-on: ubuntu-latest
     needs: build-images
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && vars.AWS_DEPLOY_ENABLED == 'true'
     environment:
       name: production-aws
       url: https://us.sewaxai.health
@@ -477,7 +477,7 @@ jobs:
     name: Deploy to Production (GCP GKE)
     runs-on: ubuntu-latest
     needs: build-images
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && vars.GCP_DEPLOY_ENABLED == 'true'
     environment:
       name: production-gcp
       url: https://eu.sewaxai.health
