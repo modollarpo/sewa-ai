@@ -1,115 +1,78 @@
 // SEWA XAI — frontend/public/sw.js
-// PWA Service Worker: offline cache, background sync, push notifications
-// Feature: PWA Capabilities
+// PWA Service Worker (vite-plugin-pwa injectManifest source).
+// Bundled at build time; the precache manifest is injected via __WB_MANIFEST.
+// Provides: precaching, runtime caching, offline navigation fallback,
+// DICOM network bypass, background sync, and clinical push notifications.
+import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
+import { NavigationRoute, registerRoute } from 'workbox-routing';
+import { NetworkFirst, StaleWhileRevalidate, CacheFirst, NetworkOnly } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
 
-const CACHE_NAME   = 'sewa-ai-v2.4.1';
-const STATIC_CACHE = 'sewa-static-v2.4.1';
-const API_CACHE    = 'sewa-api-v2.4.1';
+// ── Precache (injected at build time) ─────────────────────
+precacheAndRoute(self.__WB_MANIFEST);
 
-// Assets to precache on install
-const PRECACHE_URLS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-];
+// Navigate fallback → cached index.html for SPA routes
+registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));
 
-// API routes to cache with network-first strategy
-const NETWORK_FIRST_PATTERNS = [
-  /\/api\/v1\/scans/,
-  /\/api\/v1\/reports/,
-  /\/api\/v1\/notifications/,
-];
+// ── Runtime caching ───────────────────────────────────────
+registerRoute(
+  /^https:\/\/api\.sewaxai\.health\/api\/v1\/scans/,
+  new NetworkFirst({
+    cacheName: 'sewa-scans-cache',
+    plugins: [new ExpirationPlugin({ maxAgeSeconds: 300, maxEntries: 50 })],
+  })
+);
 
-// Cache-first patterns (static assets)
-const CACHE_FIRST_PATTERNS = [
-  /\.js$/, /\.css$/, /\.png$/, /\.jpg$/, /\.svg$/, /\.woff/,
-];
+registerRoute(
+  /^https:\/\/api\.sewaxai\.health\/api\/v1\/reports/,
+  new NetworkFirst({
+    cacheName: 'sewa-reports-cache',
+    plugins: [new ExpirationPlugin({ maxAgeSeconds: 3600, maxEntries: 20 })],
+  })
+);
 
-// ── Install ────────────────────────────────────────────────────
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
-  );
-});
+registerRoute(
+  /^https:\/\/api\.sewaxai\.health\/api\/v1\/users\/me/,
+  new StaleWhileRevalidate({ cacheName: 'sewa-user-cache' })
+);
 
-// ── Activate ───────────────────────────────────────────────────
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => ![CACHE_NAME, STATIC_CACHE, API_CACHE].includes(k))
-            .map(k => caches.delete(k))
-      )
-    ).then(() => self.clients.claim())
-  );
-});
+registerRoute(
+  /\.(?:png|jpg|jpeg|svg|gif|woff2)$/,
+  new CacheFirst({
+    cacheName: 'sewa-assets-cache',
+    plugins: [new ExpirationPlugin({ maxEntries: 100 })],
+  })
+);
 
-// ── Fetch ──────────────────────────────────────────────────────
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+// ── DICOM streams: always network, never cache ────────────
+registerRoute(({ url }) => url.pathname.includes('.dcm'), new NetworkOnly());
 
-  // Skip non-GET and cross-origin
-  if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
+// ── Offline-first API fallback ────────────────────────────
+registerRoute(
+  /^https:\/\/api\.sewaxai\.health\/api\/v1\/(?!scans|reports|users)/,
+  new NetworkFirst({
+    cacheName: 'sewa-api-cache',
+    plugins: [
+      {
+        handlerDidError: async () =>
+          new Response(JSON.stringify({ offline: true, message: 'Offline — showing cached data' }), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 503,
+          }),
+      },
+    ],
+  })
+);
 
-  // DICOM files — network only (too large to cache)
-  if (url.pathname.includes('/scans/') && url.pathname.includes('.dcm')) return;
+// ── Clinical Alert Categories ─────────────────────────────
+const CLINICAL_CATEGORIES = {
+  STROKE_CODE:       { urgency: 'CRITICAL', vibrate: [500, 250, 500, 250, 500], sound: 'critical_alert.caf', requiresAck: true },
+  CRITICAL_FINDING:  { urgency: 'CRITICAL', vibrate: [500, 250, 500, 250, 500], sound: 'critical_alert.caf', requiresAck: true },
+  URGENT_FINDING:    { urgency: 'URGENT',   vibrate: [300, 150, 300, 150, 300], sound: 'urgent_alert.caf',  requiresAck: true },
+  NORMAL_FINDING:    { urgency: 'NORMAL',   vibrate: [200],                     sound: 'default',           requiresAck: false },
+};
 
-  // Network first for API calls
-  if (NETWORK_FIRST_PATTERNS.some(p => p.test(url.pathname))) {
-    event.respondWith(networkFirst(event.request));
-    return;
-  }
-
-  // Cache first for static assets
-  if (CACHE_FIRST_PATTERNS.some(p => p.test(url.pathname))) {
-    event.respondWith(cacheFirst(event.request));
-    return;
-  }
-
-  // SPA navigation — serve index.html from cache
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      caches.match('/index.html').then(r => r ?? fetch(event.request))
-    );
-    return;
-  }
-
-  event.respondWith(networkFirst(event.request));
-});
-
-async function networkFirst(request) {
-  try {
-    const res = await fetch(request);
-    if (res.ok) {
-      const cache = await caches.open(API_CACHE);
-      cache.put(request, res.clone());
-    }
-    return res;
-  } catch {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    return new Response(JSON.stringify({ offline: true, message: 'Offline — showing cached data' }), {
-      headers: { 'Content-Type': 'application/json' }, status: 503,
-    });
-  }
-}
-
-async function cacheFirst(request) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-  const res = await fetch(request);
-  if (res.ok) {
-    const cache = await caches.open(STATIC_CACHE);
-    cache.put(request, res.clone());
-  }
-  return res;
-}
-
-// ── Background Sync (offline mutations) ───────────────────────
+// ── Background Sync (offline mutations) ───────────────────
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sewa-offline-sync') {
     event.waitUntil(syncOfflineQueue());
@@ -117,32 +80,32 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncOfflineQueue() {
-  // Retrieve queued requests from IndexedDB (offline store)
-  // In production, reads from sewa-offline Zustand-persisted IndexedDB
   console.log('[SW] Syncing offline queue...');
 }
 
-// ── Push Notifications (Feature 6) ────────────────────────────
+// ── Clinical Push Notifications ───────────────────────────
 self.addEventListener('push', (event) => {
   const data = event.data?.json() ?? {};
-  const urgency = data.urgency || 'NORMAL';
+  const category = CLINICAL_CATEGORIES[data.category] ?? CLINICAL_CATEGORIES.NORMAL_FINDING;
+  const urgency = data.urgency ?? category.urgency;
 
   const options = {
     body:    data.body  || 'New SEWA XAI notification',
     icon:    '/icons/icon-192.png',
     badge:   '/icons/badge-72.png',
-    vibrate: urgency === 'CRITICAL' ? [500, 250, 500, 250, 500] : [200],
-    tag:     data.scanId || 'sewa-notification',
-    data:    data,
-    requireInteraction: urgency === 'CRITICAL',
-    actions: urgency !== 'NORMAL' ? [
+    vibrate: category.vibrate,
+    tag:     data.scanId || `sewa-${data.category ?? 'notification'}`,
+    data:    { ...data, category: data.category ?? 'normal_finding' },
+    requireInteraction: category.requiresAck,
+    actions: category.requiresAck ? [
       { action: 'review', title: 'Review Now' },
       { action: 'dismiss', title: 'Dismiss' },
     ] : [],
+    sound: category.sound,
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'SEWA XAI', options)
+    self.registration.showNotification(data.title || 'SEWA XAI Clinical Alert', options)
   );
 });
 
@@ -155,10 +118,20 @@ self.addEventListener('notificationclick', (event) => {
     event.waitUntil(
       clients.matchAll({ type: 'window' }).then(list => {
         for (const client of list) {
-          if ('focus' in client) { client.focus(); client.postMessage({ type:'navigate', url }); return; }
+          if ('focus' in client) { client.focus(); client.postMessage({ type: 'navigate', url }); return; }
         }
         return clients.openWindow(url);
       })
     );
+  }
+});
+
+// ── Critical Alert Acknowledgement ────────────────────────
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'ACKNOWLEDGE_CRITICAL') {
+    const { scanId } = event.data;
+    clients.matchAll().then(clients => {
+      clients.forEach(c => c.postMessage({ type: 'CRITICAL_ACK', scanId }));
+    });
   }
 });

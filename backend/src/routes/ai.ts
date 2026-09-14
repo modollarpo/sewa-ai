@@ -24,9 +24,17 @@ r.post('/ambient-dictation', authorize('admin','superadmin','radiologist', 'doct
 r.post('/enterprise-transcribe', authorize('admin','superadmin','radiologist', 'doctor'), ctrl.enterpriseTranscribe);
 
 // ── Translation Services ───────────────────────────────────────
-r.post('/translate',      authenticate, ctrl.translateText);
-r.post('/detect-language', authenticate, ctrl.detectLanguage);
-r.get('/languages',        authenticate, ctrl.listLanguages);
+r.post('/translate',            authenticate, ctrl.translateText);
+r.post('/detect-language',      authenticate, ctrl.detectLanguage);
+r.get('/languages',              authenticate, ctrl.listLanguages);
+
+// ── Azure Translator (free tier: 2M chars/month) ─────────────
+r.post('/azure-translate',      authenticate, ctrl.azureTranslateText);
+r.post('/azure-detect-language',authenticate, ctrl.azureDetectLanguage);
+
+// ── Clinical Push Notifications (FCM + Azure Notification Hubs) ──
+r.post('/clinical-push',        authorize('admin','superadmin','radiologist'), ctrl.triggerClinicalPush);
+r.post('/clinical-push/acknowledge', authenticate, ctrl.acknowledgeClinicalPush);
 
 // Standard VLM (Full report)
 r.post('/vlm/:scanId',    authorize('admin','superadmin','radiologist'), ctrl.streamVLMReport); // Switched to streaming by default for better UX

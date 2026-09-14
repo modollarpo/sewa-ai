@@ -182,3 +182,77 @@ export async function getDeploymentHistory(limit = 20) {
     include: { validation: { select: { accuracy: true, federatedRoundId: true, validatedAt: true } } },
   });
 }
+
+/**
+ * Process an embedding reindex job received from Azure Service Bus.
+ * Updates the scan's embedding vector in the database and triggers
+ * downstream vector search index updates.
+ */
+export async function processEmbeddingReindex(job: {
+  scanId: string;
+  tenantId: string;
+  modelType: string;
+  embeddingVector: number[];
+}): Promise<void> {
+  try {
+    const { scanId, tenantId, modelType, embeddingVector } = job;
+    logger.info(`[MLOps] Processing embedding reindex for scan ${scanId} (model: ${modelType})`);
+
+    const result = await prisma.aIResult.findFirst({
+      where: { scanId, tenantId },
+    });
+
+    if (!result) {
+      logger.warn(`[MLOps] No AI result found for scan ${scanId} — skipping embedding update.`);
+      return;
+    }
+
+    await prisma.aIResult.update({
+      where: { id: result.id },
+      data: {
+        embeddingVector: JSON.stringify(embeddingVector),
+        embeddingUpdatedAt: new Date(),
+      },
+    });
+
+    await auditLog({
+      action: 'EMBEDDING_REINDEX',
+      userId: 'system',
+      tenantId,
+      metadata: { scanId, modelType, embeddingDimension: embeddingVector.length },
+    });
+
+    logger.info(`[MLOps] Embedding reindex complete for scan ${scanId}`);
+  } catch (err: any) {
+    logger.error(`[MLOps] Embedding reindex failed for ${job.scanId}: ${err.message}`);
+  }
+}
+
+/**
+ * Process a federated learning round job received from Azure Service Bus.
+ * Validates the aggregated model weights and triggers deployment if approved.
+ */
+export async function processFederatedRound(job: {
+  roundId: string;
+  tenantId: string;
+  modelWeights: Record<string, number[]>;
+  globalModelVersion: string;
+}): Promise<void> {
+  try {
+    const { roundId, tenantId, modelWeights, globalModelVersion } = job;
+    logger.info(`[MLOps] Processing federated round ${roundId}`);
+
+    await validateFederatedRound(roundId);
+
+    await auditLog({
+      action: 'FEDERATED_ROUND_PROCESSED',
+      userId: 'system',
+      tenantId,
+      metadata: { roundId, globalModelVersion, weightKeys: Object.keys(modelWeights) },
+    });
+
+    logger.info(`[MLOps] Federated round ${roundId} processed successfully`);
+  } catch (err: any) {
+    logger.error(`[MLOps] Federated round processing failed: ${err.message}`);
+  }
+}

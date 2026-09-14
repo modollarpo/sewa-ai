@@ -23,6 +23,7 @@ import { CookieBanner }              from './components/public/CookieBanner';
 import { socketService }             from './services/socketService';
 import { analytics }                 from './services/analytics';
 import { dashboardColors as C }      from './design-system/tokens';
+import { initClinicalPushNotifications } from './services/pushRegistration';
 
 // Lazy-loaded pages for code splitting
 const LoginPage              = lazy(() => import('./pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
@@ -75,7 +76,6 @@ const GovernancePage         = lazy(() => import('./pages/public/GovernancePage'
 const PublicationsPage       = lazy(() => import('./pages/public/PublicationsPage').then(m => ({ default: m.PublicationsPage })));
 const ResearchPortal         = lazy(() => import('./pages/public/ResearchPortal').then(m => ({ default: m.ResearchPortal })));
 const PartnerPortalPage      = lazy(() => import('./pages/public/PartnerPortalPage').then(m => ({ default: m.PartnerPortalPage })));
-const BlogPage               = lazy(() => import('./pages/public/BlogPage').then(m => ({ default: m.BlogPage })));
 const CareersPage            = lazy(() => import('./pages/public/CareersPage').then(m => ({ default: m.CareersPage })));
 const PressPage              = lazy(() => import('./pages/public/PressPage').then(m => ({ default: m.PressPage })));
 const ChangelogPage          = lazy(() => import('./pages/public/ChangelogPage').then(m => ({ default: m.ChangelogPage })));
@@ -517,7 +517,6 @@ function PublicSite() {
       {publicPage === 'research'            && <ResearchPortal {...navProps} />}
       {publicPage === 'partner-portal'      && <PartnerPortalPage {...navProps} />}
       {publicPage === 'whitepaper'          && <TechnicalWhitepaperPage {...navProps} />}
-      {publicPage === 'blog'                && <BlogPage {...navProps} />}
       {publicPage === 'careers'             && <CareersPage {...navProps} />}
       {publicPage === 'press'               && <PressPage {...navProps} />}
       {publicPage === 'sitemap'             && <SitemapPage {...navProps} />}
@@ -536,7 +535,7 @@ function PublicSite() {
       {publicPage === 'api-docs'           && <ApiDocsPage {...navProps} />}
       {publicPage === 'developers'         && <DevelopersPage {...navProps} />}
       {publicPage === 'trust'              && <TrustCenterPage {...navProps} />}
-      {!['landing','login','register','onboarding','onboarding-specialist','pricing','africa-pricing','nhs-procurement','specialized-ai','nhs-dspt-compliance','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','clinical-evidence','ai-safety','governance','publications','partner-portal','whitepaper','blog','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','pathology-ai','mammography-ai','retinal-ai','regulatory','api-docs','developers','training','trust'].includes(publicPage) && (
+      {!['landing','login','register','onboarding','onboarding-specialist','pricing','africa-pricing','nhs-procurement','specialized-ai','nhs-dspt-compliance','solutions','research','about','contact','downloads','privacy-policy','terms','cookie-policy','security','clinical-validation','clinical-evidence','ai-safety','governance','publications','partner-portal','whitepaper','careers','press','accessibility','sitemap','docs','status','changelog','triage-ai','uncertainty-ai','metacognition-ai','vision-language-ai','explainable-ai','pathology-ai','mammography-ai','retinal-ai','regulatory','api-docs','developers','training','trust'].includes(publicPage) && (
         <LandingPage onLogin={() => navigate('/login')} onNavigate={handleNavigate} />
       )}
       <CookieBanner onNavigate={handleNavigate} />
@@ -635,6 +634,14 @@ function AppShell() {
     socketService.on('scan:updated', (d: { scanId: string; status: string }) => useScanStore.getState().updateScanStatus(d.scanId, d.status));
     return () => socketService.disconnect();
   }, [isAuthenticated, token, user, fetchWorklist]);
+
+  // ── Initialize Clinical Push Notifications ──
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    const clinicalRoles = ['radiologist', 'doctor', 'technician', 'admin', 'superadmin'];
+    if (!clinicalRoles.includes(user.role)) return;
+    initClinicalPushNotifications().catch(() => {});
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     if (user?.region) setRegion(user.region);

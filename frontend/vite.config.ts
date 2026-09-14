@@ -19,31 +19,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: false,
-      workbox: {
+      strategies: 'injectManifest',
+      srcDir: 'public',
+      filename: 'sw.js',
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: '/index.html',
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.sewaxai\.health\/api\/v1\/scans/,
-            handler: 'NetworkFirst',
-            options: { cacheName: 'sewa-scans-cache', expiration: { maxAgeSeconds: 300, maxEntries: 50 } },
-          },
-          {
-            urlPattern: /^https:\/\/api\.sewaxai\.health\/api\/v1\/reports/,
-            handler: 'NetworkFirst',
-            options: { cacheName: 'sewa-reports-cache', expiration: { maxAgeSeconds: 3600, maxEntries: 20 } },
-          },
-          {
-            urlPattern: /^https:\/\/api\.sewaxai\.health\/api\/v1\/users\/me/,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'sewa-user-cache' },
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|woff2)$/,
-            handler: 'CacheFirst',
-            options: { cacheName: 'sewa-assets-cache', expiration: { maxEntries: 100 } },
-          },
-        ],
+        globIgnores: ['sw.js', 'sw.js.map', 'workbox-*.js'],
       },
     }),
   ],

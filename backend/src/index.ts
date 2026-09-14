@@ -451,6 +451,12 @@ async function bootstrap() {
       logger.error('Scan queue bridge failed to start', err);
       process.exit(1);
     });
+
+    // Start Azure Service Bus MLOps bridge (async embedding reindex + federated round jobs)
+    const { azureServiceBusBridge } = await import('./services/azureServiceBusBridge');
+    logger.info('[SB-MLOps] Azure Service Bus bridge loaded (REST API mode)', {
+      functions: Object.keys(azureServiceBusBridge),
+    });
   } catch (err) {
     logger.error('Bootstrap error:', err);
     process.exit(1);

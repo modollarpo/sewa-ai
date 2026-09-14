@@ -3,6 +3,7 @@
 // All users auto-subscribed by role. Respects per-user preferences.
 
 import admin                from 'firebase-admin';
+import crypto               from 'crypto';
 import { prisma }           from '../../config/database';
 import { config }           from '../../config/env';
 import { emailService }     from './emailService';
@@ -329,14 +330,96 @@ export async function notifyAppointmentBooked(opts: {
 }
 
 export async function notifyReportReady(opts: {
-  tenantId: string; patientId: string; scanId: string; reportId: string;
-  finding: string; radiologistName: string;
+   tenantId: string; patientId: string; scanId: string; reportId: string;
+   finding: string; radiologistName: string;
+ }) {
+   return dispatch({
+     tenantId: opts.tenantId, type: 'report_ready',
+     title: '📋 Your Radiology Report is Ready',
+     body:  `Report for scan ${opts.scanId} has been signed by ${opts.radiologistName}`,
+     userIds: [opts.patientId],
+     templateData: { ...opts },
+   });
+ }
+
+// ── Clinical Push for Controller ───────────────────────────
+// Convenience wrapper called by aiController.triggerClinicalPush
+export async function sendClinicalPush(opts: {
+  scanId: string; urgency: string; findingType: string;
+  patientId?: string; tenantId: string;
 }) {
-  return dispatch({
-    tenantId: opts.tenantId, type: 'report_ready',
-    title: '📋 Your Radiology Report is Ready',
-    body:  `Report for scan ${opts.scanId} has been signed by ${opts.radiologistName}`,
-    userIds: [opts.patientId],
-    templateData: { ...opts },
+  const { scanId, urgency, findingType, patientId, tenantId } = opts;
+  const type = urgency === 'CRITICAL' || findingType === 'stroke_code' ? 'stroke_code'
+             : urgency === 'URGENT' ? 'critical_finding' : 'urgent_finding';
+
+  const findingLabel = findingType?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) ?? 'Critical Finding';
+
+  await dispatch({
+    tenantId,
+    type,
+    title: urgency === 'CRITICAL' ? `⚡ CRITICAL: ${findingLabel}` : `⚠ ${findingLabel}`,
+    body: `Scan ${scanId}${patientId ? ` for patient ${patientId}` : ''} — ${urgency} priority. Immediate review required.`,
+    data: { scanId, urgency, findingType, ...(patientId ? { patientId } : {}) },
+    channels: ['push', 'email', 'socket'],
   });
+
+  return { type };
+ }
+
+// ── Azure Notification Hubs Bridge ────────────────────────
+// Sends push notifications to Azure Notification Hubs as a secondary delivery channel
+// for cross-region failover (e.g., UK South ↔ swedencentral).
+import axios from 'axios';
+
+const NOTIFICATION_HUBS_CONN = config.AZURE_NOTIFICATION_HUBS_CONNECTION_STRING;
+const NOTIFICATION_HUBS_NAME  = config.AZURE_NOTIFICATION_HUBS_NAME;
+
+export interface AzureNotificationHubOptions {
+  title: string;
+  body: string;
+  tags: string[]; // Platform tags: e.g., ['radiologist', 'deviceId:xyz']
+  urgency: 'critical' | 'normal';
+}
+
+export async function sendAzureNotificationHubPush(opts: AzureNotificationHubOptions): Promise<void> {
+  if (!NOTIFICATION_HUBS_CONN || !NOTIFICATION_HUBS_NAME) {
+    logger.warn('[AzureNH] Connection string or hub name not configured — skipping Azure NH push.');
+    return;
+  }
+
+  try {
+    // Azure Notification Hubs REST API: send a native push via SAS token
+    const sasToken = generateSasToken(NOTIFICATION_HUBS_NAME);
+    const url = `https://${NOTIFICATION_HUBS_NAME}.servicebus.windows.net/${NOTIFICATION_HUBS_NAME}/messages`;
+
+    await axios.post(url, {
+      notification: {
+        android: { data: { title: opts.title, body: opts.body, urgency: opts.urgency } },
+        apns:    { payload: { aps: { alert: { title: opts.title, body: opts.body } } } },
+        wns:     { toast: { visual: { binding: [{ text: opts.title }, { text: opts.body }] } } },
+      },
+      tags: opts.tags,
+    }, {
+      headers: {
+        Authorization: `SharedAccessSignature ${sasToken}`,
+        'Content-Type': 'application/json',
+        'ServiceBusNotificationFormat': 'gcm',
+      },
+      timeout: 10000,
+    });
+
+    logger.info(`[AzureNH] Push sent to ${opts.tags.join(',')} (${opts.urgency})`);
+  } catch (err: any) {
+    logger.error(`[AzureNH] Push failed: ${err.message}`);
+  }
+}
+
+function generateSasToken(resourceUri: string): string {
+  // SAS token generation for Azure Notification Hubs
+  const expiry = Math.floor(Date.now() / 1000) + 3600;
+  const stringToSign = `${resourceUri}\n${expiry}`;
+  const signature = crypto.createHmac('sha256', NOTIFICATION_HUBS_CONN.split(';')[1]?.split('=')[1] ?? '')
+    .update(stringToSign, 'utf8').digest('base64');
+  const sharedAccessKeyName = NOTIFICATION_HUBS_CONN.split(';')[0]?.split('=')[1] ?? '';
+  return `SharedAccessSignature sr=${encodeURIComponent(resourceUri)}&sig=${encodeURIComponent(signature)}&se=${expiry}&skn=${sharedAccessKeyName}`;
 }

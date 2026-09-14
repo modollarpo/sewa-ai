@@ -226,6 +226,14 @@ export const config = {
   AZURE_SPEECH_KEY: optional('AZURE_SPEECH_KEY'),
   AZURE_SPEECH_REGION: optional('AZURE_SPEECH_REGION', 'uksouth'),
 
+  // ── Azure Translator (free tier: 2M chars/month) ──
+  AZURE_TRANSLATOR_KEY:     optional('AZURE_TRANSLATOR_KEY'),
+  AZURE_TRANSLATOR_ENDPOINT: optional('AZURE_TRANSLATOR_ENDPOINT', IS_AZURE ? 'https://api.cognitive.microsoft.com' : 'https://api.cognitive.microsoft.com'),
+
+  // ── Azure Notification Hubs (free tier: 90K push/month) ──
+  AZURE_NOTIFICATION_HUBS_CONNECTION_STRING: optional('AZURE_NOTIFICATION_HUBS_CONNECTION_STRING'),
+  AZURE_NOTIFICATION_HUBS_NAME:             optional('AZURE_NOTIFICATION_HUBS_NAME', 'sewa-clinical-alerts'),
+
 } as const;
 
 // ── Startup log ───────────────────────────────────────────────

@@ -6,7 +6,10 @@ import { logger } from '../utils/logger';
 import { config } from '../config/env';
 import { triggerAITriage, generateVLMReport, generateICDCodes } from '../services/aiService';
 import { translationService } from '../services/translationService';
+import { azureTranslatorService } from '../services/azureTranslatorService';
 import { voiceTranscriptionService } from '../services/voiceTranscriptionService';
+import { sendClinicalPush } from '../services/notifications/notificationService';
+import { auditLog } from '../utils/audit';
 import { AppError } from '../utils/AppError';
 
 const AI_SERVICE_URLS: Record<string, string> = {
@@ -513,6 +516,89 @@ export const listLanguages = async (_req: Request, res: Response, next: NextFunc
   try {
     const result = await translationService.listLanguages();
     res.json(result);
+  } catch (err) { next(err); }
+};
+
+/**
+ * Translate text via Azure Translator (free tier: 2M chars/month).
+ * Falls back to the custom translation service if Azure key is absent.
+ */
+export const azureTranslateText = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { text, target, source } = req.body;
+    if (!text || !target) throw new AppError('Missing required fields: text, target', 400);
+    const result = await azureTranslatorService.azureTranslateText(text, target, source);
+    if (!result) {
+      // Fallback to custom translation service
+      const fallback = await translationService.translateText(text, source || 'en', target);
+      return res.json(fallback);
+    }
+    res.json(result);
+  } catch (err) { next(err); }
+};
+
+/**
+ * Detect language via Azure Translator (free tier: 2M chars/month).
+ * Falls back to the custom translation service if Azure key is absent.
+ */
+export const azureDetectLanguage = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { text } = req.body;
+    if (!text) throw new AppError('Missing required field: text', 400);
+    const result = await azureTranslatorService.azureDetectLanguage(text);
+    if (!result) {
+      const fallback = await translationService.detectLanguage(text);
+      return res.json(fallback);
+    }
+    res.json(result);
+  } catch (err) { next(err); }
+};
+
+/**
+ * Trigger a clinical push notification to all subscribed radiologists/doctors
+ * for a critical finding (stroke_code, critical_finding, urgent_finding).
+ */
+export const triggerClinicalPush = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { scanId, urgency, findingType, patientId } = req.body;
+    if (!scanId || !urgency) throw new AppError('Missing required fields: scanId, urgency', 400);
+    const { tenantId } = req.user!;
+
+    const notification = await sendClinicalPush({
+      scanId,
+      urgency,
+      findingType,
+      patientId,
+      tenantId,
+    });
+
+    res.json({ message: 'Clinical push notification dispatched', type: notification?.type ?? null });
+  } catch (err) { next(err); }
+};
+
+/**
+ * Acknowledge a critical clinical push notification.
+ * Called from the PWA when a clinician taps "Review Now" on a critical push.
+ */
+export const acknowledgeClinicalPush = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { scanId } = req.body;
+    if (!scanId) throw new AppError('Missing field: scanId', 400);
+    const userId = req.user!.id;
+    const { tenantId } = req.user!;
+
+    await prisma.notification.updateMany({
+      where: {
+        userId,
+        scanId,
+        type: { in: ['critical_finding', 'urgent_finding', 'stroke_code'] },
+        read: false,
+      },
+      data: { read: true },
+    });
+
+    await auditLog({ action: 'CLINICAL_ACKNOWLEDGED', userId, tenantId, metadata: { scanId } });
+    res.json({ message: 'Clinical push acknowledged', scanId });
   } catch (err) { next(err); }
 };
 

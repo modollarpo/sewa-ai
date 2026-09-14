@@ -328,6 +328,10 @@ model AIResult {
   fROCPoint       Float? // Calibration point on Free-response ROC
   calibrationId   String? // link to calibration cohort
 
+  // Async embedding reindex (Azure Service Bus / Queue Storage)
+  embeddingVector     String?   // JSON-serialized embedding vector
+  embeddingUpdatedAt  DateTime?
+
   createdAt DateTime @default(now())
 
   @@index([urgency])
