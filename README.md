@@ -68,7 +68,7 @@ sewa-ai/
 ├── frontend/                   React + Vite (TypeScript)
 │   └── src/
 │       ├── pages/
-│       │   ├── public/         19 public pages (landing, pricing, blog, careers...)
+│       │   ├── public/         18 public pages (landing, pricing, careers, whitepaper...)
 │       │   ├── radiologist/    RadiologistWorkspace (848L)
 │       │   ├── doctor/         DoctorDashboard
 │       │   ├── admin/          Hospital + AI + Population + Super admin dashboards

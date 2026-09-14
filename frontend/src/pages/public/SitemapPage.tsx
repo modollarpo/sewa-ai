@@ -28,7 +28,6 @@ const SECTIONS = [
     ['status','Status'],
     ['api-docs','API Docs'],
     ['developers','Developers'],
-    ['blog','Blog'],
     ['partner-portal','Partner Portal'],
   ].map(([p,l])=>({page:p,label:l})) },
   { title:'Company', links:[

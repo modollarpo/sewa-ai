@@ -28,7 +28,6 @@ const NAV_LINKS = [
     { label:'Specialized AI',    id:'specialized-ai', desc:'Pathology, mammography, retinal' },
   ]},
   { label:'Pricing', id:'pricing', children:null },
-  { label:'Blog', id:'blog', children:null },
   { label:'Evidence', id:'clinical-evidence', children: [
     { label:'Clinical Evidence', id:'clinical-evidence', desc:'TRL 5 & regulatory progress' },
     { label:'AI Safety', id:'ai-safety', desc:'Safety & reliability engineering' },
@@ -73,7 +72,6 @@ const FOOTER_LINKS = {
     { label:'Governance',         id:'governance' },
     { label:'Careers',            id:'careers' },
     { label:'Press',              id:'press' },
-    { label:'Blog',               id:'blog' },
     { label:'Contact',            id:'contact' },
     { label:'Status',             id:'status' },
   ],
