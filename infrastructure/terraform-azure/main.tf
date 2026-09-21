@@ -11,7 +11,7 @@
 #   - Azure Blob Storage (DICOM — GRS, 7-year lifecycle)
 #   - Azure Service Bus Premium (triage queue + HL7 queue + notifications queue)
 #   - Azure Key Vault Premium (all secrets — see keyvault-secrets.tf)
-#   - Azure Front Door Premium + WAF
+#   - Azure Front Door + WAF (removed 2026-09-21 — was unused)
 #   - Azure SignalR Premium (Socket.IO / WebSocket)
 #   - Log Analytics + Azure Monitor Prometheus + Grafana
 #   - Azure Confidential Ledger (HIPAA blockchain audit trail)
@@ -96,11 +96,10 @@ resource "azurerm_container_registry" "acr" {
     default_action = "Allow"
   }
 
-  georeplications {
-    location                = var.azure_region == "uksouth" ? "westeurope" : "uksouth"
-    zone_redundancy_enabled = true
-    tags                    = local.tags
-  }
+  # Cost optimization: uksouth geo-replication removed 2026-09-21 (UK DR via
+  # this ACR was unused; images are rebuilt per deploy from source). State was
+  # NOT reconciled here — run `terraform state rm` for this replication before
+  # the next apply from CI/Cloud Shell.
 }
 
 resource "azurerm_role_assignment" "aks_acr_pull" {
@@ -314,16 +313,16 @@ resource "azurerm_healthcare_fhir_service" "fhir" {
 # AZURE BLOB STORAGE — DICOM + GRADCAM + REPORTS
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_storage_account" "dicom" {
-  name                            = "${local.shortbase}dicom"
-  resource_group_name             = azurerm_resource_group.main.name
-  location                        = local.location
-  account_tier                    = "Standard"
-  account_replication_type        = "GRS"
-  min_tls_version                 = "TLS1_2"
-  allow_nested_items_to_be_public = false
-  public_network_access_enabled   = true
+  name                             = "${local.shortbase}dicom"
+  resource_group_name              = azurerm_resource_group.main.name
+  location                         = local.location
+  account_tier                     = "Standard"
+  account_replication_type         = "GRS"
+  min_tls_version                  = "TLS1_2"
+  allow_nested_items_to_be_public  = false
+  public_network_access_enabled    = true
   cross_tenant_replication_enabled = false
-  tags                            = local.tags
+  tags                             = local.tags
 
   network_rules {
     default_action             = "Deny"
@@ -377,14 +376,18 @@ resource "azurerm_storage_container" "reports" {
 # AZURE SERVICE BUS PREMIUM
 # ─────────────────────────────────────────────────────────────────
 resource "azurerm_servicebus_namespace" "main" {
-  name                         = "${local.base}-bus"
-  location                     = local.location
-  resource_group_name          = azurerm_resource_group.main.name
-  sku                          = "Premium"
-  capacity                     = 1
-  premium_messaging_partitions = 1
-  local_auth_enabled           = false
-  tags                         = local.tags
+  # Cost optimization: Premium namespace was unused (0 requests/14d, no
+  # connection string wired in prod). Replaced by Standard. Live resource:
+  # `sewaaieuprodbus` (created via az CLI 2026-09-21). State was NOT
+  # reconciled here (terraform refresh from dev machine is unreliable) —
+  # run `terraform state rm` for the old `sewa-ai-prod-eu-bus` resources
+  # before the next apply from CI/Cloud Shell.
+  name                = "sewaaieuprodbus"
+  location            = local.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "Standard"
+  local_auth_enabled  = false
+  tags                = local.tags
 }
 
 resource "azurerm_servicebus_queue" "triage" {
@@ -404,11 +407,13 @@ resource "azurerm_servicebus_queue" "hl7" {
   default_message_ttl                  = "P3D"
 }
 
-resource "azurerm_servicebus_queue" "notifications" {
-  name                = "sewa-notifications"
-  namespace_id        = azurerm_servicebus_namespace.main.id
-  max_delivery_count  = 3
-  default_message_ttl = "PT1H"
+resource "azurerm_servicebus_queue" "mlops" {
+  name                                 = "sewa-mlops-embedding"
+  namespace_id                         = azurerm_servicebus_namespace.main.id
+  max_delivery_count                   = 10
+  dead_lettering_on_message_expiration = true
+  default_message_ttl                  = "P7D"
+  lock_duration                        = "PT5M"
 }
 
 # ─────────────────────────────────────────────────────────────────
@@ -435,59 +440,16 @@ resource "azurerm_key_vault" "main" {
 }
 
 # ─────────────────────────────────────────────────────────────────
-# AZURE FRONT DOOR PREMIUM + WAF
+# AZURE FRONT DOOR + WAF — REMOVED
 # ─────────────────────────────────────────────────────────────────
-resource "azurerm_cdn_frontdoor_profile" "main" {
-  name                = "${local.base}-afd"
-  resource_group_name = azurerm_resource_group.main.name
-  sku_name            = "Premium_AzureFrontDoor"
-  tags                = local.tags
-}
-
-resource "azurerm_cdn_frontdoor_endpoint" "api" {
-  name                     = "sewa-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-  tags                     = local.tags
-}
-
-resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
-  name                              = "sewafirewallpolicy"
-  resource_group_name               = azurerm_resource_group.main.name
-  sku_name                          = "Premium_AzureFrontDoor"
-  enabled                           = true
-  mode                              = "Prevention"
-  custom_block_response_status_code = 403
-  tags                              = local.tags
-
-  managed_rule {
-    type    = "Microsoft_DefaultRuleSet"
-    version = "2.1"
-    action  = "Block"
-  }
-
-  managed_rule {
-    type    = "Microsoft_BotManagerRuleSet"
-    version = "1.0"
-    action  = "Block"
-  }
-}
-
-resource "azurerm_cdn_frontdoor_security_policy" "waf" {
-  name                     = "sewa-waf-policy"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  security_policies {
-    firewall {
-      cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.main.id
-      association {
-        patterns_to_match = ["/*"]
-        domain {
-          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_endpoint.api.id
-        }
-      }
-    }
-  }
-}
+# Cost optimization 2026-09-21: the Premium_AzureFrontDoor profile
+# (`sewa-ai-prod-eu-afd`) + `sewafirewallpolicy` WAF were provisioned but
+# NEVER served traffic (no routes/origins/custom domains; DNS for all
+# domains resolves directly to the AKS ingress-nginx LB `4.166.159.180`).
+# Profile (with `sewa-api` endpoint + `sewa-waf-policy`) and WAF policy are
+# DELETED in Azure. State was NOT reconciled here — run `terraform state rm`
+# for azurerm_cdn_frontdoor_profile.main, .api endpoint, .firewall_policy,
+# and .security_policy before the next apply from CI/Cloud Shell.
 
 # ─────────────────────────────────────────────────────────────────
 # AZURE SIGNALR PREMIUM — WebSocket / Socket.IO
@@ -498,9 +460,11 @@ resource "azurerm_signalr_service" "main" {
   resource_group_name = azurerm_resource_group.main.name
   tags                = local.tags
 
+  # Cost optimization: downgraded from Premium_P1 x2 (0 peak connections/14d,
+  # no AZURE_SIGNALR_CONNECTION_STRING wired in prod) to Standard_S1 x1.
   sku {
-    name     = "Premium_P1"
-    capacity = 2
+    name     = "Standard_S1"
+    capacity = 1
   }
 
   cors { allowed_origins = ["https://app.sewaxai.health", var.app_url] }

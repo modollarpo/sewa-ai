@@ -130,12 +130,6 @@ output "log_analytics_workspace_id" {
   value       = azurerm_log_analytics_workspace.main.workspace_id
 }
 
-# ── Front Door ─────────────────────────────────────────────────
-output "frontdoor_endpoint" {
-  description = "Azure Front Door endpoint hostname"
-  value       = azurerm_cdn_frontdoor_profile.main.name
-}
-
 # ── Deployment summary ─────────────────────────────────────────
 output "deployment_summary" {
   description = "Human-readable deployment summary"

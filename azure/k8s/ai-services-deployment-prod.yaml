@@ -70,7 +70,7 @@ spec:
             cpu: "2000m"
           requests:
             memory: "2Gi"
-            cpu: "2000m"
+            cpu: "1000m"
         envFrom:
         - configMapRef:
             name: sewa-config
@@ -260,7 +260,7 @@ spec:
             cpu: "2000m"
           requests:
             memory: "2Gi"
-            cpu: "2000m"
+            cpu: "1000m"
         envFrom:
         - configMapRef:
             name: sewa-config
@@ -698,7 +698,7 @@ spec:
             cpu: "2000m"
           requests:
             memory: "2Gi"
-            cpu: "2000m"
+            cpu: "1000m"
         envFrom:
         - configMapRef:
             name: sewa-config
@@ -792,7 +792,7 @@ spec:
             cpu: "2000m"
           requests:
             memory: "2Gi"
-            cpu: "2000m"
+            cpu: "1000m"
         envFrom:
         - configMapRef:
             name: sewa-config
