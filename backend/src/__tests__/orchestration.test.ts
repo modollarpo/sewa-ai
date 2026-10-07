@@ -127,25 +127,24 @@ describe('AI Orchestration Pipeline — Integration', () => {
       },
     });
 
-    // Stage 1a: Triage
+    // Stage 1a: Triage (snake_case wire contract)
     mockPost.mockResolvedValueOnce({
       data: {
-        primaryFinding:   'Acute ICH',
-        primaryCondition: 'ICH',
-        confidence:       0.95,
-        urgency:          'CRITICAL',
-        allFindings:      [],
-        inferenceMs:      100,
+        primary_finding: 'Acute ICH',
+        confidence:      0.95,
+        urgency:         'CRITICAL',
+        all_findings:    [],
+        inference_ms:    100,
       },
     });
     // Stage 1b: Uncertainty (parallel)
     mockPost.mockResolvedValueOnce({
       data: {
-        epistemicUncertainty: 0.05,
-        aleatoricUncertainty: 0.02,
-        compositeScore:       0.07,
-        highUncertaintyFlag:  false,
-        inferenceMs:          50,
+        uncertainty_score:     0.07,
+        aleatoric_uncertainty: 0.02,
+        epistemic_uncertainty: 0.05,
+        is_uncertain:          false,
+        inference_ms:          50,
       },
     });
     // Stage 2: VLM
@@ -155,8 +154,7 @@ describe('AI Orchestration Pipeline — Integration', () => {
         findings:       'Large hemorrhage detected.',
         impression:     'Acute ICH confirmed.',
         recommendation: 'Immediate neurosurgical consult.',
-        language:       'en',
-        inferenceMs:    500,
+        generation_ms:  500,
       },
     });
     // Stage 3: Metacognition
@@ -201,20 +199,19 @@ describe('AI Orchestration Pipeline — Integration', () => {
       },
     });
 
-    // Stage 1a: Triage — Normal
+    // Stage 1a: Triage — Normal (snake_case wire contract)
     mockPost.mockResolvedValueOnce({
       data: {
-        primaryFinding:   'Normal Study',
-        primaryCondition: 'NORMAL',
-        confidence:       0.99,
-        urgency:          'NORMAL',
-        allFindings:      [],
-        inferenceMs:      100,
+        primary_finding: 'Normal Study',
+        confidence:      0.99,
+        urgency:         'NORMAL',
+        all_findings:    [],
+        inference_ms:    100,
       },
     });
     // Stage 1b: Uncertainty — low
     mockPost.mockResolvedValueOnce({
-      data: { compositeScore: 0.01, highUncertaintyFlag: false, inferenceMs: 10 },
+      data: { uncertainty_score: 0.01, is_uncertain: false, inference_ms: 10 },
     });
     // Stage 2: VLM
     mockPost.mockResolvedValueOnce({
@@ -223,8 +220,7 @@ describe('AI Orchestration Pipeline — Integration', () => {
         recommendation: 'None.',
         findings:       '',
         technique:      '',
-        language:       'en',
-        inferenceMs:    100,
+        generation_ms:  100,
       },
     });
     // Stage 3: Metacognition — FAIL (safety gate)

@@ -136,7 +136,7 @@ jobs:
         with: { python-version: '${{ env.PYTHON_VERSION }}' }
       - run: |
           cd ai-services/${{ matrix.service }}
-          pip install -r requirements.txt --break-system-packages
+          pip install -r requirements.txt pytest==8.2.2 --break-system-packages
           if [ -d tests ]; then python -m pytest tests/ -v --tb=short; else echo "No tests directory yet — compile check only"; fi
           python -m py_compile main.py && echo "Syntax OK"
 
