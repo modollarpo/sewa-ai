@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "description": "Single source of truth for the HTTP contracts between backend/src/services/aiOrchestrator.ts and the AI services. Consumed by backend/src/__tests__/wireContract.test.ts (static + builder checks, no mocks) and tests/contract/test_wire_contract.py (live services in CI). Audit finding E-01..E-04 / N29: mocked tests passed while the real pipeline 422'd on every call.",
+  "services": {
+    "triage": {
+      "live": true,
+      "baseUrlEnv": "TRIAGE_SERVICE_URL",
+      "defaultBaseUrl": "http://localhost:8000",
+      "healthPath": "/health",
+      "request": {
+        "path": "/triage/predict",
+        "schema": {
+          "scan_id": "required",
+          "storage_url": "optional",
+          "modality": "required",
+          "body_part": "required",
+          "model_version": "optional",
+          "image_data": "optional"
+        },
+        "constraints": {
+          "scan_id": { "pattern": "^[A-Z0-9\\-_]{4,64}$" },
+          "storage_url": { "pattern": "^https?://.*" },
+          "modality": { "enum": ["CT", "MRI", "XR", "US", "PET", "PETCT", "MG", "RET", "ECG", "PATH"] },
+          "body_part": { "minLength": 2, "maxLength": 50 }
+        },
+        "ignoredFields": ["clinical_context"],
+        "pipelineSample": {
+          "scan_id": "CONTRACT-TRIAGE-001",
+          "storage_url": null,
+          "modality": "CT",
+          "body_part": "Head",
+          "model_version": "v2.4.1",
+          "image_data": "@synthetic_png_b64",
+          "clinical_context": "contract-test synthetic case"
+        }
+      },
+      "response": {
+        "fields": {
+          "scan_id": "string",
+          "primary_finding": "string",
+          "snomed_code": "string",
+          "urgency": "string",
+          "confidence": "number",
+          "location": "string|null",
+          "size": "string|null",
+          "midline_shift": "string|null",
+          "inference_ms": "number",
+          "model_version": "string",
+          "backend": "string",
+          "demo_mode": "boolean",
+          "all_findings": "array"
+        }
+      },
+      "orchestratorReads": [
+        "primary_finding",
+        "confidence",
+        "urgency",
+        "all_findings",
+        "inference_ms",
+        "backend",
+        "model_version",
+        "location",
+        "size",
+        "midline_shift"
+      ],
+      "normalizer": "normalizeTriage"
+    },
+    "uncertainty": {
+      "live": true,
+      "baseUrlEnv": "UNCERTAINTY_SERVICE_URL",
+      "defaultBaseUrl": "http://localhost:8002",
+      "healthPath": "/health",
+      "request": {
+        "path": "/uncertainty/explain",
+        "schema": {
+          "scan_id": "required",
+          "storage_url": "optional",
+          "image_data": "optional",
+          "modality": "required",
+          "body_part": "required",
+          "primary_finding": "required",
+          "confidence": "required",
+          "model_version": "optional"
+        },
+        "constraints": {
+          "scan_id": { "pattern": "^[A-Z0-9\\-_]{4,64}$" },
+          "storage_url": { "pattern": "^https?://.*" },
+          "modality": { "pattern": "^(CT|MRI|XR|US|PET|PETCT|MG|RET|ECG|PATH)$" },
+          "body_part": { "minLength": 2, "maxLength": 50 },
+          "primary_finding": { "minLength": 2, "maxLength": 100 },
+          "confidence": { "min": 0, "max": 1 }
+        },
+        "ignoredFields": [],
+        "pipelineSample": {
+          "scan_id": "CONTRACT-UNCERTAINTY-001",
+          "storage_url": null,
+          "image_data": "@synthetic_png_b64",
+          "modality": "CT",
+          "body_part": "Head",
+          "primary_finding": "unknown",
+          "confidence": 0.5,
+          "model_version": "v2.4.1"
+        }
+      },
+      "response": {
+        "fields": {
+          "scan_id": "string",
+          "uncertainty_score": "number",
+          "aleatoric_uncertainty": "number",
+          "epistemic_uncertainty": "number",
+          "shap_values": "array",
+          "gradcam_url": "string|null",
+          "gradcam_base64": "string|null",
+          "mc_dropout_mean": "number",
+          "mc_dropout_std": "number",
+          "mc_passes_used": "number",
+          "is_uncertain": "boolean",
+          "explanation": "string",
+          "inference_ms": "number",
+          "backend": "string",
+          "demo_mode": "boolean",
+          "attribution_method": "string"
+        }
+      },
+      "orchestratorReads": [
+        "uncertainty_score",
+        "aleatoric_uncertainty",
+        "epistemic_uncertainty",
+        "shap_values",
+        "gradcam_url",
+        "mc_passes_used",
+        "is_uncertain",
+        "inference_ms",
+        "backend"
+      ],
+      "normalizer": "normalizeUncertainty"
+    },
+    "metacognition": {
+      "live": true,
+      "baseUrlEnv": "METACOGNITION_SERVICE_URL",
+      "defaultBaseUrl": "http://localhost:8003",
+      "healthPath": "/health",
+      "request": {
+        "path": "/metacognition/evaluate",
+        "schema": {
+          "scan_id": "required",
+          "primary_finding": "required",
+          "urgency": "required",
+          "confidence": "required",
+          "uncertainty_score": "required",
+          "shap_values": "optional",
+          "modality": "required",
+          "body_part": "required",
+          "patient_age": "optional",
+          "patient_sex": "optional",
+          "all_findings": "optional",
+          "report_text": "optional"
+        },
+        "constraints": {
+          "scan_id": { "pattern": "^[A-Z0-9\\-_]{4,64}$" },
+          "primary_finding": { "minLength": 2, "maxLength": 100 },
+          "urgency": { "enum": ["CRITICAL", "URGENT", "NORMAL"] },
+          "confidence": { "min": 0, "max": 1 },
+          "uncertainty_score": { "min": 0, "max": 1 },
+          "modality": { "enum": ["CT", "MRI", "XR", "US", "PET", "PETCT", "MG", "RET", "ECG", "PATH"] },
+          "body_part": { "minLength": 2, "maxLength": 50 },
+          "patient_age": { "min": 0, "max": 150 },
+          "patient_sex": { "enum": ["M", "F", "O", "U"] },
+          "report_text": { "maxLength": 10000 }
+        },
+        "ignoredFields": [],
+        "pipelineSample": {
+          "scan_id": "CONTRACT-METACOG-001",
+          "primary_finding": "ICH",
+          "urgency": "CRITICAL",
+          "confidence": 0.92,
+          "uncertainty_score": 0.1,
+          "shap_values": [],
+          "modality": "CT",
+          "body_part": "Head",
+          "patient_age": 45,
+          "patient_sex": "M",
+          "all_findings": [],
+          "report_text": "Acute intracranial haemorrhage."
+        }
+      },
+      "response": {
+        "fields": {
+          "scan_id": "string",
+          "passed": "boolean",
+          "hallucination_risk": "number",
+          "calibration_score": "number|null",
+          "self_eval_notes": "string|null",
+          "flags": "array",
+          "corrected_urgency": "string|null",
+          "corrected_confidence": "number|null",
+          "safe_to_alert": "boolean",
+          "evaluation_ms": "number",
+          "evaluated_at": "string"
+        }
+      },
+      "orchestratorReads": [
+        "passed",
+        "hallucination_risk",
+        "calibration_score",
+        "self_eval_notes",
+        "flags",
+        "corrected_urgency",
+        "corrected_confidence",
+        "safe_to_alert",
+        "evaluation_ms",
+        "evaluated_at"
+      ],
+      "normalizer": "readMetacognition"
+    },
+    "vlm": {
+      "live": true,
+      "liveNote": "Covered live in CI without Azure credentials: vlm-report runs in cpu-template mode when AZURE_OPENAI_ENDPOINT is unset and still returns the full response contract. The Azure OpenAI generation path (ai-services/vlm-report/main.py:198) is NOT exercised here - it needs credentials. `openai` is imported at module scope (audit N19), so the contract-test job installs ai-services/vlm-report/requirements.txt before starting the service.",
+      "baseUrlEnv": "VLM_SERVICE_URL",
+      "defaultBaseUrl": "http://localhost:8001",
+      "healthPath": "/health",
+      "request": {
+        "path": "/vlm/generate-report",
+        "schema": {
+          "scan_id": "required",
+          "storage_url": "optional",
+          "modality": "required",
+          "body_part": "required",
+          "patient_age": "optional",
+          "patient_sex": "optional",
+          "clinical_indication": "optional",
+          "ai_finding": "required",
+          "urgency": "required",
+          "confidence": "required",
+          "location": "optional",
+          "shap_values": "optional",
+          "region": "optional",
+          "language": "optional",
+          "compliance": "optional"
+        },
+        "constraints": {
+          "scan_id": { "pattern": "^[A-Z0-9\\-_]{4,64}$" },
+          "storage_url": { "pattern": "^https?://.*" },
+          "modality": { "enum": ["CT", "MRI", "XR", "US", "PET", "PETCT", "MG", "RET", "ECG", "PATH"] },
+          "body_part": { "minLength": 2, "maxLength": 50 },
+          "patient_age": { "min": 0, "max": 150 },
+          "patient_sex": { "enum": ["M", "F", "O", "U"] },
+          "urgency": { "enum": ["CRITICAL", "URGENT", "NORMAL"] },
+          "confidence": { "min": 0, "max": 1 }
+        },
+        "ignoredFields": ["clinical_context", "longitudinal_context", "system_prompt"],
+        "pipelineSample": {
+          "scan_id": "CONTRACT-VLM-001",
+          "storage_url": null,
+          "modality": "CT",
+          "body_part": "Head",
+          "patient_age": 45,
+          "patient_sex": "M",
+          "clinical_indication": "contract-test synthetic case",
+          "ai_finding": "ICH",
+          "urgency": "CRITICAL",
+          "confidence": 0.92,
+          "location": "Basal ganglia",
+          "shap_values": [],
+          "clinical_context": "",
+          "longitudinal_context": "",
+          "region": "uk",
+          "language": "en",
+          "system_prompt": ""
+        }
+      },
+      "response": {
+        "fields": {
+          "scan_id": "string",
+          "technique": "string",
+          "findings": "string",
+          "impression": "string",
+          "recommendation": "string",
+          "full_text": "string",
+          "generated_at": "string",
+          "model_version": "string",
+          "generation_ms": "number"
+        }
+      },
+      "orchestratorReads": [
+        "technique",
+        "findings",
+        "impression",
+        "recommendation",
+        "full_text",
+        "generation_ms",
+        "model_version"
+      ],
+      "normalizer": "normalizeVLM"
+    }
+  }
+}

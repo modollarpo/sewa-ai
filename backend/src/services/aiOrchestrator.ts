@@ -15,6 +15,7 @@
 // © 2026 SEWA XAI — a Storegrill Inc Ltd company. Registered in England & Wales (14581073).
 
 import { AxiosError } from 'axios';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../utils/prismaClient';
 import { redisClient } from '../config/redis';
 import { logger } from '../utils/logger';
@@ -119,156 +120,30 @@ const VLM_TIMEOUT  = { timeout: 12_000 };   // VLM: template-based, fast on CPU
 // Wire contracts (snake_case) exactly as returned by the FastAPI ai-services.
 // The orchestrator normalises them at the service boundary (normalize* helpers)
 // so the rest of the pipeline only consumes the camelCase view below.
-export interface RawTriageResult {
-  scan_id?: string;
-  primary_finding: string;
-  snomed_code?: string;
-  urgency: string;                       // CRITICAL | URGENT | NORMAL
-  confidence: number;
-  location?: string | null;
-  size?: string | null;
-  midline_shift?: string | null;
-  inference_ms?: number;
-  model_version?: string;
-  backend?: string;
-  all_findings?: Array<{ condition: string; probability: number }>;
-}
-
-export interface TriageResult {
-  primaryFinding: string;
-  primaryCondition: string;
-  confidence: number;
-  urgency: 'CRITICAL' | 'URGENT' | 'NORMAL';
-  allFindings: Array<{ condition: string; probability: number }>;
-  inferenceMs: number;
-  backend?: string;   // "onnx-int8" | "onnx-fp32" | "demo"
-  modelVersion?: string;
-  location?: string | null;
-  size?: string | null;
-  midlineShift?: string | null;
-}
-
-function normalizeTriage(raw: RawTriageResult): TriageResult {
-  const urgency: TriageResult['urgency'] =
-    raw.urgency === 'CRITICAL' || raw.urgency === 'URGENT' ? raw.urgency : 'NORMAL';
-  return {
-    primaryFinding: raw.primary_finding,
-    primaryCondition: raw.primary_finding, // triage exposes no separate condition field
-    confidence: raw.confidence,
-    urgency,
-    allFindings: raw.all_findings ?? [],
-    inferenceMs: raw.inference_ms ?? 0,
-    backend: raw.backend,
-    modelVersion: raw.model_version,
-    location: raw.location,
-    size: raw.size,
-    midlineShift: raw.midline_shift,
-  };
-}
-
-export interface RawUncertaintyResult {
-  scan_id?: string;
-  uncertainty_score: number;
-  aleatoric_uncertainty: number;
-  epistemic_uncertainty: number;
-  shap_values?: Array<{ f: string; v: number }>;
-  gradcam_url?: string | null;
-  gradcam_base64?: string | null;
-  mc_dropout_mean?: number;
-  mc_dropout_std?: number;
-  mc_passes_used?: number;
-  is_uncertain: boolean;
-  explanation?: string;
-  inference_ms?: number;
-  backend?: string;
-}
-
-export interface UncertaintyResult {
-  epistemicUncertainty: number;
-  aleatoricUncertainty: number;
-  compositeScore: number;
-  highUncertaintyFlag: boolean;
-  mcPassesUsed?: number;
-  inferenceMs: number;
-  shapValues: Array<{ f: string; v: number }>;
-  gradcamUrl?: string | null;
-  backend?: string;
-}
-
-function normalizeUncertainty(raw: RawUncertaintyResult): UncertaintyResult {
-  return {
-    epistemicUncertainty: raw.epistemic_uncertainty ?? 0,
-    aleatoricUncertainty: raw.aleatoric_uncertainty ?? 0,
-    compositeScore: raw.uncertainty_score ?? 0,
-    highUncertaintyFlag: raw.is_uncertain ?? false,
-    mcPassesUsed: raw.mc_passes_used,
-    inferenceMs: raw.inference_ms ?? 0,
-    shapValues: raw.shap_values ?? [],
-    gradcamUrl: raw.gradcam_url ?? null,
-    backend: raw.backend,
-  };
-}
-
-export interface RawVLMResult {
-  scan_id?: string;
-  technique: string;
-  findings: string;
-  impression: string;
-  recommendation?: string;
-  full_text?: string | null;
-  generated_at?: string;
-  model_version?: string;
-  generation_ms?: number;
-}
-
-export interface VLMResult {
-  technique: string;
-  findings: string;
-  impression: string;
-  recommendation: string;
-  fullText: string;
-  language: string;
-  inferenceMs: number;
-  modelVersion?: string;
-}
-
-function normalizeVLM(raw: RawVLMResult, language: string): VLMResult {
-  return {
-    technique: raw.technique,
-    findings: raw.findings,
-    impression: raw.impression,
-    recommendation: raw.recommendation ?? '',
-    fullText: raw.full_text ?? '',
-    language,
-    inferenceMs: raw.generation_ms ?? 0,
-    modelVersion: raw.model_version,
-  };
-}
-
-// Metacognition service response (live contract, evidence E-02):
-// { scan_id, passed, hallucination_risk, calibration_score, self_eval_notes,
-//   flags[], corrected_urgency, corrected_confidence, safe_to_alert,
-//   evaluation_ms, evaluated_at }
-export interface MetacognitionFlag {
-  code: string;
-  severity: string;    // WARNING | ERROR | INFO
-  message: string;
-  suggestion: string;
-}
-
-export interface MetacognitionResult {
-  scan_id?: string;
-  passed: boolean;
-  hallucination_risk: number;
-  calibration_score?: number | null;
-  self_eval_notes?: string | null;
-  flags: MetacognitionFlag[];
-  corrected_urgency?: string | null;
-  corrected_confidence?: number | null;
-  safe_to_alert: boolean;
-  evaluation_ms: number;
-  evaluated_at?: string;
-}
+//
+// All wire types, normalisers and payload builders live in ./wireContract.ts
+// next to wire-contract.json so they can be contract-tested without mocking.
+import {
+  normalizeTriage,
+  normalizeUncertainty,
+  normalizeVLM,
+  readMetacognition,
+  buildTriagePayload,
+  buildUncertaintyPayload,
+  buildVlmPayload,
+  buildMetacognitionPayload,
+} from './wireContract';
+import type {
+  RawTriageResult,
+  RawUncertaintyResult,
+  RawVLMResult,
+  TriageResult,
+  UncertaintyResult,
+  VLMResult,
+  MetacognitionFlag,
+  MetacognitionResult,
+} from './wireContract';
+export * from './wireContract';
 
 export interface PathologyResult {
   scan_id:         string;
@@ -284,8 +159,6 @@ export interface PathologyResult {
   model_version:   string;
   backend:         string;
   recommendation:  string;
-  gradCamUrl?:     string;
-  shapValues?:     Record<string, number>;
 }
 
 export interface MammographyResult {
@@ -302,8 +175,6 @@ export interface MammographyResult {
   model_version: string;
   backend: string;
   recommendation: string;
-  gradCamUrl?: string;
-  shapValues?: Record<string, number>;
 }
 
 export interface RetinalResult {
@@ -319,8 +190,6 @@ export interface RetinalResult {
   model_version: string;
   backend: string;
   recommendation: string;
-  gradCamUrl?: string;
-  shapValues?: Record<string, number>;
 }
 
 // ── Safe HTTP wrapper ────────────────────────────────────────────────────
@@ -508,15 +377,17 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
             pathology: pathResult,
             pipeline:  { service: 'sewa-pathology', backend: pathResult.backend },
           } as any,
-          modelId:             `sewa-path-onnx-int8-${pathResult.model_version}`,
+          modelId:             `sewa-path-${pathResult.backend ?? 'unknown'}`,
           clinicalContext,
           longitudinalContext,
           vlmFindings:         pathResult.recommendation,
           vlmImpression:       `${pathResult.primary_finding} (${(pathResult.confidence * 100).toFixed(0)}% confidence)` +
                                 (pathResult.gleason_grade ? `. ${pathResult.gleason_grade}.` : '') +
                                 (pathResult.ki67_estimate != null ? ` Ki67 index: ${(pathResult.ki67_estimate * 100).toFixed(0)}%.` : ''),
-          gradcamUrl: pathResult.gradCamUrl,
-          shapValues: pathResult.shapValues,
+          // Pathology service exposes no Grad-CAM/SHAP output — store null
+          // rather than fabricating attributions (audit E-13 / no-demo-claims).
+          gradcamUrl: null,
+          shapValues: Prisma.JsonNull,
         },
       });
 
@@ -613,14 +484,15 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           epistemicUncertainty: 0,
           aleatoricUncertainty: 0,
           rawJson: { mammography: mgResult, pipeline: { service: 'sewa-mammography', backend: mgResult.backend } } as any,
-          modelId:             `sewa-mg-onnx-int8-${mgResult.model_version}`,
+          modelId:             `sewa-mg-${mgResult.backend ?? 'unknown'}`,
           clinicalContext,
           longitudinalContext,
           vlmFindings:         mgResult.recommendation,
           vlmImpression:       `${mgResult.primary_finding} (BI-RADS: ${mgResult.birads_category ?? 'N/A'})` +
                                 ` — ${(mgResult.confidence * 100).toFixed(0)}% confidence`,
-          gradcamUrl: mgResult.gradCamUrl,
-          shapValues: mgResult.shapValues,
+          // Mammography service exposes no Grad-CAM/SHAP output (audit E-13).
+          gradcamUrl: null,
+          shapValues: Prisma.JsonNull,
         },
       });
 
@@ -710,14 +582,15 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           epistemicUncertainty: 0,
           aleatoricUncertainty: 0,
           rawJson: { retinal: retResult, pipeline: { service: 'sewa-retinal', backend: retResult.backend } } as any,
-          modelId:             `sewa-ret-onnx-int8-${retResult.model_version}`,
+          modelId:             `sewa-ret-${retResult.backend ?? 'unknown'}`,
           clinicalContext,
           longitudinalContext,
           vlmFindings:         retResult.recommendation,
           vlmImpression:       `${retResult.primary_finding} (DR grade: ${retResult.dr_grade ?? 'N/A'})` +
                                 ` — ${(retResult.confidence * 100).toFixed(0)}% confidence`,
-          gradcamUrl: retResult.gradCamUrl,
-          shapValues: retResult.shapValues,
+          // Retinal service exposes no Grad-CAM/SHAP output (audit E-13).
+          gradcamUrl: null,
+          shapValues: Prisma.JsonNull,
         },
       });
 
@@ -788,33 +661,27 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     await emitStageProgress(scanId, tenantId, 'triage_uncertainty');
     const stage1Start = Date.now();
 
+    const scanCtx = {
+      scanId,
+      storageUrl: scan.storageUrl,
+      modality: scan.modality,
+      bodyPart: scan.bodyPart,
+      clinicalContext,
+    };
+
     const [triageRaw, uncertaintyRaw] = await Promise.all([
 
       // Engine 1: Triage — ONNX INT8 EfficientNet-B0
       safePOST<RawTriageResult>(
         `${TRIAGE_URL}/triage/predict`,
-        {
-          scan_id: scanId,
-          storage_url: scan.storageUrl,
-          modality: scan.modality,
-          body_part: scan.bodyPart,
-          clinical_context: clinicalContext,
-        },
+        buildTriagePayload(scanCtx),
         SVC_TIMEOUT,
       ),
 
       // Engine 2: Uncertainty — 10-pass ONNX MC-Dropout (parallel, not blocked by triage)
       safePOST<RawUncertaintyResult>(
         `${UNCERTAINTY_URL}/uncertainty/explain`,
-        {
-          scan_id: scanId,
-          storage_url: scan.storageUrl,
-          modality: scan.modality,
-          body_part: scan.bodyPart,
-          // Uncertainty doesn't need triage result — uses its own ONNX pass
-          primary_finding: 'unknown',  // will be overridden with real triage below
-          confidence: 0.5,             // neutral prior while running in parallel
-        },
+        buildUncertaintyPayload(scanCtx),
         SVC_TIMEOUT,
       ),
 
@@ -841,27 +708,23 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
 
     const vlmRaw = await safePOST<RawVLMResult>(
       `${VLM_URL}/vlm/generate-report`,
-      {
-        scan_id:              scanId,
-        storage_url:          scan.storageUrl,
-        modality:             scan.modality,
-        body_part:            scan.bodyPart,
-        patient_age:          patientAge,
-        patient_sex:          patientSex,
-        clinical_indication:  scan.clinicalIndication,
-        ai_finding:           triage.primaryFinding,
+      buildVlmPayload({
+        ...scanCtx,
+        patientAge,
+        patientSex,
+        clinicalIndication: scan.clinicalIndication,
+        aiFinding: triage.primaryFinding,
         // Service validates ^{CRITICAL|URGENT|NORMAL}$ — localised labels are
         // applied when rendering the report, never on the wire.
-        urgency:              triage.urgency,
-        confidence:           triage.confidence,
-        location:             triage.location ?? undefined,
-        shap_values:          uncertainty.shapValues,
-        clinical_context:     clinicalContext,
-        longitudinal_context: longitudinalContext,
-        region:               scan.tenant?.region ?? 'uk',
-        language:             reportLanguage,
-        system_prompt:        vlmSystemPrompt,
-      },
+        urgency: triage.urgency,
+        confidence: triage.confidence,
+        location: triage.location ?? undefined,
+        shapValues: uncertainty.shapValues,
+        longitudinalContext: longitudinalContext,
+        region: scan.tenant?.region ?? 'uk',
+        language: reportLanguage,
+        systemPrompt: vlmSystemPrompt,
+      }),
       VLM_TIMEOUT,
     );
     const vlm = normalizeVLM(vlmRaw, reportLanguage);
@@ -885,25 +748,25 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     // STAGE 3: Metacognition — rule-based, ~50ms on CPU (pure Python, no model)
     // ──────────────────────────────────────────────────────────────────────
     await emitStageProgress(scanId, tenantId, 'metacognition');
-    const metacog = await safePOST<MetacognitionResult>(
-      `${METACOGNITION_URL}/metacognition/evaluate`,
-      {
-        scan_id:          scanId,
-        primary_finding:  triage.primaryFinding,
-        urgency:          triage.urgency,
-        confidence:       triage.confidence,
-        uncertainty_score: uncertainty.compositeScore,
-        // Service requires a LIST of {f, v} attributions — the uncertainty
-        // engine is the sole source of truth for SHAP values.
-        shap_values:      uncertainty.shapValues,
-        modality:         scan.modality,
-        body_part:        scan.bodyPart,
-        patient_age:      patientAge,
-        patient_sex:      patientSex,
-        all_findings:     triage.allFindings,
-        report_text:      vlm.findings,
-      },
-      SVC_TIMEOUT,
+    const metacog = readMetacognition(
+      await safePOST<MetacognitionResult>(
+        `${METACOGNITION_URL}/metacognition/evaluate`,
+        buildMetacognitionPayload({
+          scanId,
+          primaryFinding: triage.primaryFinding,
+          urgency: triage.urgency,
+          confidence: triage.confidence,
+          uncertaintyScore: uncertainty.compositeScore,
+          shapValues: uncertainty.shapValues,
+          modality: scan.modality,
+          bodyPart: scan.bodyPart,
+          patientAge,
+          patientSex,
+          allFindings: triage.allFindings,
+          reportText: vlm.findings,
+        }),
+        SVC_TIMEOUT,
+      ),
     );
     logger.info(
       `[Metacognition] ${scanId}: safe_to_alert=${metacog.safe_to_alert} ` +
@@ -1025,6 +888,129 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         decisionReasoning: metacog.self_eval_notes ?? '',
       },
     }).catch(e => logger.warn(`[MetacognitionAuditLog] write failed: ${e.message}`));
+
+    // ── Explainability report (audit: ExplainabilityReport had zero writers) ──
+    // Every value below is a measurement this pipeline actually produced. When
+    // attribution is missing or generated by the demo path, the narrative says
+    // so instead of implying pixel-level evidence exists.
+    const shapRanked = [...uncertainty.shapValues].sort((a, b) => Math.abs(b.v) - Math.abs(a.v));
+    const attributionSource =
+      `${uncertainty.backend ?? 'unknown'}` +
+      (uncertainty.demoMode ? ' (demo weights)' : '') +
+      (uncertainty.attributionMethod ? `, method=${uncertainty.attributionMethod}` : '');
+    const shapNarrative = shapRanked.length === 0
+      ? `No feature attribution returned by the uncertainty engine (backend=${attributionSource}). ` +
+        'No pixel-level contribution is claimed for this scan.'
+      : `Top contributing features (backend=${attributionSource}): ` +
+        shapRanked.slice(0, 5)
+          .map(s => `${s.f} (${s.v >= 0 ? '+' : ''}${s.v.toFixed(3)})`)
+          .join(', ') +
+        '.' + (uncertainty.demoMode
+          ? ' NOTE: contributions come from the demo attribution path, not a validated model.'
+          : '');
+
+    const metacogFlagCodes = metacog.flags.map(f => f.code);
+    const requiresHumanReview = !metacog.passed || uncertainty.highUncertaintyFlag;
+
+    const reasoningSteps = [
+      {
+        step: 'triage',
+        source: 'ai-triage',
+        detail: `${triage.primaryFinding} → ${finalUrgency} (confidence ${finalConfidence.toFixed(2)})`,
+        evidence: {
+          backend: triage.backend ?? 'unknown',
+          modelVersion: triage.modelVersion ?? null,
+          location: triage.location ?? null,
+          topFindings: triage.allFindings.slice(0, 3),
+        },
+      },
+      {
+        step: 'uncertainty',
+        source: 'ai-uncertainty',
+        detail:
+          `composite ${uncertainty.compositeScore.toFixed(2)} ` +
+          `(epistemic ${uncertainty.epistemicUncertainty.toFixed(2)}, ` +
+          `aleatoric ${uncertainty.aleatoricUncertainty.toFixed(2)}, ` +
+          `MC passes ${uncertainty.mcPassesUsed ?? 0}), ` +
+          `highUncertaintyFlag=${uncertainty.highUncertaintyFlag}`,
+        evidence: { backend: uncertainty.backend ?? 'unknown', demoMode: uncertainty.demoMode ?? false },
+      },
+      {
+        step: 'attribution',
+        source: 'ai-uncertainty',
+        detail: shapRanked.length === 0
+          ? 'no SHAP/Grad-CAM attribution returned'
+          : `${shapRanked.length} SHAP contributions${uncertainty.gradcamUrl ? ' + Grad-CAM heat map' : ''}`,
+        evidence: { source: attributionSource, gradcamUrl: uncertainty.gradcamUrl ?? null },
+      },
+      {
+        step: 'metacognition',
+        source: 'ai-metacognition',
+        detail:
+          `${metacog.passed ? 'PASSED' : 'BLOCKED'} · safe_to_alert=${metacog.safe_to_alert} · ` +
+          `hallucination_risk=${metacog.hallucination_risk.toFixed(2)} · ` +
+          `flags=${metacogFlagCodes.length ? metacogFlagCodes.join(',') : 'none'}`,
+        evidence: {
+          correctedUrgency: metacog.corrected_urgency ?? null,
+          correctedConfidence: metacog.corrected_confidence ?? null,
+          selfEvalNotes: metacog.self_eval_notes ?? null,
+        },
+      },
+      {
+        step: 'decision',
+        source: 'orchestrator',
+        detail:
+          `final ${finalUrgency} @ ${finalConfidence.toFixed(2)}; ` +
+          `requiresHumanReview=${requiresHumanReview}`,
+        evidence: {
+          urgencyCorrected, confidenceCorrected, doorToAlertMs,
+          reportGeneratedBy: vlm.modelVersion ?? 'vlm',
+        },
+      },
+    ];
+
+    const summaryText =
+      `Triage: ${triage.primaryFinding} → ${finalUrgency} (confidence ${finalConfidence.toFixed(2)}, ` +
+      `backend=${triage.backend ?? 'unknown'}). ` +
+      `Uncertainty: ${uncertainty.compositeScore.toFixed(2)} ` +
+      `(epistemic ${uncertainty.epistemicUncertainty.toFixed(2)}, aleatoric ${uncertainty.aleatoricUncertainty.toFixed(2)}), ` +
+      `highUncertaintyFlag=${uncertainty.highUncertaintyFlag}. ` +
+      `Metacognition: ${metacog.passed ? 'passed' : 'blocked'}, safe_to_alert=${metacog.safe_to_alert}, ` +
+      `hallucination_risk=${metacog.hallucination_risk.toFixed(2)}${metacogFlagCodes.length ? `, flags: ${metacogFlagCodes.join(', ')}` : ''}. ` +
+      (urgencyCorrected ? `Urgency corrected by metacognition (${triage.urgency} → ${finalUrgency}). ` : '') +
+      (confidenceCorrected ? `Confidence corrected by metacognition. ` : '') +
+      (shapRanked.length === 0
+        ? 'No feature attribution available for this scan. '
+        : `Attribution: ${shapRanked.length} SHAP values from ${attributionSource}. `) +
+      (requiresHumanReview ? 'Human review required before any alert is trusted.' : 'No human-review trigger from uncertainty/metacognition.');
+
+    const explainabilityReportPayload = {
+      reasoningSteps: reasoningSteps as unknown as Prisma.InputJsonValue,
+      shapNarrative,
+      gradCamRegions: uncertainty.gradcamUrl
+        ? ({ gradcamUrl: uncertainty.gradcamUrl } as unknown as Prisma.InputJsonValue)
+        : Prisma.JsonNull,
+      summaryText,
+      contradictionText: contradictionFlag
+        ? `${contradictionFlag.code}: ${contradictionFlag.message}`
+        : null,
+    };
+
+    await prisma.explainabilityReport
+      .upsert({
+        where: { scanId },
+        create: {
+          scanId,
+          tenantId,
+          aiResultId: aiResult.id,
+          ...explainabilityReportPayload,
+        },
+        update: {
+          aiResultId: aiResult.id,
+          ...explainabilityReportPayload,
+        },
+      })
+      .catch(e => logger.warn(`[ExplainabilityReport] write failed: ${e.message}`));
 
     await prisma.report.create({
       data: {

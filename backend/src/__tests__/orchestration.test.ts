@@ -97,8 +97,11 @@ describe('AI Orchestration Pipeline — Integration', () => {
   });
 
   afterAll(async () => {
-    // Clean up in dependency order
+    // Clean up in dependency order (metacognition/explainability tables hold
+    // plain, FK-less scanId/aiResultId columns)
     await prisma.report.deleteMany({ where: { tenantId: TENANT_ID } });
+    await prisma.metacognitionAuditLog.deleteMany({ where: { tenantId: TENANT_ID } });
+    await prisma.explainabilityReport.deleteMany({ where: { tenantId: TENANT_ID } });
     await prisma.aIResult.deleteMany({ where: { tenantId: TENANT_ID } });
     await prisma.scan.deleteMany({ where: { tenantId: TENANT_ID } });
     await prisma.user.deleteMany({ where: { id: SYSTEM_USER_ID } });
@@ -107,9 +110,12 @@ describe('AI Orchestration Pipeline — Integration', () => {
 
   beforeEach(async () => {
     mockPost.mockReset();
-    await prisma.report.deleteMany({ where: { scanId: { in: [SCAN_ID_1, SCAN_ID_2] } } });
-    await prisma.aIResult.deleteMany({ where: { scanId: { in: [SCAN_ID_1, SCAN_ID_2] } } });
-    await prisma.scan.deleteMany({ where: { id: { in: [SCAN_ID_1, SCAN_ID_2] } } });
+    const scans = [SCAN_ID_1, SCAN_ID_2];
+    await prisma.report.deleteMany({ where: { scanId: { in: scans } } });
+    await prisma.metacognitionAuditLog.deleteMany({ where: { scanId: { in: scans } } });
+    await prisma.explainabilityReport.deleteMany({ where: { scanId: { in: scans } } });
+    await prisma.aIResult.deleteMany({ where: { scanId: { in: scans } } });
+    await prisma.scan.deleteMany({ where: { id: { in: scans } } });
   });
 
   it('successfully completes the 4-engine pipeline', async () => {
@@ -127,47 +133,71 @@ describe('AI Orchestration Pipeline — Integration', () => {
       },
     });
 
-    // Stage 1a: Triage (snake_case wire contract)
+    // Stage 1a: Triage (snake_case wire contract — every field the real
+    // service returns, exactly as ai-services/triage/main.py emits it)
     mockPost.mockResolvedValueOnce({
       data: {
+        scan_id:       SCAN_ID_1,
         primary_finding: 'Acute ICH',
-        confidence:      0.95,
-        urgency:         'CRITICAL',
-        all_findings:    [],
-        inference_ms:    100,
+        snomed_code:   '235595009',
+        confidence:    0.95,
+        urgency:       'CRITICAL',
+        location:      'Left basal ganglia',
+        size:          '3.2 cm',
+        midline_shift: 'none',
+        all_findings:  [{ condition: 'Acute ICH', probability: 0.95 }],
+        inference_ms:  100,
+        model_version: 'v2.4.1',
+        backend:       'onnx-int8-cpu',
       },
     });
     // Stage 1b: Uncertainty (parallel)
     mockPost.mockResolvedValueOnce({
       data: {
-        uncertainty_score:     0.07,
+        scan_id:              SCAN_ID_1,
+        uncertainty_score:    0.07,
         aleatoric_uncertainty: 0.02,
         epistemic_uncertainty: 0.05,
-        is_uncertain:          false,
-        inference_ms:          50,
+        shap_values:          [{ f: 'density', v: 0.4 }],
+        gradcam_url:          null,
+        gradcam_base64:       null,
+        mc_dropout_mean:      0.06,
+        mc_dropout_std:       0.03,
+        mc_passes_used:       10,
+        is_uncertain:         false,
+        explanation:          'Low predictive entropy across MC passes.',
+        inference_ms:         50,
+        backend:              'onnx-int8-mc10',
       },
     });
     // Stage 2: VLM
     mockPost.mockResolvedValueOnce({
       data: {
-        technique:      'Non-contrast CT Head',
-        findings:       'Large hemorrhage detected.',
-        impression:     'Acute ICH confirmed.',
+        scan_id:      SCAN_ID_1,
+        technique:    'Non-contrast CT Head',
+        findings:     'Large hemorrhage detected.',
+        impression:   'Acute ICH confirmed.',
         recommendation: 'Immediate neurosurgical consult.',
-        generation_ms:  500,
+        full_text:    'Non-contrast CT Head. Large hemorrhage detected. Acute ICH confirmed. Immediate neurosurgical consult.',
+        generated_at: '2026-10-06T00:00:00Z',
+        model_version: 'gpt-4o-vlm-2026',
+        generation_ms: 500,
       },
     });
     // Stage 3: Metacognition
     mockPost.mockResolvedValueOnce({
       data: {
-        passed:              true,
-        safe_to_alert:       true,
-        hallucination_risk:  0.01,
-        calibration_score:   0.92,
-        flags:               [],
-        corrected_urgency:   null,
+        scan_id:              SCAN_ID_1,
+        passed:               true,
+        safe_to_alert:        true,
+        hallucination_risk:   0.01,
+        calibration_score:    0.92,
+        self_eval_notes:      'Finding, urgency and confidence are mutually consistent.',
+        flags:                [],
+        corrected_urgency:    null,
         corrected_confidence: null,
-        evaluation_ms:       30,
+        evaluation_ms:        30,
+        evaluated_at:         '2026-10-06T00:00:00Z',
       },
     });
 
@@ -199,41 +229,70 @@ describe('AI Orchestration Pipeline — Integration', () => {
       },
     });
 
-    // Stage 1a: Triage — Normal (snake_case wire contract)
+    // Stage 1a: Triage — Normal (full snake_case wire contract)
     mockPost.mockResolvedValueOnce({
       data: {
+        scan_id:       SCAN_ID_2,
         primary_finding: 'Normal Study',
-        confidence:      0.99,
-        urgency:         'NORMAL',
-        all_findings:    [],
-        inference_ms:    100,
+        snomed_code:   '16901007',
+        confidence:    0.99,
+        urgency:       'NORMAL',
+        location:      null,
+        size:          null,
+        midline_shift: null,
+        all_findings:  [],
+        inference_ms:  100,
+        model_version: 'v2.4.1',
+        backend:       'onnx-int8-cpu',
       },
     });
     // Stage 1b: Uncertainty — low
     mockPost.mockResolvedValueOnce({
-      data: { uncertainty_score: 0.01, is_uncertain: false, inference_ms: 10 },
+      data: {
+        scan_id:              SCAN_ID_2,
+        uncertainty_score:    0.01,
+        aleatoric_uncertainty: 0.01,
+        epistemic_uncertainty: 0.0,
+        shap_values:          [],
+        gradcam_url:          null,
+        gradcam_base64:       null,
+        mc_dropout_mean:      0.01,
+        mc_dropout_std:       0.0,
+        mc_passes_used:       10,
+        is_uncertain:         false,
+        explanation:          'Model is confident across MC passes.',
+        inference_ms:         10,
+        backend:              'onnx-int8-mc10',
+      },
     });
     // Stage 2: VLM
     mockPost.mockResolvedValueOnce({
       data: {
+        scan_id:        SCAN_ID_2,
         impression:     'Normal.',
         recommendation: 'None.',
-        findings:       '',
-        technique:      '',
+        findings:       'No acute intracranial abnormality.',
+        technique:      'Non-contrast CT Head',
+        full_text:      'No acute intracranial abnormality.',
+        generated_at:   '2026-10-06T00:00:00Z',
+        model_version:  'gpt-4o-vlm-2026',
         generation_ms:  100,
       },
     });
     // Stage 3: Metacognition — FAIL (safety gate)
     mockPost.mockResolvedValueOnce({
       data: {
+        scan_id:              SCAN_ID_2,
         passed:               false,
         safe_to_alert:        false,
         hallucination_risk:   0.5,
         calibration_score:    0.3,
+        self_eval_notes:      'Confidence is below the reporting floor for a NORMAL study.',
         flags:                [{ code: 'LOW_CONFIDENCE', severity: 'ERROR', message: 'Confidence below floor', suggestion: 'Refer to radiologist' }],
         corrected_urgency:    null,
         corrected_confidence: null,
         evaluation_ms:        30,
+        evaluated_at:         '2026-10-06T00:00:00Z',
       },
     });
 
