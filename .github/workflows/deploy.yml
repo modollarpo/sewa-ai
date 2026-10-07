@@ -141,6 +141,47 @@ jobs:
           python -m py_compile main.py && echo "Syntax OK"
 
 # ─────────────────────────────────────────────
+# 3.5 LIVE WIRE-CONTRACT TEST (contract JSON vs running AI services)
+  contract-test:
+    name: Live Wire Contract Test
+    runs-on: ubuntu-latest
+    needs: [secret-scan]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+          cache: pip
+          cache-dependency-path: |
+            ai-services/triage/requirements.txt
+            ai-services/vlm-report/requirements.txt
+            ai-services/metacognition/requirements.txt
+      - name: Install service dependencies
+        # triage/uncertainty/metacognition share identical pins; vlm-report adds
+        # `openai` (audit N19: imported at module scope).
+        run: |
+          pip install --break-system-packages -r ai-services/triage/requirements.txt
+          pip install --break-system-packages -r ai-services/vlm-report/requirements.txt
+          pip install --break-system-packages -r ai-services/metacognition/requirements.txt
+          pip install --break-system-packages pytest==8.2.2
+      - name: Start triage, vlm, uncertainty and metacognition
+        run: |
+          export MODEL_CACHE="$RUNNER_TEMP/model-cache"
+          mkdir -p "$MODEL_CACHE"
+          (cd ai-services/triage       && MODEL_CACHE=$MODEL_CACHE uvicorn main:app --host 127.0.0.1 --port 8000 > "$RUNNER_TEMP/triage.log" 2>&1 &)
+          (cd ai-services/vlm-report   && uvicorn main:app --host 127.0.0.1 --port 8001 > "$RUNNER_TEMP/vlm.log" 2>&1 &)
+          (cd ai-services/uncertainty  && MODEL_CACHE=$MODEL_CACHE uvicorn main:app --host 127.0.0.1 --port 8002 > "$RUNNER_TEMP/uncertainty.log" 2>&1 &)
+          (cd ai-services/metacognition && uvicorn main:app --host 127.0.0.1 --port 8003 > "$RUNNER_TEMP/metacognition.log" 2>&1 &)
+          for url in http://127.0.0.1:8000/health http://127.0.0.1:8001/health http://127.0.0.1:8002/health http://127.0.0.1:8003/health; do
+            echo "Waiting for $url ..."
+            timeout 120 bash -c "until curl -sf $url > /dev/null; do sleep 3; done" || { echo "Service $url did not become healthy"; exit 1; }
+          done
+      - name: Run live contract tests
+        run: python -m pytest tests/contract/test_wire_contract.py -v --tb=short
+      - name: Service logs on failure
+        if: failure()
+        run: tail -n 200 "$RUNNER_TEMP"/*.log
+
 # 4. SECURITY SCAN (Trivy & Dep Audit)
 # ─────────────────────────────────────────────
   vulnerability-scan:
@@ -168,7 +209,7 @@ jobs:
   safety-gate:
     name: Safety Validation Gate
     runs-on: ubuntu-latest
-    needs: [test-backend, test-ai-services]
+    needs: [test-backend, test-ai-services, contract-test]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -204,7 +245,7 @@ jobs:
   build-images:
     name: Build & Push Images
     runs-on: ubuntu-latest
-    needs: [test-backend, build-frontend, test-ai-services, safety-gate]
+    needs: [test-backend, build-frontend, test-ai-services, contract-test, safety-gate]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
     permissions:
       contents: read
