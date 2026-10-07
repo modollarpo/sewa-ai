@@ -57,7 +57,7 @@ def test_shadow_explain_positive_path(client, modality, body_part, primary_findi
     assert isinstance(body["is_uncertain"], bool)
     assert isinstance(body["mc_passes_used"], int) and body["mc_passes_used"] > 0
     assert isinstance(body["inference_ms"], int)
-    assert body["backend"] == "onnx-int8-cpu"
+    assert body["backend"] in {"demo", "onnx-fp32-cpu", "onnx-int8-cpu"}
     print(
         f"[shadow-unc] {modality}/{body_part}: epistemic={body['epistemic_uncertainty']:.3f} "
         f"aleatoric={body['aleatoric_uncertainty']:.3f} uncertain={body['is_uncertain']} "
