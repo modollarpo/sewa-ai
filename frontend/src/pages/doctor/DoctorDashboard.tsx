@@ -256,6 +256,9 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
   const [explanation, setExplanation] = useState<string | null>(null);
   const [gradcamUrl, setGradcamUrl] = useState<string | null>(null);
   const [shapValues, setShapValues] = useState<Record<string, number> | null>(null);
+  // Honest scope label: services report demo_mode per response; absent that
+  // signal we assume demo (audit §34.6 - no clinically validated weights yet).
+  const [demoMode, setDemoMode] = useState(true);
   const [correcting, setCorrecting] = useState(false);
   const [escalating, setEscalating] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -282,6 +285,11 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
         if (aiRes.data) {
           setGradcamUrl(aiRes.data.gradCamUrl || null);
           setShapValues(aiRes.data.shapValues || null);
+          setDemoMode(
+            aiRes.data.rawJson?.triage?.demo_mode ??
+            aiRes.data.rawJson?.uncertainty?.demo_mode ??
+            true
+          );
         }
         setExplaining(false);
       } else if (type === 'correct') {
@@ -386,6 +394,12 @@ function PatientDetailPanel({ patient, onClose }:{ patient:any; onClose:()=>void
             <div className="pt-4 border-t border-[#1B3028] text-xs text-[#3A6055]">
               <p><strong>Interpretation:</strong> The Grad-CAM heatmap shows which image regions most influenced the AI's decision. SHAP values indicate the relative contribution of each clinical feature to the prediction. Higher values = stronger influence.</p>
             </div>
+
+            {demoMode && (
+              <div className="pt-3 border-t border-[#E08A20]/40 text-xs text-[#E08A20]">
+                <p><strong>Demo scope:</strong> These attributions come from the demo/synthetic inference path — no clinically validated weights or labelled dataset are attached yet. Illustrative only, not clinical evidence.</p>
+              </div>
+            )}
           </div>
         )}
 

@@ -61,8 +61,11 @@ MODEL_CACHE   = Path(os.getenv("MODEL_CACHE", "/models"))
 MODEL_VERSION = os.getenv("MODEL_VERSION", "v2.4.1")
 INT8_MODEL    = MODEL_CACHE / f"triage_{MODEL_VERSION}_int8.onnx"
 FP32_MODEL    = MODEL_CACHE / f"triage_{MODEL_VERSION}.onnx"
+DEMO_MODEL    = MODEL_CACHE / f"triage_{MODEL_VERSION}_demo.onnx"
 MODEL_ID      = "uncertainty-triage"
 ACTIVE_BACKEND = "demo"  # set in lifespan from the model actually loaded
+DEMO_MODE      = True    # set in lifespan — honest label for demo/random weights
+ATTRIBUTION_METHOD = "demo-random-attribution"  # set in lifespan
 INPUT_SHAPE   = (1, 3, 224, 224)
 
 # CPU-optimised MC-Dropout pass count
@@ -83,7 +86,9 @@ def _create_demo_onnx() -> Path:
         from onnx import helper, TensorProto
 
         MODEL_CACHE.mkdir(parents=True, exist_ok=True)
-        demo_path = FP32_MODEL
+        # Never write the demo graph to a real weights filename: INT8/FP32
+        # paths are the signal the service uses to claim a trained backend.
+        demo_path = DEMO_MODEL
         n_classes = 10  # triage default (model.py num_classes=10)
         X = helper.make_tensor_value_info("image", TensorProto.FLOAT, [None, 3, 224, 224])
         Y = helper.make_tensor_value_info("logits", TensorProto.FLOAT, [None, n_classes])
@@ -104,24 +109,34 @@ def _create_demo_onnx() -> Path:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global ACTIVE_BACKEND
-    model_path = INT8_MODEL if INT8_MODEL.exists() else FP32_MODEL
-    if not model_path.exists():
+    global ACTIVE_BACKEND, DEMO_MODE, ATTRIBUTION_METHOD
+    model_path = INT8_MODEL if INT8_MODEL.exists() else (FP32_MODEL if FP32_MODEL.exists() else None)
+    if model_path is None:
         # First-boot: auto-generate a structural demo ONNX so the service stays healthy
         # until a real trained weights file is supplied in MODEL_CACHE (/models).
         try:
             model_path = _create_demo_onnx()
         except Exception as e:  # noqa: BLE001 - best-effort fallback only
             logger.error(f"[Uncertainty] demo model generation failed: {e}")
-    if model_path.exists():
+    if model_path is not None and model_path.exists():
         registry.load(MODEL_ID, str(model_path))
         registry.warmup(MODEL_ID, INPUT_SHAPE, n=3)
         logger.info(f"[Uncertainty] Model loaded: {model_path.name}")
     else:
         logger.warning("[Uncertainty] No model file found — running in demo mode")
-    ACTIVE_BACKEND = (
-        "onnx-int8-cpu" if INT8_MODEL.exists()
-        else ("onnx-fp32-cpu" if FP32_MODEL.exists() else "demo")
+
+    # Honest backend label: derived from the file actually loaded, never from
+    # "a file happens to exist" (audit: demo weights were written to the FP32
+    # filename and then reported as onnx-fp32-cpu).
+    if model_path == INT8_MODEL:
+        ACTIVE_BACKEND = "onnx-int8-cpu"
+    elif model_path == FP32_MODEL:
+        ACTIVE_BACKEND = "onnx-fp32-cpu"
+    else:
+        ACTIVE_BACKEND = "demo"
+    DEMO_MODE = ACTIVE_BACKEND == "demo"
+    ATTRIBUTION_METHOD = (
+        "demo-random-attribution" if DEMO_MODE else "onnx-occlusion-finite-difference"
     )
     yield
     logger.info("[Uncertainty] Shutdown")
@@ -170,6 +185,11 @@ class UncertaintyResponse(BaseModel):
     explanation: str
     inference_ms: int
     backend: str
+    # Honest labelling (audit E-13): when the loaded graph is the auto-generated
+    # demo weights, say so instead of implying a trained model produced these
+    # numbers. `attribution_method` names how shap_values were derived.
+    demo_mode: bool
+    attribution_method: str
 
 
 # ── ONNX-based MC-Dropout (CPU-optimised) ─────────────────────
@@ -244,7 +264,7 @@ def compute_onnx_attribution(
     Perturbs each spatial region and measures output delta.
     Faster than autograd on CPU: no backprop required.
     """
-    if MODEL_ID not in registry.loaded_models:
+    if DEMO_MODE or MODEL_ID not in registry.loaded_models:
         # Demo: return uniform importances
         n = len(feature_names)
         vals = np.random.dirichlet(np.ones(n))
@@ -289,7 +309,9 @@ def compute_saliency_map_onnx(
     and measures class probability drop.
     Runtime: ~50ms for 14×14 grid on 8-vCPU node with INT8 model.
     """
-    if MODEL_ID not in registry.loaded_models:
+    if DEMO_MODE or MODEL_ID not in registry.loaded_models:
+        # Demo weights produce an arbitrary saliency map — return zeros rather
+        # than present a fabricated heatmap as model evidence.
         return np.zeros((224, 224), dtype=np.float32)
 
     input_name = registry._sessions[MODEL_ID].get_inputs()[0].name
@@ -388,7 +410,10 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
                 return cv2.imdecode(np.frombuffer(raw, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
             image_array = await asyncio.to_thread(decode)
         else:
-            image_array = np.random.randint(0, 255, (512, 512), dtype=np.uint8)
+            # Do NOT fabricate an image: a random array would produce
+            # plausible-looking uncertainty numbers for a scan that was never
+            # supplied (audit: never present invented output as real).
+            raise HTTPException(status_code=400, detail="Must provide either storage_url or image_data")
 
         if image_array is None:
             raise HTTPException(status_code=400, detail="Failed to decode image")
@@ -449,6 +474,8 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
             explanation=explanation,
             inference_ms=ms,
             backend=ACTIVE_BACKEND,
+            demo_mode=DEMO_MODE,
+            attribution_method=ATTRIBUTION_METHOD,
         )
 
     except HTTPException:
@@ -470,7 +497,10 @@ async def health() -> Dict[str, Any]:
         content={
             "status": "healthy" if model_loaded else "degraded",
             "service": "uncertainty-engine",
-            "version": "3.1.0", "backend": "onnx-cpu",
+            "version": "3.1.0",
+            "backend": ACTIVE_BACKEND,
+            "demo_mode": DEMO_MODE,
+            "attribution_method": ATTRIBUTION_METHOD,
             "mc_passes": MC_PASSES,
             "model_loaded": model_loaded,
             "models_loaded": registry.loaded_models,

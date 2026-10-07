@@ -111,7 +111,7 @@ export default function LoginScreen() {
 
         {/* Compliance badges */}
         <View style={styles.badges}>
-          {['HIPAA','GDPR','NHS DSPT','ISO 13485'].map(b => (
+          {['GDPR','NHS DSPT'].map(b => (
             <View key={b} style={styles.badge}><Text style={styles.badgeText}>{b}</Text></View>
           ))}
         </View>

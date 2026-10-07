@@ -238,8 +238,12 @@ def cohens_kappa(ai_labels: List[int], human_labels: List[int], n_classes: int =
 
 def detect_drift(corrections: List[Dict[str, Any]]) -> Dict[str, Any]:
     if len(corrections) < 10:
-        return {"drift_detected": False, "kappa": 1.0, "psi": 0.0,
-                "avg_confidence_wrong": 0.0, "error_rate": 0.0, "sample_size": len(corrections)}
+        # Never report fabricated agreement: kappa=1.0/psi=0.0 would claim
+        # perfect AI/human agreement that was never measured.
+        return {"drift_detected": False, "status": "insufficient_data",
+                "reason": f"fewer than 10 corrections ({len(corrections)}); drift not estimable",
+                "kappa": None, "psi": None,
+                "avg_confidence_wrong": None, "error_rate": None, "sample_size": len(corrections)}
     recent = corrections[-100:]
     ai_u    = [urgency_to_int(c["ai_urgency"])    for c in recent]
     human_u = [urgency_to_int(c["human_urgency"]) for c in recent]
@@ -275,6 +279,7 @@ def detect_drift(corrections: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     return {
         "drift_detected":      drift_detected,
+        "status":              "ok",
         "kappa":               round(kappa, 4),
         "psi":                 round(psi, 4),
         "avg_confidence_wrong": round(avg_conf_wrong, 4),
@@ -288,7 +293,9 @@ def detect_drift(corrections: List[Dict[str, Any]]) -> Dict[str, Any]:
 def compute_feature_drift(corrections: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Compare recent distribution vs baseline to detect feature drift."""
     if len(corrections) < 20:
-        return {"drift_detected": False, "modality_shift": {}, "body_part_shift": {}, "severity_shift": {}}
+        return {"drift_detected": False, "status": "insufficient_data",
+                "reason": f"fewer than 20 corrections ({len(corrections)}); feature drift not estimable",
+                "modality_shift": {}, "body_part_shift": {}, "severity_shift": {}}
     baseline = corrections[:-50] if len(corrections) > 50 else corrections
     recent   = corrections[-50:]
 
@@ -766,9 +773,7 @@ async def submit_correction(correction: CorrectionEvent, background_tasks: Backg
         else:
             corrections = []  # in-memory not available in this rewrite
 
-        drift = detect_drift(corrections) if corrections else {
-            "drift_detected": False, "kappa": 1.0, "psi": 0.0
-        }
+        drift = detect_drift(corrections)
 
         should_retrain = (len(corrections) % MIN_CORRECTIONS == 0
                           if corrections else False) or drift.get("drift_detected", False)
@@ -819,29 +824,34 @@ async def submit_correction(correction: CorrectionEvent, background_tasks: Backg
             background_tasks.add_task(run_training_pipeline, _pool, run_id,
                                        corrections, drift, trigger)
 
-            # Send alert on drift
+            # Send alert on drift (only reachable when drift was actually measured:
+            # drift_detected implies status == "ok", so kappa/psi are real numbers)
             if drift.get("drift_detected"):
+                kappa = float(drift["kappa"])
+                psi = float(drift["psi"])
+                kappa_breach = kappa < DRIFT_THRESHOLD
                 alert = DriftAlert(
-                    metric="kappa" if drift.get("kappa", 1.0) < DRIFT_THRESHOLD else "psi",
-                    value=drift.get("kappa", 1.0) if drift.get("kappa", 1.0) < DRIFT_THRESHOLD else drift.get("psi", 0.0),
-                    threshold=DRIFT_THRESHOLD if drift.get("kappa", 1.0) < DRIFT_THRESHOLD else PSI_THRESHOLD,
+                    metric="kappa" if kappa_breach else "psi",
+                    value=kappa if kappa_breach else psi,
+                    threshold=DRIFT_THRESHOLD if kappa_breach else PSI_THRESHOLD,
                     severity=drift.get("severity", "low"),
-                    kappa=drift.get("kappa", 1.0),
-                    psi=drift.get("psi", 0.0),
-                    sample_size=drift.get("sample_size", 0),
+                    kappa=kappa,
+                    psi=psi,
+                    sample_size=drift.get("sample_size", len(corrections)),
                 )
                 background_tasks.add_task(send_alert, alert)
 
-            # Record feature drift snapshot
-            if corrections:
+            # Record feature drift snapshot (only when both drift statistics
+            # and feature distributions were actually estimable)
+            if drift.get("status") == "ok" and feat_drift.get("status") == "ok":
                 baseline_window = datetime.now(timezone.utc) - timedelta(days=7)
                 snap_data = {
                     "model_type": MODEL_TYPE,
                     "model_version": os.getenv("CL_BASE_VERSION", "v2.4.1"),
                     "baseline_window": baseline_window,
                     "current_window": datetime.now(timezone.utc),
-                    "psi": drift.get("psi", 0.0),
-                    "kappa": drift.get("kappa", 1.0),
+                    "psi": drift["psi"],
+                    "kappa": drift["kappa"],
                     "feature_dists": feat_drift,
                     "modality_shift": feat_drift.get("modality_shift", {}),
                     "body_part_shift": feat_drift.get("body_part_shift", {}),
@@ -880,9 +890,7 @@ async def get_metrics() -> Dict[str, Any]:
     fn        = [c for c in recent if c.get("correction_type") == "false_negative"]
     crit_miss = [c for c in recent if c.get("is_critical_miss")]
 
-    drift = detect_drift(corrections) if corrections else {
-        "drift_detected": False, "kappa": 1.0, "psi": 0.0
-    }
+    drift = detect_drift(corrections)
 
     # Get latest training run
     latest_run = {}
@@ -897,18 +905,21 @@ async def get_metrics() -> Dict[str, Any]:
     return {
         "model_version":       latest_run.get("target_version") or os.getenv("CL_BASE_VERSION", "v2.4.1"),
         "total_corrections":   total,
-        "accuracy_recent_100": round(len(correct) / max(len(recent), 1), 4),
-        "false_positive_rate": round(len(fp) / max(len(recent), 1), 4),
-        "false_negative_rate": round(len(fn) / max(len(recent), 1), 4),
-        "critical_miss_rate":  round(len(crit_miss) / max(len(recent), 1), 4),
+        "sample_size":         len(recent),
+        "accuracy_recent_100": round(len(correct) / max(len(recent), 1), 4) if recent else None,
+        "false_positive_rate": round(len(fp) / max(len(recent), 1), 4) if recent else None,
+        "false_negative_rate": round(len(fn) / max(len(recent), 1), 4) if recent else None,
+        "critical_miss_rate":  round(len(crit_miss) / max(len(recent), 1), 4) if recent else None,
         "drift":               drift,
         "training_state":      latest_run,
         "last_trained":        latest_run.get("completed_at"),
-        "cohens_kappa":        drift.get("kappa", 1.0),
+        "cohens_kappa":        drift.get("kappa"),
         "kappa_interpretation": (
-            "Excellent (>0.8)" if drift.get("kappa", 1.0) > 0.8 else
-            "Good (0.6–0.8)"   if drift.get("kappa", 1.0) > 0.6 else
-            "Fair — retrain recommended"
+            "Insufficient data - fewer than 10 corrections, kappa not estimated"
+            if drift.get("kappa") is None else
+            "Excellent (>0.8)" if drift["kappa"] > 0.8 else
+            "Good (0.6-0.8)"   if drift["kappa"] > 0.6 else
+            "Fair - retrain recommended"
         ),
         "shadow_model_loaded": _shadow_session is not None,
     }

@@ -76,8 +76,14 @@ MODEL_VERSION = os.getenv("MODEL_VERSION", "v2.4.1")
 INT8_MODEL    = MODEL_CACHE / f"triage_{MODEL_VERSION}_int8.onnx"
 FP32_MODEL    = MODEL_CACHE / f"triage_{MODEL_VERSION}.onnx"
 PT_MODEL      = MODEL_CACHE / f"triage_{MODEL_VERSION}.pt"
+DEMO_MODEL    = MODEL_CACHE / "triage_demo.onnx"
 MODEL_ID      = "triage"
 INPUT_SHAPE   = (1, 3, 224, 224)
+# Honest backend label — set in lifespan /admin-reload from the file actually
+# loaded. Never derived from "some file happens to exist" (audit: health always
+# reported onnx-int8-cpu even when demo weights were serving predictions).
+ACTIVE_BACKEND = "unknown"
+DEMO_MODE      = True
 
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
@@ -91,13 +97,15 @@ _batch_queue: Optional[MicroBatchQueue] = None
 # ── Lifespan — startup model loading + warmup ──────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _batch_queue
+    global _batch_queue, ACTIVE_BACKEND, DEMO_MODE
 
     model_path = _resolve_model()
     logger.info(f"[Triage] Loading ONNX model: {model_path}")
     registry.load(MODEL_ID, str(model_path))
     registry.warmup(MODEL_ID, INPUT_SHAPE, n=5)  # 5 warmup passes to prime CPU cache
     MODEL_LOADED.set(1)
+    ACTIVE_BACKEND = _backend_for(model_path)
+    DEMO_MODE = ACTIVE_BACKEND == "demo"
 
     _batch_queue = MicroBatchQueue(
         model_id=MODEL_ID,
@@ -112,6 +120,19 @@ async def lifespan(app: FastAPI):
         await _batch_queue.stop()
     MODEL_LOADED.set(0)
     logger.info("[Triage] Shutdown complete")
+
+
+def _backend_for(model_path: Path) -> str:
+    """Truthful backend label for the model file that was actually loaded."""
+    if model_path == INT8_MODEL:
+        return "onnx-int8-cpu"
+    if model_path == FP32_MODEL:
+        return "onnx-fp32-cpu"
+    if model_path == DEMO_MODEL or model_path.name == "triage_demo.onnx":
+        return "demo"
+    # PT export / hot-reload path: quantise step writes INT8, so a non-demo ONNX
+    # that is neither canonical file still counts as a real ONNX backend.
+    return "onnx-int8-cpu" if str(model_path).endswith("_int8.onnx") else "onnx-fp32-cpu"
 
 
 def _resolve_model() -> Path:
@@ -166,7 +187,7 @@ def _create_demo_onnx_model() -> Path:
         import onnx
         from onnx import helper, TensorProto
 
-        demo_path = MODEL_CACHE / "triage_demo.onnx"
+        demo_path = DEMO_MODEL
         demo_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Simple linear layer: (B, 3, 224, 224) → (B, 14)
@@ -237,6 +258,7 @@ class TriagePredictResponse(BaseModel):
     inference_ms: int
     model_version: str
     backend: str                           # "onnx-int8" | "onnx-fp32" | "demo"
+    demo_mode: bool                        # true when synthetic demo weights serve the request
     all_findings: List[Dict[str, Any]]
 
 # ── Inference pipeline ─────────────────────────────────────────
@@ -307,7 +329,8 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
             midline_shift=await asyncio.to_thread(_estimate_midline, image_array, finding) if "head" in req.body_part.lower() else "N/A",
             inference_ms=inference_ms,
             model_version=req.model_version,
-            backend="onnx-int8" if INT8_MODEL.exists() else ("onnx-fp32" if FP32_MODEL.exists() else "demo"),
+            backend=ACTIVE_BACKEND,
+            demo_mode=DEMO_MODE,
             all_findings=results[:5],
         )
 
@@ -463,7 +486,8 @@ async def health() -> JSONResponse:
             "status": overall,
             "service": "triage-engine",
             "version": "2.4.1",
-            "backend": "onnx-int8-cpu",
+            "backend": ACTIVE_BACKEND,
+            "demo_mode": DEMO_MODE,
             "model_loaded": model_loaded,
             "models_loaded": registry.loaded_models,
             "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},
@@ -486,7 +510,7 @@ async def metrics(request: Request):
 # ╚══════════════════════════════════════════════════════════╝
 @app.post("/admin/reload")
 async def admin_reload(payload: dict) -> Dict[str, Any]:
-    global MODEL_VERSION
+    global MODEL_VERSION, ACTIVE_BACKEND, DEMO_MODE
     """
     Hot-reload the ONNX model without restarting the service.
     Called by the Continuous Learning service after a fine-tuning run completes.
@@ -530,12 +554,16 @@ async def admin_reload(payload: dict) -> Dict[str, Any]:
         # Update model file paths
         globals()["INT8_MODEL"] = MODEL_CACHE / f"triage_{model_version}_int8.onnx"
         globals()["FP32_MODEL"] = MODEL_CACHE / f"triage_{model_version}.onnx"
+        ACTIVE_BACKEND = _backend_for(model_path)
+        DEMO_MODE = ACTIVE_BACKEND == "demo"
 
-        logger.info(f"Model hot-reloaded: {model_version} from {model_path}")
+        logger.info(f"Model hot-reloaded: {model_version} from {model_path} (backend={ACTIVE_BACKEND})")
         return {
             "status": "reloaded",
             "model_version": model_version,
             "model_path": model_path_str_resolved,
+            "backend": ACTIVE_BACKEND,
+            "demo_mode": DEMO_MODE,
         }
     except Exception as e:
         logger.error(f"Model reload failed: {e}", exc_info=True)

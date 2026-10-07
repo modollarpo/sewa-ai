@@ -14,16 +14,16 @@ const PLANS: Record<string, {
   uk: [
     { label:'Starter', price:'£499', currency:'GBP', period:'/month', scans:'500', users:'10', storage:'500 GB', support:'Email', compliance:'GDPR · NHS DSPT', features:['CT/MRI/X-Ray triage','AI reports (100/mo)','Basic analytics','2-day support SLA'] },
     { label:'Pro', price:'£1,499', currency:'GBP', period:'/month', scans:'2,000', users:'30', storage:'2 TB', support:'Priority + SLA', compliance:'GDPR · NHS DSPT', features:['Unlimited modalities','Unlimited AI reports','Population health dashboard','PACS & FHIR integration','4-hour support SLA'], highlight:true },
-    { label:'Enterprise', price:'Custom', currency:'GBP', period:'', scans:'Unlimited', users:'Unlimited', storage:'Unlimited', support:'24/7 + CSM', compliance:'Full GDPR · NHS · MDR', features:['Custom SLAs','Dedicated Azure region','Federated learning','Priority model updates','Compliance reporting','On-site training'] },
+    { label:'Enterprise', price:'Custom', currency:'GBP', period:'', scans:'Unlimited', users:'Unlimited', storage:'Unlimited', support:'24/7 + CSM', compliance:'GDPR · NHS DSPT · MDR (target)', features:['Custom SLAs','Dedicated Azure region','Federated learning','Priority model updates','Compliance reporting','On-site training'] },
   ],
   us: [
-    { label:'Starter', price:'$699', currency:'USD', period:'/month', scans:'500', users:'10', storage:'500 GB', support:'Email', compliance:'HIPAA', features:['CT/MRI/X-Ray triage','AI reports (100/mo)','Basic analytics','BAA included'] },
-    { label:'Pro', price:'$1,999', currency:'USD', period:'/month', scans:'2,000', users:'30', storage:'2 TB', support:'Priority + SLA', compliance:'HIPAA', features:['Unlimited modalities','Unlimited AI reports','Population health','PACS & FHIR','4-hour SLA','BAA included'], highlight:true },
-    { label:'Enterprise', price:'Custom', currency:'USD', period:'', scans:'Unlimited', users:'Unlimited', storage:'Unlimited', support:'24/7 + CSM', compliance:'HIPAA · FDA 510(k)', features:['Custom SLAs','Dedicated infra','Federated learning','FDA compliance package'] },
+    { label:'Starter', price:'$699', currency:'USD', period:'/month', scans:'500', users:'10', storage:'500 GB', support:'Email', compliance:'HIPAA-ready', features:['CT/MRI/X-Ray triage','AI reports (100/mo)','Basic analytics','BAA included'] },
+    { label:'Pro', price:'$1,999', currency:'USD', period:'/month', scans:'2,000', users:'30', storage:'2 TB', support:'Priority + SLA', compliance:'HIPAA-ready', features:['Unlimited modalities','Unlimited AI reports','Population health','PACS & FHIR','4-hour SLA','BAA included'], highlight:true },
+    { label:'Enterprise', price:'Custom', currency:'USD', period:'', scans:'Unlimited', users:'Unlimited', storage:'Unlimited', support:'24/7 + CSM', compliance:'HIPAA-ready · FDA 510(k) planned', features:['Custom SLAs','Dedicated infra','Federated learning','FDA compliance package'] },
   ],
   ng: [
-    { label:'Impact', price:'₦120,000', currency:'NGN', period:'/month', scans:'Unlimited', users:'Unlimited', storage:'1 TB', support:'Priority', compliance:'NDPR · ISO 13485', features:['Full triage suite','AI reports','Paystack billing','NDPR compliance','Offline-capable'],  highlight:true },
-    { label:'Impact+', price:'₦250,000', currency:'NGN', period:'/month', scans:'Unlimited', users:'Unlimited', storage:'5 TB', support:'24/7', compliance:'NDPR · ISO 13485', features:['Everything in Impact','Multi-site support','Advanced analytics','Dedicated support'] },
+    { label:'Impact', price:'₦120,000', currency:'NGN', period:'/month', scans:'Unlimited', users:'Unlimited', storage:'1 TB', support:'Priority', compliance:'NDPR · ISO 13485 planned', features:['Full triage suite','AI reports','Paystack billing','NDPR compliance','Offline-capable'],  highlight:true },
+    { label:'Impact+', price:'₦250,000', currency:'NGN', period:'/month', scans:'Unlimited', users:'Unlimited', storage:'5 TB', support:'24/7', compliance:'NDPR · ISO 13485 planned', features:['Everything in Impact','Multi-site support','Advanced analytics','Dedicated support'] },
   ],
   ke: [
     { label:'Impact', price:'KES 18,000', currency:'KES', period:'/month', scans:'Unlimited', users:'Unlimited', storage:'1 TB', support:'Priority', compliance:'DPA 2019', features:['Full triage suite','M-Pesa billing','DPA 2019 compliant','Offline support'], highlight:true },

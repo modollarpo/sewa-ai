@@ -9,9 +9,19 @@
 
 ## What is SEWA XAI?
 
-SEWA XAI is an enterprise-grade clinical diagnostic AI platform that reduces the time from medical scan acquisition to clinician alert from **4–8 hours to 1.84 seconds**.
+SEWA XAI is an enterprise-grade clinical diagnostic AI platform that **targets** reducing the time from medical scan acquisition to clinician alert from **4–8 hours to under 2 seconds** (engineering target — not independently measured; see Technical Specifications).
 
-Built for NHS hospitals and African clinics — the same platform, the same AI, adapted to any environment from Azure GPU clusters to offline ARM devices with no internet.
+Built for NHS hospitals and African clinics — the same platform, adapted to any environment from Azure GPU clusters to offline ARM devices with no internet.
+
+> **⚠️ Scope statement (model outputs).** This repository contains **no clinically validated
+> model weights and no labelled dataset**. Every AI service runs in demo mode: predictions,
+> Grad-CAM/SHAP attributions, uncertainty estimates, report text and reliability metrics are
+> produced by a **demo/synthetic pipeline** and are labelled as such in API responses
+> (`demo_mode: true`, `backend: "demo"`). They are illustrative of the pipeline's behaviour,
+> not clinical evidence, and must not be quoted as performance results. Obtaining real
+> weights + evaluation data, or formally scoping all published outputs as synthetic, is an
+> open audit action (see `SEWA_AI_CODEBASE_RESEARCH_IMPLEMENTATION_AUDIT.md` §34).
+> All displayed regulatory certifications are likewise unclaimed — see Certifications & Compliance below.
 
 ---
 
@@ -25,7 +35,7 @@ Built for NHS hospitals and African clinics — the same platform, the same AI, 
 │         │                                                         │
 │  ┌──────▼────────────────────────────────────────────────────┐   │
 │  │ Engine 1: Triage (EfficientNet-B4, 380ms)                 │   │
-│  │ 14 conditions · CT/MRI/X-ray/US · Grad-CAM + SHAP        │   │
+│  │ 14 conditions · CT/MRI/X-ray/US · prediction + urgency    │   │
 │  └──────┬────────────────────────────────────────────────────┘   │
 │         │                                                         │
 │  ┌──────▼────────────────────────────────────────────────────┐   │
@@ -181,7 +191,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for full instructions.
 | G-Cloud 14 | Not claimed — not evidenced in this repository |
 | SOC 2 Type II | Not claimed — not evidenced in this repository |
 | EU AI Act Art. 14 | By design (human-review gate implemented) |
-| FDA 510(k) | ✅ Cleared |
+| FDA 510(k) | Not claimed — not evidenced in this repository |
 
 ---
 

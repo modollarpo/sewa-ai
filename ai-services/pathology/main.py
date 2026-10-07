@@ -70,6 +70,11 @@ MODEL_VERSION = os.getenv("MODEL_VERSION", "v1.0.0")
 INT8_MODEL    = MODEL_CACHE / f"pathology_{MODEL_VERSION}_int8.onnx"
 FP32_MODEL    = MODEL_CACHE / f"pathology_{MODEL_VERSION}.onnx"
 MODEL_ID      = "pathology"
+# Honest backend reporting (audit R4): resolved at startup from whichever
+# model file actually serves predictions - never a fixed "onnx-int8-cpu"
+# claim. DEMO_MODE is surfaced on /health and every prediction response.
+ACTIVE_BACKEND = "unknown"
+DEMO_MODE      = True
 INPUT_SHAPE   = (1, 3, 224, 224)  # Standard ImageNet tile size for patch classification
 TILE_SIZE     = int(os.getenv("TILE_SIZE", "224"))
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5000").split(",")
@@ -108,9 +113,17 @@ _CRITICAL_FINDINGS: set = set()  # Pathology findings are URGENT, not CRITICAL (
 # ── Lifespan — startup model loading ──────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _batch_queue
+    global _batch_queue, ACTIVE_BACKEND, DEMO_MODE
 
     model_path = _resolve_model()
+    if model_path == INT8_MODEL:
+        ACTIVE_BACKEND = "onnx-int8"
+    elif model_path == FP32_MODEL:
+        ACTIVE_BACKEND = "onnx-fp32"
+    else:
+        ACTIVE_BACKEND = "demo"
+    DEMO_MODE = ACTIVE_BACKEND == "demo"
+    logger.info(f"[Pathology] backend={ACTIVE_BACKEND} demo_mode={DEMO_MODE}")
     logger.info(f"[Pathology] Loading ONNX model: {model_path}")
     registry.load(MODEL_ID, str(model_path))
     registry.warmup(MODEL_ID, INPUT_SHAPE, n=3)
@@ -220,6 +233,7 @@ class PathologyPredictResponse(BaseModel):
     model_version:  str
     backend:        str         # "onnx-int8" | "onnx-fp32" | "demo"
     recommendation: str
+    demo_mode:      bool = False
 
 
 # ── H&E Stain Normalisation (Macenko SVD) ─────────────────────────────────
@@ -438,9 +452,10 @@ async def predict(req: PathologyPredictRequest) -> PathologyPredictResponse:
         )
 
         inference_ms = int((time.perf_counter() - start) * 1000)
+        ki67_txt = f"{ki67:.2f}" if ki67 is not None else "N/A"
         logger.info(
             f"[Pathology] {req.scan_id}: {finding} | urgency={urgency} | "
-            f"confidence={confidence:.3f} | ki67={ki67:.2f if ki67 else 'N/A'} | {inference_ms}ms"
+            f"confidence={confidence:.3f} | ki67={ki67_txt} | {inference_ms}ms"
         )
         INFERENCE_DURATION.labels(tissue=req.tissue_type).observe(inference_ms / 1000)
         status = "success"
@@ -457,7 +472,8 @@ async def predict(req: PathologyPredictRequest) -> PathologyPredictResponse:
             all_findings=results[:6],
             inference_ms=inference_ms,
             model_version=req.model_version,
-            backend="onnx-int8" if INT8_MODEL.exists() else ("onnx-fp32" if FP32_MODEL.exists() else "demo"),
+            backend=ACTIVE_BACKEND,
+            demo_mode=DEMO_MODE,
             recommendation=_build_recommendation(finding, confidence, gleason),
         )
 
@@ -484,7 +500,8 @@ async def health() -> Dict[str, Any]:
             "status":        overall,
             "service":       "pathology-engine",
             "version":       "1.0.0",
-            "backend":       "onnx-int8-cpu",
+            "backend":       ACTIVE_BACKEND,
+            "demo_mode":     DEMO_MODE,
             "model_loaded":  model_loaded,
             "models_loaded": registry.loaded_models,
             "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},
