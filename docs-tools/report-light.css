@@ -1,0 +1,163 @@
+/* SEWA AI — Report Light Theme (professional, print-optimised)
+   Brand: #408D7B | Dark: #2E6B5E | Light: #52B09A
+   Background: #FFFFFF | Text: #1A1A1A | Muted: #5A6B66
+*/
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'IBM Plex Sans', 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: #1A1A1A;
+    background: #FFFFFF;
+}
+
+/* ── Cover Page ───────────────────────────── */
+.cover {
+    height: 235mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-bottom: 4px solid #408D7B;
+    padding: 1rem 2rem;
+    margin: 0 0 1rem;
+    page-break-after: always;
+}
+
+.cover-logo { width: 280px; margin-bottom: 1.5rem; }
+.cover-logo svg { width: 100%; height: auto; }
+
+.cover-title { font-size: 26pt; font-weight: 800; color: #2E6B5E; margin: 0 0 0.4rem; }
+
+.cover-subtitle { font-size: 13pt; color: #52B09A; margin-bottom: 1rem; max-width: 90%; line-height: 1.5; font-weight: 600; }
+
+.cover-meta { font-size: 10pt; color: #5A6B66; margin-bottom: 2rem; }
+
+.cover .classification {
+    display: inline-block;
+    border: 2px solid #408D7B;
+    padding: 0.25rem 1rem;
+    border-radius: 4px;
+    font-size: 9pt;
+    font-weight: 700;
+    color: #2E6B5E;
+    margin-top: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    max-width: 80%;
+}
+
+.cover-org { font-size: 9pt; color: #6B7B76; margin-top: 2rem; line-height: 1.6; }
+
+/* ── Headings ─────────────────────────────── */
+.content h1 {
+    font-size: 18pt;
+    font-weight: 800;
+    color: #2E6B5E;
+    border-bottom: 2px solid #408D7B;
+    padding-bottom: 0.3rem;
+    margin-top: 1.5rem;
+    page-break-before: always;
+}
+
+.content h1:first-of-type { page-break-before: avoid; }
+
+.content h2 {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #2E6B5E;
+    border-bottom: 1px solid #D9E5E1;
+    padding-bottom: 4px;
+    margin-top: 1.2rem;
+}
+
+.content h3 {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #408D7B;
+    margin-top: 1rem;
+}
+
+.content h4 {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin-top: 0.75rem;
+}
+
+/* ── Body ─────────────────────────────────── */
+.content p { margin: 0.4rem 0; }
+
+a { color: #2E6B5E; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { color: #1A1A1A; }
+
+/* ── Tables ───────────────────────────────── */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.7rem 0;
+    font-size: 8pt;
+}
+
+th {
+    background: #408D7B;
+    color: #FFFFFF;
+    font-weight: 700;
+    padding: 4px 6px;
+    text-align: left;
+}
+
+td {
+    border: 1px solid #D9E5E1;
+    padding: 3px 6px;
+    vertical-align: top;
+}
+
+tr:nth-child(even) td { background: #F4F8F7; }
+
+/* ── Blockquote / Evidence notes ──────────── */
+blockquote {
+    border-left: 4px solid #408D7B;
+    background: #F0F7F5;
+    padding: 0.5rem 0.9rem;
+    margin: 0.7rem 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 9.5pt;
+}
+
+/* ── Lists ────────────────────────────────── */
+.content ul, .content ol { margin: 0.4rem 0; padding-left: 1.4rem; }
+.content li { margin: 0.2rem 0; }
+
+/* ── Code ─────────────────────────────────── */
+pre, code {
+    font-family: 'IBM Plex Mono', 'Fira Code', monospace;
+    font-size: 8pt;
+    background: #F4F8F7;
+    border: 1px solid #D9E5E1;
+    border-radius: 4px;
+}
+code { padding: 0.1rem 0.3rem; }
+pre { padding: 0.6rem; line-height: 1.3; }
+
+/* ── Compact variant (one-pager) ──────────── */
+.compact { font-size: 9pt; }
+.compact table { font-size: 6.5pt; }
+.compact td, .compact th { padding: 1px 2px; }
+.compact h1 { font-size: 14pt; margin-top: 0.8rem; }
+.compact h2 { font-size: 11pt; margin-top: 0.5rem; }
+.compact p { margin: 0.25rem 0; }
+.compact ul, .compact ol { margin: 0.25rem 0; }
+.compact li { margin: 0.1rem 0; }
+
+/* ── Horizontal rule ──────────────────────── */
+hr { border: none; border-top: 1px solid #D9E5E1; margin: 1rem 0; }

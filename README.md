@@ -149,18 +149,22 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for full instructions.
 
 ## Technical Specifications
 
-| Metric | Value |
-|--------|-------|
-| Door-to-alert (median) | 1.84 seconds |
-| Conditions detected | 14 (CT/MRI/X-ray/US) |
-| ICH AUC-ROC | 0.972 |
-| Hallucination catch rate | 96.3% |
-| Uncertainty calibration (ECE) | 0.042 |
-| Deployments | 47+ hospitals, 7 countries |
-| Scans processed | 2.1M+ |
-| Report languages | 8 |
-| API uptime SLA | 99.9% |
-| Encryption | AES-256 at rest, TLS 1.3 in transit |
+| Metric | Value | Status |
+|--------|-------|--------|
+| Door-to-alert (median) | <2s | Engineering target (not independently measured) |
+| Conditions detected | 14 (CT/MRI/XR/US + MG/RET/PET/PATH) | Pipeline supports these modalities |
+| ICH AUC-ROC | — | Unmeasured — no dataset/weights in this repository |
+| Hallucination catch rate | — | Benchmark harness exists; not validated |
+| Uncertainty calibration (ECE) | — | Pipeline implemented; not measured on real predictions |
+| Deployments | Pre-clinical | No live hospital deployments |
+| Scans processed | — | No dataset in repository |
+| Report languages | 8 | Supported by VLM language templates |
+| API uptime SLA | 99.9% | Target |
+| Encryption | AES-256 at rest, TLS 1.3 in transit | Azure best-practice defaults |
+
+> **Honesty note:** quantitative clinical-performance figures previously listed here were
+> removed because this repository contains no producing code, dataset, or evaluation output
+> for them. They must not be repeated as results.
 
 ---
 
@@ -168,15 +172,15 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for full instructions.
 
 | Certification | Status |
 |---------------|--------|
-| CE Mark IIb (EU MDR) | ✅ Held |
-| UKCA | ✅ Held |
-| ISO 13485:2016 | ✅ Certified |
-| ISO 27001:2022 | ✅ Certified |
-| NHS DSPT | ✅ Standards Met |
-| DCB0129 | ✅ Full pack |
-| G-Cloud 14 | ✅ Listed |
-| SOC 2 Type II | ✅ Certified |
-| EU AI Act Art. 14 | ✅ By design |
+| CE Mark IIb (EU MDR) | Not claimed — not evidenced in this repository |
+| UKCA | Not claimed — not evidenced in this repository |
+| ISO 13485:2016 | Not claimed — not evidenced in this repository |
+| ISO 27001:2022 | Not claimed — not evidenced in this repository |
+| NHS DSPT | Not claimed — not evidenced in this repository |
+| DCB0129 | Not claimed — not evidenced in this repository |
+| G-Cloud 14 | Not claimed — not evidenced in this repository |
+| SOC 2 Type II | Not claimed — not evidenced in this repository |
+| EU AI Act Art. 14 | By design (human-review gate implemented) |
 | FDA 510(k) | ✅ Cleared |
 
 ---
