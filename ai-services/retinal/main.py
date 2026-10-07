@@ -63,6 +63,11 @@ MODEL_VERSION = os.getenv("MODEL_VERSION", "v1.0.0")
 INT8_MODEL = MODEL_CACHE / f"retinal_{MODEL_VERSION}_int8.onnx"
 FP32_MODEL = MODEL_CACHE / f"retinal_{MODEL_VERSION}.onnx"
 MODEL_ID = "retinal"
+# Honest backend reporting (audit R4): resolved at startup from whichever
+# model file actually serves predictions; DEMO_MODE is surfaced on /health
+# and on every prediction response.
+ACTIVE_BACKEND = "unknown"
+DEMO_MODE = True
 INPUT_SHAPE = (1, 3, 224, 224)
 
 ALLOWED_ORIGINS = os.getenv(
@@ -114,9 +119,17 @@ _URGENT_FINDINGS = {
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _batch_queue
+    global _batch_queue, ACTIVE_BACKEND, DEMO_MODE
 
     model_path = _resolve_model()
+    if model_path == INT8_MODEL:
+        ACTIVE_BACKEND = "onnx-int8"
+    elif model_path == FP32_MODEL:
+        ACTIVE_BACKEND = "onnx-fp32"
+    else:
+        ACTIVE_BACKEND = "demo"
+    DEMO_MODE = ACTIVE_BACKEND == "demo"
+    logger.info(f"[Retinal] backend={ACTIVE_BACKEND} demo_mode={DEMO_MODE}")
     logger.info(f"[Retinal] Loading ONNX model: {model_path}")
     registry.load(MODEL_ID, str(model_path))
     registry.warmup(MODEL_ID, INPUT_SHAPE, n=3)
@@ -217,6 +230,7 @@ class RetinalPredictResponse(BaseModel):
     inference_ms: int
     model_version: str
     backend: str
+    demo_mode: bool = False
     recommendation: str
 
 
@@ -348,7 +362,8 @@ async def predict(req: RetinalPredictRequest) -> RetinalPredictResponse:
             all_findings=results[:5],
             inference_ms=inference_ms,
             model_version=req.model_version,
-            backend="onnx-int8" if INT8_MODEL.exists() else ("onnx-fp32" if FP32_MODEL.exists() else "demo"),
+            backend=ACTIVE_BACKEND,
+            demo_mode=DEMO_MODE,
             recommendation=_build_recommendation(finding),
         )
 
@@ -374,7 +389,8 @@ async def health() -> Dict[str, Any]:
             "status": "healthy" if model_loaded else "degraded",
             "service": "retinal-engine",
             "version": "1.0.0",
-            "backend": "onnx-int8-cpu",
+            "backend": ACTIVE_BACKEND,
+            "demo_mode": DEMO_MODE,
             "model_loaded": model_loaded,
             "models_loaded": registry.loaded_models,
             "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},

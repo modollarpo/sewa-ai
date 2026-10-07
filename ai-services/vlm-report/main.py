@@ -94,7 +94,7 @@ class VLMReportRequest(BaseModel):
     shap_values: Optional[List[Dict[str, Any]]] = None
     region: str = Field("uk", pattern=r"^[a-z]{2}$")
     language: str = Field("en", pattern=r"^[a-z]{2}$")
-    compliance: List[str] = ["HIPAA", "ISO 13485"]
+    compliance: List[str] = ["HIPAA-aligned controls", "ISO 13485 (planned)"]
 
 class VLMReportResponse(BaseModel):
     scan_id: str
