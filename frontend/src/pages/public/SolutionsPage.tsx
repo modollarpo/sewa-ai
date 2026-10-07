@@ -13,16 +13,16 @@ const C = {
 const ENGINES = [
   {
     id:'triage', icon:'⚡', label:'Triage Engine', color:C.critical,
-    headline:'Critical conditions detected in under 2 seconds',
-    description:'Our EfficientNet-B4 deep learning model analyses CT, MRI, and X-ray scans at 94% accuracy across 14 pathology classes. The triage engine fires before a radiologist opens a case — ensuring critical findings reach the right clinician immediately.',
+    headline:'Critical conditions targeted in under 2 seconds',
+    description:'Our ONNX Runtime triage model analyses CT, MRI, and X-ray scans across 14 pathology classes. The triage engine is designed to fire before a radiologist opens a case — ensuring critical findings reach the right clinician as quickly as possible.',
     conditions:['Intracranial Haemorrhage (ICH)','Large Vessel Occlusion (LVO) / Stroke','Pulmonary Embolism (PE)','Pneumothorax','Aortic Dissection','Rib Fractures','Pleural Effusion','Pneumonia / COVID-19','Tuberculosis','Spinal Cord Compression','Liver Lesions','Renal Calculi','Appendicitis','Bowel Obstruction'],
     metrics:[
-      { label:'AUC-ROC (ICH)', value:'>0.97' },
-      { label:'Sensitivity (PE)', value:'94.2%' },
-      { label:'Inference time', value:'<2s' },
-      { label:'Modalities', value:'CT · MRI · XR' },
+      { label:'AUC-ROC (ICH)', value:'Not yet measured' },
+      { label:'Sensitivity (PE)', value:'Not yet measured' },
+      { label:'Inference time', value:'<2s (target)' },
+      { label:'Modalities', value:'CT · MRI · XR · US' },
     ],
-    pipeline:'DICOM → Preprocessing → EfficientNet-B4 → Multi-label classifier → Priority score → Worklist sort',
+    pipeline:'DICOM → Preprocessing → ONNX model → Multi-label classifier → Priority score → Worklist sort',
   },
   {
     id:'uncertainty', icon:'🎯', label:'Uncertainty Engine', color:C.amber,
@@ -31,34 +31,34 @@ const ENGINES = [
     conditions:['Low-quality DICOM inputs (motion artefact, noise)','Rare or out-of-distribution pathologies','Multi-pathology overlapping findings','Paediatric anatomy (OOD vs adult training)','Post-surgical anatomy','Contrast vs non-contrast ambiguity'],
     metrics:[
       { label:'Uncertainty method', value:'Stochastic MC Dropout' },
-      { label:'Calibration (ECE)', value:'<0.04' },
-      { label:'OOD detection rate', value:'89.1%' },
-      { label:'False positive reduction', value:'31%' },
+      { label:'Calibration (ECE)', value:'Not yet measured' },
+      { label:'OOD detection rate', value:'Under evaluation' },
+      { label:'False positive reduction', value:'Under evaluation' },
     ],
     pipeline:'AI Result → Stochastic Pass → Epistemic variance → Aleatoric variance → Confidence score → Flag/Pass',
   },
   {
     id:'metacognition', icon:'🧠', label:'Metacognition Engine', color:C.purple,
     headline:'AI that checks its own work before you see it',
-    description:'Our advanced metacognition pipeline evaluates every AI result before it reaches a clinician. It checks internal consistency, cross-references against clinical rules, detects hallucinations, and assigns a Confidence Integrity Score (CIS) to every output.',
+    description:'Our advanced metacognition pipeline evaluates every AI result before it reaches a clinician. It checks internal consistency, cross-references against clinical rules, detects hallucinations, and assigns a layer-wise reliability status to every output.',
     conditions:['Anatomical hallucinations (findings in wrong location)','Physiologically impossible combinations','Contradictions with prior scans','Clinical rule violations (e.g. ICH without hyperdensity)','Report-finding misalignment','Uncertainty-confidence contradiction'],
     metrics:[
-      { label:'Hallucination catch rate', value:'96.3%' },
-      { label:'False escalation reduction', value:'28%' },
-      { label:'CIS score range', value:'0–100' },
-      { label:'Avg latency added', value:'180ms' },
+      { label:'Hallucination catch rate', value:'Not validated' },
+      { label:'False escalation reduction', value:'Under evaluation' },
+      { label:'Reliability status', value:'Layer-wise PASS/FAIL/FLAG' },
+      { label:'Avg latency added', value:'180ms (target)' },
     ],
-    pipeline:'AI Result → Anatomical consistency → Clinical rules → Prior comparison → CIS scoring → Pass/Flag/Block',
+    pipeline:'AI Result → Anatomical consistency → Clinical rules → Prior comparison → Reliability scoring → Pass/Flag/Block',
   },
   {
     id:'vlm', icon:'📋', label:'VLM Report Generator', color:C.info,
     headline:'Structured radiology reports in seconds, not hours',
-    description:'Our Vision-Language Model combines the DICOM image, AI findings, patient history, and clinical context to generate a fully-structured, editable radiology report. Radiologists review, edit, and sign — reducing reporting time by 60–70%.',
+    description:'Our Vision-Language Model combines the DICOM image, AI findings, patient history, and clinical context to generate a fully-structured, editable radiology report draft. Radiologists review, edit, and sign — with the time saving intended to be validated in deployment.',
     conditions:['Structured findings section (per organ system)','Impression with differential diagnosis','Clinical recommendations (urgent/routine)','Comparison with prior studies','Laterality, size, and HU measurements','ICD-10 coding suggestions','DICOM SR structured report output'],
     metrics:[
-      { label:'Report generation time', value:'<8s' },
-      { label:'Radiologist edit rate', value:'23%' },
-      { label:'BLEU-4 vs expert', value:'0.71' },
+      { label:'Report generation time', value:'<8s (target)' },
+      { label:'Radiologist edit rate', value:'Under evaluation' },
+      { label:'BLEU-4 vs expert', value:'Not evaluated' },
       { label:'Languages', value:'8' },
     ],
     pipeline:'DICOM + AI findings + EHR → VLM prompt → Structured report → Radiologist review → Sign & FHIR export',
@@ -69,9 +69,9 @@ const ENGINES = [
     description:'Every SEWA XAI result comes with a Grad-CAM heatmap overlaid on the DICOM image and SHAP feature attribution values. Clinicians can inspect precisely which regions drove the diagnosis — building trust and enabling faster, more confident decisions.',
     conditions:['Grad-CAM activation maps (pixel-level attribution)','SHAP feature importance (per clinical variable)','Attention rollout for transformer layers','Contrastive explanations (why NOT another class)','Interactive threshold adjustment','PDF export for audit and legal records'],
     metrics:[
-      { label:'Localisation accuracy', value:'91.4%' },
-      { label:'Radiologist trust score', value:'+47%' },
-      { label:'Heatmap render time', value:'<500ms' },
+      { label:'Localisation accuracy', value:'Under evaluation' },
+      { label:'Radiologist trust score', value:'Under evaluation' },
+      { label:'Heatmap render time', value:'<500ms (target)' },
       { label:'Export formats', value:'PNG · DICOM SR · PDF' },
     ],
     pipeline:'AI Result → Grad-CAM backward pass → SHAP TreeExplainer → Heatmap overlay → DICOM viewer render',
@@ -87,7 +87,7 @@ const ENGINES = [
       { label:'Gleason grade', value:'Prostate-only' },
       { label:'Ki67 estimate', value:'Built-in' },
     ],
-    pipeline:'Tile → Stain normalization → EfficientNet-B0 → Classification → Metrics estimation → MDT alert',
+    pipeline:'Tile → Stain normalization → ONNX INT8 classifier → Classification → Metrics estimation → MDT alert',
   },
   {
     id:'mammography', icon:'🩺', label:'Mammography Engine', color:C.brand,
@@ -96,8 +96,8 @@ const ENGINES = [
     conditions:['Normal Breast Tissue','Benign Mass','Malignant Mass','Benign Calcifications','Malignant Calcifications','Architectural Distortion','Asymmetry','Lymphadenopathy'],
     metrics:[
       { label:'BI-RADS scale', value:'0-5' },
-      { label:'Inference time', value:'<2.0s' },
-      { label:'Sensitivity (malignant)', value:'93.5%' },
+      { label:'Inference time', value:'<2.0s (target)' },
+      { label:'Sensitivity (malignant)', value:'Under evaluation' },
       { label:'Findings', value:'8' },
     ],
     pipeline:'Mammogram → Preprocessing → Classification → BI-RADS → Urgency scoring → Recommendations',
@@ -109,8 +109,8 @@ const ENGINES = [
     conditions:['Normal Retina','No DR','Mild NPDR','Moderate NPDR','Severe NPDR','PDR','Glaucoma Suspect','Primary Open-Angle Glaucoma','Dry AMD','Wet AMD','Hypertensive Retinopathy','Retinal Vein Occlusion','Retinal Artery Occlusion'],
     metrics:[
       { label:'DR grading', value:'0-4' },
-      { label:'Inference time', value:'<1.9s' },
-      { label:'Sensitivity (PDR)', value:'95.2%' },
+      { label:'Inference time', value:'<1.9s (target)' },
+      { label:'Sensitivity (PDR)', value:'Under evaluation' },
       { label:'Conditions', value:'8+' },
     ],
     pipeline:'Fundus photo → Preprocessing → Classification → DR grade → Urgency scoring → Recommendations',
@@ -119,10 +119,10 @@ const ENGINES = [
 
 const ROLES = [
   { role:'Radiologist', icon:'🩻', color:C.info,
-    solutions:['AI pre-reads worklist by priority','Grad-CAM shows exactly what AI detected','VLM draft reports cut reporting time by 65%','Uncertainty flags push borderline cases for extra review','Second opinion workflow for complex cases','Voice dictation with medical terminology'],
+    solutions:['AI pre-reads worklist by priority','Grad-CAM shows exactly what AI detected','VLM draft reports for faster reporting','Uncertainty flags push borderline cases for extra review','Second opinion workflow for complex cases','Voice dictation with medical terminology'],
   },
   { role:'Emergency Physician', icon:'🏥', color:C.critical,
-    solutions:['Stroke Code auto-trigger on ICH/LVO detection','Critical alert push to mobile in <3 seconds','Patient-at-risk dashboard with real-time AI feed','NIHSS and tPA window calculations','CT-to-needle time tracking','Escalation pathway integration'],
+    solutions:['Stroke Code auto-trigger on ICH/LVO detection','Critical alert push to mobile (latency target <3s)','Patient-at-risk dashboard with real-time AI feed','NIHSS and tPA window calculations','CT-to-needle time tracking','Escalation pathway integration'],
   },
   { role:'Hospital Admin', icon:'📊', color:C.brand,
     solutions:['Scan volume and turnaround analytics','AI performance monitoring dashboards','Radiologist productivity metrics','Compliance and audit log access','Multi-site and department management','Billing and subscription management'],
@@ -251,8 +251,8 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
               ))}
             </div>
             <div style={{ padding:20, background:`${engine.color}08`, border:`1px solid ${engine.color}20`, borderRadius:14 }}>
-              <div style={{ fontSize:11, fontWeight:700, color:engine.color, marginBottom:8 }}>Validated on</div>
-              <div style={{ fontSize:12, color:C.textMd, lineHeight:1.8 }}>CheXpert (224K) · NIH Chest X-ray · RSNA MICCAI · TCGA Pathology · NHS de-identified dataset · LUTH Nigeria dataset</div>
+              <div style={{ fontSize:11, fontWeight:700, color:engine.color, marginBottom:8 }}>Targeted validation datasets</div>
+              <div style={{ fontSize:12, color:C.textMd, lineHeight:1.8 }}>CheXpert (224K) · NIH Chest X-ray · RSNA MICCAI · TCGA Pathology · NHS de-identified dataset · LUTH Nigeria dataset — validation planned, results not yet published</div>
             </div>
             <button onClick={() => onNavigate('clinical-validation')} style={{ padding:14, background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, color:C.textMd, fontSize:12, cursor:'pointer', fontFamily:C.F }}>
               📄 View clinical validation data →

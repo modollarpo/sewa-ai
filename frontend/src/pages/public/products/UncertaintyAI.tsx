@@ -51,9 +51,9 @@ export function UncertaintyAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
       <section className="stats-grid" style={{ maxWidth:1100, margin:'0 auto', padding:'0 24px 80px', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:20 }}>
         {[
           { label:'Uncertainty Method', value:'MC-Dropout', desc:'20 Stochastic passes' },
-          { label:'OOD Detection', value:'89.1%', desc:'Out-of-distribution cases' },
-          { label:'Calibration Score', value:'<0.04', desc:'Expected Calibration Error' },
-          { label:'Risk Reduction', value:'31%', desc:'Fewer false classifications' },
+          { label:'OOD Detection', value:'Under evaluation', desc:'No measured rate yet' },
+          { label:'Calibration Score', value:'Not yet measured', desc:'ECE pipeline implemented, awaiting data' },
+          { label:'Risk Reduction', value:'Under evaluation', desc:'Unmeasured' },
         ].map(s => (
           <div key={s.label} style={{ padding:24, background:C.bg2, borderRadius:16, border:`1px solid ${C.border}` }}>
             <div style={{ fontSize:32, fontWeight:900, color:C.urgent, fontFamily:C.FM }}>{s.value}</div>

@@ -26,7 +26,7 @@ const RELEASES = [
     { cat:'feature', text:'Edge deployment: offline INT8 ONNX model + SQLite + GSM SMS fallback for Africa' },
     { cat:'feature', text:'Merkle-chained tamper-evident audit log with chain verification endpoint' },
     { cat:'feature', text:'WhatsApp Business integration: OTP, opt-in, scan alerts via Twilio' },
-    { cat:'feature', text:'Stroke Code activation: LVO/ICH/AIS/SAH/CVST with <30s door-to-alert' },
+    { cat:'feature', text:'Stroke Code activation: LVO/ICH/AIS/SAH/CVST triage with under-30s door-to-alert target' },
     { cat:'improve', text:'Multi-region payments: Stripe + Paystack + Flutterwave + M-Pesa routing' },
   ]},
   { version:'v2.2.0', date:'January 2026', type:'minor', changes:[

@@ -62,9 +62,10 @@ on 4-core CPU with GSM SMS fallback.
 
 CURRENT STAGE: TRL 5. Independent NHS validation next.
 
-INTERNAL TEST RESULTS*:
-ICH: 0.972 | PE: 0.961 | LVO Stroke: 0.958 | Pneumothorax: 0.979 | TB: 0.944 | Overall: 0.961
-*Internal testing only
+INTERNAL TEST STATUS*:
+Internal engineering testing performed across CT, MRI, and X-ray targets. Internal
+metrics under review — no AUC/performance figures claimed yet.
+*Internal testing only; not clinical results
 
 LIVE PRICING:
 Starter Clinic: £549/mo (500 scans) | Hospital Pro: £2,199/mo (5,000 scans) | Enterprise: Custom
@@ -148,7 +149,7 @@ saves lives, and works in every healthcare system."
 
 Core Values:
 - Safety First: DCB0129 complete, DB-layer HITL
-- Epistemic Honesty: MC-Dropout, ECE 0.042, U > 0.25 escalation
+- Epistemic Honesty: MC-Dropout, UQ + calibration (ECE under evaluation), U > 0.25 escalation
 - Clinical Utility: 14 time-critical conditions, zero workflow disruption
 - Equity: INT8 edge, no internet, GSM SMS, Africa Programme 60-80% off
 - Transparency: Grad-CAM + SHAP, Merkle-chain audit
@@ -203,7 +204,7 @@ both teaching hospitals (cloud AKS) and community hubs (INT8 edge).
 - Data protection: DPIA-001 (GDPR Art 35), Azure UK South, no PHI egress
 - Technical assurance: SAD-001, AKS+WAF+HSTS+TLS 1.3, pen testing Q3 2026
 - Interoperability: DICOM C-STORE, FHIR R4, HL7 v2 MLLP
-- Usability: SUS 81.4 Excellent, zero PACS disruption
+- Usability: usability evaluation under review
 
 4.4 NIHR, MRC, Innovate UK:
 - NIHR EME: Shadow trial → EME Q1 2027, West Midlands trusts
@@ -407,16 +408,17 @@ H Range      | Outcome | Action
 0.15 - 0.30  | FLAG    | Escalate to senior radiologist
 > 0.30       | BLOCK   | Prevent dispatch. Log for manual review.
 
-11.4 Hallucination Catch Rate — Formal Definition:
+11.4 Hallucination Catch Rate — Evaluation Methodology:
 
 "The proportion of cases in the expert-annotated hallucination test set (n=500 cases, 
 3-radiologist consensus panel, blinded to AI output) in which the Metacognition Gate 
-correctly produced BLOCK or FLAG, preventing autonomous dispatch.
+correctly produces BLOCK or FLAG, preventing autonomous dispatch.
 
 A hallucination is any AI-generated finding factually inconsistent with the imaging 
 study per radiologist consensus.
 
-Internal test result: 96.3% (481/500 cases correctly BLOCKed or FLAGged)."
+Internal engineering runs exist; the reported catch rate is under review and is not
+claimed as a result."
 
 Test set: 500 held-out cases (250 with hallucinations, 250 negative controls).
 3 consultant radiologists, blinded, consensus required.
@@ -433,7 +435,7 @@ Test set: 500 held-out cases (250 with hallucinations, 250 negative controls).
 - Composite: U = 0.6σ²_ep + 0.4σ²_al
 
 12.3 Calibration:
-- ECE: 0.042 (well-calibrated, target <0.05)
+- ECE: target <0.05 (measured value under evaluation)
 - MCE: 0.089
 - Brier Score: 0.031
 - Method: Temperature scaling on held-out validation (n=2,840)
@@ -470,15 +472,12 @@ GSM modem    | USB 3G/4G            | Industrial 4G| £30-80
 
 Metric              | Cloud (FP32) | Edge (INT8) | Degradation
 --------------------|--------------|-------------|------------
-ICH AUC-ROC         | 0.972        | 0.968       | -0.004
-PE AUC-ROC          | 0.961        | 0.957       | -0.004
-LVO Stroke AUC-ROC  | 0.958        | 0.954       | -0.004
-Pneumothorax AUC-ROC| 0.979        | 0.975       | -0.004
-TB AUC-ROC          | 0.944        | 0.940       | -0.004
-Inference latency   | <800ms       | <2,100ms    | +1,300ms
-Model size          | 78MB         | 18MB        | -77%
+AUC-ROC             | Under evaluation | Under evaluation | Under evaluation
+Inference latency   | Under evaluation | Under evaluation | Under evaluation
+Model size          | Under evaluation | Under evaluation | Under evaluation
 
-Negligible accuracy degradation (<0.5% AUC-ROC) enables full offline operation.
+INT8 edge deployment is engineered for CPU-only offline operation; accuracy vs. cloud
+performance is under evaluation and not yet quantified.
 
 === 14. FEDERATED LEARNING & DIFFERENTIAL PRIVACY ===
 
@@ -570,7 +569,7 @@ HL7 v2 MLLP | —          | Transport             | ✅
 DICOMweb    | STOW/WADO  | Web image exchange    | ✅
 IHE XDS-I.b | —          | Cross-enterprise      | 🔄 Q4 2026
 
-PACS Integration: Zero workflow disruption. DICOM SCP. SUS 81.4 Excellent.
+PACS Integration: DICOM SCP. Usability evaluation under review.
 
 === 18. PERFORMANCE METRICS & TEST METHODOLOGY ===
 
@@ -581,6 +580,10 @@ Training     | Model training       | 42,600 | RSNA, NIH, CQ500 + aug
 Validation   | Hyperparameter tuning| 5,680  | Held out from training
 Test         | Final evaluation     | 14,200 | Strictly held out
 Hallucination| Gate evaluation      | 500    | Expert-annotated adversarial
+
+Dataset construction uses public research datasets (RSNA, NIH, CQ500). Model performance
+on these datasets is not reported here; no clinical-performance figures are claimed until
+independent prospective validation completes.
 
 18.2 Shadow Trial (Planned):
 - Design: Prospective, observational, service evaluation
@@ -718,17 +721,12 @@ MHRA NoO                 | ⏳ Prep      | Before prospective study
 DTAC Assessment          | 🔄 Progress | Q4 2026 target
 UKCA Class IIb           | ⏳ Planned   | Q2 2027, Notified Body
 
-APPENDIX B: INTERNAL TEST RESULTS
+APPENDIX B: INTERNAL TEST STATUS
 
-Condition    | Modality  | n     | AUC-ROC | Sensitivity | Specificity | κ
--------------|-----------|-------|---------|-------------|-------------|------
-ICH          | CT Head   | 2,847 | 0.972   | 94.1%       | 97.8%       | 0.87
-PE           | CT Chest  | 1,203 | 0.961   | 91.4%       | 96.2%       | 0.84
-LVO Stroke   | CT Angio  | 1,640 | 0.958   | 90.8%       | 95.7%       | 0.82
-Pneumothorax | X-ray     | 889   | 0.979   | 96.2%       | 98.1%       | 0.91
-TB (Africa)  | X-ray     | 3,201 | 0.944   | 89.7%       | 94.8%       | 0.80
-Pneumonia    | X-ray     | 2,180 | 0.953   | 92.3%       | 95.9%       | 0.83
-Overall      | Mixed     | 14,200| 0.961   | 92.4%       | 96.4%       | 0.87
+Internal engineering testing has been performed across CT, MRI, and X-ray targets.
+Internal metrics exist but are under review and are not reported here. No AUC-ROC,
+sensitivity, specificity, or inter-reader agreement figures are claimed until
+independent prospective validation completes (Shadow Trial, Section 18.2).
 
 *Internal engineering testing only. Not independently clinically validated.
 

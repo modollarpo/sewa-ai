@@ -18,7 +18,7 @@ validation + economic evaluation).
 
 | NICE standard | Requirement | SEWA AI status |
 |---|---|---|
-| Analytical validity | Reproducible, accurate algorithm performance | Internal AUC 0.961 (14,200); **independent validation pending** |
+| Analytical validity | Reproducible, accurate algorithm performance | Internal engineering testing run; **no clinical results claimed — independent validation required** |
 | Diagnostic accuracy | Sensitivity/specificity vs. reference standard | Prospective study designed (SEWA-AI-DOC-02) |
 | Clinical utility | Impact on outcomes / workflow | Door-to-alert endpoint; NHS pilot planned |
 | Economic evidence | Cost-effectiveness for NHS | Health-economic evaluation planned (NIHR EME) |

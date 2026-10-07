@@ -18,25 +18,25 @@ const STUDIES = [
   {
     title: 'Zero-Latency Triage of Intracranial Hemorrhage',
     investigator: 'Dolapo Ariyo, et al.',
-    method: 'Retrospective analysis of 45,000 non-contrast CT head scans across 4 NHS trusts.',
-    results: 'Sensitivity: 94.2% | Specificity: 98.1% | Mean Triage Latency: 1.8s.',
-    status: 'Peer-Reviewed / Lancet Digital Health (Pre-print)',
+    method: 'Retrospective analysis of non-contrast CT head scans across NHS trusts — dataset and protocol in design.',
+    results: 'No results published yet. Sensitivity/Specificity/latency not yet measured.',
+    status: 'Planned — no published results',
     confidential: true
   },
   {
     title: 'Vision-Language Model (VLM) for Structured Reporting',
     investigator: 'Dolapo Ariyo',
-    method: 'Evaluation of LLM-refined radiology reports against board-certified radiologist consensus.',
-    results: 'Clinical agreement: 91.8% | Error rate (Critical findings): < 0.2%.',
-    status: 'Internal Validation (Phase III)',
+    method: 'Evaluation of LLM-refined radiology reports against board-certified radiologist consensus — protocol in design.',
+    results: 'No results published yet. Agreement/error rate not yet measured.',
+    status: 'Planned — no published results',
     confidential: true
   },
   {
     title: 'Federated Learning for Cross-Border Pathology',
     investigator: 'Collaborative Study',
-    method: 'Privacy-preserving model training between UK and Nigeria hospital nodes.',
-    results: 'Model robust to scanner variability (Siemens vs GE) with < 1.5% accuracy drift.',
-    status: 'Ongoing / Clinical Pilot',
+    method: 'Privacy-preserving model training between UK and Nigeria hospital nodes — pilot in design.',
+    results: 'No results published yet. Scan-scanner robustness not yet measured.',
+    status: 'Planned pilot — no published results',
     confidential: true
   }
 ];

@@ -204,23 +204,16 @@ from internal engineering development and technical testing and should not be
 interpreted as independent clinical evidence. Independent NHS clinical 
 validation through a shadow trial is the immediate next step.
 
-INTERNAL ENGINEERING TEST RESULTS (n=14,200 across 6 conditions):
+INTERNAL ENGINEERING TEST RESULTS:
 
-Condition      | Modality   | n     | AUC-ROC | Sensitivity | Specificity | κ
----------------|------------|-------|---------|-------------|-------------|------
-ICH            | CT Head    | 2,847 | 0.972   | 94.1%       | 97.8%       | 0.87
-PE             | CT Chest   | 1,203 | 0.961   | 91.4%       | 96.2%       | 0.84
-LVO Stroke     | CT Angio   | 1,640 | 0.958   | 90.8%       | 95.7%       | 0.82
-Pneumothorax   | X-ray      | 889   | 0.979   | 96.2%       | 98.1%       | 0.91
-TB (Africa)    | X-ray      | 3,201 | 0.944   | 89.7%       | 94.8%       | 0.80
-Pneumonia      | X-ray      | 2,180 | 0.953   | 92.3%       | 95.9%       | 0.83
-Overall        | Mixed      | 14,200| 0.961   | 92.4%       | 96.4%       | 0.87
+Internal engineering testing has been completed on CT, MRI, and X-ray targets. Internal
+metrics exist but are under review and are not reported here. No AUC-ROC, sensitivity, or
+specificity figures are claimed until independent NHS clinical validation completes.
 
 SAFETY ARCHITECTURE:
-- Nine-Layer Metacognition Gate (patent GB2609706.3): Hallucination catch rate 
-  96.3% on expert-annotated test set (n=500, 3-radiologist consensus, blinded)
-- Expected Calibration Error (ECE): 0.042 (well-calibrated, target <0.05)
-- SUS Usability Score: 81.4 (Excellent) from internal testing with 12 radiologists
+- Nine-Layer Metacognition Gate (patent GB2609706.3): implemented; performance under evaluation
+- Expected Calibration Error (ECE): under evaluation
+- SUS Usability Score: under evaluation
 
 SHADOW TRIAL (Planned):
 - Design: Prospective, observational, service evaluation
@@ -344,10 +337,9 @@ CLINICAL IMPACT:
   4.2-hour median urgent reporting time)
 - Stroke thrombolysis: Every 15-minute reduction saves ~1 million neurons 
   (NEJM 2006 — Saver et al.)
-- Diagnostic accuracy: Internal AUC-ROC 0.961 across 14 conditions 
-  (independent validation pending)
-- Reduced missed findings: Metacognition Gate prevents hallucinated outputs 
-  from reaching clinical teams (96.3% catch rate internal)
+- Diagnostic accuracy: under evaluation — no figures claimed until independent validation
+- Reduced missed findings: Metacognition Gate is designed to prevent hallucinated outputs 
+  from reaching clinical teams; catch rate under evaluation
 
 OPERATIONAL IMPACT:
 - Radiologist workload: Triage support for urgent cases, allowing 
@@ -634,7 +626,7 @@ What are the key milestones for your innovation? (max 300 words)
 
 COMPLETED MILESTONES:
 ✓ Core platform development (TRL 5)
-✓ Internal engineering testing (n=14,200)
+✓ Internal engineering testing performed (results under review)
 ✓ DCB0129 Clinical Safety (SMP-001 + CRM-001)
 ✓ DPIA-001 Data Protection Impact Assessment (GDPR Article 35)
 ✓ NHS Innovation Service registration (INN-2604-0064-2)
@@ -743,7 +735,7 @@ How will you gather feedback from healthcare professionals and patients?
 HEALTHCARE PROFESSIONAL FEEDBACK:
 
 1. SYSTEMATIC USABILITY EVALUATION (SUS):
-   - Baseline: SUS 81.4 (Excellent) from internal testing (n=12 radiologists)
+   - Baseline: SUS under evaluation (internal usability testing performed)
    - Shadow trial: SUS evaluation at 1-month, 3-month, and 6-month intervals
    - Target: Maintain SUS >80 throughout trial
 

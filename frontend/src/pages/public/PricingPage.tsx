@@ -78,10 +78,10 @@ const PLANS = [
 ];
 
 const ROI_METRICS = [
-  { label:'Projected radiologist hours saved/month', value:40, unit:'hrs', desc:'Based on engineering benchmarks — AI pre-reads free radiologists from routine screening' },
-  { label:'Critical finding detection (engineering)', value:97.3, unit:'%', desc:'AUC in retrospective validation datasets (not yet independently validated)' },
-  { label:'Triage-to-report time reduction', value:73, unit:'%', desc:'Measured in simulated clinical environments (TRL 5)' },
-  { label:'Metacognition hallucination catch rate', value:31, unit:'%', desc:'Reduction in VLM factual errors in internal testing' },
+  { label:'Projected radiologist hours saved/month', value:40, unit:'hrs', desc:'Illustrative planning figure — depends on workflow and volume' },
+  { label:'Critical finding detection (target)', value:97.3, unit:'%', desc:'Engineering target — no published clinical validation yet' },
+  { label:'Triage-to-report time reduction', value:73, unit:'%', desc:'Engineering target — not yet measured in production' },
+  { label:'Metacognition reliability', value:'Under', unit:'eval', desc:'Hallucination catch rate not yet independently validated' },
 ];
 
 const FAQS = [
@@ -312,9 +312,9 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
               </Card>
               <div style={{ display:'flex', flexDirection:'column', gap:spacing[3] }}>
                 {[
-                  { label:'AI-assisted reads/month', value:`${Math.round(scanVol*0.94).toLocaleString()}`, desc:'94% of scans pre-triaged by AI' },
-                  { label:'Critical alerts prevented from delay', value:`${Math.round(scanVol*0.031).toLocaleString()}`, desc:'3.1% of scans are critical findings' },
-                  { label:'Estimated ROI (Year 1)', value:`${Math.round(annualSaving / (PLANS[1].prices[region as keyof typeof PLANS[1]['prices']].annual * 12) * 100)}%`, desc:'vs Hospital plan annual cost' },
+                  { label:'AI-pre-read coverage', value:`100%`, desc:'Every eligible scan is run through the AI pipeline' },
+                  { label:'Critical findings (assumption)', value:`${Math.round(scanVol*0.031).toLocaleString()}`, desc:'Illustrative planning assumption: 3.1% of scans are critical findings' },
+                  { label:'Estimated ROI (Year 1)', value:`${Math.round(annualSaving / (PLANS[1].prices[region as keyof typeof PLANS[1]['prices']].annual * 12) * 100)}%`, desc:'Illustrative — vs Hospital plan annual cost' },
                 ].map(r => (
                   <Card key={r.label} padding={spacing[4]} style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                     <div>
@@ -351,7 +351,7 @@ export function PricingPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
         {/* CTA */}
         <Card padding={`clamp(${spacing[8]}, 8vw, ${spacing[14]})`} style={{ textAlign:'center', background:`linear-gradient(135deg,${colors.bg2},${colors.bg3})` }}>
           <h2 style={{ fontSize:'clamp(24px, 5vw, 32px)', fontWeight:800, color:colors.textHigh, margin:`0 0 ${spacing[4]}`, fontFamily:typography.fontBase, letterSpacing:'-1px' }}>Ready to transform your radiology workflow?</h2>
-          <p style={{ fontSize:14, color:colors.textMed, margin:`0 0 ${spacing[8]}` }}>Join 47+ hospitals and clinics using SEWA XAI across 7 countries.</p>
+          <p style={{ fontSize:14, color:colors.textMed, margin:`0 0 ${spacing[8]}` }}>If you are deploying SEWA XAI, share your experience with us — we track deployments by geography and site.</p>
           <div className="hero-btns" style={{ display:'flex', gap:spacing[3], justifyContent:'center', flexWrap:'wrap' }}>
             <Button variant="primary" onClick={() => onNavigate('contact')}>Request a Demo →</Button>
             <Button variant="secondary" onClick={() => onNavigate('clinical-validation')}>View Clinical Evidence</Button>

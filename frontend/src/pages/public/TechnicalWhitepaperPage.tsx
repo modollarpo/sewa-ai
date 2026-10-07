@@ -144,7 +144,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             SEWA XAI: Autonomous Diagnostic Intelligence<br/>& Clinical Workflow Integration
           </h1>
           <p style={{ ...p, fontSize:16, marginBottom:28 }}>
-            A technical deep-dive for hospital CIOs, Clinical Safety Officers, and healthcare investors. This whitepaper explains SEWA XAI\'s 4-Engine Safety Architecture, infrastructure design, regulatory compliance, and validated clinical performance.
+            A technical deep-dive for hospital CIOs, Clinical Safety Officers, and healthcare investors. This whitepaper explains SEWA XAI\'s 4-Engine Safety Architecture, infrastructure design, regulatory posture, and engineering benchmark roadmap. SEWA XAI is in pre-clinical development; quantitative figures are engineering targets unless stated otherwise.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'10px 20px', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:9, color:'white', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:C.F }}>
@@ -179,12 +179,12 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 1</div>
             <h2 style={h2}>Executive Summary</h2>
             <p style={p}>SEWA XAI is an enterprise-grade diagnostic platform designed to alleviate radiologist shortages — currently 29% in the NHS — by providing sub-2-second triage for life-threatening conditions. Unlike point-solution AI, SEWA utilises a 4-Engine Safety Architecture to ensure clinical-grade reliability, explainability, and seamless integration into existing PACS/RIS workflows.</p>
-            <p style={p}>In retrospective simulated pre-clinical validation, SEWA XAI has processed over 1.2 million anonymised historical scans, achieving AUC-ROC &gt;0.95 across 14 pathology classes with an average inference time under 2 seconds for critical findings. (Note: These metrics reflect engineering benchmarks at TRL 5 and are subject to forthcoming independent clinical validation).</p>
+            <p style={p}>SEWA XAI is in pre-clinical engineering development (TRL 5). The repository contains the 4-engine pipeline, the metacognition safety harness, and unit-level benchmarks described in this paper. No clinical datasets are included, so no measured clinical-performance figures exist yet; the figures in this document are engineering targets subject to forthcoming independent clinical validation.</p>
             <div className="metric-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginTop:20 }}>
-              <MetricCard value=">0.97" label="AUC-ROC (ICH)" color={C.critical}/>
-              <MetricCard value="<2s"   label="Triage time"   color={C.amber}/>
-              <MetricCard value="47+"   label="Hospitals"      color={C.brand}/>
-              <MetricCard value="7"     label="Countries"      color={C.normal}/>
+              <MetricCard value="Target ≥0.95" label="AUC-ROC (ICH) — unvalidated" color={C.critical}/>
+              <MetricCard value="<2s"   label="Triage time target"   color={C.amber}/>
+              <MetricCard value="0"     label="Live hospital deployments (pre-clinical)"      color={C.brand}/>
+              <MetricCard value="UK first"     label="Markets targeted (UK + Africa)"      color={C.normal}/>
             </div>
           </section>
 
@@ -216,10 +216,10 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             <p style={p}>SEWA XAI\'s core innovation is the layered 4-Engine pipeline. Each engine independently validates the previous engine's output before delivery to a clinician. This architecture is specifically designed to meet EU AI Act Article 14 (human oversight of high-risk AI) and FDA 510(k) requirements for clinical decision support.</p>
 
             {[
-              { n:1, label:'Triage Engine', color:C.critical, detail:'EfficientNet-B4 · 14 pathology classes · AUC >0.95 · <2s inference', sub:'Scan Processing → Pathological Assessment → Priority classification → Worklist sorting' },
-              { n:2, label:'Uncertainty Engine', color:C.amber, detail:'Stochastic Monte Carlo dropout · Epistemic + aleatoric variance · OOD detection 89.1%', sub:'Scan Processing → Uncertainty Quantification → Confidence Assessment' },
-              { n:3, label:'Metacognition Engine', color:C.purple, detail:'Multi-layer self-evaluation · Hallucination catch rate 96.3% · Anatomical consistency checks', sub:'Validation Processing → Clinical rule matching → Prior comparison → CIS scoring' },
-              { n:4, label:'VLM Report Generator', color:C.normal, detail:'Vision-Language Model · <8s report generation · 23% radiologist edit rate · 8 languages', sub:'Scan + Findings + History → Clinical Synthesis → Structured report → Radiologist review queue' },
+              { n:1, label:'Triage Engine', color:C.critical, detail:'14 pathology classes · ONNX Runtime CPU pipeline · <2s inference target', sub:'Scan Processing → Pathological Assessment → Priority classification → Worklist sorting' },
+              { n:2, label:'Uncertainty Engine', color:C.amber, detail:'Monte-Carlo dropout variance · Epistemic + aleatoric quantification · OOD detection under evaluation', sub:'Scan Processing → Uncertainty Quantification → Confidence Assessment' },
+              { n:3, label:'Metacognition Engine', color:C.purple, detail:'Multi-layer self-evaluation harness · hallucination detection benchmarks · anatomical consistency checks', sub:'Validation Processing → Clinical rule matching → Prior comparison → Reliability scoring' },
+              { n:4, label:'VLM Report Generator', color:C.normal, detail:'Vision-Language Model · <8s report generation target · 8 languages', sub:'Scan + Findings + History → Clinical Synthesis → Structured report → Radiologist review queue' },
             ].map(engine => (
               <div key={engine.n} style={{ marginBottom:16, padding:20, background:C.bg2, border:`1px solid ${engine.color}30`, borderRadius:14 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>
@@ -297,23 +297,23 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
           <section id="evidence" style={{ marginBottom:56, scrollMarginTop:80 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 7</div>
             <h2 style={h2}>Clinical Evidence</h2>
-            <p style={p}>All SEWA XAI performance metrics are independently validated and peer-reviewed. We do not make unsubstantiated clinical claims.</p>
+            <p style={p}>SEWA XAI is in pre-clinical engineering development. The performance figures in this document are engineering targets, not measured results; they have not been independently validated or peer-reviewed. No clinical dataset is present in this repository.</p>
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
                 <thead>
                   <tr style={{ background:C.bg3 }}>
-                    {['Condition','AUC-ROC','Sensitivity','Specificity','External Dataset'].map(h => (
+                    {['Condition','Engineering target','Validation status','External dataset'].map(h => (
                       <th key={h} style={{ padding:'9px 14px', textAlign:'left', color:C.textLo, fontSize:9, fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    ['ICH',              '0.971','>0.94','97.2%','RSNA + NHS Royal London'],
-                    ['LVO / Stroke',     '0.964','91.7%','96.8%','MICCAI + NHS Kings'],
-                    ['Pulmonary Embolism','0.948','94.2%','93.1%','RSPECT + NHS UCLH'],
-                    ['Pneumothorax',     '0.963','95.1%','97.4%','CheXpert + NIH CXR-14'],
-                    ['Tuberculosis',     '0.957','93.8%','95.2%','LUTH Nigeria + Shenzhen'],
+                    ['ICH',              'AUC ≥0.95', 'Unmeasured — no dataset in repo', '—'],
+                    ['LVO / Stroke',     'AUC ≥0.90', 'Unmeasured — no dataset in repo', '—'],
+                    ['Pulmonary Embolism','AUC ≥0.90', 'Unmeasured — no dataset in repo', '—'],
+                    ['Pneumothorax',     'AUC ≥0.90', 'Unmeasured — no dataset in repo', '—'],
+                    ['Tuberculosis',     'AUC ≥0.90', 'Unmeasured — no dataset in repo', '—'],
                   ].map(([cond,...row], i) => (
                     <tr key={cond} style={{ borderTop:`1px solid ${C.border}`, background:i%2===0?'transparent':C.bg1 }}>
                       <td style={{ padding:'10px 14px', fontWeight:600, color:C.textHi }}>{cond}</td>
@@ -323,7 +323,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
                 </tbody>
               </table>
             </div>
-            <p style={{ ...p, fontSize:11, marginTop:12 }}>6 peer-reviewed publications (Lancet Digital Health, NPJ Digital Medicine, JAMA Network Open). Full CER available in Data Room.</p>
+            <p style={{ ...p, fontSize:11, marginTop:12 }}>No peer-reviewed publications or Clinical Evaluation Report (CER) exist yet — external validation is a planned next milestone.</p>
           </section>
 
           {/* 8. Deployment */}

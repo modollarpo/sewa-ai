@@ -62,7 +62,7 @@ software level, rigorous verification, and problem-resolution with trend analysi
 ## 5. Verification & Validation
 
 - Unit tests per engine; integration tests for the four-engine pipeline.
-- Safety-gate tests: inject seeded hallucinations; confirm BLOCK rate (internal 96.3%).
+- Safety-gate tests: inject seeded hallucinations; confirm BLOCK/FLAG behaviour (metrics under evaluation).
 - Calibration tests: ECE target <0.05; Brier <0.05.
 - Independent V&V planned pre-certification by a recognised test house.
 

@@ -89,7 +89,7 @@ export function VisionLanguageAI({ onNavigate }: { onNavigate:(p:string)=>void }
             {[
               { t:'Multi-Modal Reasoning', d:'Combines pixel data with EHR history, lab results, and prior reports for holistic diagnosis.' },
               { t:'Structured Formatting', d:'Generates reports follows NHS, ACR, or local departmental templates automatically.' },
-              { t:'Laterality Awareness', d:'Precisely identifies left/right and anatomical segments with sub-centimeter accuracy.' },
+              { t:'Laterality Awareness', d:'Identifies left/right and anatomical segments referenced in the report.' },
               { t:'Clinical Coding', d:'Suggests ICD-10 and SNOMED CT codes based on the findings section.' },
             ].map(cap => (
               <div key={cap.t} style={{ padding:24, background:C.bg2, borderRadius:16, border:`1px solid ${C.border}` }}>

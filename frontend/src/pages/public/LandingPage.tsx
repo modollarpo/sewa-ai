@@ -7,17 +7,17 @@ import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal
 import { ConfidenceIndicator, UncertaintyIndicator } from '../../design-system/components';
 
 const FEATURES = [
-  { id:'triage-ai',          icon:'⚡', title:'Triage in Seconds', desc:'EfficientNet-B4 deep learning detects ICH, PE, pneumothorax, TB and stroke with AUC > 0.95 in under 2 seconds.', tag:'Triage Engine' },
+  { id:'triage-ai',          icon:'⚡', title:'Triage in Seconds', desc:'Deep learning triage detects ICH, PE, pneumothorax, TB and stroke across CT/MRI/XR — low-latency CPU pipeline.', tag:'Triage Engine' },
   { id:'uncertainty-ai',     icon:'🎯', title:'Uncertainty Engine', desc:'Stochastic Monte Carlo dropout with multi-pass uncertainty quantification computes epistemic and aleatoric uncertainty. Flags low-confidence scans for human review.', tag:'Safety' },
-  { id:'metacognition-ai',   icon:'🧠', title:'Metacognition AI', desc:'Advanced multi-layer self-evaluation to detect hallucinations. Confidence integrity score per result.', tag:'Quality Assurance' },
+  { id:'metacognition-ai',   icon:'🧠', title:'Metacognition AI', desc:'Advanced multi-layer self-evaluation detects hallucinations and records a reliability status for every case.', tag:'Quality Assurance' },
   { id:'vision-language-ai', icon:'📋', title:'VLM Report Generator', desc:'Vision-Language Model generates structured, editable radiology reports in seconds — with clinical findings, impression, and recommendations.', tag:'Reporting' },
   { id:'explainable-ai',     icon:'🔒', title:'Explainable AI', desc:'Grad-CAM pixel attribution show exactly what the AI detected and why — pixel by pixel.', tag:'Explainability' },
   { id:'downloads',          icon:'🌍', title:'Sovereign Infrastructure', desc:'Multi-region architecture ready for Azure (UK, EU, US, Africa). Strict data residency, compliance, and isolation.', tag:'Infrastructure' },
 ];
 
 const STATS = [
-  { value:'>0.95', label:'AUC-ROC on ICH detection', icon:'🎯' },
-  { value:'<2s',  label:'Median triage inference time', icon:'⚡' },
+  { value:'—',    label:'AUC-ROC on ICH — unmeasured', icon:'🎯' },
+  { value:'<2s',  label:'Median triage inference target', icon:'⚡' },
   { value:'7+',   label:'Planned deployment regions', icon:'🌍' },
   { value:'TRL 5',label:'Validation Stage', icon:'✅' },
 ];
@@ -382,8 +382,9 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
       <section className="relative py-24 bg-[#08160F] border-y border-[#1B3028]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em] mb-4">Trusted By</div>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-[#D0ECE6]">Healthcare Leaders Partnering with SEWA</h2>
+            <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em] mb-4">Engaging With</div>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-[#D0ECE6]">Health systems in our deployment conversations</h2>
+            <p className="text-xs text-[#3A6055] mt-2">Organisations shown are ones we are in dialogue with — no endorsement or signed partnership is implied.</p>
           </div>
           
           {/* Partner logos */}
@@ -424,6 +425,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
               </div>
             ))}
           </div>
+          <p className="text-center text-[10px] text-[#3A6055] mt-6">Quotes shown are illustrative and not attributable to the named individuals or organisations.</p>
         </div>
       </section>
 

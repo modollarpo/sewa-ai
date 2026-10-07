@@ -280,7 +280,7 @@ export function ClinicalDemoModal({ onClose }: Props) {
               <div style={{ padding: 18, background: C.bg2, borderRadius: 14, border: `1px solid ${stepDone(1) && !stepActive(1) ? C.critBorder : C.brand + '40'}`, transition: 'border-color 400ms' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                   <span style={{ fontSize: 16 }}>🧠</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: C.textHi, fontFamily: C.F }}>Engine 1 — Triage (EfficientNet-B4)</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: C.textHi, fontFamily: C.F }}>Engine 1 — Triage (ONNX Runtime)</span>
                   {stepDone(1) && <span style={{ marginLeft: 'auto', fontSize: 10, color: C.green, fontFamily: C.FM }}>380ms</span>}
                 </div>
                 {stepActive(1) && <ProgressBar pct={stepProgress} />}
@@ -296,7 +296,7 @@ export function ClinicalDemoModal({ onClose }: Props) {
                       <div style={{ fontSize: 28, fontWeight: 900, fontFamily: C.FM, color: C.brandLt }}>
                         <Counter target={94.2} decimals={1} suffix="%" color={C.brandLt} />
                       </div>
-                      <div style={{ fontSize: 10, color: C.textLo, marginTop: 4, fontFamily: C.F }}>AUC-ROC 0.972 on validation set</div>
+                      <div style={{ fontSize: 10, color: C.textLo, marginTop: 4, fontFamily: C.F }}>Illustrative demo figure — not a measured result</div>
                     </div>
                     <div style={{ flex: 2, minWidth: 180, padding: 14, background: C.bg3, borderRadius: 10, border: `1px solid ${C.border}` }}>
                       <div style={{ fontSize: 11, color: C.textMd, marginBottom: 10, fontFamily: C.F }}>SHAP Attribution</div>
@@ -353,7 +353,7 @@ export function ClinicalDemoModal({ onClose }: Props) {
                         <div style={{ fontSize: 12, color: key === 'impression' ? '#FFB3B3' : C.textMd, lineHeight: 1.65, fontFamily: C.F }}>{text}</div>
                       </div>
                     ))}
-                    <div style={{ fontSize: 11, color: C.textLo, fontFamily: C.F }}>Editable by radiologist · All changes tracked · 77% accepted without modification</div>
+                    <div style={{ fontSize: 11, color: C.textLo, fontFamily: C.F }}>Editable by radiologist · All changes tracked (synthetic demo)</div>
                   </div>
                 )}
               </div>
@@ -402,8 +402,7 @@ export function ClinicalDemoModal({ onClose }: Props) {
                   <AlertChip icon="📋" label="HL7 ORM (CTA order)"   delay={650}  fired={alertsFired} />
                 </div>
                 <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(0,0,0,0.20)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                  <span style={{ fontSize: 12, color: C.textMd, fontFamily: C.F }}>NHS baseline: 4–8 hours · SEWA XAI: <strong style={{ color: '#FF8080' }}>1.84 seconds</strong></span>
-                  <span style={{ fontSize: 12, color: C.textMd, fontFamily: C.FM }}>~17,000× faster</span>
+                  <span style={{ fontSize: 12, color: C.textMd, fontFamily: C.F }}>Illustrative synthetic case · ~1.84s door-to-alert (demo figure, not a measured result)</span>
                 </div>
               </div>
             )}

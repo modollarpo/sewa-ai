@@ -19,7 +19,7 @@ const SPECIALIZATIONS = [
   {
     id: 'mammography',
     title: 'Mammography AI',
-    description: 'Breast cancer screening and diagnosis with high sensitivity and specificity, including micro-calcification and mass detection.',
+    description: 'Breast cancer screening support focused on micro-calcification and mass detection. Clinical performance under evaluation — no sensitivity or specificity figures claimed yet.',
     badges: ['Breast Cancer', 'Screening', 'BI-RADS'],
     cta: 'Explore Mammography AI',
     icon: '🩺',

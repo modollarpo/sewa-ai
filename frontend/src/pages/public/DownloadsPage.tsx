@@ -114,19 +114,21 @@ const COMPARISON = [
 const DOCUMENTS = [
   {
     title: 'NHS Trust Pack v2.0',
-    subtitle: 'Confidential dossier for NHS R&D committees and Medical Directors',
+    subtitle: 'Confidential dossier for NHS R&D committees — under revision, not currently available for download',
     icon: '🏥',
     filename: 'SEWA_AI_NHS_Trust_Pack_v2.0.pdf',
     category: 'NHS Procurement',
-    date: '11 July 2026',
+    date: 'Under revision',
+    revision: true,
   },
   {
     title: 'Master Dossier v2.0',
-    subtitle: 'Complete clinical, regulatory, and technical documentation',
+    subtitle: 'Complete clinical, regulatory, and technical documentation — under revision, not currently available for download',
     icon: '📚',
     filename: 'SEWA_AI_Master_Dossier_v2.0_Integrated.pdf',
     category: 'Clinical & Regulatory',
-    date: 'July 2026',
+    date: 'Under revision',
+    revision: true,
   },
   {
     title: 'Enterprise v2.0 Vision',
@@ -135,6 +137,7 @@ const DOCUMENTS = [
     filename: 'SEWA_AI_Enterprise_v2.0_Vision.pdf',
     category: 'Strategy',
     date: 'July 2026',
+    revision: false,
   },
   {
     title: 'NHS DSPT Compliance',
@@ -143,6 +146,7 @@ const DOCUMENTS = [
     filename: 'nhs-dspt-compliance.pdf',
     category: 'Security & Compliance',
     date: 'July 2026',
+    revision: false,
   },
 ];
 
@@ -347,7 +351,23 @@ export function DownloadsPage({ onNavigate }: { onNavigate: (page: string) => vo
             </p>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20 }}>
-            {DOCUMENTS.map(doc => (
+            {DOCUMENTS.map(doc => doc.revision ? (
+              <div key={doc.filename}
+                style={{ display:'block', padding:24, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:16, opacity:0.75 }}
+              >
+                <div style={{ display:'flex', gap:16, alignItems:'start', marginBottom:12 }}>
+                  <div style={{ fontSize:32 }}>{doc.icon}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
+                      <div style={{ fontSize:16, fontWeight:800, color:C.textHi, fontFamily:C.F }}>{doc.title}</div>
+                      <div style={{ fontSize:10, padding:'3px 8px', background:`${C.border}77`, color:C.textLo, borderRadius:8, fontWeight:700, textTransform:'uppercase' }}>{doc.category}</div>
+                    </div>
+                    <div style={{ fontSize:12, color:C.textMd, marginBottom:8, fontFamily:C.F }}>{doc.subtitle}</div>
+                    <div style={{ fontSize:10, color:C.textLo, fontFamily:C.FM }}>Updated {doc.date}</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
               <a key={doc.filename} href={`/docs/${doc.filename}`} download
                 style={{ display:'block', padding:24, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:16, textDecoration:'none', transition:'all 0.2s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.brand + '60'; }}

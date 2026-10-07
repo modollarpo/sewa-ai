@@ -254,8 +254,8 @@ export function BillingDashboard() {
                     ))}
                     <div className="p-6 bg-[#08160F] border border-[#1B3028] rounded-[2rem] shadow-xl col-span-2">
                       <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-widest mb-3">SLA Confidence</div>
-                      <ConfidenceIndicator value={0.9998} size="md" showLabel={true} />
-                      <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest mt-2">99.98% uptime · Enterprise SLA verified</div>
+                      <ConfidenceIndicator value={0.99} size="md" showLabel={true} />
+                      <div className="text-[9px] text-[#3A6055] font-bold uppercase tracking-widest mt-2">SLA target · 99.9% uptime (contract terms)</div>
                     </div>
                   </div>
                 </div>

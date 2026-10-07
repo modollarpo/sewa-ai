@@ -184,8 +184,8 @@ export function HospitalAdminDashboard() {
                 <>
                   <StatCard label="Scans Today" value={stats.scansToday} icon="🩻" sub="+12% from yesterday" />
                   <StatCard label="Critical Cases" value={stats.criticalToday} color={C.critical} icon="🚨" sub="Action required" />
-                  <StatCard label="System Latency" value={stats.avgTurnaround || '12.4ms'} icon="⚡" sub="Optimized (Cloud-Z)" />
-                  <StatCard label="AI Precision" value={`${(stats.avgAIConfidence || 94.7).toFixed(1)}%`} color={C.normal} icon="🎯" sub="v2.4 Core" />
+                  <StatCard label="System Latency" value={stats.avgTurnaround ? `${stats.avgTurnaround}` : '—'} icon="⚡" sub="Awaiting live metrics" />
+                  <StatCard label="AI Precision" value={stats.avgAIConfidence ? `${stats.avgAIConfidence.toFixed(1)}%` : '—'} color={C.normal} icon="🎯" sub="Under evaluation" />
                 </>
               )}
             </div>

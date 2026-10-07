@@ -252,7 +252,7 @@ export const AIResultExplainer: React.FC<AIResultExplainerProps> = ({
             <div style={{ flex: 1, padding: 32, background: B.bg1, borderRadius: 20, border: `1px solid ${B.textLo}20` }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: B.brand, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}>Clinical Analysis Protocol</div>
               {[
-                'Neural Triage (EfficientNet-B4)',
+                'Neural Triage (ONNX Runtime)',
                 'Uncertainty Quantification (MC-Dropout)',
                 'Metacognition Safety Audit (9-Layer)',
                 'Vision-Language Report Generation',
@@ -270,10 +270,10 @@ export const AIResultExplainer: React.FC<AIResultExplainerProps> = ({
               <div style={{ fontSize: 14, fontWeight: 800, color: B.info, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}>Diagnostic Integrity Metadata</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 {[
-                  { l: 'Model ID', v: 'SEWA-TR-2.4' },
-                  { l: 'Inference', v: '1.82s' },
-                  { l: 'Precision', v: '0.942' },
-                  { l: 'Recall', v: '0.961' },
+                  { l: 'Model ID', v: 'SEWA-TR (v2)' },
+                  { l: 'Status', v: 'TRL 5 — under validation' },
+                  { l: 'Precision', v: 'under validation' },
+                  { l: 'Recall', v: 'under validation' },
                 ].map(m => (
                   <div key={m.l}>
                     <div style={{ fontSize: 11, color: B.textLo, textTransform: 'uppercase', marginBottom: 4 }}>{m.l}</div>
@@ -293,7 +293,7 @@ export const AIResultExplainer: React.FC<AIResultExplainerProps> = ({
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             borderTop: `1px solid ${B.textLo}30`, paddingTop: 24 }}>
             <div style={{ fontSize: 13, color: B.textLo }}>
-              🔒 HIPAA · GDPR · NHS DSPT · MDR IIb · Explainable AI
+              🔒 Regulatory roadmap: GDPR · HIPAA-aligned · NHS DSPT · MDR IIb (planned)
             </div>
             <div style={{ fontSize: 13, color: B.textLo, fontFamily: B.FM }}>
               {new Date().toISOString().split('T')[0]} · For clinical review only
@@ -423,14 +423,14 @@ export const PlatformIntro: React.FC = (): any => {
   const { fps, width, height } = useVideoConfig();
 
   const stats = [
-    { value: 97.2, label: 'AUC-ROC ICH', suffix: '%', color: B.critical },
-    { value: 1.8,  label: 'Triage time', suffix: 's', color: B.amber },
-    { value: 47,   label: 'Hospitals',   suffix: '+', color: B.brand },
-    { value: 7,    label: 'Regions',     suffix: '',  color: B.normal },
+    { value: 4, label: 'Safety Engines', suffix: '', color: B.critical },
+    { value: 14, label: 'Pathologies modelled', suffix: '', color: B.info },
+    { value: 5, label: 'TRL — development stage', suffix: '', color: B.brand },
+    { value: 3, label: 'Modalities', suffix: '', color: B.normal },
   ];
 
   const engines = [
-    { icon: '⚡', label: 'Triage Engine',    color: B.critical, desc: 'EfficientNet-B4 Neural Triage' },
+    { icon: '⚡', label: 'Triage Engine',    color: B.critical, desc: 'ONNX Runtime Neural Triage' },
     { icon: '🎯', label: 'Uncertainty',      color: B.amber,    desc: 'MC-Dropout Safety Verification' },
     { icon: '🧠', label: 'Metacognition',    color: B.info,     desc: '9-Layer Hallucination Audit' },
     { icon: '📋', label: 'VLM Reports',      color: B.normal,   desc: 'Autonomous Clinical Reporting' },
@@ -479,7 +479,7 @@ export const PlatformIntro: React.FC = (): any => {
         <AbsoluteFill style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 100 }}>
           <SlideUp delay={0}>
             <div style={{ fontSize: 48, fontWeight: 900, color: B.textHi, textAlign: 'center', marginBottom: 80 }}>
-              Validated Clinical Performance
+              Platform Facts
             </div>
           </SlideUp>
           <div style={{ display: 'flex', gap: 40, justifyContent: 'center' }}>
@@ -487,7 +487,7 @@ export const PlatformIntro: React.FC = (): any => {
               <Sequence key={i} from={i * 12}>
                 <SlideUp delay={0}>
                   <div style={{ padding: '48px 56px', background: B.bg2, border: `2px solid ${stat.color}30`, borderRadius: 32, textAlign: 'center', minWidth: 260, position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)', background: stat.color, padding: '4px 16px', borderRadius: 12, fontSize: 14, fontWeight: 900, color: 'white' }}>LIVE</div>
+                    <div style={{ position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)', background: stat.color, padding: '4px 16px', borderRadius: 12, fontSize: 14, fontWeight: 900, color: 'white' }}>FACT</div>
                     <div style={{ fontSize: 72, fontWeight: 900, color: stat.color, fontFamily: B.FM, lineHeight: 1 }}>
                       <CountUp target={stat.value} suffix={stat.suffix} decimals={stat.value % 1 !== 0 ? 1 : 0} />
                     </div>
@@ -526,7 +526,7 @@ export const PlatformIntro: React.FC = (): any => {
           <Sequence from={60}>
             <FadeIn>
               <div style={{ marginTop: 60, fontSize: 22, color: B.textLo, fontWeight: 700, letterSpacing: '0.2em' }}>
-                NHS · FDA 510(k) · EU MDR IIb · ISO 13485 · GDPR · HIPAA
+                Regulatory roadmap: NHS conformance · 510(k) · MDR IIb · ISO 13485 (planned)
               </div>
             </FadeIn>
           </Sequence>

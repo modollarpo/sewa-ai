@@ -36,7 +36,7 @@ export function TriageAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
           <Tag label="ENGINE 01: TRIAGE" color={C.critical} />
           <h1 style={{ fontSize:'clamp(32px, 8vw, 56px)', fontWeight:900, color:C.textHi, margin:'24px 0 20px', letterSpacing:'-2px', lineHeight:1.1 }}>
             Wait time: <span style={{ color:C.critical }}>0 seconds.</span><br/>
-            Accuracy: <span style={{ color:C.normal }}>94.2%.</span>
+            Accuracy: <span style={{ color:C.normal }}>under clinical validation.</span>
           </h1>
           <p style={{ fontSize:'clamp(15px, 2.5vw, 18px)', color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
             Our Triage Engine is the first line of defence in the clinical worklist. It analyzes scans the moment they leave the PACS, identifying critical pathologies like ICH and LVO before a human ever sees the case.
@@ -51,9 +51,9 @@ export function TriageAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
       {/* Stats */}
       <section className="stats-grid" style={{ maxWidth:1100, margin:'0 auto', padding:'0 24px 80px', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:20 }}>
         {[
-          { label:'Inference Time', value:'< 2.4s', desc:'Full brain CT analysis' },
-          { label:'Sensitivity (PE)', value:'96.1%', desc:'Validated on NIH dataset' },
-          { label:'False Positives', value:'-31%', desc:'Recursive noise reduction' },
+          { label:'Inference Time', value:'< 2.4s', desc:'Engineered latency target' },
+          { label:'Sensitivity (PE)', value:'Under evaluation', desc:'No published clinical validation yet' },
+          { label:'False Positives', value:'Under evaluation', desc:'No published clinical validation yet' },
           { label:'Priority Classes', value:'14', desc:'STAT-level pathologies' },
         ].map(s => (
           <div key={s.label} style={{ padding:24, background:C.bg2, borderRadius:16, border:`1px solid ${C.border}` }}>
@@ -98,7 +98,7 @@ export function TriageAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
           {[
             { t:'DICOM Ingest', d:'Zero-latency stream from PACS via WADO-RS.' },
             { t:'Preprocessing', d:'Normalisation, pixel-spacing alignment, and noise reduction.' },
-            { t:'Ensemble Analysis', d:'Dual-stage EfficientNet analysis for primary findings.' },
+            { t:'Ensemble Analysis', d:'Dual-stage ONNX model analysis for primary findings.' },
             { t:'Priority Scoring', d:'Pathology-specific clinical weighting for worklist sorting.' },
             { t:'STAT Delivery', d:'Push notifications to clinician mobile via WhatsApp/FCM.' },
           ].map((step, i) => (
@@ -113,7 +113,8 @@ export function TriageAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
 
       {/* Research Section */}
       <section style={{ padding:'80px 24px', maxWidth:1000, margin:'0 auto' }}>
-        <h2 style={{ fontSize:24, fontWeight:800, color:C.textHi, marginBottom:32, textAlign:'center' }}>Key Research & Citations</h2>
+        <h2 style={{ fontSize:24, fontWeight:800, color:C.textHi, marginBottom:8, textAlign:'center' }}>Key Research & Citations</h2>
+        <p style={{ fontSize:12, color:C.textLo, textAlign:'center', marginBottom:32 }}>References below are published literature on AI-assisted CT triage — they are not SEWA XAI study results. SEWA XAI has no published clinical validation yet.</p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:20 }}>
           {[
             {

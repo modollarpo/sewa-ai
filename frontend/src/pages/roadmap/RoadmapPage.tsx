@@ -37,7 +37,7 @@ const CAT_CFG: Record<Category, { color:string; label:string; icon:string }> = {
 const ROADMAP: RoadmapItem[] = [
   // Q1 2025 - Q1 2026 (shipped / in progress)
   { id:'r1',  title:'Edge AI (Africa)', desc:'Fully offline SEWA on ruggedised tablets for zero-connectivity environments.', status:'shipped', category:'ai', votes:356, quarter:'Q1 2025', impact:'high' },
-  { id:'r2',  title:'Triage AI v2.4', desc:'CT/MRI/XR triage with 98% sensitivity for critical findings — ONNX Runtime, CPU-optimised.', status:'shipped', category:'ai', votes:421, quarter:'Q1 2025', impact:'high' },
+  { id:'r2',  title:'Triage AI v2 (ONNX Runtime)', desc:'CT/MRI/XR triage — ONNX Runtime, CPU-optimised. Performance figures awaiting clinical validation.', status:'shipped', category:'ai', votes:421, quarter:'Q1 2025', impact:'high' },
   { id:'r3',  title:'Uncertainty Quantification', desc:'AI confidence scores with uncertainty bounds and out-of-distribution detection.', status:'shipped', category:'ai', votes:287, quarter:'Q2 2025', impact:'high' },
   { id:'r4',  title:'VLM Report Generator', desc:'Vision-language model to auto-generate radiology reports from scan findings.', status:'shipped', category:'ai', votes:298, quarter:'Q2 2025', impact:'high' },
   { id:'r5',  title:'Clinical Rules Engine', desc:'Configurable CDS rules for stroke, PE, trauma — auto-alert, order entry, pathway activation.', status:'shipped', category:'clinical', votes:312, quarter:'Q2 2025', impact:'high' },

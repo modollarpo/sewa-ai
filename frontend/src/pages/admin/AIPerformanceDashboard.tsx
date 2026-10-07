@@ -1,16 +1,16 @@
 // SEWA XAI — AIPerformanceDashboard.tsx
 // AI monitoring: inference latency, accuracy by condition, A/B tests, drift detection, bias
 // P1 fix: latency chart now comes from /ai-monitoring/latency API
-// P2 fix: P50/P95/P99 from real backend percentile data
-// P3 fix: Overall AUC/sensitivity/specificity from /ai-monitoring/aggregates
-// P6 fix: Live last-updated timestamp with auto-refresh counter
+// P2 fix: P50/P95/P99 from real backend percentile data (null when unavailable)
+// Audit E-12/E-14: all reported values must be real. Metrics that cannot be
+// measured are rendered as '—' — never as fabricated baselines.
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAIData } from '../../hooks/useDashboardData';
 import { apiClient } from '../../services/apiClient';
 
 import { dashboardColors as C } from '../../design-system/tokens';
 
-// Clinically-vetted baseline profile (empty by default, populated by real inference data)
+// No synthetic fallback data (audit E-12): empty until the API reports real latencies.
 const LATENCY_FALLBACK: number[] = [];
 
 function Metric({ label,value,color=C.textHi,sub }:{ label:string;value:string|number;color?:string;sub?:string }) {
@@ -32,23 +32,22 @@ export function AIPerformanceDashboard() {
   const [percentiles, setPercentiles]     = useState<{p50:string;p95:string;p99:string}|null>(null);
   const [latencyLoading, setLatencyLoading] = useState(false);
 
-  // P3: Real aggregate metrics
-  const overallAUC = aggregates?.overallAuc
-    ? aggregates.overallAuc.toFixed(3)
-    : (conditionStats.length > 0
-        ? (conditionStats.reduce((s:number,c:any) => s + c.auc, 0) / conditionStats.length).toFixed(3)
-        : '—');
-  const overallSens = aggregates?.avgSensitivity
-    ? `${(aggregates.avgSensitivity * 100).toFixed(1)}%`
-    : (conditionStats.length > 0
-        ? `${(conditionStats.reduce((s:number,c:any) => s + c.sensitivity, 0) / conditionStats.length * 100).toFixed(1)}%`
-        : '—');
+  // Honest aggregates (audit E-12): average only non-null values; '—' when
+  // no real measurement exists.
+  const realAUCs = (conditionStats ?? []).filter((c: any) => c && c.auc != null).map((c: any) => c.auc);
+  const realSens = (conditionStats ?? []).filter((c: any) => c && c.sensitivity != null).map((c: any) => c.sensitivity);
+  const overallAUC = realAUCs.length > 0
+    ? (realAUCs.reduce((s: number, a: number) => s + a, 0) / realAUCs.length).toFixed(3)
+    : '—';
+  const overallSens = realSens.length > 0
+    ? `${(realSens.reduce((s: number, a: number) => s + a, 0) / realSens.length * 100).toFixed(1)}%`
+    : '—';
   const overallSpec = aggregates?.avgSpecificity
     ? `${(aggregates.avgSpecificity * 100).toFixed(1)}%`
     : '—';
   const avgInference = aggregates?.avgLatencyMs
     ? `${(aggregates.avgLatencyMs / 1000).toFixed(1)}s`
-    : '1.3s';
+    : '—';
   const totalInferences = aggregates?.totalCount ?? metrics.length ?? 0;
 
   // P6: Live last-updated timestamp
@@ -102,7 +101,7 @@ export function AIPerformanceDashboard() {
     marginBottom:'-1px',cursor:'pointer',fontFamily:C.F,whiteSpace:'nowrap',
   });
 
-  const displayPercentiles = percentiles ?? { p50:'1.3s', p95:'1.8s', p99:'2.4s' };
+  const displayPercentiles = percentiles ?? { p50:'—', p95:'—', p99:'—' };
 
   return (
     <div style={{padding: isMobile ? '16px' : '24px', background:C.bg1, minHeight:'calc(100vh - 76px)', fontFamily:C.F}}>
@@ -166,7 +165,7 @@ export function AIPerformanceDashboard() {
             )}
           </div>
           {conditionStats.length === 0 ? (
-            <div style={{padding:40,textAlign:'center',color:C.textLo}}>{loading?'Measuring performance...':'No condition stats found.'}</div>
+            <div style={{padding:40,textAlign:'center',color:C.textLo}}>{loading?'Measuring performance...':'No condition stats found. Metrics appear once scans are validated by clinicians.'}</div>
           ) : conditionStats.map((cond:any,i:number)=>(
             <div key={cond.name} style={{
               display:'grid',
@@ -177,15 +176,17 @@ export function AIPerformanceDashboard() {
               <div style={{display:'flex',alignItems:'center',gap:6, justifyContent: isMobile ? 'flex-end' : 'flex-start'}}>
                 {!isMobile && (
                   <div style={{flex:1,height:4,background:C.bg4,borderRadius:2,overflow:'hidden'}}>
-                    <div style={{width:`${cond.auc*100}%`,height:'100%',background:cond.auc>=0.95?C.normal:cond.auc>=0.9?C.brand:C.urgent}}/>
+                    <div style={{width:`${(cond.auc != null ? cond.auc : 0)*100}%`,height:'100%',background:cond.auc!=null&&cond.auc>=0.95?C.normal:cond.auc!=null&&cond.auc>=0.9?C.brand:C.urgent}}/>
                   </div>
                 )}
-                <span style={{fontSize:10,fontFamily:C.FM,fontWeight:700,color:cond.auc>=0.95?C.normal:C.brand,minWidth:32, textAlign: isMobile ? 'right' : 'left'}}>{cond.auc.toFixed(3)}</span>
+                <span style={{fontSize:10,fontFamily:C.FM,fontWeight:700,color:cond.auc!=null&&cond.auc>=0.95?C.normal:C.brand,minWidth:32, textAlign: isMobile ? 'right' : 'left'}}>
+                  {cond.auc != null ? cond.auc.toFixed(3) : '—'}
+                </span>
               </div>
               {!isMobile && (
                 <>
-                  <span style={{fontSize:11,fontFamily:C.FM,color:C.textHi}}>{(cond.sensitivity*100).toFixed(1)}%</span>
-                  <span style={{fontSize:11,fontFamily:C.FM,color:C.textMd}}>{cond.cases.toLocaleString()}</span>
+                  <span style={{fontSize:11,fontFamily:C.FM,color:C.textHi}}>{cond.sensitivity != null ? `${(cond.sensitivity*100).toFixed(1)}%` : '—'}</span>
+                  <span style={{fontSize:11,fontFamily:C.FM,color:C.textMd}}>{cond.cases != null ? cond.cases.toLocaleString() : '—'}</span>
                 </>
               )}
             </div>
@@ -202,7 +203,7 @@ export function AIPerformanceDashboard() {
           <div style={{display:'flex',alignItems:'flex-end',gap:3,height:100}}>
             {latencyHours.map((v,i)=>(
               <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
-                <div title={`${v.toFixed(2)}s`} style={{width:'100%',height:`${(v/2)*100}%`,background:`linear-gradient(180deg,${C.brand},${C.brandLt})`,borderRadius:'2px 2px 0 0',opacity:0.8,minHeight:4}}/>
+                <div title={v != null ? `${v.toFixed(2)}s` : 'no data'} style={{width:'100%',height: v != null ? `${Math.min((v/2)*100,100)}%` : 0,background:v!=null?`linear-gradient(180deg,${C.brand},${C.brandLt})`:'transparent',borderRadius:'2px 2px 0 0',opacity:0.8,minHeight:4}}/>
               </div>
             ))}
           </div>
@@ -268,17 +269,25 @@ export function AIPerformanceDashboard() {
       )}
 
       {tab==='drift' && (
+        drift.status === 'not_available' ? (
+          <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
+            <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:8}}>Model Drift — Not Measurable</div>
+            <div style={{fontSize:11,color:C.textMd,lineHeight:1.6}}>
+              {drift.message || 'PSI/Kappa drift detection requires per-inference feature distributions and a reference training distribution, which are not captured. Drift metrics are not reported until real measurement is wired up.'}
+            </div>
+          </div>
+        ) : (
         <div style={{padding:20,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:16}}>
             <span style={{width:8,height:8,borderRadius:'50%',background:drift.status==='stable'?C.normal:C.critical,boxShadow:`0 0 6px ${drift.status==='stable'?C.normal:C.critical}`}}/>
             <span style={{fontSize:12,fontWeight:700,color:C.textHi}}>{drift.status==='stable'?'No Drift Detected':'⚠️ Drift Detected'}</span>
-            <span style={{fontSize:11,color:C.textLo,fontFamily:C.F}}>Checked every 30 min via Cohen's Kappa + PSI</span>
+            <span style={{fontSize:11,color:C.textLo,fontFamily:C.F}}>Checked via Cohen's Kappa + PSI</span>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
             {[
-              {label:"Cohen's Kappa",value:drift.kappa.toFixed(3),threshold:0.75,good:drift.kappa > 0.75},
-              {label:'PSI Score',value:drift.psi.toFixed(3),threshold:0.1,good:drift.psi < 0.1},
-              {label:'Covariate Shift',value:drift.status==='stable'?'None':'Low',threshold:'—',good:drift.status==='stable'},
+              {label:"Cohen's Kappa",value:drift.kappa != null ? drift.kappa.toFixed(3) : '—',threshold:0.75,good:drift.kappa != null && drift.kappa > 0.75},
+              {label:'PSI Score',value:drift.psi != null ? drift.psi.toFixed(3) : '—',threshold:0.1,good:drift.psi != null && drift.psi < 0.1},
+              {label:'Covariate Shift',value:drift.status==='stable'?'None':'Unknown',threshold:'—',good:drift.status==='stable'},
             ].map(m=>(
               <div key={m.label} style={{padding:'12px 14px',background:C.bg3,borderRadius:10}}>
                 <div style={{fontSize:10,color:C.textLo,marginBottom:6}}>{m.label}</div>
@@ -288,12 +297,15 @@ export function AIPerformanceDashboard() {
             ))}
           </div>
         </div>
+        )
       )}
 
       {tab==='bias' && (
         <div style={{display:'flex',flexDirection:'column',gap:12}}>
           <div style={{padding:14,background:`${C.normal}0A`,borderRadius:12,border:`1px solid ${C.normal}30`,fontSize:12,color:C.textMd}}>
-            ✓ Bias monitoring active across age groups, sex, and geographic region. Last audit: Q1 2026.
+            {bias.status === 'not_available'
+              ? (bias.message || 'Bias auditing requires protected-attribute labels joined to ground-truth outcomes. These are not captured yet, so no bias metrics are reported.')
+              : 'Bias monitoring active across age groups, sex, and geographic region.'}
           </div>
           {[
             {group:'By Age Group',metrics: bias.age || []},
@@ -303,10 +315,10 @@ export function AIPerformanceDashboard() {
             <div key={group.group} style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
               <div style={{fontSize:12,fontWeight:700,color:C.textHi,marginBottom:12}}>{group.group}</div>
               <div style={{display:'flex',gap:8, flexWrap:'wrap'}}>
-                {group.metrics.length === 0 ? <span style={{fontSize:11, color:C.textLo}}>Auditing...</span> : group.metrics.map((m:any)=>(
+                {group.metrics.length === 0 ? <span style={{fontSize:11, color:C.textLo}}>No metrics yet</span> : group.metrics.map((m:any)=>(
                   <div key={m.group} style={{flex:'1 1 120px',padding:'10px 8px',background:C.bg3,borderRadius:8,textAlign:'center'}}>
                     <div style={{fontSize:9,color:C.textLo,marginBottom:4}}>{m.group}</div>
-                    <div style={{fontSize:14,fontWeight:700,color:m.auc>=0.93?C.normal:C.urgent,fontFamily:C.FM}}>{m.auc.toFixed(3)}</div>
+                    <div style={{fontSize:14,fontWeight:700,color:m.auc!=null&&m.auc>=0.93?C.normal:C.urgent,fontFamily:C.FM}}>{m.auc != null ? m.auc.toFixed(3) : '—'}</div>
                   </div>
                 ))}
               </div>

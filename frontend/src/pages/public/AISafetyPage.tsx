@@ -15,7 +15,7 @@ const FEATURES = [
   },
   {
     title: 'Metacognition & Hallucination Defense',
-    desc: 'Our VLM reports are evaluated by an independent cross-checking mechanism before they are presented to the clinician. This multi-layer self-evaluation prevents hallucinations and ensures factual accuracy.'
+    desc: 'Our VLM reports are evaluated by an independent cross-checking mechanism before they are presented to the clinician. This multi-layer self-evaluation is designed to reduce the risk of hallucinations and improve factual accuracy.'
   }
 ];
 

@@ -28,7 +28,7 @@ THE FOUR-ENGINE PIPELINE
 1. DETECTION CNN
    - 14 acute conditions across CT, MRI, and X-ray
    - ICH, LVO stroke, PE, aortic dissection, pneumothorax, pneumonia, TB, etc.
-   - Internal AUC-ROC: 0.961 overall (n=14,200)
+   - Internal engineering figures exist but are under review — no clinical results claimed yet
 
 2. UNCERTAINTY QUANTIFICATION
    - Monte Carlo Dropout: 20 stochastic forward passes
@@ -40,7 +40,7 @@ THE FOUR-ENGINE PIPELINE
    - Nine-layer safety audit of every AI output
    - Hallucination risk score H ∈ [0,1]
    - H > 0.30: Autonomous dispatch BLOCKED. No silent discard.
-   - Internal catch rate: 96.3% (n=500, 3-radiologist consensus)
+   - Internal test-set figures under review — no hallucination catch rate claimed yet
 
 4. VLM REPORT GENERATION
    - Structured radiology finding + natural language impression
@@ -187,15 +187,10 @@ SECTION 6: CLINICAL EVIDENCE & NEXT STEPS (2 minutes)
 
 INTERNAL TEST RESULTS (Engineering Testing Only — Not Clinically Validated)
 
-| Condition | Modality | n | AUC-ROC | Sensitivity | Specificity | κ vs Radiologist |
-|-----------|----------|---|---------|-------------|-------------|------------------|
-| ICH | CT Head | 2,847 | 0.972 | 94.1% | 97.8% | 0.87 |
-| PE | CT Chest | 1,203 | 0.961 | 91.4% | 96.2% | 0.84 |
-| LVO Stroke | CT Angio | 1,640 | 0.958 | 90.8% | 95.7% | 0.82 |
-| Pneumothorax | X-ray | 889 | 0.979 | 96.2% | 98.1% | 0.91 |
-| TB (Africa) | X-ray | 3,201 | 0.944 | 89.7% | 94.8% | 0.80 |
-| Pneumonia | X-ray | 2,180 | 0.953 | 92.3% | 95.9% | 0.83 |
-| **Overall** | **Mixed** | **14,200** | **0.961** | **92.4%** | **96.4%** | **0.87** |
+Internal engineering testing has been performed across CT, MRI, and X-ray targets, but
+figures from those internal runs are not reported as clinical results. No AUC, sensitivity,
+specificity, or inter-reader agreement figures are claimed until independent prospective
+validation completes (Shadow Trial Design below).
 
 SHADOW TRIAL DESIGN (Planned)
 

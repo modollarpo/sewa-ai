@@ -39,7 +39,7 @@ export function PathologyAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
             Results in <span style={{ color:C.normal }}>under 2 seconds.</span>
           </h1>
           <p style={{ fontSize:'clamp(15px, 2.5vw, 18px)', color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
-            Our Digital Pathology Engine analyzes H&E-stained tissue slides using Macenko SVD-based stain normalization to reduce batch effects, providing high-accuracy patch-level carcinoma detection on standard CPU hardware.
+            Our Digital Pathology Engine analyzes H&E-stained tissue slides using Macenko SVD-based stain normalization to reduce batch effects, providing patch-level carcinoma detection and Gleason/Ki67 estimates on standard CPU hardware.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:10, justifyContent:'center' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'14px 32px', background:C.info, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer' }}>Deploy Digital Pathology →</button>
@@ -97,7 +97,7 @@ export function PathologyAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
           {[
             { t:'Tile Ingest', d:'Load tile from storage URL or base64 payload (SVS, TIFF, JPEG supported).' },
             { t:'Stain Normalisation', d:'Macenko SVD-based H&E stain normalisation to reduce batch effects.' },
-            { t:'Patch Classification', d:'ONNX INT8 EfficientNet-B0 patch-level carcinoma detection.' },
+            { t:'Patch Classification', d:'ONNX INT8 patch-level carcinoma detection.' },
             { t:'Metrics Estimation', d:'Ki67 proliferation index estimate from staining intensity; Gleason grade for prostate tissue.' },
             { t:'MDT Alert', d:'Urgent findings trigger MDT review within 24 hours.' },
           ].map((step, i) => (

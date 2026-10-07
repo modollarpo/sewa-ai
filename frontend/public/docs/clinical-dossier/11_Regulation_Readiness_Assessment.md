@@ -40,8 +40,9 @@ In short: the *study design* is sufficient and regulation-ready; the *evidence* 
 ## 3. Evidence Sufficiency by Gate
 
 ### Gate A — Engineering / analytical validity
-- **Status:** Met (internal). AUC 0.961 across 14 conditions (n=14,200), internal.
-- **Caveat:** must be reproduced independently; internal figures are disclaimed throughout.
+- **Status:** Not met — internal engineering runs only; no analytical validity claimed.
+- **Caveat:** internal engineering figures are not reported as validation results and must be
+  reproduced independently before any analytical-validity claim.
 
 ### Gate B — Independent clinical validation (the decisive gap)
 - **Status:** **Not met.** No NHS prospective/retrospective validation completed.

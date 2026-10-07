@@ -138,9 +138,7 @@ export function NHSProcurementPage({ onNavigate }: { onNavigate: (p: string) => 
           <p style={{ fontSize: 14, color: colors.textMed, margin: `0 0 ${spacing[8]}` }}>Contact our NHS team for a tailored demo and framework pricing.</p>
           <div style={{ display: 'flex', gap: spacing[3], justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button variant="primary" onClick={() => onNavigate('contact')}>Contact NHS Team →</Button>
-            <a href="/docs/SEWA_AI_NHS_Trust_Pack_v2.0.pdf" download style={{ textDecoration: 'none' }}>
-              <Button variant="secondary">Download NHS Trust Pack</Button>
-            </a>
+            <Button variant="secondary" onClick={() => onNavigate('contact')}>Request NHS Trust Pack</Button>
             <Button variant="secondary" onClick={() => onNavigate('nhs-dspt-compliance')}>NHS DSPT Compliance</Button>
             <Button variant="secondary" onClick={() => onNavigate('clinical-validation')}>View Clinical Evidence</Button>
           </div>

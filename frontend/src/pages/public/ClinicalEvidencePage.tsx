@@ -15,15 +15,15 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
             Clinical Evidence
           </h1>
           <p style={{ fontSize: 16, color: colors.textMed, maxWidth: 600, margin: '0 auto', lineHeight: 1.8 }}>
-            SEWA XAI is built on robust, peer-reviewed engineering. Our models undergo extensive retrospective testing and we are actively engaging in clinical safety reviews under the DCB0129 standard.
+            SEWA XAI is built on an engineering validation pipeline at TRL 5. No model-performance figures are claimed until an evaluation dataset is onboarded and independently reviewed.
           </p>
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: spacing[5] }}>
           <Card padding={spacing[8]}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: colors.textHigh, margin: `0 0 ${spacing[3]}` }}>Engineering Validation (TRL 5)</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: colors.textHigh, margin: `0 0 ${spacing[3]}` }}>Engineering Validation Status (TRL 5)</h2>
             <p style={{ color: colors.textMed, lineHeight: 1.8, margin: 0 }}>
-              Our AI models (Triage, Uncertainty, and Metacognition) have been validated in simulated clinical environments using diverse datasets. We achieve an AUC &gt; 0.95 in detecting critical findings in engineering benchmarks.
+              Our AI models (Triage, Uncertainty, and Metacognition) run end-to-end harnesses in this repository. Metrics such as AUC, sensitivity, calibration error, and hallucination catch rate are not yet measured — they are targets for retrospective evaluation once datasets are onboarded.
             </p>
           </Card>
           

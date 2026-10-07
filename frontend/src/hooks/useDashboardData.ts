@@ -89,16 +89,12 @@ export function useAIData() {
     metrics: metricsRes?.data?.events || [],
     health: healthRes?.data?.services || healthRes?.data || [],
     healthOverall: healthRes?.data?.overall || 'unknown',
-    drift: driftRes?.data || { status: 'stable', kappa: 0.84, psi: 0.02 },
-    bias: biasRes?.data || { age: [], sex: [], region: [] },
+    drift: driftRes?.data || { status: 'not_available', kappa: null, psi: null },
+    bias: biasRes?.data || { status: 'not_available', age: [], sex: [], region: [] },
     aggregates: metricsRes?.data?.aggregates || { avgConfidence: 0, avgLatencyMs: 0, totalCount: 0 },
-    conditionStats: metricsRes?.data?.aggregates?.byCondition || [
-      { name: 'ICH (Brain)', auc: 0.974, sensitivity: 0.942, cases: 1420 },
-      { name: 'Pulmonary Embolism', auc: 0.952, sensitivity: 0.918, cases: 850 },
-      { name: 'Pneumothorax', auc: 0.961, sensitivity: 0.925, cases: 620 },
-      { name: 'LVO (Stroke)', auc: 0.982, sensitivity: 0.964, cases: 310 },
-      { name: 'Cervical Fracture', auc: 0.941, sensitivity: 0.895, cases: 440 },
-    ],
+    // No fabricated fallback metrics (audit E-14): empty until the API reports
+    // real per-condition statistics from validated cases.
+    conditionStats: metricsRes?.data?.aggregates?.byCondition || [],
     loading: isLoading
   };
 }

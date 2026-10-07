@@ -6,13 +6,13 @@ import { PublicLayout } from '../../components/public/PublicLayout';
 const DOCS_DATA = [
   {
     title: 'NHS Trust Pack v2.0',
-    content: 'Confidential dossier for NHS R&D committees and Medical Directors. Includes clinical evidence, regulatory status, and procurement information.',
-    action: { label: 'Download', href: '/docs/SEWA_AI_NHS_Trust_Pack_v2.0.pdf', download: true },
+    content: 'Confidential dossier for NHS R&D committees and Medical Directors. PDF under revision — clinical evidence and regulatory status are available now.',
+    action: { label: 'View Clinical Evidence', onClick: (onNavigate: (p: string) => void) => onNavigate('clinical-validation') },
   },
   {
     title: 'Master Dossier v2.0',
-    content: 'Complete clinical, regulatory, and technical documentation for SEWA XAI platform.',
-    action: { label: 'Download', href: '/docs/SEWA_AI_Master_Dossier_v2.0_Integrated.pdf', download: true },
+    content: 'Complete clinical, regulatory, and technical documentation for SEWA XAI platform. PDF under revision — clinical evidence and regulatory status are available now.',
+    action: { label: 'View Clinical Evidence', onClick: (onNavigate: (p: string) => void) => onNavigate('clinical-validation') },
   },
   {
     title: 'Enterprise v2.0 Vision',

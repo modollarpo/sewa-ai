@@ -5,10 +5,10 @@ import { Card, Badge, Button } from '../../design-system/components';
 import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
 const METRICS = [
-  { value: '1.2M', label: 'Scans in R&D dataset', icon: '🩻' },
+  { value: '—', label: 'R&D dataset scans (none claimed yet)', icon: '🩻' },
   { value: '14', label: 'Pathologies modelled', icon: '🔬' },
   { value: 'TRL 5', label: 'Development Stage', icon: '🏥' },
-  { value: '8', label: 'Clinical partners (R&D)', icon: '🤝' },
+  { value: '—', label: 'Published clinical results', icon: '🤝' },
 ];
 
 const TEAM = [

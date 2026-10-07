@@ -55,9 +55,9 @@ export function MetacognitionAI({ onNavigate }: { onNavigate:(p:string)=>void })
           { icon:'🛡️', title:'Hallucination Detection', desc:'Flags anatomical findings that are physiologically impossible or logically inconsistent.' },
           { icon:'📏', title:'Rule-Based Verification', desc:'Verifies AI findings against 200+ established clinical guidelines and anatomical rules.' },
           { icon:'🔄', title:'Cross-Model Consistency', desc:'Compares outputs from multiple AI versions to identify variance and contradictions.' },
-          { icon:'📉', title:'False Alert Reduction', desc:'Blocks low-confidence or illogical flags, reducing clinician alarm fatigue by 28%.' },
+          { icon:'📉', title:'False Alert Reduction', desc:'Blocks low-confidence or illogical flags, reducing clinician alarm fatigue.' },
           { icon:'📜', title:'Prior Scan Comparison', desc:'Checks if AI findings contradict or fail to account for changes in prior patient studies.' },
-          { icon:'✅', title:'CIS Scoring', desc:'Assigns a Confidence Integrity Score (CIS) to every case based on 12 safety metrics.' },
+          { icon:'✅', title:'Reliability Scoring', desc:'Layer-wise self-evaluation records a PASS/FAIL/FLAG status for every reliability check on each case.' },
         ].map(f => (
           <div key={f.title} style={{ padding:32, background:C.bg2, borderRadius:20, border:`1px solid ${C.border}` }}>
             <div style={{ fontSize:32, marginBottom:16 }}>{f.icon}</div>

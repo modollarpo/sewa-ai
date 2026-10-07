@@ -24,20 +24,13 @@ GRADE: B / Good — can become A- / Strong with targeted revisions
    CURRENT: No quantitative data provided
    RECOMMENDED: Add brief quantitative summary WITH disclaimer:
 
-   "Internal engineering testing (n=14,200 across 6 conditions) has generated 
-   the following metrics, which should not be interpreted as independent clinical 
-   validation:
-   - Overall AUC-ROC: 0.961
-   - ICH (CT Head): 0.972 (n=2,847)
-   - PE (CT Chest): 0.961 (n=1,203)
-   - LVO Stroke (CT Angio): 0.958 (n=1,640)
-   - Pneumothorax (X-ray): 0.979 (n=889)
-   - TB Africa (X-ray): 0.944 (n=3,201)
-   - Pneumonia (X-ray): 0.953 (n=2,180)
+   "Internal engineering testing has been completed on CT, MRI, and X-ray targets.
+   Internal metrics exist but are under review and are not reported here; they should
+   not be interpreted as independent clinical validation. No AUC-ROC, sensitivity, or
+   specificity figures are claimed until independent NHS clinical validation completes.
 
-   The Nine-Layer Metacognition Gate (patent GB2609706.3) achieved a 96.3% 
-   hallucination catch rate on an expert-annotated test set (n=500, 3-radiologist 
-   consensus, blinded). Expected Calibration Error (ECE): 0.042.
+   The Nine-Layer Metacognition Gate (patent GB2609706.3) is implemented; its
+   hallucination-catch performance is under evaluation and not yet claimed.
 
    Independent NHS clinical validation is the immediate next step."
 

@@ -51,10 +51,10 @@ export function MammographyAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
       {/* Stats */}
       <section className="stats-grid" style={{ maxWidth:1100, margin:'0 auto', padding:'0 24px 80px', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:20 }}>
         {[
-          { label:'Inference Time', value:'< 2.0s', desc:'Full mammogram analysis' },
+          { label:'Inference Time', value:'< 2.0s', desc:'Engineered latency target' },
           { label:'BI-RADS', value:'0-5', desc:'Full classification scale' },
           { label:'Findings', value:'8', desc:'Masses, calcifications, etc.' },
-          { label:'Sensitivity', value:'93.5%', desc:'For malignant findings' },
+          { label:'Sensitivity', value:'Under evaluation', desc:'No published clinical validation yet' },
         ].map(s => (
           <div key={s.label} style={{ padding:24, background:C.bg2, borderRadius:16, border:`1px solid ${C.border}` }}>
             <div style={{ fontSize:32, fontWeight:900, color:C.brand, fontFamily:C.FM }}>{s.value}</div>
@@ -112,7 +112,8 @@ export function MammographyAI({ onNavigate }: { onNavigate:(p:string)=>void }) {
 
       {/* Research Section */}
       <section style={{ padding:'80px 24px', maxWidth:1000, margin:'0 auto' }}>
-        <h2 style={{ fontSize:24, fontWeight:800, color:C.textHi, marginBottom:32, textAlign:'center' }}>Key Research & Citations</h2>
+        <h2 style={{ fontSize:24, fontWeight:800, color:C.textHi, marginBottom:8, textAlign:'center' }}>Key Research & Citations</h2>
+        <p style={{ fontSize:12, color:C.textLo, textAlign:'center', marginBottom:32 }}>References below are published literature on medical image ML — they are not SEWA XAI study results. SEWA XAI has no published clinical validation yet.</p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:20 }}>
           {[
             {

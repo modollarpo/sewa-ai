@@ -193,7 +193,7 @@ export function RadiologySimulator({ onClose }: { onClose: () => void }) {
             </div>
 
             <p className="text-xs text-[#3A6055] max-w-xs mx-auto leading-relaxed">
-              SEWA XAI's algorithmic baseline for this dataset is 97.4%. Your results have been logged to the clinical registry.
+              SEWA XAI's algorithmic baseline for this dataset is under evaluation — no published figure yet. Your results have been logged to the clinical registry.
             </p>
 
             <button 
