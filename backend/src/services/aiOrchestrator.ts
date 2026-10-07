@@ -29,8 +29,8 @@ import * as longitudinalService from './longitudinalService';
 import { dlq } from './dlqService';
 import { createAxiosInstance } from '../utils/axiosInstance';
 import { buildVLMSystemPrompt, translateReportContent, type SupportedLanguage } from './vlmLanguageService';
-import { clinicalRulesEngine } from './roadmap/clinicalRulesEngine';
 import { strokeCodeService, type StrokeCodeType } from './roadmap/strokeCodeService';
+import { computeReliabilityState } from '../evaluation/reliabilityState';
 
 const axios = createAxiosInstance();
 
@@ -810,6 +810,15 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       ],
     });
 
+    // Frozen reliability state g-v1 (audit §30.3) — pre-registered, logged.
+    const reliability = computeReliabilityState({
+      confidence: finalConfidence,
+      epistemic: uncertainty.epistemicUncertainty,
+      aleatoric: uncertainty.aleatoricUncertainty,
+      errorFlags: metacog.flags.filter(f => f.severity === 'ERROR').length,
+      warningFlags: metacog.flags.filter(f => f.severity === 'WARNING').length,
+    });
+
     const aiResult = await prisma.aIResult.create({
       data: {
         tenantId, // Ensure tenantId is persisted for isolation
@@ -828,6 +837,11 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           },
           vlm, metacog, doorToAlertMs,
           pipeline: { stage1ParallelMs: stage1Ms, backend: triage.backend },
+          // Per-case signal logger (audit §30.2/§30.3): the frozen reliability
+          // state rides along with the inference payload so the evaluation
+          // harness can consume it. Logged only — it does not yet change the
+          // human-review decision (that would move a frozen threshold).
+          reliability,
         } as any,
         // Honest model id: expose the actual inference backend reported by the
         // service (e.g. "demo" when weights are absent) — never a fixed "v2".

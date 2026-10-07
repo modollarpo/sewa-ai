@@ -21,7 +21,8 @@
     "db:seed:js": "node prisma/seed.js",
     "db:onboard": "ts-node scripts/onboard_tenant.ts",
     "safety-validation": "ts-node src/validation/safety-validation.ts",
-    "metacognition-benchmark": "ts-node src/validation/metacognition-benchmark.ts"
+    "metacognition-benchmark": "ts-node src/validation/metacognition-benchmark.ts",
+    "reliability-eval": "ts-node src/evaluation/reliabilityEval.ts"
   },
   "dependencies": {
     "@azure-rest/communication-messages": "^1.0.0-beta.1",

@@ -90,6 +90,8 @@ router.post('/review/:scanId',
       if (scan.aiResult) {
         const aiFinding = scan.aiResult.primaryFinding;
         const isCorrect = finalGroundTruth.trim().toLowerCase() === aiFinding.trim().toLowerCase();
+        const modelVersion = scan.aiResult.modelVersion ?? null;
+        const confidenceBin = binFor(scan.aiResult.confidence);
         await calibrationService.recordPrediction({
           scanId,
           tenantId,
@@ -101,6 +103,45 @@ router.post('/review/:scanId',
           outcomeDeterminedAt: new Date(),
           clinicianOverride: !isCorrect,
         }).catch(e => logger.warn(`[LearningLoop] calibration record failed: ${e.message}`));
+
+        // ── Per-case signal logger (audit §30.2) ─────────────────────────
+        // Ground truth lands on the AIResult row it belongs to. FP/FN flags
+        // stay null on purpose: a single-string ground truth cannot separate
+        // a false positive from a missed finding, and guessing would fabricate
+        // a metric (audit §34.4).
+        await prisma.aIResult.update({
+          where: { id: scan.aiResult.id },
+          data: {
+            validationStatus: isCorrect ? 'CONFIRMED' : 'REJECTED',
+            humanCorrectedFinding: isCorrect ? null : finalGroundTruth,
+            validationComments: `Adjudicated via peer review (agreementTarget=${agreementTarget ?? 'unspecified'})`,
+            validatedBy: userId,
+            validatedAt: new Date(),
+          },
+        }).catch(e => logger.warn(`[LearningLoop] AIResult validation update failed: ${e.message}`));
+
+        // CalibrationRecord / CalibrationSummary tables had zero writers;
+        // record the prediction-outcome pair and the per-pair Brier term on
+        // the provenance row so the ECE/Brier machinery has real inputs.
+        await prisma.calibrationRecord.create({
+          data: {
+            tenantId,
+            modality: scan.modality,
+            modelVersion,
+            predictedConfidence: scan.aiResult.confidence,
+            actualOutcome: isCorrect,
+            confidenceBin,
+            scanId,
+            aiResultId: scan.aiResult.id,
+          },
+        }).catch(e => logger.warn(`[LearningLoop] CalibrationRecord failed: ${e.message}`));
+
+        const brier = (scan.aiResult.confidence - (isCorrect ? 1 : 0)) ** 2;
+        await prisma.metacognitionAuditLog.updateMany({
+          where: { scanId, tenantId },
+          data: { calibrationBin: confidenceBin, brierScore: brier },
+        }).catch(e => logger.warn(`[LearningLoop] audit-log calibration update failed: ${e.message}`));
+
         await auditLog({
           tenantId, userId, action: 'ADJUDICATION_RECORDED',
           entity: 'Scan', entityId: scanId,
@@ -124,5 +165,13 @@ router.post('/review/:scanId',
     } catch (err) { next(err); }
   }
 );
+
+/** Equal-width confidence bin label used by CalibrationRecord.calibrationBin. */
+function binFor(confidence: number): string {
+  const c = Math.min(0.9999, Math.max(0, Number.isFinite(confidence) ? confidence : 0));
+  const lo = Math.floor(c * 10) / 10;
+  const hi = Math.min(1, lo + 0.1);
+  return `${lo.toFixed(2)}-${hi.toFixed(2)}`;
+}
 
 export default router;
