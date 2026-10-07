@@ -422,7 +422,7 @@ export function SuperAdminDashboard({ tab: initialTab }: { tab?: string } = {}) 
                 {label:'RAM Usage',    value:`${telemetry?.infrastructure?.memory ?? '--'}%`,color:C.urgent},
                 {label:'Storage Used', value:telemetry?.infrastructure?.storage ?? '4.2 TB', color:C.textHi},
                 {label:'P50 Latency',  value:telemetry?.infrastructure?.latency ?? '142ms',  color:C.info},
-                {label:'Uptime',       value:telemetry?.global?.uptime ?? '99.98%',           color:C.normal},
+                {label:'Uptime',       value:telemetry?.global?.uptime ?? '—',           color:C.normal},
                 {label:'Active Nodes', value:telemetry?.global?.activeNodes ?? 14,            color:C.textHi},
               ].map(s=>(  
                 <div key={s.label} style={{padding:'12px 14px',background:C.bg3,borderRadius:10,border:`1px solid ${C.border}`}}>
@@ -453,7 +453,7 @@ export function SuperAdminDashboard({ tab: initialTab }: { tab?: string } = {}) 
             {[
               {label:'DLQ Queue Depth', value: dlqDepth ?? '—', color: (dlqDepth ?? 0)>0?C.urgent:C.normal, icon:'📬'},
               {label:'Failed Scans',    value: failedScans.length, color: failedScans.length>0?C.critical:C.normal, icon:'❌'},
-              {label:'Backend Uptime',  value: telemetry?.global?.uptime ?? '99.98%', color: C.normal, icon:'✅'},
+              {label:'Backend Uptime',  value: telemetry?.global?.uptime ?? '—', color: C.normal, icon:'✅'},
             ].map(s=>(
               <div key={s.label} style={{padding:16,background:C.bg2,borderRadius:12,border:`1px solid ${C.border}`}}>
                 <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>

@@ -27,7 +27,7 @@ export default function ConsentScreen() {
     <ScrollView style={{ flex:1, backgroundColor:T.bg0 }} contentContainerStyle={{ padding:16, paddingTop:60, paddingBottom:40 }}>
       <Text style={{ color:T.textHi, fontSize:20, fontWeight:'900', marginBottom:8 }}>Privacy & Consent</Text>
       <Text style={{ color:T.textMd, fontSize:12, marginBottom:24, lineHeight:18 }}>
-        Control how your data is used. Your medical records are encrypted end-to-end and protected under GDPR, HIPAA, and applicable regional data protection laws.
+        Control how your data is used. Your medical records are encrypted in transit and at rest, and handled under GDPR, HIPAA, and applicable regional data protection requirements.
       </Text>
 
       {CONSENT_ITEMS.map(item => (

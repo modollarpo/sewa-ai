@@ -17,8 +17,8 @@ const STEPS = [
 const REGIONS = [
   { key:'uk', flag:'🇬🇧', label:'United Kingdom', compliance:'NHS DSPT · GDPR', currency:'GBP', payment:'Stripe' },
   { key:'eu', flag:'🇪🇺', label:'European Union',  compliance:'MDR · EU AI Act', currency:'EUR', payment:'Stripe' },
-  { key:'us', flag:'🇺🇸', label:'North America',   compliance:'HIPAA · FDA 510(k)', currency:'USD', payment:'Stripe' },
-  { key:'ng', flag:'🇳🇬', label:'Nigeria',         compliance:'NDPR · ISO 13485', currency:'NGN', payment:'Paystack' },
+  { key:'us', flag:'🇺🇸', label:'North America',   compliance:'HIPAA · FDA 510(k) planned', currency:'USD', payment:'Stripe' },
+  { key:'ng', flag:'🇳🇬', label:'Nigeria',         compliance:'NDPR · ISO 13485 planned', currency:'NGN', payment:'Paystack' },
   { key:'ke', flag:'🇰🇪', label:'Kenya',           compliance:'DPA 2019', currency:'KES', payment:'M-Pesa' },
   { key:'za', flag:'🇿🇦', label:'South Africa',    compliance:'POPIA', currency:'ZAR', payment:'Paystack' },
   { key:'gh', flag:'🇬🇭', label:'Ghana',           compliance:'DPA 2012', currency:'GHS', payment:'Flutterwave' },
@@ -438,7 +438,7 @@ export function OnboardingWizard() {
             {step === 1 && !data.launched && (
               <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
                 <div style={{ padding:14, background:`${C.info}0A`, borderRadius:12, border:`1px solid ${C.info}30`, fontSize:12, color:C.textMd, lineHeight:1.6 }}>
-                  ℹ️ SEWA XAI supports full compliance across all major healthcare regulations. Select all frameworks that apply to your institution.
+                  ℹ️ SEWA XAI is designed against major healthcare regulations and tracks evidence per framework. Certification is not yet held. Select all frameworks that apply to your institution.
                 </div>
 
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
@@ -668,7 +668,7 @@ export function OnboardingWizard() {
                 <div style={{ padding:16, background:`${C.normal}0A`, borderRadius:12, border:'1px solid #0D2A1A' }}>
                   <div style={{ fontSize:12, fontWeight:700, color:C.normal, marginBottom:8 }}>Ready to launch</div>
                   <div style={{ fontSize:12, color:C.textMd, lineHeight:1.6 }}>
-                    Your SEWA XAI instance will be provisioned on Azure {REGIONS.find(r=>r.key===data.region)?.label} infrastructure with full {REGIONS.find(r=>r.key===data.region)?.compliance} compliance. Provisioning takes approximately 5 minutes.
+                    Your SEWA XAI instance will be provisioned on Azure {REGIONS.find(r=>r.key===data.region)?.label} infrastructure with {REGIONS.find(r=>r.key===data.region)?.compliance} controls configured. Provisioning takes approximately 5 minutes.
                   </div>
                 </div>
 
