@@ -1,132 +1,136 @@
-// Removed PrismaClient for local DB bypassing
+// Full pipeline safety validation — metacognition gate on synthetic corpus.
+//
+// This harness validates the LAST-STAGE safety gate (metacognition) against
+// synthetic triage/VLM/uncertainty inputs. Upstream stages are deliberately
+// replaced with the synthetic case attributes (documented design decision —
+// there are no real DICOM images for the generated cases).
+//
+// FIXED (2026-10-06 audit E-11/N29):
+//  - sends `shap_values: []` (list contract, not object)
+//  - drops non-existent `primary_condition` request field
+//  - reads real response field `safe_to_alert` / `passed`
+//  - service errors are counted as `errorCases` (fail the run), NOT as FAIL
+//    outcomes — the old `catch → metacogPass=false` inflated precision/recall
+//  - precision/recall report 'N/A' when denominators are 0
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
-// const prisma = new PrismaClient();
-
 const BASE_DIR = path.join(__dirname);
 const DIRS = ['pass_cases', 'fail_cases', 'hallucination_cases', 'uncertainty_cases', 'contradiction_cases'];
 
-const TRIAGE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-const UNCERTAINTY_URL = process.env.UNCERTAINTY_SERVICE_URL || 'http://localhost:8002';
-const VLM_URL = process.env.VLM_SERVICE_URL || 'http://localhost:8001';
 const METACOGNITION_URL = process.env.METACOGNITION_URL || 'http://localhost:8003';
 
 async function runSafetyValidation() {
-  console.log(`Starting Full Safety Validation Pipeline...`);
-  
-  // 1. Create a temporary validation tenant
-  const tenantId = `VALIDATION-${uuidv4()}`;
+  console.log(`Starting Full Pipeline Safety Validation...`);
 
   let total = 0;
   let expectedFails = 0;
   let expectedPasses = 0;
   let actualFails = 0;
   let actualPasses = 0;
+  let errorCases = 0;
 
   let falsePasses = 0;
   let falseBlocks = 0;
-  let safetyInterventions = 0; // Stage 6
+  let safetyInterventions = 0;
 
-  const resultsMatrix = [];
+  const resultsMatrix: unknown[] = [];
 
-  try {
-    for (const dir of DIRS) {
-      const dirPath = path.join(BASE_DIR, dir);
-      if (!fs.existsSync(dirPath)) continue;
+  for (const dir of DIRS) {
+    const dirPath = path.join(BASE_DIR, dir);
+    if (!fs.existsSync(dirPath)) continue;
 
-      const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.json')).slice(0, 10); // Limit to 10 per dir to avoid overloading
-      for (const file of files) {
-        total++;
-        const data = JSON.parse(fs.readFileSync(path.join(dirPath, file), 'utf-8'));
-        
-        // 2. Generate temporary scan entry
-        const scanId = `SCAN-${uuidv4()}`;
+    const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.json')).slice(0, 10);
+    for (const file of files) {
+      total++;
+      const data = JSON.parse(fs.readFileSync(path.join(dirPath, file), 'utf-8'));
 
-        const triagePass = true;
-        const vlmPass = true;
-        let metacogPass = true;
+      const scanId = `SCAN-${uuidv4()}`;
 
-        try {
-          // Stage A: Triage + Uncertainty (Mocked since we don't have real images, we send raw params or skip the image processing)
-          // Actually, Triage expects an image. Since we don't have images for the generated cases, we will just use the generated attributes to skip straight to Metacognition.
-          // Wait! The user's specification for Stage 5 is to run the pipeline sequentially. We can mock the responses of Triage/VLM to feed exactly our synthetic JSON inputs into Metacognition, to see what the pipeline decision is.
-          
-          const triageResult = {
-            primaryFinding: data.triageFinding,
-            primaryCondition: data.primary_condition,
-            urgency: "CRITICAL",
-            confidence: data.confidence,
-            allFindings: []
-          };
+      // Synthetic upstream outputs (documented mock — no real images exist
+      // for generated cases; the gate decision is what is under test).
+      const triageResult = {
+        primaryFinding: data.triageFinding,
+        urgency: data.urgency ?? "CRITICAL",
+        confidence: data.confidence,
+        allFindings: []
+      };
 
-          const uncertaintyResult = {
-            compositeScore: data.uncertainty
-          };
+      const uncertaintyResult = {
+        compositeScore: data.uncertainty
+      };
 
-          const vlmResult = {
-            findings: data.vlmImpression,
-            impression: data.vlmImpression
-          };
+      const vlmResult = {
+        findings: data.vlmImpression,
+        impression: data.vlmImpression
+      };
 
-          // Stage B: Metacognition
-          const metacogResp = await axios.post(`${METACOGNITION_URL}/metacognition/evaluate`, {
-            scan_id: scanId,
-            primary_finding: triageResult.primaryFinding,
-            primary_condition: triageResult.primaryCondition,
-            urgency: triageResult.urgency,
-            confidence: triageResult.confidence,
-            uncertainty_score: uncertaintyResult.compositeScore,
-            shap_values: {},
-            modality: data.modality,
-            body_part: data.body_part,
-            patient_age: 45,
-            patient_sex: "M",
-            all_findings: [],
-            report_text: vlmResult.impression
-          });
+      // Stage B: Metacognition (real service call)
+      let metacogPass = false;
+      let metacogAlert = false;
+      let errored = false;
+      try {
+        const metacogResp = await axios.post(`${METACOGNITION_URL}/metacognition/evaluate`, {
+          scan_id: scanId,
+          primary_finding: triageResult.primaryFinding,
+          urgency: triageResult.urgency,
+          confidence: triageResult.confidence,
+          uncertainty_score: uncertaintyResult.compositeScore,
+          shap_values: [],
+          modality: data.modality,
+          body_part: data.body_part,
+          patient_age: 45,
+          patient_sex: "M",
+          all_findings: [],
+          report_text: vlmResult.impression
+        });
 
-          metacogPass = metacogResp.data.layer9_safe_to_alert;
-          if (!metacogPass) safetyInterventions++;
-
-        } catch (e: any) {
-          metacogPass = false;
-        }
-
-        const actual = metacogPass ? "PASS" : "FAIL";
-        const expected = data.expected;
-
-        if (expected === "FAIL") expectedFails++;
-        else expectedPasses++;
-
-        if (actual === "FAIL") actualFails++;
-        else actualPasses++;
-
-        if (expected === "FAIL" && actual === "PASS") falsePasses++;
-        if (expected === "PASS" && actual === "FAIL") falseBlocks++;
-
-        resultsMatrix.push({ scanId, expected, actual });
-
-        // Cleanup scan
+        metacogPass = !!metacogResp.data.passed;
+        metacogAlert = !!metacogResp.data.safe_to_alert;
+        if (!metacogPass || !metacogAlert) safetyInterventions++;
+      } catch (e: any) {
+        // An unreachable/failing gate is NOT a safety outcome.
+        errored = true;
+        console.error(`Error on case ${data.scan_id}:`, e.message);
       }
-    }
-    
-    const precision = actualFails > 0 ? ((expectedFails - falsePasses) / actualFails) * 100 : 100;
-    const recall = expectedFails > 0 ? ((expectedFails - falsePasses) / expectedFails) * 100 : 100;
 
-    console.log(`\n--- Full Pipeline Validation ---`);
-    console.log(`Total Scans Tested: ${total}`);
-    console.log(`Safety Precision: ${precision.toFixed(1)}%`);
-    console.log(`Safety Recall (Catch Rate): ${recall.toFixed(1)}%`);
-    console.log(`False Pass Rate (Danger): ${((falsePasses / total) * 100).toFixed(1)}%`);
-    console.log(`False Block Rate (Nuisance): ${((falseBlocks / total) * 100).toFixed(1)}%`);
-    console.log(`\nSafety Intervention Rate: ${((safetyInterventions / total) * 100).toFixed(1)}% (Cases where Metacognition changed outcome to FAIL)`);
-    
-  } finally {
-    // Cleanup tenant
+      if (errored) {
+        errorCases++;
+        resultsMatrix.push({ scanId: data.scan_id, expected: data.expected, actual: 'ERROR' });
+        continue;
+      }
+
+      const actual = metacogPass && metacogAlert ? "PASS" : "FAIL";
+      const expected = data.expected;
+
+      if (expected === "FAIL") expectedFails++;
+      else expectedPasses++;
+
+      if (actual === "FAIL") actualFails++;
+      else actualPasses++;
+
+      if (expected === "FAIL" && actual === "PASS") falsePasses++;
+      if (expected === "PASS" && actual === "FAIL") falseBlocks++;
+
+      resultsMatrix.push({ scanId: data.scan_id, expected, actual });
+    }
   }
+
+  const precision = actualFails > 0 ? ((expectedFails - falsePasses) / actualFails) * 100 : null;
+  const recall = expectedFails > 0 ? ((expectedFails - falsePasses) / expectedFails) * 100 : null;
+
+  console.log(`\n--- Full Pipeline Validation ---`);
+  console.log(`Total Scans Tested: ${total}`);
+  console.log(`Service Errors: ${errorCases} (fail the run)`);
+  console.log(`Safety Precision: ${precision === null ? 'N/A' : precision.toFixed(1)}%`);
+  console.log(`Safety Recall (Catch Rate): ${recall === null ? 'N/A' : recall.toFixed(1)}%`);
+  console.log(`False Pass Rate (Danger): ${total > 0 ? ((falsePasses / total) * 100).toFixed(1) : 'N/A'}%`);
+  console.log(`False Block Rate (Nuisance): ${total > 0 ? ((falseBlocks / total) * 100).toFixed(1) : 'N/A'}%`);
+  console.log(`\nSafety Intervention Rate: ${total > 0 ? ((safetyInterventions / total) * 100).toFixed(1) : 'N/A'}% (Cases where Metacognition changed outcome to FAIL)`);
+
+  process.exitCode = errorCases > 0 ? 1 : 0;
 }
 
 runSafetyValidation().catch(console.error);

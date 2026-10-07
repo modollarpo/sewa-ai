@@ -2,6 +2,9 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { prisma } from '../config/database';
 import { AppError } from '../utils/AppError';
+import { calibrationService } from '../services/calibrationService';
+import { logger } from '../utils/logger';
+import { auditLog } from '../utils/audit';
 
 const router = Router();
 
@@ -73,8 +76,37 @@ router.post('/review/:scanId',
 
       if (!finalGroundTruth) throw new AppError('finalGroundTruth is required', 400);
 
-      const scan = await prisma.scan.findFirst({ where: { id: scanId, tenantId } });
+      // Load AI result so the adjudication can be recorded against it
+      const scan = await prisma.scan.findFirst({
+        where: { id: scanId, tenantId },
+        include: { aiResult: true },
+      });
       if (!scan) throw new AppError('Scan not found', 404);
+
+      // ── Calibration wiring (audit E-09) ────────────────────────────────
+      // recordPrediction was defined but never called. This adjudication is
+      // the prediction-outcome pair source: correct when the final ground
+      // truth matches the AI finding, incorrect otherwise.
+      if (scan.aiResult) {
+        const aiFinding = scan.aiResult.primaryFinding;
+        const isCorrect = finalGroundTruth.trim().toLowerCase() === aiFinding.trim().toLowerCase();
+        await calibrationService.recordPrediction({
+          scanId,
+          tenantId,
+          modality: scan.modality,
+          predictedConfidence: scan.aiResult.confidence,
+          predictedFinding: aiFinding,
+          actualOutcome: isCorrect ? 'correct' : 'incorrect',
+          outcomeDeterminedBy: 'radiologist',
+          outcomeDeterminedAt: new Date(),
+          clinicianOverride: !isCorrect,
+        }).catch(e => logger.warn(`[LearningLoop] calibration record failed: ${e.message}`));
+        await auditLog({
+          tenantId, userId, action: 'ADJUDICATION_RECORDED',
+          entity: 'Scan', entityId: scanId,
+          metadata: { aiFinding, finalGroundTruth, aiCorrect: isCorrect },
+        }).catch(e => logger.warn(`[LearningLoop] auditLog failed: ${e.message}`));
+      }
 
       // Reset the requiresHumanReview flag since it has been peer-reviewed
       await prisma.scan.update({
@@ -84,10 +116,10 @@ router.post('/review/:scanId',
 
       // Simulate sending to Continuous Learning microservice for retraining
       // fetch(process.env.CL_SERVICE_URL + '/adjudication', { ... })
-      
+
       res.json({ 
         message: 'Peer review recorded and dispatched to Continuous Learning Engine.',
-        adjudication: { scanId, userId, agreementTarget }
+        adjudication: { scanId, userId, agreementTarget, calibrationRecorded: !!scan.aiResult }
       });
     } catch (err) { next(err); }
   }

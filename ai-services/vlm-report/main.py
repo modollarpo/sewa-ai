@@ -82,7 +82,7 @@ app.add_middleware(
 class VLMReportRequest(BaseModel):
     scan_id: str = Field(..., pattern=r"^[A-Z0-9\-_]{4,64}$")
     storage_url: Optional[str] = Field(None, pattern=r"^https?://.*")
-    modality: str = Field(..., pattern=r"^(CT|MRI|XR)$")
+    modality: str = Field(..., pattern=r"^(CT|MRI|XR|US|PET|PETCT|MG|RET|ECG|PATH)$")
     body_part: str = Field(..., min_length=2, max_length=50)
     patient_age: Optional[int] = Field(None, ge=0, le=150)
     patient_sex: Optional[str] = Field(None, pattern=r"^(M|F|O|U)$")
@@ -101,6 +101,7 @@ class VLMReportResponse(BaseModel):
     technique: str
     findings: str
     impression: str
+    recommendation: str
     full_text: str
     generated_at: str
     model_version: str
@@ -256,8 +257,9 @@ HL7 ORU message will be dispatched on signing.
                 return VLMReportResponse(
                     scan_id=req.scan_id,
                     technique=technique,
-                    findings=req.ai_finding,
-                    impression=req.urgency,
+                    findings=findings,
+                    impression=impression,
+                    recommendation=rec,
                     full_text=full_text,
                     generated_at=datetime.now(timezone.utc).isoformat(),
                     model_version="gpt-4o",
@@ -310,6 +312,7 @@ HL7 ORU message will be dispatched on signing.
             technique=technique,
             findings=findings,
             impression=impression,
+            recommendation=rec,
             full_text=full_text,
             generated_at=datetime.now(timezone.utc).isoformat(),
             model_version="vlm-v1.8.0",

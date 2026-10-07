@@ -27,7 +27,7 @@ import * as fhirService from './fhirService';
 import * as longitudinalService from './longitudinalService';
 import { dlq } from './dlqService';
 import { createAxiosInstance } from '../utils/axiosInstance';
-import { buildVLMSystemPrompt, translateReportContent, translateUrgency, type SupportedLanguage } from './vlmLanguageService';
+import { buildVLMSystemPrompt, translateReportContent, type SupportedLanguage } from './vlmLanguageService';
 import { clinicalRulesEngine } from './roadmap/clinicalRulesEngine';
 import { strokeCodeService, type StrokeCodeType } from './roadmap/strokeCodeService';
 
@@ -116,17 +116,71 @@ const SVC_TIMEOUT  = { timeout: 8_000  };   // per AI service call (8s generous 
 const VLM_TIMEOUT  = { timeout: 12_000 };   // VLM: template-based, fast on CPU
 
 // ── Types ─────────────────────────────────────────────────────────────────
+// Wire contracts (snake_case) exactly as returned by the FastAPI ai-services.
+// The orchestrator normalises them at the service boundary (normalize* helpers)
+// so the rest of the pipeline only consumes the camelCase view below.
+export interface RawTriageResult {
+  scan_id?: string;
+  primary_finding: string;
+  snomed_code?: string;
+  urgency: string;                       // CRITICAL | URGENT | NORMAL
+  confidence: number;
+  location?: string | null;
+  size?: string | null;
+  midline_shift?: string | null;
+  inference_ms?: number;
+  model_version?: string;
+  backend?: string;
+  all_findings?: Array<{ condition: string; probability: number }>;
+}
+
 export interface TriageResult {
   primaryFinding: string;
   primaryCondition: string;
   confidence: number;
-  urgency: 'CRITICAL' | 'URGENT' | 'NORMAL' | 'ROUTINE';
+  urgency: 'CRITICAL' | 'URGENT' | 'NORMAL';
   allFindings: Array<{ condition: string; probability: number }>;
-  gradCamUrl?: string;
-  shapValues?: Record<string, number>;
   inferenceMs: number;
   backend?: string;   // "onnx-int8" | "onnx-fp32" | "demo"
-  location?: string;
+  modelVersion?: string;
+  location?: string | null;
+  size?: string | null;
+  midlineShift?: string | null;
+}
+
+function normalizeTriage(raw: RawTriageResult): TriageResult {
+  const urgency: TriageResult['urgency'] =
+    raw.urgency === 'CRITICAL' || raw.urgency === 'URGENT' ? raw.urgency : 'NORMAL';
+  return {
+    primaryFinding: raw.primary_finding,
+    primaryCondition: raw.primary_finding, // triage exposes no separate condition field
+    confidence: raw.confidence,
+    urgency,
+    allFindings: raw.all_findings ?? [],
+    inferenceMs: raw.inference_ms ?? 0,
+    backend: raw.backend,
+    modelVersion: raw.model_version,
+    location: raw.location,
+    size: raw.size,
+    midlineShift: raw.midline_shift,
+  };
+}
+
+export interface RawUncertaintyResult {
+  scan_id?: string;
+  uncertainty_score: number;
+  aleatoric_uncertainty: number;
+  epistemic_uncertainty: number;
+  shap_values?: Array<{ f: string; v: number }>;
+  gradcam_url?: string | null;
+  gradcam_base64?: string | null;
+  mc_dropout_mean?: number;
+  mc_dropout_std?: number;
+  mc_passes_used?: number;
+  is_uncertain: boolean;
+  explanation?: string;
+  inference_ms?: number;
+  backend?: string;
 }
 
 export interface UncertaintyResult {
@@ -136,6 +190,35 @@ export interface UncertaintyResult {
   highUncertaintyFlag: boolean;
   mcPassesUsed?: number;
   inferenceMs: number;
+  shapValues: Array<{ f: string; v: number }>;
+  gradcamUrl?: string | null;
+  backend?: string;
+}
+
+function normalizeUncertainty(raw: RawUncertaintyResult): UncertaintyResult {
+  return {
+    epistemicUncertainty: raw.epistemic_uncertainty ?? 0,
+    aleatoricUncertainty: raw.aleatoric_uncertainty ?? 0,
+    compositeScore: raw.uncertainty_score ?? 0,
+    highUncertaintyFlag: raw.is_uncertain ?? false,
+    mcPassesUsed: raw.mc_passes_used,
+    inferenceMs: raw.inference_ms ?? 0,
+    shapValues: raw.shap_values ?? [],
+    gradcamUrl: raw.gradcam_url ?? null,
+    backend: raw.backend,
+  };
+}
+
+export interface RawVLMResult {
+  scan_id?: string;
+  technique: string;
+  findings: string;
+  impression: string;
+  recommendation?: string;
+  full_text?: string | null;
+  generated_at?: string;
+  model_version?: string;
+  generation_ms?: number;
 }
 
 export interface VLMResult {
@@ -143,21 +226,48 @@ export interface VLMResult {
   findings: string;
   impression: string;
   recommendation: string;
+  fullText: string;
   language: string;
   inferenceMs: number;
+  modelVersion?: string;
+}
+
+function normalizeVLM(raw: RawVLMResult, language: string): VLMResult {
+  return {
+    technique: raw.technique,
+    findings: raw.findings,
+    impression: raw.impression,
+    recommendation: raw.recommendation ?? '',
+    fullText: raw.full_text ?? '',
+    language,
+    inferenceMs: raw.generation_ms ?? 0,
+    modelVersion: raw.model_version,
+  };
+}
+
+// Metacognition service response (live contract, evidence E-02):
+// { scan_id, passed, hallucination_risk, calibration_score, self_eval_notes,
+//   flags[], corrected_urgency, corrected_confidence, safe_to_alert,
+//   evaluation_ms, evaluated_at }
+export interface MetacognitionFlag {
+  code: string;
+  severity: string;    // WARNING | ERROR | INFO
+  message: string;
+  suggestion: string;
 }
 
 export interface MetacognitionResult {
-  layer1_modality_plausibility:   'PASS' | 'FAIL' | 'REJECT';
-  layer2_urgency_consistency:     'PASS' | 'FAIL' | 'FLAG';
-  layer3_confidence_floor:        'PASS' | 'FAIL' | 'FLAG';
-  layer4_shap_coherence:          'PASS' | 'FAIL' | 'FLAG';
-  layer5_uncertainty_conflict:    'PASS' | 'FAIL' | 'FLAG';
-  layer6_report_concordance:      'PASS' | 'FAIL' | 'FLAG';
-  layer7_demographic_plausibility:'PASS' | 'FAIL' | 'FLAG';
-  layer8_hallucination_risk:      number;
-  layer9_safe_to_alert:           boolean;
-  inferenceMs: number;
+  scan_id?: string;
+  passed: boolean;
+  hallucination_risk: number;
+  calibration_score?: number | null;
+  self_eval_notes?: string | null;
+  flags: MetacognitionFlag[];
+  corrected_urgency?: string | null;
+  corrected_confidence?: number | null;
+  safe_to_alert: boolean;
+  evaluation_ms: number;
+  evaluated_at?: string;
 }
 
 export interface PathologyResult {
@@ -240,7 +350,15 @@ async function safePOST<T>(
         await new Promise(r => setTimeout(r, delayMs));
         continue;
       }
-      throw err;
+      // Surface response detail (e.g. pydantic 422 field errors) so DLQ/log
+      // messages are actionable instead of a bare axios status string.
+      const detail = status && err.response?.data
+        ? ` | ${status}: ${JSON.stringify(err.response.data).slice(0, 500)}`
+        : '';
+      if (!detail) throw err;
+      const wrapped = new Error(`${err.message}${detail}`);
+      wrapped.stack = `${err.stack}\n${wrapped.stack}`;
+      throw wrapped;
     }
   }
   throw new Error(`safePOST: exhausted retries for ${url}`);
@@ -670,10 +788,10 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     await emitStageProgress(scanId, tenantId, 'triage_uncertainty');
     const stage1Start = Date.now();
 
-    const [triage, uncertainty] = await Promise.all([
+    const [triageRaw, uncertaintyRaw] = await Promise.all([
 
       // Engine 1: Triage — ONNX INT8 EfficientNet-B0
-      safePOST<TriageResult>(
+      safePOST<RawTriageResult>(
         `${TRIAGE_URL}/triage/predict`,
         {
           scan_id: scanId,
@@ -686,7 +804,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       ),
 
       // Engine 2: Uncertainty — 10-pass ONNX MC-Dropout (parallel, not blocked by triage)
-      safePOST<UncertaintyResult>(
+      safePOST<RawUncertaintyResult>(
         `${UNCERTAINTY_URL}/uncertainty/explain`,
         {
           scan_id: scanId,
@@ -701,6 +819,9 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       ),
 
     ]);
+
+    const triage = normalizeTriage(triageRaw);
+    const uncertainty = normalizeUncertainty(uncertaintyRaw);
 
     const stage1Ms = Date.now() - stage1Start;
     logger.info(
@@ -717,9 +838,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     await emitStageProgress(scanId, tenantId, 'vlm');
     const reportLanguage = (scan.tenant?.reportLanguage ?? 'en') as SupportedLanguage;
     const vlmSystemPrompt = buildVLMSystemPrompt(reportLanguage);
-    const localizedUrgency = translateUrgency(triage.urgency, reportLanguage);
 
-    const vlm = await safePOST<VLMResult>(
+    const vlmRaw = await safePOST<RawVLMResult>(
       `${VLM_URL}/vlm/generate-report`,
       {
         scan_id:              scanId,
@@ -730,10 +850,12 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         patient_sex:          patientSex,
         clinical_indication:  scan.clinicalIndication,
         ai_finding:           triage.primaryFinding,
-        urgency:              localizedUrgency,
+        // Service validates ^{CRITICAL|URGENT|NORMAL}$ — localised labels are
+        // applied when rendering the report, never on the wire.
+        urgency:              triage.urgency,
         confidence:           triage.confidence,
-        location:             (triage as any).location,
-        shap_values:          triage.shapValues,
+        location:             triage.location ?? undefined,
+        shap_values:          uncertainty.shapValues,
         clinical_context:     clinicalContext,
         longitudinal_context: longitudinalContext,
         region:               scan.tenant?.region ?? 'uk',
@@ -742,6 +864,7 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       },
       VLM_TIMEOUT,
     );
+    const vlm = normalizeVLM(vlmRaw, reportLanguage);
     logger.info(`[VLM] ${scanId}: report in ${vlm.inferenceMs}ms`);
     stageTimings.vlm = vlm.inferenceMs;
 
@@ -767,11 +890,12 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       {
         scan_id:          scanId,
         primary_finding:  triage.primaryFinding,
-        primary_condition: triage.primaryCondition,
         urgency:          triage.urgency,
         confidence:       triage.confidence,
         uncertainty_score: uncertainty.compositeScore,
-        shap_values:      triage.shapValues || {},
+        // Service requires a LIST of {f, v} attributions — the uncertainty
+        // engine is the sole source of truth for SHAP values.
+        shap_values:      uncertainty.shapValues,
         modality:         scan.modality,
         body_part:        scan.bodyPart,
         patient_age:      patientAge,
@@ -782,10 +906,28 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       SVC_TIMEOUT,
     );
     logger.info(
-      `[Metacognition] ${scanId}: safe_to_alert=${metacog.layer9_safe_to_alert} ` +
-      `hallucination_risk=${metacog.layer8_hallucination_risk.toFixed(3)} ms=${metacog.inferenceMs}`
+      `[Metacognition] ${scanId}: safe_to_alert=${metacog.safe_to_alert} ` +
+      `passed=${metacog.passed} hallucination_risk=${metacog.hallucination_risk.toFixed(3)} ms=${metacog.evaluation_ms}`
     );
-    stageTimings.metacog = metacog.inferenceMs;
+    stageTimings.metacog = metacog.evaluation_ms;
+
+    // ── Metacognition corrections ───────────────────────────────────────
+    // The service may override urgency/confidence when its rules detect an
+    // implausible triage output. Apply valid corrections from here on.
+    const urgencyCorrected =
+      !!metacog.corrected_urgency &&
+      metacog.corrected_urgency !== triage.urgency &&
+      (metacog.corrected_urgency === 'CRITICAL' ||
+        metacog.corrected_urgency === 'URGENT' ||
+        metacog.corrected_urgency === 'NORMAL');
+    const finalUrgency: 'CRITICAL' | 'URGENT' | 'NORMAL' = urgencyCorrected
+      ? metacog.corrected_urgency as 'CRITICAL' | 'URGENT' | 'NORMAL'
+      : triage.urgency;
+    const confidenceCorrected =
+      metacog.corrected_confidence != null &&
+      metacog.corrected_confidence >= 0 && metacog.corrected_confidence <= 1 &&
+      metacog.corrected_confidence !== triage.confidence;
+    const finalConfidence: number = confidenceCorrected && metacog.corrected_confidence != null ? metacog.corrected_confidence : triage.confidence;
 
     const doorToAlertMs = Date.now() - pipelineStart;
 
@@ -793,12 +935,15 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     const validatedResult = AIResultSchema.parse({
       scanId,
       primaryFinding:   triage.primaryFinding,
-      urgency:          triage.urgency === 'ROUTINE' ? 'NORMAL' : triage.urgency,
-      confidence:       triage.confidence,
+      urgency:          finalUrgency,
+      confidence:       finalConfidence,
       uncertaintyScore: uncertainty.compositeScore,
       metacognitionFlags: [
-        ...(metacog.layer9_safe_to_alert  ? []                    : ['UNSAFE_TO_ALERT']),
+        ...(metacog.safe_to_alert ? [] : ['UNSAFE_TO_ALERT']),
+        ...(metacog.passed ? [] : ['METACOGNITION_BLOCKED']),
         ...(uncertainty.highUncertaintyFlag ? ['HIGH_UNCERTAINTY'] : []),
+        ...(urgencyCorrected ? ['URGENCY_CORRECTED_BY_METACOGNITION'] : []),
+        ...metacog.flags.map(f => f.code),
       ],
     });
 
@@ -807,6 +952,9 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         tenantId, // Ensure tenantId is persisted for isolation
         ...validatedResult,
         summary: triage.primaryFinding, // populate summary
+        location: triage.location ?? null,
+        size: triage.size ?? null,
+        midlineShift: triage.midlineShift ?? null,
         epistemicUncertainty: uncertainty.epistemicUncertainty,
         aleatoricUncertainty: uncertainty.aleatoricUncertainty,
         rawJson: {
@@ -818,15 +966,65 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           vlm, metacog, doorToAlertMs,
           pipeline: { stage1ParallelMs: stage1Ms, backend: triage.backend },
         } as any,
-        modelId: 'sewa-cpu-onnx-int8-v2',
+        // Honest model id: expose the actual inference backend reported by the
+        // service (e.g. "demo" when weights are absent) — never a fixed "v2".
+        modelId: `sewa-triage-${triage.backend ?? 'unknown'}`,
+        modelVersion: triage.modelVersion ?? null,
+        inferenceMs: Date.now() - pipelineStart,
         clinicalContext,
         longitudinalContext,
+        vlmTechnique:  vlm.technique,
         vlmFindings:   vlm.findings,
         vlmImpression: vlm.impression,
-        gradcamUrl: triage.gradCamUrl,
-        shapValues: triage.shapValues,
+        vlmFullText:   vlm.fullText,
+        metacognitionPassed: metacog.passed,
+        metacognitionLayers: {
+          flags: metacog.flags,
+          safe_to_alert: metacog.safe_to_alert,
+          corrected_urgency: metacog.corrected_urgency ?? null,
+          corrected_confidence: metacog.corrected_confidence ?? null,
+          calibration_score: metacog.calibration_score ?? null,
+          evaluated_at: metacog.evaluated_at ?? null,
+        } as any,
+        hallucinationRisk: metacog.hallucination_risk,
+        selfEvalNotes: metacog.self_eval_notes ?? null,
+        metacognitionScore: metacog.calibration_score ?? null,
+        gradcamUrl: uncertainty.gradcamUrl ?? null,
+        shapValues: uncertainty.shapValues as any,
       },
     });
+
+    // ── Metacognition audit trail (audit E-09) ───────────────────────────
+    // MetacognitionAuditLog had zero writers. Persist the wire flags mapped
+    // onto the schema's layer model; never blocks the pipeline on failure.
+    const auditFlags = metacog.flags;
+    const layerStatusFor = (code: string): string => {
+      const f = auditFlags.find(x => x.code === code);
+      return f ? (f.severity === 'ERROR' ? 'FAIL' : 'FLAG') : 'PASS';
+    };
+    const contradictionFlag = auditFlags.find(x => x.code === 'REPORT_CONTRADICTION');
+    await prisma.metacognitionAuditLog.create({
+      data: {
+        scanId, tenantId, aiResultId: aiResult.id,
+        layer1ModalityPlausibility: layerStatusFor('IMPLAUSIBLE_FINDING'),
+        layer2UrgencyConsistency: layerStatusFor('URGENCY_MISMATCH'),
+        layer3ConfidenceFloor: layerStatusFor('LOW_CONFIDENCE'),
+        layer4SHAPCoherence: layerStatusFor('SHAP_INCOHERENCE'),
+        layer5UncertaintyConflict: layerStatusFor('CONFIDENCE_UNCERTAINTY_CONFLICT'),
+        layer6ReportConcordance: layerStatusFor('REPORT_CONTRADICTION'),
+        layer7DemographicPlausibility: layerStatusFor('DEMOGRAPHIC_IMPLAUSIBILITY'),
+        layer8HallucinationRisk: metacog.hallucination_risk,
+        layer9SafeToAlert: metacog.safe_to_alert,
+        contradictionDetected: !!contradictionFlag,
+        contradictionType: contradictionFlag ? 'REPORT_VLM_CONTRADICTION' : null,
+        contradictionSeverity: contradictionFlag?.severity ?? null,
+        contradictionDetail: (contradictionFlag ?? null) as any,
+        reasoningChain: auditFlags as any,
+        overallDecision: !metacog.passed ? 'BLOCKED' : metacog.safe_to_alert ? 'PASS' : 'ALERT_SUPPRESSED',
+        decisionConfidence: metacog.calibration_score ?? 0,
+        decisionReasoning: metacog.self_eval_notes ?? '',
+      },
+    }).catch(e => logger.warn(`[MetacognitionAuditLog] write failed: ${e.message}`));
 
     await prisma.report.create({
       data: {
@@ -835,7 +1033,10 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         findings: vlm.findings,
         impression: vlm.impression,
         technique: vlm.technique,
-        recommendation: vlm.recommendation,
+        recommendation: vlm.recommendation || null,
+        fullText: vlm.fullText || null,
+        vlmGenerated: true,
+        vlmVersion: vlm.modelVersion ?? null,
         content: `TECHNIQUE: ${vlm.technique}\n\nFINDINGS: ${vlm.findings}\n\nIMPRESSION: ${vlm.impression}\n\nRECOMMENDATION: ${vlm.recommendation}`,
         summary: vlm.impression,
         status: 'draft',
@@ -846,11 +1047,11 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       where: { id: scanId },
       data: {
         status: 'ai_complete',
-        urgency: triage.urgency,
-        requiresHumanReview: !metacog.layer9_safe_to_alert || uncertainty.highUncertaintyFlag,
+        urgency: finalUrgency,
+        requiresHumanReview: !metacog.passed || uncertainty.highUncertaintyFlag,
         humanReviewReason: uncertainty.highUncertaintyFlag
           ? 'HIGH_UNCERTAINTY'
-          : (!metacog.layer9_safe_to_alert ? 'METACOGNITION_FAIL' : null),
+          : (!metacog.passed ? 'METACOGNITION_FAIL' : null),
       },
     });
 
@@ -862,9 +1063,12 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       entityId: aiResult.id,
       metadata: {
         scanId,
-        urgency: triage.urgency,
-        confidence: triage.confidence,
-        safeToAlert: metacog.layer9_safe_to_alert,
+        urgency: finalUrgency,
+        confidence: finalConfidence,
+        safeToAlert: metacog.safe_to_alert,
+        metacognitionPassed: metacog.passed,
+        correctedUrgency: metacog.corrected_urgency ?? null,
+        correctedConfidence: metacog.corrected_confidence ?? null,
         doorToAlertMs,
         backend: triage.backend ?? 'unknown',
         stage1ParallelMs: stage1Ms,
@@ -873,31 +1077,31 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
 
     // Real-time worklist update
     io.to(`tenant:${tenantId}`).emit('scan:ai_complete', {
-      scanId, urgency: triage.urgency, confidence: triage.confidence,
+      scanId, urgency: finalUrgency, confidence: finalConfidence,
       primaryFinding: triage.primaryFinding,
-      metacognitionPassed: metacog.layer9_safe_to_alert,
+      metacognitionPassed: metacog.passed,
       doorToAlertMs,
     });
 
     // Cache result
     await redisClient.setex(`ai:result:${scanId}`, 3600, JSON.stringify(aiResult));
 
-    // Alert dispatch (only if metacog passed)
-    if (metacog.layer9_safe_to_alert) {
+    // Alert dispatch (only if metacog passed its alert safety gate)
+    if (metacog.safe_to_alert) {
       await alertService.dispatch({
         tenantId, scanId, aiResultId: aiResult.id,
-        urgency: triage.urgency, primaryFinding: triage.primaryFinding,
-        confidence: triage.confidence, doorToAlertMs,
+        urgency: finalUrgency, primaryFinding: triage.primaryFinding,
+        confidence: finalConfidence, doorToAlertMs,
       });
     } else {
       logger.warn(`[Metacognition] ${scanId}: FAIL — routed to human review`);
       io.to(`tenant:${tenantId}`).emit('scan:review_required', {
-        scanId, urgency: triage.urgency, reason: 'metacognition_safety_gate',
+        scanId, urgency: finalUrgency, reason: 'metacognition_safety_gate',
       });
     }
 
     stageTimings.total = Date.now() - pipelineStart;
-    const terminalStage: PipelineStage = !metacog.layer9_safe_to_alert || uncertainty.highUncertaintyFlag
+    const terminalStage: PipelineStage = !metacog.passed || uncertainty.highUncertaintyFlag
       ? 'human_review'
       : 'complete';
     await emitStageProgress(scanId, tenantId, terminalStage, {

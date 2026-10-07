@@ -62,6 +62,7 @@ MODEL_VERSION = os.getenv("MODEL_VERSION", "v2.4.1")
 INT8_MODEL    = MODEL_CACHE / f"triage_{MODEL_VERSION}_int8.onnx"
 FP32_MODEL    = MODEL_CACHE / f"triage_{MODEL_VERSION}.onnx"
 MODEL_ID      = "uncertainty-triage"
+ACTIVE_BACKEND = "demo"  # set in lifespan from the model actually loaded
 INPUT_SHAPE   = (1, 3, 224, 224)
 
 # CPU-optimised MC-Dropout pass count
@@ -103,6 +104,7 @@ def _create_demo_onnx() -> Path:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global ACTIVE_BACKEND
     model_path = INT8_MODEL if INT8_MODEL.exists() else FP32_MODEL
     if not model_path.exists():
         # First-boot: auto-generate a structural demo ONNX so the service stays healthy
@@ -117,6 +119,10 @@ async def lifespan(app: FastAPI):
         logger.info(f"[Uncertainty] Model loaded: {model_path.name}")
     else:
         logger.warning("[Uncertainty] No model file found — running in demo mode")
+    ACTIVE_BACKEND = (
+        "onnx-int8-cpu" if INT8_MODEL.exists()
+        else ("onnx-fp32-cpu" if FP32_MODEL.exists() else "demo")
+    )
     yield
     logger.info("[Uncertainty] Shutdown")
 
@@ -139,7 +145,7 @@ class UncertaintyRequest(BaseModel):
     scan_id: str = Field(..., pattern=r"^[A-Z0-9\-_]{4,64}$")
     storage_url: Optional[str] = Field(None, pattern=r"^https?://.*")
     image_data: Optional[str] = None
-    modality: str = Field(..., pattern=r"^(CT|MRI|XR)$")
+    modality: str = Field(..., pattern=r"^(CT|MRI|XR|US|PET|PETCT|MG|RET|ECG|PATH)$")
     body_part: str = Field(..., min_length=2, max_length=50)
     primary_finding: str = Field(..., min_length=2, max_length=100)
     confidence: float = Field(..., ge=0.0, le=1.0)
@@ -442,7 +448,7 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
             is_uncertain=is_uncertain,
             explanation=explanation,
             inference_ms=ms,
-            backend="onnx-int8-cpu",
+            backend=ACTIVE_BACKEND,
         )
 
     except HTTPException:

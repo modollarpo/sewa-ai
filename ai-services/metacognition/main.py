@@ -129,7 +129,7 @@ class MetacognitionRequest(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0)
     uncertainty_score: float = Field(..., ge=0.0, le=1.0)
     shap_values: Optional[List[SHAPValue]] = []
-    modality: str = Field(..., pattern=r"^(CT|MRI|XR)$")
+    modality: str = Field(..., pattern=r"^(CT|MRI|XR|US|PET|PETCT|MG|RET|ECG|PATH)$")
     body_part: str = Field(..., min_length=2, max_length=50)
     patient_age: Optional[int] = Field(None, ge=0, le=150)
     patient_sex: Optional[str] = Field(None, pattern=r"^(M|F|O|U)$")

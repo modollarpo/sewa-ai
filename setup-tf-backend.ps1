@@ -15,7 +15,7 @@ Write-Host "`nLogging in to Azure..."
 az login
 
 # Optionally set the subscription (choose your number from az login)
-# az account set --subscription "15178061-4b15-46ed-9c4a-38ce0b485428"
+# az account set --subscription "a14702a0-439b-42f5-b31a-8b898adfa965"
 
 # ───────────────────────────────
 # Step 2: Create Resource Group

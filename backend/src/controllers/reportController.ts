@@ -93,6 +93,28 @@ export async function signReport(req: Request, res: Response, next: NextFunction
     if (!report) throw new AppError('Report not found', 404);
     if (report.status === 'approved') throw new AppError('Report already signed', 409);
 
+    // Safety gate (audit E-13/N30): a scan still flagged for human review by
+    // the AI pipeline (HIGH_UNCERTAINTY / METACOGNITION_FAIL / modality
+    // escalation) must not be signed without an explicit acknowledgment of
+    // that flag. This makes the sign action a conscious human review rather
+    // than an accidental bypass of the safety gate.
+    if (report.scan.requiresHumanReview) {
+      const acknowledge = (req as any).body?.acknowledgeReview === true;
+      if (!acknowledge) {
+        throw new AppError(
+          `Scan ${report.scanId} is still flagged for human review` +
+          (report.scan.humanReviewReason ? ` (${report.scan.humanReviewReason})` : '') +
+          '. Signing is blocked until the review flag is acknowledged: ' +
+          'release it via the review workflow, or pass acknowledgeReview: true after reviewing the scan.',
+          403,
+        );
+      }
+      await auditLog({
+        tenantId, userId, action: 'REVIEW_ACKNOWLEDGED_ON_SIGN', entity: 'Scan', entityId: report.scanId,
+        metadata: { reason: report.scan.humanReviewReason ?? null, reportId: id },
+      });
+    }
+
     await snapshotReportVersion(id, userId, 'Signed version');
 
     const signed = await prisma.report.update({
@@ -103,7 +125,12 @@ export async function signReport(req: Request, res: Response, next: NextFunction
     // Generate Final High-Fidelity Report (Feature 36)
     await generateClinicalPDF(id).catch(e => logger.warn(`[ReportGen] Failed for ${id}: ${e.message}`));
 
-    await prisma.scan.update({ where: { id: report.scanId }, data: { status: 'reported' } });
+    await prisma.scan.update({
+      where: { id: report.scanId },
+      // Signing is the terminal human review — clear the AI safety flag so the
+      // scan leaves the review worklist.
+      data: { status: 'reported', requiresHumanReview: false, humanReviewReason: null },
+    });
 
     // FHIR Integration (Feature 4) — R4 Compliance
     let fhirId: string | null = null;

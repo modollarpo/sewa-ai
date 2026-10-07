@@ -64,6 +64,10 @@ describe('AI Service Circuit Breaker', () => {
 
   it('should successfully generate report on API success', async () => {
     mockPost.mockResolvedValueOnce({ data: { impression: 'Normal' } });
+    (prisma.aIResult.findUnique as jest.Mock).mockResolvedValueOnce({
+      scanId: 'scan1', primaryFinding: 'Acute ICH', urgency: 'CRITICAL', confidence: 0.95,
+      scan: { modality: 'CT', bodyPart: 'HEAD', storageUrl: 'https://example.com/dicom' },
+    });
     (prisma.aIResult.update as jest.Mock).mockResolvedValueOnce({});
 
     const result = await generateVLMReport('scan1', 'tenant1');
@@ -75,6 +79,10 @@ describe('AI Service Circuit Breaker', () => {
 
   it('should trigger circuit breaker and throw error on API failure', async () => {
     mockPost.mockRejectedValueOnce(new Error('Network Error'));
+    (prisma.aIResult.findUnique as jest.Mock).mockResolvedValue({
+      scanId: 'scan1', primaryFinding: 'Acute ICH', urgency: 'CRITICAL', confidence: 0.95,
+      scan: { modality: 'CT', bodyPart: 'HEAD', storageUrl: 'https://example.com/dicom' },
+    });
 
     await expect(generateVLMReport('scan1', 'tenant1')).rejects.toThrow(
       'VLM Engine currently unavailable. Request queued for secondary processing.',

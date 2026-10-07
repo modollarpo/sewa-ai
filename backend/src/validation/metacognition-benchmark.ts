@@ -1,3 +1,13 @@
+// Metacognition Benchmark — safety gate catch-rate on synthetic corpus.
+//
+// FIXED (2026-10-06 audit E-11/N29):
+//  - sends `shap_values: []` (service requires a LIST, not an object)
+//  - no longer sends non-existent `primary_condition` request field
+//  - reads the real response fields `passed` / `safe_to_alert` (not the
+//    non-existent `layer9_safe_to_alert`)
+//  - **service errors are counted as errors, NOT as "blocked/safe"** — the old
+//    `catch → blockedCases++` behaviour inflated the reported catch rate.
+//  - zero-denominator catch rate reports 'N/A' instead of a hard-coded '100.0'
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
@@ -11,6 +21,7 @@ async function runBenchmark() {
   let totalCases = 0;
   let unsafeCases = 0;
   let blockedCases = 0;
+  let errorCases = 0;
   let vlmContradictions = 0;
   let caughtContradictions = 0;
   let uncertaintyEscalations = 0;
@@ -35,11 +46,11 @@ async function runBenchmark() {
         const resp = await axios.post(`${METACOGNITION_URL}/metacognition/evaluate`, {
           scan_id: data.scan_id,
           primary_finding: data.triageFinding,
-          primary_condition: data.primary_condition,
-          urgency: "CRITICAL",
+          urgency: data.urgency ?? "CRITICAL",
           confidence: data.confidence,
           uncertainty_score: data.uncertainty,
-          shap_values: {},
+          // Service contract requires a list of {f, v} attributions.
+          shap_values: [],
           modality: data.modality,
           body_part: data.body_part,
           patient_age: 45,
@@ -49,7 +60,9 @@ async function runBenchmark() {
         });
 
         const result = resp.data;
-        const blocked = !result.layer9_safe_to_alert;
+        // blocked == the gate withholds either radiologist routing (passed)
+        // or pager alert (safe_to_alert).
+        const blocked = !result.passed || !result.safe_to_alert;
         
         if (isUnsafe && blocked) blockedCases++;
         if (dir === 'contradiction_cases' && blocked) caughtContradictions++;
@@ -57,23 +70,28 @@ async function runBenchmark() {
 
       } catch (err: any) {
         console.error(`Error on case ${data.scan_id}:`, err.message);
-        // If service fails or timeouts, we assume it's blocked/failed safety.
-        if (isUnsafe) blockedCases++;
+        // Failures must NOT count as blocked — that would inflate the results.
+        errorCases++;
       }
     }
   }
 
-  const catchRate = unsafeCases > 0 ? ((blockedCases / unsafeCases) * 100).toFixed(1) : '100.0';
+  const catchRate = unsafeCases > 0 ? ((blockedCases / unsafeCases) * 100).toFixed(1) : 'N/A';
   
   console.log(`\nTotal Cases: ${totalCases}`);
   console.log(`\nUnsafe Cases:\n${unsafeCases}`);
   console.log(`\nBlocked:\n${blockedCases}`);
   console.log(`\nMissed:\n${unsafeCases - blockedCases}`);
+  console.log(`\nService Errors (not safety outcomes):\n${errorCases}`);
   console.log(`\nCatch Rate:\n${catchRate}%`);
   console.log(`\nVLM Contradictions:\n${vlmContradictions}`);
   console.log(`\nCaught:\n${caughtContradictions}`);
   console.log(`\nUncertainty Escalations:\n${uncertaintyEscalations}`);
   console.log(`\nCorrect Escalations:\n${correctEscalations}`);
+
+  // Non-zero exit when the service is unreachable — a failed run must not
+  // masquerade as a passing safety gate in CI.
+  process.exitCode = errorCases > 0 ? 1 : 0;
 }
 
 runBenchmark().catch(console.error);

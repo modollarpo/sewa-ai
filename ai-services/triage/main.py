@@ -212,6 +212,8 @@ class Modality(str, Enum):
     MRI  = "MRI"
     XR   = "XR"
     US   = "US"
+    PET  = "PET"
+    PETCT = "PETCT"
     ECG  = "ECG"
     PATH = "PATH"   # Digital Pathology — Whole Slide Image tiles
 

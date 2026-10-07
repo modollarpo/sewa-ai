@@ -137,7 +137,7 @@ jobs:
       - run: |
           cd ai-services/${{ matrix.service }}
           pip install -r requirements.txt --break-system-packages
-          python -m pytest tests/ -v --tb=short 2>/dev/null || echo "No tests yet — linting only"
+          if [ -d tests ]; then python -m pytest tests/ -v --tb=short; else echo "No tests directory yet — compile check only"; fi
           python -m py_compile main.py && echo "Syntax OK"
 
 # ─────────────────────────────────────────────

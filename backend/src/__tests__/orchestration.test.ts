@@ -162,10 +162,14 @@ describe('AI Orchestration Pipeline — Integration', () => {
     // Stage 3: Metacognition
     mockPost.mockResolvedValueOnce({
       data: {
-        layer1_modality_plausibility: 'PASS',
-        layer9_safe_to_alert:         true,
-        layer8_hallucination_risk:    0.01,
-        inferenceMs:                  30,
+        passed:              true,
+        safe_to_alert:       true,
+        hallucination_risk:  0.01,
+        calibration_score:   0.92,
+        flags:               [],
+        corrected_urgency:   null,
+        corrected_confidence: null,
+        evaluation_ms:       30,
       },
     });
 
@@ -226,9 +230,14 @@ describe('AI Orchestration Pipeline — Integration', () => {
     // Stage 3: Metacognition — FAIL (safety gate)
     mockPost.mockResolvedValueOnce({
       data: {
-        layer9_safe_to_alert:      false,
-        layer8_hallucination_risk: 0.5,
-        inferenceMs:               30,
+        passed:               false,
+        safe_to_alert:        false,
+        hallucination_risk:   0.5,
+        calibration_score:    0.3,
+        flags:                [{ code: 'LOW_CONFIDENCE', severity: 'ERROR', message: 'Confidence below floor', suggestion: 'Refer to radiologist' }],
+        corrected_urgency:    null,
+        corrected_confidence: null,
+        evaluation_ms:        30,
       },
     });
 

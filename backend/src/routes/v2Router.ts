@@ -3,18 +3,75 @@ import { prisma } from '../utils/prismaClient';
 import { calibrationService } from '../services/calibrationService';
 import { federatedV2Service } from '../services/federatedV2Service';
 import { getSystemHealth, getPipelineMetrics, getSecurityEvents } from '../services/observabilityService';
+import { authenticate, authorize } from '../middleware/auth';
 
 const v2Router = Router();
+
+// ── Auth gate (audit E-08) ────────────────────────────────────────────────
+// v2 serves observability / self-audit / FL admin + rollback endpoints and was
+// previously mounted unauthenticated. All routes now require a superadmin.
+v2Router.use(authenticate, authorize('superadmin'));
 
 // ── Self-Audit Endpoints ───────────────────────────────────────────
 
 v2Router.get('/self-audit/scan/:scanId', async (req: Request, res: Response) => {
   try {
-    const result = await prisma.metacognitionAuditLog.findFirst({
-      where: { scanId: req.params.scanId },
+    const { tenantId } = req.user as { tenantId: string };
+    const record = await prisma.metacognitionAuditLog.findFirst({
+      where: { scanId: req.params.scanId, tenantId },
     });
-    if (!result) return res.status(404).json({ error: 'Audit record not found' });
-    res.json(result);
+    if (!record) return res.status(404).json({ error: 'Audit record not found' });
+
+    // Re-run the live self-audit against the persisted pipeline I/O so the
+    // endpoint exercises the otherwise dead runSelfAudit path (audit E-09).
+    let liveSelfAudit = null;
+    try {
+      const aiResult = await prisma.aIResult.findUnique({
+        where: { scanId: req.params.scanId },
+        include: { scan: true },
+      });
+      if (aiResult?.rawJson) {
+        const raw = aiResult.rawJson as any;
+        const selfAuditService = (await import('../services/selfAuditService')).selfAuditService;
+        liveSelfAudit = await selfAuditService.runSelfAudit({
+          scanId: aiResult.scanId,
+          tenantId,
+          modality: aiResult.scan?.modality ?? 'CT',
+          bodyPart: aiResult.scan?.bodyPart ?? null,
+          patientAge: null,
+          patientSex: null,
+          triage: {
+            primaryFinding: aiResult.primaryFinding,
+            urgency: aiResult.urgency,
+            confidence: aiResult.confidence,
+            findings: (raw.triage?.allFindings ?? []).map((f: any) => ({ name: f.condition, confidence: f.probability })),
+          },
+          uncertainty: {
+            epistemic: raw.uncertainty?.epistemicUncertainty ?? 0,
+            aleatoric: raw.uncertainty?.aleatoricUncertainty ?? 0,
+            composite: raw.uncertainty?.compositeScore ?? 0,
+          },
+          vlm: {
+            impression: aiResult.vlmImpression ?? '',
+            findings: raw.vlm?.findings ? [raw.vlm.findings] : [],
+            confidence: aiResult.confidence,
+          },
+          metacognition: {
+            layers: (raw.metacog?.flags ?? []).map((f: any) => ({
+              id: f.code,
+              passed: f.severity === 'ERROR' ? false : true,
+              detail: `${f.severity}: ${f.message}`,
+            })),
+            hallucinationRisk: raw.metacog?.hallucination_risk ?? 0,
+            safeToAlert: raw.metacog?.safe_to_alert ?? false,
+          },
+        });
+      }
+    } catch (e: any) {
+      liveSelfAudit = { error: `Recompute failed: ${e.message}` };
+    }
+
+    res.json({ ...record, liveSelfAudit });
   } catch (e) {
     res.status(500).json({ error: 'Failed to fetch audit record' });
   }

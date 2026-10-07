@@ -121,27 +121,22 @@ r.get('/metrics', async (req, res, next) => {
       conditionMetrics[condition].confidences.push(v.scan.aiResult.confidence);
     });
 
-    // Deterministic per-hour bucket for stable baseline metrics when data is sparse
-    const hrBucket = Math.floor(Date.now() / 3_600_000);
-    
-    const byCondition = statsByCondition.map((c: { primaryFinding: string; _count: { id: number } }, idx: number) => {
+    // Honest per-condition metrics (audit E-12). Reported values come ONLY from
+    // real human validation rows (ClinicalValidation). AUC cannot be derived
+    // from agreement counts, so `auc` is always null until a proper evaluation
+    // harness records ROC data. `sensitivity` is the human-agreement rate on
+    // validated cases (tp / (tp + fp)) and is null when no validation exists.
+    const byCondition = statsByCondition.map((c: { primaryFinding: string; _count: { id: number } }) => {
       const m = conditionMetrics[c.primaryFinding];
-      const hasRealData = m && (m.tp + m.fp) > 5;
-      
-      // Calculate real metrics or use high-fidelity baseline
-      const auc = hasRealData 
-        ? Math.min(0.99, 0.85 + (m.tp / (m.tp + m.fp)) * 0.14) // Simplified AUC approx
-        : (0.94 + ((hrBucket + idx) % 5) / 100);
-        
-      const sensitivity = hasRealData
-        ? (m.tp / (m.tp + m.fp))
-        : (0.92 + ((hrBucket + idx * 2) % 6) / 100);
-
+      const validated = m ? m.tp + m.fp : 0;
+      const agreementRate = validated > 0 ? m.tp / validated : null;
       return {
         name: c.primaryFinding,
-        auc: parseFloat(auc.toFixed(3)),
-        sensitivity: parseFloat(sensitivity.toFixed(3)),
-        cases: c._count.id
+        cases: c._count.id,
+        validated,
+        auc: null,
+        sensitivity: agreementRate === null ? null : parseFloat(agreementRate.toFixed(3)),
+        agreementRate: agreementRate === null ? null : parseFloat(agreementRate.toFixed(3)),
       };
     });
 
@@ -159,45 +154,42 @@ r.get('/metrics', async (req, res, next) => {
 
 /**
  * GET /api/v1/ai-monitoring/drift
- * Model drift detection via PSI and Cohen's Kappa
+ * Model drift detection via PSI and Cohen's Kappa.
+ *
+ * Honest response (audit E-12): the old endpoint returned deterministic
+ * time-bucketed pseudo-metrics (`kappa = 0.84 + (t % 6) / 100`). PSI/Kappa
+ * require per-inference feature distributions and a reference training
+ * distribution, which the platform does not capture. Drift is therefore
+ * NOT measurable today and is reported as such.
  */
-r.get('/drift', async (req, res, next) => {
-  try {
-    // Deterministic per-30-min bucket
-    const driftBucket = Math.floor(Date.now() / 1_800_000);
-    res.json({
-      status: 'stable',
-      kappa: 0.84 + (driftBucket % 6) / 100,   // 0.84–0.89
-      psi:   0.02 + (driftBucket % 2) / 100,   // 0.02–0.03
-      lastChecked: new Date()
-    });
-  } catch (err) { next(err); }
+r.get('/drift', async (_req, res) => {
+  const measured = await prisma.aIResult.count({ select: { _all: true } }).catch(() => ({ _all: 0 }));
+  res.json({
+    status: 'not_available',
+    kappa: null,
+    psi: null,
+    lastChecked: null,
+    message: 'PSI/Kappa drift detection requires per-inference feature distributions and a reference training distribution, which are not captured. Drift cannot be reported without fabricating measurements.',
+    measurements: measured._all,
+  });
 });
 
 /**
  * GET /api/v1/ai-monitoring/bias
- * Demographic bias analysis
+ * Demographic bias analysis.
+ *
+ * Honest response (audit E-12): the old endpoint returned hard-coded AUCs.
+ * Bias auditing requires protected-attribute labels joined to ground truth
+ * outcomes; those are not captured, so the audit is reported as not available.
  */
-r.get('/bias', async (req, res, next) => {
-  try {
-    // Simulate bias audit results
-    res.json({
-      age: [
-        { group: '18-40', auc: 0.943 },
-        { group: '41-60', auc: 0.951 },
-        { group: '61-80', auc: 0.949 },
-        { group: '80+', auc: 0.932 }
-      ],
-      sex: [
-        { group: 'Male', auc: 0.950 },
-        { group: 'Female', auc: 0.951 }
-      ],
-      region: [
-        { group: 'UK', auc: 0.947 },
-        { group: 'Africa', auc: 0.933 }
-      ]
-    });
-  } catch (err) { next(err); }
+r.get('/bias', async (_req, res) => {
+  res.json({
+    status: 'not_available',
+    age: [],
+    sex: [],
+    region: [],
+    message: 'Bias audit requires protected-attribute labels joined to ground-truth outcomes. These are not captured today, so no bias metrics are reported.',
+  });
 });
 
 /**
@@ -228,7 +220,9 @@ r.get('/latency', async (req, res, next) => {
     const hourly = hourlyBuckets.map(bucket =>
       bucket.length > 0
         ? parseFloat((bucket.reduce((a, b) => a + b, 0) / bucket.length / 1000).toFixed(2))
-        : 1.3 // fallback to expected baseline
+        // No inference data for this hour — null, never a fabricated baseline
+        // (audit E-12: the previous hard-coded 1.3s fallback misreported latency).
+        : null
     );
 
     // Compute percentiles across all values
