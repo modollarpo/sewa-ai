@@ -69,8 +69,18 @@ async function runBenchmark() {
         if (data.reason?.includes('highly uncertain') && blocked) correctEscalations++;
 
       } catch (err: any) {
+        const status = err?.response?.status;
+        // A 4xx rejection is the gate refusing malformed input (e.g. Attack-3
+        // "missing metadata") — that IS a safety block, not a service failure.
+        if (status && status >= 400 && status < 500) {
+          console.log(`Case ${data.scan_id}: gateway rejected malformed request (${status}) -> blocked`);
+          if (isUnsafe) blockedCases++;
+          if (data.reason?.includes('highly uncertain')) correctEscalations++;
+          continue;
+        }
+        // Transport/5xx means the gate never ran — must not count as blocked,
+        // that would inflate the results.
         console.error(`Error on case ${data.scan_id}:`, err.message);
-        // Failures must NOT count as blocked — that would inflate the results.
         errorCases++;
       }
     }

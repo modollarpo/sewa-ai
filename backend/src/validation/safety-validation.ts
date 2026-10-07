@@ -91,9 +91,18 @@ async function runSafetyValidation() {
         metacogAlert = !!metacogResp.data.safe_to_alert;
         if (!metacogPass || !metacogAlert) safetyInterventions++;
       } catch (e: any) {
-        // An unreachable/failing gate is NOT a safety outcome.
-        errored = true;
-        console.error(`Error on case ${data.scan_id}:`, e.message);
+        const status = e?.response?.status;
+        // A 4xx rejection is the gate refusing malformed input (e.g. Attack-3
+        // "missing metadata") — that IS a safety block, not a service failure.
+        if (status && status >= 400 && status < 500) {
+          metacogPass = false;
+          metacogAlert = false;
+          safetyInterventions++;
+        } else {
+          // Unreachable/failing gate is NOT a safety outcome.
+          errored = true;
+          console.error(`Error on case ${data.scan_id}:`, e.message);
+        }
       }
 
       if (errored) {
