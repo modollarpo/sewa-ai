@@ -61,6 +61,27 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-07 — research-audit contract repair, branch `fix/contract-repair`)
+
+Audit source: `SEWA_AI_CODEBASE_RESEARCH_IMPLEMENTATION_AUDIT.md` (§34 = next-step list). Frozen tag: `audit-2026-10-06` @ `031b522`.
+
+### ✅ Completed
+- **Wire contract as single source of truth**: `backend/src/services/wire-contract.json` (4 services: request schema + pydantic-mirroring `constraints` + `pipelineSample` + `response.fields` incl. `demo_mode`/`attribution_method`; `vlm` now `live: true`, scope = cpu-template mode) consumed by `backend/src/services/wireContract.ts` (normalizers, builders, `assertContractFields`, `validateRequestPayload`) and by `tests/contract/test_wire_contract.py`.
+- **Live contract test in CI**: `.github/workflows/deploy.yml` → new `contract-test` job (installs triage/vlm/metacognition requirements, boots uvicorn 8000/8001/8002/8003 with `MODEL_CACHE=$RUNNER_TEMP/model-cache`, runs `pytest tests/contract`); `safety-gate` and `build-images` now `need` it. Verified locally: **20/20 live tests pass** against all four real services.
+- **Safety harnesses honest**: `metacognition-benchmark.ts` + `safety-validation.ts` validate the payload first (422 on malformed case = *blocked*; 422 on contract-valid payload / 5xx / transport / malformed response = *contract error* → `process.exitCode = 1`); shared helpers in `backend/src/validation/metacogCase.ts`; `N/A` instead of hard-coded 100% on zero denominators; deleted duplicate `backend/scripts/run-safety-challenge.ts`. Negative-tested: dead service URL → exit 1.
+- **Demo/label honesty**: triage + uncertainty report truthful `backend`, `demo_mode`, `attribution_method` on `/health` *and* on every response (demo weights no longer overwrite real-weight filenames; demo attribution now labelled `demo-random-attribution`); uncertainty no longer fabricates a random image when no image is supplied (400); orchestrator `modelId = sewa-triage-<backend>`.
+- **Fabricated metrics removed**: `ai-monitoring.ts` `/drift` `/bias` return `not_available` + null (E-12/N10/N11); `continuous-learning/main.py` `detect_drift`/`compute_feature_drift` return `status: insufficient_data` with `kappa/psi = null` (<10 / <20 samples) instead of `kappa 1.0 / psi 0.0`, `/metrics` reports null + `"Insufficient data…"` interpretation, drift alerts/snapshots only written with measured values.
+- **Audit-trail writers**: `MetacognitionAuditLog` (E-09), `calibrationService.recordPrediction` at adjudication (`learningLoop.ts`), and now **`ExplainabilityReport` upsert** in `aiOrchestrator.ts` (derived-only reasoning steps, SHAP narrative incl. demo caveat, Grad-CAM url, contradiction text).
+- **Report-signing gate documented**: `docs/adr/003-report-signing-human-review-gate.md` (403 unless `acknowledgeReview: true`; UI has no caller — intentional, logged via `REVIEW_ACKNOWLEDGED_ON_SIGN`).
+- **Tests**: `backend/src/__tests__/wireContract.test.ts` 47/47 pass (DB-free); `orchestration.test.ts` fixtures = full wire contract + cleanup for the two new tables. `npm run lint` → 0 errors; `tsc --noEmit` clean; full jest = 11/15 suites pass locally (the 4 failures are env-only: local Postgres rejects the `sewa` creds and `health.test.ts` wants `DATABASE_URL` from CI env — all four run in CI).
+
+### 🔜 Next
+- **Commit pending**: all of the above is uncommitted on `fix/contract-repair` (untracked: `wire-contract.json`, `wireContract.ts`, `wireContract.test.ts`, `metacogCase.ts`, `tests/contract/`, `docs/adr/003-…`). Do NOT add pre-existing junk: `docs-tools/debug*.mjs`, `infrastructure/terraform-azure/tfplan-*`.
+- Then: push, open PR, confirm CI `contract-test` + `safety-gate` + `test-backend` (incl. `orchestration.test.ts`) go green.
+- Still open from audit §34: "obtain real weights+data or publicly scope all outputs as synthetic/demo" (README/whitepaper claims) and §30 research programme.
+
+---
+
 ## 📋 Work State (2026-08-02 — swedencentral rebuild)
 
 ### ✅ Completed
