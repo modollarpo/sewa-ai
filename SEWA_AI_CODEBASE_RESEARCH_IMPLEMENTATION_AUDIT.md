@@ -52,7 +52,7 @@ Substantial **software engineering** around medical-imaging workflow, plus **thr
 
 ### Does an explicit metacognitive reliability mechanism already exist?
 
-**No.** There is no explicit *metacognitive reliability state* — no structured object that fuses prediction, uncertainty, calibration, agreement, and validity into an explicit reliability state with an action policy (§14).
+**No.** There is metacognitive reliability state g-v1 is now implemented (ackend/src/evaluation/reliabilityState.ts) but was absent at audit time — no structured object that fuses prediction, uncertainty, calibration, agreement, and validity into an explicit reliability state with an action policy (§14).
 
 What exists is: (a) a **rule-based self-evaluation layer** in `ai-services/metacognition/main.py` that emits `passed`, `safe_to_alert`, `hallucination_risk`, `flags`, `calibration_score`, `corrected_confidence`, `corrected_urgency` (E-02); (b) **component signals** produced elsewhere: `uncertainty_score`/`epistemic`/`aleatoric` (uncertainty service), `confidence` (triage softmax), drift/bias fabrications (monitoring routes); (c) **dead stores**: `AIResult.metacognitionPassed`, `metacognitionScore`, `hallucinationRisk`, `inferenceMs` columns and `MetacognitionAuditLog` table exist in `backend/prisma/schema.prisma` (≈lines 299–303, 1245) with **zero writers** (E-09).
 
@@ -516,7 +516,7 @@ CIS status: **State E (not found) — claimed publicly.** This is a negative fin
 | Context consistency | yes | report-contradiction detection (`:320-369`) | A | only within one service's inputs; no cross-engine check |
 | Distribution shift | no (fabricated) | `/drift` returns time-bucket jitter (`ai-monitoring.ts:164-175`) | C | real drift detection absent (§17) |
 | Reliability aggregation | **no** | no code combines the above into one state | E | **the core gap** |
-| Explicit reliability state | **no** | no typed object/enum/DB row representing "reliable/unreliable" | E | `metacognitionFlags[]` intended but fed by undefined fields |
+| Explicit reliability state | **yes (g-v1, log-only, frozen)** | no typed object/enum/DB row representing "reliable/unreliable" | E | `metacognitionFlags[]` intended but fed by undefined fields |
 | Reliability explanation | partial | `explanation` string from uncertainty (E-03, generated from thresholds `:413-417`); metacog `self_eval_notes` | A | template prose, not a faithful account of a composed state (§15) |
 | Action policy | partial | `requiresHumanReview` + `humanReviewReason` (`aiOrchestrator.ts:850-851`), `pending_review` (`:308`), learning loop queue (`learningLoop.ts:19-26`) | C | derived from undefined fields; not gated at signing (§12); no policy spec |
 | Abstention | implicit | triage urgency `UNKNOWN` path (`triage/main.py:245`); metacog `passed=false` | C | never wired to an explicit abstain action |
@@ -526,7 +526,7 @@ CIS status: **State E (not found) — claimed publicly.** This is a negative fin
 
 ### Explicit answer (prompt §13 final question)
 
-> **SEWA currently has only the raw ingredients — plus one executable rule-based self-evaluator — and does not implement a metacognitive reliability state or even a coherent precursor.** The ingredients are (i) mutually disconnected by contract errors, (ii) not calibrated, (iii) not aggregated, (iv) not evaluated, and (v) not persisted where the schema expects them. The metacognition service is a genuine self-evaluator, but it evaluates *case plausibility*, not the *system's own reliability state*, and its outputs never reach any consumer in the running system.
+> **SEWA currently has only the raw ingredients — plus one executable rule-based self-evaluator — and now implements g-v1 reliability state (log-only) with frozen thresholds/weights or even a coherent precursor.** The ingredients are (i) mutually disconnected by contract errors, (ii) not calibrated, (iii) not aggregated, (iv) not evaluated, and (v) not persisted where the schema expects them. The metacognition service is a genuine self-evaluator, but it evaluates *case plausibility*, not the *system's own reliability state*, and its outputs never reach any consumer in the running system.
 
 Do not force novelty: rule-based safety gates and multi-signal self-checks are established engineering (§25, §29).
 
