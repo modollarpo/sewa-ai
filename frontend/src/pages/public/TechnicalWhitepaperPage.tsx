@@ -274,16 +274,20 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
           <section id="compliance" style={{ marginBottom:56, scrollMarginTop:80 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.brand, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:8 }}>Section 6</div>
             <h2 style={h2}>Regulatory Compliance</h2>
+            <div style={{ fontSize:11, color:C.textLo, lineHeight:1.6, marginBottom:12, padding:'10px 14px', background:C.bg2, border:`1px solid ${C.normal}30`, borderRadius:10 }}>
+              Status: none of the certifications below are claimed or evidenced in this repository. Each entry is a
+              planned pathway or a control framework the platform is designed against.
+            </div>
             <div className="regulatory-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>
               {[
-                { cert:'CE Mark (MDR IIb)', detail:'EU Medical Device Regulation 2017/745 · Notified body: BSI Healthcare', color:C.normal },
-                { cert:'UKCA Mark',          detail:'UK Conformity Assessment · Post-Brexit equivalent to CE mark', color:C.normal },
-                { cert:'FDA 510(k)',          detail:'ICH, PE, pneumothorax detection · De Novo classification K200000', color:C.normal },
-                { cert:'NHS DSPT',           detail:'Data Security & Protection Toolkit · Standards Met (2025/2026)', color:C.normal },
-                { cert:'ISO 27001',          detail:'Information Security Management · Annual BSI audit', color:C.brand },
-                { cert:'ISO 13485',          detail:'Medical Device Quality Management System', color:C.brand },
-                { cert:'SOC 2 Type II',      detail:'Annual security, availability & confidentiality audit', color:C.brand },
-                { cert:'Cyber Essentials+',  detail:'UK NCSC Cyber Essentials Plus certification', color:C.brand },
+                { cert:'CE Mark (MDR IIb)', detail:'Not claimed · EU MDR 2017/745 pathway; notified body not yet engaged', color:C.normal },
+                { cert:'UKCA Mark',          detail:'Not claimed · planned Q2 2027 (per regulatory plan)', color:C.normal },
+                { cert:'FDA 510(k)',          detail:'Not claimed · submission planned; no clearance held', color:C.normal },
+                { cert:'NHS DSPT',           detail:'Not claimed · designed against; self-assessment in progress', color:C.normal },
+                { cert:'ISO 27001',          detail:'Not claimed · QMS designed around its controls', color:C.brand },
+                { cert:'ISO 13485',          detail:'Not claimed · certification pathway planned', color:C.brand },
+                { cert:'SOC 2 Type II',      detail:'Not claimed · not audited', color:C.brand },
+                { cert:'Cyber Essentials+',  detail:'Not claimed · not certified', color:C.brand },
               ].map(c => (
                 <div key={c.cert} style={{ padding:'14px 16px', background:C.bg2, border:`1px solid ${c.color}30`, borderRadius:12 }}>
                   <div style={{ fontSize:12, fontWeight:700, color:c.color, marginBottom:4 }}>{c.cert}</div>

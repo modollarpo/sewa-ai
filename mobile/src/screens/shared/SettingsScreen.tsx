@@ -61,7 +61,7 @@ export default function SettingsScreen() {
       {/* About */}
       <View style={s.section}>
         <Text style={s.sectionLabel}>ABOUT</Text>
-        {[['App Version','2.4.1'],['AI Engine','EfficientNet-B4 v2.4.1'],['Compliance','HIPAA · GDPR · NHS DSPT · ISO 13485'],['Build','production']].map(([label, val]) => (
+        {[['App Version','2.4.1'],['AI Engine','EfficientNet-B4 v2.4.1'],['Compliance','HIPAA-ready · GDPR · NHS DSPT · ISO 13485 (planned)'],['Build','production']].map(([label, val]) => (
           <View key={label} style={s.row}><Text style={s.rowLabel}>{label}</Text><Text style={s.rowVal}>{val}</Text></View>
         ))}
       </View>

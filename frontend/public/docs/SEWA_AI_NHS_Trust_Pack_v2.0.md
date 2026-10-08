@@ -176,8 +176,8 @@ WHAT'S INCLUDED IN HOSPITAL PRO
 ✓ WhatsApp, SMS & EHR critical alerts
 ✓ Multi-department / multi-site support
 ✓ SSO / SAML 2.0 (NHS Care Identity Service)
-✓ Audit logs (HIPAA & NHS DSPT compliant)
-✓ 99.9% guaranteed uptime SLA
+✓ Audit logs (HIPAA & NHS DSPT aligned)
+✓ 99.9% uptime SLA target
 ✓ Priority 4-hour technical support
 ✓ Dedicated Customer Success Manager
 

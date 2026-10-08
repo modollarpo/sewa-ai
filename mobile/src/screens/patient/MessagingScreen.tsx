@@ -9,7 +9,7 @@ interface Msg { id:string; from:'patient'|'doctor'|'system'; text:string; ts:str
 export default function MessagingScreen() {
   const [input, setInput] = useState('');
   const [msgs, setMsgs] = useState<Msg[]>([
-    { id:'1', from:'system', text:'Secure encrypted messaging with your care team. Messages are end-to-end encrypted.', ts: new Date().toISOString() },
+    { id:'1', from:'system', text:'Secure encrypted messaging with your care team. Messages are encrypted in transit and at rest.', ts: new Date().toISOString() },
     { id:'2', from:'doctor', text:'Hello! I\'ve reviewed your CT Head scan. The AI found no acute findings. Please follow up if you experience any symptoms.', ts: new Date().toISOString() },
   ]);
   const listRef = useRef<FlatList>(null);
