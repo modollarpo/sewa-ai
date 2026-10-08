@@ -991,7 +991,7 @@ The codebase supports an EPSRC-style proposal **only** in the form: *engineering
 3. Gate report signing on `requiresHumanReview` (or explicitly document the policy decision).
 4. Remove/quarantine fabricated metrics (`ai-monitoring.ts:164-201`); label demo mode explicitly (`backend` labels, `modelId`).
 5. Wire `recordPrediction` at adjudication; populate `MetacognitionAuditLog`.
-6. Either obtain real weights+data or publicly scope all outputs as synthetic/demo.
+6. Either publicly scope all outputs as demo/synthetic; obtain real weights+data before making any clinical performance claims.
 
 **Research (after step 1):** execute §30 MVP — pre-registered reliability state \(g\), evaluation harness, N≥300 labelled cases, H1–H3 as first experiments; treat WP1+WP2+WP5 as the programme (§26).
 
