@@ -1,3 +1,6 @@
+> **g-v1 implemented (commit f0cd3f, 2026-10-07 20:30:34 +0100):** frozen thresholds/weights in ackend/src/evaluation/reliabilityState.ts, evaluation harness in metrics.ts/eliabilityEval.ts (with 
+pm run reliability-eval), per-case signal logger in iOrchestrator.ts and learningLoop.ts, calibration writes to CalibrationRecord + MetacognitionAuditLog (bin/Brier), 33/33 tests pass. State is log-only (does not change human-review decision).
+
 # SEWA AI — Codebase Research & Implementation Audit
 
 **Repository:** `C:\sewa_extract` (1,038 git-tracked files, audited work tree unmodified by this audit)
