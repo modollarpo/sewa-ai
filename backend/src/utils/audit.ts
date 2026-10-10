@@ -13,6 +13,13 @@ import { sealAuditBlock } from '../services/merkleBlockService';
 const _RAW_KEY = process.env.AUDIT_PRIVATE_KEY ?? '';
 const _KEY_IS_MOCK = !_RAW_KEY || _RAW_KEY.includes('MOCK') || _RAW_KEY.length < 64;
 const _IS_AZURE_DEPLOY = process.env.DEPLOY_TARGET === 'azure';
+// Public key for signature verification, derived from the signing key so we do
+// not need a second secret. null when no real key is configured.
+let _PUBLIC_KEY: crypto.KeyObject | null = null;
+if (!_KEY_IS_MOCK) {
+  try { _PUBLIC_KEY = crypto.createPublicKey(_RAW_KEY); }
+  catch { _PUBLIC_KEY = null; console.warn('[AUDIT] Could not derive public key from AUDIT_PRIVATE_KEY; signatures cannot be verified.'); }
+}
 if (_KEY_IS_MOCK) {
   const msg = '[AUDIT] CRITICAL: AUDIT_PRIVATE_KEY is missing or is a mock value. '
     + 'Audit log signatures are NOT cryptographically valid. '
@@ -36,24 +43,69 @@ export interface AuditEntry {
   userAgent?: string;
 }
 
+// Recursively sort object keys so the JSON that gets hashed is independent of
+// insertion order. Postgres stores `Json` as jsonb, which does NOT preserve key
+// order, so without this the payload hash written and the one re-derived by
+// verifyChain() could differ for the same logical entry.
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    return Object.keys(value as Record<string, unknown>)
+      .sort()
+      .reduce<Record<string, unknown>>((acc, k) => {
+        acc[k] = canonicalize((value as Record<string, unknown>)[k]);
+        return acc;
+      }, {});
+  }
+  return value;
+}
+
+interface CanonicalFields {
+  tenantId?: string;
+  userId?: string;
+  action: string;
+  entity?: string;
+  entityId?: string;
+  metadata?: unknown;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+// The single canonical serialization used by BOTH the writer and the verifier.
+// Changing this changes every hash, so treat it as a frozen format.
+function canonicalPayload(f: CanonicalFields, timestampISO: string): string {
+  return JSON.stringify({
+    tenantId: f.tenantId ?? undefined,
+    userId: f.userId ?? undefined,
+    action: f.action,
+    entity: f.entity ?? undefined,
+    entityId: f.entityId ?? undefined,
+    metadata: f.metadata ? canonicalize(f.metadata) : undefined,
+    ipAddress: f.ipAddress ?? undefined,
+    userAgent: f.userAgent ?? undefined,
+    timestamp: timestampISO,
+  });
+}
+
 export async function auditLog(entry: AuditEntry): Promise<void> {
   try {
     const last = await prisma.auditLog.findFirst({
       orderBy: { createdAt: 'desc' }, select: { sha256Hash: true }
     });
-    const payload = JSON.stringify({ ...entry, timestamp: new Date().toISOString() });
+    // Fix the timestamp up front and persist it as createdAt, so verifyChain()
+    // (which reads createdAt) reconstructs the exact same payload. userId is
+    // normalised to the value actually stored so the hash matches on read-back.
+    const timestamp = new Date();
+    const payload = canonicalPayload({ ...entry, userId: entry.userId || 'SYSTEM' }, timestamp.toISOString());
     const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
     const chainHash = crypto.createHash('sha256')
       .update(payloadHash + (last?.sha256Hash || 'genesis')).digest('hex');
 
     // ── Digital Signature (Feature 20: Tamper-proof Legality) ──
-    const signer = crypto.createSign('RSA-SHA256');
-    signer.update(chainHash);
-    // In production, AUDIT_PRIVATE_KEY is loaded from Azure Key Vault via AKS secret
-    const privateKey = _RAW_KEY;
+    // In production, AUDIT_PRIVATE_KEY is loaded from Azure Key Vault via AKS secret.
     const signature = _KEY_IS_MOCK
       ? 'unsigned:' + chainHash   // clearly marked as unsigned for non-prod
-      : signer.sign(privateKey, 'hex');
+      : crypto.createSign('RSA-SHA256').update(chainHash).sign(_RAW_KEY, 'hex');
 
     const log = await prisma.auditLog.create({
       data: {
@@ -66,8 +118,10 @@ export async function auditLog(entry: AuditEntry): Promise<void> {
         ipAddress: entry.ipAddress,
         userAgent: entry.userAgent,
         sha256Hash: chainHash,
+        payloadHash,
+        signature,
         previousHash: last?.sha256Hash || 'genesis',
-        // metadata: { ...entry.metadata as any, signature } // Storing signature in metadata for now if schema allows
+        createdAt: timestamp,
       }
     });
 
@@ -87,46 +141,78 @@ export async function auditLog(entry: AuditEntry): Promise<void> {
   }
 }
 
-export async function verifyChain(limit = 1000): Promise<{ valid: boolean; brokenId?: string }> {
+export interface ChainVerification {
+  valid: boolean;
+  brokenId?: string;
+  reason?: string;
+  blocksChecked: number;
+  signaturesPresent: number;
+  signaturesVerified: number;
+}
+
+export async function verifyChain(limit = 1000): Promise<ChainVerification> {
   const logs = await prisma.auditLog.findMany({
     orderBy: { createdAt: 'asc' }, take: limit,
   });
 
+  let signaturesPresent = 0;
+  let signaturesVerified = 0;
+
+  const fail = (entry: { id: string }, reason: string): ChainVerification => ({
+    valid: false, brokenId: entry.id, reason,
+    blocksChecked: logs.length, signaturesPresent, signaturesVerified,
+  });
+
   for (let i = 0; i < logs.length; i++) {
     const entry = logs[i];
-    
-    // 1. Verify link to previous hash (Chain Integrity)
-    if (i > 0) {
-      if (entry.previousHash !== logs[i - 1].sha256Hash) {
-        return { valid: false, brokenId: entry.id };
-      }
+
+    // 1. Chain link — each block's previousHash must equal the prior block's hash.
+    const expectedPrev = i === 0 ? 'genesis' : (logs[i - 1].sha256Hash || 'genesis');
+    if ((entry.previousHash || 'genesis') !== expectedPrev) {
+      return fail(entry, 'chain link broken: previousHash does not match prior sha256Hash');
     }
 
-    // 2. Verify payload integrity (Content Integrity)
-    // We must reconstruct the payload exactly as it was hashed in auditLog()
-    // Note: This requires the 'timestamp' to be identical.
-    // Since timestamp is stored in createdAt, we use that.
-    const payloadData = {
-      tenantId: entry.tenantId || undefined,
-      userId: entry.userId === 'SYSTEM' ? undefined : entry.userId,
+    // 2. Payload integrity — rebuild the canonical payload exactly as written.
+    const payload = canonicalPayload({
+      tenantId: entry.tenantId ?? undefined,
+      userId: entry.userId ?? undefined,
       action: entry.action,
-      entity: entry.entity || undefined,
-      entityId: entry.entityId || undefined,
-      metadata: entry.metadata || undefined,
-      ipAddress: entry.ipAddress || undefined,
-      userAgent: entry.userAgent || undefined,
-      timestamp: entry.createdAt.toISOString()
-    };
-    
-    const payload = JSON.stringify(payloadData);
+      entity: entry.entity ?? undefined,
+      entityId: entry.entityId ?? undefined,
+      metadata: entry.metadata ?? undefined,
+      ipAddress: entry.ipAddress ?? undefined,
+      userAgent: entry.userAgent ?? undefined,
+    }, entry.createdAt.toISOString());
     const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
+
+    // payloadHash column: only present on rows written after the signing fix.
+    if (entry.payloadHash && entry.payloadHash !== payloadHash) {
+      return fail(entry, 'payload tampered: stored payloadHash != recomputed payloadHash');
+    }
+
     const expectedChainHash = crypto.createHash('sha256')
       .update(payloadHash + (entry.previousHash || 'genesis')).digest('hex');
-
     if (entry.sha256Hash !== expectedChainHash) {
-      // Flag as mismatch - chain integrity violated
-      return { valid: false, brokenId: entry.id };
+      return fail(entry, 'chain hash mismatch: sha256Hash != sha256(payloadHash + previousHash)');
+    }
+
+    // 3. Signature — verify RSA over the chain hash when a signature is present.
+    if (entry.signature) {
+      signaturesPresent++;
+      if (entry.signature.startsWith('unsigned:')) {
+        // Non-prod marker; must still match the chain hash it was written for.
+        if (entry.signature !== 'unsigned:' + (entry.sha256Hash || '')) {
+          return fail(entry, 'unsigned marker does not match chain hash');
+        }
+      } else if (_PUBLIC_KEY) {
+        const ok = crypto.createVerify('RSA-SHA256').update(entry.sha256Hash || '').verify(_PUBLIC_KEY, entry.signature, 'hex');
+        if (!ok) return fail(entry, 'RSA signature invalid');
+        signaturesVerified++;
+      } else {
+        return fail(entry, 'signature present but no AUDIT_PRIVATE_KEY/AUDIT_PUBLIC_KEY available to verify');
+      }
     }
   }
-  return { valid: true };
+
+  return { valid: true, blocksChecked: logs.length, signaturesPresent, signaturesVerified };
 }

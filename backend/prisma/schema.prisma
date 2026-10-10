@@ -360,6 +360,9 @@ model Report {
   summary        String? // legacy summary field
 
   // Status
+  // DB CHECK "report_approved_requires_signature" (migration 20261010...) enforces
+  // status IN ('approved','signed') => signedBy AND signedAt are set. Prisma does
+  // not model CHECK constraints, so the constraint lives only in the migration.
   status   String    @default("draft") // draft | pending_review | approved | rejected | signed
   signedAt DateTime?
   signedBy String?
@@ -740,6 +743,8 @@ model AuditLog {
   metadata     Json?
   // Blockchain (Feature 19)
   sha256Hash   String?
+  payloadHash  String? // canonical payload hash (pre-chain) — enables tamper verification
+  signature    String? // RSA-SHA256 over sha256Hash; "unsigned:<hash>" when no audit key
   blockIndex   Int?
   merkleRoot   String?
   createdAt    DateTime @default(now())
