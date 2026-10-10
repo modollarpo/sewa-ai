@@ -46,6 +46,8 @@ export interface ServiceContract {
   live: boolean;
   liveNote?: string;
   baseUrlEnv: string;
+  /** Additional env vars consulted (in order) when {@link baseUrlEnv} is unset. */
+  baseUrlEnvFallbacks?: string[];
   defaultBaseUrl: string;
   healthPath: string;
   request: ServiceRequestContract;

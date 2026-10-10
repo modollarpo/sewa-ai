@@ -4,7 +4,8 @@
   "services": {
     "triage": {
       "live": true,
-      "baseUrlEnv": "TRIAGE_SERVICE_URL",
+      "baseUrlEnv": "AI_SERVICE_URL",
+      "baseUrlEnvFallbacks": ["TRIAGE_URL"],
       "defaultBaseUrl": "http://localhost:8000",
       "healthPath": "/health",
       "request": {
