@@ -118,22 +118,28 @@
           "is_uncertain": "boolean",
           "explanation": "string",
           "inference_ms": "number",
-          "backend": "string",
-          "demo_mode": "boolean",
-          "attribution_method": "string"
-        }
-      },
-      "orchestratorReads": [
-        "uncertainty_score",
-        "aleatoric_uncertainty",
-        "epistemic_uncertainty",
-        "shap_values",
-        "gradcam_url",
-        "mc_passes_used",
-        "is_uncertain",
-        "inference_ms",
-        "backend"
-      ],
+      "backend": "string",
+      "demo_mode": "boolean",
+      "attribution_method": "string",
+      "mc_method": "string",
+      "ood_score": "number|null",
+      "ood_flag": "boolean"
+    }
+  },
+  "orchestratorReads": [
+    "uncertainty_score",
+    "aleatoric_uncertainty",
+    "epistemic_uncertainty",
+    "shap_values",
+    "gradcam_url",
+    "mc_passes_used",
+    "is_uncertain",
+    "inference_ms",
+    "backend",
+    "mc_method",
+    "ood_score",
+    "ood_flag"
+  ],
       "normalizer": "normalizeUncertainty"
     },
     "metacognition": {

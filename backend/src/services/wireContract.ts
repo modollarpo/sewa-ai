@@ -176,6 +176,9 @@ export interface RawUncertaintyResult {
   backend?: string;
   demo_mode?: boolean;
   attribution_method?: string;
+  mc_method?: string;
+  ood_score?: number | null;
+  ood_flag?: boolean;
 }
 
 export interface UncertaintyResult {
@@ -191,6 +194,12 @@ export interface UncertaintyResult {
   demoMode?: boolean;
   /** How shapValues were produced: "onnx-occlusion-finite-difference" | "demo-random-attribution". */
   attributionMethod?: string;
+  /** How MC passes were generated: "mc-dropout-torch" | "onnx-input-noise". */
+  mcMethod?: string;
+  /** Mahalanobis OOD distance over the penultimate embedding; null until enabled. */
+  oodScore?: number | null;
+  /** True when oodScore exceeds the configured OOD threshold. */
+  oodFlag?: boolean;
 }
 
 export interface RawVLMResult {
@@ -271,6 +280,9 @@ export function normalizeUncertainty(raw: RawUncertaintyResult): UncertaintyResu
     backend: raw.backend,
     demoMode: raw.demo_mode ?? false,
     attributionMethod: raw.attribution_method,
+    mcMethod: raw.mc_method,
+    oodScore: raw.ood_score ?? null,
+    oodFlag: raw.ood_flag ?? false,
   };
 }
 

@@ -137,3 +137,24 @@ with an artificially lowered threshold.
 | 6 | Report-signature DB constraint | add CHECK constraint | strengthens | yes |
 | 7 | Audit signature | persist + verify | preserves claim | yes |
 | 8 | Uncertainty local default port | 8009 → 8002 | none | low |
+
+---
+
+## Phase 2 implementation status (approved; landed 2026-10-10)
+
+| # | Item | Status | Evidence |
+|---|------|--------|----------|
+| 8 | Uncertainty port | ✅ | `backend/src/config/env.ts` local default `8002` |
+| 7 | Audit signature | ✅ | `backend/src/utils/audit.ts` canonical payload + persisted `payloadHash`/`signature`, `verifyChain()` verifies; `AuditLog` columns via migration `20261010000000_…` |
+| 6 | Report-signature DB CHECK | ✅ | same migration adds `report_approved_requires_signature` (`NOT VALID`) |
+| 5 | Architecture B0 | ✅ | `ai-services/uncertainty/model.py` `DEFAULT_BACKBONE="efficientnet_b0"`, rationale in header (B4/resnet50 retained for experiments) |
+| 2 | Real MC-Dropout | ✅ | `model.py` `enable_mc_dropout`/`mc_dropout_predict`; `main.py` `mc_dropout_torch` + dispatcher. ONNX input-noise retained **only** as labelled fallback (`mc_method="onnx-input-noise"`). New response fields `mc_method`/`ood_score`/`ood_flag` added to `wire-contract.json` + `normaliseUncertainty` + contract test |
+| 1 | Triggerable thresholds | ✅ (provisional) | `EPISTEMIC_THRESHOLD=0.15`, `ALEATORIC_THRESHOLD=0.40`, env-overridable; filed formula unchanged. Values to be finalised after N≥300 calibration |
+| 3 (OOD) | Mahalanobis OOD | ✅ (off by default) | `main.py` `_load_ood_reference`/`compute_ood`; enabled only with `OOD_ENABLED=true` **and** fitted `ood_reference.npz`. `/health` reports `ood_enabled` |
+| 3 (window) | Window-specific coherence | ⏳ **awaiting definition** | No spec text in-repo defining the "window". Generic SHAP coherence already exists. Needs the exact intended semantics before building |
+| 4 | Grad-CAM/SHAP | ✅ kept | unchanged; ONNX-approximation labelled |
+| 5 | Clinical-mode demo refusal | ✅ | `backend/src/services/clinicalMode.ts` (`assertClinicalModeSafe`, fail-closed); `CLINICAL_MODE` env in `config/env.ts`; wired at single persistence choke point in `aiOrchestrator.ts` before `AIResult.create`; 7 unit tests |
+
+Verification for this batch: `tsc --noEmit` clean; `eslint` 0 errors; `wireContract.test.ts` 47/47;
+`clinicalMode.test.ts` 7/7; live `contract-real-services.test.ts` 5/5 and Python `tests/contract`
+20/20 against all four booted services (uncertainty now serving `mc_method`/`ood_score`/`ood_flag`).

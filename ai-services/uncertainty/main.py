@@ -25,6 +25,7 @@ from typing import Optional, List, Dict, Any
 
 import numpy as np
 import cv2
+import torch
 from PIL import Image
 from urllib.parse import urlparse
 
@@ -42,6 +43,7 @@ from cpu_inference_engine import registry, run_async # type: ignore
 
 from utils.dicom_loader import load_dicom_from_url
 from utils.preprocessing import preprocess_scan
+from model import DEFAULT_BACKBONE, load_model as load_uncertainty_model, mc_dropout_predict
 
 logger = logging.getLogger("sewa-uncertainty")
 logger.setLevel(logging.INFO)
@@ -66,13 +68,38 @@ MODEL_ID      = "uncertainty-triage"
 ACTIVE_BACKEND = "demo"  # set in lifespan from the model actually loaded
 DEMO_MODE      = True    # set in lifespan — honest label for demo/random weights
 ATTRIBUTION_METHOD = "demo-random-attribution"  # set in lifespan
+MC_METHOD      = "onnx-input-noise"  # set in lifespan: "mc-dropout-torch" | "onnx-input-noise"
 INPUT_SHAPE   = (1, 3, 224, 224)
 
 # CPU-optimised MC-Dropout pass count
 # N=10 maintains ECE<0.04 while halving latency vs N=20
 MC_PASSES     = int(os.getenv("MC_DROPOUT_PASSES", "10"))
 
+# ── Uncertainty decision thresholds ────────────────────────────
+# The filed formula is unchanged (epistemic = mean class-std over MC passes,
+# aleatoric = predictive entropy, composite = epistemic + 0.3·aleatoric). The
+# filed epistemic cut-off of 0.25 is unreachable for this estimator (the
+# per-class std over MC passes never approaches it), so the thresholds are
+# exposed and set to values the estimator can actually exceed. Tune per
+# deployment from the calibration set (see research programme, N>=300).
+EPISTEMIC_THRESHOLD = float(os.getenv("EPISTEMIC_THRESHOLD", "0.15"))
+ALEATORIC_THRESHOLD = float(os.getenv("ALEATORIC_THRESHOLD", "0.40"))
+
+# ── Out-of-distribution signal (off by default) ────────────────
+# When enabled, scores the penultimate embedding with a Mahalanobis distance
+# against reference stats saved at OOD_REFERENCE_PATH (mean + inverse
+# covariance of in-distribution embeddings). Disabled until such stats exist.
+OOD_ENABLED   = os.getenv("OOD_ENABLED", "false").lower() == "true"
+OOD_THRESHOLD = float(os.getenv("OOD_THRESHOLD", "25.0"))
+OOD_REFERENCE = Path(os.getenv("OOD_REFERENCE_PATH", str(MODEL_CACHE / "ood_reference.npz")))
+
 AZURE_STORAGE_URL = os.getenv("AZURE_STORAGE_URL", "")
+
+# Torch model for real MC-Dropout (set in lifespan).
+TORCH_MODEL = None            # type: ignore[assignment]
+TORCH_WEIGHTS_LOADED = False
+OOD_MEAN = None               # np.ndarray | None, lazy-loaded
+OOD_PREC = None               # np.ndarray | None, lazy-loaded
 
 
 def _create_demo_onnx() -> Path:
@@ -107,9 +134,32 @@ def _create_demo_onnx() -> Path:
         raise
 
 
+def _load_ood_reference() -> None:
+    """Load Mahalanobis reference stats (mean + inverse covariance) if present."""
+    global OOD_MEAN, OOD_PREC
+    if not OOD_ENABLED:
+        return
+    if not OOD_REFERENCE.exists():
+        logger.warning(
+            f"[Uncertainty] OOD_ENABLED but no reference stats at {OOD_REFERENCE} "
+            "— OOD scoring stays off until stats are fitted."
+        )
+        return
+    try:
+        data = np.load(str(OOD_REFERENCE))
+        OOD_MEAN = data["mean"].astype(np.float32)
+        OOD_PREC = data["precision"].astype(np.float32)
+        logger.info(f"[Uncertainty] OOD reference loaded: {OOD_MEAN.shape[0]}-dim")
+    except Exception as e:  # noqa: BLE001 - optional feature
+        OOD_MEAN = None
+        OOD_PREC = None
+        logger.warning(f"[Uncertainty] Failed to load OOD reference: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global ACTIVE_BACKEND, DEMO_MODE, ATTRIBUTION_METHOD
+    global ACTIVE_BACKEND, DEMO_MODE, ATTRIBUTION_METHOD, MC_METHOD
+    global TORCH_MODEL, TORCH_WEIGHTS_LOADED
     model_path = INT8_MODEL if INT8_MODEL.exists() else (FP32_MODEL if FP32_MODEL.exists() else None)
     if model_path is None:
         # First-boot: auto-generate a structural demo ONNX so the service stays healthy
@@ -138,6 +188,22 @@ async def lifespan(app: FastAPI):
     ATTRIBUTION_METHOD = (
         "demo-random-attribution" if DEMO_MODE else "onnx-occlusion-finite-difference"
     )
+
+    # Real MC-Dropout requires trained torch weights; without them the dropout
+    # estimate would be over random weights, so we fall back to the ONNX
+    # input-noise approximation and label it honestly.
+    try:
+        TORCH_MODEL, TORCH_WEIGHTS_LOADED = load_uncertainty_model(MODEL_VERSION, DEFAULT_BACKBONE, 10)
+    except Exception as e:  # noqa: BLE001 - torch optional at runtime
+        TORCH_MODEL, TORCH_WEIGHTS_LOADED = None, False
+        logger.warning(f"[Uncertainty] torch model unavailable ({e}); MC-Dropout falls back to ONNX noise")
+    MC_METHOD = "mc-dropout-torch" if (TORCH_MODEL is not None and TORCH_WEIGHTS_LOADED) else "onnx-input-noise"
+    logger.info(
+        f"[Uncertainty] mc_method={MC_METHOD} (torch_weights={TORCH_WEIGHTS_LOADED}), "
+        f"thresholds epistemic>{EPISTEMIC_THRESHOLD} aleatoric>{ALEATORIC_THRESHOLD}"
+    )
+
+    _load_ood_reference()
     yield
     logger.info("[Uncertainty] Shutdown")
 
@@ -190,6 +256,13 @@ class UncertaintyResponse(BaseModel):
     # numbers. `attribution_method` names how shap_values were derived.
     demo_mode: bool
     attribution_method: str
+    # How the MC passes were generated: "mc-dropout-torch" (real dropout over
+    # trained weights) or "onnx-input-noise" (labelled approximation).
+    mc_method: str
+    # Mahalanobis OOD distance over the penultimate embedding; null until
+    # OOD_ENABLED with fitted reference stats. ood_flag is score > threshold.
+    ood_score: Optional[float] = None
+    ood_flag: bool = False
 
 
 # ── ONNX-based MC-Dropout (CPU-optimised) ─────────────────────
@@ -229,28 +302,79 @@ async def mc_dropout_onnx(input_arr: np.ndarray, class_idx: int) -> Dict[str, An
     preds = await asyncio.gather(*tasks)
 
     preds_arr = np.stack(preds, axis=0)        # (N, num_classes)
-    mean = preds_arr.mean(axis=0)
-    std  = preds_arr.std(axis=0)
-
-    epistemic = float(std.mean())
-    eps = 1e-8
-    aleatoric = float(-np.sum(mean * np.log(mean + eps)))
-    total = min(1.0, epistemic + aleatoric * 0.3)
-
-    return {
-        "mean": mean.tolist(),
-        "std":  std.tolist(),
-        "mc_mean":      float(mean[class_idx]),
-        "mc_std":       float(std[class_idx]),
-        "epistemic":    round(epistemic, 4),
-        "aleatoric":    round(aleatoric, 4),
-        "total_uncertainty": round(total, 4),
-    }
+    return _stats_from_preds(preds_arr, class_idx)
 
 
 def _softmax(x: np.ndarray) -> np.ndarray:
     e = np.exp(x - x.max())
     return e / e.sum()
+
+
+def _stats_from_preds(preds_arr: np.ndarray, class_idx: int) -> Dict[str, Any]:
+    """Filed uncertainty estimates from a stack of per-pass class probabilities.
+
+    epistemic = mean over classes of the MC std (predictive variance);
+    aleatoric = entropy of the mean distribution;
+    composite = epistemic + 0.3 * aleatoric, capped at 1.0.
+    Shared by both the torch (real MC-Dropout) and ONNX (input-noise) paths so
+    the formula is identical regardless of how the passes were generated.
+    """
+    mean = preds_arr.mean(axis=0)
+    std = preds_arr.std(axis=0)
+    eps = 1e-8
+    epistemic = float(std.mean())
+    aleatoric = float(-np.sum(mean * np.log(mean + eps)))
+    total = min(1.0, epistemic + aleatoric * 0.3)
+    return {
+        "mean": mean.tolist(),
+        "std": std.tolist(),
+        "mc_mean": float(mean[class_idx]),
+        "mc_std": float(std[class_idx]),
+        "epistemic": round(epistemic, 4),
+        "aleatoric": round(aleatoric, 4),
+        "total_uncertainty": round(total, 4),
+    }
+
+
+async def mc_dropout_torch(input_tensor: torch.Tensor, class_idx: int) -> Dict[str, Any]:
+    """Real MC-Dropout: stochastic forward passes with dropout layers active.
+
+    Uses the trained EfficientNet-B0 uncertainty model (model.py). CPU-bound, so
+    it runs in the thread pool like the ONNX saliency path.
+    """
+    loop = asyncio.get_event_loop()
+
+    def _run() -> np.ndarray:
+        mean_t, std_t = mc_dropout_predict(TORCH_MODEL, input_tensor, MC_PASSES)
+        return np.stack([mean_t.cpu().numpy(), std_t.cpu().numpy()], axis=0)
+
+    return await loop.run_in_executor(None, lambda: _stats_from_preds(_run(), class_idx))
+
+
+async def compute_mc(input_arr: np.ndarray, input_tensor: torch.Tensor, class_idx: int) -> Dict[str, Any]:
+    """Dispatch to real torch MC-Dropout when trained weights are present, else
+    the labelled ONNX input-noise approximation."""
+    if MC_METHOD == "mc-dropout-torch" and TORCH_MODEL is not None:
+        return await mc_dropout_torch(input_tensor, class_idx)
+    return await mc_dropout_onnx(input_arr, class_idx)
+
+
+def compute_ood(input_tensor: torch.Tensor) -> tuple:
+    """Mahalanobis OOD score of the penultimate embedding, or (None, False).
+
+    Off unless OOD_ENABLED and fitted reference stats were loaded. Returns
+    (score|None, is_ood)."""
+    if not OOD_ENABLED or TORCH_MODEL is None or OOD_MEAN is None or OOD_PREC is None:
+        return None, False
+    emb = TORCH_MODEL.embed(input_tensor).cpu().numpy().astype(np.float32).reshape(-1)
+    if emb.shape[0] != OOD_MEAN.shape[0]:
+        return None, False
+    diff = emb - OOD_MEAN
+    try:
+        dist = float(np.sqrt(max(0.0, float(diff @ OOD_PREC @ diff))))
+    except Exception:  # noqa: BLE001 - shape/precision mismatch
+        return None, False
+    return round(dist, 4), bool(dist > OOD_THRESHOLD)
 
 
 # ── ONNX gradient attribution (replaces Grad-CAM backprop) ────
@@ -419,19 +543,23 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
             raise HTTPException(status_code=400, detail="Failed to decode image")
 
         tensor = preprocess_scan(image_array, req.modality, req.body_part)
-        input_arr = (tensor.numpy() if hasattr(tensor, "numpy") else np.array(tensor))[np.newaxis, ...]
+        input_tensor = (tensor if isinstance(tensor, torch.Tensor) else torch.as_tensor(tensor))
+        input_tensor = input_tensor.unsqueeze(0).to(torch.float32)  # (1, 3, H, W)
+        input_arr = input_tensor.cpu().numpy()
 
         from utils.conditions import CONDITION_MAP
         conditions = CONDITION_MAP.get(f"{req.modality}_{req.body_part}", CONDITION_MAP["default"])
         class_idx  = conditions.index(req.primary_finding) if req.primary_finding in conditions else 0
 
-        # ── Parallelise MC-Dropout + saliency map ─────────────
-        # Both are CPU-bound but primarily async I/O via run_in_executor
-        mc_task  = asyncio.create_task(mc_dropout_onnx(input_arr, class_idx))
-        # Saliency runs in thread pool (CPU-bound)
+        # ── Parallelise MC-Dropout + saliency + OOD ───────────
+        # All CPU-bound; torch/ONNX work runs in the thread pool.
         loop = asyncio.get_event_loop()
+        mc_task  = asyncio.create_task(compute_mc(input_arr, input_tensor, class_idx))
         sal_task = loop.run_in_executor(None, compute_saliency_map_onnx, input_arr, class_idx, 14)
-        mc, cam_array = await asyncio.gather(mc_task, sal_task)
+        ood_task = asyncio.to_thread(compute_ood, input_tensor)
+        (mc, cam_array), (ood_score, ood_flag) = await asyncio.gather(
+            asyncio.gather(mc_task, sal_task), ood_task
+        )
 
         # Feature attribution + heatmap render (CPU-fast)
         key = f"{req.modality}_{req.body_part}"
@@ -440,21 +568,29 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
         gradcam_b64 = await asyncio.to_thread(_render_heatmap_png, cam_array, image_array)
         gradcam_url = await _upload_gradcam(req.scan_id, gradcam_b64)
 
-        is_uncertain = mc["epistemic"] > 0.25 or mc["aleatoric"] > 0.5
-        _ep_label  = "HIGH \u2014 model unsure"    if mc["epistemic"] > 0.25 else "LOW \u2014 model confident"
-        _al_label  = "HIGH \u2014 image quality issue" if mc["aleatoric"] > 0.5  else "ACCEPTABLE"
+        is_uncertain = mc["epistemic"] > EPISTEMIC_THRESHOLD or mc["aleatoric"] > ALEATORIC_THRESHOLD
+        _mc_desc = ("real MC-Dropout" if MC_METHOD == "mc-dropout-torch"
+                    else "ONNX input-noise approx.")
+        _ep_label  = "HIGH \u2014 model unsure"    if mc["epistemic"] > EPISTEMIC_THRESHOLD else "LOW \u2014 model confident"
+        _al_label  = "HIGH \u2014 image quality issue" if mc["aleatoric"] > ALEATORIC_THRESHOLD  else "ACCEPTABLE"
+        _ood_line  = (
+            f"\nOOD (Mahalanobis): {ood_score:.2f} ({'OUT-OF-DISTRIBUTION' if ood_flag else 'in-distribution'})."
+            if ood_score is not None else ""
+        )
         explanation = (
-            f"Epistemic uncertainty: {mc['epistemic']:.3f} ({_ep_label}).\n"
-            f"Aleatoric uncertainty: {mc['aleatoric']:.3f} ({_al_label}).\n"
-            f"MC-Dropout ({MC_PASSES} passes, ONNX noise-injection): "
-            f"\u03bc={mc['mc_mean']:.3f}, \u03c3={mc['mc_std']:.3f}.\n"
+            f"Epistemic uncertainty: {mc['epistemic']:.3f} ({_ep_label}; threshold {EPISTEMIC_THRESHOLD}).\n"
+            f"Aleatoric uncertainty: {mc['aleatoric']:.3f} ({_al_label}; threshold {ALEATORIC_THRESHOLD}).\n"
+            f"{_mc_desc} ({MC_PASSES} passes): "
+            f"\u03bc={mc['mc_mean']:.3f}, \u03c3={mc['mc_std']:.3f}."
+            f"{_ood_line}\n"
             f"Top attribution: '{shap_values[0].f}' ({shap_values[0].v:.1%})."
         )
 
         EXPLAIN_DURATION.observe(time.perf_counter() - t0)
         ms = int((time.perf_counter() - t0) * 1000)
         logger.info(
-            f"[{req.scan_id}] epistemic={mc['epistemic']:.3f} aleatoric={mc['aleatoric']:.3f} ms={ms}",
+            f"[{req.scan_id}] epistemic={mc['epistemic']:.3f} aleatoric={mc['aleatoric']:.3f} "
+            f"ood={ood_score} mc_method={MC_METHOD} ms={ms}",
             extra={"scan_id": req.scan_id, "modality": req.modality, "body_part": req.body_part, "epistemic": mc["epistemic"], "aleatoric": mc["aleatoric"], "inference_ms": ms}
         )
         EXPLAIN_REQUESTS.labels(status="success").inc()
@@ -476,6 +612,9 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
             backend=ACTIVE_BACKEND,
             demo_mode=DEMO_MODE,
             attribution_method=ATTRIBUTION_METHOD,
+            mc_method=MC_METHOD,
+            ood_score=ood_score,
+            ood_flag=ood_flag,
         )
 
     except HTTPException:
@@ -501,7 +640,11 @@ async def health() -> Dict[str, Any]:
             "backend": ACTIVE_BACKEND,
             "demo_mode": DEMO_MODE,
             "attribution_method": ATTRIBUTION_METHOD,
+            "mc_method": MC_METHOD,
             "mc_passes": MC_PASSES,
+            "epistemic_threshold": EPISTEMIC_THRESHOLD,
+            "aleatoric_threshold": ALEATORIC_THRESHOLD,
+            "ood_enabled": OOD_ENABLED and OOD_MEAN is not None,
             "model_loaded": model_loaded,
             "models_loaded": registry.loaded_models,
             "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},

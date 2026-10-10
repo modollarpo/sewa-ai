@@ -82,6 +82,11 @@ export const config = {
   NHS_CIS2_CLIENT_ID:   optional('NHS_CIS2_CLIENT_ID'),
   NHS_CIS2_CLIENT_SECRET: optional('NHS_CIS2_CLIENT_SECRET'),
 
+  // ── Clinical / Demo gating ────────────────────────────────────
+  // When true, the orchestrator refuses to emit any output whose stages ran on
+  // demo/synthetic weights (fail-closed). Leave false for demo/research runs.
+  CLINICAL_MODE: optional('CLINICAL_MODE', 'false') === 'true',
+
   // ── Research / Study Mode ─────────────────────────────────────
   RESEARCH_MODE_ENABLED: optional('RESEARCH_MODE_ENABLED', 'false') === 'true',
   STUDY_ID:              optional('STUDY_ID'),

@@ -31,6 +31,7 @@ import { createAxiosInstance } from '../utils/axiosInstance';
 import { buildVLMSystemPrompt, translateReportContent, type SupportedLanguage } from './vlmLanguageService';
 import { strokeCodeService, type StrokeCodeType } from './roadmap/strokeCodeService';
 import { computeReliabilityState } from '../evaluation/reliabilityState';
+import { assertClinicalModeSafe } from './clinicalMode';
 
 const axios = createAxiosInstance();
 
@@ -818,6 +819,15 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       errorFlags: metacog.flags.filter(f => f.severity === 'ERROR').length,
       warningFlags: metacog.flags.filter(f => f.severity === 'WARNING').length,
     });
+
+    // ── Clinical-mode demo refusal (fail-closed) ─────────────────────────
+    // In clinical mode we must never persist numbers derived from demo/
+    // synthetic weights. This throws before any AIResult / ExplainabilityReport
+    // is written, so the outer catch marks the scan failed and routes to DLQ.
+    assertClinicalModeSafe(config.CLINICAL_MODE, [
+      { stage: 'triage', demoMode: triage.backend === 'demo', backend: triage.backend },
+      { stage: 'uncertainty', demoMode: uncertainty.demoMode === true, backend: uncertainty.backend },
+    ]);
 
     const aiResult = await prisma.aIResult.create({
       data: {

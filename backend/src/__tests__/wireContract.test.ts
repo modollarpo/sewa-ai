@@ -73,6 +73,9 @@ const UNCERTAINTY_RAW = {
   backend: 'onnx-int8-mc10',
   demo_mode: false,
   attribution_method: 'mc-dropout-perturbation',
+  mc_method: 'onnx-input-noise',
+  ood_score: null,
+  ood_flag: false,
 };
 
 const VLM_RAW = {
