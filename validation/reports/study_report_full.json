@@ -1,0 +1,250 @@
+{
+  "model": "fully fine-tuned EfficientNet-B0",
+  "model_kind": "full",
+  "model_val_auroc": 0.9148444444444446,
+  "scope": "RSNA development set (image-level); NO external test",
+  "n": {
+    "train": 1400,
+    "val": 300,
+    "test": 300
+  },
+  "test_error_rate": 0.19,
+  "review_rates": [
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ],
+  "evidence_marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "arms": {
+    "B1_maxsoftmax": {
+      "error_auroc": 0.7559021009313407,
+      "aurc": 0.08229429182737848,
+      "brier": 0.144530714811128,
+      "ece": 0.110018098346702,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 166.66666666666666,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.7913669064748201,
+          "accepted_specificity": 0.8561643835616438
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 143.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.813953488372093,
+          "accepted_specificity": 0.8652482269503546
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8198198198198198,
+          "accepted_specificity": 0.9069767441860465
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 76.66666666666666,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8279569892473119,
+          "accepted_specificity": 0.9401709401709402
+        }
+      }
+    },
+    "B2_entropy": {
+      "error_auroc": 0.7559021009313407,
+      "aurc": 0.08229429182737848,
+      "brier": 0.144530714811128,
+      "ece": 0.110018098346702,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 166.66666666666666,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.7913669064748201,
+          "accepted_specificity": 0.8561643835616438
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 143.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.813953488372093,
+          "accepted_specificity": 0.8652482269503546
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8198198198198198,
+          "accepted_specificity": 0.9069767441860465
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 76.66666666666666,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8279569892473119,
+          "accepted_specificity": 0.9401709401709402
+        }
+      }
+    },
+    "C1_uncertainty": {
+      "error_auroc": 0.755685510071475,
+      "aurc": 0.08232446554430403,
+      "brier": 0.144530714811128,
+      "ece": 0.110018098346702,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 166.66666666666666,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.7913669064748201,
+          "accepted_specificity": 0.8561643835616438
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 143.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.813953488372093,
+          "accepted_specificity": 0.8652482269503546
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8198198198198198,
+          "accepted_specificity": 0.9069767441860465
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 76.66666666666666,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8279569892473119,
+          "accepted_specificity": 0.9401709401709402
+        }
+      }
+    },
+    "C2_ood": {
+      "error_auroc": 0.40083748465814745,
+      "aurc": 0.257616687013154,
+      "brier": 0.144530714811128,
+      "ece": 0.110018098346702,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 183.33333333333331,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.7702702702702703,
+          "accepted_specificity": 0.8467153284671532
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 173.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.7762237762237763,
+          "accepted_specificity": 0.84251968503937
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 146.66666666666666,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8015267175572519,
+          "accepted_specificity": 0.8348623853211009
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 133.33333333333334,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8,
+          "accepted_specificity": 0.8222222222222222
+        }
+      }
+    },
+    "C4_conflict": {
+      "error_auroc": 0.7560464948379179,
+      "aurc": 0.08227496634308307,
+      "brier": 0.144530714811128,
+      "ece": 0.110018098346702,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 166.66666666666666,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.7777777777777778,
+          "accepted_specificity": 0.8723404255319149
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 143.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8,
+          "accepted_specificity": 0.8785714285714286
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8198198198198198,
+          "accepted_specificity": 0.9069767441860465
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 76.66666666666666,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8279569892473119,
+          "accepted_specificity": 0.9401709401709402
+        }
+      }
+    },
+    "D_composite_H": {
+      "error_auroc": 0.7382138473756408,
+      "aurc": 0.10367056351248477,
+      "brier": 0.144530714811128,
+      "ece": 0.110018098346702,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 163.33333333333334,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.7898550724637681,
+          "accepted_specificity": 0.8639455782312925
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 143.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.7984496124031008,
+          "accepted_specificity": 0.8794326241134752
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 103.33333333333333,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8245614035087719,
+          "accepted_specificity": 0.9126984126984127
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 83.33333333333333,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8191489361702128,
+          "accepted_specificity": 0.9310344827586207
+        }
+      }
+    }
+  },
+  "composite_vs_better_baseline": {
+    "baseline": "B1_maxsoftmax",
+    "by_review_rate": {
+      "0.05": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.019999999999999886,
+        "ci95": [
+          -0.037735849056603724,
+          0.12251275510204075
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.1": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.0,
+        "ci95": [
+          -0.10716698841698825,
+          0.073216463414634
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.2": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.03125000000000009,
+        "ci95": [
+          -0.08830213903743328,
+          0.12202743902439012
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.3": {
+        "relative_reduction_vs_B1_maxsoftmax": -0.0869565217391305,
+        "ci95": [
+          -0.17647058823529424,
+          0.08000000000000006
+        ],
+        "passes_20pct_ci_excl_zero": false
+      }
+    }
+  }
+}

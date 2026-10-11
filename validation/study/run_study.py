@@ -75,9 +75,23 @@ def compute_head():
     return out
 
 
+CACHE = Path("validation/data_cache/full_preds.npz")
+
+
 def compute_full(batch=32):
     import torch
     from validation.study.model import build_model
+    st = CLASSIFIER.stat()
+    key = f"{st.st_mtime_ns}:{st.st_size}"
+    if CACHE.exists():
+        d = np.load(CACHE, allow_pickle=True)
+        if str(d["key"]) == key:
+            print("[cache] reusing fine-tuned predictions", flush=True)
+            return {"y": d["y"], "ids": [str(s) for s in d["ids"]], "split": d["split"],
+                    "probs": d["probs"], "feats": d["feats"], "val_auroc": float(d["val_auroc"]),
+                    "kind": str(d["kind"]),
+                    "val": (d["val_mp"], d["val_ep"], d["val_al"]),
+                    "test": (d["test_mp"], d["test_ep"], d["test_al"])}
     ckpt = torch.load(CLASSIFIER, map_location="cpu", weights_only=False)
     model, _ = build_model(ckpt["args"].get("dropout", 0.3), pretrained=False)
     model.load_state_dict(ckpt["state_dict"])
@@ -103,6 +117,12 @@ def compute_full(batch=32):
     for name, m in (("val", split == "val"), ("test", split == "test")):
         xb = datamod.tensors(np.where(m)[0], mean, std)[0]
         out[name] = _mc(model, xb)
+    np.savez(CACHE, key=key, y=y, ids=np.array(ids, dtype=object), split=split,
+             probs=probs, feats=feats, val_auroc=np.array(out["val_auroc"] or 0.0),
+             kind=np.array(out["kind"], dtype=object),
+             val_mp=out["val"][0], val_ep=out["val"][1], val_al=out["val"][2],
+             test_mp=out["test"][0], test_ep=out["test"][1], test_al=out["test"][2])
+    print("[cache] saved fine-tuned predictions", flush=True)
     return out
 
 

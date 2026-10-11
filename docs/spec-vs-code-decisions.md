@@ -208,4 +208,12 @@ validation prompt) is the only way the provisional values above stop being guess
 - **Result (RSNA dev set only)**: head val AUROC 0.745; test error rate 0.283. Error-detection AUROC - B1 max-softmax 0.614; B2 entropy 0.614; C1 uncertainty 0.626; C2 OOD 0.605; C4 conflict 0.582; **D composite H 0.636**. Composite H vs the better baseline (B1): relative reduction in unsafe-accepted = 2.5% / 0.0% / 1.6% / 1.6% at 5/10/20/30% review; **95% CI includes zero at every rate; the pre-registered >=20% criterion is NOT met.** No single signal materially matches H (C1 uncertainty is closest).
 - **Status**: the feasibility pipeline runs end-to-end; the gating hypothesis is NOT supported on this weak dev classifier. An external test (CQ500) and a stronger classifier are required before any claim. Negation and attribution arms are not evaluated (need generated reports / BHX boxes).
 
+### Update: full fine-tune (2026-10-11, same run)
+
+- **Backbone now fully fine-tuned** (EfficientNet-B0, batch 8, CPU, 6 epochs; best val AUROC **0.915**, up from 0.745 frozen). Checkpoint `validation/models/classifier.pt`; predictions cached in `validation/data_cache/full_preds.npz` so the study reruns instantly.
+- **Result (RSNA dev, test n=300)**: test error rate **0.190**. Error-detection AUROC - B1 max-softmax **0.756**; B2 entropy **0.756**; C1 uncertainty **0.756**; C2 OOD **0.401** (worse than chance - the Mahalanobis score is anti-correlated with error here); C4 conflict **0.756**; **D composite H 0.738**.
+- **Composite H vs better baseline (B1)**: relative reduction in unsafe-accepted = 2.0% / 0.0% / 3.1% / -8.7% at 5/10/20/30% review; **95% CI includes zero at every rate; the pre-registered >=20% criterion is NOT met.** The composite is marginally *worse* than plain max-softmax error-detection AUROC.
+- **Finding**: with a decent classifier, single-pass softmax/entropy already detect errors well; the composite hallucination-risk score does **not** beat them, and the OOD component is actively harmful on this data. This is a negative result - report it as such.
+- **Status**: feasibility pipeline complete on RSNA. Gating hypothesis NOT supported on RSNA dev (frozen or fine-tuned). External CQ500 test and a re-tuned OOD are required before any claim. Pre-registration frozen at `docs/evidence/preregistration.md`.
+
 This run does not convert any provisional value above into an evidence-backed one.
