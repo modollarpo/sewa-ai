@@ -14,8 +14,8 @@ def test_composite_U_formula():
 def test_normalized_U_ceiling():
     # raw U = 0.6*0.15 + 0.4*0.15 = 0.15 -> normalized 1.0
     assert signals.normalized_U(np.array([0.15]), np.array([0.15]))[0] == pytest.approx(1.0)
-    # above ceiling is clipped
-    assert signals.normalized_U(np.array([1.0]), np.array([1.0]))[0] == pytest.approx(1.0)
+    # linear scaling: raw 0.075 -> 0.5
+    assert signals.normalized_U(np.array([0.075]), np.array([0.075]))[0] == pytest.approx(0.5)
 
 
 def test_entropy_bounds():
