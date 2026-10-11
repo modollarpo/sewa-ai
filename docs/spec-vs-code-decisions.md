@@ -196,3 +196,16 @@ the second application.
 
 The validation study (RSNA or other public data — **licence must be confirmed first**, see the
 validation prompt) is the only way the provisional values above stop being guesses.
+
+## Validation study: RSNA development run (2026-10-11)
+
+- **Data**: RSNA-2019 (Kaggle) 2,000-slice balanced subset (1,000 pos / 1,000 neg), image-level split 1400/300/300 (seed 42). RSNA releases no patient id -> splits are image-level (slices from one patient may cross splits). Documented limitation, not a design choice.
+- **Backbone**: EfficientNet-B0 pretrained (IMAGENET1K_V1), **FROZEN** (CPU-only; full fine-tune is ~13 min/epoch on this 4-core box). A dropout MLP head is trained on the frozen 1280-d penultimate features. This is a transfer-learning probe, NOT full fine-tuning - never describe it as fine-tuning.
+- **U (uncertainty)**: implemented exactly per the prompt - epistemic = Var(p) over N=20 MC-dropout passes; aleatoric = mean p(1-p); U = 0.6*epistemic + 0.4*aleatoric. Raw ceiling ~0.15, so `u_max_possible = 0.15`; U is reported normalised by 0.15. Do NOT use 0.25.
+- **Thresholds**: every gate uses VALIDATION-set score quantiles at the matched review rate (5/10/20/30%). No hand-set thresholds anywhere.
+- **Composite H**: logistic regression (class-balanced) fitted on VALIDATION only, then frozen and applied to test.
+- **OOD**: shared-covariance Mahalanobis on frozen penultimate features (shrinkage 0.05), fit on TRAIN only.
+- **Result (RSNA dev set only)**: head val AUROC 0.745; test error rate 0.283. Error-detection AUROC - B1 max-softmax 0.614; B2 entropy 0.614; C1 uncertainty 0.626; C2 OOD 0.605; C4 conflict 0.582; **D composite H 0.636**. Composite H vs the better baseline (B1): relative reduction in unsafe-accepted = 2.5% / 0.0% / 1.6% / 1.6% at 5/10/20/30% review; **95% CI includes zero at every rate; the pre-registered >=20% criterion is NOT met.** No single signal materially matches H (C1 uncertainty is closest).
+- **Status**: the feasibility pipeline runs end-to-end; the gating hypothesis is NOT supported on this weak dev classifier. An external test (CQ500) and a stronger classifier are required before any claim. Negation and attribution arms are not evaluated (need generated reports / BHX boxes).
+
+This run does not convert any provisional value above into an evidence-backed one.
