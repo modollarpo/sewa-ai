@@ -56,14 +56,65 @@ def _iter_competition_files(api, competition: str):
             break
 
 
+_CRED_LOCK = None
+_CRED = None
+
+
+class _AzCliCredential:
+    """TokenCredential backed by one cached `az account get-access-token`.
+
+    Spawning the Azure CLI per request breaks under many threads / long runs;
+    this caches a single token and refreshes only near expiry.
+    """
+
+    def __init__(self, resource: str = "https://storage.azure.com/"):
+        self._resource = resource
+        self._token = None
+        self._expires_on = 0.0
+
+    def get_token(self, *scopes, **kwargs):
+        import json
+        import subprocess
+        import threading
+        import time
+        from azure.core.credentials import AccessToken
+
+        global _CRED_LOCK
+        if _CRED_LOCK is None:
+            _CRED_LOCK = threading.Lock()
+        with _CRED_LOCK:
+            if self._token is None or time.time() > self._expires_on - 300:
+                cmd = ("az account get-access-token --resource "
+                       f"{self._resource} -o json")
+                out = subprocess.run(cmd, capture_output=True, text=True,
+                                     timeout=90, shell=True)
+                if out.returncode != 0:
+                    raise RuntimeError("az account get-access-token failed: " + out.stderr[:200])
+                d = json.loads(out.stdout)
+                self._token = d["accessToken"]
+                self._expires_on = float(d.get("expires_on") or 0)
+                if not self._expires_on:
+                    import calendar, datetime
+                    dt = datetime.datetime.strptime(d["expiresOn"][:19], "%Y-%m-%d %H:%M:%S")
+                    self._expires_on = calendar.timegm(dt.timetuple())
+            from azure.core.credentials import AccessToken
+            return AccessToken(self._token, int(self._expires_on))
+
+
+def _credential():
+    global _CRED
+    if _CRED is None:
+        _CRED = _AzCliCredential()
+    return _CRED
+
+
 def _blob_container(container: str):
     try:
-        from azure.identity import DefaultAzureCredential
         from azure.storage.blob import BlobServiceClient
     except ImportError:
         sys.exit("azure-storage-blob not installed: "
                  "python -m pip install azure-storage-blob azure-identity")
-    svc = BlobServiceClient(account_url=ACCOUNT_URL, credential=DefaultAzureCredential())
+    svc = BlobServiceClient(account_url=ACCOUNT_URL, credential=_credential())
     return svc.get_container_client(container)
 
 
