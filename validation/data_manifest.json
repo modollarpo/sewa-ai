@@ -26,7 +26,16 @@
       "file_checksums": null,
       "sampling_method": null,
       "proposed_subset": "Patient-level subset of a few thousand studies (per prompt rule 5) IF licence approved and disk permits",
-      "licence_resolved_2026_10_11": false
+      "licence_resolved_2026_10_11": false,
+      "access_check_2026_10_11": {
+        "kaggle_cli": true,
+        "kaggle_token": "stored at ~/.kaggle/access_token (mode restricted to user)",
+        "kaggle_api_auth_verified": "competitions list returned 200 + rows",
+        "competition_file_listing": "EMPTY (0 files returned by both v1 API and kagglesdk)",
+        "likely_cause": "Kaggle competition rules/terms NOT yet accepted by this account in the browser",
+        "aws_public_s3_list": "403 Forbidden at rsna-intracranial-hemorrhage-detection (us-east-1)",
+        "aws_registry": "intracranial-hemorrhage controlled-access bucket (us-west-2) via https://mira.rsna.org/dataset/1 - NOT an anonymous public endpoint"
+      }
     },
     {
       "role": "external test (never tuned on)",
@@ -79,8 +88,8 @@
   "blocking_decisions_needed": [
     "1. RSNA licence: may we use the non-commercial RSNA data for this company-internal feasibility study, via a university partner, or with RSNA's explicit permission?",
     "2. CQ500 CC BY-NC-SA: acceptable for the study (NC) and are outputs acceptable under SA?",
-    "3. Kaggle credentials: does the user have a Kaggle account + API token, or should we pull the RSNA AWS bucket?",
+    "3. Kaggle account: accept the RSNA competition rules in the browser (kaggle.com) - the API is live (token verified) but the competition file list is empty until rules are accepted.",
     "4. Disk: only ~33 GiB free now. A subset (few GB-10s GB) is feasible; full RSNA (459 GB) is not on this machine.",
-    "5. Compute: does this machine have a GPU? (Prompt recommends one; otherwise CPU training is very slow.)"
+    "5. Compute: no NVIDIA GPU/nvidia-smi on this machine - CPU-only training (slower; subset + small model as planned)."
   ]
 }
