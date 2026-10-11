@@ -35,6 +35,17 @@
         "likely_cause": "Kaggle competition rules/terms NOT yet accepted by this account in the browser",
         "aws_public_s3_list": "403 Forbidden at rsna-intracranial-hemorrhage-detection (us-east-1)",
         "aws_registry": "intracranial-hemorrhage controlled-access bucket (us-west-2) via https://mira.rsna.org/dataset/1 - NOT an anonymous public endpoint"
+      },
+      "bundle_resolved_2026_10_11": {
+        "rules_accepted": true,
+        "delivery": "SINGLE signed bundle zip on GCS (archive.zip), Content-Length 194,671,162,157 bytes, Accept-Ranges: bytes; Last-Modified 2020-05-16",
+        "per_file_api": "none (SDK list_data_files returns empty; per-file download endpoint 404s)",
+        "central_directory": "124,712,141 bytes, 874,037 entries, read via HTTP range requests",
+        "counts": {"stage_2_train_dicom": 752803, "stage_2_test_dicom": 121232},
+        "labels": "rsna-intracranial-hemorrhage-detection/stage_2_train.csv (119,696,322 B uncompressed, 16,970,302 B deflate); per-image rows ID_<id>_<subtype>, subtypes epidural/intraparenchymal/intraventricular/subarachnoid/subdural/any; binary label = _any",
+        "patient_id_present": false,
+        "split_limitation": "filenames are per-IMAGE; no patient id in released data -> patient-level split impossible for RSNA; splits are by image id (recorded in every report)",
+        "subset_pipeline": "validation/scripts/rsna_zipfetch.py (range ZIP reader) + rsna_subset.py (balanced subset -> Azure blob); PROVEN on 40 images (20 pos / 20 neg) -> container rsna-subset/dicom/, verified with pydicom (512x512, BitsStored 12, Slope 1, Intercept -1024)"
       }
     },
     {
