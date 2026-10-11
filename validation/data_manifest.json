@@ -85,6 +85,19 @@
       "licence_resolved_2026_10_11": false
     }
   ],
+  "storage": {
+    "provider": "Azure Blob Storage",
+    "subscription": "Azure subscription 1 (a14702a0-439b-42f5-b31a-8b898adfa965)",
+    "resource_group": "sewa-validation-rg",
+    "account": "sewavalidationdata",
+    "region": "swedencentral",
+    "sku": "Standard_LRS",
+    "public_network_access": "default Deny; bypass AzureServices; allowed IP = 102.89.46.84 (deployer egress)",
+    "containers": ["rsna-subset", "cq500", "processed"],
+    "note": "Dedicated study account - production storage (sewaaieuproddicom) is NOT reused.",
+    "created": "2026-10-11",
+    "verify": "az storage container list --account-name sewavalidationdata --auth-mode login --output table"
+  },
   "blocking_decisions_needed": [
     "1. RSNA licence: may we use the non-commercial RSNA data for this company-internal feasibility study, via a university partner, or with RSNA's explicit permission?",
     "2. CQ500 CC BY-NC-SA: acceptable for the study (NC) and are outputs acceptable under SA?",
