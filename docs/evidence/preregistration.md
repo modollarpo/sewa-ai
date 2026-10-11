@@ -89,7 +89,7 @@ never as success.
   — a negative result — and surface it early (claim strategy depends on it).
 - Any single signal statistically matching H must be reported explicitly.
 
-## 7.5 Sample-size and power note
+## 7b. Sample-size and power note
 
 RSNA dev used 300 test images. CQ500 has 491 studies (~ up to that many usable). The
 bootstrap CI (1000 resamples) is reported for every rate; we do not claim power we
