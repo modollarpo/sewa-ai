@@ -1,0 +1,248 @@
+{
+  "scope": "RSNA development set (image-level); NO external test",
+  "head_val_auroc": 0.7450222222222221,
+  "n": {
+    "train": 1400,
+    "val": 300,
+    "test": 300
+  },
+  "test_error_rate": 0.2833333333333333,
+  "review_rates": [
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ],
+  "arms": {
+    "B1_maxsoftmax": {
+      "error_auroc": 0.6143365253077976,
+      "aurc": 0.22300177855764514,
+      "brier": 0.19894233995620222,
+      "ece": 0.08185638661475003,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 263.3333333333333,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8181818181818182,
+          "accepted_specificity": 0.6267605633802817
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 236.66666666666666,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8296296296296296,
+          "accepted_specificity": 0.6444444444444445
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 206.66666666666666,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8151260504201681,
+          "accepted_specificity": 0.6694214876033058
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 163.33333333333334,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8076923076923077,
+          "accepted_specificity": 0.7264150943396226
+        }
+      }
+    },
+    "B2_entropy": {
+      "error_auroc": 0.6143365253077976,
+      "aurc": 0.22300177855764514,
+      "brier": 0.19894233995620222,
+      "ece": 0.08185638661475003,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 263.3333333333333,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8181818181818182,
+          "accepted_specificity": 0.6267605633802817
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 236.66666666666666,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8296296296296296,
+          "accepted_specificity": 0.6444444444444445
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 206.66666666666666,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8151260504201681,
+          "accepted_specificity": 0.6694214876033058
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 163.33333333333334,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8076923076923077,
+          "accepted_specificity": 0.7264150943396226
+        }
+      }
+    },
+    "C1_uncertainty": {
+      "error_auroc": 0.62593707250342,
+      "aurc": 0.21597355647985675,
+      "brier": 0.19894233995620222,
+      "ece": 0.08185638661475003,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 263.3333333333333,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8098591549295775,
+          "accepted_specificity": 0.6363636363636364
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 240.0,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8222222222222222,
+          "accepted_specificity": 0.6444444444444445
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 210.0,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8151260504201681,
+          "accepted_specificity": 0.6611570247933884
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 160.0,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8173076923076923,
+          "accepted_specificity": 0.7264150943396226
+        }
+      }
+    },
+    "C2_ood": {
+      "error_auroc": 0.6049794801641587,
+      "aurc": 0.2214631909692506,
+      "brier": 0.19894233995620222,
+      "ece": 0.08185638661475003,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 246.66666666666669,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8561151079136691,
+          "accepted_specificity": 0.6301369863013698
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 236.66666666666666,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8604651162790697,
+          "accepted_specificity": 0.624113475177305
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 200.0,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8636363636363636,
+          "accepted_specificity": 0.6538461538461539
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 156.66666666666669,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8958333333333334,
+          "accepted_specificity": 0.6754385964912281
+        }
+      }
+    },
+    "C4_conflict": {
+      "error_auroc": 0.5815047879616964,
+      "aurc": 0.23636068550164266,
+      "brier": 0.19894233995620222,
+      "ece": 0.08185638661475003,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 246.66666666666669,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8380281690140845,
+          "accepted_specificity": 0.6433566433566433
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 236.66666666666666,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.835820895522388,
+          "accepted_specificity": 0.6397058823529411
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 206.66666666666666,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8442622950819673,
+          "accepted_specificity": 0.635593220338983
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 186.66666666666669,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8301886792452831,
+          "accepted_specificity": 0.6346153846153846
+        }
+      }
+    },
+    "D_composite_H": {
+      "error_auroc": 0.6357865937072503,
+      "aurc": 0.20382916526901557,
+      "brier": 0.19894233995620222,
+      "ece": 0.08185638661475003,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 256.66666666666663,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.823943661971831,
+          "accepted_specificity": 0.6363636363636364
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 236.66666666666666,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8296296296296296,
+          "accepted_specificity": 0.6444444444444445
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 203.33333333333334,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8389830508474576,
+          "accepted_specificity": 0.6557377049180327
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 160.0,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8415841584158416,
+          "accepted_specificity": 0.7064220183486238
+        }
+      }
+    }
+  },
+  "composite_vs_better_baseline": {
+    "baseline": "B1_maxsoftmax",
+    "by_review_rate": {
+      "0.05": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.025316455696202604,
+        "ci95": [
+          -0.026675675675675525,
+          0.06851693302891938
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.1": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.0,
+        "ci95": [
+          -0.047619047619047554,
+          0.04615384615384628
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.2": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.016129032258064425,
+        "ci95": [
+          -0.034497882637628506,
+          0.09375
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.3": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.02040816326530618,
+        "ci95": [
+          -0.03777284498705137,
+          0.1176719840478564
+        ],
+        "passes_20pct_ci_excl_zero": false
+      }
+    }
+  },
+  "evidence_marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE."
+}
