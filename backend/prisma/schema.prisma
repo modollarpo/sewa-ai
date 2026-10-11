@@ -1260,6 +1260,9 @@ model MetacognitionAuditLog {
   layer3ConfidenceFloor          String
   layer3Detail                   Json?
   layer4SHAPCoherence            String
+  // Both coherence measures (generic SHAP + experimental window-specific) and
+  // the windows used, so the window ablation is reproducible from the audit row.
+  layer4Detail                   Json?
   layer5UncertaintyConflict      String
   layer6ReportConcordance        String
   layer7DemographicPlausibility  String

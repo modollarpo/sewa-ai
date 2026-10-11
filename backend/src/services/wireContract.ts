@@ -179,6 +179,11 @@ export interface RawUncertaintyResult {
   mc_method?: string;
   ood_score?: number | null;
   ood_flag?: boolean;
+  window_coherence?: number | null;
+  window_deficit?: number | null;
+  channel_shares?: Record<string, number> | null;
+  channel_flag?: boolean;
+  sensitive_windows?: string[] | null;
 }
 
 export interface UncertaintyResult {
@@ -200,6 +205,16 @@ export interface UncertaintyResult {
   oodScore?: number | null;
   /** True when oodScore exceeds the configured OOD threshold. */
   oodFlag?: boolean;
+  /** Experimental window-specific coherence (0..1); null unless the flag is on. Not validated. */
+  windowCoherence?: number | null;
+  /** 1 - windowCoherence. */
+  windowDeficit?: number | null;
+  /** Per-window (brain/subdural/bone) share of attribution mass. */
+  channelShares?: Record<string, number> | null;
+  /** True when a non-sensitive window dominates a finding-specific call. */
+  channelFlag?: boolean;
+  /** Windows considered sensitive for this finding. */
+  sensitiveWindows?: string[] | null;
 }
 
 export interface RawVLMResult {
@@ -244,6 +259,16 @@ export interface MetacognitionResult {
   safe_to_alert: boolean;
   evaluation_ms: number;
   evaluated_at?: string;
+  /** Generic SHAP coherence used for the hallucination-risk check. */
+  shap_coherence?: number | null;
+  /** Experimental window-specific coherence; null unless the flag is on. Not validated. */
+  window_coherence?: number | null;
+  /** 1 - window_coherence. */
+  window_deficit?: number | null;
+  /** Windows considered sensitive for this finding. */
+  sensitive_windows?: string[] | null;
+  /** True when the window deficit (rather than generic coherence) drove the H check. */
+  window_flag_used?: boolean;
 }
 
 // ── Normalisers (response → internal shape) ──────────────────────────────────
@@ -283,6 +308,11 @@ export function normalizeUncertainty(raw: RawUncertaintyResult): UncertaintyResu
     mcMethod: raw.mc_method,
     oodScore: raw.ood_score ?? null,
     oodFlag: raw.ood_flag ?? false,
+    windowCoherence: raw.window_coherence ?? null,
+    windowDeficit: raw.window_deficit ?? null,
+    channelShares: raw.channel_shares ?? null,
+    channelFlag: raw.channel_flag ?? false,
+    sensitiveWindows: raw.sensitive_windows ?? null,
   };
 }
 
@@ -396,6 +426,11 @@ export interface MetacognitionPayloadContext {
   patientSex?: string | null;
   allFindings: Array<{ condition: string; probability: number }>;
   reportText: string;
+  /** Experimental window-coherence inputs (only present when the flag is on). */
+  windowCoherence?: number | null;
+  windowDeficit?: number | null;
+  sensitiveWindows?: string[] | null;
+  windowChannelFlag?: boolean | null;
 }
 
 export function buildMetacognitionPayload(ctx: MetacognitionPayloadContext): Record<string, unknown> {
@@ -414,10 +449,12 @@ export function buildMetacognitionPayload(ctx: MetacognitionPayloadContext): Rec
     patient_sex: ctx.patientSex ?? null,
     all_findings: ctx.allFindings,
     report_text: ctx.reportText,
+    window_coherence: ctx.windowCoherence ?? null,
+    window_deficit: ctx.windowDeficit ?? null,
+    sensitive_windows: ctx.sensitiveWindows ?? null,
+    window_channel_flag: ctx.windowChannelFlag ?? null,
   };
 }
-
-/** Fields the builders emit that a service's request model does not declare. */
 export function payloadContractCheck(
   service: string,
   payload: Record<string, unknown>,

@@ -42,8 +42,17 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
 from cpu_inference_engine import registry, run_async # type: ignore
 
 from utils.dicom_loader import load_dicom_from_url
-from utils.preprocessing import preprocess_scan
+from utils.preprocessing import (
+    preprocess_scan,
+    build_ct_window_channels,
+    stack_ct_windows,
+    CT_WINDOW_ORDER,
+)
 from model import DEFAULT_BACKBONE, load_model as load_uncertainty_model, mc_dropout_predict
+from window_coherence import (
+    evaluate_window_coherence,
+    load_window_sensitivity,
+)
 
 logger = logging.getLogger("sewa-uncertainty")
 logger.setLevel(logging.INFO)
@@ -92,6 +101,15 @@ ALEATORIC_THRESHOLD = float(os.getenv("ALEATORIC_THRESHOLD", "0.40"))
 OOD_ENABLED   = os.getenv("OOD_ENABLED", "false").lower() == "true"
 OOD_THRESHOLD = float(os.getenv("OOD_THRESHOLD", "25.0"))
 OOD_REFERENCE = Path(os.getenv("OOD_REFERENCE_PATH", str(MODEL_CACHE / "ood_reference.npz")))
+
+# ── Window-specific coherence (NEW, off by default, NOT validated) ───────────
+# Computes per-channel (brain/subdural/bone) input attribution and measures how
+# much of the sensitive-window attribution sits inside the expected anatomical
+# region. Meant to be evaluated as an ablation vs generic SHAP coherence; it
+# makes no clinical performance claim. See window_coherence.py + the YAML config.
+WINDOW_COHERENCE_ENABLED = os.getenv("WINDOW_COHERENCE_ENABLED", "false").lower() == "true"
+WINDOW_SENSITIVITY_PATH = os.getenv("WINDOW_SENSITIVITY_PATH")  # optional override
+WINDOW_COHERENCE: Any = None  # WindowSensitivityConfig, loaded in lifespan
 
 AZURE_STORAGE_URL = os.getenv("AZURE_STORAGE_URL", "")
 
@@ -159,7 +177,7 @@ def _load_ood_reference() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global ACTIVE_BACKEND, DEMO_MODE, ATTRIBUTION_METHOD, MC_METHOD
-    global TORCH_MODEL, TORCH_WEIGHTS_LOADED
+    global TORCH_MODEL, TORCH_WEIGHTS_LOADED, WINDOW_COHERENCE
     model_path = INT8_MODEL if INT8_MODEL.exists() else (FP32_MODEL if FP32_MODEL.exists() else None)
     if model_path is None:
         # First-boot: auto-generate a structural demo ONNX so the service stays healthy
@@ -204,6 +222,14 @@ async def lifespan(app: FastAPI):
     )
 
     _load_ood_reference()
+
+    if WINDOW_COHERENCE_ENABLED:
+        WINDOW_COHERENCE = load_window_sensitivity(WINDOW_SENSITIVITY_PATH)
+        logger.info(
+            f"[Uncertainty] window-specific coherence ENABLED "
+            f"({len(WINDOW_COHERENCE.sensitive_windows)} finding rules; NOT validated)"
+        )
+
     yield
     logger.info("[Uncertainty] Shutdown")
 
@@ -263,6 +289,15 @@ class UncertaintyResponse(BaseModel):
     # OOD_ENABLED with fitted reference stats. ood_flag is score > threshold.
     ood_score: Optional[float] = None
     ood_flag: bool = False
+    # Window-specific coherence (NEW, off by default, NOT validated). All null
+    # unless WINDOW_COHERENCE_ENABLED and channel attributions were available.
+    # `channel_shares` = per-window |attribution| share; `sensitive_windows` =
+    # the windows the sensitivity config selected for this finding.
+    window_coherence: Optional[float] = None
+    window_deficit: Optional[float] = None
+    channel_shares: Optional[Dict[str, float]] = None
+    channel_flag: bool = False
+    sensitive_windows: Optional[List[str]] = None
 
 
 # ── ONNX-based MC-Dropout (CPU-optimised) ─────────────────────
@@ -462,6 +497,50 @@ def compute_saliency_map_onnx(
     return cam
 
 
+# ── Per-channel input attribution (window-specific coherence) ──
+def compute_channel_attribution(
+    input_arr: np.ndarray,
+    class_idx: int,
+    grid_size: int = 7,
+) -> Dict[str, np.ndarray]:
+    """Per-channel input-attribution maps for the brain/subdural/bone tensor.
+
+    Input-attribution (not Grad-CAM): each channel is occluded patch-by-patch on
+    a grid and the drop in the target-class probability forms a 2-D map. This is
+    a SHAP-style perturbation of the *inputs*, so it is defined per input
+    channel. Returns ``{channel: (224,224) float map}``.
+
+    Demo mode / missing model returns zero maps so the caller honestly falls back
+    to generic coherence instead of scoring fabricated attribution.
+    """
+    empty = {name: np.zeros((224, 224), dtype=np.float32) for name in CT_WINDOW_ORDER}
+    if DEMO_MODE or MODEL_ID not in registry.loaded_models:
+        return {c: v.copy() for c, v in empty.items()}
+
+    input_name = registry._sessions[MODEL_ID].get_inputs()[0].name
+    _, _, H, W = input_arr.shape
+    patch_h = max(1, H // grid_size)
+    patch_w = max(1, W // grid_size)
+    base_prob = _softmax(registry.run(MODEL_ID, {input_name: input_arr})[0][0])[class_idx]
+
+    maps: Dict[str, np.ndarray] = {}
+    for ci, name in enumerate(CT_WINDOW_ORDER):
+        sal = np.zeros((grid_size, grid_size), dtype=np.float32)
+        for row in range(grid_size):
+            for col in range(grid_size):
+                r0, r1 = row * patch_h, min(H, (row + 1) * patch_h)
+                c0, c1 = col * patch_w, min(W, (col + 1) * patch_w)
+                perturbed = input_arr.copy()
+                perturbed[:, ci, r0:r1, c0:c1] = 0.0
+                out = registry.run(MODEL_ID, {input_name: perturbed})[0][0]
+                sal[row, col] = max(0.0, base_prob - _softmax(out)[class_idx])
+        m = cv2.resize(sal, (224, 224), interpolation=cv2.INTER_LINEAR)
+        if m.max() > 0:
+            m = (m - m.min()) / (m.max() - m.min() + 1e-8)
+        maps[name] = m.astype(np.float32)
+    return maps
+
+
 def _render_heatmap_png(cam: np.ndarray, original: Optional[np.ndarray] = None) -> str:
     # Ensure cam is a numpy array and of correct type for applyColorMap
     cam_uint8 = (255 * cam).astype(np.uint8)
@@ -568,6 +647,37 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
         gradcam_b64 = await asyncio.to_thread(_render_heatmap_png, cam_array, image_array)
         gradcam_url = await _upload_gradcam(req.scan_id, gradcam_b64)
 
+        # ── Window-specific coherence (off by default; NOT validated) ──
+        # Computed alongside generic coherence; the caller decides which to use.
+        window_coherence = window_deficit = channel_shares = sensitive_windows = None
+        channel_flag = False
+        if WINDOW_COHERENCE_ENABLED:
+            try:
+                win_channels, win_is_hu = await asyncio.to_thread(
+                    build_ct_window_channels, image_array
+                )
+                win_tensor = stack_ct_windows(win_channels).unsqueeze(0).to(torch.float32)
+                attr_maps = await asyncio.to_thread(
+                    compute_channel_attribution, win_tensor.cpu().numpy(), class_idx, 7
+                )
+                wc = evaluate_window_coherence(
+                    attr_maps, req.primary_finding,
+                    brain_channel=win_channels["brain"], is_hu=win_is_hu,
+                    sensitivity=WINDOW_COHERENCE,
+                )
+                window_coherence = wc.coherence
+                window_deficit = wc.deficit
+                channel_shares = {k: round(float(v), 4) for k, v in wc.channel_shares.items()}
+                channel_flag = wc.channel_flag
+                sensitive_windows = wc.sensitive_windows
+                logger.info(
+                    f"[{req.scan_id}] window coherence: coh={window_coherence} "
+                    f"deficit={window_deficit} windows={sensitive_windows} "
+                    f"mask={wc.mask_source} channel_flag={channel_flag} shares={channel_shares}"
+                )
+            except Exception as e:  # noqa: BLE001 - optional feature must not break the endpoint
+                logger.warning(f"[{req.scan_id}] window coherence failed: {e}")
+
         is_uncertain = mc["epistemic"] > EPISTEMIC_THRESHOLD or mc["aleatoric"] > ALEATORIC_THRESHOLD
         _mc_desc = ("real MC-Dropout" if MC_METHOD == "mc-dropout-torch"
                     else "ONNX input-noise approx.")
@@ -577,12 +687,18 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
             f"\nOOD (Mahalanobis): {ood_score:.2f} ({'OUT-OF-DISTRIBUTION' if ood_flag else 'in-distribution'})."
             if ood_score is not None else ""
         )
+        _win_line = (
+            f"\nWindow coherence (experimental): {window_coherence:.2f} "
+            f"(sensitive windows {sensitive_windows}, deficit {window_deficit:.2f}"
+            + ("; CHANNEL MISMATCH)" if channel_flag else ").")
+            if window_coherence is not None else ""
+        )
         explanation = (
             f"Epistemic uncertainty: {mc['epistemic']:.3f} ({_ep_label}; threshold {EPISTEMIC_THRESHOLD}).\n"
             f"Aleatoric uncertainty: {mc['aleatoric']:.3f} ({_al_label}; threshold {ALEATORIC_THRESHOLD}).\n"
             f"{_mc_desc} ({MC_PASSES} passes): "
             f"\u03bc={mc['mc_mean']:.3f}, \u03c3={mc['mc_std']:.3f}."
-            f"{_ood_line}\n"
+            f"{_ood_line}{_win_line}\n"
             f"Top attribution: '{shap_values[0].f}' ({shap_values[0].v:.1%})."
         )
 
@@ -615,6 +731,11 @@ async def explain(req: UncertaintyRequest) -> UncertaintyResponse:
             mc_method=MC_METHOD,
             ood_score=ood_score,
             ood_flag=ood_flag,
+            window_coherence=window_coherence,
+            window_deficit=window_deficit,
+            channel_shares=channel_shares,
+            channel_flag=channel_flag,
+            sensitive_windows=sensitive_windows,
         )
 
     except HTTPException:
@@ -645,6 +766,7 @@ async def health() -> Dict[str, Any]:
             "epistemic_threshold": EPISTEMIC_THRESHOLD,
             "aleatoric_threshold": ALEATORIC_THRESHOLD,
             "ood_enabled": OOD_ENABLED and OOD_MEAN is not None,
+            "window_coherence_enabled": WINDOW_COHERENCE_ENABLED,
             "model_loaded": model_loaded,
             "models_loaded": registry.loaded_models,
             "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},

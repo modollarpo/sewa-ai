@@ -148,13 +148,51 @@ with an artificially lowered threshold.
 | 7 | Audit signature | ✅ | `backend/src/utils/audit.ts` canonical payload + persisted `payloadHash`/`signature`, `verifyChain()` verifies; `AuditLog` columns via migration `20261010000000_…` |
 | 6 | Report-signature DB CHECK | ✅ | same migration adds `report_approved_requires_signature` (`NOT VALID`) |
 | 5 | Architecture B0 | ✅ | `ai-services/uncertainty/model.py` `DEFAULT_BACKBONE="efficientnet_b0"`, rationale in header (B4/resnet50 retained for experiments) |
-| 2 | Real MC-Dropout | ✅ | `model.py` `enable_mc_dropout`/`mc_dropout_predict`; `main.py` `mc_dropout_torch` + dispatcher. ONNX input-noise retained **only** as labelled fallback (`mc_method="onnx-input-noise"`). New response fields `mc_method`/`ood_score`/`ood_flag` added to `wire-contract.json` + `normaliseUncertainty` + contract test |
-| 1 | Triggerable thresholds | ✅ (provisional) | `EPISTEMIC_THRESHOLD=0.15`, `ALEATORIC_THRESHOLD=0.40`, env-overridable; filed formula unchanged. Values to be finalised after N≥300 calibration |
-| 3 (OOD) | Mahalanobis OOD | ✅ (off by default) | `main.py` `_load_ood_reference`/`compute_ood`; enabled only with `OOD_ENABLED=true` **and** fitted `ood_reference.npz`. `/health` reports `ood_enabled` |
-| 3 (window) | Window-specific coherence | ⏳ **awaiting definition** | No spec text in-repo defining the "window". Generic SHAP coherence already exists. Needs the exact intended semantics before building |
+| 2 | Real MC-Dropout | ⚠️ **coded, UNVERIFIED** | `model.py` `enable_mc_dropout`/`mc_dropout_predict`; `main.py` `mc_dropout_torch` + dispatcher. **No local `.pt` checkpoint exists**, so no run has ever executed this path — runtime reports `mc_method="onnx-input-noise"` (labelled fallback). Real-dropout must be exercised against real weights before it can be claimed. New response fields `mc_method`/`ood_score`/`ood_flag` in `wire-contract.json` + `normaliseUncertainty` + contract test |
+| 1 | Triggerable thresholds | ⚠️ (provisional, still guessed) | `EPISTEMIC_THRESHOLD=0.15`, `ALEATORIC_THRESHOLD=0.40`, env-overridable; filed formula unchanged. The resolution policy requires these be **derived from the evaluated distribution, not guessed** — that has not happened (no data). Provisional only; do not present as calibrated |
+| 3 (OOD) | Mahalanobis OOD | ⚠️ **coded, UNVERIFIED, off by default** | `main.py` `_load_ood_reference`/`compute_ood`; enabled only with `OOD_ENABLED=true` **and** fitted `ood_reference.npz`. No reference is fitted and the path has never run. `/health` reports `ood_enabled:false` |
+| 3 (window) | Window-specific coherence | ⚠️ **coded, UNVERIFIED, off by default (candidate)** | `ai-services/uncertainty/window_coherence.py` + `window_sensitivity.yaml` + `utils/preprocessing.py` (multi-window CT channels, HU/box/heuristic mask); uncertainty computes it only when `WINDOW_COHERENCE_ENABLED=true`; metacognition uses the window deficit for H only when `WINDOW_SPECIFIC_COHERENCE=true`, always reports/logs **both** generic + window coherence and the windows used; audit row `MetacognitionAuditLog.layer4Detail`. Must be evaluated as an **ablation against generic coherence**; claim only if it helps. See inventorship note below |
 | 4 | Grad-CAM/SHAP | ✅ kept | unchanged; ONNX-approximation labelled |
 | 5 | Clinical-mode demo refusal | ✅ | `backend/src/services/clinicalMode.ts` (`assertClinicalModeSafe`, fail-closed); `CLINICAL_MODE` env in `config/env.ts`; wired at single persistence choke point in `aiOrchestrator.ts` before `AIResult.create`; 7 unit tests |
 
 Verification for this batch: `tsc --noEmit` clean; `eslint` 0 errors; `wireContract.test.ts` 47/47;
-`clinicalMode.test.ts` 7/7; live `contract-real-services.test.ts` 5/5 and Python `tests/contract`
-20/20 against all four booted services (uncertainty now serving `mc_method`/`ood_score`/`ood_flag`).
+`clinicalMode.test.ts` 7/7; window-coherence Python units 23/23; metacognition-window units 6/6;
+live `contract-real-services.test.ts` 5/5 and Python `tests/contract` 20/20 against all four booted
+services (uncertainty serving `mc_method`/`ood_score`/`ood_flag`; also
+`window_coherence_enabled`/`window_deficit`/`channel_shares`/`sensitive_windows` when enabled).
+
+---
+
+## Inventorship & evidence status (2026-10-11)
+
+This is an **honest** ledger, not a claims statement. Raise it with the attorney / IP clinic before
+the second application.
+
+- **Roles**: several features in this repo (window-specific coherence, gate-before-generate,
+  conflict escalation, and the other Phase-2 candidates) first appeared in an **AI-generated rewrite**
+  (`SEWA_AI_CODEBASE_RESEARCH_IMPLEMENTATION_AUDIT.md` / v3), and the proposal was later refined by a
+  human who wrote the definition that was approved in this document. The AI assistant cannot be an
+  inventor (UK law requires a natural person who actually devised the invention and can explain why it
+  works).
+- **Rule for this repo**: for every feature that is a candidate for a claim, the responsible human
+  must answer yes to both: (1) *"Did I make the inventive choices?"* and (2) *"Can I explain why it
+  works?"* If the answer to either is no, treat the feature as **low priority** and do not advance it
+  in the second application without the attorney's guidance.
+- **Window-specific coherence** = candidate, **not evidence**. It is off by default, has no validated
+  weights, and its sensitivity map is heuristic. It is to be evaluated in the validation study only as
+  an **ablation against generic SHAP coherence** (both measures are already logged per case). It is
+  claimable **only if** it demonstrably helps on licenced real data.
+
+## Threshold / dropout / OOD status vs the raised points
+
+- **Thresholds**: formula unchanged (filed), values `0.15`/`0.40` are **guesses pending data** — not
+  yet derived from an evaluated distribution. Do not claim them as calibrated.
+- **Dropout**: real MC-Dropout is **coded but never run** (no weights). The deployed path is the
+  labelled input-noise approximation. Until a real checkpoint is loaded, "MC-Dropout" cannot be
+  claimed as executed.
+- **OOD**: Mahalanobis signal is **coded but never run** and the reference covariance is **not
+  fitted**. `ood_enabled` is `false` in every current deployment. Cannot be claimed until fitted and
+  evaluated.
+
+The validation study (RSNA or other public data — **licence must be confirmed first**, see the
+validation prompt) is the only way the provisional values above stop being guesses.

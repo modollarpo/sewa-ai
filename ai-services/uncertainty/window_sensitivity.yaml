@@ -1,0 +1,42 @@
+# SEWA XAI — window-specific coherence sensitivity config
+#
+# Maps a clinical finding to the CT reconstruction *windows* (channels) that
+# physically contain the evidence for that finding. Window-specific coherence
+# checks that the model's input attribution is concentrated in the windows a
+# radiologist would actually read for that finding.
+#
+# Channels (in tensor order the uncertainty service builds them):
+#   brain    — soft-tissue brain window  (ww 80  / wc 40)
+#   subdural — subdural / blood window   (ww 130 / wc 50)
+#   bone     — bone window               (ww 2000 / wc 400)
+#
+# NOT a validated mapping. Heuristic defaults for an ablation experiment; see
+# docs/spec-vs-code-decisions.md. Evaluation uses expert boxes where available.
+
+# Exact finding label (as returned by triage) → sensitive channels.
+# Matched case-insensitively after normalising "-"/"_" to spaces.
+sensitive_windows:
+  "ICH":                       ["brain", "subdural"]
+  "Intracranial Hemorrhage":   ["brain", "subdural"]
+  "Intracranial Haemorrhage":  ["brain", "subdural"]
+  "Hemorrhagic Stroke":        ["brain", "subdural"]
+  "Haemorrhagic Stroke":       ["brain", "subdural"]
+  "Subdural Hematoma":         ["brain", "subdural"]
+  "Subdural Haematoma":        ["brain", "subdural"]
+  "Epidural Hematoma":         ["brain", "subdural"]
+  "Epidural Haematoma":        ["brain", "subdural"]
+  "Subarachnoid Hemorrhage":   ["brain", "subdural"]
+  "Subarachnoid Haemorrhage":  ["brain", "subdural"]
+  "Fracture":                  ["bone"]
+  "Skull Fracture":            ["bone"]
+  "Rib Fracture":              ["bone"]
+
+# Keyword fallback for unseen labels (checked when no exact match).
+keyword_rules:
+  - keywords: ["hemorrhage", "haemorrhage", "hematoma", "haematoma", "ich"]
+    channels: ["brain", "subdural"]
+  - keywords: ["fracture"]
+    channels: ["bone"]
+
+# Applied when a finding matches nothing above.
+default: ["brain"]

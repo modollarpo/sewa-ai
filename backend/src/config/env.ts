@@ -87,6 +87,12 @@ export const config = {
   // demo/synthetic weights (fail-closed). Leave false for demo/research runs.
   CLINICAL_MODE: optional('CLINICAL_MODE', 'false') === 'true',
 
+  // Experimental window-specific coherence (uncertainty-engine ablation).
+  // Off by default; must match WINDOW_SPECIFIC_COHERENCE on the metacognition
+  // service. When on, the backend threads the uncertainty service's window
+  // metrics into metacognition and logs both coherence measures.
+  WINDOW_SPECIFIC_COHERENCE: optional('WINDOW_SPECIFIC_COHERENCE', 'false') === 'true',
+
   // ── Research / Study Mode ─────────────────────────────────────
   RESEARCH_MODE_ENABLED: optional('RESEARCH_MODE_ENABLED', 'false') === 'true',
   STUDY_ID:              optional('STUDY_ID'),

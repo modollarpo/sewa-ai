@@ -76,6 +76,11 @@ const UNCERTAINTY_RAW = {
   mc_method: 'onnx-input-noise',
   ood_score: null,
   ood_flag: false,
+  window_coherence: null,
+  window_deficit: null,
+  channel_shares: null,
+  channel_flag: false,
+  sensitive_windows: null,
 };
 
 const VLM_RAW = {
@@ -102,6 +107,11 @@ const METACOG_RAW = {
   safe_to_alert: true,
   evaluation_ms: 12,
   evaluated_at: '2026-10-06T00:00:00Z',
+  shap_coherence: 0.9,
+  window_coherence: null,
+  window_deficit: null,
+  sensitive_windows: null,
+  window_flag_used: false,
 };
 
 const NORMALIZERS: Record<string, (raw: never) => unknown> = {

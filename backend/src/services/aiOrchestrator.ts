@@ -765,6 +765,14 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
           patientSex,
           allFindings: triage.allFindings,
           reportText: vlm.findings,
+          // Experimental (off by default): thread the window-coherence signals
+          // from the uncertainty stage through to metacognition. The service
+          // only *uses* them in H when its own flag is on; they are null when
+          // the uncertainty service has window coherence disabled.
+          windowCoherence: uncertainty.windowCoherence ?? null,
+          windowDeficit: uncertainty.windowDeficit ?? null,
+          sensitiveWindows: uncertainty.sensitiveWindows ?? null,
+          windowChannelFlag: uncertainty.channelFlag ?? null,
         }),
         SVC_TIMEOUT,
       ),
@@ -773,6 +781,17 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
       `[Metacognition] ${scanId}: safe_to_alert=${metacog.safe_to_alert} ` +
       `passed=${metacog.passed} hallucination_risk=${metacog.hallucination_risk.toFixed(3)} ms=${metacog.evaluation_ms}`
     );
+    // Experimental window coherence: log BOTH measures + the windows used so
+    // the ablation can be evaluated offline regardless of which drove H.
+    if (uncertainty.windowCoherence != null || metacog.window_flag_used) {
+      logger.info(
+        `[WindowCoherence] ${scanId}: generic=${metacog.shap_coherence ?? 'n/a'} ` +
+        `window=${uncertainty.windowCoherence ?? 'n/a'} ` +
+        `deficit=${uncertainty.windowDeficit ?? null} ` +
+        `windows=${JSON.stringify(uncertainty.sensitiveWindows ?? metacog.sensitive_windows ?? null)} ` +
+        `channelFlag=${uncertainty.channelFlag ?? false} used_in_H=${metacog.window_flag_used ?? false}`
+      );
+    }
     stageTimings.metacog = metacog.evaluation_ms;
 
     // ── Metacognition corrections ───────────────────────────────────────
@@ -885,10 +904,20 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
     // MetacognitionAuditLog had zero writers. Persist the wire flags mapped
     // onto the schema's layer model; never blocks the pipeline on failure.
     const auditFlags = metacog.flags;
-    const layerStatusFor = (code: string): string => {
-      const f = auditFlags.find(x => x.code === code);
+    const layerStatusFor = (...codes: string[]): string => {
+      const f = auditFlags.find(x => codes.includes(x.code));
       return f ? (f.severity === 'ERROR' ? 'FAIL' : 'FLAG') : 'PASS';
     };
+    // Layer-4 detail: both coherence measures + which windows were used, so the
+    // window-specific ablation is recorded in the audit trail (not just logs).
+    const layer4Detail = {
+      generic_shap_coherence: metacog.shap_coherence ?? null,
+      window_coherence: uncertainty.windowCoherence ?? metacog.window_coherence ?? null,
+      window_deficit: uncertainty.windowDeficit ?? metacog.window_deficit ?? null,
+      sensitive_windows: uncertainty.sensitiveWindows ?? metacog.sensitive_windows ?? null,
+      window_channel_flag: uncertainty.channelFlag ?? false,
+      window_flag_used: metacog.window_flag_used ?? false,
+    } as unknown as Prisma.InputJsonValue;
     const contradictionFlag = auditFlags.find(x => x.code === 'REPORT_CONTRADICTION');
     await prisma.metacognitionAuditLog.create({
       data: {
@@ -896,7 +925,8 @@ export async function runAIPipeline(scanId: string, tenantId: string): Promise<v
         layer1ModalityPlausibility: layerStatusFor('IMPLAUSIBLE_FINDING'),
         layer2UrgencyConsistency: layerStatusFor('URGENCY_MISMATCH'),
         layer3ConfidenceFloor: layerStatusFor('LOW_CONFIDENCE'),
-        layer4SHAPCoherence: layerStatusFor('SHAP_INCOHERENCE'),
+        layer4SHAPCoherence: layerStatusFor('SHAP_INCOHERENCE', 'WINDOW_INCOHERENCE'),
+        layer4Detail,
         layer5UncertaintyConflict: layerStatusFor('CONFIDENCE_UNCERTAINTY_CONFLICT'),
         layer6ReportConcordance: layerStatusFor('REPORT_CONTRADICTION'),
         layer7DemographicPlausibility: layerStatusFor('DEMOGRAPHIC_IMPLAUSIBILITY'),
