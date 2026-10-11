@@ -138,22 +138,68 @@ def cmd_fetch(args) -> int:
     print(f"selected {len(chosen)} studies (pos={n_each})")
 
     container = _container(args.container)
-    manifest = []
-    for iid, lab in chosen:
+    if args.skip_existing:
+        existing = {b.name.split("/")[-1][:-4]
+                    for b in container.list_blobs(name_starts_with="dicom/")
+                    if b.name.endswith(".dcm")}
+        before = len(chosen)
+        chosen = [c for c in chosen if c[0] not in existing]
+        print(f"skip-existing: {before - len(chosen)} already present, {len(chosen)} to fetch", flush=True)
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from validation.scripts.rsna_zipfetch import RemoteZip as _RZ
+    import threading
+
+    # one RemoteZip per worker (independent range connections)
+    thread_local = threading.local()
+
+    def _rz():
+        if not hasattr(thread_local, "rz"):
+            thread_local.rz = _RZ(url)
+        return thread_local.rz
+
+    def _one(item):
+        iid, lab = item
         lho, csize, method = train[iid]
-        raw = rz.read_member(lho, csize, method)
+        raw = _rz().read_member(lho, csize, method)
         blob_name = f"dicom/{iid}.dcm"
         container.get_blob_client(blob_name).upload_blob(raw, overwrite=True)
-        manifest.append({"image_id": iid, "label_any": lab, "bytes": len(raw), "blob": f"{args.container}/{blob_name}"})
-        print(f"  {iid} label={lab} {len(raw)//1024}KB -> {blob_name}")
+        return {"image_id": iid, "label_any": lab, "bytes": len(raw),
+                "blob": f"{args.container}/{blob_name}"}
+
+    manifest = []
+    done = 0
+    plog = Path(args.progress)
+    plog.parent.mkdir(parents=True, exist_ok=True)
+
+    def _log(msg: str) -> None:
+        with open(plog, "a", encoding="utf-8") as f:
+            f.write(msg + "\n")
+
+    with ThreadPoolExecutor(max_workers=args.workers) as ex:
+        futs = {ex.submit(_one, it): it for it in chosen}
+        for fut in as_completed(futs):
+            m = fut.result()
+            manifest.append(m)
+            done += 1
+            _log(f"OK {done}/{len(chosen)} {m['image_id']} label={m['label_any']} {m['bytes']//1024}KB")
+
+    manifest.sort(key=lambda m: (m["label_any"], m["image_id"]))
 
     out = Path(args.manifest)
     out.parent.mkdir(parents=True, exist_ok=True)
     import csv as _csv
+    rows = []
+    for b in container.list_blobs(name_starts_with="dicom/"):
+        if not b.name.endswith(".dcm"):
+            continue
+        iid = b.name.split("/")[-1][:-4]
+        rows.append({"image_id": iid, "label_any": labels.get(iid, ""),
+                     "bytes": b.size, "blob": f"{args.container}/{b.name}"})
+    rows.sort(key=lambda r: (str(r["label_any"]), r["image_id"]))
     with open(out, "w", newline="", encoding="utf-8") as f:
         w = _csv.DictWriter(f, fieldnames=["image_id", "label_any", "bytes", "blob"])
-        w.writeheader(); w.writerows(manifest)
-    print(f"manifest -> {out}")
+        w.writeheader(); w.writerows(rows)
+    print(f"manifest -> {out} ({len(rows)} images)", flush=True)
     return 0
 
 
@@ -167,6 +213,10 @@ def build_parser():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--n", type=int, default=40)
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--workers", type=int, default=8)
+    p.add_argument("--skip-existing", action="store_true", default=True)
+    p.add_argument("--no-skip-existing", dest="skip_existing", action="store_false")
+    p.add_argument("--progress", default="C:/Users/USER/AppData/Local/Temp/opencode/rsna2000_progress.log")
     p.add_argument("--container", default="rsna-subset")
     p.add_argument("--cd-cache", default="C:/Users/USER/AppData/Local/Temp/opencode/rsna_cd.bin")
     p.add_argument("--url-file", default="C:/Users/USER/AppData/Local/Temp/opencode/rsna_url.txt")
