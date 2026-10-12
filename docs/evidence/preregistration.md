@@ -37,6 +37,8 @@ Secondary: does any **single** signal match H (relevant to claim strategy)?
 - One image = one *slice* for RSNA; for CQ500, a study aggregates slices.
 - **Study score** = mean of the model's slice probabilities for the top-3 highest-
   scoring slices of the study (frozen rule; config `evaluation`/`study.yaml`).
+- **Calibration:** temperature scaling fitted on the RSNA **validation** set only
+  (T≈2.656), applied to all single-pass probabilities before B1/B2/C4 thresholding.
 - No fine-tuning, recalibration, or threshold change may use CQ500 labels.
 
 ## 4. Signals (frozen definitions)
@@ -44,7 +46,8 @@ Secondary: does any **single** signal match H (relevant to claim strategy)?
 - **Uncertainty (C1):** N=20 MC-dropout passes; epistemic = Var(p); aleatoric =
   mean p(1-p); U = 0.6*epistemic + 0.4*aleatoric; ceiling 0.15; normalised by 0.15.
 - **OOD (C2):** shared-covariance Mahalanobis on penultimate features, shrinkage
-  0.05, fit on TRAINING features only.
+  0.05, fit on TRAINING features only. **DROPPED from the composite** (amendment 1);
+  still reported standalone as arm C2.
 - **Conflict (C4):** confidence * normalised-U.
 - **Attribution (C3):** Grad-CAM overlap vs BHX boxes; **"not evaluated"** unless the
   BHX annotations are available and licences verified. If unavailable, C3 is omitted
@@ -57,8 +60,9 @@ Secondary: does any **single** signal match H (relevant to claim strategy)?
 - Thresholds are **quantiles of the validation (RSNA) score distribution** calibrated
   to the matched review rate. The SAME thresholds are applied to CQ500. No CQ500
   quantiles are used for gating.
-- **Composite H:** logistic regression (class-balanced) on the five signals, fitted
-  on the **RSNA validation split only**, then frozen (`h_weights.json`).
+- **Composite H:** logistic regression (class-balanced) over the **evaluated signals**
+  (C1 uncertainty + C4 conflict; OOD excluded — amendment 1; attrib/negation not
+  evaluated), fitted on the **RSNA validation split only**, then frozen.
 
 ## 6. Evaluation
 
@@ -104,5 +108,13 @@ have not demonstrated.
 - No CQ500-derived model weight or artefact is redistributed (share-alike).
 
 ## 9. Amendments log
+
+- **Amendment 1 (2026-10-12):** OOD signal (C2) excluded from composite H; H = LR over
+  C1 and C4 only. Reason: on RSNA dev, C2 error-detection AUROC = 0.502 (chance) and it
+  was the only component that degraded the composite (leave-one-out: dropping C2 restored
+  H to the baseline). Recorded **before** any CQ500 data was touched.
+- **Amendment 2 (2026-10-12):** temperature scaling (fitted on RSNA validation only,
+  T≈2.656) applied to single-pass probabilities before B1/B2/C4 thresholding, per Step 3.
+  Recorded **before** CQ500.
 
 - (none yet)

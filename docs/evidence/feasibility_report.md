@@ -3,8 +3,8 @@
 **Marking: FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
 **Evidence status: development-set (RSNA) feasibility run. No external test performed yet.**
 
-- Commit: `c7297b5921b1329b2612956e987c97baa80e71ad` (branch `fix/patent-aligned`)
-- Environment: Python 3.14.2, numpy 2.4.1, scikit-learn 1.9.1, torch 2.10.0+cpu (CPU-only)
+- Branch: `fix/patent-aligned` (commit containing this report: `git log -1 -- docs/evidence/feasibility_report.md`)
+- Environment: Python 3.14.2, numpy 2.4.1, scikit-learn 1.9.1, scipy, torch 2.10.0+cpu (CPU-only)
 - Seeds: split seed 42; fixed seeds in metrics bootstrap
 - Config: `validation/config/study.yaml`; signals in `validation/study/signals.py`
 - Run artefacts: `validation/reports/study_report_full.{json,md}`, `study_curves_full.npz`,
@@ -33,40 +33,36 @@ from one patient may cross splits. This is a documented limitation, not a design
 - **Preprocessing:** DICOM -> Hounsfield Units (rescale slope/intercept); three-window tensor
   (brain 40/80, subdural 80/200, bone 600/2800); resize 224x224; normalised. 2,000 slices
   cached (`validation/data_cache/rsna_2000_224_3win.npz`).
-- **Split:** 1400/300/300 (seed 42), balanced (700/150/150 positive), leakage test passing
-  (disjoint, full coverage, unique ids).
+- **Split:** 1400/300/300 (seed 42), balanced (700/150/150 positive), leakage test passing.
 - **Model:** EfficientNet-B0 (ImageNet `IMAGENET1K_V1`), fully fine-tuned on CPU (batch 8,
   12 epochs, best epoch 10). Fitted dropout in the head -> genuine MC dropout. Best
   **val AUROC 0.9184**; test error rate 0.190.
-- **Signals (each a tested function, `validation/study/signals.py`):**
+- **Calibration:** temperature scaling fitted on the **validation set only** (T≈2.656),
+  applied to single-pass probabilities before B1/B2/C4 thresholding. Cut test ECE 0.152 -> 0.066.
+- **Signals (each a tested function):**
   1. Uncertainty C1: N=20 MC-dropout passes; epistemic = Var(p); aleatoric = mean p(1-p);
      U = 0.6*epistemic + 0.4*aleatoric (ceiling ~0.15); normalised by 0.15.
-  2. OOD C2: class-conditional shared-covariance Mahalanobis on penultimate features,
-     shrinkage 0.05, fit on train only.
+  2. OOD C2: class-conditional shared-covariance Mahalanobis, shrinkage 0.05, fit on train only.
+     Reported standalone; **excluded from the composite (amendment 1)**.
   3. Attribution coherence C3: **not evaluated** (no BHX boxes).
   4. Conflict C4: confidence x normalised U.
   5. Report negation: **not evaluated** (needs generated reports); excluded.
-- **Composite H:** logistic regression (class-balanced) over the evaluated signals, fit on the
-  **validation set only**, then frozen and applied to test.
-- **Thresholds:** validation-set score quantiles at each review rate (no hand-set thresholds).
-- **Aggregation:** binary slice task here; study-level rule (mean of top-3 slice probabilities)
-  is frozen for CQ500 but untested (RSNA has no study ids).
-- **Metrics:** error-detection AUROC (mid-rank ties), risk-coverage + AURC, unsafe-accepted
-  per 1,000, sensitivity/specificity, share reviewed; 95% bootstrap CI (1000 resamples, fixed seed).
-- **Not done (pending):** temperature scaling on validation (Step 3) — baselines use raw softmax.
+- **Composite H:** logistic regression (class-balanced) over the **evaluated signals**
+  (C1 + C4), fit on the **validation set only**, then frozen. (Baselines are comparators, not
+  composite inputs.)
+- **Thresholds:** validation-set score quantiles at the matched review rate.
+- **Composite weights:** learned in this study (spec leaves them unspecified).
 
-## 4. Results (RSNA dev set, test n=300)
-
-Error-detection AUROC (higher = better):
+## 4. Results (RSNA dev, test n=300)
 
 | arm | error AUROC | AURC | Brier | ECE |
 |---|---|---|---|---|
-| B1 max-softmax | 0.751 | 0.084 | 0.155 | 0.152 |
-| B2 entropy | 0.751 | 0.084 | 0.155 | 0.152 |
-| C1 uncertainty | 0.751 | 0.084 | 0.155 | 0.152 |
-| C2 OOD | 0.502 | 0.189 | 0.155 | 0.152 |
-| C4 conflict | 0.748 | 0.085 | 0.155 | 0.152 |
-| **D composite H** | **0.685** | 0.132 | 0.155 | 0.152 |
+| B1 max-softmax | 0.749 | 0.085 | 0.136 | 0.066 |
+| B2 entropy | 0.749 | 0.085 | 0.136 | 0.066 |
+| C1 uncertainty | 0.751 | 0.084 | 0.136 | 0.066 |
+| C2 OOD (standalone) | 0.502 | 0.189 | — | — |
+| C4 conflict | 0.751 | 0.084 | 0.136 | 0.066 |
+| **D composite H** | **0.751** | 0.084 | 0.136 | 0.066 |
 
 Arm A (no gate): unsafe accepted 190.0 per 1,000; sensitivity 0.793, specificity 0.827.
 
@@ -74,20 +70,17 @@ Arm A (no gate): unsafe accepted 190.0 per 1,000; sensitivity 0.793, specificity
 
 | review rate | rel. reduction in unsafe-accepted | 95% CI | passes >=20% & CI>0 |
 |---|---|---|---|
-| 5%  | -0.021 | [-0.093, 0.043] | no |
-| 10% |  0.024 | [-0.089, 0.059] | no |
-| 20% | -0.031 | [-0.098, 0.080] | no |
-| 30% |  0.077 | [-0.136, 0.200] | no |
+| 5%  | 0.021 | [-0.018, 0.050] | no |
+| 10% | 0.023 | [-0.049, 0.067] | no |
+| 20% | 0.000 | [-0.059, 0.069] | no |
+| 30% | 0.000 | [-0.031, 0.083] | no |
 
 **Ablations (leave-one-signal-out, LR refit on validation):**
 
 | variant | error AUROC | rel. reduction vs B1 @20% |
 |---|---|---|
-| without B1 max-softmax | 0.685 | -0.031 |
-| without B2 entropy | 0.678 | -0.031 |
-| without C1 uncertainty | 0.686 | -0.031 |
-| **without C2 OOD** | **0.751** | 0.000 |
-| without C4 conflict | 0.684 | -0.031 |
+| without C1 uncertainty | 0.751 | 0.000 |
+| without C4 conflict | 0.751 | 0.000 |
 
 Figures: `fig_risk_coverage_full.svg`, `fig_error_auroc_full.svg`.
 
@@ -98,40 +91,40 @@ Figures: `fig_risk_coverage_full.svg`, `fig_error_auroc_full.svg`.
 ## 5. Findings
 
 1. **The composite risk score H does not beat single-pass confidence.** Composite error AUROC
-   0.685 vs 0.751 for max-softmax/entropy; relative reduction in unsafe-accepted never reaches
-   the pre-registered 20% and the 95% CI includes zero at every review rate.
-2. **The single-pass signals are collinear.** Max-softmax, entropy, MC-uncertainty and
-   confidence-uncertainty conflict are effectively the same ranking (all ~0.75); removing any
-   one barely changes the result.
-3. **The OOD component is uninformative and harmful here.** C2 error AUROC 0.502 (chance); it
-   is the *only* component that drags the composite down — dropping it restores H to exactly the
-   baseline (0.751). This is expected: in-distribution errors on RSNA are ambiguous positives,
-   not out-of-distribution inputs.
-4. A stronger classifier did not help the gate: the composite was *worse* at val AUROC 0.918
-   than at 0.745, because a better single-pass score leaves less for a composite to add.
+   0.751, statistically indistinguishable from max-softmax/entropy (0.749) and the signals
+   themselves (0.751); relative reduction in unsafe-accepted never approaches the pre-registered
+   20%, and the 95% CI includes zero at every review rate.
+2. **The signals are collinear.** Max-softmax, entropy, MC-uncertainty and conflict rank errors
+   almost identically (~0.75); leave-one-out changes nothing. The composite reduces to its own
+   inputs.
+3. **The OOD component is uninformative here.** C2 error AUROC 0.502 (chance); it was the only
+   component that degraded the composite (earlier run: including it gave 0.685 vs 0.751 without).
+   It is therefore **dropped from the composite** (pre-registration amendment 1).
+4. **A stronger classifier did not help the gate.** The composite was worse at val AUROC 0.918
+   than at 0.745 because a better single-pass score leaves less for a composite to add.
+5. **Calibration helps the raw probabilities, not the ranking.** Temperature scaling cut ECE
+   ~2.3x but left error-detection AUROC essentially unchanged.
 
 ## 6. Limitations
 
 - Development set only; **no external (CQ500) test yet**.
 - Image-level splits (RSNA has no patient id) — leakage risk documented.
-- Non-commercial data licences (RSNA non-commercial; CQ500 NC-SA). Models are for
-  non-commercial research use only.
+- Non-commercial data licences (RSNA non-commercial) — non-commercial research use only.
 - 2D slices; study-level aggregation rule fixed but untested.
 - Negation and attribution signals not evaluated.
-- Composite weights learned in this study (spec leaves them unspecified).
-- No temperature-scaling calibration yet.
+- Composite weights learned in this study.
 - Single task (haemorrhage vs none); small n (300 test slices).
 - **Not clinical evidence.**
 
 ## 7. Reproduce
 
 ```
-python -u -m validation.preprocessing.build_tensors --workers 16   # GCS-sourced, resumable
+python -u -m validation.preprocessing.build_tensors --workers 16
 python -u -m validation.preprocessing.make_splits
-python -u -m validation.study.train --epochs 12 --batch 8           # CPU, ~excluded h
-python -u -m validation.study.run_study --model full                # arms A,B1,B2,C1,C2,C4,D,E
+python -u -m validation.study.train --epochs 12 --batch 8
+python -u -m validation.study.run_study --model full          # cached -> fast
 python -u -m validation.study.figures --tag full
-pytest validation/study/tests -q
+python -m pytest validation/study/tests -q
 ```
 
 ## 8. Decisions / approvals needed
@@ -141,4 +134,4 @@ pytest validation/study/tests -q
 2. **RSNA non-commercial approval** before any commercial use of the model.
 3. **Weights note:** composite weights are learned; confirm this is acceptable for the filing.
 4. Confirm the default success criterion (>=20% relative reduction, CI excluding zero) stands.
-5. Confirm whether to drop the OOD signal from the composite (finding 3) before the external test.
+5. Confirm dropping the OOD signal (finding 3 / amendment 1) — **done by instruction**; flag any objection.

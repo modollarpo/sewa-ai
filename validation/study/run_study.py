@@ -126,35 +126,61 @@ def compute_full(batch=32):
     return out
 
 
-def evaluate(r, tag):
+def _fit_temperature(p, y):
+    from scipy.optimize import minimize_scalar
+    p = np.clip(np.asarray(p, float), 1e-6, 1 - 1e-6)
+    z = np.log(p / (1 - p))
+    y = np.asarray(y, float)
+
+    def nll(logT):
+        q = 1.0 / (1.0 + np.exp(-z / np.exp(logT)))
+        q = np.clip(q, 1e-9, 1 - 1e-9)
+        return -np.mean(y * np.log(q) + (1 - y) * np.log(1 - q))
+
+    return float(np.exp(minimize_scalar(nll, bounds=(-3.0, 3.0), method="bounded").x))
+
+
+def _apply_temperature(p, T):
+    p = np.clip(np.asarray(p, float), 1e-6, 1 - 1e-6)
+    z = np.log(p / (1 - p))
+    return 1.0 / (1.0 + np.exp(-z / T))
+
+
+def evaluate(r, tag, keep_ood=False):
     from sklearn.linear_model import LogisticRegression
     y, split = r["y"], r["split"]
-    y_te = y[split == "test"]
-    pt = r["test"][0]
+    y_va, y_te = y[split == "val"], y[split == "test"]
 
-    ood = signals.MahalanobisOOD().fit(r["feats"][split == "train"], y[split == "train"])
+    p_va_raw, p_te_raw = r["probs"][split == "val"], r["probs"][split == "test"]
+    T = _fit_temperature(p_va_raw, y_va)
+    p_va, p_te = _apply_temperature(p_va_raw, T), _apply_temperature(p_te_raw, T)
+
     U_va = signals.normalized_U(r["val"][1], r["val"][2])
     U_te = signals.normalized_U(r["test"][1], r["test"][2])
+    ood = signals.MahalanobisOOD().fit(r["feats"][split == "train"], y[split == "train"])
 
-    arms_va = {"B1_maxsoftmax": signals.risk_max_softmax(r["val"][0]),
-               "B2_entropy": signals.risk_entropy(r["val"][0]),
+    arms_va = {"B1_maxsoftmax": signals.risk_max_softmax(p_va),
+               "B2_entropy": signals.risk_entropy(p_va),
                "C1_uncertainty": U_va,
-               "C2_ood": ood.score(r["feats"][split == "val"]),
-               "C4_conflict": signals.risk_conflict(r["val"][0], r["val"][1], r["val"][2])}
-    arms_te = {"B1_maxsoftmax": signals.risk_max_softmax(pt),
-               "B2_entropy": signals.risk_entropy(pt),
+               "C4_conflict": signals.risk_conflict(p_va, r["val"][1], r["val"][2])}
+    arms_te = {"B1_maxsoftmax": signals.risk_max_softmax(p_te),
+               "B2_entropy": signals.risk_entropy(p_te),
                "C1_uncertainty": U_te,
-               "C2_ood": ood.score(r["feats"][split == "test"]),
-               "C4_conflict": signals.risk_conflict(pt, r["test"][1], r["test"][2])}
+               "C4_conflict": signals.risk_conflict(p_te, r["test"][1], r["test"][2])}
+    if keep_ood:
+        arms_va["C2_ood"] = ood.score(r["feats"][split == "val"])
+        arms_te["C2_ood"] = ood.score(r["feats"][split == "test"])
 
-    err_va = ((r["val"][0] >= 0.5).astype(int) != y[split == "val"])
-    err_te = ((pt >= 0.5).astype(int) != y_te)
-    names = list(arms_va)
+    err_va = ((p_va >= 0.5).astype(int) != y_va)
+    err_te = ((p_te >= 0.5).astype(int) != y_te)
+
+    sig_names = [n for n in ("C1_uncertainty", "C2_ood", "C4_conflict") if n in arms_va]
     H = LogisticRegression(max_iter=2000, class_weight="balanced").fit(
-        np.column_stack([arms_va[n] for n in names]), err_va.astype(int))
-    arms_te["D_composite_H"] = H.predict_proba(np.column_stack([arms_te[n] for n in names]))[:, 1]
+        np.column_stack([arms_va[n] for n in sig_names]), err_va.astype(int))
+    arms_te["D_composite_H"] = H.predict_proba(np.column_stack([arms_te[n] for n in sig_names]))[:, 1]
 
     report = {"model": r["kind"], "model_kind": tag, "model_val_auroc": r.get("val_auroc"),
+              "temperature": T, "keep_ood": bool(keep_ood), "composite_signals": sig_names,
               "scope": "RSNA development set (image-level); NO external test",
               "n": {k: int((split == k).sum()) for k in ("train", "val", "test")},
               "test_error_rate": float(err_te.mean()), "review_rates": REVIEW_RATES,
@@ -163,11 +189,11 @@ def evaluate(r, tag):
     for arm, risk in arms_te.items():
         _cov, _rc, aurc = risk_coverage(risk, err_te)
         entry = {"error_auroc": float(auroc(risk, err_te)), "aurc": float(aurc),
-                 "brier": float(brier(pt, y_te)), "ece": float(ece(pt, y_te)),
+                 "brier": float(brier(p_te, y_te)), "ece": float(ece(p_te, y_te)),
                  "by_review_rate": {}}
         for rr in REVIEW_RATES:
             acc = risk <= np.quantile(risk, 1.0 - rr)
-            sens, spec = sensitivity_specificity(pt[acc], y_te[acc], 0.5)
+            sens, spec = sensitivity_specificity(p_te[acc], y_te[acc], 0.5)
             entry["by_review_rate"][str(rr)] = {
                 "unsafe_accepted_per_1000": float(unsafe_accepted_per_1000(risk, err_te, rr)),
                 "share_reviewed": float(rr),
@@ -185,14 +211,14 @@ def evaluate(r, tag):
                         "passes_20pct_ci_excl_zero": bool(np.isfinite(ptv) and ptv >= 0.20 and ci[0] > 0)}
     report["composite_vs_better_baseline"] = {"baseline": better, "by_review_rate": cmp}
 
-    sens_a, spec_a = sensitivity_specificity(pt, y_te, 0.5)
+    sens_a, spec_a = sensitivity_specificity(p_te, y_te, 0.5)
     report["arm_A_no_gate"] = {"unsafe_accepted_per_1000": float(err_te.mean() * 1000),
                                "share_reviewed": 0.0, "accepted_sensitivity": float(sens_a),
                                "accepted_specificity": float(spec_a), "note": "accept-all; no gate"}
 
     abl = {}
-    for drop in names:
-        keep = [n for n in names if n != drop]
+    for drop in sig_names:
+        keep = [n for n in sig_names if n != drop]
         Hk = LogisticRegression(max_iter=2000, class_weight="balanced").fit(
             np.column_stack([arms_va[n] for n in keep]), err_va.astype(int))
         risk = Hk.predict_proba(np.column_stack([arms_te[n] for n in keep]))[:, 1]
@@ -208,7 +234,8 @@ def evaluate(r, tag):
              **{f"risk__{k}": v for k, v in arms_te.items()})
     (REPORTS / f"study_report_{tag}.json").write_text(json.dumps(report, indent=2))
     _write_md(report, tag)
-    print(json.dumps({"model": report["model"], "test_error_rate": report["test_error_rate"],
+    print(json.dumps({"model": report["model"], "temperature": round(T, 3),
+                      "composite_signals": sig_names, "test_error_rate": report["test_error_rate"],
                       "arms": {k: round(v["error_auroc"], 3) for k, v in report["arms"].items()},
                       "criterion": {k: v["passes_20pct_ci_excl_zero"]
                                     for k, v in cmp.items()}}, indent=2))
@@ -218,6 +245,8 @@ def evaluate(r, tag):
 def _write_md(report, tag):
     L = [f"# RSNA development-set gating study ({tag})", "",
          f"**Model:** {report['model']} (val AUROC {report['model_val_auroc']})",
+         f"**Temperature (val-fitted):** {report.get('temperature')}  "
+         f"**composite signals:** {report.get('composite_signals')}",
          f"**Scope:** {report['scope']}", f"**Marking:** {report['evidence_marking']}", "",
          f"- n: {report['n']}  test error rate: {report['test_error_rate']:.3f}", "",
          "| arm | error AUROC | AURC | Brier | ECE |", "|---|---|---|---|---|"]
@@ -249,9 +278,11 @@ def _write_md(report, tag):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", choices=["head", "full"], default="head")
+    ap.add_argument("--keep-ood", action="store_true",
+                    help="include the OOD signal in the composite (default: dropped per finding 3)")
     args = ap.parse_args()
     r = compute_head() if args.model == "head" else compute_full()
-    evaluate(r, args.model)
+    evaluate(r, args.model, keep_ood=args.keep_ood)
     return 0
 
 
