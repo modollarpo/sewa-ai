@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="440" font-family="sans-serif">
+<rect width="640" height="440" fill="white"/>
+<text x="320.0" y="24" text-anchor="middle" font-size="15">Error-detection AUROC (higher = better)</text>
+<line x1="56" y1="384" x2="616" y2="384" stroke="black"/>
+<line x1="56" y1="40" x2="56" y2="384" stroke="black"/>
+<text x="336.0" y="422" text-anchor="middle" font-size="12"></text>
+<text x="16" y="212.0" text-anchor="middle" font-size="12" transform="rotate(-90 16 212.0)"></text>
+<rect x="69.3" y="125.7" width="53.3" height="258.3" fill="#888"/>
+<text x="96.0" y="119.7" text-anchor="middle" font-size="10">0.751</text>
+<text x="96.0" y="398.0" text-anchor="middle" font-size="10">B1</text>
+<rect x="149.3" y="125.7" width="53.3" height="258.3" fill="#555"/>
+<text x="176.0" y="119.7" text-anchor="middle" font-size="10">0.751</text>
+<text x="176.0" y="398.0" text-anchor="middle" font-size="10">B2</text>
+<rect x="229.3" y="125.6" width="53.3" height="258.4" fill="#1f77b4"/>
+<text x="256.0" y="119.6" text-anchor="middle" font-size="10">0.751</text>
+<text x="256.0" y="398.0" text-anchor="middle" font-size="10">C1</text>
+<rect x="309.3" y="211.3" width="53.3" height="172.7" fill="#2ca02c"/>
+<text x="336.0" y="205.3" text-anchor="middle" font-size="10">0.502</text>
+<text x="336.0" y="398.0" text-anchor="middle" font-size="10">C2</text>
+<rect x="389.3" y="126.8" width="53.3" height="257.2" fill="#9467bd"/>
+<text x="416.0" y="120.8" text-anchor="middle" font-size="10">0.748</text>
+<text x="416.0" y="398.0" text-anchor="middle" font-size="10">C4</text>
+<rect x="469.3" y="148.4" width="53.3" height="235.6" fill="#d62728"/>
+<text x="496.0" y="142.4" text-anchor="middle" font-size="10">0.685</text>
+<text x="496.0" y="398.0" text-anchor="middle" font-size="10">D</text>
+<line x1="56" y1="212.0" x2="616" y2="212.0" stroke="red" stroke-dasharray="4" stroke-width="1"/>
+</svg>

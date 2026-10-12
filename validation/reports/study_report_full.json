@@ -246,5 +246,99 @@
         "passes_20pct_ci_excl_zero": false
       }
     }
+  },
+  "arm_A_no_gate": {
+    "unsafe_accepted_per_1000": 190.0,
+    "share_reviewed": 0.0,
+    "accepted_sensitivity": 0.7933333333333333,
+    "accepted_specificity": 0.8266666666666667,
+    "note": "accept-all; no gate"
+  },
+  "ablations_leave_one_out": {
+    "without_B1_maxsoftmax": {
+      "error_auroc": 0.6851490867085409,
+      "by_review_rate": {
+        "0.05": {
+          "relative_reduction_vs_B1": -0.02127659574468073
+        },
+        "0.1": {
+          "relative_reduction_vs_B1": 0.023809523809523878
+        },
+        "0.2": {
+          "relative_reduction_vs_B1": -0.031249999999999955
+        },
+        "0.3": {
+          "relative_reduction_vs_B1": 0.07692307692307697
+        }
+      }
+    },
+    "without_B2_entropy": {
+      "error_auroc": 0.6781459822395495,
+      "by_review_rate": {
+        "0.05": {
+          "relative_reduction_vs_B1": -0.02127659574468073
+        },
+        "0.1": {
+          "relative_reduction_vs_B1": 0.023809523809523878
+        },
+        "0.2": {
+          "relative_reduction_vs_B1": -0.031249999999999955
+        },
+        "0.3": {
+          "relative_reduction_vs_B1": 0.07692307692307697
+        }
+      }
+    },
+    "without_C1_uncertainty": {
+      "error_auroc": 0.6858710562414266,
+      "by_review_rate": {
+        "0.05": {
+          "relative_reduction_vs_B1": -0.02127659574468073
+        },
+        "0.1": {
+          "relative_reduction_vs_B1": 0.0
+        },
+        "0.2": {
+          "relative_reduction_vs_B1": -0.031249999999999955
+        },
+        "0.3": {
+          "relative_reduction_vs_B1": 0.07692307692307697
+        }
+      }
+    },
+    "without_C2_ood": {
+      "error_auroc": 0.7509927081077179,
+      "by_review_rate": {
+        "0.05": {
+          "relative_reduction_vs_B1": 0.0
+        },
+        "0.1": {
+          "relative_reduction_vs_B1": 0.0
+        },
+        "0.2": {
+          "relative_reduction_vs_B1": 0.0
+        },
+        "0.3": {
+          "relative_reduction_vs_B1": 0.0
+        }
+      }
+    },
+    "without_C4_conflict": {
+      "error_auroc": 0.684282723269078,
+      "by_review_rate": {
+        "0.05": {
+          "relative_reduction_vs_B1": -0.02127659574468073
+        },
+        "0.1": {
+          "relative_reduction_vs_B1": 0.023809523809523878
+        },
+        "0.2": {
+          "relative_reduction_vs_B1": -0.031249999999999955
+        },
+        "0.3": {
+          "relative_reduction_vs_B1": 0.11538461538461554
+        }
+      }
+    }
   }
 }

@@ -185,7 +185,27 @@ def evaluate(r, tag):
                         "passes_20pct_ci_excl_zero": bool(np.isfinite(ptv) and ptv >= 0.20 and ci[0] > 0)}
     report["composite_vs_better_baseline"] = {"baseline": better, "by_review_rate": cmp}
 
+    sens_a, spec_a = sensitivity_specificity(pt, y_te, 0.5)
+    report["arm_A_no_gate"] = {"unsafe_accepted_per_1000": float(err_te.mean() * 1000),
+                               "share_reviewed": 0.0, "accepted_sensitivity": float(sens_a),
+                               "accepted_specificity": float(spec_a), "note": "accept-all; no gate"}
+
+    abl = {}
+    for drop in names:
+        keep = [n for n in names if n != drop]
+        Hk = LogisticRegression(max_iter=2000, class_weight="balanced").fit(
+            np.column_stack([arms_va[n] for n in keep]), err_va.astype(int))
+        risk = Hk.predict_proba(np.column_stack([arms_te[n] for n in keep]))[:, 1]
+        rates = {}
+        for rr in REVIEW_RATES:
+            rates[str(rr)] = {"relative_reduction_vs_B1": float(
+                relative_reduction(err_te, risk, arms_te["B1_maxsoftmax"], rr))}
+        abl[f"without_{drop}"] = {"error_auroc": float(auroc(risk, err_te)), "by_review_rate": rates}
+    report["ablations_leave_one_out"] = abl
+
     REPORTS.mkdir(parents=True, exist_ok=True)
+    np.savez(REPORTS / f"study_curves_{tag}.npz", y_te=y_te, err_te=err_te,
+             **{f"risk__{k}": v for k, v in arms_te.items()})
     (REPORTS / f"study_report_{tag}.json").write_text(json.dumps(report, indent=2))
     _write_md(report, tag)
     print(json.dumps({"model": report["model"], "test_error_rate": report["test_error_rate"],
@@ -209,6 +229,17 @@ def _write_md(report, tag):
     for rr, v in cb["by_review_rate"].items():
         k = "relative_reduction_vs_" + cb["baseline"]
         L.append(f"| {rr} | {v[k]:.3f} | [{v['ci95'][0]:.3f}, {v['ci95'][1]:.3f}] | {v['passes_20pct_ci_excl_zero']} |")
+    a = report["arm_A_no_gate"]
+    L += ["", "### Arm A (no gate)",
+          f"- unsafe accepted per 1,000 = {a['unsafe_accepted_per_1000']:.1f}; "
+          f"sens {a['accepted_sensitivity']:.3f}, spec {a['accepted_specificity']:.3f}"]
+    abl = report.get("ablations_leave_one_out", {})
+    if abl:
+        L += ["", "### Ablations (leave-one-signal-out, LR refit on val)",
+              "| variant | error AUROC | rel. reduction vs B1 @20% |", "|---|---|---|"]
+        for k, v in abl.items():
+            L.append(f"| {k} | {v['error_auroc']:.3f} | "
+                     f"{v['by_review_rate']['0.2']['relative_reduction_vs_B1']:.3f} |")
     L += ["", "### Limitations", "- RSNA only; no external (CQ500) test yet.",
           "- RSNA has no patient id: image-level splits.",
           "- Not clinical evidence."]

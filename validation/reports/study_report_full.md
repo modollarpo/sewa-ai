@@ -24,6 +24,18 @@
 | 0.2 | -0.031 | [-0.098, 0.080] | False |
 | 0.3 | 0.077 | [-0.136, 0.200] | False |
 
+### Arm A (no gate)
+- unsafe accepted per 1,000 = 190.0; sens 0.793, spec 0.827
+
+### Ablations (leave-one-signal-out, LR refit on val)
+| variant | error AUROC | rel. reduction vs B1 @20% |
+|---|---|---|
+| without_B1_maxsoftmax | 0.685 | -0.031 |
+| without_B2_entropy | 0.678 | -0.031 |
+| without_C1_uncertainty | 0.686 | -0.031 |
+| without_C2_ood | 0.751 | 0.000 |
+| without_C4_conflict | 0.684 | -0.031 |
+
 ### Limitations
 - RSNA only; no external (CQ500) test yet.
 - RSNA has no patient id: image-level splits.
