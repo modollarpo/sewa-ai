@@ -1,7 +1,14 @@
 {
+  "status": "PARTIAL",
+  "citable": false,
+  "note": "Preliminary plumbing smoke-test only. Not a study result. See docs/evidence/feasibility_report_v2.md banner. Missing: multi-slice sampling (<=32/scan), power analysis, arms C1-C4/D1-D3/E on Test A and Test B, Test C checksum verification.",
+  "slice_depth": 1,
+  "model_trained_epochs": 1,
+  "temperature": 0.8158,
   "test_auroc": 0.8169491525423729,
   "err_auroc_b1": 0.6883116883116883,
   "err_auroc_b2": 0.6883116883116883,
   "test_samples": 124,
-  "test_error_rate": 0.2661290322580645
+  "test_error_rate": 0.2661290322580645,
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE."
 }
