@@ -7,6 +7,18 @@ Branch `fix/patent-aligned`, all work local (**not pushed**).
 
 ---
 
+## Design flaw (pre-registration) — recorded, not re-scored
+
+The pre-registered **≥15%** success bar sat **near the ceiling of the G0 design**. NEG can
+only see the **injected** contradictions; those are ≈**20%** of unsafe (O1) reports (101/506
+in the test run), because a report faithfully built from the classifier cannot contradict it.
+A perfect NEG that flagged every injection (and no classifier error) could therefore reduce
+unsafe-accepted reports by at most ≈ the injection share (~20%); the observed 5.3% at the 20%
+review rate is the fraction reachable at that review budget. **This is a flaw in the
+pre-registered threshold, not a re-score of the frozen criterion — the verdict stays NOT MET.**
+
+---
+
 ## 1. Aim
 
 Study v4 asks the one question v1–v3 could not: does a **report-versus-classifier
@@ -59,11 +71,12 @@ Rule-based NegEx/pyConText-style extractor (own code; `v4_step2_negation.py`), o
   smoke test only.
 - **Independent adversarial set**, frozen *before* evaluation
   (`v4_negation_adversarial.json`; dev 60 / holdout 60; hand-written distractors,
-  scoped negation, synonyms like "blood"/"bleed"): **v1 first run on the untouched
-  holdout = 0.700 / 0.700 (primary).** After general rule fixes informed by dev failures,
-  **0.983 / 0.983 (post-hoc, optimistic).**
-  - Holdout per-class (post-hoc): present P1.00/R1.00 · absent P0.95/R1.00 · uncertain
-    P1.00/R0.92 · historical P1.00/R1.00 · resolved P1.00/R1.00.
+  scoped negation, synonyms like "blood"/"bleed"). **Extractor accuracy = 0.700** — the
+  **untouched** first run on the held-out split (the headline number to quote). The **0.983**
+  figure is **post-hoc** (after general rule fixes informed by the dev split) and
+  **optimistic — label it post-hoc, not the accuracy.**
+  - Holdout per-class (post-hoc, 0.983 configuration): present P1.00/R1.00 · absent
+    P0.95/R1.00 · uncertain P1.00/R0.92 · historical P1.00/R1.00 · resolved P1.00/R1.00.
   - Known residual failures: implicit finding with no haemorrhage word ("subdural
     collection has decreased") → `absent`; "…is not seen, though it cannot be excluded"
     → `absent`.
@@ -149,12 +162,14 @@ error) **0.280**, **NEG fires on 6.4%**, urgency-mismatch 0.357. Polarity counts
 |---|---|---|
 | classifier error (report faithfully mirrors a wrong decision) | 405 | 80% |
 | synthetic generator injection (G0 flip/hedge) | 101 | 20% |
-| extractor/rule error | 0 | 0% |
 
-NEG can only see the 20% injection-induced unsafe reports (a faithful report cannot
-contradict the classifier it was built from). The pre-registered ≥15% bar is therefore
-close to the design ceiling of a 10%-injection G0 (≈20%); observed 5.3% at the 20% review
-rate is the fraction of injections the gate can reach at that review budget.
+No "extractor error" row is claimed: **G0 and the extractor share template wording**, so a
+zero here would be **no evidence of extractor accuracy** — the extractor is only validated on
+the independent adversarial set (§4: **0.700** untouched holdout). NEG can only see the 20%
+injection-induced unsafe reports (a faithful report cannot contradict the classifier it was
+built from). The pre-registered ≥15% bar is therefore close to the design ceiling of a
+10%-injection G0 (≈20%); observed 5.3% at the 20% review rate is the fraction of injections
+the gate can reach at that review budget (see the Design-flaw note at the top).
 
 ## 8. Verdict
 
