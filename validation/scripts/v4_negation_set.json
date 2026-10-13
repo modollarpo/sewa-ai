@@ -1,0 +1,2619 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. UNREVIEWED BY A CLINICIAN.",
+  "dev": [
+    {
+      "text": "New intraventricular hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute temporal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute subarachnoid hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute intraventricular hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a intraparenchymal hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute parietal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a subarachnoid hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute subdural hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left intraparenchymal hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense cerebral hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute temporal hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left parietal hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New frontal hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left temporal hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left intraventricular hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a cerebral hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute frontal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute cerebral hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a subdural hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a cerebral hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a temporal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a temporal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense subdural hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New epidural hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a parietal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a frontal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute cerebellar hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense subarachnoid hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense intraventricular hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute parietal hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left cerebral hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense frontal hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New parietal hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a temporal hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "No evidence of a cerebral hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a intraventricular hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no cerebral hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a epidural hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a frontal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A cerebral hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A epidural hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute intraventricular hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The intraventricular hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The temporal hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A parietal hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A temporal hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No cerebellar hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no epidural hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a intraparenchymal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No frontal collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The intraventricular hemorrhage has not been seen on this study.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a temporal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The cerebral hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No subarachnoid hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a cerebral hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No intraventricular hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no subdural hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No subdural hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no cerebellar hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute intraparenchymal hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No intraventricular collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute frontal hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a subdural hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a cerebellar hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a parietal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "Without evidence of any cortical hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a epidural hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No subdural, epidural or subarachnoid hemorrhage is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A cerebellar hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The frontal hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A intraparenchymal hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute epidural hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute subdural hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "Cannot exclude a small epidural hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible temporal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A cerebral hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A frontal hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a cerebellar hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible epidural hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A cerebellar hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small parietal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A epidural hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a temporal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small subarachnoid hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a epidural hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small frontal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small intraventricular hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible parietal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a temporal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible frontal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A intraparenchymal hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A subdural hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible subdural hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A subdural hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small intraparenchymal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A cerebral hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible intraventricular hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A intraventricular hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible intraparenchymal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A temporal hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A cerebellar hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a subarachnoid hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A intraparenchymal hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a subdural hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Although no definite hemorrhage is seen, subarachnoid hemorrhage cannot be excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small temporal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A intraventricular hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A parietal hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a intraparenchymal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A intraparenchymal hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a frontal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A parietal hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a intraventricular hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a intraparenchymal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "No skull fracture, but a subdural hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute parietal hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute intraparenchymal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a intraparenchymal hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a intraparenchymal hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large subdural hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a parietal hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute temporal hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute temporal hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large intraventricular hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a cerebral hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a temporal hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute subdural hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a cerebellar hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a epidural hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute subdural hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a parietal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute epidural hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a subarachnoid hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large subarachnoid hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute subarachnoid hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute epidural hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute intraventricular hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a intraventricular hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a subdural hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute temporal hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute cerebellar hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute subarachnoid hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a subarachnoid hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute subdural hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a subdural hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute cerebral hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a parietal hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute frontal hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a intraventricular hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a temporal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute cerebellar hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large parietal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute temporal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute frontal hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute parietal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Previously seen intraparenchymal hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left epidural hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen frontal hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic cerebellar hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior frontal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left intraventricular hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented parietal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen subarachnoid hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed intraventricular hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic cerebral hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old intraventricular hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen intraventricular hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left cerebellar hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a epidural hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented temporal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic frontal hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed intraparenchymal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old cerebral hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old temporal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed frontal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented cerebellar hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior intraparenchymal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left parietal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented intraventricular hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen cerebral hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen parietal hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior subarachnoid hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented intraparenchymal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented frontal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old intraparenchymal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed subarachnoid hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior parietal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old parietal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic intraventricular hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented subarachnoid hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed temporal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a temporal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior cerebellar hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a subarachnoid hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left subarachnoid hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "The intraparenchymal hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted frontal hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the epidural hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted subarachnoid hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The intraventricular hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A temporal hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved cerebral hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved frontal hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The parietal hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A intraventricular hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the intraparenchymal hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the parietal hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the subdural hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The parietal hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the cerebellar hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A frontal hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Prior subarachnoid hemorrhage, now resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the intraventricular hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted cerebellar hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the subdural hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the previously seen subdural hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved temporal hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A subdural hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A epidural hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved parietal hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the temporal hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The epidural hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The cerebellar hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted temporal hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved intraparenchymal hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted parietal hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted cerebral hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen parietal hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved cerebellar hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen subarachnoid hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the cerebral hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The temporal hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved subarachnoid hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The cerebellar hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen cerebral hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen subdural hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "No extra-axial fluid collection or midline shift.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "No skull fracture.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "Mild cerebral volume loss.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "The ventricles are normal in size.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "No midline shift or mass effect.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "No mass effect, no midline shift, no hydrocephalus.",
+      "label": "absent",
+      "cat": "distractor"
+    }
+  ],
+  "holdout": [
+    {
+      "text": "Acute frontal hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute cerebral hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense parietal hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New cerebral hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense intraparenchymal hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a subdural hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is a large intraparenchymal hematoma with surrounding edema.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New cerebellar hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a epidural hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute right subdural and subarachnoid hemorrhage are present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New temporal hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New intraparenchymal hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute epidural hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a intraventricular hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense cerebellar hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left epidural hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New subdural hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a epidural hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "There is an acute cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a epidural hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense epidural hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a subdural hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "New subarachnoid hemorrhage identified.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left cerebellar hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a parietal hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A hyperdense temporal hematoma is seen.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a cerebellar hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Findings consistent with a parietal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left subdural hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a frontal hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left frontal hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute epidural hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Focal hyperdensity in keeping with a cerebral hematoma.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "The study shows a frontal hemorrhage.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "A left subarachnoid hematoma is demonstrated.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute intraparenchymal hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "Acute subdural hemorrhage is present.",
+      "label": "present",
+      "cat": "affirmation"
+    },
+    {
+      "text": "No cerebral hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The subarachnoid hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A intraventricular hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No intraparenchymal collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a intraparenchymal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No parietal collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute cerebellar hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The intraparenchymal hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The cerebellar hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The epidural hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no intraventricular hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute parietal hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No parietal hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no frontal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no parietal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a temporal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No cerebral collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No subdural collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a intraventricular hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No temporal collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No subarachnoid collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No cerebellar collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A frontal hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no intraparenchymal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No frontal hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a parietal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute cerebral hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A subdural hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No epidural hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No temporal hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a subdural hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "A subarachnoid hemorrhage is not seen.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The subdural hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute temporal hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No evidence of a frontal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no convincing evidence of a cerebellar hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "The parietal hemorrhage is absent.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No epidural collection is present.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No intraparenchymal hemorrhage, hematoma, or collection.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "There is no temporal hemorrhage.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "No acute subarachnoid hemorrhage is identified.",
+      "label": "absent",
+      "cat": "negation"
+    },
+    {
+      "text": "Possible subarachnoid hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A cerebellar hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A temporal hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A frontal hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A temporal hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a cerebral hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small subdural hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A temporal hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a subarachnoid hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A epidural hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A subarachnoid hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A cerebral hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A frontal hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a subdural hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible cerebellar hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A cerebral hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A cerebellar hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a frontal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A frontal hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a cerebral hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A parietal hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a parietal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A epidural hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A subdural hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a intraventricular hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "No definitive acute hemorrhage, however a subdural hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A intraventricular hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A subarachnoid hemorrhage is not excluded.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A parietal hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A subarachnoid hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "There may be a parietal hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A intraparenchymal hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small cerebral hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Possible cerebral hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a epidural hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Equivocal increased density that could represent a small subdural hematoma.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A subarachnoid hemorrhage cannot be entirely dismissed.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A subdural hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A epidural hemorrhage is a consideration.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Mild hyperdensity that may reflect a cerebellar hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "Cannot exclude a small cerebellar hemorrhage.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "A intraventricular hemorrhage cannot be ruled out.",
+      "label": "uncertain",
+      "cat": "hedged"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large cerebellar hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a intraparenchymal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute intraventricular hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large temporal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No subdural hematoma; there is, however, a subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute parietal hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a temporal hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute cerebral hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large frontal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a frontal hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large epidural hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a epidural hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a cerebellar hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute epidural hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect, but there is an acute frontal hemorrhage.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a subarachnoid hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a epidural hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute frontal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute subdural hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large intraparenchymal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute parietal hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute cerebellar hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute intraparenchymal hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute cerebral hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute subarachnoid hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet a frontal hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute intraventricular hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a intraventricular hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "Sulci are effaced, but an acute intraparenchymal hemorrhage is seen.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No evidence of mass effect but acute left subdural hematoma is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a frontal hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a cerebellar hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No hydrocephalus, but acute epidural hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No mass effect; however, an acute cerebral hemorrhage is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No skull fracture, but a cerebral hematoma is demonstrated.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No intraventricular hemorrhage, but a large cerebral hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "No midline shift; however, a cerebral hemorrhage is present.",
+      "label": "present",
+      "cat": "scoped"
+    },
+    {
+      "text": "History of a frontal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left intraparenchymal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen cerebellar hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented subdural hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a subdural hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old subarachnoid hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left frontal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic subdural hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old cerebellar hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a intraventricular hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a cerebellar hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed parietal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a parietal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed epidural hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic intraparenchymal hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented epidural hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen subdural hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen epidural hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior temporal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "A previously documented cerebral hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left cerebral hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Previously seen temporal hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old subdural hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old frontal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed cerebellar hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic epidural hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left temporal hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior intraventricular hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic temporal hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior subdural hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Status post evacuation of a prior epidural hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a cerebral hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic parietal hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Old epidural hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed subdural hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior cerebral hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "History of a intraparenchymal hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Prior epidural hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Chronic left subdural hematoma.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Healed cerebral hemorrhage.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "Known chronic subarachnoid hematoma, stable.",
+      "label": "historical",
+      "cat": "historical"
+    },
+    {
+      "text": "The subdural hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the intraparenchymal hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The temporal hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted subdural hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The intraventricular hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The frontal hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A intraparenchymal hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The frontal hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A cerebral hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A subarachnoid hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the subarachnoid hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The subarachnoid hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted intraparenchymal hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The cerebral hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the subarachnoid hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the parietal hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The intraparenchymal hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen cerebellar hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen intraventricular hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen frontal hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the frontal hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen intraparenchymal hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen temporal hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved intraventricular hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The epidural hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The subdural hemorrhage is no longer seen.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the cerebellar hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the epidural hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved epidural hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A parietal hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the temporal hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The subarachnoid hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Previously seen epidural hemorrhage now cleared.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "A cerebellar hematoma is resolving.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted epidural hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the cerebral hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The cerebral hemorrhage has resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Near-complete resolution of the intraventricular hematoma.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Resolved subdural hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Interval improvement of the frontal hemorrhage.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "The previously noted intraventricular hemorrhage has largely resolved.",
+      "label": "resolved",
+      "cat": "resolved"
+    },
+    {
+      "text": "Mild sulcal effacement.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "White matter is unremarkable.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "No evidence of midline shift.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "No hydrocephalus.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "Sulci and ventricles are age-appropriate.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "No extra-axial fluid collection or mass effect.",
+      "label": "absent",
+      "cat": "distractor"
+    },
+    {
+      "text": "Cannot exclude mass effect.",
+      "label": "absent",
+      "cat": "distractor"
+    }
+  ],
+  "hard": [
+    [
+      "present",
+      "Small acute right subdural hematoma, not associated with mass effect or midline shift."
+    ],
+    [
+      "absent",
+      "There is no evidence to support the presence of a subdural hematoma."
+    ],
+    [
+      "absent",
+      "No hemorrhage is identified; no mass effect is present."
+    ],
+    [
+      "uncertain",
+      "The possibility of a subarachnoid hemorrhage cannot be entirely dismissed."
+    ],
+    [
+      "historical",
+      "No acute hemorrhage identified, although a chronic subdural hematoma persists."
+    ],
+    [
+      "present",
+      "Interval development of an intraparenchymal hemorrhage."
+    ],
+    [
+      "resolved",
+      "The small subdural hematoma has essentially resolved since the prior study."
+    ],
+    [
+      "present",
+      "Acute subarachnoid hemorrhage with no intraventricular extension."
+    ],
+    [
+      "absent",
+      "No cortical contusion or extra-axial hemorrhage."
+    ],
+    [
+      "uncertain",
+      "Subtle hyperdensity along the tentorium, possibly representing subarachnoid hemorrhage."
+    ],
+    [
+      "historical",
+      "Stable chronic bilateral subdural hematomas."
+    ],
+    [
+      "present",
+      "Large left epidural hematoma with mass effect."
+    ],
+    [
+      "absent",
+      "No evidence of acute intracranial hemorrhage."
+    ],
+    [
+      "uncertain",
+      "Mild prepontine hyperdensity; a small subarachnoid hemorrhage cannot be confidently excluded."
+    ],
+    [
+      "absent",
+      "No intraventricular or subarachnoid hemorrhage."
+    ],
+    [
+      "present",
+      "Right frontal intraparenchymal hematoma with surrounding edema."
+    ],
+    [
+      "resolved",
+      "Prior subdural hematoma, resolved on the current examination."
+    ],
+    [
+      "historical",
+      "Known remote cerebellar hemorrhage, unchanged."
+    ],
+    [
+      "present",
+      "An acute subdural hemorrhage is present despite the absence of mass effect."
+    ],
+    [
+      "absent",
+      "The brain is unremarkable with no hemorrhage."
+    ]
+  ]
+}
