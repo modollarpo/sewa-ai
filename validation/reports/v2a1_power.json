@@ -1,0 +1,45 @@
+{
+  "signals": [
+    "C1",
+    "C2",
+    "C3",
+    "C4"
+  ],
+  "n_val_studies": 120,
+  "n_complete": 120,
+  "temperature": 0.7984246735920938,
+  "review_rates": [
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ],
+  "by_review_rate": {
+    "0.05": {
+      "obs_rel_reduction_vs_B1": 0.03421133850228682,
+      "boot_se": 0.06170361784080259,
+      "mde_80pct_power": 0.17286793018852495,
+      "underpowered_vs_20pct": false
+    },
+    "0.1": {
+      "obs_rel_reduction_vs_B1": 0.06782413274090368,
+      "boot_se": 0.10849514622465506,
+      "mde_80pct_power": 0.30395837423580024,
+      "underpowered_vs_20pct": true
+    },
+    "0.2": {
+      "obs_rel_reduction_vs_B1": 0.07437459232065925,
+      "boot_se": 0.27415047940897763,
+      "mde_80pct_power": 0.7680558708550007,
+      "underpowered_vs_20pct": true
+    },
+    "0.3": {
+      "obs_rel_reduction_vs_B1": -0.010412594015572017,
+      "boot_se": 0.48744858646402334,
+      "mde_80pct_power": 1.365628648108811,
+      "underpowered_vs_20pct": true
+    }
+  },
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "note": "MDE from paired cluster bootstrap on validation; composite is fitted in-sample so MDE is optimistic (true MDE likely larger). If the 20% review MDE > 0.20 a null Test-B result is reported as INCONCLUSIVE."
+}
