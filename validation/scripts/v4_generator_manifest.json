@@ -1,0 +1,31 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. SYNTHETIC TEXT.",
+  "generators": {
+    "G0": {
+      "type": "template",
+      "licence": "own code",
+      "temperature": "n/a",
+      "contradiction_rate": 0.1,
+      "note": "synthetic injection, not model behaviour"
+    },
+    "G1": {
+      "type": "text-LLM",
+      "model": "Qwen2.5-1.5B-Instruct",
+      "format": "GGUF q4_k_m",
+      "licence": "Apache-2.0",
+      "runtime": "llama.cpp CPU binary (MIT), build b11583",
+      "max_new_tokens": 120,
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "reports_per_scan": 3,
+      "note": "text-only; not a vision-language model; deviation from filed design"
+    },
+    "G2": {
+      "type": "VLM",
+      "status": "skipped",
+      "note": "no permissive VLM feasible on CPU in budget"
+    }
+  },
+  "prompt_G1_system": "You are a radiology report generator for a research prototype. Given a structured triage output, write ONE short impression sentence about intracranial haemorrhage only. Do not invent other findings. Do not address the patient. Maximum 40 words.",
+  "prompt_G1_user": "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}."
+}
