@@ -61,6 +61,25 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-13 — v2 validation feasibility, amendment 2, branch `fix/patent-aligned`)
+
+Governing prompt: `C:\Users\USER\Downloads\SEWA AI Coding Agent Prompt, Validation Re-run (v2).md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Local commit `d7c34fa` (**NOT pushed**).
+
+### ✅ Completed
+- **Root cause of the failed v2 run (a1) found**: the cached `stage_2_train_with_metadata.csv` label block is **decoupled** from its SOP/Study/Series block — metadata `Label` agreed with the authoritative RSNA `stage_2_train.csv` only 72% of the time; slice-positive rate 5.8% vs true 14.3%. The a1 trainer therefore saw ~random labels (val study-AUROC stalled ~0.54). Evidence: `validation/scripts/_verify_labels.py`, `_capture.py`.
+- **Labels repaired**: `validation/scripts/step1c_extract_labels.py` fetches `stage_2_train.csv` from the RSNA zip → `validation/data_cache/rsna_image_labels.csv` (752,803 images, 107,933 positive, 0.1434). `validation/scripts/step1b_select_slices_v2b.py` relabels the frozen 8-slice selection and, for truly-positive scans with no positive slice, swaps the most peripheral slice for the nearest-in-z positive (**16 swaps**, +13 tiles fetched). Real result: train 367/560, val 75/120, test 83/120 positive scans. The 8-slice selection itself was fine (captures 509/525 = 97% of positive scans).
+- **Wider unfreeze**: `K_LATE` 3→6 in `v2_lib.py`, late-block LR 3e-4→1e-4 (`step3_train_v2a1.py`). Early-feature cache rebuilt at **24×40×40** (`v2_early_{train,val,test}.npz`). Retrained (8 epochs, early stop): **best val study-AUROC 0.9618 (epoch 6), temperature 0.798** → `validation/models/classifier_v2a1.pt`.
+- **Pre-registered amendment 2** (`docs/evidence/preregistration_v2_amendment2.md`) before any formal test eval.
+- **Power (5b)**: `validation/reports/v2a1_power.json` — MDE at 20% review = **0.768** (>>0.20) ⇒ Test B **underpowered**; a null/under-threshold result is **INCONCLUSIVE**, not a gate failure.
+- **Formal Test A/Test B**: `validation/reports/v2a1_report.json` + `v2a1_curves.npz`, report `docs/evidence/feasibility_report_v2a1.md`. Test A error-AUROC D3 **0.807** (B1 0.706). Primary Test B: D3 vs **B2** at 20% review = **16.5%** rel reduction, 95% CI **[0.08, 0.26]** (excludes 0, Holm p=0.003) — statistically significant but **below the pre-registered ≥20%** ⇒ criterion NOT met; at 30% review = **20.5%** (criterion met). **Verdict: INCONCLUSIVE** (underpowered at the primary 20% rate).
+
+### 🔜 Next
+- Decide push/merge of `d7c34fa` (currently local only).
+- Test C (CQ500) remains **HELD** (493 files / 28.7 GB staged; `step5b_verify_cq500.py` is a verifier only).
+- Single-seed, 8 slices/scan, 160px ⇒ metrics are lower bounds vs the full prereg; grouping is by `StudyInstanceUID` not patient.
+
+---
+
 ## 📋 Work State (2026-10-07 — research-audit contract repair, branch `fix/contract-repair`)
 
 Audit source: `SEWA_AI_CODEBASE_RESEARCH_IMPLEMENTATION_AUDIT.md` (§34 = next-step list). Frozen tag: `audit-2026-10-06` @ `031b522`.
