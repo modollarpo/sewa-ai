@@ -79,6 +79,37 @@ python -m pytest validation/study/tests -q
 - `C:\Python314\python.exe`: Python 3.14.2, numpy 2.4.1, scikit-learn 1.9.1, torch 2.10.0+cpu, PyYAML, pytest.
 - No GPU -> CPU-only (batch 8 fine-tune; ~14-25 min/epoch on this 4-core box; ~7.9 GB RAM, batch 32 OOMs).
 
-## Open decisions (see `docs/evidence/feasibility_report.md` §8)
+## v4 — report-negation signal study (latest; local, not pushed)
 
-CQ500 access route; RSNA non-commercial approval; learned composite weights; keep or drop the OOD signal.
+FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. See
+`docs/evidence/feasibility_report_v4.md` and `docs/evidence/preregistration_v4.md`.
+
+- **Question:** does a report-versus-classifier consistency check (**NEG**) add value over
+  the classifier-level gate **D2** at catching unsafe generated reports?
+- **Result (one-shot, G0 template + 10% injected contradictions):** primary D2N vs D2 at
+  20% review, shifted disjoint test, unsafe-accepted **5.3% relative reduction
+  [1.2%, 8.5%]** — significant but **below the pre-registered ≥15% ⇒ NOT MET**. Paired
+  error-AUROC D2N−D2 = +0.056 [0.036, 0.077]. MDE at 20% = 6.4% (adequately powered).
+- **Deviations:** G1 (Qwen2.5-1.5B text LLM) attempted, **download failed** (network), so
+  all numbers are **G0 (synthetic injection, not model behaviour)**; G2 VLM skipped.
+  Text-only generator ≠ the filed image-conditioned design.
+- **Extractor:** rule-based; independent adversarial holdout primary **0.700** (untouched),
+  0.983 post-hoc after fixes; labels **unreviewed by a clinician** (120-sentence pack
+  prepared).
+
+Reproduce (from repo root, `PYTHONPATH=.`):
+
+```
+python validation/scripts/v4_step4_manifest.py
+python validation/scripts/v4_step4_select_slices.py
+python validation/scripts/step1b_fetch_tiles.py        # set SEWA_IDS_FILE=validation/data_cache/v4_selected_image_ids.txt
+python validation/scripts/v4_step6_signals.py
+python validation/scripts/v4_power.py                  # BEFORE the test eval
+python validation/scripts/v4_evaluate.py               # run once
+python validation/scripts/v4_failure_analysis.py
+pytest validation/tests validation/study/tests -q
+```
+
+## Open decisions (see `docs/evidence/feasibility_report.md` §8; v4 list in `feasibility_report_v4.md` §11)
+
+CQ500 access route; RSNA non-commercial approval; learned composite weights; keep or drop the OOD signal. v4: clinician-check the extractor pack; retry G1 on a stable network; keep local until the second application is filed.
