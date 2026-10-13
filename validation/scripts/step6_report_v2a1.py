@@ -14,6 +14,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
+
+from validation.study.metrics import auroc
+
 R = Path("validation/reports")
 OUT = Path("docs/evidence/feasibility_report_v2a1.md")
 MARK = "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE."
@@ -56,6 +60,8 @@ def main() -> int:
     report = json.loads((R / "v2a1_report.json").read_text(encoding="utf-8"))
     power = json.loads((R / "v2a1_power.json").read_text(encoding="utf-8"))
     tr = json.loads(Path("validation/data_cache/v2a1_train_summary.json").read_text(encoding="utf-8"))
+    ph = json.loads((R / "v2a1_posthoc_dweights.json").read_text(encoding="utf-8"))
+    pw = json.loads((R / "v2a1_posthoc_power_design.json").read_text(encoding="utf-8"))
     v, vtext = verdict(report, power)
     pr = report["primary_testB_D3_vs_better"]
 
@@ -135,6 +141,67 @@ def main() -> int:
         L.append(f"| {rr} | {fmt(e['rel_reduction'])} | "
                  f"[{fmt(e['ci95'][0])}, {fmt(e['ci95'][1])}] | "
                  f"{e['passes_20pct_ci_excl_zero']} |")
+
+    sub = ph["subset"]
+    L += ["", "---", "", "# POST-HOC, EXPLORATORY (not pre-registered)", "",
+          "_These analyses were added after the pre-registered run. They do not change the "
+          "pre-registered primary comparison or the verdict above._", "",
+          "## How the 60-scan C3/D3 subset was chosen (outcome-independent)",
+          "`select_gradcam_studies(studies, labels, frac=0.5)`: studies are sorted by "
+          "`StudyInstanceUID`, grouped by **ground-truth study label**, and a deterministic stride "
+          "sample of `frac=0.5` of each class is taken. It uses only the StudyInstanceUID ordering and "
+          "the labels — never the model's scores, predictions, probabilities, or errors — so the "
+          "selection cannot be biased by outcomes. Result: **60 scans** "
+          f"({sub['positive']} positive / {sub['negative']} negative; overall Test B is 83/120 positive).",
+          "",
+          "## Test B D1/D2 across all 120 scans, and fitted composite weights",
+          "D1 and D2 use no C3, so they are defined on all 120 scans (1080 scan x corruption instances):",
+          "", "| arm | error AUROC (all 120 scans) |", "|---|---|"]
+    for k in ("B1", "B2", "C1", "C2", "C4", "D1", "D2"):
+        L.append(f"| {k} | {fmt(ph['testB_all_120_scans'][k]['error_auroc'])} |")
+    L += ["", "On the 60-scan subset where C3 is defined (540 instances), arm error-AUROC is:"]
+    znp = np.load(R / "v2a1_testb_instances.npz", allow_pickle=True)
+    zerr = znp["err"].astype(bool)
+    msub = np.isfinite(znp["D3"])
+    L += ["", "| arm | error AUROC (60-scan subset) |", "|---|---|"]
+    for k in ("B1", "B2", "C1", "C2", "C3", "C4", "D1", "D2", "D3"):
+        rr = znp[k][msub]
+        mm = np.isfinite(rr)
+        val = auroc(rr[mm], zerr[msub][mm])
+        L.append(f"| {k} | {fmt(val)} |")
+    wt = ph["weights"]
+    lines_w = []
+    for name in ("D1", "D2", "D3"):
+        feats = wt[name]["features"]
+        parts = ", ".join(f"{f}={c:+.3f}" for f, c in zip(feats, wt[name]["coef"]))
+        lines_w.append(f"- **{name}** ({'+'.join(feats)}), intercept {wt[name]['intercept']:+.3f}: {parts}")
+    L += ["", "### Fitted composite weights (logistic regression on validation only)",
+          *lines_w, "",
+          f"**C3 weight in D3 is negative ({wt['D3']['c3_weight']:+.3f})** — the fitted model uses the "
+          "anti-predictive Grad-CAM proxy with a negative sign, consistent with its below-chance "
+          "error-AUROC. This is reported as-is; the sign is not flipped.", ""]
+
+    L += ["## Design-based power analysis for the actual Test B design (post-hoc)",
+          f"- Effective **scans = {pw['design']['scans']}** "
+          f"({pw['design']['instances']} instances = 60 scans x 9 corruptions), baseline "
+          f"{pr['baseline']}, review rate 20%.",
+          f"- Design-based bootstrap SE = **{fmt(pw['bootstrap_se'])}**; 95% CI half-width = "
+          f"**{fmt(pw['ci_half_width'])}** (reproduces the pre-registered CI half-width ~0.09).",
+          f"- MDE at 80% power (CI-excludes-0) = **{fmt(pw['mde_80pct_power_design_based'])}**.",
+          f"- Power under the **full pre-registered success rule** (point estimate >= 20% AND CI "
+          f"excludes 0): {fmt(pw['power_by_true_effect']['0.2'], 2)} at a true 20% effect; "
+          f"{fmt(pw['power_by_true_effect']['0.25'], 2)} at 25%; "
+          f"{fmt(pw['power_by_true_effect']['0.15'], 2)} at 15%.",
+          f"- _Reason the earlier validation-based MDE (0.77) differs from this CI half-width (~0.09): "
+          f"they are different designs. Section 5b bootstrapped the **validation** set (120 uncorrupted "
+          f"scans, composite fitted in-sample, baseline B1), where the relative-reduction ratio at 20% "
+          f"review has a heavy tail (SD 0.27). The design-based analysis uses the **actual Test B "
+          f"design** (60 scan-clusters, each averaging 9 corruptions, baseline B2), whose SE is ~5.8x "
+          f"smaller (0.05). Part of the ratio (1.43x) is just the z-constant (MDE uses "
+          f"z_0.975+z_0.8 = 2.8 x SD; a CI half-width is ~1.96 x SD). Note that reaching a >=20% "
+          f"*point estimate* at a true 20% effect is ~a coin flip by construction, so power under the "
+          f"full rule is ~0.49 even though the CI-exclusion MDE is 0.13._", ""]
+
     L += ["", f"## Verdict: **{v}**", "", vtext, "",
           "## Limitations",
           "- Real public RSNA data only; CQ500 (Test C) held and not evaluated.",

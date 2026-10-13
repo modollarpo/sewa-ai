@@ -85,6 +85,57 @@ _Only the **20%** row is the pre-registered primary comparison. The 30% row is a
 | 0.2 | 0.000 | [-0.500, 0.500] | False |
 | 0.3 | 0.222 | [-0.333, 0.667] | False |
 
+---
+
+# POST-HOC, EXPLORATORY (not pre-registered)
+
+_These analyses were added after the pre-registered run. They do not change the pre-registered primary comparison or the verdict above._
+
+## How the 60-scan C3/D3 subset was chosen (outcome-independent)
+`select_gradcam_studies(studies, labels, frac=0.5)`: studies are sorted by `StudyInstanceUID`, grouped by **ground-truth study label**, and a deterministic stride sample of `frac=0.5` of each class is taken. It uses only the StudyInstanceUID ordering and the labels — never the model's scores, predictions, probabilities, or errors — so the selection cannot be biased by outcomes. Result: **60 scans** (42 positive / 18 negative; overall Test B is 83/120 positive).
+
+## Test B D1/D2 across all 120 scans, and fitted composite weights
+D1 and D2 use no C3, so they are defined on all 120 scans (1080 scan x corruption instances):
+
+| arm | error AUROC (all 120 scans) |
+|---|---|
+| B1 | 0.711 |
+| B2 | 0.716 |
+| C1 | 0.717 |
+| C2 | 0.729 |
+| C4 | 0.716 |
+| D1 | 0.718 |
+| D2 | 0.752 |
+
+On the 60-scan subset where C3 is defined (540 instances), arm error-AUROC is:
+
+| arm | error AUROC (60-scan subset) |
+|---|---|
+| B1 | 0.709 |
+| B2 | 0.721 |
+| C1 | 0.726 |
+| C2 | 0.753 |
+| C3 | 0.343 |
+| C4 | 0.729 |
+| D1 | 0.728 |
+| D2 | 0.774 |
+| D3 | 0.782 |
+
+### Fitted composite weights (logistic regression on validation only)
+- **D1** (C1+C4), intercept -0.507: C1=+1.482, C4=+1.101
+- **D2** (C1+C2+C4), intercept -3.527: C1=+1.464, C2=+0.092, C4=+1.100
+- **D3** (C1+C2+C3+C4), intercept -2.550: C1=+1.520, C2=+0.077, C3=-1.038, C4=+1.132
+
+**C3 weight in D3 is negative (-1.038)** — the fitted model uses the anti-predictive Grad-CAM proxy with a negative sign, consistent with its below-chance error-AUROC. This is reported as-is; the sign is not flipped.
+
+## Design-based power analysis for the actual Test B design (post-hoc)
+- Effective **scans = 60** (540 instances = 60 scans x 9 corruptions), baseline B2, review rate 20%.
+- Design-based bootstrap SE = **0.048**; 95% CI half-width = **0.092** (reproduces the pre-registered CI half-width ~0.09).
+- MDE at 80% power (CI-excludes-0) = **0.133**.
+- Power under the **full pre-registered success rule** (point estimate >= 20% AND CI excludes 0): 0.49 at a true 20% effect; 0.85 at 25%; 0.14 at 15%.
+- _Reason the earlier validation-based MDE (0.77) differs from this CI half-width (~0.09): they are different designs. Section 5b bootstrapped the **validation** set (120 uncorrupted scans, composite fitted in-sample, baseline B1), where the relative-reduction ratio at 20% review has a heavy tail (SD 0.27). The design-based analysis uses the **actual Test B design** (60 scan-clusters, each averaging 9 corruptions, baseline B2), whose SE is ~5.8x smaller (0.05). Part of the ratio (1.43x) is just the z-constant (MDE uses z_0.975+z_0.8 = 2.8 x SD; a CI half-width is ~1.96 x SD). Note that reaching a >=20% *point estimate* at a true 20% effect is ~a coin flip by construction, so power under the full rule is ~0.49 even though the CI-exclusion MDE is 0.13._
+
+
 ## Verdict: **INCONCLUSIVE**
 
 At the primary 20% review rate the observed relative reduction is 16.5% (95% CI [7.7%, 26.3%], Holm p=0.003) — below the pre-registered >=20% bar, so the criterion is NOT met. Test B is underpowered for a 20% effect (MDE 0.77 > 0.20, 60 scan clusters), so this sub-threshold result is **INCONCLUSIVE**: it cannot be attributed to the gate failing. The 30% review rate is secondary/exploratory and is not counted as a pass.
