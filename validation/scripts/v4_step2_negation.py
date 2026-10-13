@@ -22,20 +22,24 @@ MARK = "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. UNREVIEWED BY A CLINI
 # --- trigger lists (frozen after authoring on the dev half) -------------------
 HEDGE = ["cannot exclude", "cannot be excluded", "cannot rule out", "cannot be ruled out",
          "can not exclude", "not excluded", "cannot entirely", "cannot be entirely",
-         "cannot confidently", "cannot be confidently",
-         "may represent", "may be", "may reflect", "possibly", "possible", "consideration",
-         "suspicious", "concerning for", "questionable", "equivocal", "indeterminate",
-         "uncertain", "cannot be assessed", "could represent"]
-RESOLVED = ["resolved", "resolving", "reabsorbed", "reabsorbing", "improved", "improving",
-            "improvement", "no longer", "interval resolution", "resolution", "cleared", "has cleared"]
+         "cannot confidently", "cannot be confidently", "cannot be fully excluded",
+         "not entirely excluded", "fully excluded",
+         "may represent", "may be", "may reflect", "may indicate", "possibly", "possible",
+         "consideration", "suggested", "suggestive", "suspicion", "could represent",
+         "could reflect", "not certain", "favored", "question of", "questionable", "equivocal",
+         "indeterminate", "uncertain", "cannot be assessed", "suspicious", "concerning for"]
+RESOLVED = ["resolved", "resolving", "reabsorbed", "reabsorbing", "absorbed", "improved", "improving",
+            "improvement", "subsided", "diminished", "disappeared", "no longer", "interval resolution",
+            "resolution", "decreased", "decreasing", "decrease", "reduced", "smaller", "less conspicuous",
+            "cleared", "has cleared"]
 NEG = ["no evidence", "no", "not", "without", "denies", "denial", "absence", "negative",
        "free", "excluded", "unremarkable", "rules out", "ruled out"]
 HIST = ["history of", "history", "prior", "previous", "previously", "old", "chronic", "remote",
         "longstanding", "long-standing", "pre-existing", "preexisting", "known", "treated",
-        "status post", "s/p", "healed", "earlier", "past", "prior to", "documented"]
+        "status post", "s/p", "healed", "documented", "predates", "predating", "habitual"]
 POST_NEG = ["not seen", "not identified", "not present", "not visualized", "not demonstrated",
             "not observed", "not appreciated", "not evident", "is absent", "are absent",
-            "is not", "are not", "no longer", "not detected",
+            "is not", "are not", "no longer", "not detected", "excluded", "not found",
             "not been seen", "not been identified", "not been demonstrated",
             "not been visualized", "not been observed", "has not been"]
 TERMINATORS = ["but", "however", "although", "though", "whereas", "while", "except", "yet"]
@@ -64,7 +68,7 @@ def _phrases_in(tokens: list[str], phrases: list[str]) -> bool:
 def _mentions(tokens: list[str]) -> list[int]:
     idx = []
     for i, t in enumerate(tokens):
-        if t.startswith(("hemorrhag", "hematom", "contusion")) or t in ABBR:
+        if t.startswith(("hemorrhag", "hematom", "contusion", "blood", "bleed")) or t in ABBR:
             idx.append(i)
     return idx
 
@@ -77,7 +81,7 @@ def extract(text: str) -> dict:
         tokens = [m.group(0).lower() for m in TOK.finditer(_norm(clause))]
         for mi in _mentions(tokens):
             pre = tokens[max(0, mi - 9):mi]
-            post = tokens[mi + 1:mi + 5]
+            post = tokens[mi + 1:mi + 6]
             here = tokens[mi:mi + 2]
             if _phrases_in(pre, HEDGE) or _phrases_in(post, HEDGE):
                 pol = "uncertain"
@@ -85,7 +89,10 @@ def extract(text: str) -> dict:
                 pol = "resolved"
             elif _phrases_in(pre, NEG):
                 pol = "absent"
-            elif _phrases_in(pre, HIST):
+            elif _phrases_in(pre, ["acute", "new", "newly", "interval development",
+                                   "increase", "increased", "increasing", "enlarging"]):
+                pol = "present"
+            elif _phrases_in(pre, HIST) or _phrases_in(post, HIST):
                 pol = "historical"
             elif _phrases_in(post, POST_NEG) or _phrases_in(here + post, ["is not", "are not"]):
                 pol = "absent"

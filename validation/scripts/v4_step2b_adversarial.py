@@ -168,7 +168,13 @@ def evaluate() -> None:
     with open("validation/scripts/v4_negation_adversarial_set.json", encoding="utf-8") as fh:
         data = json.load(fh)
     labels = ["present", "absent", "uncertain", "historical", "resolved"]
-    res = {"marking": MARK, "frozen_set": "v4_negation_adversarial_set.json"}
+    res = {"marking": MARK, "frozen_set": "v4_negation_adversarial_set.json",
+           "history": "v1 = extractor as first authored, run on this frozen set: dev 0.700 / "
+                      "holdout 0.700 (PRIMARY, untouched). v2/v3 = after general rule fixes "
+                      "informed by dev failures; reported post-hoc and optimistic.",
+           "known_residual_failures": [
+               "implicit finding with no haemorrhage word (e.g. 'subdural collection has decreased') -> absent",
+               "'...is not seen, though it cannot be excluded' -> absent (clause split on 'though')"]}
     for name in ("dev", "holdout"):
         part = data[name]
         gold = [r["gold"] for r in part]
