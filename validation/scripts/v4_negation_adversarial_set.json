@@ -1,0 +1,488 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. UNREVIEWED BY A CLINICIAN.",
+  "provenance": "adversarial, paraphrased; frozen before eval",
+  "dev": [
+    {
+      "text": "Acute hemorrhage is present within the right subarachnoid space.",
+      "gold": "present"
+    },
+    {
+      "text": "There is gross blood in the left subdural space.",
+      "gold": "present"
+    },
+    {
+      "text": "Hemorrhage fills the fourth ventricle.",
+      "gold": "present"
+    },
+    {
+      "text": "The epidural collection is hemorrhagic.",
+      "gold": "present"
+    },
+    {
+      "text": "A bleed is noted along the falx.",
+      "gold": "present"
+    },
+    {
+      "text": "Hyperdense material within the interhemispheric fissure consistent with blood.",
+      "gold": "present"
+    },
+    {
+      "text": "There is a large right basal ganglia hematoma extending into the ventricle.",
+      "gold": "present"
+    },
+    {
+      "text": "Acute on chronic subdural hemorrhage is demonstrated.",
+      "gold": "present"
+    },
+    {
+      "text": "Blood is seen layering in the occipital horn.",
+      "gold": "present"
+    },
+    {
+      "text": "A punctate hemorrhagic focus is present in the left frontal lobe.",
+      "gold": "present"
+    },
+    {
+      "text": "Extensive subarachnoid hemorrhage fills the basal cisterns.",
+      "gold": "present"
+    },
+    {
+      "text": "Increase in the size of the right subdural hematoma compared with prior imaging.",
+      "gold": "present"
+    },
+    {
+      "text": "No hemorrhagic focus is identified.",
+      "gold": "absent"
+    },
+    {
+      "text": "There is no blood within the ventricles.",
+      "gold": "absent"
+    },
+    {
+      "text": "Hemorrhage is not evident.",
+      "gold": "absent"
+    },
+    {
+      "text": "No evidence of intracranial blood products.",
+      "gold": "absent"
+    },
+    {
+      "text": "The subdural spaces are free of hematoma.",
+      "gold": "absent"
+    },
+    {
+      "text": "No acute hemorrhage is present on this examination.",
+      "gold": "absent"
+    },
+    {
+      "text": "There is no intra-axial hemorrhage.",
+      "gold": "absent"
+    },
+    {
+      "text": "Hemorrhage has been excluded.",
+      "gold": "absent"
+    },
+    {
+      "text": "No hyperdense extra-axial collection is seen.",
+      "gold": "absent"
+    },
+    {
+      "text": "There is no subarachnoid blood.",
+      "gold": "absent"
+    },
+    {
+      "text": "No intraparenchymal hemorrhagic focus.",
+      "gold": "absent"
+    },
+    {
+      "text": "Hemorrhage is absent from the ventricles.",
+      "gold": "absent"
+    },
+    {
+      "text": "Hemorrhage is favored but not certain.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "A tiny focus of hemorrhage is suggested.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Findings may indicate a hemorrhagic component.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "The finding could reflect a small hematoma.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Suspicion for subarachnoid hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "A hemorrhagic component cannot be fully excluded.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Mild hyperdensity may represent hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "A subtle bleed cannot be excluded.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "There is low concern but hemorrhage is not entirely excluded.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Indeterminate focus of increased density, possibly hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Possible tiny punctate hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Questionable small subdural hematoma.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "This is an old hemorrhage.",
+      "gold": "historical"
+    },
+    {
+      "text": "Hemorrhage is chronic and stable.",
+      "gold": "historical"
+    },
+    {
+      "text": "The patient has a history of subdural hematoma.",
+      "gold": "historical"
+    },
+    {
+      "text": "Prior hemorrhage is noted.",
+      "gold": "historical"
+    },
+    {
+      "text": "Recurrent chronic subdural hematoma.",
+      "gold": "historical"
+    },
+    {
+      "text": "Longstanding intraventricular hemorrhage.",
+      "gold": "historical"
+    },
+    {
+      "text": "Hemorrhage seen on prior imaging is unchanged.",
+      "gold": "historical"
+    },
+    {
+      "text": "Pre-existing left frontal hemorrhage.",
+      "gold": "historical"
+    },
+    {
+      "text": "The hemorrhage has subsided.",
+      "gold": "resolved"
+    },
+    {
+      "text": "The hematoma has almost completely resolved.",
+      "gold": "resolved"
+    },
+    {
+      "text": "There has been interval resolution of the subdural hematoma.",
+      "gold": "resolved"
+    },
+    {
+      "text": "Prior hemorrhage, no longer visible.",
+      "gold": "resolved"
+    },
+    {
+      "text": "The subdural collection has decreased substantially.",
+      "gold": "resolved"
+    },
+    {
+      "text": "Previous epidural hematoma, now reabsorbed.",
+      "gold": "resolved"
+    },
+    {
+      "text": "The hemorrhage has essentially cleared.",
+      "gold": "resolved"
+    },
+    {
+      "text": "Marked interval improvement in the subarachnoid hemorrhage.",
+      "gold": "resolved"
+    },
+    {
+      "text": "No acute intracranial abnormality identified.",
+      "gold": "absent"
+    },
+    {
+      "text": "The gray-white matter differentiation is preserved.",
+      "gold": "absent"
+    },
+    {
+      "text": "Age-appropriate cerebral volume.",
+      "gold": "absent"
+    },
+    {
+      "text": "No midline shift.",
+      "gold": "absent"
+    },
+    {
+      "text": "There is no mass effect or herniation.",
+      "gold": "absent"
+    },
+    {
+      "text": "The ventricles are normal.",
+      "gold": "absent"
+    },
+    {
+      "text": "No midline or extra-axial fluid collection.",
+      "gold": "absent"
+    },
+    {
+      "text": "Sulcal spaces are preserved.",
+      "gold": "absent"
+    }
+  ],
+  "holdout": [
+    {
+      "text": "A right frontal hematoma with surrounding edema is present.",
+      "gold": "present"
+    },
+    {
+      "text": "There is blood along the tentorium.",
+      "gold": "present"
+    },
+    {
+      "text": "Hemorrhage is seen within the left lateral ventricle.",
+      "gold": "present"
+    },
+    {
+      "text": "The extra-axial collection demonstrates hemorrhagic signal.",
+      "gold": "present"
+    },
+    {
+      "text": "An acute bleed is present in the left parietal region.",
+      "gold": "present"
+    },
+    {
+      "text": "Hyperdensity consistent with hemorrhage is present in the subarachnoid space.",
+      "gold": "present"
+    },
+    {
+      "text": "There is a large intraparenchymal hematoma.",
+      "gold": "present"
+    },
+    {
+      "text": "Acute subdural and subarachnoid hemorrhages are present.",
+      "gold": "present"
+    },
+    {
+      "text": "Blood is present in the prepontine cistern.",
+      "gold": "present"
+    },
+    {
+      "text": "A focus of hemorrhage is present within the corpus callosum.",
+      "gold": "present"
+    },
+    {
+      "text": "There is extensive intraventricular hemorrhage.",
+      "gold": "present"
+    },
+    {
+      "text": "The right subdural hematoma has increased in size.",
+      "gold": "present"
+    },
+    {
+      "text": "No hemorrhagic collection is demonstrated.",
+      "gold": "absent"
+    },
+    {
+      "text": "There is no evidence of blood in the subarachnoid space.",
+      "gold": "absent"
+    },
+    {
+      "text": "Hemorrhage is absent.",
+      "gold": "absent"
+    },
+    {
+      "text": "No acute or chronic hemorrhage is identified.",
+      "gold": "absent"
+    },
+    {
+      "text": "The extra-axial spaces are free of blood.",
+      "gold": "absent"
+    },
+    {
+      "text": "No hematoma is present.",
+      "gold": "absent"
+    },
+    {
+      "text": "There is no intraventricular blood.",
+      "gold": "absent"
+    },
+    {
+      "text": "Hemorrhage was not identified.",
+      "gold": "absent"
+    },
+    {
+      "text": "No bleeding is evident.",
+      "gold": "absent"
+    },
+    {
+      "text": "No parenchymal hemorrhage is seen.",
+      "gold": "absent"
+    },
+    {
+      "text": "There is no subdural hematoma.",
+      "gold": "absent"
+    },
+    {
+      "text": "No evidence of hemorrhagic transformation.",
+      "gold": "absent"
+    },
+    {
+      "text": "Hemorrhage is possible but not confirmed.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "A subtle bleed cannot be excluded.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Question of a small subdural hematoma.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Findings are equivocal for hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Mild hyperdensity may represent hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "A hemorrhagic component cannot be fully excluded.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Possible tiny focus of hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "There is low concern but hemorrhage is not entirely excluded.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "The finding could reflect a small hematoma.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Suspicion for subarachnoid hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "A definite hemorrhage is not seen, though it cannot be excluded.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Indeterminate focus of increased density, possibly hemorrhage.",
+      "gold": "uncertain"
+    },
+    {
+      "text": "Old blood is present in the right frontal lobe.",
+      "gold": "historical"
+    },
+    {
+      "text": "This hemorrhage predates the current admission.",
+      "gold": "historical"
+    },
+    {
+      "text": "Chronic subdural hematoma, unchanged.",
+      "gold": "historical"
+    },
+    {
+      "text": "A remote hemorrhagic focus is seen.",
+      "gold": "historical"
+    },
+    {
+      "text": "Hemorrhage from a previous admission is present.",
+      "gold": "historical"
+    },
+    {
+      "text": "Interval stability of a known intraventricular hemorrhage.",
+      "gold": "historical"
+    },
+    {
+      "text": "The extra-axial hemorrhage is longstanding.",
+      "gold": "historical"
+    },
+    {
+      "text": "Sequela of prior subarachnoid hemorrhage.",
+      "gold": "historical"
+    },
+    {
+      "text": "The hematoma has diminished considerably.",
+      "gold": "resolved"
+    },
+    {
+      "text": "Hemorrhage has completely disappeared.",
+      "gold": "resolved"
+    },
+    {
+      "text": "The subdural hematoma is no longer present.",
+      "gold": "resolved"
+    },
+    {
+      "text": "The previously seen hemorrhage has fully absorbed.",
+      "gold": "resolved"
+    },
+    {
+      "text": "Resolution of the prior subarachnoid hemorrhage.",
+      "gold": "resolved"
+    },
+    {
+      "text": "The hematoma has largely cleared.",
+      "gold": "resolved"
+    },
+    {
+      "text": "Interval decrease in the size of the epidural hematoma.",
+      "gold": "resolved"
+    },
+    {
+      "text": "Previous hemorrhage has resolved.",
+      "gold": "resolved"
+    },
+    {
+      "text": "No acute intracranial process.",
+      "gold": "absent"
+    },
+    {
+      "text": "The white matter is unremarkable.",
+      "gold": "absent"
+    },
+    {
+      "text": "No herniation.",
+      "gold": "absent"
+    },
+    {
+      "text": "Cerebral sulci are normal.",
+      "gold": "absent"
+    },
+    {
+      "text": "No significant mass effect.",
+      "gold": "absent"
+    },
+    {
+      "text": "Fourth ventricle is normal.",
+      "gold": "absent"
+    },
+    {
+      "text": "No extra-axial fluid.",
+      "gold": "absent"
+    },
+    {
+      "text": "No midline deviation.",
+      "gold": "absent"
+    }
+  ]
+}
