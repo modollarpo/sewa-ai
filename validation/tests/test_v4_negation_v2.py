@@ -102,6 +102,45 @@ def test_cluster_bootstrap_perfect():
     assert cluster_bootstrap(rows, n_boot=200)["rate"] == 1.0
 
 
+# --- merged label pack (blinding, kappa) --------------------------------------
+def test_cohen_kappa_perfect_and_chance():
+    from validation.scripts.v4_merged_label_analysis import cohen_kappa
+    a = ["contradicts", "consistent", "ambiguous", "contradicts"]
+    assert cohen_kappa(a, a)["kappa"] == pytest.approx(1.0)
+    # independent-ish labels -> kappa well below 1
+    b = ["consistent", "contradicts", "ambiguous", "consistent"]
+    assert cohen_kappa(a, b)["kappa"] < 0.5
+
+
+def test_merged_sheet_is_blinded():
+    from pathlib import Path
+    import csv as _csv
+    p = Path("validation/reports/v4_g1_merged_labelling_sheet.csv")
+    if not p.exists():
+        pytest.skip("merged sheet not built")
+    with p.open(encoding="utf-8") as f:
+        rows = list(_csv.DictReader(f))
+    assert len(rows) == 300
+    header = set(rows[0])
+    for forbidden in ("variant", "study", "index", "k", "seed", "polarity", "contradiction"):
+        assert forbidden not in header
+    assert "instructions" in header and "second_labeller_subset" in header
+    assert sum(1 for r in rows if r["second_labeller_subset"] == "TRUE") == 50
+    assert "ambiguous" in rows[0]["instructions"].lower()
+
+
+def test_clinician_copy_drops_proposed_label():
+    from pathlib import Path
+    import csv as _csv
+    p = Path("validation/reports/v4_extractor_clinician_review_clinician.csv")
+    if not p.exists():
+        pytest.skip("clinician copy not built")
+    with p.open(encoding="utf-8") as f:
+        header = next(_csv.reader(f))
+    assert "proposed_label" not in header
+    assert header == ["id", "sentence", "clinician_label", "comment"]
+
+
 def test_load_joined_confusion(tmp_path):
     run = {"records": [
         {"study": "s1", "decision_present": False, "text": "There is a hemorrhage.",

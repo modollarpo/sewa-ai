@@ -1,0 +1,7 @@
+# FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.
+# SHA-256 of unlabelled labelling artefacts
+
+dd7cdb4ca592b1d3e19a7cda29843b8e208bf989779a53df16898e70a6c0c5ae  validation/reports/v4_extractor_clinician_review_clinician.csv
+dd10f10df9d3b9296dd418bb2c43c0541292d11ef4445282582bc9742de1fac7  validation/reports/v4_g1_blinded_labelling_sheet.csv
+92c889a15fdd2b43a75e078e744acc90c829545a6ec569351cce1567efb00caa  validation/reports/v4_g1b_blinded_labelling_sheet.csv
+1b07bbe26701db4455c391e81af37d7c1ceb7e7f0c5df9ee56f6854a3126b5ee  validation/reports/v4_g1_merged_labelling_sheet.csv

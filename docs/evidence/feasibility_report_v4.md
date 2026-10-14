@@ -129,9 +129,24 @@ numeric-probability reader ("10%", "0.15 probability"); other triggers are reuse
 `v4_g1_blinded_labelling_sheet.csv` / `v4_g1b_blinded_labelling_sheet.csv`, showing the
 decision, probability, urgency and report text but **not** the extractor polarity or
 contradiction flag (label column: `consistent | contradicts | ambiguous`; plus `notes` and
-`clinician_signoff`). On return, `v4_g1_label_analysis.py` reports the extractor-vs-label
-confusion matrix, the **true** contradiction rate with a **scan-cluster bootstrap 95% CI**
-(resampling the 50 scans), and examples of each failure type.
+`clinician_signoff`).
+
+Additional labelling pack (`v4_build_label_pack.py`, hashes in
+`docs/evidence/label_hashes.txt`):
+
+- **One merged 300-row sheet** `v4_g1_merged_labelling_sheet.csv`: variants a+b shuffled
+  with a fixed seed and re-numbered `R001…R300`, with **no column revealing the prompt
+  variant**. A **private key** `v4_g1_merged_key_PRIVATE.json` maps `new_id → variant +
+  original row_id + scan`. A random **50** rows are flagged `second_labeller_subset` (for a
+  second labeller, to compute agreement). The `instructions` column carries the rule:
+  *"If a report both asserts and denies the finding, label it ambiguous and add a note."*
+- A **clinician copy** of the extractor review **without `proposed_label`**
+  (`v4_extractor_clinician_review_clinician.csv`); the original is kept unchanged as the key.
+- On return, `v4_merged_label_analysis.py` reports **inter-labeller Cohen's kappa**, the
+  extractor-vs-clinician confusion matrix, and the **true contradiction rate per prompt
+  variant with scan-cluster bootstrap 95% CIs** (resampling the 50 `StudyInstanceUID`
+  clusters), plus failure examples. `v4_g1_label_analysis.py` (`--extractor v1|v2`) and
+  `v4_g1_prompt_compare.py` cover the per-variant sheets and the paired a−b difference.
 
 ## 5. Power (Step 5b, before the test run)
 
@@ -287,10 +302,11 @@ python -m validation.scripts.v4_g1_label_analysis \
 
 1. **Clinician check** of the 120-sentence pack (`v4_extractor_clinician_review.csv`) — the
    extractor’s only verified number is synthetic otherwise.
-2. **Label the two blinded sheets** (150 reports each, variants a and b,
-   `v4_g1_blinded_labelling_sheet.csv` and `v4_g1b_blinded_labelling_sheet.csv`, column
-   `label` = consistent/contradicts/ambiguous). On return, run `v4_g1_label_analysis.py`
-   and `v4_g1_prompt_compare.py` — no further code changes needed.
+2. **Label the merged sheet** (`v4_g1_merged_labelling_sheet.csv`, 300 rows, variant-blind;
+   column `label` = consistent/contradicts/ambiguous, and `label_2` on the 50
+   `second_labeller_subset` rows). On return, run `v4_merged_label_analysis.py` (kappa +
+   confusion + per-variant rates). The blinded `proposed_label`-free
+   `v4_extractor_clinician_review_clinician.csv` covers the extractor check.
 3. **G1 result:** the text-only model almost always asserts "present" and so contradicts any
    low-probability triage. Decide whether to (a) accept this as a limitation, (b) add a
    stronger prompt / few-shot or constrain output, or (c) move to an image-conditioned

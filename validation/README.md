@@ -98,12 +98,19 @@ FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. See
 - **Extractor:** rule-based; independent adversarial holdout primary **0.700** (untouched),
   0.983 post-hoc after fixes; labels **unreviewed by a clinician** (120-sentence pack
   prepared).
-- **Blinded labelling sheets exported (awaiting clinician labels):** 150 reports each for
-  prompt variants **a** and **b**, random order, showing decision/probability/urgency but
-  **not** the extractor polarity or flag:
-  `validation/reports/v4_g1_blinded_labelling_sheet.csv` (a) and
-  `v4_g1b_blinded_labelling_sheet.csv` (b). Columns: `label` (consistent|contradicts|
-  ambiguous), `notes`, `clinician_signoff`.
+- **Blinded labelling pack (awaiting clinician labels):**
+  - Per-variant sheets (a/b), 150 rows each: `v4_g1_blinded_labelling_sheet.csv`,
+    `v4_g1b_blinded_labelling_sheet.csv`.
+  - **Merged 300-row sheet** `v4_g1_merged_labelling_sheet.csv` — variants a+b shuffled
+    with a fixed seed, re-numbered `R001…R300`, **no column reveals the prompt variant**
+    (private key: `v4_g1_merged_key_PRIVATE.json` maps `new_id → variant + original row_id +
+    scan`). Columns: `label` / `label_2` (consistent|contradicts|ambiguous), `notes`,
+    `clinician_signoff`, an `instructions` column, and `second_labeller_subset` on a random
+    **50** rows. Instruction: *"If a report both asserts and denies the finding, label it
+    ambiguous and add a note."*
+  - Clinician copy of the extractor review **without `proposed_label`**:
+    `v4_extractor_clinician_review_clinician.csv` (original kept as the key).
+  - SHA-256 of every unlabelled artefact: `docs/evidence/label_hashes.txt`.
 - **Extractor v2 (probability-aware):** new rules read low/high/moderate probability,
   "unlikely", and numeric probabilities. Developed on a **new** probability-phrasing
   synthetic set with a frozen holdout: v2 **1.000 dev / 1.000 holdout** vs v1 **0.583 / 0.539**
@@ -113,10 +120,11 @@ FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. See
   haemorrhage detected"): same scans/seeds/settings, extractor-flagged rate **0.067** vs
   **0.493** for variant a. Comparison under **manual labels** (paired scan-cluster bootstrap)
   is wired and runs once both label sheets are returned.
-- **After labels return:** `v4_g1_label_analysis.py` gives the extractor-vs-clinician
-  confusion matrix, the **true** contradiction rate with a scan-cluster bootstrap 95% CI
-  (50 scans), and failure examples; `v4_g1_prompt_compare.py` gives the paired a−b
-  difference. No script tunes on the 150.
+- **After labels return:** `v4_merged_label_analysis.py` (merged sheet + key) gives
+  **inter-labeller Cohen's kappa** (second-labeller subset), the extractor-vs-clinician
+  **confusion matrix** (P/R/F1), and the **true contradiction rate per prompt variant with
+  scan-cluster bootstrap 95% CIs**, plus failure examples. (`v4_g1_label_analysis.py` /
+  `v4_g1_prompt_compare.py` remain for the per-variant sheets.) No script tunes on the 150.
 
 Reproduce (from repo root, `PYTHONPATH=.`):
 
@@ -135,7 +143,9 @@ python -m validation.scripts.v4_step2c_negation_v2_g1  # exploratory, untuned
 python -m validation.scripts.v4_g1_export_blinded      # blinded sheet (a)
 python -m validation.scripts.v4_g1_export_blinded --json validation/reports/v4_g1_qwen_b.json --out validation/reports/v4_g1b_blinded_labelling_sheet.csv
 python -m validation.scripts.v4_g1_prompt_compare      # extractor rates now; true rates after labels
+python -m validation.scripts.v4_build_label_pack                     # clinician copy + merged sheet + key + hashes
 python -m validation.scripts.v4_g1_label_analysis --labels validation/reports/v4_g1_blinded_labelling_sheet.csv
+python -m validation.scripts.v4_merged_label_analysis                # after merged sheet is labelled (kappa + by-variant rates)
 pytest validation/tests validation/study/tests -q
 ```
 
