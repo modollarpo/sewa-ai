@@ -166,3 +166,35 @@ def test_auroc_perfect_and_inverse():
 
 def test_unsafe_accepted_per_1000_zero_error():
     assert unsafe_accepted_per_1000(np.zeros(10), np.zeros(10, dtype=bool), 0.2) == 0.0
+
+
+# --- G1 runner (Qwen2.5 text-only generator) ---
+from validation.scripts.v4_g1_qwen import parse_output, is_contradiction  # noqa: E402
+
+
+def test_g1_parse_output_extracts_reply():
+    stdout = (
+        "Loading model...\n\nbuild : b11583\navailable commands:\n  /exit\n\n"
+        "> Triage: haemorrhage probability 0.90; urgency emergent; attribution top-slice.\n"
+        "There is an intracranial haemorrhage.\n\n[ Prompt: 13.1 t/s | Generation: 6.3 t/s ]\n"
+        "Exiting...\n"
+    )
+    assert parse_output(stdout) == "There is an intracranial haemorrhage."
+
+
+def test_g1_parse_output_multiline_reply():
+    stdout = "> q\nfindings may represent\nan acute haemorrhage.\n[ Prompt: 1 t/s ]\n"
+    assert parse_output(stdout) == "findings may represent an acute haemorrhage."
+
+
+@pytest.mark.parametrize("pol,dec,want", [
+    ("present", True, False),
+    ("present", False, True),
+    ("absent", True, True),
+    ("absent", False, False),
+    ("uncertain", True, False),
+    ("uncertain", False, False),
+    (None, True, False),
+])
+def test_g1_contradiction_rule(pol, dec, want):
+    assert is_contradiction(pol, dec) is want

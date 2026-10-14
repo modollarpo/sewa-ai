@@ -90,9 +90,11 @@ FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. See
   20% review, shifted disjoint test, unsafe-accepted **5.3% relative reduction
   [1.2%, 8.5%]** — significant but **below the pre-registered ≥15% ⇒ NOT MET**. Paired
   error-AUROC D2N−D2 = +0.056 [0.036, 0.077]. MDE at 20% = 6.4% (adequately powered).
-- **Deviations:** G1 (Qwen2.5-1.5B text LLM) attempted, **download failed** (network), so
-  all numbers are **G0 (synthetic injection, not model behaviour)**; G2 VLM skipped.
-  Text-only generator ≠ the filed image-conditioned design.
+- **Primary numbers are G0** (template + 10% injected contradictions). **G1** (Qwen2.5-1.5B,
+  text-only; GGUF sha256-verified) was run separately for generator/input consistency:
+  149/150 generations assert *present*, so **0/75 contradictions on decided-present** vs
+  **74/75 (98.7%) on decided-absent** scans (~44% population-weighted). G2 (VLM) skipped.
+  No image-conditioned generator was run — a deviation from the filed design.
 - **Extractor:** rule-based; independent adversarial holdout primary **0.700** (untouched),
   0.983 post-hoc after fixes; labels **unreviewed by a clinician** (120-sentence pack
   prepared).
@@ -107,6 +109,7 @@ python validation/scripts/v4_step6_signals.py
 python validation/scripts/v4_power.py                  # BEFORE the test eval
 python validation/scripts/v4_evaluate.py               # run once
 python validation/scripts/v4_failure_analysis.py
+python validation/scripts/v4_g1_qwen.py --scans 50     # G1 (needs verified GGUF + llama.cpp)
 pytest validation/tests validation/study/tests -q
 ```
 

@@ -28,8 +28,8 @@ conditioned on the structured triage output, followed by a consistency check.
 
 **What this can show:** whether the check catches unsafe reports the classifier-level
 gate misses (mechanism). **What it cannot show:** clinical benefit, or how a real medical
-vision-language model behaves — on this CPU the generator is a template (G0). **Not a
-novelty test:** negation checks against findings exist in the literature.
+vision-language model behaves — no image-conditioned generator was run (G0 template; G1
+text-only). **Not a novelty test:** negation checks against findings exist in the literature.
 
 ## 2. Data (fresh, disjoint)
 
@@ -52,14 +52,27 @@ low-dose ×3). Universe: 1,800 test instances (180 scans × 10 conditions; 1,620
   from the triage output, then **injects a controlled contradiction at 10%** (flip polarity
   or hedge). This tests the *checking machinery only*: results are **"synthetic injection,
   not model behaviour."** Observed injection rate on the shifted test: **152/1,620 (9.4%)**.
-- **G1 — Qwen2.5-1.5B-Instruct (Apache-2.0) via llama.cpp (MIT), text-only.** Planned for a
-  subset with a fixed prompt, ≤120 tokens, 3 reports/scan. **Attempted but NOT obtained:**
-  the link to the model/CDN hosts failed repeatedly (`curl` error 56; BITS stalled at
-  ~7 KB/s for a 1.1 GB file). Recorded as a **deviation — G1 not run.** Not a VLM (filed
-  design is image-conditioned); that deviation is also recorded.
+- **G1 — Qwen2.5-1.5B-Instruct (Apache-2.0) via llama.cpp win-cpu-x64 b11583 (MIT), text-only.**
+  Model `qwen2.5-1.5b-instruct-q4_k_m.gguf` from the official HF repo
+  (`Qwen/Qwen2.5-1.5B-Instruct-GGUF`); **size 1,117,320,736; SHA256 verified
+  `6a1a2eb6…9407e`** (matches the HF LFS pointer / `X-Linked-ETag`). Fixed prompt
+  (system + triage line), ≤120 new tokens, temperature 0.7, top-p 0.9, **3 reports/scan**,
+  seeds fixed. **Not a VLM** (the filed design is image-conditioned) — a recorded deviation.
+  - **Run on a 50-scan stratified subset (25 decided-present / 25 decided-absent, 150
+    generations; `validation/reports/v4_g1_qwen.json`).** Measured only **generator-introduced
+    contradiction**: report polarity vs. the triage decision.
+    - **decided-present scans: 0/75 contradictions** (model said *present* in 75/75).
+    - **decided-absent scans: 74/75 = 98.7% contradictions** (model still said *present* in
+      74/75). Overall on the balanced subset **49.3%**; **population-weighted ≈ 44%** using
+      the test set's 45% decided-absent share.
+    - **Interpretation:** the text-only model has a strong "haemorrhage-present" prior
+      (149/150 generations assert *present*) and effectively ignores a low probability; it
+      does not faithfully reflect its input. **This measures generator/input inconsistency,
+      not detection accuracy** — no accuracy claim is made (labels unreviewed by a clinician).
 - **G2 — permissive VLM:** skipped (no CPU-feasible permissive VLM in budget).
 
-Manifest of prompts, licences and settings: `validation/scripts/v4_generator_manifest.json`.
+Manifest of prompts, licences, artefacts and checksums:
+`validation/scripts/v4_generator_manifest.json`. Runner: `validation/scripts/v4_g1_qwen.py`.
 
 ## 4. Extractor validation (Step 2)
 
@@ -183,8 +196,12 @@ novelty, if pursued (raise at the attorney consult).
 
 ## 9. Limitations
 
-- **G0 only.** No text LLM (G1 attempted, download failed) and no VLM (G2 skipped):
-  text-only/template deviation from the filed image-conditioned design.
+- **Primary numbers are G0 (template).** G1 (Qwen2.5-1.5B, text-only) was run separately and
+  only for generator/input consistency; G2 (VLM) skipped. No image-conditioned generator was
+  tested, so nothing here reflects the filed design's actual generator.
+- **G1 is text-only and small** (50 scans, 150 generations, one prompt). Its ~44% weighted
+  contradiction rate reflects a strong "present" prior (149/150 assert haemorrhage present),
+  not clinical accuracy; no clinician-reviewed labels were used.
 - Extractor accuracy is measured on a **synthetic** set whose labels are **unreviewed by a
   clinician**; the independent adversarial set is small (60/60) and the post-fix 0.983 is
   post-hoc/optimistic (untouched primary was 0.700).
@@ -210,14 +227,17 @@ python validation/scripts/v4_step6_signals.py
 python validation/scripts/v4_power.py                           # BEFORE the test eval
 python validation/scripts/v4_evaluate.py                        # one shot
 python validation/scripts/v4_failure_analysis.py
+python validation/scripts/v4_g1_qwen.py --scans 50              # G1 (needs verified GGUF + llama.cpp)
 ```
 
 ## 11. Decisions for you
 
 1. **Clinician check** of the 120-sentence pack (`v4_extractor_clinician_review.csv`) — the
    extractor’s only verified number is synthetic otherwise.
-2. **G1:** retry on a stable network (or supply the GGUF/llama.cpp locally) to test a real
-   text generator; otherwise keep the stated deviation.
+2. **G1 result:** the text-only model almost always asserts "present" and so contradicts any
+   low-probability triage. Decide whether to (a) accept this as a limitation, (b) add a
+   stronger prompt / few-shot or constrain output, or (c) move to an image-conditioned
+   generator (G2), which is the design actually filed.
 3. Whether a 10%-injection template is the right stress level, or whether a *realistic*
    generator (with its own error modes) is needed to test whether NEG has clinical value.
 4. Keep everything **local** per the v4 prompt until the second application is filed.
