@@ -146,10 +146,12 @@ def _check_reference_hash(ref: Path) -> list[str]:
     return []
 
 
-def verify_all(blessing: Path, dolapo: Path) -> dict:
+def verify_all(blessing: Path, dolapo: Path,
+               blessing_ref: Path = BLESSING_REF, dolapo_ref: Path = DOLAPO_REF) -> dict:
     out = {}
-    for name, returned in (("blessing", blessing), ("dolapo", dolapo)):
-        ref, id_col, immutable, label_cols = SCHEMAS[name]
+    for name, returned, ref in (("blessing", blessing, blessing_ref),
+                                ("dolapo", dolapo, dolapo_ref)):
+        _, id_col, immutable, label_cols = SCHEMAS[name]
         out[name] = _check_reference_hash(ref) + verify_sheet(ref, returned, id_col,
                                                               immutable, label_cols)
     return out
@@ -302,6 +304,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--blessing", default=str(BLESSING_REF))
     ap.add_argument("--dolapo", default=str(DOLAPO_REF))
+    ap.add_argument("--ref-blessing", default=str(BLESSING_REF))
+    ap.add_argument("--ref-dolapo", default=str(DOLAPO_REF))
     ap.add_argument("--key", default="validation/reports/v4_g1_merged_key_PRIVATE.json")
     ap.add_argument("--run-a", default=str(RUN_JSONS["a"]))
     ap.add_argument("--run-b", default=str(RUN_JSONS["b"]))
@@ -317,7 +321,8 @@ def main(argv: list[str] | None = None) -> int:
             return 2
 
     # (a) verify returned vs hashed originals
-    checks = verify_all(Path(args.blessing), Path(args.dolapo))
+    checks = verify_all(Path(args.blessing), Path(args.dolapo),
+                        Path(args.ref_blessing), Path(args.ref_dolapo))
     bad = {k: v for k, v in checks.items() if v}
     print(MARK)
     for name, probs in checks.items():
@@ -343,7 +348,7 @@ def main(argv: list[str] | None = None) -> int:
     rows, _ = load_records(Path(args.blessing), Path(args.dolapo), Path(args.key),
                            {"a": args.run_a, "b": args.run_b})
     labelled = [r for r in rows if r["label"] is not None]
-    if not labelled:
+    if not any(r["label3"] for r in rows):
         print("no usable labels (blessing label column empty?)", flush=True)
         return 2
 
@@ -374,13 +379,15 @@ def main(argv: list[str] | None = None) -> int:
             "split_by_classifier_decision": split,
             "extractor_flagged_rate": (sum(1 for r in vr if r["extractor_cat"] == "contradicts")
                                        / len(vr)) if vr else None,
-            "n_ambiguous": sum(1 for r in rows if r["variant"] == v and r["label3"] is None),
+            "n_ambiguous": sum(1 for r in rows
+                               if r["variant"] == v and r["label3"] == "ambiguous"),
         }
 
     out = {
         "marking": MARK, "frozen_rule": "docs/evidence/preregistration_v4_g1_labels.md",
         "n_rows": len(rows), "n_labelled": len(labelled),
-        "n_ambiguous": sum(1 for r in rows if r["label3"] is None),
+        "n_ambiguous": sum(1 for r in rows if r["label3"] == "ambiguous"),
+        "n_blank": sum(1 for r in rows if r["label3"] is None),
         "label_counts": dict(Counter(r["label_raw"].strip().lower() for r in rows)),
         "extractor_v1_mapping_rule": {
             "uncertain": "ambiguous", "historical|resolved": "consistent",
