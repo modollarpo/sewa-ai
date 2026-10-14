@@ -173,7 +173,8 @@ def main(argv: list[str] | None = None) -> int:
         "temperature": TEMPERATURE, "top_p": TOP_P, "max_new_tokens": MAX_NEW_TOKENS,
         "reports_per_scan": REPORTS_PER_SCAN, "split": args.split,
         "n_scans": len(idx), "n_generations": len(recs), "n_parsed": len(ok),
-        "contradiction_rate": (len(contra) / len(ok)) if ok else None,
+        "extractor_flagged_contradiction_rate_unvalidated_upper_bound": (len(contra) / len(ok)) if ok else None,
+        "contradiction_rate": (len(contra) / len(ok)) if ok else None,  # keep legacy key for compatibility
         "polarity_counts": pol_counts,
         "note": "text-only generator; measures generator-introduced contradictions only; "
                 "no clinical accuracy claim",

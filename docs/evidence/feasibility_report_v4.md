@@ -200,7 +200,7 @@ novelty, if pursued (raise at the attorney consult).
   only for generator/input consistency; G2 (VLM) skipped. No image-conditioned generator was
   tested, so nothing here reflects the filed design's actual generator.
 - **G1 is text-only and small** (50 scans, 150 generations, one prompt). Its ~44% weighted
-  contradiction rate reflects a strong "present" prior (149/150 assert haemorrhage present),
+  extractor-flagged contradiction rate (UNVALIDATED, upper bound) reflects a strong "present" prior (149/150 assert haemorrhage present),
   not clinical accuracy; no clinician-reviewed labels were used.
 - Extractor accuracy is measured on a **synthetic** set whose labels are **unreviewed by a
   clinician**; the independent adversarial set is small (60/60) and the post-fix 0.983 is
