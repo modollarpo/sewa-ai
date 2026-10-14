@@ -9,7 +9,7 @@ This single entrypoint does everything needed once the human labels come back:
       probability, urgency, report_text, instructions); the ONLY columns allowed to change
       are the label columns (label / notes / label_2); label values must come from the
       allowed set. Any other difference -> MISMATCH -> exit 3 and STOP.
-  (b) inter-labeller agreement: Cohen's kappa (Blessing vs second labeller) on the subset,
+  (b) inter-labeller agreement: Cohen's kappa (SEWA vs second labeller) on the subset,
       with a scan-cluster bootstrap 95% CI and the list of disagreements.
   (c) extractor v1 -> manual 3-category mapping rule (FIXED; see
       docs/evidence/preregistration_v4_g1_labels.md):
@@ -28,9 +28,9 @@ ambiguity handling are frozen in the pre-registration BEFORE any labels are seen
 
 Usage:
   python -m validation.scripts.v4_merged_label_analysis --verify-only \
-      --blessing <returned> --dolapo <returned>
+      --sewa <returned> --dolapo <returned>
   python -m validation.scripts.v4_merged_label_analysis \
-      --blessing <returned> --dolapo <returned> --key <key.json>
+      --sewa <returned> --dolapo <returned> --key <key.json>
 """
 from __future__ import annotations
 
@@ -50,7 +50,7 @@ LABELS3 = ("consistent", "contradicts", "ambiguous")
 SEED = 20261014
 
 # reference = the committed, hashed unlabelled sheets; returned = the filled copies.
-BLESSING_REF = Path("validation/labelling/blessing_labelling_sheet.xlsx")
+SEWA_REF = Path("validation/labelling/sewa_labelling_sheet.xlsx")
 DOLAPO_REF = Path("validation/labelling/dolapo_subset_sheet.xlsx")
 CLIN_REF = Path("validation/labelling/clinician_review_sheet.xlsx")
 MERGED_REF = Path("validation/reports/v4_g1_merged_labelling_sheet.csv")
@@ -63,7 +63,7 @@ CLIN_VALUES = ("present", "absent", "uncertain", "historical", "resolved")
 
 # id column -> (immutable columns, {column: allowed values or None})
 SCHEMAS = {
-    "blessing": (BLESSING_REF, "new_id",
+    "sewa": (SEWA_REF, "new_id",
                  ["new_id", "decision", "probability", "urgency", "report_text", "instructions"],
                  {"label": LABELS3, "notes": None}),
     "dolapo": (DOLAPO_REF, "new_id",
@@ -146,10 +146,10 @@ def _check_reference_hash(ref: Path) -> list[str]:
     return []
 
 
-def verify_all(blessing: Path, dolapo: Path,
-               blessing_ref: Path = BLESSING_REF, dolapo_ref: Path = DOLAPO_REF) -> dict:
+def verify_all(sewa: Path, dolapo: Path,
+               sewa_ref: Path = SEWA_REF, dolapo_ref: Path = DOLAPO_REF) -> dict:
     out = {}
-    for name, returned, ref in (("blessing", blessing, blessing_ref),
+    for name, returned, ref in (("sewa", sewa, sewa_ref),
                                 ("dolapo", dolapo, dolapo_ref)):
         _, id_col, immutable, label_cols = SCHEMAS[name]
         out[name] = _check_reference_hash(ref) + verify_sheet(ref, returned, id_col,
@@ -264,7 +264,7 @@ def binary_scenario(lab3: list[str], ext3: list[str], ambiguous_as: str) -> dict
 
 
 # --------------------------------------------------------------------------- assemble
-def load_records(blessing: Path, dolapo: Path, key_path: Path,
+def load_records(sewa: Path, dolapo: Path, key_path: Path,
                  run_jsons: dict | None = None) -> tuple[list[dict], list[str]]:
     """Join key + run JSONs + the two labelled sheets into analysis rows."""
     notes: list[str] = []
@@ -275,7 +275,7 @@ def load_records(blessing: Path, dolapo: Path, key_path: Path,
         p = Path(p)
         runs[v] = ([r for r in json.loads(p.read_text(encoding="utf-8")).get("records", [])
                     if r.get("text")] if p.exists() else [])
-    bless = {str(r.get("new_id", "")).strip(): r for r in read_rows(Path(blessing))}
+    sewa_rows = {str(r.get("new_id", "")).strip(): r for r in read_rows(Path(sewa))}
     dol = {str(r.get("new_id", "")).strip(): r for r in read_rows(Path(dolapo))}
 
     rows = []
@@ -284,7 +284,7 @@ def load_records(blessing: Path, dolapo: Path, key_path: Path,
         rec = runs.get(variant, [])[sri] if sri < len(runs.get(variant, [])) else None
         if rec is None:
             continue
-        b = bless.get(nid, {})
+        b = sewa_rows.get(nid, {})
         d = dol.get(nid, {})
         rows.append({
             "new_id": nid, "variant": variant, "study": meta["study"],
@@ -302,9 +302,9 @@ def load_records(blessing: Path, dolapo: Path, key_path: Path,
 # --------------------------------------------------------------------------- main
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--blessing", default=str(BLESSING_REF))
+    ap.add_argument("--sewa", default=str(SEWA_REF))
     ap.add_argument("--dolapo", default=str(DOLAPO_REF))
-    ap.add_argument("--ref-blessing", default=str(BLESSING_REF))
+    ap.add_argument("--ref-sewa", default=str(SEWA_REF))
     ap.add_argument("--ref-dolapo", default=str(DOLAPO_REF))
     ap.add_argument("--key", default="validation/reports/v4_g1_merged_key_PRIVATE.json")
     ap.add_argument("--run-a", default=str(RUN_JSONS["a"]))
@@ -315,14 +315,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--boot", type=int, default=5000)
     args = ap.parse_args(argv)
 
-    for p in (args.blessing, args.dolapo):
+    for p in (args.sewa, args.dolapo):
         if not Path(p).exists():
             print(f"missing {p}", flush=True)
             return 2
 
     # (a) verify returned vs hashed originals
-    checks = verify_all(Path(args.blessing), Path(args.dolapo),
-                        Path(args.ref_blessing), Path(args.ref_dolapo))
+    checks = verify_all(Path(args.sewa), Path(args.dolapo),
+                        Path(args.ref_sewa), Path(args.ref_dolapo))
     bad = {k: v for k, v in checks.items() if v}
     print(MARK)
     for name, probs in checks.items():
@@ -345,17 +345,17 @@ def main(argv: list[str] | None = None) -> int:
         print(f"missing {args.key}", flush=True)
         return 2
 
-    rows, _ = load_records(Path(args.blessing), Path(args.dolapo), Path(args.key),
+    rows, _ = load_records(Path(args.sewa), Path(args.dolapo), Path(args.key),
                            {"a": args.run_a, "b": args.run_b})
     labelled = [r for r in rows if r["label"] is not None]
     if not any(r["label3"] for r in rows):
-        print("no usable labels (blessing label column empty?)", flush=True)
+        print("no usable labels (sewa label column empty?)", flush=True)
         return 2
 
     # (b) inter-labeller kappa on the subset
     pair = [r for r in rows if r["subset"] and r["label3"] and r["label2"]]
     kappa = kappa_cluster_ci(pair, args.boot, SEED)
-    disagreements = [{"new_id": r["new_id"], "variant": r["variant"], "blessing": r["label3"],
+    disagreements = [{"new_id": r["new_id"], "variant": r["variant"], "sewa": r["label3"],
                       "second_labeller": r["label2"], "text": r["text"]}
                      for r in pair if r["label3"] != r["label2"]]
 
@@ -400,7 +400,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     Path(args.out).write_text(json.dumps(out, indent=2), encoding="utf-8")
     with Path(args.disagreements).open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["new_id", "variant", "blessing", "second_labeller",
+        w = csv.DictWriter(f, fieldnames=["new_id", "variant", "sewa", "second_labeller",
                                           "text"])
         w.writeheader()
         w.writerows(disagreements)

@@ -39,42 +39,42 @@ def test_map_v1_rule_frozen():
 
 
 def test_verifier_accepts_valid_filled():
-    _, idc, imm, lc = _schema("blessing")
-    probs = ana.verify_sheet(DUMMY / "dummy_blessing_unlabelled.xlsx",
-                             DUMMY / "dummy_blessing_filled.xlsx", idc, imm, lc)
+    _, idc, imm, lc = _schema("sewa")
+    probs = ana.verify_sheet(DUMMY / "dummy_sewa_unlabelled.xlsx",
+                             DUMMY / "dummy_sewa_filled.xlsx", idc, imm, lc)
     assert probs == []
 
 
 def test_verifier_rejects_tampered_text():
-    _, idc, imm, lc = _schema("blessing")
-    probs = ana.verify_sheet(DUMMY / "dummy_blessing_unlabelled.xlsx",
-                             DUMMY / "dummy_blessing_tampered.xlsx", idc, imm, lc)
+    _, idc, imm, lc = _schema("sewa")
+    probs = ana.verify_sheet(DUMMY / "dummy_sewa_unlabelled.xlsx",
+                             DUMMY / "dummy_sewa_tampered.xlsx", idc, imm, lc)
     assert probs, "tampered file must be rejected"
     assert any("report_text" in p for p in probs)
 
 
 def test_verifier_rejects_bad_label_value():
-    _, idc, imm, lc = _schema("blessing")
-    probs = ana.verify_sheet(DUMMY / "dummy_blessing_unlabelled.xlsx",
-                             DUMMY / "dummy_blessing_badlabel.xlsx", idc, imm, lc)
+    _, idc, imm, lc = _schema("sewa")
+    probs = ana.verify_sheet(DUMMY / "dummy_sewa_unlabelled.xlsx",
+                             DUMMY / "dummy_sewa_badlabel.xlsx", idc, imm, lc)
     assert probs, "label outside the allowed set must be rejected"
     assert any("not in" in p for p in probs)
 
 
 def test_verifier_rejects_wrong_row_count(tmp_path):
     from openpyxl import load_workbook
-    _, idc, imm, lc = _schema("blessing")
-    wb = load_workbook(DUMMY / "dummy_blessing_filled.xlsx")
+    _, idc, imm, lc = _schema("sewa")
+    wb = load_workbook(DUMMY / "dummy_sewa_filled.xlsx")
     ws = wb["Labels"]
     ws.delete_rows(2)  # drop a data row
     short = tmp_path / "short.xlsx"
     wb.save(short)
-    probs = ana.verify_sheet(DUMMY / "dummy_blessing_unlabelled.xlsx", short, idc, imm, lc)
+    probs = ana.verify_sheet(DUMMY / "dummy_sewa_unlabelled.xlsx", short, idc, imm, lc)
     assert any("row count" in p for p in probs)
 
 
 def test_load_records_counts():
-    rows, _ = ana.load_records(DUMMY / "dummy_blessing_filled.xlsx",
+    rows, _ = ana.load_records(DUMMY / "dummy_sewa_filled.xlsx",
                                DUMMY / "dummy_dolapo_filled.xlsx",
                                DUMMY / "dummy_key.json", RUNS)
     assert len(rows) == 12
@@ -83,7 +83,7 @@ def test_load_records_counts():
 
 
 def test_kappa_and_two_scenarios():
-    rows, _ = ana.load_records(DUMMY / "dummy_blessing_filled.xlsx",
+    rows, _ = ana.load_records(DUMMY / "dummy_sewa_filled.xlsx",
                                DUMMY / "dummy_dolapo_filled.xlsx",
                                DUMMY / "dummy_key.json", RUNS)
     pair = [r for r in rows if r["subset"] and r["label3"] and r["label2"]]
@@ -101,7 +101,7 @@ def test_kappa_and_two_scenarios():
 
 
 def test_kappa_ci_deterministic():
-    rows, _ = ana.load_records(DUMMY / "dummy_blessing_filled.xlsx",
+    rows, _ = ana.load_records(DUMMY / "dummy_sewa_filled.xlsx",
                                DUMMY / "dummy_dolapo_filled.xlsx",
                                DUMMY / "dummy_key.json", RUNS)
     pair = [r for r in rows if r["subset"] and r["label3"] and r["label2"]]
@@ -110,10 +110,10 @@ def test_kappa_ci_deterministic():
     assert a == b
 
 
-def _main_args(tmp_path, blessing="dummy_blessing_filled.xlsx"):
-    return ["--blessing", str(DUMMY / blessing),
+def _main_args(tmp_path, sewa="dummy_sewa_filled.xlsx"):
+    return ["--sewa", str(DUMMY / sewa),
             "--dolapo", str(DUMMY / "dummy_dolapo_filled.xlsx"),
-            "--ref-blessing", str(DUMMY / "dummy_blessing_unlabelled.xlsx"),
+            "--ref-sewa", str(DUMMY / "dummy_sewa_unlabelled.xlsx"),
             "--ref-dolapo", str(DUMMY / "dummy_dolapo_unlabelled.xlsx"),
             "--key", str(DUMMY / "dummy_key.json"),
             "--run-a", str(RUNS["a"]), "--run-b", str(RUNS["b"]),
@@ -133,7 +133,7 @@ def test_main_end_to_end(tmp_path):
 
 
 def test_main_stops_on_tampered(tmp_path):
-    rc = ana.main(_main_args(tmp_path, blessing="dummy_blessing_tampered.xlsx"))
+    rc = ana.main(_main_args(tmp_path, sewa="dummy_sewa_tampered.xlsx"))
     assert rc == 3
     assert not (tmp_path / "out.json").exists(), "must not write analysis on mismatch"
 

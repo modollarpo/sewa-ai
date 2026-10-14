@@ -26,7 +26,7 @@ classifier's operating decision for that scan (`positive` iff calibrated `p >= 0
   ambiguous and add a note."*).
 
 Labelling artefacts (unlabelled, hashed in `docs/evidence/label_hashes.txt`):
-`validation/labelling/blessing_labelling_sheet.xlsx` (all 300, variant-blind),
+`validation/labelling/sewa_labelling_sheet.xlsx` (all 300, variant-blind),
 `validation/labelling/dolapo_subset_sheet.xlsx` (the 50-row second-labeller subset),
 `validation/labelling/clinician_review_sheet.xlsx` (120 extractor sentences, 5-class).
 
@@ -79,7 +79,7 @@ This rule is implemented once in `validation/scripts/v4_merged_label_analysis.py
 ## 3. Metrics and their uncertainty (FIXED)
 
 - **Inter-labeller agreement (item 7):** Cohen's kappa between the primary labeller
-  (Blessing) and the second labeller (Dolapo) on the 50-row subset, over the 3 categories
+  (SEWA) and the second labeller (Dolapo) on the 50-row subset, over the 3 categories
   including `ambiguous`, with a **scan-cluster bootstrap 95% CI** (resampling the
   `StudyInstanceUID` clusters, seed 20261014, 5000 resamples) and the list of
   disagreements. The subset is labelled by both people; the full 300 by one.

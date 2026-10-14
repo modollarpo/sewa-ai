@@ -3,7 +3,7 @@
 FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.
 
 Creates (no labels exist yet; the private key is kept out of every shared sheet):
-  validation/labelling/blessing_labelling_sheet.xlsx   - full 300 rows (variant-blind)
+  validation/labelling/sewa_labelling_sheet.xlsx       - full 300 rows (variant-blind)
   validation/labelling/dolapo_subset_sheet.xlsx        - the 50 second-labeller rows
   validation/labelling/clinician_review_sheet.xlsx     - extractor sentences (no key)
   validation/labelling/private/extractor_sentences_key.csv - PRIVATE key (proposed labels)
@@ -33,7 +33,7 @@ KEY_SRC = Path("validation/reports/v4_extractor_clinician_review.csv")
 
 OUT_DIR = Path("validation/labelling")
 PRIV_DIR = OUT_DIR / "private"
-BLESSING = OUT_DIR / "blessing_labelling_sheet.xlsx"
+SEWA = OUT_DIR / "sewa_labelling_sheet.xlsx"
 DOLAPO = OUT_DIR / "dolapo_subset_sheet.xlsx"
 CLIN_XLSX = OUT_DIR / "clinician_review_sheet.xlsx"
 KEY_PRIV = PRIV_DIR / "extractor_sentences_key.csv"
@@ -84,15 +84,15 @@ def _data_sheet(wb: Workbook, cols: list[str], rows: list[list], label_col: str,
     dv.add(f"{letter}2:{letter}{max(len(rows) + 1, 2)}")
 
 
-def build_blessing(rows: list[dict]) -> None:
+def build_sewa(rows: list[dict]) -> None:
     wb = Workbook()
-    _instructions_sheet(wb, [MARK, "", "Blessing - report-negation labelling", "", RULE,
+    _instructions_sheet(wb, [MARK, "", "SEWA - report-negation labelling", "", RULE,
                              "", "Columns: new_id, decision, probability, urgency, "
                              "report_text, label, notes, instructions."])
     data = [[r["new_id"], r["decision"], r["probability"], r["urgency"], r["report_text"],
              "", "", r["instructions"]] for r in rows]
     _data_sheet(wb, COLUMNS, data, "label", LABEL_VALUES)
-    wb.save(BLESSING)
+    wb.save(SEWA)
 
 
 def build_dolapo(rows: list[dict]) -> None:
@@ -149,7 +149,7 @@ def main() -> int:
     subset = [r for r in rows if (r.get("second_labeller_subset", "").strip().upper() == "TRUE")]
     print(f"{MARK}\nmerged rows={len(rows)}  second-labeller subset={len(subset)}")
 
-    build_blessing(rows)
+    build_sewa(rows)
     build_dolapo(subset)
     n_clin = build_clinician()
     copy_private_key()
@@ -157,10 +157,10 @@ def main() -> int:
 
     files = [CLIN_CSV, Path("validation/reports/v4_g1_blinded_labelling_sheet.csv"),
              Path("validation/reports/v4_g1b_blinded_labelling_sheet.csv"), MERGED,
-             BLESSING, DOLAPO, CLIN_XLSX, KEY_PRIV]
+             SEWA, DOLAPO, CLIN_XLSX, KEY_PRIV]
     write_hashes(files)
 
-    for p in (BLESSING, DOLAPO, CLIN_XLSX, KEY_PRIV):
+    for p in (SEWA, DOLAPO, CLIN_XLSX, KEY_PRIV):
         print(f"wrote {p}")
     print(f"wrote {HASHES}")
     for ln in HASHES.read_text(encoding="utf-8").splitlines()[2:]:

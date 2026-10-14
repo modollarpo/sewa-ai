@@ -21,7 +21,7 @@ INSTR = ("If a report both asserts and denies the finding, label it ambiguous an
 COLS = ["new_id", "decision", "probability", "urgency", "report_text", "label", "notes",
         "instructions"]
 
-# (variant, study, k, text, decision_present, extractor polarity, blessing label)
+# (variant, study, k, text, decision_present, extractor polarity, sewa label)
 SCANS_A = [
     ("ID_dummyA1", 0, "Acute subdural hemorrhage is present.", True, "present", "consistent"),
     ("ID_dummyA1", 1, "No hemorrhage is seen.", True, "absent", "contradicts"),
@@ -63,8 +63,8 @@ def build() -> dict:
     scans = {"a": SCANS_A, "b": SCANS_B}
     records = {"a": [], "b": []}
     key = {}
-    bless_rows, dolapo_rows = [], []
-    bless_labels, dolapo_labels = [], []
+    sewa_rows, dolapo_rows = [], []
+    sewa_labels, dolapo_labels = [], []
     nid_i = 0
     for v in ("a", "b"):
         for sri, (study, k, text, dp, pol, blab) in enumerate(scans[v]):
@@ -78,8 +78,8 @@ def build() -> dict:
                                "error": None})
             key[nid] = {"variant": v, "source_row_id": sri, "study": study,
                         "index": str(k), "k": str(k), "seed": str(1000 + nid_i)}
-            bless_rows.append([nid, dec, f"{prob}", "routine", text, INSTR])
-            bless_labels.append(blab)
+            sewa_rows.append([nid, dec, f"{prob}", "routine", text, INSTR])
+            sewa_labels.append(blab)
             if nid in DOLAPO:
                 dolapo_rows.append([nid, dec, f"{prob}", "routine", text, INSTR])
                 dolapo_labels.append(DOLAPO[nid])
@@ -93,20 +93,20 @@ def build() -> dict:
         json.dumps({"marking": "DUMMY SYNTHETIC", "key": key}, indent=2), encoding="utf-8")
 
     # unlabelled references
-    _write_sheet(OUT / "dummy_blessing_unlabelled.xlsx", bless_rows)
+    _write_sheet(OUT / "dummy_sewa_unlabelled.xlsx", sewa_rows)
     _write_sheet(OUT / "dummy_dolapo_unlabelled.xlsx", dolapo_rows)
     # returned, valid
-    _write_sheet(OUT / "dummy_blessing_filled.xlsx", bless_rows, bless_labels)
+    _write_sheet(OUT / "dummy_sewa_filled.xlsx", sewa_rows, sewa_labels)
     _write_sheet(OUT / "dummy_dolapo_filled.xlsx", dolapo_rows, dolapo_labels)
     # tampered: report_text of row 0 changed
-    tampered = [list(r) for r in bless_rows]
+    tampered = [list(r) for r in sewa_rows]
     tampered[0][4] = "TAMPERED TEXT - hemorrhage is definitely absent."
-    _write_sheet(OUT / "dummy_blessing_tampered.xlsx", tampered, bless_labels)
+    _write_sheet(OUT / "dummy_sewa_tampered.xlsx", tampered, sewa_labels)
     # bad label outside the allowed set
-    bad = list(bless_labels)
+    bad = list(sewa_labels)
     bad[1] = "maybe"
-    _write_sheet(OUT / "dummy_blessing_badlabel.xlsx", bless_rows, bad)
-    return {"n_blessing": len(bless_rows), "n_dolapo": len(dolapo_rows),
+    _write_sheet(OUT / "dummy_sewa_badlabel.xlsx", sewa_rows, bad)
+    return {"n_sewa": len(sewa_rows), "n_dolapo": len(dolapo_rows),
             "n_key": len(key), "out": str(OUT)}
 
 

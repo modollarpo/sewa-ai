@@ -2,7 +2,7 @@
 
 FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.
 
-The unlabelled artefacts are gzip-free .xlsx (blessing/dolapo/clinician) built by
+The unlabelled artefacts are gzip-free .xlsx (sewa/dolapo/clinician) built by
 `v4_build_labelling_xlsx.py`; labels are filled by humans into the same columns. This
 module reads either .xlsx or .csv, returns ordered records keyed by `new_id` (or `id`),
 and normalises label strings.
