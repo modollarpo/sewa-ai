@@ -41,5 +41,10 @@
     "note": "research/nonclinical; local only, not pushed"
   },
   "prompt_G1_system": "You are a radiology report generator for a research prototype. Given a structured triage output, write ONE short impression sentence about intracranial haemorrhage only. Do not invent other findings. Do not address the patient. Maximum 40 words.",
-  "prompt_G1_user": "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}."
+  "prompt_G1_user": "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}.",
+  "prompt_G1_variants": {
+    "a": "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}.",
+    "b": "Triage decision: {decision}; haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}. (decision = 'haemorrhage detected' or 'no haemorrhage detected')"
+  },
+  "runner": "validation/scripts/v4_g1_qwen.py (--prompt-variant a|b); resumable"
 }

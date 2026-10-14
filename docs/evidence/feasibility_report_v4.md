@@ -63,12 +63,21 @@ low-dose ×3). Universe: 1,800 test instances (180 scans × 10 conditions; 1,620
     contradiction**: report polarity vs. the triage decision.
     - **decided-present scans: 0/75 contradictions** (model said *present* in 75/75).
     - **decided-absent scans: 74/75 = 98.7% contradictions** (model still said *present* in
-      74/75). Overall on the balanced subset **49.3%**; **population-weighted ≈ 44%** using
-      the test set's 45% decided-absent share.
+      74/75). Overall on the balanced subset, the **extractor-flagged contradiction rate
+      (UNVALIDATED, upper bound) = 49.3%**; **population-weighted ≈ 44%** using the test
+      set's 45% decided-absent share. (Extractor-flagged only: no clinician labels yet, so
+      this is an **upper bound** on the true rate — see §4c.)
     - **Interpretation:** the text-only model has a strong "haemorrhage-present" prior
       (149/150 generations assert *present*) and effectively ignores a low probability; it
       does not faithfully reflect its input. **This measures generator/input inconsistency,
       not detection accuracy** — no accuracy claim is made (labels unreviewed by a clinician).
+  - **Prompt variant b (explicit decision).** Same 50 scans, seeds and settings, but the
+    prompt adds the decision string ("haemorrhage detected" / "no haemorrhage detected").
+    Extractor-flagged rate **0.067** (150 generations; polarity absent 65 / present 85) vs
+    **0.493** for variant a — the explicit decision largely removes the "present" prior.
+    `validation/reports/v4_g1_qwen_b.json`, `v4_g1_prompt_compare.json`. **Under manual
+    labels**, `v4_g1_prompt_compare.py` reports each variant's true rate and their paired
+    scan-cluster-bootstrap difference once both blinded sheets are returned.
 - **G2 — permissive VLM:** skipped (no CPU-feasible permissive VLM in budget).
 
 Manifest of prompts, licences, artefacts and checksums:
@@ -95,6 +104,34 @@ Rule-based NegEx/pyConText-style extractor (own code; `v4_step2_negation.py`), o
     → `absent`.
 - Labels are **unreviewed by a clinician**. A clinician pack of **120 sentences**
   (`v4_extractor_clinician_review.csv`) is prepared for the check you offered to arrange.
+
+### 4b. Extractor v2 (probability-aware) — G1 follow-up
+
+The v1 extractor ignores probability/likelihood phrasing (e.g. "low probability of
+haemorrhage", "…is unlikely", "90% probability"), which the G1 reports contain. v2
+(`v4_step2_negation_v2.py`) adds low/high/moderate phrase rules, an "unlikely" rule and a
+numeric-probability reader ("10%", "0.15 probability"); other triggers are reused from v1.
+
+- **Development set (new, disjoint from the 150 G1 reports):** `build_prob_set()` — a
+  probability-phrasing synthetic set, split dev/holdout with a fixed seed
+  (`v4_negation_v2_set.json`). v2 accuracy **1.000 dev / 1.000 holdout** vs v1 **0.583 /
+  0.539** (`v4_negation_v2.json`). **Synthetic and templated — a smoke test, not clinical
+  evidence.**
+- **Exploratory re-run on the 150 G1 reports (variant a), applied ONCE, untuned**
+  (`v4_negation_v2_g1_exploratory.json`): extractor-flagged rate **0.493 (v1) → 0.240 (v2)**;
+  v2 polarity absent 34 / present 110 / uncertain 6. **Still UNVALIDATED** — the extractor's
+  notion of "low probability ⇒ not asserted" may be wrong for some reports, so these rates
+  await the clinician labels.
+
+### 4c. Blinded clinician labelling (in progress)
+
+150 reports for each prompt variant a and b were exported in **random order** to
+`v4_g1_blinded_labelling_sheet.csv` / `v4_g1b_blinded_labelling_sheet.csv`, showing the
+decision, probability, urgency and report text but **not** the extractor polarity or
+contradiction flag (label column: `consistent | contradicts | ambiguous`; plus `notes` and
+`clinician_signoff`). On return, `v4_g1_label_analysis.py` reports the extractor-vs-label
+confusion matrix, the **true** contradiction rate with a **scan-cluster bootstrap 95% CI**
+(resampling the 50 scans), and examples of each failure type.
 
 ## 5. Power (Step 5b, before the test run)
 
@@ -205,6 +242,13 @@ novelty, if pursued (raise at the attorney consult).
 - Extractor accuracy is measured on a **synthetic** set whose labels are **unreviewed by a
   clinician**; the independent adversarial set is small (60/60) and the post-fix 0.983 is
   post-hoc/optimistic (untouched primary was 0.700).
+- **Extractor v2's 1.000 dev/holdout is on a templated probability set** and shows only that
+  the added rules fire as intended — it is **not** an accuracy claim on real text. The v2
+  application to the 150 G1 reports is **exploratory/untuned** and still **unvalidated**;
+  the blinded label sheets (variants a and b) are the missing validation.
+- **All G1 contradiction numbers are extractor-flagged** and therefore **upper bounds** until
+  the clinician labels return; the blinded sheets deliberately hide the extractor flag so the
+  extractor-vs-label confusion matrix is not circular.
 - Public RSNA labels; noncommercial licence → research only.
 - Scan-level (`StudyInstanceUID`) grouping; single seed; 8 slices/scan; temperature and D2
   weights reused from v2.
@@ -227,17 +271,31 @@ python validation/scripts/v4_step6_signals.py
 python validation/scripts/v4_power.py                           # BEFORE the test eval
 python validation/scripts/v4_evaluate.py                        # one shot
 python validation/scripts/v4_failure_analysis.py
-python validation/scripts/v4_g1_qwen.py --scans 50              # G1 (needs verified GGUF + llama.cpp)
+python validation/scripts/v4_g1_qwen.py --scans 50              # G1 variant a (needs verified GGUF + llama.cpp)
+python -m validation.scripts.v4_g1_qwen --scans 50 --prompt-variant b   # G1 variant b
+python -m validation.scripts.v4_step2_negation_v2               # extractor v2 (synthetic dev/holdout)
+python -m validation.scripts.v4_step2c_negation_v2_g1           # v2 on the 150 G1 reports (exploratory)
+python -m validation.scripts.v4_g1_export_blinded               # blinded sheet (variant a)
+python -m validation.scripts.v4_g1_export_blinded --json validation/reports/v4_g1_qwen_b.json \
+    --out validation/reports/v4_g1b_blinded_labelling_sheet.csv
+python -m validation.scripts.v4_g1_prompt_compare               # rates now; true rates after labels
+python -m validation.scripts.v4_g1_label_analysis \
+    --labels validation/reports/v4_g1_blinded_labelling_sheet.csv   # after labels return
 ```
 
 ## 11. Decisions for you
 
 1. **Clinician check** of the 120-sentence pack (`v4_extractor_clinician_review.csv`) — the
    extractor’s only verified number is synthetic otherwise.
-2. **G1 result:** the text-only model almost always asserts "present" and so contradicts any
+2. **Label the two blinded sheets** (150 reports each, variants a and b,
+   `v4_g1_blinded_labelling_sheet.csv` and `v4_g1b_blinded_labelling_sheet.csv`, column
+   `label` = consistent/contradicts/ambiguous). On return, run `v4_g1_label_analysis.py`
+   and `v4_g1_prompt_compare.py` — no further code changes needed.
+3. **G1 result:** the text-only model almost always asserts "present" and so contradicts any
    low-probability triage. Decide whether to (a) accept this as a limitation, (b) add a
    stronger prompt / few-shot or constrain output, or (c) move to an image-conditioned
-   generator (G2), which is the design actually filed.
+   generator (G2), which is the design actually filed. (Variant b — explicit decision — is
+   the (b) experiment: extractor-flagged rate fell from 0.493 to 0.067.)
 3. Whether a 10%-injection template is the right stress level, or whether a *realistic*
    generator (with its own error modes) is needed to test whether NEG has clinical value.
 4. Keep everything **local** per the v4 prompt until the second application is filed.

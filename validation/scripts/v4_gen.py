@@ -67,6 +67,13 @@ MANIFEST = {
     },
     "prompt_G1_system": G1_SYSTEM,
     "prompt_G1_user": "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}.",
+    "prompt_G1_variants": {
+        "a": "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}.",
+        "b": ("Triage decision: {decision}; haemorrhage probability {prob:.2f}; urgency "
+              "{urgency}; attribution {attr}. (decision = 'haemorrhage detected' or "
+              "'no haemorrhage detected')"),
+    },
+    "runner": "validation/scripts/v4_g1_qwen.py (--prompt-variant a|b); resumable",
 }
 
 

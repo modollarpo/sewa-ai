@@ -12,6 +12,14 @@ contradictions, using the same NEG semantics as G0 (v4_lib). No accuracy claims.
 Model / runtime (verified on download):
   Qwen/Qwen2.5-1.5B-Instruct-GGUF  qwen2.5-1.5b-instruct-q4_k_m.gguf  licence Apache-2.0
   llama.cpp official win-cpu-x64 release build b11583               licence MIT
+
+Prompt variants:
+  a (default) - triage line only (probability, urgency, attribution)
+  b           - triage line plus the explicit decision ("haemorrhage detected" /
+                "no haemorrhage detected")
+
+The runner is resumable: if the output JSON already exists, completed (index, k)
+generations are skipped, so a run interrupted by the shell timeout can be continued.
 """
 from __future__ import annotations
 
@@ -41,10 +49,16 @@ G1_SYSTEM = (
     "only. Do not invent other findings. Do not address the patient. Maximum 40 words."
 )
 G1_USER = "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}."
+G1_USER_B = (
+    "Triage decision: {decision}; haemorrhage probability {prob:.2f}; urgency {urgency}; "
+    "attribution {attr}."
+)
 REPORTS_PER_SCAN = 3
 MAX_NEW_TOKENS = 120
 TEMPERATURE = 0.7
 TOP_P = 0.9
+# frozen key for the extractor-flagged rate (see report §3 / §9)
+RATE_KEY = "extractor_flagged_contradiction_rate_unvalidated_upper_bound"
 
 
 def triage_urgency(prob: float) -> str:
@@ -53,6 +67,10 @@ def triage_urgency(prob: float) -> str:
     if prob >= 0.5:
         return "urgent"
     return "routine"
+
+
+def triage_decision(prob: float) -> str:
+    return "haemorrhage detected" if prob >= 0.5 else "no haemorrhage detected"
 
 
 def stable_seed(study: str, k: int) -> int:
@@ -83,6 +101,13 @@ def is_contradiction(polarity: str | None, decision_present: bool) -> bool:
         polarity == "absent" and decision_present)
 
 
+def user_prompt(variant: str, prob: float, urgency: str, attr: str = "top-slice") -> str:
+    if variant == "b":
+        return G1_USER_B.format(decision=triage_decision(prob), prob=prob,
+                                urgency=urgency, attr=attr)
+    return G1_USER.format(prob=prob, urgency=urgency, attr=attr)
+
+
 def generate(user_text: str, seed: int, n_ctx: int = 2048, timeout: int = 300) -> dict:
     cmd = [str(LLAMA), "-m", str(GGUF), "-sys", G1_SYSTEM, "-p", user_text,
            "-n", str(MAX_NEW_TOKENS), "--temp", str(TEMPERATURE), "--top-p", str(TOP_P),
@@ -96,7 +121,6 @@ def generate(user_text: str, seed: int, n_ctx: int = 2048, timeout: int = 300) -
     if not text and p.returncode != 0:
         return {"text": "", "error": f"rc={p.returncode}: {p.stderr.strip()[-300:]}"}
     return {"text": text}
-
 
 
 def select_subset(studies: np.ndarray, prob: np.ndarray, n_scans: int, seed: int) -> list[int]:
@@ -115,75 +139,98 @@ def select_subset(studies: np.ndarray, prob: np.ndarray, n_scans: int, seed: int
     return sorted(idx)
 
 
+def summarize(recs: list[dict], n_scans: int, variant: str, split: str) -> dict:
+    ok = [r for r in recs if r["text"]]
+    contra = [r for r in ok if r["contradiction"]]
+    pol_counts: dict[str, int] = {}
+    for r in ok:
+        pol_counts[str(r["polarity"])] = pol_counts.get(str(r["polarity"]), 0) + 1
+    return {
+        "marking": MARK,
+        "generator": "G1", "model": "Qwen2.5-1.5B-Instruct", "format": "GGUF q4_k_m",
+        "licence": "Apache-2.0", "runtime": "llama.cpp b11583 win-cpu-x64 (MIT)",
+        "prompt_variant": variant,
+        "temperature": TEMPERATURE, "top_p": TOP_P, "max_new_tokens": MAX_NEW_TOKENS,
+        "reports_per_scan": REPORTS_PER_SCAN, "split": split,
+        "n_scans": n_scans, "n_generations": len(recs), "n_parsed": len(ok),
+        RATE_KEY: (len(contra) / len(ok)) if ok else None,
+        "rate_note": "extractor-flagged ONLY; UNVALIDATED (no clinician labels); "
+                     "an UPPER BOUND on the true contradiction rate",
+        "polarity_counts": pol_counts,
+        "note": "text-only generator; measures generator-introduced contradictions only; "
+                "no clinical accuracy claim",
+        "records": recs,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--npz", default=str(REPORTS / "v4_signals_test.npz"))
     ap.add_argument("--split", default="test")
     ap.add_argument("--scans", type=int, default=50)
     ap.add_argument("--seed", type=int, default=44)
+    ap.add_argument("--prompt-variant", choices=["a", "b"], default="a")
+    ap.add_argument("--out", default="")
     ap.add_argument("--limit", type=int, default=0, help="debug: cap generations")
+    ap.add_argument("--timeout", type=int, default=300, help="per-generation timeout (s)")
     args = ap.parse_args(argv)
 
     if not GGUF.exists() or not LLAMA.exists():
         print(f"missing model/runtime: gguf={GGUF.exists()} llama={LLAMA.exists()}", flush=True)
         return 2
 
+    out_path = Path(args.out) if args.out else (
+        REPORTS / ("v4_g1_qwen_b.json" if args.prompt_variant == "b" else "v4_g1_qwen.json"))
+
     d = np.load(args.npz, allow_pickle=True)
     studies = d["studies"]
     prob = d["clean|prob"]
     idx = select_subset(studies, prob, args.scans, args.seed)
-    print(f"{MARK}\nG1 subset: {len(idx)} scans x {REPORTS_PER_SCAN} = "
-          f"{len(idx) * REPORTS_PER_SCAN} generations", flush=True)
 
+    # resumable: reuse completed (index, k) records
     recs: list[dict] = []
+    done: set[tuple[int, int]] = set()
+    if out_path.exists():
+        try:
+            prev = json.loads(out_path.read_text(encoding="utf-8"))
+            recs = prev.get("records", [])
+            done = {(int(r["index"]), int(r["k"])) for r in recs if r.get("text")}
+        except Exception:  # noqa: BLE001
+            recs, done = [], set()
+
+    todo = [(i, k) for i in idx for k in range(REPORTS_PER_SCAN) if (i, k) not in done]
+    print(f"{MARK}\nG1 variant={args.prompt_variant} subset: {len(idx)} scans x "
+          f"{REPORTS_PER_SCAN}; already done {len(done)}; todo {len(todo)}", flush=True)
+
     t0 = time.time()
-    done = 0
-    for i in idx:
+    added = 0
+    for i, k in todo:
+        if args.limit and added >= args.limit:
+            break
         study, p = str(studies[i]), float(prob[i])
         decision = p >= 0.5
         urgency = triage_urgency(p)
-        user = G1_USER.format(prob=p, urgency=urgency, attr="top-slice")
-        for k in range(REPORTS_PER_SCAN):
-            if args.limit and done >= args.limit:
-                break
-            r = generate(user, stable_seed(study, k))
-            pol = extract(r["text"])["polarity"] if r["text"] else None
-            contradiction = is_contradiction(pol, decision)
-            recs.append({"study": study, "index": int(i), "prob": round(p, 4),
-                         "decision_present": decision, "urgency": urgency, "k": k,
-                         "seed": stable_seed(study, k), "text": r["text"],
-                         "polarity": pol, "contradiction": bool(contradiction),
-                         "error": r.get("error")})
-            done += 1
-            if done % 10 == 0:
-                el = time.time() - t0
-                print(f"  {done} gens, {el / done:.1f}s/gen", flush=True)
-        if args.limit and done >= args.limit:
-            break
+        user = user_prompt(args.prompt_variant, p, urgency)
+        r = generate(user, stable_seed(study, k), timeout=args.timeout)
+        pol = extract(r["text"])["polarity"] if r["text"] else None
+        recs.append({"study": study, "index": int(i), "prob": round(p, 4),
+                     "decision_present": decision, "urgency": urgency, "k": k,
+                     "seed": stable_seed(study, k), "text": r["text"],
+                     "polarity": pol, "contradiction": bool(is_contradiction(pol, decision)),
+                     "error": r.get("error")})
+        added += 1
+        if added % 5 == 0:
+            out_path.write_text(json.dumps(
+                summarize(recs, len(idx), args.prompt_variant, args.split), indent=2),
+                encoding="utf-8")
+            el = time.time() - t0
+            print(f"  {added} new ({len(recs)} total), {el / added:.1f}s/gen", flush=True)
 
-    ok = [r for r in recs if r["text"]]
-    contra = [r for r in ok if r["contradiction"]]
-    pol_counts: dict[str, int] = {}
-    for r in ok:
-        pol_counts[str(r["polarity"])] = pol_counts.get(str(r["polarity"]), 0) + 1
-    out = {
-        "marking": MARK,
-        "generator": "G1", "model": "Qwen2.5-1.5B-Instruct", "format": "GGUF q4_k_m",
-        "licence": "Apache-2.0", "runtime": "llama.cpp b11583 win-cpu-x64 (MIT)",
-        "temperature": TEMPERATURE, "top_p": TOP_P, "max_new_tokens": MAX_NEW_TOKENS,
-        "reports_per_scan": REPORTS_PER_SCAN, "split": args.split,
-        "n_scans": len(idx), "n_generations": len(recs), "n_parsed": len(ok),
-        "extractor_flagged_contradiction_rate_unvalidated_upper_bound": (len(contra) / len(ok)) if ok else None,
-        "contradiction_rate": (len(contra) / len(ok)) if ok else None,  # keep legacy key for compatibility
-        "polarity_counts": pol_counts,
-        "note": "text-only generator; measures generator-introduced contradictions only; "
-                "no clinical accuracy claim",
-        "records": recs,
-    }
-    (REPORTS / "v4_g1_qwen.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
-    print(f"\ncontradiction_rate={out['contradiction_rate']} over {len(ok)} parsed "
-          f"({len(recs)} generated); polarity={pol_counts}", flush=True)
-    print("wrote", REPORTS / "v4_g1_qwen.json", flush=True)
+    out = summarize(recs, len(idx), args.prompt_variant, args.split)
+    out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    print(f"\n{RATE_KEY}={out[RATE_KEY]} over {out['n_parsed']} parsed "
+          f"({out['n_generations']} generated); polarity={out['polarity_counts']}", flush=True)
+    print("wrote", out_path, flush=True)
     return 0
 
 

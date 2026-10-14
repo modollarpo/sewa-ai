@@ -98,6 +98,25 @@ FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. See
 - **Extractor:** rule-based; independent adversarial holdout primary **0.700** (untouched),
   0.983 post-hoc after fixes; labels **unreviewed by a clinician** (120-sentence pack
   prepared).
+- **Blinded labelling sheets exported (awaiting clinician labels):** 150 reports each for
+  prompt variants **a** and **b**, random order, showing decision/probability/urgency but
+  **not** the extractor polarity or flag:
+  `validation/reports/v4_g1_blinded_labelling_sheet.csv` (a) and
+  `v4_g1b_blinded_labelling_sheet.csv` (b). Columns: `label` (consistent|contradicts|
+  ambiguous), `notes`, `clinician_signoff`.
+- **Extractor v2 (probability-aware):** new rules read low/high/moderate probability,
+  "unlikely", and numeric probabilities. Developed on a **new** probability-phrasing
+  synthetic set with a frozen holdout: v2 **1.000 dev / 1.000 holdout** vs v1 **0.583 / 0.539**
+  (synthetic & templated — not clinical evidence). Applied to the 150 G1 reports **once**
+  (no tuning) as **EXPLORATORY**: extractor-flagged rate **0.493 (v1) → 0.240 (v2)**.
+- **Prompt variant b** (adds the explicit decision, "haemorrhage detected" / "no
+  haemorrhage detected"): same scans/seeds/settings, extractor-flagged rate **0.067** vs
+  **0.493** for variant a. Comparison under **manual labels** (paired scan-cluster bootstrap)
+  is wired and runs once both label sheets are returned.
+- **After labels return:** `v4_g1_label_analysis.py` gives the extractor-vs-clinician
+  confusion matrix, the **true** contradiction rate with a scan-cluster bootstrap 95% CI
+  (50 scans), and failure examples; `v4_g1_prompt_compare.py` gives the paired a−b
+  difference. No script tunes on the 150.
 
 Reproduce (from repo root, `PYTHONPATH=.`):
 
@@ -109,7 +128,14 @@ python validation/scripts/v4_step6_signals.py
 python validation/scripts/v4_power.py                  # BEFORE the test eval
 python validation/scripts/v4_evaluate.py               # run once
 python validation/scripts/v4_failure_analysis.py
-python validation/scripts/v4_g1_qwen.py --scans 50     # G1 (needs verified GGUF + llama.cpp)
+python -m validation.scripts.v4_step2_negation_v2      # extractor v2 (synthetic dev/holdout)
+python -m validation.scripts.v4_g1_qwen --scans 50     # G1 variant a (GGUF + llama.cpp)
+python -m validation.scripts.v4_g1_qwen --scans 50 --prompt-variant b   # variant b
+python -m validation.scripts.v4_step2c_negation_v2_g1  # exploratory, untuned
+python -m validation.scripts.v4_g1_export_blinded      # blinded sheet (a)
+python -m validation.scripts.v4_g1_export_blinded --json validation/reports/v4_g1_qwen_b.json --out validation/reports/v4_g1b_blinded_labelling_sheet.csv
+python -m validation.scripts.v4_g1_prompt_compare      # extractor rates now; true rates after labels
+python -m validation.scripts.v4_g1_label_analysis --labels validation/reports/v4_g1_blinded_labelling_sheet.csv
 pytest validation/tests validation/study/tests -q
 ```
 

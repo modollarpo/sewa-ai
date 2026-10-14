@@ -1,0 +1,67 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. UNREVIEWED BY A CLINICIAN.",
+  "n_total": 328,
+  "n_dev": 163,
+  "n_holdout": 165,
+  "extractor": "v2 (probability-aware)",
+  "dev": {
+    "v2": {
+      "n": 163,
+      "accuracy": 1.0,
+      "per_class": {
+        "present": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 61
+        },
+        "absent": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 61
+        },
+        "uncertain": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 41
+        }
+      },
+      "failures": []
+    },
+    "v1_baseline": {
+      "accuracy": 0.5828220858895705
+    }
+  },
+  "holdout": {
+    "v2": {
+      "n": 165,
+      "accuracy": 1.0,
+      "per_class": {
+        "present": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 62
+        },
+        "absent": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 62
+        },
+        "uncertain": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 41
+        }
+      },
+      "failures": []
+    },
+    "v1_baseline": {
+      "accuracy": 0.5393939393939394
+    }
+  }
+}

@@ -1,0 +1,258 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. EXPLORATORY (UNTUNED).",
+  "status": "exploratory",
+  "note": "extractor v2 frozen on a separate probability synthetic set; applied to the 150 G1 reports ONCE. No tuning on these reports. Extractor-flagged rates are UNVALIDATED (no clinician labels) and are upper bounds on the true rate.",
+  "extractor_v2_needs_clinician_labels": true,
+  "n_reports": 150,
+  "v1_extractor": {
+    "rate": 0.49333333333333335,
+    "polarity_counts": {
+      "present": 149,
+      "absent": 1
+    }
+  },
+  "v2_extractor": {
+    "rate": 0.24,
+    "polarity_counts": {
+      "absent": 34,
+      "present": 110,
+      "uncertain": 6
+    }
+  },
+  "per_report_disagreement": [
+    {
+      "index": 13,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 17,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 17,
+      "k": 2,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 22,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 22,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 22,
+      "k": 2,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 24,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 24,
+      "k": 2,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 26,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 26,
+      "k": 2,
+      "v1": "present",
+      "v2": "uncertain"
+    },
+    {
+      "index": 27,
+      "k": 2,
+      "v1": "present",
+      "v2": "uncertain"
+    },
+    {
+      "index": 31,
+      "k": 1,
+      "v1": "present",
+      "v2": "uncertain"
+    },
+    {
+      "index": 43,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 43,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 52,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 52,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 54,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 54,
+      "k": 2,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 66,
+      "k": 1,
+      "v1": "present",
+      "v2": "uncertain"
+    },
+    {
+      "index": 73,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 75,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 75,
+      "k": 2,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 83,
+      "k": 0,
+      "v1": "present",
+      "v2": "uncertain"
+    },
+    {
+      "index": 83,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 95,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 95,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 98,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 98,
+      "k": 2,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 102,
+      "k": 2,
+      "v1": "present",
+      "v2": "uncertain"
+    },
+    {
+      "index": 103,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 103,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 111,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 133,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 133,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 160,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 160,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 161,
+      "k": 0,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 161,
+      "k": 1,
+      "v1": "present",
+      "v2": "absent"
+    },
+    {
+      "index": 161,
+      "k": 2,
+      "v1": "present",
+      "v2": "absent"
+    }
+  ]
+}
