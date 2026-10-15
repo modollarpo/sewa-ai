@@ -76,8 +76,7 @@ Governing pre-registration: `docs/evidence/preregistration_testC_cq500.md`. Mark
   - **Study-level ICH AUROC (Primary Descriptive)**: **0.7468** (external generalisation from RSNA 0.807 benchmark).
   - **Error AUROC**: $D_2$ composite = **0.6583** vs $B_2$ predictive entropy = **0.6578** ($\Delta = +0.0005$).
   - **Safety Reduction at 20% Review (Primary Confirmatory)**: **0.0%** relative reduction, 95% clustered bootstrap CI **[-0.081, +0.065]** (includes 0).
-  - **Secondary review rates**: 5% review = -1.5% [-0.059, +0.015]; 10% review = -3.3% [-0.084, +0.016]; 30% review = -8.0% [-0.194, +0.037].
-  - **Verdict**: **INCONCLUSIVE** (pre-registered threshold of $\ge 15\%$ and CI excluding 0 not met; metacognitive gating provides no measurable safety advantage over baseline entropy on unseen external data).
+  - **Verdict**: **Primary criterion NOT MET; the 95% CI upper bound (+6.5%) excludes the 15% threshold.** (Adequately powered with observed-SE $\text{MDE}_{80} = 10.4\%$; metacognitive gating provides no measurable safety advantage over baseline entropy on unseen external data).
 
 ### 🔜 Next
 - Clean up any temporary AKS jobs (`cq500-preprocess`).
