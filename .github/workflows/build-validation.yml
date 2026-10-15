@@ -11,32 +11,37 @@ on:
       - '.github/workflows/build-validation.yml'
   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
-
-env:
-  ACR_NAME: sewaaieuprodacr
-  AZURE_SUBSCRIPTION: a14702a0-439b-42f5-b31a-8b898adfa965
-
 jobs:
   build-validation-image:
     name: Build & Push Validation Image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: azure/login@v2
+
+      - name: Login to Azure ACR
+        uses: azure/docker-login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ env.AZURE_SUBSCRIPTION }}
-      - name: Build and Push to ACR
+          login-server: sewaaieuprodacr.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set image tag
+        id: tag
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
-          az acr build \
-            --registry ${{ env.ACR_NAME }} \
-            --image sewa-validation:main-${SHORT_SHA} \
-            --image sewa-validation:testc-latest \
-            --file validation/Dockerfile \
-            . --no-logs
-          echo "Built and pushed sewa-validation:main-${SHORT_SHA} and testc-latest" >> $GITHUB_STEP_SUMMARY
+          echo "tag=main-${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: validation/Dockerfile
+          push: true
+          tags: |
+            sewaaieuprodacr.azurecr.io/sewa-validation:${{ steps.tag.outputs.tag }}
+            sewaaieuprodacr.azurecr.io/sewa-validation:testc-latest
+          cache-from: type=registry,ref=sewaaieuprodacr.azurecr.io/sewa-validation:cache
+          cache-to: type=registry,ref=sewaaieuprodacr.azurecr.io/sewa-validation:cache,mode=max
