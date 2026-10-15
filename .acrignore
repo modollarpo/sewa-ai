@@ -1,0 +1,21 @@
+# .acrignore — exclude large directories from az acr build context upload
+# (ACR uses this just like .dockerignore)
+
+.kilo/
+.venv/
+node_modules/
+.pytest_cache/
+__pycache__/
+*.pyc
+validation/data_cache/
+validation/data_subsets/
+validation/data/
+docs/build/
+docs-tools/node_modules/
+frontend/node_modules/
+backend/node_modules/
+*.tar.gz
+*.zip
+*.npz
+*.pt
+*.onnx
