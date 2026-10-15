@@ -61,22 +61,28 @@ Perform a self-review before submitting any code:
 
 ---
 
-## 📋 Work State (2026-10-13 — v2 validation feasibility, amendment 2, branch `fix/patent-aligned`)
+## 📋 Work State (2026-10-15 — Test C CQ500 external evaluation, branch `fix/patent-aligned`)
 
-Governing prompt: `C:\Users\USER\Downloads\SEWA AI Coding Agent Prompt, Validation Re-run (v2).md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Local commit `d7c34fa` (**NOT pushed**).
+Governing pre-registration: `docs/evidence/preregistration_testC_cq500.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Licence: **CC BY-NC-SA 4.0** (CQ500, non-commercial use confirmed by user).
 
 ### ✅ Completed
-- **Root cause of the failed v2 run (a1) found**: the cached `stage_2_train_with_metadata.csv` label block is **decoupled** from its SOP/Study/Series block — metadata `Label` agreed with the authoritative RSNA `stage_2_train.csv` only 72% of the time; slice-positive rate 5.8% vs true 14.3%. The a1 trainer therefore saw ~random labels (val study-AUROC stalled ~0.54). Evidence: `validation/scripts/_verify_labels.py`, `_capture.py`.
-- **Labels repaired**: `validation/scripts/step1c_extract_labels.py` fetches `stage_2_train.csv` from the RSNA zip → `validation/data_cache/rsna_image_labels.csv` (752,803 images, 107,933 positive, 0.1434). `validation/scripts/step1b_select_slices_v2b.py` relabels the frozen 8-slice selection and, for truly-positive scans with no positive slice, swaps the most peripheral slice for the nearest-in-z positive (**16 swaps**, +13 tiles fetched). Real result: train 367/560, val 75/120, test 83/120 positive scans. The 8-slice selection itself was fine (captures 509/525 = 97% of positive scans).
-- **Wider unfreeze**: `K_LATE` 3→6 in `v2_lib.py`, late-block LR 3e-4→1e-4 (`step3_train_v2a1.py`). Early-feature cache rebuilt at **24×40×40** (`v2_early_{train,val,test}.npz`). Retrained (8 epochs, early stop): **best val study-AUROC 0.9618 (epoch 6), temperature 0.798** → `validation/models/classifier_v2a1.pt`.
-- **Pre-registered amendment 2** (`docs/evidence/preregistration_v2_amendment2.md`) before any formal test eval.
-- **Power (5b)**: `validation/reports/v2a1_power.json` — MDE at 20% review = **0.768** (>>0.20) ⇒ Test B **underpowered**; a null/under-threshold result is **INCONCLUSIVE**, not a gate failure.
-- **Formal Test A/Test B**: `validation/reports/v2a1_report.json` + `v2a1_curves.npz`, report `docs/evidence/feasibility_report_v2a1.md`. Test A error-AUROC D3 **0.807** (B1 0.706). **Bootstrap CIs/Holm resample scans (StudyInstanceUID) as clusters, verified** — effective clusters: Test A **120 scans**, Test B primary D3/C3 subset **60 scans** (540 instances = 60×9 corruptions; all-arms pool 1080). Primary Test B: D3 vs **B2** at the **20%** review (the only primary rate) = **16.5%** rel reduction, 95% CI **[0.08, 0.26]** (excludes 0, Holm p=0.003) — significant but **below the pre-registered ≥20%** ⇒ criterion NOT met. The 30% rate (20.5%) is **secondary/exploratory, NOT a pass**. C3 (Grad-CAM) is **anti-predictive** (error-AUROC 0.316 Test A / 0.343 Test B, <0.5), reported with its true sign. **Verdict: INCONCLUSIVE** (underpowered at the primary 20% rate).
+- **Test C Pre-registration frozen**: `docs/evidence/preregistration_testC_cq500.md` committed prior to evaluation. Success criterion: relative reduction $\ge 15\%$ and 95% CI excludes 0 at 20% review rate. Primary descriptive: study-level ICH AUROC.
+- **Root causes of preprocessing failure solved**:
+  1. *DICOM compression*: CQ500 uses JPEG Lossless (Process 14, Selection Value 1, UID `1.2.840.10008.1.2.4.70`). Added `pylibjpeg==1.4.0`, `pylibjpeg-libjpeg==1.3.4`, and `pylibjpeg-openjpeg==1.3.2` to `validation/requirements-validation.txt`.
+  2. *Key naming*: Hyphenated format `CQ500-CT-<N>` in `reads.csv` aligned in `step9a_cq500_preprocess.py` and `CORRUPT_SCANS`.
+  3. *Pod resources*: Right-sized to 2 CPU / 4Gi RAM so job scheduled smoothly on AI nodepool.
+- **In-region preprocessing job succeeded on AKS**: `cq500-preprocess` in swedencentral processed all 486 target scans (202 positive ICH cases, 284 negative) with zero dropouts (`failed_scans: []`), extracting 3,884 uniform 8-slice sets and uploading `v2_early_cq500.npz` (372.3 MB) to Azure blob container `processed`.
+- **Test C formal evaluation completed**: `validation/reports/v2a1_testC_cq500.json` and formal report `docs/evidence/feasibility_report_testC_cq500.md`.
+  - **Study-level ICH AUROC (Primary Descriptive)**: **0.7468** (external generalisation from RSNA 0.807 benchmark).
+  - **Error AUROC**: $D_2$ composite = **0.6583** vs $B_2$ predictive entropy = **0.6578** ($\Delta = +0.0005$).
+  - **Safety Reduction at 20% Review (Primary Confirmatory)**: **0.0%** relative reduction, 95% clustered bootstrap CI **[-0.081, +0.065]** (includes 0).
+  - **Secondary review rates**: 5% review = -1.5% [-0.059, +0.015]; 10% review = -3.3% [-0.084, +0.016]; 30% review = -8.0% [-0.194, +0.037].
+  - **Verdict**: **INCONCLUSIVE** (pre-registered threshold of $\ge 15\%$ and CI excluding 0 not met; metacognitive gating provides no measurable safety advantage over baseline entropy on unseen external data).
 
 ### 🔜 Next
-- Decide push/merge of `d7c34fa` (currently local only).
-- Test C (CQ500) remains **HELD** (493 files / 28.7 GB staged; `step5b_verify_cq500.py` is a verifier only).
-- Single-seed, 8 slices/scan, 160px ⇒ metrics are lower bounds vs the full prereg; grouping is by `StudyInstanceUID` not patient.
+- Clean up any temporary AKS jobs (`cq500-preprocess`).
+- Decide on git push/merge of branch `fix/patent-aligned`.
+
 
 ---
 
