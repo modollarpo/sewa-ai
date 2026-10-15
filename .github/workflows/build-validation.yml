@@ -1,0 +1,42 @@
+name: Build Validation Image (Test C)
+
+on:
+  push:
+    branches:
+      - 'fix/patent-aligned'
+      - main
+    paths:
+      - 'validation/**'
+      - '.acrignore'
+      - '.github/workflows/build-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ACR_NAME: sewaaieuprodacr
+  AZURE_SUBSCRIPTION: a14702a0-439b-42f5-b31a-8b898adfa965
+
+jobs:
+  build-validation-image:
+    name: Build & Push Validation Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION }}
+      - name: Build and Push to ACR
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
+          az acr build \
+            --registry ${{ env.ACR_NAME }} \
+            --image sewa-validation:main-${SHORT_SHA} \
+            --image sewa-validation:testc-latest \
+            --file validation/Dockerfile \
+            . --no-logs
+          echo "Built and pushed sewa-validation:main-${SHORT_SHA} and testc-latest" >> $GITHUB_STEP_SUMMARY
