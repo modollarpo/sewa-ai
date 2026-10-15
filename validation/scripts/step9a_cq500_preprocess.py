@@ -52,7 +52,7 @@ CACHE_DIR = Path(os.environ.get("SEWA_CACHE_DIR", "validation/data_cache"))
 N_SLICES = 8          # uniform-spaced slices per scan (matches RSNA pipeline)
 SIZE_TILE = 224       # tile size before 160px downsample in v2_lib
 
-CORRUPT_SCANS = frozenset({"CQ500CT19", "CQ500CT22", "CQ500CT25", "CQ500CT52", "CQ500CT120"})
+CORRUPT_SCANS = frozenset({"CQ500-CT-19", "CQ500-CT-22", "CQ500-CT-25", "CQ500-CT-52", "CQ500-CT-120"})
 MARK = "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE."
 WINDOWS = [("brain", 40, 80), ("subdural", 80, 200), ("bone", 600, 2800)]
 
@@ -200,7 +200,7 @@ def main() -> int:
     # Step 2: build scan list
     scan_list: list[tuple[str, int]] = []
     for i in range(491):
-        name = f"CQ500CT{i}"
+        name = f"CQ500-CT-{i}"
         if name in CORRUPT_SCANS:
             continue
         if name not in labels:

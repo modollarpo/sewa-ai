@@ -24,13 +24,13 @@ metadata:
     marking: feasibility-public-data
 spec:
   ttlSecondsAfterFinished: 86400   # auto-clean after 24h
-  backoffLimit: 2
+  backoffLimit: 1
   template:
     metadata:
       labels:
         app: cq500-preprocess
     spec:
-      restartPolicy: OnFailure
+      restartPolicy: Never          # keep pod after failure so logs are visible
       nodeSelector:
         nodepool: ai              # Standard_D8ds_v5 nodes (16 GB RAM, enough for in-memory processing)
       containers:
@@ -41,7 +41,7 @@ spec:
             - -m
             - validation.scripts.step9a_cq500_preprocess
             - --workers
-            - "6"
+            - "4"
           env:
             - name: AZURE_STORAGE_CONNECTION_STRING
               valueFrom:
@@ -52,11 +52,11 @@ spec:
               value: /cache
           resources:
             requests:
-              memory: "12Gi"    # ~60 MB/scan × 6 workers in-flight + model + feature buffer
-              cpu: "4"
+              memory: "4Gi"
+              cpu: "2"
             limits:
-              memory: "14Gi"
-              cpu: "6"
+              memory: "8Gi"
+              cpu: "4"
           volumeMounts:
             - name: cache
               mountPath: /cache
