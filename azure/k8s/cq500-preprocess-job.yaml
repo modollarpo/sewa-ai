@@ -35,7 +35,7 @@ spec:
         nodepool: ai              # Standard_D8ds_v5 nodes (16 GB RAM, enough for in-memory processing)
       containers:
         - name: cq500-preprocess
-          image: sewaaieuprodacr.azurecr.io/sewa-validation:main-latest
+          image: sewaaieuprodacr.azurecr.io/sewa-validation:testc-latest
           command:
             - python
             - -m
