@@ -27,7 +27,7 @@ const ENGINES = [
   {
     id:'uncertainty', icon:'🎯', label:'Uncertainty Engine', color:C.amber,
     headline:'Know when to trust the AI — and when not to',
-    description:'SEWA XAI is the only clinical AI platform that quantifies its own uncertainty. Using stochastic Monte Carlo dropout with multi-pass uncertainty quantification, we compute both epistemic (model) and aleatoric (data) uncertainty — flagging borderline cases for mandatory human review.',
+    description:'SEWA XAI is designed to quantify its own uncertainty. Using stochastic Monte Carlo dropout with multi-pass uncertainty quantification, it computes both epistemic (model) and aleatoric (data) uncertainty — flagging borderline cases for human review. Clinical impact is not yet measured.',
     conditions:['Low-quality DICOM inputs (motion artefact, noise)','Rare or out-of-distribution pathologies','Multi-pathology overlapping findings','Paediatric anatomy (OOD vs adult training)','Post-surgical anatomy','Contrast vs non-contrast ambiguity'],
     metrics:[
       { label:'Uncertainty method', value:'Stochastic MC Dropout' },
@@ -40,8 +40,8 @@ const ENGINES = [
   {
     id:'metacognition', icon:'🧠', label:'Metacognition Engine', color:C.purple,
     headline:'AI that checks its own work before you see it',
-    description:'Our advanced metacognition pipeline evaluates every AI result before it reaches a clinician. It checks internal consistency, cross-references against clinical rules, detects hallucinations, and assigns a layer-wise reliability status to every output.',
-    conditions:['Anatomical hallucinations (findings in wrong location)','Physiologically impossible combinations','Contradictions with prior scans','Clinical rule violations (e.g. ICH without hyperdensity)','Report-finding misalignment','Uncertainty-confidence contradiction'],
+    description:'Our advanced metacognition pipeline evaluates every AI result before it reaches a clinician. It checks internal consistency, cross-references against clinical rules, and assigns a layer-wise reliability status to every output. No hallucination-detection claim is made; results from a pre-registered evaluation were inconclusive.',
+    conditions:['Anatomical consistency checks','Physiologically impossible combinations','Contradictions with prior scans','Clinical rule violations (e.g. ICH without hyperdensity)','Report-finding misalignment','Uncertainty-confidence contradiction'],
     metrics:[
       { label:'Hallucination catch rate', value:'Not validated' },
       { label:'False escalation reduction', value:'Under evaluation' },
@@ -168,12 +168,15 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
             Eight AI engines.<br/>One clinical platform.
           </h1>
           <p style={{ fontSize:15, color:C.textMd, lineHeight:1.8, margin:'0 0 36px' }}>
-            SEWA XAI is not a single model — it is a layered clinical intelligence pipeline. Each engine is independently validated, explainable, and designed to improve patient outcomes at every step of the diagnostic workflow.
+            SEWA XAI is not a single model — it is a layered clinical intelligence pipeline. Only the ICH triage engine on non-contrast head CT has been evaluated on public data; the remaining engines are engineering-validated, research-stage, or planned.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:8, justifyContent:'center', flexWrap:'wrap' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'12px 28px', background:`linear-gradient(135deg,${C.brand},${C.brandDk})`, border:'none', borderRadius:10, color:'white', fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:C.F }}>Request Demo →</button>
-            <button onClick={() => onNavigate('clinical-validation')} style={{ padding:'12px 22px', background:'none', border:`1px solid ${C.border}`, borderRadius:10, color:C.textMd, fontSize:14, cursor:'pointer', fontFamily:C.F }}>Clinical Evidence</button>
+            <button onClick={() => onNavigate('clinical-evidence')} style={{ padding:'12px 22px', background:'none', border:`1px solid ${C.border}`, borderRadius:10, color:C.textMd, fontSize:14, cursor:'pointer', fontFamily:C.F }}>Clinical Evidence</button>
           </div>
+          <button onClick={() => onNavigate('clinical-evidence')} style={{ marginTop:20, padding:'10px 16px', background:`${C.amber}10`, border:`1px solid ${C.amber}40`, borderRadius:10, color:C.amber, fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:C.F }}>
+            Validated today: ICH triage on non-contrast head CT only. External ICH AUROC 0.7468 (CQ500). Other engines are research-stage or planned.
+          </button>
         </div>
       </div>
 
@@ -254,8 +257,8 @@ export function SolutionsPage({ onNavigate }: { onNavigate:(p:string)=>void }) {
               <div style={{ fontSize:11, fontWeight:700, color:engine.color, marginBottom:8 }}>Targeted validation datasets</div>
               <div style={{ fontSize:12, color:C.textMd, lineHeight:1.8 }}>CheXpert (224K) · NIH Chest X-ray · RSNA MICCAI · TCGA Pathology · NHS de-identified dataset · LUTH Nigeria dataset — validation planned, results not yet published</div>
             </div>
-            <button onClick={() => onNavigate('clinical-validation')} style={{ padding:14, background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, color:C.textMd, fontSize:12, cursor:'pointer', fontFamily:C.F }}>
-              📄 View clinical validation data →
+            <button onClick={() => onNavigate('clinical-evidence')} style={{ padding:14, background:C.bg3, border:`1px solid ${C.border}`, borderRadius:10, color:C.textMd, fontSize:12, cursor:'pointer', fontFamily:C.F }}>
+              📄 View validation &amp; evidence →
             </button>
           </div>
         </div>

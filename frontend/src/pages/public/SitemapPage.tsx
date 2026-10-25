@@ -16,7 +16,7 @@ const SECTIONS = [
     ['explainable-ai','Explainable AI'],
   ].map(([p,l])=>({page:p,label:l})) },
   { title:'Clinical & Regulatory', links:[
-    ['clinical-validation','Clinical Validation'],
+    ['clinical-evidence','Validation & Evidence'],
     ['whitepaper','Technical Whitepaper'],
     ['security','Security'],
     ['regulatory','Regulatory'],

@@ -40,7 +40,7 @@ export function MetacognitionAI({ onNavigate }: { onNavigate:(p:string)=>void })
             <span style={{ color:C.purple }}>every other AI.</span>
           </h1>
           <p style={{ fontSize:'clamp(15px, 2.5vw, 18px)', color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
-            Our Metacognition Engine acts as the 'Auditor-in-Chief'. It evaluates the consistency and clinical feasibility of every AI result, identifying hallucinations and logical errors before they reach the radiologist's screen.
+            Our Metacognition Engine evaluates the consistency and clinical feasibility of every AI result, identifying potential issues and assigning a reliability status before it reaches the radiologist's screen. Pre-registered evaluation was inconclusive (0.0% reduction at 20% review, 95% CI -8.1% to +6.5%); no hallucination-detection or safety-gating benefit is claimed.
           </p>
           <div className="hero-btns" style={{ display:'flex', gap:10, justifyContent:'center' }}>
             <button onClick={() => onNavigate('contact')} style={{ padding:'14px 32px', background:C.purple, border:'none', borderRadius:12, color:'white', fontWeight:700, cursor:'pointer' }}>Activate AI Governance →</button>

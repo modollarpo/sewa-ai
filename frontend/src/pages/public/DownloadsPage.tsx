@@ -18,11 +18,11 @@ const MOBILE_FEATURES = [
   { icon:'🔔', title:'Critical Push Alerts',    desc:'Interrupt-level iOS & Android notifications for stroke codes and critical findings. Never miss an urgent result.' },
   { icon:'📷', title:'DICOM Viewer',             desc:'Full-featured mobile DICOM viewer with pinch-zoom, window/level adjustment, and AI overlay rendering.' },
   { icon:'✍️', title:'Report Editing',           desc:'Edit and sign AI-generated reports from your phone. Voice dictation with medical terminology recognition.' },
-  { icon:'👆', title:'Face ID / Fingerprint',   desc:'Biometric authentication with fallback PIN. HIPAA-compliant session management on iOS and Android.' },
+  { icon:'👆', title:'Face ID / Fingerprint',   desc:'Biometric authentication with fallback PIN. HIPAA-aligned session management on iOS and Android (in preparation).' },
   { icon:'📴', title:'Offline Mode',             desc:'Access your last 50 scans and reports without connectivity. Queued actions sync automatically on reconnect.' },
   { icon:'💻', title:'Telehealth Video',         desc:'Integrated video consultations for telemedicine appointments with patients, directly in the app.' },
   { icon:'🌍', title:'Multi-language',           desc:'English, French, Swahili, Hausa, Yoruba, Portuguese, Arabic, Hindi — auto-detected from device locale.' },
-  { icon:'🔒', title:'HIPAA & GDPR',             desc:'End-to-end encrypted storage, automatic screen lock, remote wipe, and jailbreak/root detection.' },
+  { icon:'🔒', title:'Privacy & Security',       desc:'Designed for end-to-end encryption, automatic screen lock, remote wipe, and jailbreak/root detection. GDPR/HIPAA alignment in preparation.' },
 ];
 
 const PLATFORMS = [

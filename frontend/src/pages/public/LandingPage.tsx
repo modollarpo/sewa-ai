@@ -6,33 +6,46 @@ import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 import { RemotionPlayerModal } from '../../components/shared/RemotionPlayerModal';
 import { ConfidenceIndicator, UncertaintyIndicator } from '../../design-system/components';
 
-const FEATURES = [
-  { id:'triage-ai',          icon:'⚡', title:'Triage in Seconds', desc:'Deep learning triage detects ICH, PE, pneumothorax, TB and stroke across CT/MRI/XR — low-latency CPU pipeline.', tag:'Triage Engine' },
-  { id:'uncertainty-ai',     icon:'🎯', title:'Uncertainty Engine', desc:'Stochastic Monte Carlo dropout with multi-pass uncertainty quantification computes epistemic and aleatoric uncertainty. Flags low-confidence scans for human review.', tag:'Safety' },
-  { id:'metacognition-ai',   icon:'🧠', title:'Metacognition AI', desc:'Advanced multi-layer self-evaluation detects hallucinations and records a reliability status for every case.', tag:'Quality Assurance' },
-  { id:'vision-language-ai', icon:'📋', title:'VLM Report Generator', desc:'Vision-Language Model generates structured, editable radiology reports in seconds — with clinical findings, impression, and recommendations.', tag:'Reporting' },
-  { id:'explainable-ai',     icon:'🔒', title:'Explainable AI', desc:'Grad-CAM pixel attribution show exactly what the AI detected and why — pixel by pixel.', tag:'Explainability' },
-  { id:'downloads',          icon:'🌍', title:'Sovereign Infrastructure', desc:'Multi-region architecture ready for Azure (UK, EU, US, Africa). Strict data residency, compliance, and isolation.', tag:'Infrastructure' },
+type EvidenceStatus = 'validated' | 'engineering' | 'research';
+
+const STATUS_STYLE: Record<EvidenceStatus, { label:string; color:string; bg:string }> = {
+  validated:   { label:'Validated',              color:'#1DBF73', bg:'rgba(29,191,115,0.10)' },
+  engineering: { label:'Engineering-validated',   color:'#F59E0B', bg:'rgba(245,158,11,0.10)' },
+  research:    { label:'Research-stage',          color:'#9CA8A3', bg:'rgba(156,168,163,0.10)' },
+};
+
+const FEATURES: { id:string; icon:string; title:string; desc:string; tag:string; status:EvidenceStatus }[] = [
+  { id:'triage-ai',        icon:'⚡', title:'ICH Triage Engine', desc:'Head CT only. Study-level ICH AUROC 0.807 internal (RSNA) and 0.7468 external (CQ500, 486 scans). Pre-registered; research use only.', tag:'Triage Engine', status:'validated' },
+  { id:'uncertainty-ai',   icon:'🎯', title:'Uncertainty Engine', desc:'Monte Carlo dropout confidence estimation flags low-confidence scans for human review. Engineering-validated; clinical impact not yet measured.', tag:'Safety', status:'engineering' },
+  { id:'explainable-ai',   icon:'🔍', title:'Explainability (Grad-CAM)', desc:'Grad-CAM attribution visualises the image regions influencing a model output. Engineering-validated; clinical utility not yet measured.', tag:'Explainability', status:'engineering' },
+  { id:'metacognition-ai', icon:'🧠', title:'Metacognition (Research)', desc:'Experimental self-evaluation signals under active validation. At a 20% review rate the pre-registered result was inconclusive (0.0%, 95% CI -8.1% to +6.5%). No hallucination-detection claim.', tag:'Research', status:'research' },
+];
+
+const ROADMAP = [
+  { icon:'🫁', title:'PE, pneumothorax, TB & stroke detection', note:'Planned — not yet evaluated' },
+  { icon:'🩻', title:'MRI and X-ray modalities', note:'Planned — head CT only today' },
+  { icon:'📋', title:'VLM structured report generation', note:'Planned — clinical accuracy not evaluated' },
+  { icon:'🔗', title:'Federated learning', note:'Planned — no outcomes measured' },
+  { icon:'🌍', title:'Sovereign multi-region infrastructure', note:'Planned architecture — no live deployments' },
 ];
 
 const STATS = [
-  { value:'—',    label:'AUC-ROC on ICH — unmeasured', icon:'🎯' },
-  { value:'<2s',  label:'Median triage inference target', icon:'⚡' },
-  { value:'7+',   label:'Planned deployment regions', icon:'🌍' },
-  { value:'TRL 5',label:'Validation Stage', icon:'✅' },
+  { value:'0.75',  label:'External ICH AUROC (CQ500, 486 scans)', icon:'🎯' },
+  { value:'0.81',  label:'Internal ICH AUROC (RSNA)',             icon:'📊' },
+  { value:'<2s',   label:'Median inference target (CPU)',          icon:'⚡' },
+  { value:'TRL 5', label:'Validation stage',                      icon:'✅' },
 ];
 
 const COMPLIANCE = [
   { label:'NHS Innovation', flag:'🇬🇧', desc:'INN-2604-0064-2' },
-  { label:'DCB0129', flag:'🇬🇧', desc:'Clinical Safety' },
+  { label:'DCB0129', flag:'🇬🇧', desc:'Aligned / in preparation' },
   { label:'Patent Pending', flag:'🔬', desc:'GB2609706.3' },
-  { label:'TRL 5', flag:'📈', desc:'Engineering Validated' },
-  { label:'GDPR & HIPAA', flag:'🔒', desc:'Privacy Ready' },
+  { label:'TRL 5', flag:'📈', desc:'Pre-clinical R&D' },
+  { label:'GDPR & HIPAA', flag:'🔒', desc:'Privacy controls (GDPR-aligned)' },
 ];
 
 export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavigate:(p:string)=>void }) {
   const [demoEmail, setDemoEmail] = useState('');
-  const [counter, setCounter] = useState(0);
   const [showDemo, setShowDemo] = useState(false);
   const [showPlatformTour, setShowPlatformTour] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -40,13 +53,7 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 400);
     window.addEventListener('scroll', h);
-    const target = 18340;
-    const step = Math.ceil(target / 60);
-    const interval = setInterval(() => {
-      setCounter(c => { if (c >= target) { clearInterval(interval); return target; } return Math.min(target, c+step); });
-    }, 30);
     return () => {
-      clearInterval(interval);
       window.removeEventListener('scroll', h);
     };
   }, []);
@@ -66,14 +73,14 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#408D7B 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
         </div>
 
-        {/* Live Counter Badge */}
+        {/* Pre-clinical status badge */}
         <div className="relative z-10 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-[#08160F] border border-[#1B3028] mb-8 animate-fade-in shadow-2xl">
           <span className="flex h-2 w-2 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#408D7B] opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#408D7B]"></span>
           </span>
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#408D7B]">
-            {counter.toLocaleString()} SCANS IN VALIDATION PIPELINE
+            Pre-clinical • TRL 5 • Research use only
           </span>
         </div>
 
@@ -84,10 +91,10 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#408D7B] via-[#52B09A] to-[#408D7B] bg-[length:200%_auto] animate-gradient">
               Diagnostic Intelligence
             </span>
-            {' '}at Scale.
+            {' '}by Design.
           </h1>
           <p className="text-[clamp(1rem,2vw,1.25rem)] text-[#6FA898] max-w-2xl mx-auto leading-relaxed font-medium animate-slide-up [animation-delay:200ms]">
-            A Trustworthy Clinical Intelligence Platform designed to support clinicians through explainable, uncertainty-aware AI for diagnostic imaging.
+            A research-stage clinical intelligence platform designed to support clinicians through explainable, uncertainty-aware AI for diagnostic imaging.
           </p>
         </div>
 
@@ -137,6 +144,9 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             </div>
           ))}
         </div>
+        <p className="relative z-10 text-center text-[10px] text-[#3A6055] max-w-2xl mx-auto mt-8 uppercase tracking-widest">
+          Study-level ICH triage results on public datasets. Feasibility on public data — not clinical evidence.
+        </p>
       </main>
 
       {/* Compliance Ribbon */}
@@ -160,29 +170,59 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
         <div className="text-center space-y-4 mb-20">
           <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em]">Proprietary Stack</div>
           <h2 className="text-4xl md:text-5xl font-black tracking-tight text-[#D0ECE6]">Institutional-Grade Intelligence</h2>
-          <p className="text-[#6FA898] max-w-xl mx-auto font-medium">Powering the next generation of digital radiology departments with audited AI integrity.</p>
+          <p className="text-[#6FA898] max-w-xl mx-auto font-medium">Designed to support the next generation of digital radiology workflows, with evidence status shown for every capability.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((f) => (
-            <div 
-              key={f.id}
-              onClick={() => onNavigate(f.id)}
-              className="group p-8 bg-[#0C1D17] border border-[#1B3028] rounded-[2rem] hover:border-[#408D7B]/40 transition-all duration-500 cursor-pointer relative overflow-hidden flex flex-col"
-            >
-              <div className="absolute top-0 right-0 p-8 text-7xl opacity-[0.03] group-hover:opacity-10 group-hover:scale-110 transition-all">
-                {f.icon}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {FEATURES.map((f) => {
+            const st = STATUS_STYLE[f.status];
+            return (
+              <div
+                key={f.id}
+                onClick={() => onNavigate(f.id)}
+                className="group p-8 bg-[#0C1D17] border border-[#1B3028] rounded-[2rem] hover:border-[#408D7B]/40 transition-all duration-500 cursor-pointer relative overflow-hidden flex flex-col"
+              >
+                <div className="absolute top-0 right-0 p-8 text-7xl opacity-[0.03] group-hover:opacity-10 group-hover:scale-110 transition-all">
+                  {f.icon}
+                </div>
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="inline-flex px-3 py-1 rounded-full bg-[#408D7B]/10 border border-[#408D7B]/20 text-[#408D7B] text-[9px] font-black uppercase tracking-widest w-fit">
+                    {f.tag}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest" style={{ color: st.color, background: st.bg, border: `1px solid ${st.color}40` }}>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.color }} />
+                    {st.label}
+                  </span>
+                </div>
+                <h3 className="text-xl font-black text-[#D0ECE6] mb-4 group-hover:text-[#408D7B] transition-colors">{f.title}</h3>
+                <p className="text-sm text-[#6FA898] leading-relaxed font-medium flex-1">{f.desc}</p>
+                <div className="mt-8 flex items-center gap-2 text-[#408D7B] text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                  Explore Technology <span>→</span>
+                </div>
               </div>
-              <div className="inline-flex px-3 py-1 rounded-full bg-[#408D7B]/10 border border-[#408D7B]/20 text-[#408D7B] text-[9px] font-black uppercase tracking-widest mb-8 w-fit">
-                {f.tag}
+            );
+          })}
+        </div>
+
+        {/* Roadmap */}
+        <div className="mt-20">
+          <div className="text-center space-y-3 mb-10">
+            <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-[0.4em]">Roadmap</div>
+            <h3 className="text-2xl md:text-3xl font-black text-[#D0ECE6]">Planned capabilities</h3>
+            <p className="text-[#6FA898] max-w-xl mx-auto text-sm font-medium">These capabilities are in development and have not been clinically validated.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {ROADMAP.map(r => (
+              <div key={r.title} className="p-6 bg-[#0C1D17]/50 border border-dashed border-[#1B3028] rounded-2xl">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-xl opacity-70">{r.icon}</span>
+                  <span className="px-2 py-0.5 rounded-full border border-[#3A6055] text-[8px] font-black uppercase tracking-widest text-[#6FA898]">Planned</span>
+                </div>
+                <div className="text-sm font-bold text-[#D0ECE6] mb-1">{r.title}</div>
+                <div className="text-[11px] text-[#3A6055]">{r.note}</div>
               </div>
-              <h3 className="text-xl font-black text-[#D0ECE6] mb-4 group-hover:text-[#408D7B] transition-colors">{f.title}</h3>
-              <p className="text-sm text-[#6FA898] leading-relaxed font-medium flex-1">{f.desc}</p>
-              <div className="mt-8 flex items-center gap-2 text-[#408D7B] text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                Explore Technology <span>→</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
@@ -192,27 +232,27 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
           <div className="flex flex-col lg:flex-row gap-16 items-center">
             <div className="lg:w-1/2">
               <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em] mb-4">Clinical Governance</div>
-              <h2 className="text-4xl md:text-5xl font-black tracking-tight text-[#D0ECE6] mb-8">AI you can actually trust.</h2>
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight text-[#D0ECE6] mb-8">Designed for clinical scrutiny.</h2>
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="text-3xl">🔍</div>
                   <div>
-                    <h3 className="text-[#D0ECE6] font-bold text-lg">Radical Explainability</h3>
-                    <p className="text-[#6FA898] text-sm leading-relaxed">Every positive triage generates pixel-perfect Grad-CAM heatmaps. See exactly what the AI saw, ensuring the algorithm's attention aligns with human clinical judgment.</p>
+                    <h3 className="text-[#D0ECE6] font-bold text-lg">Explainability by default</h3>
+                    <p className="text-[#6FA898] text-sm leading-relaxed">Grad-CAM heatmaps visualise the regions influencing a model output, so reviewers can inspect whether the model's attention aligns with expected anatomy. Engineering-validated; clinical utility not yet measured.</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="text-3xl">⚖️</div>
                   <div>
                     <h3 className="text-[#D0ECE6] font-bold text-lg">Uncertainty Quantification</h3>
-                    <p className="text-[#6FA898] text-sm leading-relaxed">Using Monte Carlo dropout, SEWA knows when it doesn't know. Borderline or out-of-distribution cases are flagged with high epistemic uncertainty for mandatory human review.</p>
+                    <p className="text-[#6FA898] text-sm leading-relaxed">Using Monte Carlo dropout, the system estimates when a case is uncertain. Borderline or out-of-distribution cases can be flagged for human review; the clinical benefit of this gating has not yet been demonstrated.</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="text-3xl">🩺</div>
                   <div>
                     <h3 className="text-[#D0ECE6] font-bold text-lg">Human-in-the-Loop Workflow</h3>
-                    <p className="text-[#6FA898] text-sm leading-relaxed">AI acts as a triage assistant, never an autonomous decision maker. Our architecture mandates that a qualified radiologist always signs off on the final diagnostic report.</p>
+                    <p className="text-[#6FA898] text-sm leading-relaxed">AI is designed as a triage assistant, never an autonomous decision maker. A qualified radiologist is required to sign off on the final diagnostic report.</p>
                   </div>
                 </div>
               </div>
@@ -293,9 +333,12 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
                     </g>
                   </svg>
                 </div>
-                 <div className="mt-6 flex items-center gap-4 px-4">
-                   <ConfidenceIndicator value={0.974} size="sm" />
-                   <UncertaintyIndicator value={0.98} showLabel={true} />
+                 <div className="mt-6 flex flex-col gap-3 px-4">
+                   <div className="flex items-center gap-4">
+                     <ConfidenceIndicator value={0.974} size="sm" />
+                     <UncertaintyIndicator value={0.98} showLabel={true} />
+                   </div>
+                   <p className="text-[10px] text-[#3A6055]">Illustrative visualisation — not a measured clinical case.</p>
                  </div>
              </div>
           </div>
@@ -318,8 +361,8 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             
             <div className="space-y-12 md:space-y-0">
               {[
-                { phase:'Phase 1', title:'Innovation & Design', status:'Completed', statusColor:'#1DBF73', 
-                  items:['DCB0129 Clinical Risk Management', 'IEC 62304 Software Lifecycle', 'ISO 14971 Risk Management', 'NHS Innovation Service (INN-2604-0064-2)'],
+                { phase:'Phase 1', title:'Innovation & Design', status:'In preparation', statusColor:'#F59E0B',
+                  items:['DCB0129 clinical risk management — aligned, in preparation', 'IEC 62304 software lifecycle — aligned, in preparation', 'ISO 14971 risk management — aligned, in preparation', 'NHS Innovation Service (INN-2604-0064-2)'],
                   side:'left' },
                 { phase:'Phase 2', title:'Technical Validation', status:'In Progress', statusColor:'#408D7B',
                   items:['Engineering validation (TRL 5)', 'Prospective validation datasets', 'Multi-site performance testing', 'NICE Evidence Standards alignment'],
@@ -364,9 +407,9 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { icon:'🏥', label:'NHS Innovation Service', desc:'INN-2604-0064-2' },
-              { icon:'🛡️', label:'DCB0129', desc:'Clinical Safety' },
-              { icon:'📋', label:'IEC 62304', desc:'Software Lifecycle' },
-              { icon:'🔒', label:'ISO 14971', desc:'Risk Management' },
+              { icon:'🛡️', label:'DCB0129', desc:'Aligned / in preparation' },
+              { icon:'📋', label:'IEC 62304', desc:'Aligned / in preparation' },
+              { icon:'🔒', label:'ISO 14971', desc:'Aligned / in preparation' },
             ].map(c => (
               <div key={c.label} className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-2xl text-center group hover:border-[#408D7B]/30 transition-all">
                 <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">{c.icon}</div>
@@ -378,72 +421,21 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
         </div>
       </section>
 
-      {/* Customer Trust & Testimonials */}
-      <section className="relative py-24 bg-[#08160F] border-y border-[#1B3028]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em] mb-4">Engaging With</div>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-[#D0ECE6]">Health systems in our deployment conversations</h2>
-            <p className="text-xs text-[#3A6055] mt-2">Organisations shown are ones we are in dialogue with — no endorsement or signed partnership is implied.</p>
-          </div>
-          
-          {/* Partner logos */}
-          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10 mb-16">
-            {[
-              { name:'NHS', sub:'England', color:'#005EB8' },
-              { name:'NIHR', sub:'National Institute for Health and Care Research', color:'#005EB8' },
-              { name:'NHS Innovation Service', sub:'Innovation.nhs.uk', color:'#330066' },
-              { name:'VerIQ UK', sub:'Healthcare Intelligence', color:'#408D7B' },
-              { name:'MedConnect', sub:'Digital Health', color:'#2A6EF2' },
-            ].map(p => (
-              <div key={p.name} className="group flex items-center gap-3 px-5 py-3 bg-[#0C1D17]/60 border border-[#1B3028] rounded-xl hover:border-[#408D7B]/30 hover:bg-[#0C1D17] transition-all">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black" style={{ background:`${p.color}20`, color:p.color }}>
-                  {p.name.split(/\s+/).map(w => w[0]).join('').slice(0,2)}
-                </div>
-                <div>
-                  <div className="text-[11px] font-bold text-[#D0ECE6] group-hover:text-[#408D7B] transition-colors">{p.name}</div>
-                  <div className="text-[8px] text-[#3A6055] uppercase tracking-widest">{p.sub}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Testimonial Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { quote:'SEWA XAI has transformed our emergency department triage workflow. Critical findings are now flagged within seconds, not hours.', author:'Dr. Amina Okafor', role:'Chief Radiologist', org:'Lagos University Teaching Hospital', flag:'🇳🇬' },
-              { quote:'The uncertainty quantification is exactly what we needed. We can trust the AI outputs because it tells us when it is unsure.', author:'Prof. James Okello', role:'Head of Radiology', org:'Kenyatta National Hospital', flag:'🇰🇪' },
-              { quote:'Federated learning means we can contribute to global AI improvement without compromising patient data sovereignty.', author:'Dr. Sarah Mensah', role:'Medical Director', org:'Korle Bu Teaching Hospital', flag:'🇬🇭' },
-            ].map((t, i) => (
-              <div key={i} className="p-8 bg-[#0C1D17] border border-[#1B3028] rounded-2xl hover:border-[#408D7B]/30 transition-all">
-                <div className="text-2xl mb-4">{t.flag}</div>
-                <p className="text-sm text-[#6FA898] leading-relaxed font-medium mb-6 italic">"{t.quote}"</p>
-                <div>
-                  <div className="text-xs font-bold text-[#D0ECE6]">{t.author}</div>
-                  <div className="text-[10px] text-[#3A6055]">{t.role} — {t.org}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-[10px] text-[#3A6055] mt-6">Quotes shown are illustrative and not attributable to the named individuals or organisations.</p>
-        </div>
-      </section>
-
       {/* Global Map Section */}
       <section className="relative py-32 bg-[#08160F] border-y border-[#1B3028]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row gap-20 items-center">
             <div className="lg:w-1/3 space-y-6">
-              <h2 className="text-4xl font-black text-[#D0ECE6] tracking-tight">Global Reach,<br/><span className="text-[#408D7B]">Local Residency.</span></h2>
+              <h2 className="text-4xl font-black text-[#D0ECE6] tracking-tight">Planned Global<br/><span className="text-[#408D7B]">Residency.</span></h2>
               <p className="text-[#6FA898] font-medium leading-relaxed">
-                SEWA XAI's infrastructure is built for 7+ sovereign cloud regions, ensuring future adherence to local health data regulations including NHS, HIPAA, and GDPR.
+                The architecture is planned for 7+ sovereign cloud regions, with the aim of supporting local health data regulations including NHS, HIPAA, and GDPR. No live deployments, throughput, or customers are implied.
               </p>
               <div className="space-y-4 pt-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[#0C1D17] border border-[#1B3028] flex items-center justify-center text-xl">🛡️</div>
                   <div>
-                    <div className="text-xs font-black text-[#D0ECE6] uppercase tracking-widest">End-to-End Encryption</div>
-                    <div className="text-[10px] text-[#3A6055] font-medium">AES-256 + TLS 1.3 Standard</div>
+                    <div className="text-xs font-black text-[#D0ECE6] uppercase tracking-widest">Planned Controls</div>
+                    <div className="text-[10px] text-[#3A6055] font-medium">AES-256 + TLS 1.3 (target)</div>
                   </div>
                 </div>
               </div>
@@ -451,19 +443,19 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
             
             <div className="lg:w-2/3 grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
               {[
-                { flag:'🇬🇧', r:'UK South', p:'GBP', s:'4.8K+' },
-                { flag:'🇪🇺', r:'EU West', p:'EUR', s:'3.6K+' },
-                { flag:'🇺🇸', r:'US East', p:'USD', s:'6.2K+' },
-                { flag:'🇰🇪', r:'Africa North', p:'KES', s:'1.3K+' },
-                { flag:'🇿🇦', r:'Africa South', p:'ZAR', s:'0.8K+' },
-                { flag:'🇳🇬', r:'Africa West', p:'NGN', s:'2.1K+' },
-                { flag:'🇬🇭', r:'Africa West 2', p:'GHS', s:'0.4K+' },
-                { flag:'🇮🇳', r:'Central India', p:'INR', s:'BETA' },
+                { flag:'🇬🇧', r:'UK South', p:'GBP' },
+                { flag:'🇪🇺', r:'EU West', p:'EUR' },
+                { flag:'🇺🇸', r:'US East', p:'USD' },
+                { flag:'🇰🇪', r:'Africa North', p:'KES' },
+                { flag:'🇿🇦', r:'Africa South', p:'ZAR' },
+                { flag:'🇳🇬', r:'Africa West', p:'NGN' },
+                { flag:'🇬🇭', r:'Africa West 2', p:'GHS' },
+                { flag:'🇮🇳', r:'Central India', p:'INR' },
               ].map(r => (
                 <div key={r.r} className="p-6 bg-[#0C1D17] border border-[#1B3028] rounded-2xl group hover:border-[#408D7B]/30 transition-all">
                   <div className="text-2xl mb-4 group-hover:scale-110 transition-transform">{r.flag}</div>
                   <div className="text-[11px] font-black text-[#D0ECE6] uppercase tracking-tight truncate">{r.r}</div>
-                  <div className="text-[9px] font-bold text-[#3A6055] mt-1">{r.p} • {r.s} SCANS</div>
+                  <div className="text-[9px] font-bold text-[#3A6055] mt-1">{r.p} • PLANNED REGION</div>
                 </div>
               ))}
             </div>
@@ -475,9 +467,9 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
       <section className="relative py-32 overflow-hidden px-6">
         <div className="max-w-4xl mx-auto bg-gradient-to-br from-[#0C1D17] to-[#08160F] border border-[#1B3028] rounded-[3rem] p-12 md:p-20 text-center relative">
           <div className="absolute top-0 right-0 p-20 opacity-5 text-9xl">⚡</div>
-          <h2 className="text-3xl md:text-4xl font-black text-[#D0ECE6] mb-6">Ready to Modernize Your Clinical Node?</h2>
+          <h2 className="text-3xl md:text-4xl font-black text-[#D0ECE6] mb-6">Join the Clinical Validation Network</h2>
           <p className="text-[#6FA898] text-lg font-medium mb-10 max-w-xl mx-auto">
-            Join the clinical validation network to partner with SEWA on our pre-clinical R&D phase.
+            Partner with SEWA on our pre-clinical R&amp;D phase. No clinical deployment is offered or implied.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">

@@ -21,15 +21,15 @@ const LANGUAGES = [
 
 const NAV_LINKS = [
   { label:'Solutions',  id:'solutions', children:[
-    { label:'Triage AI',         id:'triage-ai',     desc:'ICH, PE, stroke in < 2s' },
-    { label:'Uncertainty Engine',id:'uncertainty-ai', desc:'Monte Carlo Dropout confidence' },
-    { label:'VLM Reports',       id:'vision-language-ai', desc:'AI-generated structured reports' },
-    { label:'Explainability',    id:'explainable-ai',  desc:'Grad-CAM pixel attribution' },
-    { label:'Specialized AI',    id:'specialized-ai', desc:'Pathology, mammography, retinal' },
+    { label:'Triage AI',         id:'triage-ai',     desc:'ICH triage on head CT (validated scope)' },
+    { label:'Uncertainty Engine',id:'uncertainty-ai', desc:'Monte Carlo Dropout confidence (engineering)' },
+    { label:'VLM Reports',       id:'vision-language-ai', desc:'Structured report generation (planned)' },
+    { label:'Explainability',    id:'explainable-ai',  desc:'Grad-CAM attribution (engineering)' },
+    { label:'Specialized AI',    id:'specialized-ai', desc:'Pathology, mammography, retinal (planned)' },
   ]},
   { label:'Pricing', id:'pricing', children:null },
   { label:'Evidence', id:'clinical-evidence', children: [
-    { label:'Clinical Evidence', id:'clinical-evidence', desc:'TRL 5 & regulatory progress' },
+    { label:'Validation & Evidence', id:'clinical-evidence', desc:'Measured results & evidence status' },
     { label:'AI Safety', id:'ai-safety', desc:'Safety & reliability engineering' },
     { label:'Research', id:'research', desc:'Research & development' },
     { label:'Regulatory', id:'regulatory', desc:'Regulatory timeline' },
@@ -61,7 +61,7 @@ const FOOTER_LINKS = {
     { label:'Africa Pricing',     id:'africa-pricing' },
   ],
   Evidence: [
-    { label:'Clinical Evidence',  id:'clinical-evidence' },
+    { label:'Validation & Evidence', id:'clinical-evidence' },
     { label:'AI Safety',          id:'ai-safety' },
     { label:'Research Portal',    id:'research' },
     { label:'Regulatory Timeline',id:'regulatory' },
@@ -273,10 +273,10 @@ export function PublicFooter({ onNavigate }: { onNavigate: (page: string) => voi
               <span style={{ fontSize:18, fontWeight:800, color:colors.textHigh, letterSpacing:'-0.5px' }}>SEWA XAI</span>
             </div>
             <p style={pStyle}>
-              Building the future of diagnostic intelligence. Engineering clinical AI to detect life-threatening conditions in seconds. (Currently in TRL 5 R&D validation).
+              Research-stage clinical AI for diagnostic imaging. Currently in TRL 5 R&D validation; research use only.
             </p>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-              {['DCB0129','NHS INNOVATION'].map(b => (
+              {['DCB0129 (in prep)','NHS INNOVATION'].map(b => (
                 <span key={b} style={{ padding:'4px 10px', background:colors.bg2, border:`1px solid ${colors.bgBorder}`, borderRadius:20, fontSize:10, fontWeight:700, color:colors.brand, letterSpacing:'0.02em' }}>{b}</span>
               ))}
             </div>
@@ -333,7 +333,7 @@ export function PublicFooter({ onNavigate }: { onNavigate: (page: string) => voi
              ))}
           </div>
           <div style={{ fontSize:12, color:colors.textLow, display:'flex', alignItems:'center', gap:8 }}>
-            <span style={{ color:colors.normal }}>●</span> Platform Status: Operational
+            <span style={{ color:colors.normal }}>●</span> Platform Status: Operational (research)
           </div>
         </div>
       </div>

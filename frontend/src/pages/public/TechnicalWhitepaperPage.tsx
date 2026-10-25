@@ -218,7 +218,7 @@ export function TechnicalWhitepaperPage({ onNavigate }: { onNavigate:(pg:string)
             {[
               { n:1, label:'Triage Engine', color:C.critical, detail:'14 pathology classes · ONNX Runtime CPU pipeline · <2s inference target', sub:'Scan Processing → Pathological Assessment → Priority classification → Worklist sorting' },
               { n:2, label:'Uncertainty Engine', color:C.amber, detail:'Monte-Carlo dropout variance · Epistemic + aleatoric quantification · OOD detection under evaluation', sub:'Scan Processing → Uncertainty Quantification → Confidence Assessment' },
-              { n:3, label:'Metacognition Engine', color:C.purple, detail:'Multi-layer self-evaluation harness · hallucination detection benchmarks · anatomical consistency checks', sub:'Validation Processing → Clinical rule matching → Prior comparison → Reliability scoring' },
+               { n:3, label:'Metacognition Engine', color:C.purple, detail:'Multi-layer self-evaluation harness · anatomical consistency checks · reliability scoring (research-stage)', sub:'Validation Processing → Clinical rule matching → Prior comparison → Reliability scoring' },
               { n:4, label:'VLM Report Generator', color:C.normal, detail:'Vision-Language Model · <8s report generation target · 8 languages', sub:'Scan + Findings + History → Clinical Synthesis → Structured report → Radiologist review queue' },
             ].map(engine => (
               <div key={engine.n} style={{ marginBottom:16, padding:20, background:C.bg2, border:`1px solid ${engine.color}30`, borderRadius:14 }}>
