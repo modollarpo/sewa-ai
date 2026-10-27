@@ -168,6 +168,12 @@ describe('AI Orchestration Pipeline — Integration', () => {
         explanation:          'Low predictive entropy across MC passes.',
         inference_ms:         50,
         backend:              'onnx-int8-mc10',
+        demo_mode:            true,
+        attribution_method:   'demo-random-attribution',
+        mc_method:            'onnx-input-noise',
+        ood_score:            null,
+        ood_flag:             false,
+        window_coherence:     null,
       },
     });
     // Stage 2: VLM
@@ -263,6 +269,12 @@ describe('AI Orchestration Pipeline — Integration', () => {
         explanation:          'Model is confident across MC passes.',
         inference_ms:         10,
         backend:              'onnx-int8-mc10',
+        demo_mode:            true,
+        attribution_method:   'demo-random-attribution',
+        mc_method:            'onnx-input-noise',
+        ood_score:            null,
+        ood_flag:             false,
+        window_coherence:     null,
       },
     });
     // Stage 2: VLM
