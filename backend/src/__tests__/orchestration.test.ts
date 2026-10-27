@@ -208,6 +208,11 @@ describe('AI Orchestration Pipeline — Integration', () => {
         corrected_confidence: null,
         evaluation_ms:        30,
         evaluated_at:         '2026-10-06T00:00:00Z',
+        shap_coherence:       null,
+        window_coherence:     null,
+        window_deficit:       null,
+        sensitive_windows:    null,
+        window_flag_used:     false,
       },
     });
 
@@ -313,6 +318,11 @@ describe('AI Orchestration Pipeline — Integration', () => {
         corrected_confidence: null,
         evaluation_ms:        30,
         evaluated_at:         '2026-10-06T00:00:00Z',
+        shap_coherence:       null,
+        window_coherence:     null,
+        window_deficit:       null,
+        sensitive_windows:    null,
+        window_flag_used:     false,
       },
     });
 
