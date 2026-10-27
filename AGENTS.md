@@ -61,6 +61,36 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — Test D OpenI external evaluation, branch `main`)
+
+Governing pre-registration: `docs/evidence/preregistration_testD_openi.md` (committed in `5f9d873`). Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Licence: **Public Domain / NLM terms** (OpenI Indiana University reports).
+
+### ✅ Completed
+- **Minimal Validation Datasets Acquired & Committed (`655f23b`)**:
+  - Head CT bounding boxes: BHX CQ500 6,283 bboxes (226 studies, CC BY-SA 4.0, 9.3 MB)
+  - VLM clinical reports: OpenI Indiana University 7,265 paired radiologist captions (Public Domain, 2.1 MB)
+  - Mammography smoke: CBIS-DDSM calc metadata + sample images (CC BY 3.0)
+  - Retinal smoke: EyePACS fundus image samples
+  - Subset integrity tests: `validation/tests/test_validation_subsets.py` (100% passing).
+- **Test D Pre-registration Frozen (`5f9d873`)**: `docs/evidence/preregistration_testD_openi.md` committed prior to evaluation. Evaluates Metacognition Layer 6 Contradiction Detection against 7,265 real radiologist clinical reports.
+- **Test D Evaluation Executed (`step10_evaluate_openi.py`)**:
+  - `validation/reports/v2a1_testD_openi.json` and formal report `docs/evidence/feasibility_report_testD_openi.md`.
+  - **Pneumothorax Contradiction Recall**: **89.25%** (95% CI: [88.10%, 90.51%]) -> **MET** ($\ge 85\%$).
+  - **Pleural Effusion Contradiction Recall**: **94.46%** (95% CI: [93.43%, 95.50%]) -> **MET** ($\ge 85\%$).
+  - **Cardiomegaly Contradiction Recall**: **52.94%** (95% CI: [50.12%, 55.84%]) -> **NOT MET** (anatomical variants like "heart size normal" uncaptured by keyword negation).
+  - **Aggregate Contradiction Recall**: **82.90%** (95% CI: [81.96%, 83.82%]) -> **PARTIAL** (acute emergencies $\ge 89.2\%$).
+  - **Affirmation Specificity**: **47.08%** (95% CI: [44.67%, 49.49%]) -> **NOT MET** (short impression token dilution).
+  - **Safety Alert Suppression**: **100.0%** (367 / 367) suppressed unsafe alerts (`safe_to_alert = False`).
+  - **Mean Processing Latency**: **0.97 ms** (well within < 50ms requirement).
+  - **Verdict**: **PARTIAL / NOT MET**.
+
+### 🔜 Next
+- Delete temporary ACR repository `sewa-validation` from Azure Cloud Shell.
+- Implement recommended context-gated negation scope and synonym mapping in Metacognition Layer 6.
+- Decide on git push / archive for branch `fix/patent-aligned`.
+
+---
+
 ## 📋 Work State (2026-10-15 — Test C CQ500 external evaluation, branch `fix/patent-aligned`)
 
 Governing pre-registration: `docs/evidence/preregistration_testC_cq500.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Licence: **CC BY-NC-SA 4.0** (CQ500, non-commercial use confirmed by user).

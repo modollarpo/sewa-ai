@@ -1,0 +1,85 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "evaluation": "Test D \u2014 OpenI External Validation of Metacognition Contradiction Detection",
+  "date": "2026-10-28 00:54:56",
+  "dataset": {
+    "source": "OpenI Indiana University Chest X-rays",
+    "n_total_reports": 7265,
+    "licence": "Public Domain / NLM terms"
+  },
+  "findings": {
+    "Pneumothorax": {
+      "n_negated": 2857,
+      "n_affirmed": 86,
+      "contradiction_recall": {
+        "point": 0.8925,
+        "ci_lower": 0.881,
+        "ci_upper": 0.9051
+      },
+      "specificity": {
+        "point": 0.2907,
+        "ci_lower": 0.186,
+        "ci_upper": 0.3837
+      },
+      "eval_duration_sec": 0.125
+    },
+    "Pleural Effusion": {
+      "n_negated": 1644,
+      "n_affirmed": 980,
+      "contradiction_recall": {
+        "point": 0.9446,
+        "ci_lower": 0.9343,
+        "ci_upper": 0.955
+      },
+      "specificity": {
+        "point": 0.4245,
+        "ci_lower": 0.3908,
+        "ci_upper": 0.4531
+      },
+      "eval_duration_sec": 0.136
+    },
+    "Cardiomegaly": {
+      "n_negated": 1241,
+      "n_affirmed": 510,
+      "contradiction_recall": {
+        "point": 0.5294,
+        "ci_lower": 0.5012,
+        "ci_upper": 0.5584
+      },
+      "specificity": {
+        "point": 0.5902,
+        "ci_lower": 0.545,
+        "ci_upper": 0.6314
+      },
+      "eval_duration_sec": 0.065
+    }
+  },
+  "pipeline_simulation": {
+    "n_simulated": 500,
+    "mean_latency_ms": 0.97,
+    "latency_ci": [
+      0.75,
+      1.32
+    ],
+    "contradictions_flagged": 367,
+    "alerts_properly_blocked": 367,
+    "alert_block_rate_on_contradiction": 1.0
+  },
+  "primary_outcomes": {
+    "aggregate_contradiction_recall": {
+      "point": 0.829,
+      "ci_lower": 0.8196,
+      "ci_upper": 0.8382,
+      "target": 0.85,
+      "met": false
+    },
+    "aggregate_specificity": {
+      "point": 0.4708,
+      "ci_lower": 0.4467,
+      "ci_upper": 0.4949,
+      "target": 0.85,
+      "met": false
+    }
+  },
+  "verdict": "PARTIAL / NOT MET"
+}
