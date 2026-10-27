@@ -174,6 +174,10 @@ describe('AI Orchestration Pipeline — Integration', () => {
         ood_score:            null,
         ood_flag:             false,
         window_coherence:     null,
+        window_deficit:       null,
+        channel_shares:       null,
+        channel_flag:         false,
+        sensitive_windows:    null,
       },
     });
     // Stage 2: VLM
@@ -275,6 +279,10 @@ describe('AI Orchestration Pipeline — Integration', () => {
         ood_score:            null,
         ood_flag:             false,
         window_coherence:     null,
+        window_deficit:       null,
+        channel_shares:       null,
+        channel_flag:         false,
+        sensitive_windows:    null,
       },
     });
     // Stage 2: VLM
