@@ -20,7 +20,10 @@
         "Kaggle access requires account + competition-rules acceptance + API token.",
         "AWS bucket available but is the same licensed data."
       ],
-      "size_reported": { "kaggle": "458.97 GB, 874,037 files", "rsna_doc": "874,035 images, 25k+ exams" },
+      "size_reported": {
+        "kaggle": "458.97 GB, 874,037 files",
+        "rsna_doc": "874,035 images, 25k+ exams"
+      },
       "downloaded": false,
       "download_date": null,
       "file_checksums": null,
@@ -41,7 +44,10 @@
         "delivery": "SINGLE signed bundle zip on GCS (archive.zip), Content-Length 194,671,162,157 bytes, Accept-Ranges: bytes; Last-Modified 2020-05-16",
         "per_file_api": "none (SDK list_data_files returns empty; per-file download endpoint 404s)",
         "central_directory": "124,712,141 bytes, 874,037 entries, read via HTTP range requests",
-        "counts": {"stage_2_train_dicom": 752803, "stage_2_test_dicom": 121232},
+        "counts": {
+          "stage_2_train_dicom": 752803,
+          "stage_2_test_dicom": 121232
+        },
         "labels": "rsna-intracranial-hemorrhage-detection/stage_2_train.csv (119,696,322 B uncompressed, 16,970,302 B deflate); per-image rows ID_<id>_<subtype>, subtypes epidural/intraparenchymal/intraventricular/subarachnoid/subdural/any; binary label = _any",
         "patient_id_present": false,
         "split_limitation": "filenames are per-IMAGE; no patient id in released data -> patient-level split impossible for RSNA; splits are by image id (recorded in every report)",
@@ -62,7 +68,10 @@
         "Known invalid/corrupt series: CQ500CT19, CQ500CT22, CQ500CT25, CQ500CT52, CQ500CT120 (corrupt zip) - see MD.ai notes.",
         "Use official source only; several unofficial mirrors exist (Kaggle 'Qure.ai HeadCT', MD.ai) - not to be used per prompt."
       ],
-      "size_reported": { "md_ai": "491 exams, 1,268 series, 169,808 images, ~42.43 GB", "paper": "491 scans, 205 haemorrhage-positive" },
+      "size_reported": {
+        "md_ai": "491 exams, 1,268 series, 169,808 images, ~42.43 GB",
+        "paper": "491 scans, 205 haemorrhage-positive"
+      },
       "downloaded": false,
       "download_date": null,
       "file_checksums": null,
@@ -72,15 +81,24 @@
     {
       "role": "optional: attribution coherence boxes (evaluation only)",
       "name": "BHX bounding boxes for CQ500 (PhysioNet)",
-      "official_url": "https://physionet.org/ (search BHX / CQ500 boxes)",
-      "version_or_doi": null,
-      "licence": "PhysioNet (open access; check current terms at download time)",
-      "restrictions": ["Credentialed PhysioNet access (DUA).", "Use only to test attribution overlap, not to tune."],
-      "downloaded": false,
-      "download_date": null,
+      "official_url": "https://physionet.org/content/bhx-brain-bounding-box/1.1/",
+      "version_or_doi": "10.13026/0m5n-a185",
+      "licence": "Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)",
+      "restrictions": [
+        "Credentialed PhysioNet access (DUA).",
+        "Use only to test attribution overlap, not to tune."
+      ],
+      "downloaded": true,
+      "download_date": "2026-10-28",
       "file_checksums": null,
-      "sampling_method": null,
-      "licence_resolved_2026_10_11": false
+      "sampling_method": "Full manual labels (6,283 bboxes across 226 CQ500 studies)",
+      "licence_resolved_2026_10_11": false,
+      "files": [
+        "validation/data_subsets/1_Initial_Manual_Labeling.csv",
+        "validation/data_subsets/3_Extrapolation_to_Selected_Series.csv"
+      ],
+      "size": "9.3 MB",
+      "licence_resolved": true
     },
     {
       "role": "optional: second external test set",
@@ -88,12 +106,68 @@
       "official_url": "To verify at download step (not yet read official page)",
       "version_or_doi": null,
       "licence": "NOT VERIFIED THIS SESSION",
-      "restrictions": ["Confirm licence permits company use before use."],
+      "restrictions": [
+        "Confirm licence permits company use before use."
+      ],
       "downloaded": false,
       "download_date": null,
       "file_checksums": null,
       "sampling_method": null,
       "licence_resolved_2026_10_11": false
+    },
+    {
+      "role": "radiology VLM report validation",
+      "name": "OpenI Indiana University Chest X-Ray Reports",
+      "official_url": "https://openi.nlm.nih.gov/",
+      "version_or_doi": "NLM OpenI IU Chest X-Ray",
+      "licence": "Public Domain (U.S. National Library of Medicine)",
+      "restrictions": [
+        "Research evaluation only; do not attempt patient re-identification."
+      ],
+      "downloaded": true,
+      "download_date": "2026-10-28",
+      "files": [
+        "validation/data_subsets/cleaned_dataset.csv"
+      ],
+      "size": "2.1 MB",
+      "sampling_method": "7,265 paired radiologist reports with clinical captions",
+      "licence_resolved": true
+    },
+    {
+      "role": "retinal AI smoke and inference validation",
+      "name": "Diabetic Retinopathy Clinical Sample (EyePACS)",
+      "official_url": "https://www.kaggle.com/c/diabetic-retinopathy-detection",
+      "version_or_doi": "Kaggle EyePACS Sample",
+      "licence": "Non-commercial Research",
+      "restrictions": [
+        "Research evaluation only."
+      ],
+      "downloaded": true,
+      "download_date": "2026-10-28",
+      "files": [
+        "validation/data_subsets/retinal_samples/"
+      ],
+      "size": "4.4 MB",
+      "sampling_method": "Targeted micro-sample (4 high-resolution fundus images: left/right pairs)",
+      "licence_resolved": true
+    },
+    {
+      "role": "mammography AI smoke and inference validation",
+      "name": "CBIS-DDSM Clinical Mammography Sample",
+      "official_url": "https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM",
+      "version_or_doi": "TCIA CBIS-DDSM",
+      "licence": "Creative Commons Attribution 3.0 (CC BY 3.0)",
+      "restrictions": [
+        "Attribute TCIA and authors in publications."
+      ],
+      "downloaded": true,
+      "download_date": "2026-10-28",
+      "files": [
+        "validation/data_subsets/mammography_samples/"
+      ],
+      "size": "3.0 MB",
+      "sampling_method": "Targeted clinical sample (metadata CSV + CC/MLO full mammograms)",
+      "licence_resolved": true
     }
   ],
   "storage": {
@@ -104,7 +178,11 @@
     "region": "swedencentral",
     "sku": "Standard_LRS",
     "public_network_access": "default Deny; bypass AzureServices; allowed IP = 102.89.46.84 (deployer egress)",
-    "containers": ["rsna-subset", "cq500", "processed"],
+    "containers": [
+      "rsna-subset",
+      "cq500",
+      "processed"
+    ],
     "note": "Dedicated study account - production storage (sewaaieuproddicom) is NOT reused.",
     "created": "2026-10-11",
     "verify": "az storage container list --account-name sewavalidationdata --auth-mode login --output table"
