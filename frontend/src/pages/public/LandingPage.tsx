@@ -19,14 +19,13 @@ const FEATURES: { id:string; icon:string; title:string; desc:string; tag:string;
   { id:'uncertainty-ai',   icon:'🎯', title:'Uncertainty Engine', desc:'Monte Carlo dropout confidence estimation flags low-confidence scans for human review. Engineering-validated; clinical impact not yet measured.', tag:'Safety', status:'engineering' },
   { id:'explainable-ai',   icon:'🔍', title:'Explainability (Grad-CAM)', desc:'Grad-CAM attribution visualises the image regions influencing a model output. Engineering-validated; clinical utility not yet measured.', tag:'Explainability', status:'engineering' },
   { id:'metacognition-ai', icon:'🧠', title:'Metacognition (Research)', desc:'Experimental self-evaluation signals under active validation. At a 20% review rate the pre-registered result was inconclusive (0.0%, 95% CI -8.1% to +6.5%). No hallucination-detection claim.', tag:'Research', status:'research' },
+  { id:'vision-language-ai', icon:'📋', title:'VLM Report Generator', desc:'Vision-Language Model service implemented in code; generates structured report templates. Clinical accuracy unmeasured.', tag:'Reporting', status:'research' },
+  { id:'specialized-ai',   icon:'🔬', title:'Pathology, Mammography & Retinal AI', desc:'Microservices implemented for H&E pathology, breast cancer screening, and diabetic retinopathy grading on CPU. Unvalidated clinically.', tag:'Specialized AI', status:'research' },
 ];
 
-const ROADMAP = [
-  { icon:'🫁', title:'PE, pneumothorax, TB & stroke detection', note:'Planned — not yet evaluated' },
-  { icon:'🩻', title:'MRI and X-ray modalities', note:'Planned — head CT only today' },
-  { icon:'📋', title:'VLM structured report generation', note:'Planned — clinical accuracy not evaluated' },
-  { icon:'🔗', title:'Federated learning', note:'Planned — no outcomes measured' },
-  { icon:'🌍', title:'Sovereign multi-region infrastructure', note:'Planned architecture — no live deployments' },
+const ARCHITECTURE_NOTES = [
+  { icon:'🔗', title:'Federated Learning & Continuous Learning', note:'Microservices implemented with differential privacy; no clinical multi-site outcomes measured.' },
+  { icon:'🌍', title:'Sovereign Multi-Region Infrastructure', note:'Containerised for Azure AKS (UK South, EU, US, Africa); zero PHI egress architecture.' },
 ];
 
 const STATS = [
@@ -204,22 +203,22 @@ export function LandingPage({ onLogin, onNavigate }: { onLogin:()=>void, onNavig
           })}
         </div>
 
-        {/* Roadmap */}
+        {/* Microservices & Infrastructure Implementation Status */}
         <div className="mt-20">
           <div className="text-center space-y-3 mb-10">
-            <div className="text-[10px] font-black text-[#3A6055] uppercase tracking-[0.4em]">Roadmap</div>
-            <h3 className="text-2xl md:text-3xl font-black text-[#D0ECE6]">Planned capabilities</h3>
-            <p className="text-[#6FA898] max-w-xl mx-auto text-sm font-medium">These capabilities are in development and have not been clinically validated.</p>
+            <div className="text-[10px] font-black text-[#408D7B] uppercase tracking-[0.4em]">Architecture Implementation</div>
+            <h3 className="text-2xl md:text-3xl font-black text-[#D0ECE6]">Implemented microservices &amp; infrastructure</h3>
+            <p className="text-[#6FA898] max-w-xl mx-auto text-sm font-medium">All microservices are implemented in code; clinical outcomes and multi-site deployments are unmeasured / pre-clinical (TRL 5).</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {ROADMAP.map(r => (
-              <div key={r.title} className="p-6 bg-[#0C1D17]/50 border border-dashed border-[#1B3028] rounded-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+            {ARCHITECTURE_NOTES.map(r => (
+              <div key={r.title} className="p-6 bg-[#0C1D17]/50 border border-[#1B3028] rounded-2xl">
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-xl opacity-70">{r.icon}</span>
-                  <span className="px-2 py-0.5 rounded-full border border-[#3A6055] text-[8px] font-black uppercase tracking-widest text-[#6FA898]">Planned</span>
+                  <span className="px-2 py-0.5 rounded-full border border-[#408D7B]/40 bg-[#408D7B]/10 text-[8px] font-black uppercase tracking-widest text-[#408D7B]">Implemented Code</span>
                 </div>
                 <div className="text-sm font-bold text-[#D0ECE6] mb-1">{r.title}</div>
-                <div className="text-[11px] text-[#3A6055]">{r.note}</div>
+                <div className="text-[11px] text-[#6FA898]">{r.note}</div>
               </div>
             ))}
           </div>
