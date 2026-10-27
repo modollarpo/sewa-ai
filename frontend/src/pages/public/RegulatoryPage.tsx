@@ -31,7 +31,7 @@ export function RegulatoryPage({ onNavigate }: { onNavigate:(p:string)=>void }) 
             <span style={{ color:C.brand }}>Clinical-grade trust.</span>
           </h1>
           <p style={{ fontSize:'clamp(15px, 2.5vw, 18px)', color:C.textMd, lineHeight:1.7, margin:'0 0 40px' }}>
-            SEWA XAI is built to exceed the most stringent clinical and data security standards globally. We are committed to transparency, security by design, and proactive clinical safety.
+            SEWA XAI is designed against clinical and data-security standards. We are pre-clinical: the items below are aligned-with, in preparation, or planned unless a certification is explicitly stated.
           </p>
         </div>
       </section>
@@ -39,12 +39,12 @@ export function RegulatoryPage({ onNavigate }: { onNavigate:(p:string)=>void }) 
       {/* Compliance Grid */}
       <section className="compliance-grid" style={{ maxWidth:1100, margin:'0 auto', padding:'0 24px 80px', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:24 }}>
         {[
-          { t:'NHS DTAC & DSPT', d:'Fully compliant with UK NHS Digital Technology Assessment Criteria and Data Security & Protection Toolkit.', icon:'🇬🇧' },
-          { t:'GDPR & DPA 2018', d:'Zero-knowledge architecture ensuring absolute patient privacy and data sovereignty across jurisdictions.', icon:'🇪🇺' },
-          { t:'HIPAA Compliant', d:'End-to-end encryption and strict audit controls meeting US clinical data standards.', icon:'🇺🇸' },
-          { t:'ISO 13485:2016', d:'Quality Management System for medical devices ensuring rigorous software development lifecycles.', icon:'🔬' },
-          { t:'EU MDR Class IIb', d:'Certified as a Class IIb medical device under the EU Medical Device Regulation.', icon:'🩺' },
-          { t:'Cyber Essentials Plus', d:'Verified UK government standard for cybersecurity and perimeter protection.', icon:'🛡️' },
+          { t:'NHS DTAC & DSPT', d:'Aligned with UK NHS Digital Technology Assessment Criteria and Data Security & Protection Toolkit requirements (assessment in preparation).', icon:'🇬🇧' },
+          { t:'GDPR & DPA 2018', d:'Designed around GDPR and DPA 2018 requirements; a Data Processing Agreement is available with clients.', icon:'🇪🇺' },
+          { t:'HIPAA', d:'HIPAA-aligned controls (in preparation). No certification is claimed.', icon:'🇺🇸' },
+          { t:'ISO 13485:2016', d:'Quality Management System designed around ISO 13485 requirements (certification planned).', icon:'🔬' },
+          { t:'EU MDR Class IIb', d:'EU MDR Class IIb regulatory pathway planned. No certification or CE mark is claimed.', icon:'🩺' },
+          { t:'Cyber Essentials Plus', d:'Cyber Essentials Plus is planned; the organisation is not yet certified.', icon:'🛡️' },
         ].map(item => (
           <div key={item.t} style={{ padding:32, background:C.bg2, borderRadius:20, border:`1px solid ${C.border}` }}>
              <div style={{ fontSize:32, marginBottom:16 }}>{item.icon}</div>
@@ -62,13 +62,13 @@ export function RegulatoryPage({ onNavigate }: { onNavigate:(p:string)=>void }) 
             <div style={{ padding:24, background:C.bg2, borderRadius:16, border:`1px solid ${C.border}` }}>
                <h3 style={{ fontSize:16, fontWeight:700, color:C.brand, marginBottom:12 }}>Hazard Log & Mitigation</h3>
                <p style={{ fontSize:14, color:C.textMd, lineHeight:1.7 }}>
-                 Our Clinical Safety Officer (CSO) maintains a live Hazard Log for all AI engines. We implement 'Safety Interlocks'—including our Uncertainty and Metacognition engines—to mitigate diagnostic errors before they reach the clinician.
+                 A Clinical Safety Officer (CSO) role and hazard-log process are being established as part of DCB0129 alignment (in preparation). Uncertainty and metacognition components are intended as safety interlocks; their clinical benefit has not yet been demonstrated.
                </p>
             </div>
              <div style={{ padding:24, background:C.bg2, borderRadius:16, border:`1px solid ${C.border}` }}>
                 <h3 style={{ fontSize:16, fontWeight:700, color:C.brand, marginBottom:12 }}>Bias Monitoring</h3>
                 <p style={{ fontSize:14, color:C.textMd, lineHeight:1.7 }}>
-                  We actively monitor our models for performance drift across varied demographics (age, ethnicity, gender, and device type). SEWA XAI is validated on multi-ethnic datasets globally to ensure clinical equity.
+                  Drift-monitoring code is implemented but reports <em>insufficient data</em> below the configured sample thresholds. No demographic performance or equity claim is made; the current evaluation uses public RSNA and CQ500 data only.
                 </p>
              </div>
           </div>

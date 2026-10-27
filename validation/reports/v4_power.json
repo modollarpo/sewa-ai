@@ -1,0 +1,34 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "n_val_scans": 120,
+  "n_val_instances": 1200,
+  "base_O1_rate": 0.32,
+  "by_review_rate": {
+    "0.05": {
+      "obs_rel_reduction_D2N_vs_D2": 0.020114942528735566,
+      "boot_se": 0.013694315722139772,
+      "mde_80pct_power": 0.03836578951241096,
+      "underpowered_vs_15pct": false
+    },
+    "0.1": {
+      "obs_rel_reduction_D2N_vs_D2": 0.044025157232704365,
+      "boot_se": 0.01738595878124277,
+      "mde_80pct_power": 0.048708241332148024,
+      "underpowered_vs_15pct": false
+    },
+    "0.2": {
+      "obs_rel_reduction_D2N_vs_D2": 0.0684410646387834,
+      "boot_se": 0.022834405077032417,
+      "mde_80pct_power": 0.06397252674773787,
+      "underpowered_vs_15pct": false
+    },
+    "0.3": {
+      "obs_rel_reduction_D2N_vs_D2": 0.09004739336492897,
+      "boot_se": 0.03319990883301583,
+      "mde_80pct_power": 0.09301236658794466,
+      "underpowered_vs_15pct": false
+    }
+  },
+  "underpowered_at_20pct": false,
+  "note": "MDE from scan-cluster bootstrap on the validation set; D2N is fitted in-sample so MDE is optimistic (true MDE likely larger)."
+}

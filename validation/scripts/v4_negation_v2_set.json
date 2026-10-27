@@ -1,0 +1,1647 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. UNREVIEWED BY A CLINICIAN.",
+  "dev": [
+    {
+      "text": "A intraventricular hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a temporal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a subarachnoid hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a intraventricular hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a parietal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a intraventricular hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a intraventricular hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a subdural hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A intraparenchymal hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a cerebral hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a subarachnoid hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a temporal hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A parietal hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A frontal hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a intraparenchymal hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A temporal hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A intraventricular hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a cerebral hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a frontal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a cerebral hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a subdural hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a cerebral hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a temporal hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a temporal hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a subdural hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A epidural hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a parietal hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a frontal hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a cerebellar hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a parietal hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A cerebral hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a frontal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a intraparenchymal hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A parietal hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a cerebellar hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute temporal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Low probability of a cerebral hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a intraventricular hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A cerebral hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a epidural hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a frontal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A subarachnoid hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a cerebral hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a epidural hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a intraventricular hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a intraventricular hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a temporal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a parietal hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a temporal hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A cerebellar hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A epidural hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a intraparenchymal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute frontal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A 0.05 probability of a subdural hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a temporal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a cerebral hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A subarachnoid hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a cerebral hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A intraventricular hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A subdural hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A subdural hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A cerebellar hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a intraparenchymal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute intraventricular hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a frontal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a subdural hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a cerebellar hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a parietal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low chance of subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a epidural hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A temporal hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a cerebellar hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a frontal hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a intraparenchymal hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a epidural hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a subdural hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Moderate probability of a epidural hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a temporal hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute cerebral hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible frontal hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a cerebellar hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a epidural hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute cerebellar hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a parietal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible epidural hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute temporal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a subarachnoid hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a epidural hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a frontal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a intraventricular hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a parietal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a temporal hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a frontal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a intraparenchymal hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible subdural hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a subdural hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute subdural hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a intraparenchymal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible cerebral hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a intraventricular hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a intraventricular hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a intraparenchymal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a temporal hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a cerebellar hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a subarachnoid hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute intraparenchymal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a subdural hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible temporal hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible parietal hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute intraventricular hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute parietal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a intraparenchymal hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible intraparenchymal hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a frontal hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a parietal hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a intraventricular hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a intraparenchymal hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "No mass effect, but a high probability of a temporal hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No mass effect, but a high probability of a subdural hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a intraventricular hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No mass effect, but a high probability of a parietal hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a temporal hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a temporal hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No mass effect, but a high probability of a intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a parietal hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No mass effect, but a high probability of a subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a intraparenchymal hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a subarachnoid hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a parietal hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a subdural hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a subdural hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a parietal hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No mass effect, but a high probability of a epidural hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a temporal hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a cerebellar hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a subdural hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "The subdural hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a frontal hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The temporal hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a frontal hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The parietal hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a epidural hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The subarachnoid hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a cerebral hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a cerebellar hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a cerebellar hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a epidural hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The cerebellar hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a intraventricular hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a epidural hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a parietal hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a subdural hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a subdural hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a frontal hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a intraventricular hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    }
+  ],
+  "holdout": [
+    {
+      "text": "The probability of a frontal hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a cerebral hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a parietal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A cerebral hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a subdural hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Subdural hemorrhage is probable; 85% likelihood.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A cerebellar hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a epidural hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A 0.9 probability of a subdural hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a subarachnoid hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A temporal hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A intraparenchymal hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a cerebellar hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a epidural hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A epidural hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A subdural hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a epidural hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "High probability of a cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute epidural hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a epidural hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute subdural hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A subarachnoid hematoma is very likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A cerebellar hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute parietal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "90% probability of a temporal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "There is a high likelihood of a parietal hematoma.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A subdural hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute frontal hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A frontal hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a epidural hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "95% likelihood of an acute cerebral hemorrhage.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "Findings are consistent with a frontal hemorrhage; probability 90%.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A subarachnoid hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a intraparenchymal hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "The probability of a subdural hemorrhage is high.",
+      "label": "present",
+      "cat": "p_affirm"
+    },
+    {
+      "text": "A cerebral hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a subarachnoid hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a intraventricular hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute intraparenchymal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a intraparenchymal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute parietal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a cerebellar hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a intraparenchymal hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a cerebellar hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a epidural hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A intraventricular hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a parietal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A parietal hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A frontal hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A parietal hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute temporal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute cerebral hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute subdural hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a intraventricular hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a temporal hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute cerebellar hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a frontal hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A intraparenchymal hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A frontal hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a parietal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a cerebral hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a subdural hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A epidural hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a temporal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a subdural hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "There is a low likelihood of a subarachnoid hematoma.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a subdural hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Low probability of a frontal hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "Unlikely to represent a cerebellar hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "The probability of a parietal hemorrhage is low.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "5% probability of an acute epidural hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A intraparenchymal hematoma is very unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "A temporal hemorrhage is unlikely.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "10% chance of a subarachnoid hemorrhage.",
+      "label": "absent",
+      "cat": "p_negate"
+    },
+    {
+      "text": "50% probability of a subarachnoid hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible cerebellar hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a temporal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a frontal hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a temporal hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a cerebral hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a subdural hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a temporal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a subarachnoid hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a epidural hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a subarachnoid hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a cerebral hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a frontal hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a subdural hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a cerebellar hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a cerebral hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a cerebellar hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a frontal hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute frontal hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a cerebral hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a parietal hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a parietal hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute epidural hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a subdural hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a intraventricular hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Borderline probability (~45%) of an epidural hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible intraventricular hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Equivocal probability of an acute subarachnoid hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a subarachnoid hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "There is an indeterminate likelihood of a parietal hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a intraparenchymal hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a cerebral hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "50% probability of a cerebral hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a epidural hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "The likelihood of a subdural hematoma is indeterminate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Possible subarachnoid hemorrhage; equivocal probability.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a subdural hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Probability of a epidural hemorrhage is moderate.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Cannot exclude a cerebellar hemorrhage; probability 50%.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Moderate probability of a cerebellar hemorrhage.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "Intermediate probability of a intraventricular hematoma.",
+      "label": "uncertain",
+      "cat": "p_uncertain"
+    },
+    {
+      "text": "No mass effect, but a high probability of a intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a frontal hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a intraparenchymal hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a frontal hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a frontal hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a subarachnoid hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a subarachnoid hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a epidural hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a intraventricular hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a cerebellar hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a epidural hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a intraventricular hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a intraparenchymal hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No extra-axial collection; however, high probability of a subdural hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No mass effect, but a high probability of a frontal hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No mass effect, but a high probability of a cerebellar hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a epidural hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No skull fracture, but a cerebral hematoma is probable.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No midline shift; however, a cerebral hemorrhage is likely.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "Ventricles are normal, yet 90% probability of a cerebral hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No mass effect, but a high probability of a cerebral hemorrhage.",
+      "label": "present",
+      "cat": "p_scoped"
+    },
+    {
+      "text": "No evidence of a intraparenchymal hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a temporal hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a cerebral hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The intraventricular hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The frontal hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a temporal hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a subdural hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a intraventricular hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a parietal hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The cerebral hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The intraparenchymal hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a subarachnoid hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No evidence of a temporal hemorrhage; 5% probability.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a intraparenchymal hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "No hemorrhage; probability of a subdural hematoma is low (5%).",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a intraparenchymal hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a cerebellar hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "The epidural hemorrhage is absent; likelihood low.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a subarachnoid hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "White matter is unremarkable; low likelihood of a cerebral hemorrhage.",
+      "label": "absent",
+      "cat": "p_distract"
+    },
+    {
+      "text": "Probability of a parietal hemorrhage is low; no mass effect.",
+      "label": "absent",
+      "cat": "p_distract"
+    }
+  ]
+}

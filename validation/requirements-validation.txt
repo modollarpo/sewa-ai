@@ -1,0 +1,15 @@
+# validation/requirements-validation.txt
+# Dependencies for the CQ500 preprocessing job and local evaluation.
+# Pinned to match the versions used in the v2a1 training run.
+torch==2.3.1
+torchvision==0.18.1
+efficientnet_pytorch==0.7.1
+pydicom==2.4.4
+numpy==1.26.4
+scipy==1.13.1
+scikit-learn==1.5.1
+azure-storage-blob==12.20.0
+pandas==2.2.2
+pylibjpeg==1.4.0
+pylibjpeg-libjpeg==1.3.4
+pylibjpeg-openjpeg==1.3.2

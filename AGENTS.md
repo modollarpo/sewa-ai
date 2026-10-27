@@ -61,6 +61,30 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-15 — Test C CQ500 external evaluation, branch `fix/patent-aligned`)
+
+Governing pre-registration: `docs/evidence/preregistration_testC_cq500.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Licence: **CC BY-NC-SA 4.0** (CQ500, non-commercial use confirmed by user).
+
+### ✅ Completed
+- **Test C Pre-registration frozen**: `docs/evidence/preregistration_testC_cq500.md` committed prior to evaluation. Success criterion: relative reduction $\ge 15\%$ and 95% CI excludes 0 at 20% review rate. Primary descriptive: study-level ICH AUROC.
+- **Root causes of preprocessing failure solved**:
+  1. *DICOM compression*: CQ500 uses JPEG Lossless (Process 14, Selection Value 1, UID `1.2.840.10008.1.2.4.70`). Added `pylibjpeg==1.4.0`, `pylibjpeg-libjpeg==1.3.4`, and `pylibjpeg-openjpeg==1.3.2` to `validation/requirements-validation.txt`.
+  2. *Key naming*: Hyphenated format `CQ500-CT-<N>` in `reads.csv` aligned in `step9a_cq500_preprocess.py` and `CORRUPT_SCANS`.
+  3. *Pod resources*: Right-sized to 2 CPU / 4Gi RAM so job scheduled smoothly on AI nodepool.
+- **In-region preprocessing job succeeded on AKS**: `cq500-preprocess` in swedencentral processed all 486 target scans (202 positive ICH cases, 284 negative) with zero dropouts (`failed_scans: []`), extracting 3,884 uniform 8-slice sets and uploading `v2_early_cq500.npz` (372.3 MB) to Azure blob container `processed`.
+- **Test C formal evaluation completed**: `validation/reports/v2a1_testC_cq500.json` and formal report `docs/evidence/feasibility_report_testC_cq500.md`.
+  - **Study-level ICH AUROC (Primary Descriptive)**: **0.7468** (external generalisation from RSNA 0.807 benchmark).
+  - **Error AUROC**: $D_2$ composite = **0.6583** vs $B_2$ predictive entropy = **0.6578** ($\Delta = +0.0005$).
+  - **Safety Reduction at 20% Review (Primary Confirmatory)**: **0.0%** relative reduction, 95% clustered bootstrap CI **[-0.081, +0.065]** (includes 0).
+  - **Verdict**: **Primary criterion NOT MET; the 95% CI upper bound (+6.5%) excludes the 15% threshold.** (Adequately powered with observed-SE $\text{MDE}_{80} = 10.4\%$; metacognitive gating provides no measurable safety advantage over baseline entropy on unseen external data).
+
+### 🔜 Next
+- Clean up any temporary AKS jobs (`cq500-preprocess`).
+- Decide on git push/merge of branch `fix/patent-aligned`.
+
+
+---
+
 ## 📋 Work State (2026-10-07 — research-audit contract repair, branch `fix/contract-repair`)
 
 Audit source: `SEWA_AI_CODEBASE_RESEARCH_IMPLEMENTATION_AUDIT.md` (§34 = next-step list). Frozen tag: `audit-2026-10-06` @ `031b522`.

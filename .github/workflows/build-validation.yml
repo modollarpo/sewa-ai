@@ -1,0 +1,56 @@
+name: Build Validation Image (Test C)
+
+on:
+  push:
+    branches:
+      - 'fix/patent-aligned'
+      - main
+    paths:
+      - 'validation/**'
+      - '.acrignore'
+      - '.github/workflows/build-validation.yml'
+  workflow_dispatch:
+
+jobs:
+  build-validation-image:
+    name: Build & Push Validation Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free runner disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
+
+      - name: Login to Azure ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: sewaaieuprodacr.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set image tag
+        id: tag
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | head -c8)
+          echo "tag=main-${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: validation/Dockerfile
+          push: true
+          tags: |
+            sewaaieuprodacr.azurecr.io/sewa-validation:${{ steps.tag.outputs.tag }}
+            sewaaieuprodacr.azurecr.io/sewa-validation:testc-latest
+          cache-from: type=registry,ref=sewaaieuprodacr.azurecr.io/sewa-validation:cache
+          cache-to: type=registry,ref=sewaaieuprodacr.azurecr.io/sewa-validation:cache,mode=max

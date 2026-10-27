@@ -1,0 +1,50 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. SYNTHETIC TEXT.",
+  "generators": {
+    "G0": {
+      "type": "template",
+      "licence": "own code",
+      "temperature": "n/a",
+      "contradiction_rate": 0.1,
+      "note": "synthetic injection, not model behaviour"
+    },
+    "G1": {
+      "type": "text-LLM",
+      "model": "Qwen2.5-1.5B-Instruct",
+      "format": "GGUF q4_k_m",
+      "licence": "Apache-2.0",
+      "runtime": "llama.cpp win-cpu-x64 release (MIT), build b11583",
+      "max_new_tokens": 120,
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "reports_per_scan": 3,
+      "invocation": "llama-cli -m <gguf> -sys <system> -p <triage> -n 120 --temp 0.7 --top-p 0.9 --seed <seed> -c 2048 -st --log-disable --no-warmup",
+      "note": "text-only; not a vision-language model; deviation from filed design"
+    },
+    "G2": {
+      "type": "VLM",
+      "status": "skipped",
+      "note": "no permissive VLM feasible on CPU in budget"
+    }
+  },
+  "G1_artifacts": {
+    "model_source": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF",
+    "file": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+    "size_bytes": 1117320736,
+    "sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
+    "sha256_source": "HF LFS pointer / X-Linked-ETag (verified match after download)",
+    "runtime_url": "https://github.com/ggml-org/llama.cpp/releases/download/b11583/llama-b11583-bin-win-cpu-x64.zip",
+    "licences": {
+      "model": "Apache-2.0",
+      "llama.cpp": "MIT"
+    },
+    "note": "research/nonclinical; local only, not pushed"
+  },
+  "prompt_G1_system": "You are a radiology report generator for a research prototype. Given a structured triage output, write ONE short impression sentence about intracranial haemorrhage only. Do not invent other findings. Do not address the patient. Maximum 40 words.",
+  "prompt_G1_user": "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}.",
+  "prompt_G1_variants": {
+    "a": "Triage: haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}.",
+    "b": "Triage decision: {decision}; haemorrhage probability {prob:.2f}; urgency {urgency}; attribution {attr}. (decision = 'haemorrhage detected' or 'no haemorrhage detected')"
+  },
+  "runner": "validation/scripts/v4_g1_qwen.py (--prompt-variant a|b); resumable"
+}

@@ -6,22 +6,22 @@ import { PublicNav, PublicFooter } from '../../components/public/PublicLayout';
 
 const COMPLIANCE_BADGES = [
   { icon:'🏥', label:'NHS Innovation Service', desc:'INN-2604-0064-2', status:'Active', color:colors.brand },
-  { icon:'🛡️', label:'DCB0129', desc:'Clinical Risk Management', status:'Compliant', color:colors.normal },
+  { icon:'🛡️', label:'DCB0129', desc:'Clinical Risk Management', status:'In Preparation', color:colors.warning },
   { icon:'📋', label:'IEC 62304', desc:'Medical Device Software Lifecycle', status:'In Progress', color:colors.warning },
   { icon:'🔒', label:'ISO 14971', desc:'Risk Management for Medical Devices', status:'In Progress', color:colors.warning },
   { icon:'🔐', label:'ISO 27001', desc:'Information Security Management', status:'Planned', color:colors.textMed },
   { icon:'🏥', label:'ISO 13485', desc:'Quality Management for Medical Devices', status:'Planned', color:colors.textMed },
-  { icon:'🌍', label:'GDPR', desc:'General Data Protection Regulation', status:'Compliant', color:colors.normal },
-  { icon:'🇺🇸', label:'HIPAA', desc:'Health Insurance Portability and Accountability', status:'Compliant', color:colors.normal },
+  { icon:'🌍', label:'GDPR', desc:'General Data Protection Regulation', status:'Aligned', color:colors.warning },
+  { icon:'🇺🇸', label:'HIPAA', desc:'Health Insurance Portability and Accountability', status:'Aligned', color:colors.warning },
 ];
 
 const SECURITY_FEATURES = [
-  { icon:'🔐', title:'End-to-End Encryption', desc:'AES-256 encryption at rest, TLS 1.3 in transit. All clinical data encrypted before leaving the device.' },
+  { icon:'🔐', title:'End-to-End Encryption', desc:'Designed for AES-256 encryption at rest and TLS 1.3 in transit, with clinical data encrypted before leaving the device.' },
   { icon:'🛡️', title:'Zero-Trust Architecture', desc:'Every request verified. No implicit trust. Microsegmentation and least-privilege access controls.' },
-  { icon:'🌍', title:'Data Residency', desc:'Clinical data never leaves your chosen region. UK, EU, US, or Africa data residency guarantees.' },
-  { icon:'🔍', title:'Audit Logging', desc:'Complete audit trail for all system access and modifications. HIPAA and NHS DSPT compliant.' },
-  { icon:'🧬', title:'Federated Learning', desc:'Train models without moving data. Privacy-preserving AI that keeps patient data secure.' },
-  { icon:'✅', title:'Penetration Testing', desc:'Regular third-party security assessments. Vulnerability scanning and remediation.' },
+  { icon:'🌍', title:'Data Residency', desc:'Data residency is planned for UK, EU, US and Africa regions. No live regional deployments are claimed today.' },
+  { icon:'🔍', title:'Audit Logging', desc:'Complete audit trail for all system access and modifications. HIPAA and NHS DSPT aligned (in preparation).' },
+  { icon:'🧬', title:'Federated Learning', desc:'Planned architecture for training models without moving data.' },
+  { icon:'✅', title:'Penetration Testing', desc:'Third-party security assessments and vulnerability scanning are planned as the platform matures.' },
 ];
 
 const INCIDENT_RESPONSE = [
@@ -40,16 +40,16 @@ export function TrustCenterPage({ onNavigate }: { onNavigate:(p:string)=>void })
       <div style={{ textAlign:'center', padding:`clamp(${spacing[10]}, 10vh, ${spacing[20]}) ${spacing[6]} ${spacing[12]}`, background:`linear-gradient(180deg,${colors.bg1},${colors.bg0})` }}>
         <Badge variant="brand" style={{ marginBottom:spacing[5] }}>TRUST CENTER</Badge>
         <h1 style={{ fontSize:'clamp(28px, 7vw, 48px)', fontWeight:900, color:colors.textHigh, margin:`0 0 ${spacing[4]}`, letterSpacing:'-0.04em', lineHeight:1.1 }}>
-          Security & Compliance
+          Security &amp; Regulatory Alignment
         </h1>
         <p style={{ fontSize:'clamp(14px, 2.5vw, 15px)', color:colors.textMed, maxWidth:600, margin:`0 auto ${spacing[8]}`, lineHeight:1.8 }}>
-          Enterprise-grade security and regulatory compliance built into every layer of the SEWA XAI platform.
+          Security controls and regulatory alignment designed into the SEWA XAI platform. Certifications shown as in progress or planned are not yet held.
         </p>
       </div>
 
       {/* Compliance Badges Grid */}
       <div style={{ maxWidth:1160, margin:'0 auto', padding:`0 ${spacing[6]} ${spacing[20]}` }}>
-        <h2 style={{ fontSize:24, fontWeight:800, color:colors.textHigh, margin:`0 0 ${spacing[6]}`, textAlign:'center' }}>Regulatory Compliance</h2>
+        <h2 style={{ fontSize:24, fontWeight:800, color:colors.textHigh, margin:`0 0 ${spacing[6]}`, textAlign:'center' }}>Regulatory Alignment</h2>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:spacing[4], marginBottom:spacing[20] }}>
           {COMPLIANCE_BADGES.map(badge => (
             <Card key={badge.label} padding={spacing[6]} hoverable style={{ display:'flex', alignItems:'center', gap:spacing[4] }}>

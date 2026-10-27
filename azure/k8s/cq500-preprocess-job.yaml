@@ -1,0 +1,68 @@
+# CQ500 preprocessing job — runs step9a in swedencentral, co-located with blob storage.
+# Reads 28.7 GB from blob in-region (fast, no egress charge).
+# Writes only v2_early_cq500.npz (~200 MB) back to blob 'processed' container.
+#
+# Run:
+#   kubectl apply -f azure/k8s/cq500-preprocess-job.yaml --context sewa-ai-prod-eu-aks -n sewa-ai
+#   kubectl logs -f job/cq500-preprocess -n sewa-ai --context sewa-ai-prod-eu-aks
+#
+# After completion, download the feature cache locally:
+#   az storage blob download \
+#     --account-name sewavalidationdata \
+#     --container-name processed \
+#     --name v2_early_cq500.npz \
+#     --file validation/data_cache/v2_early_cq500.npz \
+#     --auth-mode login
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cq500-preprocess
+  namespace: sewa-ai
+  labels:
+    app: cq500-preprocess
+    study: test-c
+    marking: feasibility-public-data
+spec:
+  ttlSecondsAfterFinished: 86400   # auto-clean after 24h
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: cq500-preprocess
+    spec:
+      restartPolicy: Never          # keep pod after failure so logs are visible
+      nodeSelector:
+        nodepool: ai              # Standard_D8ds_v5 nodes (16 GB RAM, enough for in-memory processing)
+      containers:
+        - name: cq500-preprocess
+          image: sewaaieuprodacr.azurecr.io/sewa-validation:main-ad14b9b1
+          imagePullPolicy: Always
+          command:
+            - python
+            - -m
+            - validation.scripts.step9a_cq500_preprocess
+            - --workers
+            - "4"
+          env:
+            - name: AZURE_STORAGE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: validation-storage-secret
+                  key: connection-string
+            - name: SEWA_CACHE_DIR
+              value: /cache
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "2"
+            limits:
+              memory: "8Gi"
+              cpu: "4"
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+      volumes:
+        - name: cache
+          emptyDir:
+            medium: Memory      # ephemeral — only the blob upload matters
+            sizeLimit: 2Gi

@@ -178,6 +178,21 @@ jobs:
           done
       - name: Run live contract tests
         run: python -m pytest tests/contract/test_wire_contract.py -v --tb=short
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: npm, cache-dependency-path: backend/package-lock.json }
+      - name: Install backend dependencies
+        run: cd backend && npm ci --legacy-peer-deps
+      - name: Backend boundary contract vs live services
+        # Same four services, but exercises the backend's own contract code
+        # (serviceContract + payload builders + response normalisers), not just
+        # the raw JSON contract. Real HTTP; no mocks.
+        run: cd backend && npx jest --runTestsByPath src/__tests__/contract-real-services.test.ts --forceExit
+        env:
+          RUN_REAL_SERVICE_CONTRACT: '1'
+          AI_SERVICE_URL: http://127.0.0.1:8000
+          VLM_SERVICE_URL: http://127.0.0.1:8001
+          UNCERTAINTY_SERVICE_URL: http://127.0.0.1:8002
+          METACOGNITION_SERVICE_URL: http://127.0.0.1:8003
       - name: Service logs on failure
         if: failure()
         run: tail -n 200 "$RUNNER_TEMP"/*.log

@@ -1,0 +1,93 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "status": "POST-HOC, EXPLORATORY",
+  "definition": {
+    "C3_risk": "1 - inside_fraction; HIGHER = more Grad-CAM mass outside the brain mask",
+    "inside_fraction": "sum(cam*mask)/sum(cam); mask = brain-window channel 0 > 0.05 on the 160px tile",
+    "gradcam_target": "argmax(logits) = the PREDICTED class (class 1=hemorrhage when predicted positive, else class 0)",
+    "backbone": "model.features (full backbone) -> avgpool -> classifier"
+  },
+  "val": {
+    "error_auroc_C3": 0.35428571428571426,
+    "by_class": {
+      "where_model_predicts_negative": {
+        "n": 56,
+        "mean_C3_risk": 0.4393256949629921,
+        "mean_C3_inside": 0.5606743050370079
+      },
+      "where_model_predicts_positive": {
+        "n": 64,
+        "mean_C3_risk": 0.6140274614705826,
+        "mean_C3_inside": 0.3859725385294174
+      }
+    },
+    "by_truth_x_prediction": {
+      "TN": {
+        "n": 43,
+        "mean_C3_risk": 0.43335535837867095,
+        "mean_C3_inside": 0.566644641621329,
+        "mean_GradCAM_targets_class1": 0.09302325581395349
+      },
+      "FP": {
+        "n": 2,
+        "mean_C3_risk": 0.6110524661262656,
+        "mean_C3_inside": 0.3889475338737344,
+        "mean_GradCAM_targets_class1": 0.6666666666666666
+      },
+      "FN": {
+        "n": 13,
+        "mean_C3_risk": 0.4590737313572851,
+        "mean_C3_inside": 0.540926268642715,
+        "mean_GradCAM_targets_class1": 0.28205128205128205
+      },
+      "TP": {
+        "n": 62,
+        "mean_C3_risk": 0.6141234290623347,
+        "mean_C3_inside": 0.3858765709376652,
+        "mean_GradCAM_targets_class1": 0.9193548387096773
+      }
+    }
+  },
+  "testA": {
+    "error_auroc_C3": 0.3157894736842105,
+    "by_class": {
+      "where_model_predicts_negative": {
+        "n": 54,
+        "mean_C3_risk": 0.4524024971202278,
+        "mean_C3_inside": 0.5475975028797722
+      },
+      "where_model_predicts_positive": {
+        "n": 66,
+        "mean_C3_risk": 0.6054847595192271,
+        "mean_C3_inside": 0.39451524048077274
+      }
+    },
+    "by_truth_x_prediction": {
+      "TN": {
+        "n": 36,
+        "mean_C3_risk": 0.45982449404392295,
+        "mean_C3_inside": 0.540175505956077,
+        "mean_GradCAM_targets_class1": 0.08333333333333333
+      },
+      "FP": {
+        "n": 1,
+        "mean_C3_risk": 0.664964829525299,
+        "mean_C3_inside": 0.33503517047470094,
+        "mean_GradCAM_targets_class1": 0.6666666666666666
+      },
+      "FN": {
+        "n": 18,
+        "mean_C3_risk": 0.43755850327283763,
+        "mean_C3_inside": 0.5624414967271623,
+        "mean_GradCAM_targets_class1": 0.18518518518518517
+      },
+      "TP": {
+        "n": 65,
+        "mean_C3_risk": 0.6045696815191338,
+        "mean_C3_inside": 0.39543031848086624,
+        "mean_GradCAM_targets_class1": 0.9230769230769231
+      }
+    }
+  },
+  "note": "C3 targets the predicted class, so its target differs between predicted-positive and predicted-negative scans. Its negative fitted weight in D3 is NOT evidence of value."
+}

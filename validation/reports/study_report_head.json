@@ -1,0 +1,250 @@
+{
+  "model": "frozen-EfficientNet-B0 features + trained dropout head",
+  "model_kind": "head",
+  "model_val_auroc": 0.7450222222222221,
+  "scope": "RSNA development set (image-level); NO external test",
+  "n": {
+    "train": 1400,
+    "val": 300,
+    "test": 300
+  },
+  "test_error_rate": 0.2733333333333333,
+  "review_rates": [
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ],
+  "evidence_marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "arms": {
+    "B1_maxsoftmax": {
+      "error_auroc": 0.596945625419557,
+      "aurc": 0.2161069001906719,
+      "brier": 0.19824221573223605,
+      "ece": 0.05627554987012873,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 266.6666666666667,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8098591549295775,
+          "accepted_specificity": 0.6293706293706294
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 243.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8208955223880597,
+          "accepted_specificity": 0.6397058823529411
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 200.0,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8333333333333334,
+          "accepted_specificity": 0.6666666666666666
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 166.66666666666666,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8137254901960784,
+          "accepted_specificity": 0.7129629629629629
+        }
+      }
+    },
+    "B2_entropy": {
+      "error_auroc": 0.596945625419557,
+      "aurc": 0.2161069001906719,
+      "brier": 0.19824221573223605,
+      "ece": 0.05627554987012873,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 266.6666666666667,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8098591549295775,
+          "accepted_specificity": 0.6293706293706294
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 243.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8208955223880597,
+          "accepted_specificity": 0.6397058823529411
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 200.0,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8333333333333334,
+          "accepted_specificity": 0.6666666666666666
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 166.66666666666666,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8137254901960784,
+          "accepted_specificity": 0.7129629629629629
+        }
+      }
+    },
+    "C1_uncertainty": {
+      "error_auroc": 0.6091966882971582,
+      "aurc": 0.20608613057811123,
+      "brier": 0.19824221573223605,
+      "ece": 0.05627554987012873,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 260.0,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8137931034482758,
+          "accepted_specificity": 0.6357142857142857
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 240.0,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8175182481751825,
+          "accepted_specificity": 0.6466165413533834
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 203.33333333333334,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8264462809917356,
+          "accepted_specificity": 0.6638655462184874
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 163.33333333333334,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8235294117647058,
+          "accepted_specificity": 0.7129629629629629
+        }
+      }
+    },
+    "C2_ood": {
+      "error_auroc": 0.5929178787200716,
+      "aurc": 0.21905441018587504,
+      "brier": 0.19824221573223605,
+      "ece": 0.05627554987012873,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 236.66666666666666,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8705035971223022,
+          "accepted_specificity": 0.636986301369863
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 226.66666666666666,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.875968992248062,
+          "accepted_specificity": 0.6312056737588653
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 193.33333333333334,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8727272727272727,
+          "accepted_specificity": 0.6615384615384615
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 156.66666666666669,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8958333333333334,
+          "accepted_specificity": 0.6754385964912281
+        }
+      }
+    },
+    "C4_conflict": {
+      "error_auroc": 0.5888901320205863,
+      "aurc": 0.2141072485664141,
+      "brier": 0.19824221573223605,
+      "ece": 0.05627554987012873,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 243.33333333333334,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8428571428571429,
+          "accepted_specificity": 0.6482758620689655
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 230.0,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8432835820895522,
+          "accepted_specificity": 0.6470588235294118
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 203.33333333333334,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8442622950819673,
+          "accepted_specificity": 0.6440677966101694
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 176.66666666666666,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8425925925925926,
+          "accepted_specificity": 0.6470588235294118
+        }
+      }
+    },
+    "D_composite_H": {
+      "error_auroc": 0.6197135824569255,
+      "aurc": 0.1987859395495678,
+      "brier": 0.19824221573223605,
+      "ece": 0.05627554987012873,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 260.0,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8181818181818182,
+          "accepted_specificity": 0.6338028169014085
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 240.0,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8235294117647058,
+          "accepted_specificity": 0.6417910447761194
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 200.0,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8403361344537815,
+          "accepted_specificity": 0.6611570247933884
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 160.0,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8415841584158416,
+          "accepted_specificity": 0.7064220183486238
+        }
+      }
+    }
+  },
+  "composite_vs_better_baseline": {
+    "baseline": "B1_maxsoftmax",
+    "by_review_rate": {
+      "0.05": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.02500000000000007,
+        "ci95": [
+          -0.01429089026915106,
+          0.07595280682443577
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.1": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.01369863013698634,
+        "ci95": [
+          -0.054833108238471734,
+          0.05714285714285718
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.2": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.0,
+        "ci95": [
+          -0.05454545454545471,
+          0.08336864406779666
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.3": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.039999999999999945,
+        "ci95": [
+          -0.02127659574468073,
+          0.11331853496115403
+        ],
+        "passes_20pct_ci_excl_zero": false
+      }
+    }
+  }
+}

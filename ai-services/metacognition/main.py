@@ -117,6 +117,12 @@ CONFIDENCE_THRESHOLDS = {
     "NORMAL":   0.40,
 }
 
+# Experimental: when enabled AND the caller supplies a window deficit, the
+# hallucination-risk SHAP check uses the window-specific deficit instead of the
+# generic SHAP coherence. Off by default pending the validation-study ablation.
+WINDOW_SPECIFIC_COHERENCE = os.getenv("WINDOW_SPECIFIC_COHERENCE", "false").lower() in ("1", "true", "yes")
+INCOHERENCE_THRESHOLD = 0.60   # deficit above this == coherence below 0.40
+
 # ─── Request / Response Schemas ───────────────────────────────
 class SHAPValue(BaseModel):
     f: str           # feature name
@@ -135,6 +141,12 @@ class MetacognitionRequest(BaseModel):
     patient_sex: Optional[str] = Field(None, pattern=r"^(M|F|O|U)$")
     all_findings: Optional[List[Dict[str, Any]]] = []
     report_text: Optional[str] = Field(None, max_length=10000) # DoS protection
+    # Experimental window-specific coherence (see ai-services/uncertainty).
+    # Only consulted when WINDOW_SPECIFIC_COHERENCE is enabled (default off).
+    window_coherence: Optional[float] = Field(None, ge=0.0, le=1.0)
+    window_deficit: Optional[float] = Field(None, ge=0.0, le=1.0)
+    sensitive_windows: Optional[List[str]] = None
+    window_channel_flag: Optional[bool] = None
 
 class MetacognitionFlag(BaseModel):
     code: str
@@ -154,6 +166,13 @@ class MetacognitionResponse(BaseModel):
     safe_to_alert: bool              # whether to fire critical alert to pager
     evaluation_ms: int
     evaluated_at: str
+    # Audit trail: both coherence measures are always reported so the backend
+    # can log them + the windows used (see orchestration audit record).
+    shap_coherence: Optional[float] = None       # generic SHAP coherence (0..1)
+    window_coherence: Optional[float] = None     # experimental window coherence (0..1)
+    window_deficit: Optional[float] = None       # 1 - window_coherence
+    sensitive_windows: Optional[List[str]] = None
+    window_flag_used: bool = False               # window deficit drove the H check
 
 # ─── Core Evaluation Logic ─────────────────────────────────────
 class MetacognitionEvaluator:
@@ -222,16 +241,49 @@ class MetacognitionEvaluator:
                 if corrected_urgency is None:
                     corrected_urgency = "NORMAL" if req.urgency == "CRITICAL" else req.urgency
 
-        # ── 4. SHAP coherence ─────────────────────────────────
+        # ── 4. SHAP coherence (generic) and optional window-specific deficit ──
         shap_coherence = self._check_shap_coherence(req.shap_values or [], req.primary_finding, req.modality)
-        if shap_coherence["score"] < 0.4:
-            flags.append(MetacognitionFlag(
-                code="SHAP_INCOHERENCE",
-                severity="WARNING",
-                message=f"SHAP features do not strongly support '{req.primary_finding}' ({shap_coherence['score']:.2f}/1.0).",
-                suggestion="AI may be relying on spurious image features. Mandatory radiologist review."
-            ))
+        generic_coherence = float(shap_coherence["score"])
+        generic_deficit = 1.0 - generic_coherence
+
+        # Both measures are always computed/reported; the window deficit is only
+        # *used* in H when the flag is on and the caller supplied one.
+        window_flag_used = (
+            WINDOW_SPECIFIC_COHERENCE and req.window_deficit is not None
+        )
+        active_deficit = req.window_deficit if window_flag_used else generic_deficit
+
+        if active_deficit > INCOHERENCE_THRESHOLD:
+            if window_flag_used:
+                flags.append(MetacognitionFlag(
+                    code="WINDOW_INCOHERENCE",
+                    severity="WARNING",
+                    message=(
+                        f"Window-specific attribution is weak for '{req.primary_finding}' "
+                        f"(coherence {req.window_coherence:.2f}, windows {req.sensitive_windows})."
+                    ),
+                    suggestion="Attribution is not concentrated in the expected window/anatomy. Mandatory radiologist review."
+                ))
+            else:
+                flags.append(MetacognitionFlag(
+                    code="SHAP_INCOHERENCE",
+                    severity="WARNING",
+                    message=f"SHAP features do not strongly support '{req.primary_finding}' ({generic_coherence:.2f}/1.0).",
+                    suggestion="AI may be relying on spurious image features. Mandatory radiologist review."
+                ))
             hallucination_risk += 0.20
+
+        # Channel mismatch is reported but (being unvalidated) does not move H.
+        if window_flag_used and req.window_channel_flag:
+            flags.append(MetacognitionFlag(
+                code="WINDOW_CHANNEL_MISMATCH",
+                severity="WARNING",
+                message=(
+                    f"Attribution for '{req.primary_finding}' is dominated by a non-sensitive window "
+                    f"(expected {req.sensitive_windows})."
+                ),
+                suggestion="Confirm the finding is driven by the correct CT window before signing."
+            ))
 
         # ── 5. Uncertainty-confidence agreement ───────────────
         # High confidence + high uncertainty = contradiction
@@ -284,7 +336,10 @@ class MetacognitionEvaluator:
 
         logger.info(
             f"[{req.scan_id}] Metacog: passed={passed}, risk={hallucination_risk:.3f}, "
-            f"flags={len(flags)}, urgency_override={corrected_urgency}, ms={eval_ms}"
+            f"flags={len(flags)}, urgency_override={corrected_urgency}, ms={eval_ms}, "
+            f"shap_coherence={generic_coherence:.3f}, window_coherence={req.window_coherence}, "
+            f"window_deficit={req.window_deficit}, sensitive_windows={req.sensitive_windows}, "
+            f"window_flag_used={window_flag_used}"
         )
 
         return MetacognitionResponse(
@@ -299,6 +354,11 @@ class MetacognitionEvaluator:
             safe_to_alert=safe_to_alert,
             evaluation_ms=eval_ms,
             evaluated_at=datetime.now(timezone.utc).isoformat(),
+            shap_coherence=round(generic_coherence, 4),
+            window_coherence=req.window_coherence,
+            window_deficit=req.window_deficit,
+            sensitive_windows=req.sensitive_windows,
+            window_flag_used=window_flag_used,
         )
 
     def _check_shap_coherence(

@@ -4,7 +4,8 @@
   "services": {
     "triage": {
       "live": true,
-      "baseUrlEnv": "TRIAGE_SERVICE_URL",
+      "baseUrlEnv": "AI_SERVICE_URL",
+      "baseUrlEnvFallbacks": ["TRIAGE_URL"],
       "defaultBaseUrl": "http://localhost:8000",
       "healthPath": "/health",
       "request": {
@@ -117,22 +118,38 @@
           "is_uncertain": "boolean",
           "explanation": "string",
           "inference_ms": "number",
-          "backend": "string",
-          "demo_mode": "boolean",
-          "attribution_method": "string"
-        }
-      },
-      "orchestratorReads": [
-        "uncertainty_score",
-        "aleatoric_uncertainty",
-        "epistemic_uncertainty",
-        "shap_values",
-        "gradcam_url",
-        "mc_passes_used",
-        "is_uncertain",
-        "inference_ms",
-        "backend"
-      ],
+      "backend": "string",
+      "demo_mode": "boolean",
+      "attribution_method": "string",
+      "mc_method": "string",
+      "ood_score": "number|null",
+      "ood_flag": "boolean",
+      "window_coherence": "number|null",
+      "window_deficit": "number|null",
+      "channel_shares": "object|null",
+      "channel_flag": "boolean",
+      "sensitive_windows": "array|null"
+    }
+  },
+  "orchestratorReads": [
+    "uncertainty_score",
+    "aleatoric_uncertainty",
+    "epistemic_uncertainty",
+    "shap_values",
+    "gradcam_url",
+    "mc_passes_used",
+    "is_uncertain",
+    "inference_ms",
+    "backend",
+    "mc_method",
+    "ood_score",
+    "ood_flag",
+    "window_coherence",
+    "window_deficit",
+    "channel_shares",
+    "channel_flag",
+    "sensitive_windows"
+  ],
       "normalizer": "normalizeUncertainty"
     },
     "metacognition": {
@@ -154,12 +171,18 @@
           "patient_age": "optional",
           "patient_sex": "optional",
           "all_findings": "optional",
-          "report_text": "optional"
+          "report_text": "optional",
+          "window_coherence": "optional",
+          "window_deficit": "optional",
+          "sensitive_windows": "optional",
+          "window_channel_flag": "optional"
         },
         "constraints": {
           "scan_id": { "pattern": "^[A-Z0-9\\-_]{4,64}$" },
           "primary_finding": { "minLength": 2, "maxLength": 100 },
           "urgency": { "enum": ["CRITICAL", "URGENT", "NORMAL"] },
+          "window_coherence": { "min": 0, "max": 1 },
+          "window_deficit": { "min": 0, "max": 1 },
           "confidence": { "min": 0, "max": 1 },
           "uncertainty_score": { "min": 0, "max": 1 },
           "modality": { "enum": ["CT", "MRI", "XR", "US", "PET", "PETCT", "MG", "RET", "ECG", "PATH"] },
@@ -181,7 +204,11 @@
           "patient_age": 45,
           "patient_sex": "M",
           "all_findings": [],
-          "report_text": "Acute intracranial haemorrhage."
+          "report_text": "Acute intracranial haemorrhage.",
+          "window_coherence": null,
+          "window_deficit": null,
+          "sensitive_windows": null,
+          "window_channel_flag": null
         }
       },
       "response": {
@@ -196,7 +223,12 @@
           "corrected_confidence": "number|null",
           "safe_to_alert": "boolean",
           "evaluation_ms": "number",
-          "evaluated_at": "string"
+          "evaluated_at": "string",
+          "shap_coherence": "number|null",
+          "window_coherence": "number|null",
+          "window_deficit": "number|null",
+          "sensitive_windows": "array|null",
+          "window_flag_used": "boolean"
         }
       },
       "orchestratorReads": [
@@ -209,7 +241,12 @@
         "corrected_confidence",
         "safe_to_alert",
         "evaluation_ms",
-        "evaluated_at"
+        "evaluated_at",
+        "shap_coherence",
+        "window_coherence",
+        "window_deficit",
+        "sensitive_windows",
+        "window_flag_used"
       ],
       "normalizer": "readMetacognition"
     },

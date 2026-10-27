@@ -1,0 +1,267 @@
+{
+  "model": "fully fine-tuned EfficientNet-B0",
+  "model_kind": "full",
+  "model_val_auroc": 0.9184,
+  "temperature": 2.6559725839804784,
+  "keep_ood": false,
+  "composite_signals": [
+    "C1_uncertainty",
+    "C4_conflict"
+  ],
+  "scope": "RSNA development set (image-level); NO external test",
+  "n": {
+    "train": 1400,
+    "val": 300,
+    "test": 300
+  },
+  "test_error_rate": 0.19,
+  "review_rates": [
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ],
+  "evidence_marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "arms": {
+    "B1_maxsoftmax": {
+      "error_auroc": 0.748610208649195,
+      "aurc": 0.08532291499168548,
+      "brier": 0.13598728327871068,
+      "ece": 0.06576781977007277,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 160.0,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8188405797101449,
+          "accepted_specificity": 0.8435374149659864
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 143.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8267716535433071,
+          "accepted_specificity": 0.8531468531468531
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8648648648648649,
+          "accepted_specificity": 0.8682170542635659
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 86.66666666666667,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8543689320388349,
+          "accepted_specificity": 0.897196261682243
+        }
+      }
+    },
+    "B2_entropy": {
+      "error_auroc": 0.748610208649195,
+      "aurc": 0.08532291499168548,
+      "brier": 0.13598728327871068,
+      "ece": 0.06576781977007277,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 160.0,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8188405797101449,
+          "accepted_specificity": 0.8435374149659864
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 143.33333333333334,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8267716535433071,
+          "accepted_specificity": 0.8531468531468531
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8648648648648649,
+          "accepted_specificity": 0.8682170542635659
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 86.66666666666667,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8543689320388349,
+          "accepted_specificity": 0.897196261682243
+        }
+      }
+    },
+    "C1_uncertainty": {
+      "error_auroc": 0.7512092989675836,
+      "aurc": 0.08400661204643416,
+      "brier": 0.13598728327871068,
+      "ece": 0.06576781977007277,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 156.66666666666669,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8260869565217391,
+          "accepted_specificity": 0.8435374149659864
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 140.0,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8346456692913385,
+          "accepted_specificity": 0.8531468531468531
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8648648648648649,
+          "accepted_specificity": 0.8682170542635659
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 86.66666666666667,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8543689320388349,
+          "accepted_specificity": 0.897196261682243
+        }
+      }
+    },
+    "C4_conflict": {
+      "error_auroc": 0.7509927081077179,
+      "aurc": 0.08404109602136602,
+      "brier": 0.13598728327871068,
+      "ece": 0.06576781977007277,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 156.66666666666669,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8321167883211679,
+          "accepted_specificity": 0.8378378378378378
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 140.0,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8346456692913385,
+          "accepted_specificity": 0.8531468531468531
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8648648648648649,
+          "accepted_specificity": 0.8682170542635659
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 86.66666666666667,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8557692307692307,
+          "accepted_specificity": 0.8962264150943396
+        }
+      }
+    },
+    "D_composite_H": {
+      "error_auroc": 0.751137102014295,
+      "aurc": 0.08401992600332465,
+      "brier": 0.13598728327871068,
+      "ece": 0.06576781977007277,
+      "by_review_rate": {
+        "0.05": {
+          "unsafe_accepted_per_1000": 156.66666666666669,
+          "share_reviewed": 0.05,
+          "accepted_sensitivity": 0.8260869565217391,
+          "accepted_specificity": 0.8435374149659864
+        },
+        "0.1": {
+          "unsafe_accepted_per_1000": 140.0,
+          "share_reviewed": 0.1,
+          "accepted_sensitivity": 0.8346456692913385,
+          "accepted_specificity": 0.8531468531468531
+        },
+        "0.2": {
+          "unsafe_accepted_per_1000": 106.66666666666667,
+          "share_reviewed": 0.2,
+          "accepted_sensitivity": 0.8648648648648649,
+          "accepted_specificity": 0.8682170542635659
+        },
+        "0.3": {
+          "unsafe_accepted_per_1000": 86.66666666666667,
+          "share_reviewed": 0.3,
+          "accepted_sensitivity": 0.8543689320388349,
+          "accepted_specificity": 0.897196261682243
+        }
+      }
+    }
+  },
+  "composite_vs_better_baseline": {
+    "baseline": "B1_maxsoftmax",
+    "by_review_rate": {
+      "0.05": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.020833333333333214,
+        "ci95": [
+          -0.017551691729323356,
+          0.05000000000000003
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.1": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.023255813953488438,
+        "ci95": [
+          -0.04878048780487819,
+          0.06666666666666667
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.2": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.0,
+        "ci95": [
+          -0.05882352941176475,
+          0.06898556535685647
+        ],
+        "passes_20pct_ci_excl_zero": false
+      },
+      "0.3": {
+        "relative_reduction_vs_B1_maxsoftmax": 0.0,
+        "ci95": [
+          -0.03127520161290318,
+          0.08342391304347824
+        ],
+        "passes_20pct_ci_excl_zero": false
+      }
+    }
+  },
+  "arm_A_no_gate": {
+    "unsafe_accepted_per_1000": 190.0,
+    "share_reviewed": 0.0,
+    "accepted_sensitivity": 0.7933333333333333,
+    "accepted_specificity": 0.8266666666666667,
+    "note": "accept-all; no gate"
+  },
+  "ablations_leave_one_out": {
+    "without_C1_uncertainty": {
+      "error_auroc": 0.7509927081077179,
+      "by_review_rate": {
+        "0.05": {
+          "relative_reduction_vs_B1": 0.020833333333333214
+        },
+        "0.1": {
+          "relative_reduction_vs_B1": 0.023255813953488438
+        },
+        "0.2": {
+          "relative_reduction_vs_B1": 0.0
+        },
+        "0.3": {
+          "relative_reduction_vs_B1": 0.0
+        }
+      }
+    },
+    "without_C4_conflict": {
+      "error_auroc": 0.7512092989675836,
+      "by_review_rate": {
+        "0.05": {
+          "relative_reduction_vs_B1": 0.020833333333333214
+        },
+        "0.1": {
+          "relative_reduction_vs_B1": 0.023255813953488438
+        },
+        "0.2": {
+          "relative_reduction_vs_B1": 0.0
+        },
+        "0.3": {
+          "relative_reduction_vs_B1": 0.0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "status": "preprocessing complete",
+  "n_scans": 486,
+  "n_positive": 202,
+  "n_slices": 3884,
+  "failed_scans": [],
+  "feature_cache_blob": "processed/v2_early_cq500.npz",
+  "manifest_blob": "processed/cq500_manifest.json"
+}

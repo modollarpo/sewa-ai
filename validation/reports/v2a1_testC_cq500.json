@@ -1,0 +1,56 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "licence": "CC BY-NC-SA 4.0",
+  "status": "Test C \u2014 external held-out evaluation on CQ500",
+  "model": "v2a1 EfficientNet-B0 (frozen; not retrained on CQ500)",
+  "temperature": 0.7984246735920938,
+  "n_scans": 486,
+  "n_positive": 202,
+  "primary_study_auroc_ICH": 0.746775205689583,
+  "error_auroc": {
+    "D2": 0.6583008447043535,
+    "B2": 0.6577729044834308
+  },
+  "composite_D2_coef": [
+    0.4356678231710649,
+    0.46342415490943195,
+    0.2869670697658609
+  ],
+  "composite_D2_intercept": -0.2291696262354804,
+  "rates_D2_vs_B2": {
+    "0.05": {
+      "rel_reduction": -0.015037593984962466,
+      "ci95": [
+        -0.05883599202392809,
+        0.015040442014126073
+      ],
+      "passes": false
+    },
+    "0.1": {
+      "rel_reduction": -0.03278688524590142,
+      "ci95": [
+        -0.08418325883787071,
+        0.015513104466592887
+      ],
+      "passes": false
+    },
+    "0.2": {
+      "rel_reduction": 0.0,
+      "ci95": [
+        -0.08080808080808084,
+        0.06522247054043068
+      ],
+      "passes": false
+    },
+    "0.3": {
+      "rel_reduction": -0.07999999999999995,
+      "ci95": [
+        -0.19402985074626855,
+        0.03707264957264952
+      ],
+      "passes": false
+    }
+  },
+  "success_criterion": "point estimate >= 15% AND 95% CI excludes 0 at 20% review",
+  "verdict": "INCONCLUSIVE"
+}

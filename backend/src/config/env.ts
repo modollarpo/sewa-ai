@@ -82,6 +82,17 @@ export const config = {
   NHS_CIS2_CLIENT_ID:   optional('NHS_CIS2_CLIENT_ID'),
   NHS_CIS2_CLIENT_SECRET: optional('NHS_CIS2_CLIENT_SECRET'),
 
+  // ── Clinical / Demo gating ────────────────────────────────────
+  // When true, the orchestrator refuses to emit any output whose stages ran on
+  // demo/synthetic weights (fail-closed). Leave false for demo/research runs.
+  CLINICAL_MODE: optional('CLINICAL_MODE', 'false') === 'true',
+
+  // Experimental window-specific coherence (uncertainty-engine ablation).
+  // Off by default; must match WINDOW_SPECIFIC_COHERENCE on the metacognition
+  // service. When on, the backend threads the uncertainty service's window
+  // metrics into metacognition and logs both coherence measures.
+  WINDOW_SPECIFIC_COHERENCE: optional('WINDOW_SPECIFIC_COHERENCE', 'false') === 'true',
+
   // ── Research / Study Mode ─────────────────────────────────────
   RESEARCH_MODE_ENABLED: optional('RESEARCH_MODE_ENABLED', 'false') === 'true',
   STUDY_ID:              optional('STUDY_ID'),
@@ -96,7 +107,7 @@ export const config = {
   // Azure: http://ai-triage:8000 … (AKS internal DNS)
   AI_SERVICE_URL:            optional('AI_SERVICE_URL',            optional('TRIAGE_URL',         IS_AZURE ? 'http://sewa-triage:8000'        : 'http://localhost:8000')),
   VLM_SERVICE_URL:           optional('VLM_SERVICE_URL',           optional('VLM_URL',            IS_AZURE ? 'http://sewa-vlm-report:8001'   : 'http://localhost:8001')),
-  UNCERTAINTY_SERVICE_URL:   optional('UNCERTAINTY_SERVICE_URL',   optional('UNCERTAINTY_URL',    IS_AZURE ? 'http://sewa-uncertainty:8009'  : 'http://localhost:8009')),
+  UNCERTAINTY_SERVICE_URL:   optional('UNCERTAINTY_SERVICE_URL',   optional('UNCERTAINTY_URL',    IS_AZURE ? 'http://sewa-uncertainty:8009'  : 'http://localhost:8002')),
   METACOGNITION_SERVICE_URL: optional('METACOGNITION_SERVICE_URL', optional('METACOGNITION_URL', IS_AZURE ? 'http://sewa-metacognition:8003' : 'http://localhost:8003')),
   FL_SERVICE_URL:            optional('FL_SERVICE_URL',            IS_AZURE ? 'http://sewa-federated:8004' : 'http://localhost:8004'),
   CL_SERVICE_URL:            optional('CL_SERVICE_URL',            IS_AZURE ? 'http://sewa-continuous:8005' : 'http://localhost:8005'),

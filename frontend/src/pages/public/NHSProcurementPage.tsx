@@ -30,7 +30,7 @@ const COMPLIANCE = [
   'CQC-aligned clinical governance',
   'NHS 111/CQS integration',
   'NICE Evidence Standards Framework compliance',
-  'GDPR Art. 28 compliant data processing',
+  'GDPR Art. 28-aligned data processing (in preparation)',
 ];
 
 const BENEFITS = [
@@ -84,7 +84,7 @@ export function NHSProcurementPage({ onNavigate }: { onNavigate: (p: string) => 
       {/* Frameworks */}
       <div style={{ maxWidth: 1160, margin: '0 auto', padding: `0 ${spacing[6]} ${spacing[12]}` }}>
         <h2 style={{ fontSize: 26, fontWeight: 800, color: colors.textHigh, margin: `0 0 ${spacing[2]}`, fontFamily: typography.fontBase, letterSpacing: '-0.5px', textAlign: 'center' }}>Available Frameworks</h2>
-        <p style={{ fontSize: 13, color: colors.textMed, textAlign: 'center', margin: `0 0 ${spacing[10]}` }}>SEWA XAI is listed on the following frameworks for fast, compliant procurement</p>
+        <p style={{ fontSize: 13, color: colors.textMed, textAlign: 'center', margin: `0 0 ${spacing[10]}` }}>SEWA XAI is listed on the following frameworks to support procurement planning (certifications in preparation)</p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: spacing[5], marginBottom: spacing[16] }}>
           {FRAMEWORKS.map((fw, i) => (
@@ -110,7 +110,7 @@ export function NHSProcurementPage({ onNavigate }: { onNavigate: (p: string) => 
 
         {/* Benefits */}
         <h2 style={{ fontSize: 26, fontWeight: 800, color: colors.textHigh, margin: `0 0 ${spacing[2]}`, fontFamily: typography.fontBase, letterSpacing: '-0.5px', textAlign: 'center' }}>NHS Procurement Benefits</h2>
-        <p style={{ fontSize: 13, color: colors.textMed, textAlign: 'center', margin: `0 0 ${spacing[10]}` }}>Everything you need for a compliant, fast deployment</p>
+        <p style={{ fontSize: 13, color: colors.textMed, textAlign: 'center', margin: `0 0 ${spacing[10]}` }}>Everything you need for procurement planning and deployment preparation</p>
         <div className="benefits-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: spacing[5], marginBottom: spacing[16] }}>
           {BENEFITS.map((b, i) => (
             <Card key={i} padding={spacing[6]} style={{ background: colors.bg2, borderRadius: radius.md }}>

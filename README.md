@@ -9,19 +9,17 @@
 
 ## What is SEWA XAI?
 
-SEWA XAI is an enterprise-grade clinical diagnostic AI platform that **targets** reducing the time from medical scan acquisition to clinician alert from **4–8 hours to under 2 seconds** (engineering target — not independently measured; see Technical Specifications).
+SEWA XAI is an enterprise-grade clinical diagnostic AI architecture designed as an engineering target to reduce the time from medical scan acquisition to clinician alert from **4–8 hours to under 2 seconds** (engineering target / mock benchmark — not independently measured as a clinical outcome; see Technical Specifications & Evidence Matrix).
 
-Built for NHS hospitals and African clinics — the same platform, adapted to any environment from Azure GPU clusters to offline ARM devices with no internet.
+Built for NHS hospitals and African clinics — the same architecture, designed for environments from Azure clusters to offline ARM devices with no internet.
 
-> **⚠️ Scope statement (model outputs).** This repository contains **no clinically validated
-> model weights and no labelled dataset**. Every AI service runs in demo mode: predictions,
-> Grad-CAM/SHAP attributions, uncertainty estimates, report text and reliability metrics are
-> produced by a **demo/synthetic pipeline** and are labelled as such in API responses
-> (`demo_mode: true`, `backend: "demo"`). They are illustrative of the pipeline's behaviour,
-> not clinical evidence, and must not be quoted as performance results. Obtaining real
-> weights + evaluation data, or formally scoping all published outputs as synthetic, is an
-> open audit action (see `SEWA_AI_CODEBASE_RESEARCH_IMPLEMENTATION_AUDIT.md` §34).
-> All displayed regulatory certifications are likewise unclaimed — see Certifications & Compliance below.
+> **⚠️ Scope statement & Evidence Audit (Model Outputs & Claims).** 
+> This repository contains **no clinically validated model weights and no patient datasets**. Every AI microservice defaults to demo/synthetic execution mode: predictions, Grad-CAM/SHAP attributions, uncertainty estimates, report text, and reliability metrics are produced by a **demo fallback pipeline** and are explicitly tagged in API responses (`demo_mode: true`, `backend: "demo"`). 
+> 
+> - **Evaluated Scope:** Only intracranial haemorrhage (ICH) triage on non-contrast head CT has been evaluated on public datasets (RSNA internal AUROC **0.807**, CQ500 external generalisation AUROC **0.7468** across $n=486$). 
+> - **Inconclusive Findings:** Pre-registered metacognition evaluation showed a **0.0% safety error reduction** at a 20% review rate (95% CI [-8.1%, +6.5%], **inconclusive**); no hallucination-detection or safety-gating benefit is claimed.
+> - **Certifications:** All regulatory certifications (UKCA, CE, ISO 13485/27001, DCB0129 compliance, DSPT) are in preparation, aligned, or planned — none are currently held or claimed as certified in this repository.
+> - **Traceability:** See `docs/CLAIMS_EVIDENCE_MATRIX.md` for a complete audit of every claim across the project.
 
 ---
 
@@ -34,26 +32,26 @@ Built for NHS hospitals and African clinics — the same platform, adapted to an
 │  DICOM / FHIR R4 / HL7v2 / Upload                               │
 │         │                                                         │
 │  ┌──────▼────────────────────────────────────────────────────┐   │
-│  │ Engine 1: Triage (EfficientNet-B4, 380ms)                 │   │
-│  │ 14 conditions · CT/MRI/X-ray/US · prediction + urgency    │   │
+│  │ Engine 1: Triage (ONNX INT8 / Demo Fallback, target ~380ms)│   │
+│  │ ICH Triage evaluated · CT Head · prediction + urgency     │   │
 │  └──────┬────────────────────────────────────────────────────┘   │
 │         │                                                         │
 │  ┌──────▼────────────────────────────────────────────────────┐   │
-│  │ Engine 2: Uncertainty (MC-Dropout ×20, 280ms)             │   │
-│  │ Epistemic + aleatoric decomposition · Mandatory escalation │   │
+│  │ Engine 2: Uncertainty (MC-Dropout target ~280ms)          │   │
+│  │ Epistemic + aleatoric decomposition · Mandatory escalation│   │
 │  └──────┬────────────────────────────────────────────────────┘   │
 │         │                                                         │
 │  ┌──────▼────────────────────────────────────────────────────┐   │
-│  │ Engine 3: VLM Report Generator (900ms)                    │   │
-│  │ CLIP + Llama-3 LoRA · 8 languages · Clinician-editable    │   │
+│  │ Engine 3: VLM Report Generator (Target ~900ms)            │   │
+│  │ Structured report template generation                     │   │
 │  └──────┬────────────────────────────────────────────────────┘   │
 │         │                                                         │
 │  ┌──────▼────────────────────────────────────────────────────┐   │
-│  │ Engine 4: Metacognition (9 layers, 120ms)                 │   │
-│  │ Hallucination detection · Safe-to-alert gate              │   │
+│  │ Engine 4: Metacognition (Research-stage, target ~120ms)    │   │
+│  │ Self-evaluation harness · Inconclusive safety gain        │   │
 │  └──────┬────────────────────────────────────────────────────┘   │
 │         │                                                         │
-│  Door-to-alert: 1.84 seconds                                      │
+│  Door-to-alert: Engineering Target (~1.84s simulated)            │
 │  FCM · WebSocket · Email · HL7 ORU^R01 · Stroke Code             │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -161,20 +159,17 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for full instructions.
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Door-to-alert (median) | <2s | Engineering target (not independently measured) |
-| Conditions detected | 14 (CT/MRI/XR/US + MG/RET/PET/PATH) | Pipeline supports these modalities |
-| ICH AUC-ROC | — | Unmeasured — no dataset/weights in this repository |
-| Hallucination catch rate | — | Benchmark harness exists; not validated |
-| Uncertainty calibration (ECE) | — | Pipeline implemented; not measured on real predictions |
-| Deployments | Pre-clinical | No live hospital deployments |
-| Scans processed | — | No dataset in repository |
+| Door-to-alert (median) | <2s (target ~1.84s) | Engineering target (not measured as clinical outcome) |
+| Conditions / Modalities | ICH triage on non-contrast head CT | Evaluated scope; multi-condition/modality modules are planned |
+| ICH AUC-ROC (Internal) | 0.807 | Verified on RSNA ICH public dataset (research-only) |
+| ICH AUC-ROC (External) | 0.7468 | Verified on CQ500 external dataset ($n=486$, 3-rad majority) |
+| Metacognition safety gain | 0.0% (95% CI [-8.1%, +6.5%]) | Pre-registered evaluation: **Inconclusive** (no safety-gating claim) |
+| Deployments | Pre-clinical (TRL 5) | No live hospital deployments |
 | Report languages | 8 | Supported by VLM language templates |
 | API uptime SLA | 99.9% | Target |
 | Encryption | AES-256 at rest, TLS 1.3 in transit | Azure best-practice defaults |
 
-> **Honesty note:** quantitative clinical-performance figures previously listed here were
-> removed because this repository contains no producing code, dataset, or evaluation output
-> for them. They must not be repeated as results.
+> **Honesty note:** Quantitative clinical-performance figures are restricted to pre-registered evaluations on public benchmark datasets (RSNA and CQ500) for ICH head CT triage. All other modules and claims are exploratory, research-stage, or planned. See `docs/CLAIMS_EVIDENCE_MATRIX.md`.
 
 ---
 

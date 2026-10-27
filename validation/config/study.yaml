@@ -1,0 +1,94 @@
+# SEWA AI validation study - frozen parameters (from the coding-agent prompt).
+# Do not change values marked FROZEN without a new pre-registereation + stop-and-ask.
+
+task: "binary study-level: intracranial haemorrhage vs no haemorrhage on non-contrast head CT"
+
+imaging:
+  window_presets:            # standard clinical presets, FROZEN
+    brain:    { window_center: 40,  window_width: 80  }
+    subdural: { window_center: 80,  window_width: 200 }
+    bone:     { window_center: 600, window_width: 2800 }
+  resize_size: 224           # FROZEN (default per prompt)
+
+preprocess:
+  hu_rescale: true           # read DICOM RescaleSlope/RescaleIntercept -> Hounsfield Units
+  cache_dir: "data/cache"    # git-ignored; store preprocessed tensors + metadata parquet
+
+splits:
+  by_patient: true           # NEVER separate slices of one patient into train/val/test
+  seeds: { train_val_test: 42 }
+  split_files_dir: "data/splits"
+
+task_levels:
+  labels_per:                 # RSNA per-slice; CQ500 per-study
+    rsna: "slice"
+    cq500: "study"
+  study_score: "mean_of_top_3_slice_probs"   # FROZEN default; configurable
+  cq500_ground_truth: "majority_of_3_radiologist_reads"
+
+model:
+  backbone: "efficientnet_b0" # ImageNet-pretrained (record pretrained-weights licence)
+  head_dropout: true          # real MC-dropout in the head
+  calibration: "temperature_scaling_on_validation_only"
+
+baselines:                   # FROZEN named comparators
+  B1: "single-pass max-softmax-probability thresholding"
+  B2: "single-pass predictive entropy thresholding"
+
+signals:
+  uncertainty:
+    mc_passes: 20             # N, FROZEN
+    epistemic_weight: 0.6     # FROZEN per prompt
+    aleatoric_weight: 0.4     # FROZEN per prompt
+    u_max_possible: 0.15      # hard ceiling with the given formula -> do NOT use 0.25
+    threshold_rule: "validation-set quantiles"
+  ood_distance: "mahalanobis penultimate-layer, shared covariance, shrinkage, fit on TRAINING only"
+  attribution: "grad-cam overlap vs BHX boxes on CQ500 positives; signal = 'not evaluated' if BHX unavailable"
+  conflict: "high confidence AND high U, thresholds from validation quantiles"
+  negation: "not evaluated / excluded - requires generated reports; state this limitation in every report"
+
+composite_H:
+  weights: "logistic regression fitted on VALIDATION ONLY, then frozen"
+  weight_file: "models/h_weights.json"
+
+evaluation:
+  review_rates: [0.05, 0.10, 0.20, 0.30]
+  bootstrap_resamples: 1000   # patient-level, fixed seeds
+  success_criterion: ">=20% relative reduction in wrongly-accepted haemorrhage/confident-wrong at matched review rate vs BETTER of B1/B2, 95% CI excluding zero"
+
+arms:
+  A:  "no gate"
+  B1: "single-pass max-softmax threshold"
+  B2: "single-pass entropy threshold"
+  C1: "uncertainty only (MC dropout U)"
+  C2: "OOD distance only"
+  C3: "attribution coherence only (if evaluated)"
+  C4: "confidence-uncertainty conflict only"
+  D:  "full composite H"
+  E:  "ablations - H minus each signal, one at a time"
+
+metrics_per_arm_and_rate:
+  - error-detection AUROC
+  - risk-coverage curve + area under it
+  - unsafe-accepted rate (wrong, confident, passes gate) per 1,000 studies
+  - missed haemorrhage among accepted studies
+  - sensitivity/specificity of final decision
+  - share routed to human review
+
+evidence_marking: "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE."
+
+data:
+  rsna:
+    role: "development (train/validation)"
+    source: "Kaggle rsna-intracranial-hemorrhage-detection or AWS open-data controlled access"
+    licence_status: "NON-COMMERCIAL - stop-and-ask pending"   # see data_manifest.json
+  cq500:
+    role: "external test (never tuned)"
+    source: "http://headctstudy.qure.ai/dataset (official)"
+    licence_status: "CC BY-NC-SA 4.0 (non-commercial + share-alike) - verification pending"
+  bhx:
+    role: "optional attribution check"
+    source: "PhysioNet (open access)"
+  hemorica:
+    role: "optional second external set"
+    licence_status: "not verified this session"

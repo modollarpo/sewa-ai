@@ -1,0 +1,29 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "status": "POST-HOC, EXPLORATORY (not pre-registered; does not change the frozen verdict)",
+  "estimand": "relative reduction in wrongly-accepted studies, D3 vs B2, 20% review",
+  "design": {
+    "instances": 540,
+    "scans": 60,
+    "corruptions_per_scan": 9,
+    "effective_scan_clusters": 60,
+    "n_boot": 4000
+  },
+  "observed_rel_reduction": 0.17431192660550474,
+  "bootstrap_se": 0.04750904377456353,
+  "bootstrap_ci95_percentile": [
+    0.08653017241379306,
+    0.2711864406779661
+  ],
+  "ci_half_width": 0.09232813413208651,
+  "mde_80pct_power_design_based": 0.1331006244031606,
+  "power_by_true_effect": {
+    "0.0": 0.0,
+    "0.1": 0.02,
+    "0.15": 0.1447,
+    "0.2": 0.4905,
+    "0.25": 0.8535,
+    "0.3": 0.9858
+  },
+  "note": "Cluster bootstrap resamples the 60 scans (each carrying its 9 corruptions). MDE = (z_0.975+z_0.8)*SE. Power uses an additive-shift bootstrap with a normal-approx CI; exploratory."
+}

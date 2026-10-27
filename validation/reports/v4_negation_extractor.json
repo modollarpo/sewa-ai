@@ -1,0 +1,218 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. UNREVIEWED BY A CLINICIAN.",
+  "n_total": 506,
+  "n_dev": 251,
+  "n_holdout": 255,
+  "holdout": {
+    "accuracy": 1.0,
+    "per_class": {
+      "present": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 82
+      },
+      "absent": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 49
+      },
+      "uncertain": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 42
+      },
+      "historical": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 41
+      },
+      "resolved": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 41
+      }
+    },
+    "n": 255,
+    "failures": []
+  },
+  "dev": {
+    "accuracy": 1.0,
+    "per_class": {
+      "present": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 82
+      },
+      "absent": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 47
+      },
+      "uncertain": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 41
+      },
+      "historical": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 40
+      },
+      "resolved": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 41
+      }
+    },
+    "n": 251,
+    "failures": []
+  },
+  "hard_adversarial": {
+    "accuracy": 1.0,
+    "n": 20,
+    "per_class": {
+      "present": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 6
+      },
+      "absent": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 6
+      },
+      "uncertain": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "historical": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "resolved": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      }
+    },
+    "cases": [
+      {
+        "text": "Small acute right subdural hematoma, not associated with mass effect or midline shift.",
+        "gold": "present",
+        "pred": "present"
+      },
+      {
+        "text": "There is no evidence to support the presence of a subdural hematoma.",
+        "gold": "absent",
+        "pred": "absent"
+      },
+      {
+        "text": "No hemorrhage is identified; no mass effect is present.",
+        "gold": "absent",
+        "pred": "absent"
+      },
+      {
+        "text": "The possibility of a subarachnoid hemorrhage cannot be entirely dismissed.",
+        "gold": "uncertain",
+        "pred": "uncertain"
+      },
+      {
+        "text": "No acute hemorrhage identified, although a chronic subdural hematoma persists.",
+        "gold": "historical",
+        "pred": "historical"
+      },
+      {
+        "text": "Interval development of an intraparenchymal hemorrhage.",
+        "gold": "present",
+        "pred": "present"
+      },
+      {
+        "text": "The small subdural hematoma has essentially resolved since the prior study.",
+        "gold": "resolved",
+        "pred": "resolved"
+      },
+      {
+        "text": "Acute subarachnoid hemorrhage with no intraventricular extension.",
+        "gold": "present",
+        "pred": "present"
+      },
+      {
+        "text": "No cortical contusion or extra-axial hemorrhage.",
+        "gold": "absent",
+        "pred": "absent"
+      },
+      {
+        "text": "Subtle hyperdensity along the tentorium, possibly representing subarachnoid hemorrhage.",
+        "gold": "uncertain",
+        "pred": "uncertain"
+      },
+      {
+        "text": "Stable chronic bilateral subdural hematomas.",
+        "gold": "historical",
+        "pred": "historical"
+      },
+      {
+        "text": "Large left epidural hematoma with mass effect.",
+        "gold": "present",
+        "pred": "present"
+      },
+      {
+        "text": "No evidence of acute intracranial hemorrhage.",
+        "gold": "absent",
+        "pred": "absent"
+      },
+      {
+        "text": "Mild prepontine hyperdensity; a small subarachnoid hemorrhage cannot be confidently excluded.",
+        "gold": "uncertain",
+        "pred": "uncertain"
+      },
+      {
+        "text": "No intraventricular or subarachnoid hemorrhage.",
+        "gold": "absent",
+        "pred": "absent"
+      },
+      {
+        "text": "Right frontal intraparenchymal hematoma with surrounding edema.",
+        "gold": "present",
+        "pred": "present"
+      },
+      {
+        "text": "Prior subdural hematoma, resolved on the current examination.",
+        "gold": "resolved",
+        "pred": "resolved"
+      },
+      {
+        "text": "Known remote cerebellar hemorrhage, unchanged.",
+        "gold": "historical",
+        "pred": "historical"
+      },
+      {
+        "text": "An acute subdural hemorrhage is present despite the absence of mass effect.",
+        "gold": "present",
+        "pred": "present"
+      },
+      {
+        "text": "The brain is unremarkable with no hemorrhage.",
+        "gold": "absent",
+        "pred": "absent"
+      }
+    ]
+  }
+}

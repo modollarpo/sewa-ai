@@ -1,0 +1,27 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "extractor": "v1",
+  "variant_a": {
+    "extractor_flagged": {
+      "rate": 0.49333333333333335,
+      "n_parsed": 150,
+      "polarity_counts": {
+        "present": 149,
+        "absent": 1
+      },
+      "prompt_variant": "a"
+    }
+  },
+  "variant_b": {
+    "extractor_flagged": {
+      "rate": 0.06666666666666667,
+      "n_parsed": 150,
+      "polarity_counts": {
+        "absent": 65,
+        "present": 85
+      },
+      "prompt_variant": "b"
+    }
+  },
+  "labels_note": "label columns empty; only extractor-flagged rates compared"
+}

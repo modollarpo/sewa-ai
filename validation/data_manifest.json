@@ -1,0 +1,119 @@
+{
+  "$schema": "validation/seed/data_manifest.schema.json",
+  "study": "SEWA AI public-data feasibility study (ICH vs no-ICH on non-contrast head CT). Step 1 of the validation prompt: licence verification only. NOT CLINICAL EVIDENCE.",
+  "generated": "2026-10-11",
+  "status": "STOPPED_FOR_APPROVAL",
+  "stop_reason": "Prompt ground-rule 2: every candidate dataset is non-commercial and two require credentials. The prompt requires stopping and asking before any download under these conditions.",
+  "datasets": [
+    {
+      "role": "development (train/validation)",
+      "name": "RSNA 2019 Brain CT Hemorrhage Detection Challenge",
+      "official_url": "https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection",
+      "aws_open_data": "https://registry.opendata.aws/rsna-intracranial-hemorrhage-detection",
+      "version_or_doi": "10.1148/ryai.2020190211",
+      "licence": "Non-commercial licence (RSNA terms of use). NOT a standard SPDX licence.",
+      "licence_excerpt": "You may access and use these de-identified imaging datasets and annotations ('the data') for non-commercial purposes only, including academic research and education, as long as you agree to abide by the following provisions: Not to make any attempt to identify or contact any individual(s) who may be the subjects of the data. If you share or re-distribute the data in any form, include a citation ... Flanders AF, et al. Radiology: Artificial Intelligence 2020;2:3.",
+      "restrictions": [
+        "NON-COMMERCIAL ONLY. Company use without permission is out of scope; protocol suggests asking RSNA or running via a university partner.",
+        "No attempts to identify subjects.",
+        "No unofficial mirrors / no re-distribution.",
+        "Kaggle access requires account + competition-rules acceptance + API token.",
+        "AWS bucket available but is the same licensed data."
+      ],
+      "size_reported": { "kaggle": "458.97 GB, 874,037 files", "rsna_doc": "874,035 images, 25k+ exams" },
+      "downloaded": false,
+      "download_date": null,
+      "file_checksums": null,
+      "sampling_method": null,
+      "proposed_subset": "Patient-level subset of a few thousand studies (per prompt rule 5) IF licence approved and disk permits",
+      "licence_resolved_2026_10_11": false,
+      "access_check_2026_10_11": {
+        "kaggle_cli": true,
+        "kaggle_token": "stored at ~/.kaggle/access_token (mode restricted to user)",
+        "kaggle_api_auth_verified": "competitions list returned 200 + rows",
+        "competition_file_listing": "EMPTY (0 files returned by both v1 API and kagglesdk)",
+        "likely_cause": "Kaggle competition rules/terms NOT yet accepted by this account in the browser",
+        "aws_public_s3_list": "403 Forbidden at rsna-intracranial-hemorrhage-detection (us-east-1)",
+        "aws_registry": "intracranial-hemorrhage controlled-access bucket (us-west-2) via https://mira.rsna.org/dataset/1 - NOT an anonymous public endpoint"
+      },
+      "bundle_resolved_2026_10_11": {
+        "rules_accepted": true,
+        "delivery": "SINGLE signed bundle zip on GCS (archive.zip), Content-Length 194,671,162,157 bytes, Accept-Ranges: bytes; Last-Modified 2020-05-16",
+        "per_file_api": "none (SDK list_data_files returns empty; per-file download endpoint 404s)",
+        "central_directory": "124,712,141 bytes, 874,037 entries, read via HTTP range requests",
+        "counts": {"stage_2_train_dicom": 752803, "stage_2_test_dicom": 121232},
+        "labels": "rsna-intracranial-hemorrhage-detection/stage_2_train.csv (119,696,322 B uncompressed, 16,970,302 B deflate); per-image rows ID_<id>_<subtype>, subtypes epidural/intraparenchymal/intraventricular/subarachnoid/subdural/any; binary label = _any",
+        "patient_id_present": false,
+        "split_limitation": "filenames are per-IMAGE; no patient id in released data -> patient-level split impossible for RSNA; splits are by image id (recorded in every report)",
+        "subset_pipeline": "validation/scripts/rsna_zipfetch.py (range ZIP reader) + rsna_subset.py (balanced subset -> Azure blob); PROVEN on 40 images (20 pos / 20 neg) -> container rsna-subset/dicom/, verified with pydicom (512x512, BitsStored 12, Slope 1, Intercept -1024)"
+      }
+    },
+    {
+      "role": "external test (never tuned on)",
+      "name": "CQ500 (Qure.ai)",
+      "official_url": "http://headctstudy.qure.ai/dataset",
+      "version_or_doi": null,
+      "licence": "CC BY-NC-SA 4.0 (per Qure.ai official blog and legal pages)",
+      "licence_excerpt": "We make this dataset and the radiologists' reads public under CC-BY-NC-SA license. Other researchers can use this dataset to benchmark their algorithms. (Qure.ai blog; see also qER Lancet paper Chilamkurthy et al.)",
+      "restrictions": [
+        "NON-COMMERCIAL (NC).",
+        "SHARE-ALIKE (SA): derivative outputs must carry the same licence.",
+        "Study-level ground truth = majority of the three radiologists' reads (documented choice).",
+        "Known invalid/corrupt series: CQ500CT19, CQ500CT22, CQ500CT25, CQ500CT52, CQ500CT120 (corrupt zip) - see MD.ai notes.",
+        "Use official source only; several unofficial mirrors exist (Kaggle 'Qure.ai HeadCT', MD.ai) - not to be used per prompt."
+      ],
+      "size_reported": { "md_ai": "491 exams, 1,268 series, 169,808 images, ~42.43 GB", "paper": "491 scans, 205 haemorrhage-positive" },
+      "downloaded": false,
+      "download_date": null,
+      "file_checksums": null,
+      "sampling_method": null,
+      "licence_resolved_2026_10_11": false
+    },
+    {
+      "role": "optional: attribution coherence boxes (evaluation only)",
+      "name": "BHX bounding boxes for CQ500 (PhysioNet)",
+      "official_url": "https://physionet.org/ (search BHX / CQ500 boxes)",
+      "version_or_doi": null,
+      "licence": "PhysioNet (open access; check current terms at download time)",
+      "restrictions": ["Credentialed PhysioNet access (DUA).", "Use only to test attribution overlap, not to tune."],
+      "downloaded": false,
+      "download_date": null,
+      "file_checksums": null,
+      "sampling_method": null,
+      "licence_resolved_2026_10_11": false
+    },
+    {
+      "role": "optional: second external test set",
+      "name": "Hemorica (372 head CT exams)",
+      "official_url": "To verify at download step (not yet read official page)",
+      "version_or_doi": null,
+      "licence": "NOT VERIFIED THIS SESSION",
+      "restrictions": ["Confirm licence permits company use before use."],
+      "downloaded": false,
+      "download_date": null,
+      "file_checksums": null,
+      "sampling_method": null,
+      "licence_resolved_2026_10_11": false
+    }
+  ],
+  "storage": {
+    "provider": "Azure Blob Storage",
+    "subscription": "Azure subscription 1 (a14702a0-439b-42f5-b31a-8b898adfa965)",
+    "resource_group": "sewa-validation-rg",
+    "account": "sewavalidationdata",
+    "region": "swedencentral",
+    "sku": "Standard_LRS",
+    "public_network_access": "default Deny; bypass AzureServices; allowed IP = 102.89.46.84 (deployer egress)",
+    "containers": ["rsna-subset", "cq500", "processed"],
+    "note": "Dedicated study account - production storage (sewaaieuproddicom) is NOT reused.",
+    "created": "2026-10-11",
+    "verify": "az storage container list --account-name sewavalidationdata --auth-mode login --output table"
+  },
+  "blocking_decisions_needed": [
+    "1. RSNA licence: may we use the non-commercial RSNA data for this company-internal feasibility study, via a university partner, or with RSNA's explicit permission?",
+    "2. CQ500 CC BY-NC-SA: acceptable for the study (NC) and are outputs acceptable under SA?",
+    "3. Kaggle account: accept the RSNA competition rules in the browser (kaggle.com) - the API is live (token verified) but the competition file list is empty until rules are accepted.",
+    "4. Disk: only ~33 GiB free now. A subset (few GB-10s GB) is feasible; full RSNA (459 GB) is not on this machine.",
+    "5. Compute: no NVIDIA GPU/nvidia-smi on this machine - CPU-only training (slower; subset + small model as planned)."
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "preregistration": "docs/evidence/preregistration_v3.md",
+  "status": "ONE-SHOT confirmatory feasibility test (fresh disjoint scans + shift)",
+  "data": {
+    "manifest": "validation/scripts/step2_manifest_v3.json",
+    "fresh_scans": 120,
+    "disjoint_from": "v2 train/val/test and tile/feature cache"
+  },
+  "model": "v2a1 EfficientNet-B0 (reused; not retrained)",
+  "temperature": 0.7984246735920938,
+  "composite_D2_standardised_weights": [
+    0.3729227515358072,
+    0.46924157690540014,
+    0.3543456531352371
+  ],
+  "composite_D2_intercept": -0.23310077006327667,
+  "primary_test20_D2_vs_B2": {
+    "by_review_rate": {
+      "0.05": {
+        "rel_reduction": 0.012861736334405115,
+        "ci95": [
+          -0.014089537223340009,
+          0.04225725376996965
+        ]
+      },
+      "0.1": {
+        "rel_reduction": 0.02135231316725963,
+        "ci95": [
+          -0.018663783355947493,
+          0.06343431651267481
+        ]
+      },
+      "0.2": {
+        "rel_reduction": 0.078838174273859,
+        "ci95": [
+          0.014700554134697218,
+          0.1413638104967437
+        ]
+      },
+      "0.3": {
+        "rel_reduction": 0.038043478260869484,
+        "ci95": [
+          -0.021863961597681156,
+          0.11541666666666658
+        ]
+      }
+    },
+    "paired_auroc_diff_D2_minus_B2": {
+      "auroc_diff": 0.02477312237834739,
+      "ci95": [
+        0.006333595506832649,
+        0.0441997186045608
+      ],
+      "auroc_D2": 0.7138112250594109,
+      "auroc_B2": 0.6890381026810635,
+      "n": 1080
+    },
+    "n_scans": 120,
+    "n_instances": 1080,
+    "base_error_rate": 0.31296296296296294
+  },
+  "secondary_clean": {
+    "by_review_rate": {
+      "0.05": {
+        "rel_reduction": 0.0,
+        "ci95": [
+          -0.09090909090909102,
+          0.13652597402597388
+        ]
+      },
+      "0.1": {
+        "rel_reduction": -0.058823529411764774,
+        "ci95": [
+          -0.18181818181818205,
+          0.15384615384615402
+        ]
+      },
+      "0.2": {
+        "rel_reduction": -0.1428571428571429,
+        "ci95": [
+          -0.42896825396825383,
+          0.05882352941176457
+        ]
+      },
+      "0.3": {
+        "rel_reduction": -0.2222222222222221,
+        "ci95": [
+          -0.8333333333333331,
+          0.12500000000000003
+        ]
+      }
+    },
+    "paired_auroc_diff_D2_minus_B2": {
+      "auroc_diff": 0.0385477364410578,
+      "ci95": [
+        -0.026445777275001827,
+        0.11411083878527487
+      ],
+      "auroc_D2": 0.7355445988346033,
+      "auroc_B2": 0.6969968623935455,
+      "n": 120
+    },
+    "n_scans": 120,
+    "base_error_rate": 0.19166666666666668
+  },
+  "secondary_per_corruption": {
+    "noise_0": {
+      "rel_reduction_20": 0.0,
+      "ci95": [
+        -0.2352941176470589,
+        0.13652597402597388
+      ]
+    },
+    "noise_1": {
+      "rel_reduction_20": 0.035714285714285754,
+      "ci95": [
+        -0.13043478260869565,
+        0.18190235690235684
+      ]
+    },
+    "noise_2": {
+      "rel_reduction_20": 0.016666666666666743,
+      "ci95": [
+        -0.0770491803278688,
+        0.1323529411764706
+      ]
+    },
+    "blur_0": {
+      "rel_reduction_20": 0.0,
+      "ci95": [
+        -0.2609267734553774,
+        0.1428571428571429
+      ]
+    },
+    "blur_1": {
+      "rel_reduction_20": 0.05882352941176457,
+      "ci95": [
+        -0.14285714285714285,
+        0.18187799043062194
+      ]
+    },
+    "blur_2": {
+      "rel_reduction_20": 0.021739130434782705,
+      "ci95": [
+        -0.10422207446808501,
+        0.12244897959183675
+      ]
+    },
+    "lowdose_0": {
+      "rel_reduction_20": 0.0,
+      "ci95": [
+        -0.4169642857142856,
+        0.19071428571428553
+      ]
+    },
+    "lowdose_1": {
+      "rel_reduction_20": -0.18749999999999978,
+      "ci95": [
+        -0.3333333333333334,
+        0.04545454545454536
+      ]
+    },
+    "lowdose_2": {
+      "rel_reduction_20": 0.0,
+      "ci95": [
+        -0.28571428571428564,
+        0.1666666666666667
+      ]
+    }
+  },
+  "success_criterion": "point estimate >= 15% and 95% CI excludes 0 at 20% review",
+  "verdict": "NOT MET"
+}

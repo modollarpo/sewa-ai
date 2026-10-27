@@ -5,9 +5,9 @@ import { PublicLayout } from '../../components/public/PublicLayout';
 const C = { bg0:'#050F0C', bg1:'#08160F', bg2:'#0C1D17', brand:'#408D7B', brandLight:'#52B09A', textHigh:'#D0ECE6', textMed:'#6FA898', textLow:'#3A6055', border:'#1B3028', F:"'IBM Plex Sans',system-ui,sans-serif" };
 const RELEASES = [
   { date:'March 2026', headline:'SEWA XAI Opens £1.5M Seed Round to Accelerate AI-Assisted Radiology Across NHS and Africa', body:`Storegrill Inc Ltd today announced the opening of its seed round as SEWA XAI works towards its first hospital deployments. Deployment counts are published once sites are live.` },
-  { date:'February 2026', headline:'SEWA XAI Announces Proof-of-Concept Plans at Royal London Hospital', body:`SEWA XAI is working with Royal London Hospital on a proof-of-concept for its ICH triage pipeline. No clinical results have been published yet; performance figures will be released with the study.` },
+  { date:'February 2026', headline:'SEWA XAI Announces Proof-of-Concept Plans with a UK NHS Trust', body:`SEWA XAI is working towards a proof-of-concept for its ICH triage pipeline with a UK NHS trust. No clinical results have been published yet; performance figures will be released with the study.` },
   { date:'January 2026', headline:'SEWA XAI Engaging with the NHS Innovation Service', body:`SEWA XAI is supported by the NHS Innovation Service (INN-2604-0064-2) and is progressing through the regulatory pathways required before full commercial deployment.` },
-  { date:'December 2025', headline:'SEWA XAI in Pilot Discussions with LUTH Nigeria and Kenyatta National Hospital', body:`SEWA XAI's offline-first edge deployment is in pilot discussions with LUTH Nigeria and Kenyatta National Hospital, Kenya, targeting AI-assisted radiology for hospitals with limited connectivity.` },
+  { date:'December 2025', headline:'SEWA XAI in Early Pilot Discussions in Nigeria and Kenya', body:`SEWA XAI's offline-first edge architecture is being explored with hospitals in Nigeria and Kenya, targeting AI-assisted radiology for hospitals with limited connectivity. No partnership, endorsement or deployment is implied.` },
 ];
 const COVERAGE = [
   { outlet:'No third-party media coverage published yet', headline:'All press material on this page is drafted by SEWA XAI. Outlet coverage will be listed here once independently published.', date:'' },

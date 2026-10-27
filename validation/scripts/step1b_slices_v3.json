@@ -1,0 +1,4810 @@
+{
+  "seed": 43,
+  "slices_per_scan": 8,
+  "source": "v3 fresh shift set",
+  "splits": {
+    "test": [
+      {
+        "study": "ID_00644107fa",
+        "image_id": "ID_5767a679d",
+        "label": 0
+      },
+      {
+        "study": "ID_00644107fa",
+        "image_id": "ID_cec24fd30",
+        "label": 0
+      },
+      {
+        "study": "ID_00644107fa",
+        "image_id": "ID_f7e01e4aa",
+        "label": 0
+      },
+      {
+        "study": "ID_00644107fa",
+        "image_id": "ID_4024bbdff",
+        "label": 1
+      },
+      {
+        "study": "ID_00644107fa",
+        "image_id": "ID_e83c63882",
+        "label": 1
+      },
+      {
+        "study": "ID_00644107fa",
+        "image_id": "ID_46e28f98d",
+        "label": 1
+      },
+      {
+        "study": "ID_00644107fa",
+        "image_id": "ID_4dac5daf1",
+        "label": 0
+      },
+      {
+        "study": "ID_00644107fa",
+        "image_id": "ID_095de695f",
+        "label": 0
+      },
+      {
+        "study": "ID_09e797f58b",
+        "image_id": "ID_a8139a0a5",
+        "label": 0
+      },
+      {
+        "study": "ID_09e797f58b",
+        "image_id": "ID_f454f5c32",
+        "label": 0
+      },
+      {
+        "study": "ID_09e797f58b",
+        "image_id": "ID_1dd0c596f",
+        "label": 1
+      },
+      {
+        "study": "ID_09e797f58b",
+        "image_id": "ID_3b7eb450f",
+        "label": 1
+      },
+      {
+        "study": "ID_09e797f58b",
+        "image_id": "ID_0777c6dd7",
+        "label": 1
+      },
+      {
+        "study": "ID_09e797f58b",
+        "image_id": "ID_28ae5fcd1",
+        "label": 1
+      },
+      {
+        "study": "ID_09e797f58b",
+        "image_id": "ID_241b8bdce",
+        "label": 0
+      },
+      {
+        "study": "ID_09e797f58b",
+        "image_id": "ID_3d47fc609",
+        "label": 0
+      },
+      {
+        "study": "ID_0b1b7f0fa4",
+        "image_id": "ID_5a449e1d9",
+        "label": 0
+      },
+      {
+        "study": "ID_0b1b7f0fa4",
+        "image_id": "ID_d12f46f3a",
+        "label": 1
+      },
+      {
+        "study": "ID_0b1b7f0fa4",
+        "image_id": "ID_f8323b064",
+        "label": 1
+      },
+      {
+        "study": "ID_0b1b7f0fa4",
+        "image_id": "ID_ec7158c6b",
+        "label": 0
+      },
+      {
+        "study": "ID_0b1b7f0fa4",
+        "image_id": "ID_84bf9d0d8",
+        "label": 0
+      },
+      {
+        "study": "ID_0b1b7f0fa4",
+        "image_id": "ID_3399cbf35",
+        "label": 0
+      },
+      {
+        "study": "ID_0b1b7f0fa4",
+        "image_id": "ID_649860999",
+        "label": 0
+      },
+      {
+        "study": "ID_0b1b7f0fa4",
+        "image_id": "ID_7befc3acf",
+        "label": 0
+      },
+      {
+        "study": "ID_0d505cd9e8",
+        "image_id": "ID_8861586e1",
+        "label": 0
+      },
+      {
+        "study": "ID_0d505cd9e8",
+        "image_id": "ID_7fff8c7f2",
+        "label": 0
+      },
+      {
+        "study": "ID_0d505cd9e8",
+        "image_id": "ID_e7a8f2968",
+        "label": 0
+      },
+      {
+        "study": "ID_0d505cd9e8",
+        "image_id": "ID_cb319667b",
+        "label": 0
+      },
+      {
+        "study": "ID_0d505cd9e8",
+        "image_id": "ID_0c7eb8ed6",
+        "label": 0
+      },
+      {
+        "study": "ID_0d505cd9e8",
+        "image_id": "ID_e839f5932",
+        "label": 0
+      },
+      {
+        "study": "ID_0d505cd9e8",
+        "image_id": "ID_6e7794e1c",
+        "label": 0
+      },
+      {
+        "study": "ID_0d505cd9e8",
+        "image_id": "ID_e2848bf98",
+        "label": 0
+      },
+      {
+        "study": "ID_12e4e92d9e",
+        "image_id": "ID_8d4a9490d",
+        "label": 0
+      },
+      {
+        "study": "ID_12e4e92d9e",
+        "image_id": "ID_8df79807e",
+        "label": 0
+      },
+      {
+        "study": "ID_12e4e92d9e",
+        "image_id": "ID_595872d54",
+        "label": 0
+      },
+      {
+        "study": "ID_12e4e92d9e",
+        "image_id": "ID_8506914f9",
+        "label": 0
+      },
+      {
+        "study": "ID_12e4e92d9e",
+        "image_id": "ID_5961bf79c",
+        "label": 1
+      },
+      {
+        "study": "ID_12e4e92d9e",
+        "image_id": "ID_0be4910f6",
+        "label": 0
+      },
+      {
+        "study": "ID_12e4e92d9e",
+        "image_id": "ID_e82c6e0ab",
+        "label": 0
+      },
+      {
+        "study": "ID_12e4e92d9e",
+        "image_id": "ID_20680591f",
+        "label": 0
+      },
+      {
+        "study": "ID_13d6f969d2",
+        "image_id": "ID_2696ef432",
+        "label": 0
+      },
+      {
+        "study": "ID_13d6f969d2",
+        "image_id": "ID_d2092528a",
+        "label": 0
+      },
+      {
+        "study": "ID_13d6f969d2",
+        "image_id": "ID_7cfb2cc9b",
+        "label": 0
+      },
+      {
+        "study": "ID_13d6f969d2",
+        "image_id": "ID_9075f22d6",
+        "label": 1
+      },
+      {
+        "study": "ID_13d6f969d2",
+        "image_id": "ID_cbbfc26f9",
+        "label": 0
+      },
+      {
+        "study": "ID_13d6f969d2",
+        "image_id": "ID_446a176ff",
+        "label": 0
+      },
+      {
+        "study": "ID_13d6f969d2",
+        "image_id": "ID_96a4ee064",
+        "label": 0
+      },
+      {
+        "study": "ID_13d6f969d2",
+        "image_id": "ID_a34c51f3b",
+        "label": 0
+      },
+      {
+        "study": "ID_1584c17de1",
+        "image_id": "ID_7c6d6efa1",
+        "label": 0
+      },
+      {
+        "study": "ID_1584c17de1",
+        "image_id": "ID_cabe178c3",
+        "label": 0
+      },
+      {
+        "study": "ID_1584c17de1",
+        "image_id": "ID_afdcfc18b",
+        "label": 0
+      },
+      {
+        "study": "ID_1584c17de1",
+        "image_id": "ID_a4eddec47",
+        "label": 0
+      },
+      {
+        "study": "ID_1584c17de1",
+        "image_id": "ID_2025b60bf",
+        "label": 0
+      },
+      {
+        "study": "ID_1584c17de1",
+        "image_id": "ID_4307fad57",
+        "label": 0
+      },
+      {
+        "study": "ID_1584c17de1",
+        "image_id": "ID_e4c1227c3",
+        "label": 0
+      },
+      {
+        "study": "ID_1584c17de1",
+        "image_id": "ID_85f11d31e",
+        "label": 0
+      },
+      {
+        "study": "ID_16db96dcf4",
+        "image_id": "ID_ea3ffd6c3",
+        "label": 0
+      },
+      {
+        "study": "ID_16db96dcf4",
+        "image_id": "ID_a8a5baa81",
+        "label": 0
+      },
+      {
+        "study": "ID_16db96dcf4",
+        "image_id": "ID_094af0cc0",
+        "label": 0
+      },
+      {
+        "study": "ID_16db96dcf4",
+        "image_id": "ID_04020165d",
+        "label": 1
+      },
+      {
+        "study": "ID_16db96dcf4",
+        "image_id": "ID_8bc54b85f",
+        "label": 1
+      },
+      {
+        "study": "ID_16db96dcf4",
+        "image_id": "ID_03116d9fe",
+        "label": 1
+      },
+      {
+        "study": "ID_16db96dcf4",
+        "image_id": "ID_6ed569d73",
+        "label": 0
+      },
+      {
+        "study": "ID_16db96dcf4",
+        "image_id": "ID_3fac727f1",
+        "label": 0
+      },
+      {
+        "study": "ID_1b9ec539c0",
+        "image_id": "ID_7971c2f68",
+        "label": 0
+      },
+      {
+        "study": "ID_1b9ec539c0",
+        "image_id": "ID_9e080923c",
+        "label": 0
+      },
+      {
+        "study": "ID_1b9ec539c0",
+        "image_id": "ID_bebf4158b",
+        "label": 1
+      },
+      {
+        "study": "ID_1b9ec539c0",
+        "image_id": "ID_c0d3207a3",
+        "label": 1
+      },
+      {
+        "study": "ID_1b9ec539c0",
+        "image_id": "ID_e9534b944",
+        "label": 1
+      },
+      {
+        "study": "ID_1b9ec539c0",
+        "image_id": "ID_658ece34f",
+        "label": 1
+      },
+      {
+        "study": "ID_1b9ec539c0",
+        "image_id": "ID_46ac0ebbf",
+        "label": 0
+      },
+      {
+        "study": "ID_1b9ec539c0",
+        "image_id": "ID_eb889ecd0",
+        "label": 0
+      },
+      {
+        "study": "ID_2137e3da5c",
+        "image_id": "ID_859fdea22",
+        "label": 0
+      },
+      {
+        "study": "ID_2137e3da5c",
+        "image_id": "ID_8f6106d9e",
+        "label": 0
+      },
+      {
+        "study": "ID_2137e3da5c",
+        "image_id": "ID_b7af0ec32",
+        "label": 1
+      },
+      {
+        "study": "ID_2137e3da5c",
+        "image_id": "ID_ddc2e4ff9",
+        "label": 1
+      },
+      {
+        "study": "ID_2137e3da5c",
+        "image_id": "ID_34a7d1ebd",
+        "label": 1
+      },
+      {
+        "study": "ID_2137e3da5c",
+        "image_id": "ID_8c5534e72",
+        "label": 0
+      },
+      {
+        "study": "ID_2137e3da5c",
+        "image_id": "ID_0f3ad62d7",
+        "label": 0
+      },
+      {
+        "study": "ID_2137e3da5c",
+        "image_id": "ID_2aeb60331",
+        "label": 0
+      },
+      {
+        "study": "ID_21fbb85ee4",
+        "image_id": "ID_4b97266fa",
+        "label": 0
+      },
+      {
+        "study": "ID_21fbb85ee4",
+        "image_id": "ID_b298ae0ce",
+        "label": 0
+      },
+      {
+        "study": "ID_21fbb85ee4",
+        "image_id": "ID_78ef84593",
+        "label": 1
+      },
+      {
+        "study": "ID_21fbb85ee4",
+        "image_id": "ID_39d94405a",
+        "label": 1
+      },
+      {
+        "study": "ID_21fbb85ee4",
+        "image_id": "ID_f466c79ce",
+        "label": 1
+      },
+      {
+        "study": "ID_21fbb85ee4",
+        "image_id": "ID_6b10cf78d",
+        "label": 0
+      },
+      {
+        "study": "ID_21fbb85ee4",
+        "image_id": "ID_3d80a0e00",
+        "label": 0
+      },
+      {
+        "study": "ID_21fbb85ee4",
+        "image_id": "ID_633709442",
+        "label": 0
+      },
+      {
+        "study": "ID_28eac1c2b5",
+        "image_id": "ID_71bd4005e",
+        "label": 0
+      },
+      {
+        "study": "ID_28eac1c2b5",
+        "image_id": "ID_8b61af173",
+        "label": 0
+      },
+      {
+        "study": "ID_28eac1c2b5",
+        "image_id": "ID_4060d95a9",
+        "label": 0
+      },
+      {
+        "study": "ID_28eac1c2b5",
+        "image_id": "ID_c6eb6ec73",
+        "label": 1
+      },
+      {
+        "study": "ID_28eac1c2b5",
+        "image_id": "ID_5a7ff81d8",
+        "label": 1
+      },
+      {
+        "study": "ID_28eac1c2b5",
+        "image_id": "ID_1237f731f",
+        "label": 0
+      },
+      {
+        "study": "ID_28eac1c2b5",
+        "image_id": "ID_7a3521a5a",
+        "label": 0
+      },
+      {
+        "study": "ID_28eac1c2b5",
+        "image_id": "ID_ef7b6bdca",
+        "label": 0
+      },
+      {
+        "study": "ID_29ebfaff73",
+        "image_id": "ID_ff7aac4c4",
+        "label": 0
+      },
+      {
+        "study": "ID_29ebfaff73",
+        "image_id": "ID_887c907e1",
+        "label": 0
+      },
+      {
+        "study": "ID_29ebfaff73",
+        "image_id": "ID_37be3ed0c",
+        "label": 0
+      },
+      {
+        "study": "ID_29ebfaff73",
+        "image_id": "ID_d2638a330",
+        "label": 1
+      },
+      {
+        "study": "ID_29ebfaff73",
+        "image_id": "ID_95a80fa9c",
+        "label": 1
+      },
+      {
+        "study": "ID_29ebfaff73",
+        "image_id": "ID_6c7f3652a",
+        "label": 1
+      },
+      {
+        "study": "ID_29ebfaff73",
+        "image_id": "ID_a314da714",
+        "label": 0
+      },
+      {
+        "study": "ID_29ebfaff73",
+        "image_id": "ID_7ae448746",
+        "label": 0
+      },
+      {
+        "study": "ID_2c5a81b83a",
+        "image_id": "ID_f47442bb2",
+        "label": 0
+      },
+      {
+        "study": "ID_2c5a81b83a",
+        "image_id": "ID_6f678a4d1",
+        "label": 1
+      },
+      {
+        "study": "ID_2c5a81b83a",
+        "image_id": "ID_f6cf51828",
+        "label": 1
+      },
+      {
+        "study": "ID_2c5a81b83a",
+        "image_id": "ID_0f3df3f6c",
+        "label": 1
+      },
+      {
+        "study": "ID_2c5a81b83a",
+        "image_id": "ID_1bba38486",
+        "label": 1
+      },
+      {
+        "study": "ID_2c5a81b83a",
+        "image_id": "ID_9beaa2695",
+        "label": 1
+      },
+      {
+        "study": "ID_2c5a81b83a",
+        "image_id": "ID_95b06e887",
+        "label": 0
+      },
+      {
+        "study": "ID_2c5a81b83a",
+        "image_id": "ID_438299643",
+        "label": 0
+      },
+      {
+        "study": "ID_341b3c0d88",
+        "image_id": "ID_3b14e950a",
+        "label": 0
+      },
+      {
+        "study": "ID_341b3c0d88",
+        "image_id": "ID_b2e9df272",
+        "label": 0
+      },
+      {
+        "study": "ID_341b3c0d88",
+        "image_id": "ID_9b2012da4",
+        "label": 0
+      },
+      {
+        "study": "ID_341b3c0d88",
+        "image_id": "ID_938edb15c",
+        "label": 0
+      },
+      {
+        "study": "ID_341b3c0d88",
+        "image_id": "ID_a32d7ed86",
+        "label": 1
+      },
+      {
+        "study": "ID_341b3c0d88",
+        "image_id": "ID_8d52b96a8",
+        "label": 1
+      },
+      {
+        "study": "ID_341b3c0d88",
+        "image_id": "ID_1a29d8ddf",
+        "label": 0
+      },
+      {
+        "study": "ID_341b3c0d88",
+        "image_id": "ID_129fcf352",
+        "label": 0
+      },
+      {
+        "study": "ID_3618ccc51e",
+        "image_id": "ID_74d70c521",
+        "label": 0
+      },
+      {
+        "study": "ID_3618ccc51e",
+        "image_id": "ID_69e376cf8",
+        "label": 0
+      },
+      {
+        "study": "ID_3618ccc51e",
+        "image_id": "ID_e29b1c1cb",
+        "label": 1
+      },
+      {
+        "study": "ID_3618ccc51e",
+        "image_id": "ID_d63eb60f9",
+        "label": 1
+      },
+      {
+        "study": "ID_3618ccc51e",
+        "image_id": "ID_0378dd032",
+        "label": 1
+      },
+      {
+        "study": "ID_3618ccc51e",
+        "image_id": "ID_f8b8b111e",
+        "label": 0
+      },
+      {
+        "study": "ID_3618ccc51e",
+        "image_id": "ID_e29385a0c",
+        "label": 0
+      },
+      {
+        "study": "ID_3618ccc51e",
+        "image_id": "ID_5156e211e",
+        "label": 0
+      },
+      {
+        "study": "ID_38b41e0472",
+        "image_id": "ID_1e84ba79c",
+        "label": 0
+      },
+      {
+        "study": "ID_38b41e0472",
+        "image_id": "ID_6c320540e",
+        "label": 0
+      },
+      {
+        "study": "ID_38b41e0472",
+        "image_id": "ID_bf71ad1ce",
+        "label": 1
+      },
+      {
+        "study": "ID_38b41e0472",
+        "image_id": "ID_87930182f",
+        "label": 1
+      },
+      {
+        "study": "ID_38b41e0472",
+        "image_id": "ID_8bc40a373",
+        "label": 1
+      },
+      {
+        "study": "ID_38b41e0472",
+        "image_id": "ID_c7e36c6db",
+        "label": 0
+      },
+      {
+        "study": "ID_38b41e0472",
+        "image_id": "ID_0f6e08038",
+        "label": 0
+      },
+      {
+        "study": "ID_38b41e0472",
+        "image_id": "ID_2ba93bdd1",
+        "label": 0
+      },
+      {
+        "study": "ID_4042539f5d",
+        "image_id": "ID_fced97943",
+        "label": 1
+      },
+      {
+        "study": "ID_4042539f5d",
+        "image_id": "ID_c930a5070",
+        "label": 0
+      },
+      {
+        "study": "ID_4042539f5d",
+        "image_id": "ID_c017d38e8",
+        "label": 0
+      },
+      {
+        "study": "ID_4042539f5d",
+        "image_id": "ID_a06c9ba8f",
+        "label": 0
+      },
+      {
+        "study": "ID_4042539f5d",
+        "image_id": "ID_8e1f8769f",
+        "label": 0
+      },
+      {
+        "study": "ID_4042539f5d",
+        "image_id": "ID_bf3fff5d8",
+        "label": 0
+      },
+      {
+        "study": "ID_4042539f5d",
+        "image_id": "ID_a4c528e31",
+        "label": 0
+      },
+      {
+        "study": "ID_4042539f5d",
+        "image_id": "ID_067aae42f",
+        "label": 0
+      },
+      {
+        "study": "ID_44346d7d2d",
+        "image_id": "ID_babeac96b",
+        "label": 0
+      },
+      {
+        "study": "ID_44346d7d2d",
+        "image_id": "ID_f00f1dc1a",
+        "label": 0
+      },
+      {
+        "study": "ID_44346d7d2d",
+        "image_id": "ID_1ec96cde8",
+        "label": 0
+      },
+      {
+        "study": "ID_44346d7d2d",
+        "image_id": "ID_556b27d3d",
+        "label": 0
+      },
+      {
+        "study": "ID_44346d7d2d",
+        "image_id": "ID_edb4b1b94",
+        "label": 0
+      },
+      {
+        "study": "ID_44346d7d2d",
+        "image_id": "ID_63b544084",
+        "label": 0
+      },
+      {
+        "study": "ID_44346d7d2d",
+        "image_id": "ID_c9eff097a",
+        "label": 0
+      },
+      {
+        "study": "ID_44346d7d2d",
+        "image_id": "ID_5199990de",
+        "label": 0
+      },
+      {
+        "study": "ID_45d85e1cf9",
+        "image_id": "ID_0626c9f84",
+        "label": 0
+      },
+      {
+        "study": "ID_45d85e1cf9",
+        "image_id": "ID_a0dbe8bef",
+        "label": 0
+      },
+      {
+        "study": "ID_45d85e1cf9",
+        "image_id": "ID_5696574e7",
+        "label": 0
+      },
+      {
+        "study": "ID_45d85e1cf9",
+        "image_id": "ID_2fd48734b",
+        "label": 0
+      },
+      {
+        "study": "ID_45d85e1cf9",
+        "image_id": "ID_8fa146a86",
+        "label": 0
+      },
+      {
+        "study": "ID_45d85e1cf9",
+        "image_id": "ID_140a693e7",
+        "label": 1
+      },
+      {
+        "study": "ID_45d85e1cf9",
+        "image_id": "ID_dd56038fa",
+        "label": 0
+      },
+      {
+        "study": "ID_45d85e1cf9",
+        "image_id": "ID_8dee78501",
+        "label": 0
+      },
+      {
+        "study": "ID_46a1453551",
+        "image_id": "ID_37a0d884f",
+        "label": 0
+      },
+      {
+        "study": "ID_46a1453551",
+        "image_id": "ID_7d92fe3b0",
+        "label": 0
+      },
+      {
+        "study": "ID_46a1453551",
+        "image_id": "ID_034fcaa78",
+        "label": 0
+      },
+      {
+        "study": "ID_46a1453551",
+        "image_id": "ID_fc7cca635",
+        "label": 0
+      },
+      {
+        "study": "ID_46a1453551",
+        "image_id": "ID_5561a353c",
+        "label": 0
+      },
+      {
+        "study": "ID_46a1453551",
+        "image_id": "ID_a3b32f9c8",
+        "label": 0
+      },
+      {
+        "study": "ID_46a1453551",
+        "image_id": "ID_971daf0d4",
+        "label": 0
+      },
+      {
+        "study": "ID_46a1453551",
+        "image_id": "ID_aa0d82ef0",
+        "label": 0
+      },
+      {
+        "study": "ID_49b3dbeeed",
+        "image_id": "ID_58f8d7d78",
+        "label": 0
+      },
+      {
+        "study": "ID_49b3dbeeed",
+        "image_id": "ID_04ea43b3f",
+        "label": 0
+      },
+      {
+        "study": "ID_49b3dbeeed",
+        "image_id": "ID_975332c85",
+        "label": 0
+      },
+      {
+        "study": "ID_49b3dbeeed",
+        "image_id": "ID_14182acf0",
+        "label": 1
+      },
+      {
+        "study": "ID_49b3dbeeed",
+        "image_id": "ID_ec69ceecb",
+        "label": 1
+      },
+      {
+        "study": "ID_49b3dbeeed",
+        "image_id": "ID_41d42e8ad",
+        "label": 1
+      },
+      {
+        "study": "ID_49b3dbeeed",
+        "image_id": "ID_28d215980",
+        "label": 1
+      },
+      {
+        "study": "ID_49b3dbeeed",
+        "image_id": "ID_d20b75699",
+        "label": 0
+      },
+      {
+        "study": "ID_4a71c49565",
+        "image_id": "ID_e7f35dcd2",
+        "label": 0
+      },
+      {
+        "study": "ID_4a71c49565",
+        "image_id": "ID_a6186caa8",
+        "label": 0
+      },
+      {
+        "study": "ID_4a71c49565",
+        "image_id": "ID_6c2f68e85",
+        "label": 0
+      },
+      {
+        "study": "ID_4a71c49565",
+        "image_id": "ID_87cd409e5",
+        "label": 1
+      },
+      {
+        "study": "ID_4a71c49565",
+        "image_id": "ID_c4122d6dd",
+        "label": 1
+      },
+      {
+        "study": "ID_4a71c49565",
+        "image_id": "ID_74345db5b",
+        "label": 1
+      },
+      {
+        "study": "ID_4a71c49565",
+        "image_id": "ID_c37997b18",
+        "label": 1
+      },
+      {
+        "study": "ID_4a71c49565",
+        "image_id": "ID_de785192b",
+        "label": 0
+      },
+      {
+        "study": "ID_4ff809d972",
+        "image_id": "ID_ff991f6e7",
+        "label": 0
+      },
+      {
+        "study": "ID_4ff809d972",
+        "image_id": "ID_0b868f040",
+        "label": 0
+      },
+      {
+        "study": "ID_4ff809d972",
+        "image_id": "ID_ce9ff2773",
+        "label": 0
+      },
+      {
+        "study": "ID_4ff809d972",
+        "image_id": "ID_1d6107fc6",
+        "label": 0
+      },
+      {
+        "study": "ID_4ff809d972",
+        "image_id": "ID_e8543fee8",
+        "label": 0
+      },
+      {
+        "study": "ID_4ff809d972",
+        "image_id": "ID_b89f636ba",
+        "label": 0
+      },
+      {
+        "study": "ID_4ff809d972",
+        "image_id": "ID_aedffadb3",
+        "label": 0
+      },
+      {
+        "study": "ID_4ff809d972",
+        "image_id": "ID_f9422d6a7",
+        "label": 0
+      },
+      {
+        "study": "ID_51b2560496",
+        "image_id": "ID_49859fec4",
+        "label": 0
+      },
+      {
+        "study": "ID_51b2560496",
+        "image_id": "ID_a0feff117",
+        "label": 0
+      },
+      {
+        "study": "ID_51b2560496",
+        "image_id": "ID_7b4b4e4d9",
+        "label": 0
+      },
+      {
+        "study": "ID_51b2560496",
+        "image_id": "ID_f844b6737",
+        "label": 0
+      },
+      {
+        "study": "ID_51b2560496",
+        "image_id": "ID_b3fe93e8c",
+        "label": 0
+      },
+      {
+        "study": "ID_51b2560496",
+        "image_id": "ID_0c39366d1",
+        "label": 0
+      },
+      {
+        "study": "ID_51b2560496",
+        "image_id": "ID_e9284155c",
+        "label": 0
+      },
+      {
+        "study": "ID_51b2560496",
+        "image_id": "ID_d42188a8d",
+        "label": 0
+      },
+      {
+        "study": "ID_55c2ae2458",
+        "image_id": "ID_bc32442ad",
+        "label": 0
+      },
+      {
+        "study": "ID_55c2ae2458",
+        "image_id": "ID_158056818",
+        "label": 0
+      },
+      {
+        "study": "ID_55c2ae2458",
+        "image_id": "ID_e3da9cdba",
+        "label": 0
+      },
+      {
+        "study": "ID_55c2ae2458",
+        "image_id": "ID_55f2e8030",
+        "label": 0
+      },
+      {
+        "study": "ID_55c2ae2458",
+        "image_id": "ID_678c9fcba",
+        "label": 0
+      },
+      {
+        "study": "ID_55c2ae2458",
+        "image_id": "ID_f7621d06a",
+        "label": 0
+      },
+      {
+        "study": "ID_55c2ae2458",
+        "image_id": "ID_cae174d29",
+        "label": 0
+      },
+      {
+        "study": "ID_55c2ae2458",
+        "image_id": "ID_e6c593160",
+        "label": 0
+      },
+      {
+        "study": "ID_55c5db2783",
+        "image_id": "ID_98985999a",
+        "label": 0
+      },
+      {
+        "study": "ID_55c5db2783",
+        "image_id": "ID_0a390ea32",
+        "label": 0
+      },
+      {
+        "study": "ID_55c5db2783",
+        "image_id": "ID_b620eb3cf",
+        "label": 0
+      },
+      {
+        "study": "ID_55c5db2783",
+        "image_id": "ID_3094a3ba7",
+        "label": 0
+      },
+      {
+        "study": "ID_55c5db2783",
+        "image_id": "ID_e99190424",
+        "label": 0
+      },
+      {
+        "study": "ID_55c5db2783",
+        "image_id": "ID_87d0a166f",
+        "label": 1
+      },
+      {
+        "study": "ID_55c5db2783",
+        "image_id": "ID_1db942c21",
+        "label": 1
+      },
+      {
+        "study": "ID_55c5db2783",
+        "image_id": "ID_ef6ac5a7d",
+        "label": 0
+      },
+      {
+        "study": "ID_561806c69f",
+        "image_id": "ID_7d3d67fe7",
+        "label": 0
+      },
+      {
+        "study": "ID_561806c69f",
+        "image_id": "ID_12cd9d710",
+        "label": 0
+      },
+      {
+        "study": "ID_561806c69f",
+        "image_id": "ID_828e0a65e",
+        "label": 1
+      },
+      {
+        "study": "ID_561806c69f",
+        "image_id": "ID_455abcac3",
+        "label": 1
+      },
+      {
+        "study": "ID_561806c69f",
+        "image_id": "ID_af355cb37",
+        "label": 1
+      },
+      {
+        "study": "ID_561806c69f",
+        "image_id": "ID_08ec357ed",
+        "label": 1
+      },
+      {
+        "study": "ID_561806c69f",
+        "image_id": "ID_a2d79f895",
+        "label": 0
+      },
+      {
+        "study": "ID_561806c69f",
+        "image_id": "ID_3635740c2",
+        "label": 0
+      },
+      {
+        "study": "ID_58b7cb5c13",
+        "image_id": "ID_5a15ef097",
+        "label": 0
+      },
+      {
+        "study": "ID_58b7cb5c13",
+        "image_id": "ID_e7b49bc7b",
+        "label": 0
+      },
+      {
+        "study": "ID_58b7cb5c13",
+        "image_id": "ID_4aea67d59",
+        "label": 0
+      },
+      {
+        "study": "ID_58b7cb5c13",
+        "image_id": "ID_8908d195b",
+        "label": 0
+      },
+      {
+        "study": "ID_58b7cb5c13",
+        "image_id": "ID_1c0eacf09",
+        "label": 0
+      },
+      {
+        "study": "ID_58b7cb5c13",
+        "image_id": "ID_aa0625787",
+        "label": 0
+      },
+      {
+        "study": "ID_58b7cb5c13",
+        "image_id": "ID_2829793f3",
+        "label": 0
+      },
+      {
+        "study": "ID_58b7cb5c13",
+        "image_id": "ID_d11fed669",
+        "label": 0
+      },
+      {
+        "study": "ID_599682abae",
+        "image_id": "ID_1e1438826",
+        "label": 0
+      },
+      {
+        "study": "ID_599682abae",
+        "image_id": "ID_59448b2b3",
+        "label": 0
+      },
+      {
+        "study": "ID_599682abae",
+        "image_id": "ID_b7fda0e1c",
+        "label": 0
+      },
+      {
+        "study": "ID_599682abae",
+        "image_id": "ID_783620bfa",
+        "label": 1
+      },
+      {
+        "study": "ID_599682abae",
+        "image_id": "ID_1ba5f3026",
+        "label": 1
+      },
+      {
+        "study": "ID_599682abae",
+        "image_id": "ID_da2ccedb5",
+        "label": 1
+      },
+      {
+        "study": "ID_599682abae",
+        "image_id": "ID_018fd9893",
+        "label": 1
+      },
+      {
+        "study": "ID_599682abae",
+        "image_id": "ID_0b7a7f6d3",
+        "label": 0
+      },
+      {
+        "study": "ID_599dde833d",
+        "image_id": "ID_f9cbb2e82",
+        "label": 0
+      },
+      {
+        "study": "ID_599dde833d",
+        "image_id": "ID_65281ab3f",
+        "label": 0
+      },
+      {
+        "study": "ID_599dde833d",
+        "image_id": "ID_2e6e8cf23",
+        "label": 1
+      },
+      {
+        "study": "ID_599dde833d",
+        "image_id": "ID_7cf1abd6c",
+        "label": 1
+      },
+      {
+        "study": "ID_599dde833d",
+        "image_id": "ID_2b27ace90",
+        "label": 1
+      },
+      {
+        "study": "ID_599dde833d",
+        "image_id": "ID_acd346a08",
+        "label": 1
+      },
+      {
+        "study": "ID_599dde833d",
+        "image_id": "ID_348be6d5a",
+        "label": 0
+      },
+      {
+        "study": "ID_599dde833d",
+        "image_id": "ID_c3cf4bcfa",
+        "label": 0
+      },
+      {
+        "study": "ID_5ac74f2635",
+        "image_id": "ID_e207684bb",
+        "label": 0
+      },
+      {
+        "study": "ID_5ac74f2635",
+        "image_id": "ID_6949298b1",
+        "label": 0
+      },
+      {
+        "study": "ID_5ac74f2635",
+        "image_id": "ID_a3d3582f8",
+        "label": 0
+      },
+      {
+        "study": "ID_5ac74f2635",
+        "image_id": "ID_8e90186c3",
+        "label": 0
+      },
+      {
+        "study": "ID_5ac74f2635",
+        "image_id": "ID_93cd943af",
+        "label": 0
+      },
+      {
+        "study": "ID_5ac74f2635",
+        "image_id": "ID_e9ba0706f",
+        "label": 0
+      },
+      {
+        "study": "ID_5ac74f2635",
+        "image_id": "ID_d3cf8d996",
+        "label": 0
+      },
+      {
+        "study": "ID_5ac74f2635",
+        "image_id": "ID_c6a477945",
+        "label": 0
+      },
+      {
+        "study": "ID_5bb1e3ea32",
+        "image_id": "ID_554a8c790",
+        "label": 0
+      },
+      {
+        "study": "ID_5bb1e3ea32",
+        "image_id": "ID_ffbc365d6",
+        "label": 0
+      },
+      {
+        "study": "ID_5bb1e3ea32",
+        "image_id": "ID_294fb396b",
+        "label": 1
+      },
+      {
+        "study": "ID_5bb1e3ea32",
+        "image_id": "ID_c940a8c12",
+        "label": 1
+      },
+      {
+        "study": "ID_5bb1e3ea32",
+        "image_id": "ID_34a40a76a",
+        "label": 1
+      },
+      {
+        "study": "ID_5bb1e3ea32",
+        "image_id": "ID_f972a904d",
+        "label": 0
+      },
+      {
+        "study": "ID_5bb1e3ea32",
+        "image_id": "ID_a58f7be5c",
+        "label": 0
+      },
+      {
+        "study": "ID_5bb1e3ea32",
+        "image_id": "ID_6708c2b02",
+        "label": 0
+      },
+      {
+        "study": "ID_5bd798e8c7",
+        "image_id": "ID_aa730e9a2",
+        "label": 0
+      },
+      {
+        "study": "ID_5bd798e8c7",
+        "image_id": "ID_dc781830b",
+        "label": 0
+      },
+      {
+        "study": "ID_5bd798e8c7",
+        "image_id": "ID_f63a39f7d",
+        "label": 0
+      },
+      {
+        "study": "ID_5bd798e8c7",
+        "image_id": "ID_0370580b3",
+        "label": 1
+      },
+      {
+        "study": "ID_5bd798e8c7",
+        "image_id": "ID_e781bf463",
+        "label": 1
+      },
+      {
+        "study": "ID_5bd798e8c7",
+        "image_id": "ID_7e68ff364",
+        "label": 0
+      },
+      {
+        "study": "ID_5bd798e8c7",
+        "image_id": "ID_9c690b2b7",
+        "label": 0
+      },
+      {
+        "study": "ID_5bd798e8c7",
+        "image_id": "ID_2678cff26",
+        "label": 0
+      },
+      {
+        "study": "ID_5cdecd5c65",
+        "image_id": "ID_1dba57994",
+        "label": 0
+      },
+      {
+        "study": "ID_5cdecd5c65",
+        "image_id": "ID_96214715a",
+        "label": 0
+      },
+      {
+        "study": "ID_5cdecd5c65",
+        "image_id": "ID_4a619b630",
+        "label": 0
+      },
+      {
+        "study": "ID_5cdecd5c65",
+        "image_id": "ID_9c98080e3",
+        "label": 0
+      },
+      {
+        "study": "ID_5cdecd5c65",
+        "image_id": "ID_dcc86a228",
+        "label": 0
+      },
+      {
+        "study": "ID_5cdecd5c65",
+        "image_id": "ID_91a78358a",
+        "label": 0
+      },
+      {
+        "study": "ID_5cdecd5c65",
+        "image_id": "ID_fda733061",
+        "label": 0
+      },
+      {
+        "study": "ID_5cdecd5c65",
+        "image_id": "ID_b8fc48497",
+        "label": 1
+      },
+      {
+        "study": "ID_5fae63520e",
+        "image_id": "ID_4478f5084",
+        "label": 0
+      },
+      {
+        "study": "ID_5fae63520e",
+        "image_id": "ID_e0e702b71",
+        "label": 0
+      },
+      {
+        "study": "ID_5fae63520e",
+        "image_id": "ID_617cf2cc7",
+        "label": 0
+      },
+      {
+        "study": "ID_5fae63520e",
+        "image_id": "ID_71043e395",
+        "label": 1
+      },
+      {
+        "study": "ID_5fae63520e",
+        "image_id": "ID_648b64cc3",
+        "label": 1
+      },
+      {
+        "study": "ID_5fae63520e",
+        "image_id": "ID_7bac3a55c",
+        "label": 0
+      },
+      {
+        "study": "ID_5fae63520e",
+        "image_id": "ID_395091634",
+        "label": 0
+      },
+      {
+        "study": "ID_5fae63520e",
+        "image_id": "ID_4bb847acc",
+        "label": 0
+      },
+      {
+        "study": "ID_6139b065ff",
+        "image_id": "ID_92ff2c5ac",
+        "label": 1
+      },
+      {
+        "study": "ID_6139b065ff",
+        "image_id": "ID_8e02e3769",
+        "label": 0
+      },
+      {
+        "study": "ID_6139b065ff",
+        "image_id": "ID_ee809828e",
+        "label": 0
+      },
+      {
+        "study": "ID_6139b065ff",
+        "image_id": "ID_43db9d5af",
+        "label": 0
+      },
+      {
+        "study": "ID_6139b065ff",
+        "image_id": "ID_60633ca9f",
+        "label": 0
+      },
+      {
+        "study": "ID_6139b065ff",
+        "image_id": "ID_3ab29c19d",
+        "label": 0
+      },
+      {
+        "study": "ID_6139b065ff",
+        "image_id": "ID_2a8e29df5",
+        "label": 0
+      },
+      {
+        "study": "ID_6139b065ff",
+        "image_id": "ID_2844efc30",
+        "label": 0
+      },
+      {
+        "study": "ID_645ea1f5e5",
+        "image_id": "ID_50ac05d55",
+        "label": 0
+      },
+      {
+        "study": "ID_645ea1f5e5",
+        "image_id": "ID_e30105d47",
+        "label": 0
+      },
+      {
+        "study": "ID_645ea1f5e5",
+        "image_id": "ID_a12b5556c",
+        "label": 0
+      },
+      {
+        "study": "ID_645ea1f5e5",
+        "image_id": "ID_d581e65e2",
+        "label": 0
+      },
+      {
+        "study": "ID_645ea1f5e5",
+        "image_id": "ID_29d0e486d",
+        "label": 0
+      },
+      {
+        "study": "ID_645ea1f5e5",
+        "image_id": "ID_f037c051c",
+        "label": 0
+      },
+      {
+        "study": "ID_645ea1f5e5",
+        "image_id": "ID_0a25c50b4",
+        "label": 0
+      },
+      {
+        "study": "ID_645ea1f5e5",
+        "image_id": "ID_a08a19233",
+        "label": 0
+      },
+      {
+        "study": "ID_65d6c69e33",
+        "image_id": "ID_3cf5d71a4",
+        "label": 1
+      },
+      {
+        "study": "ID_65d6c69e33",
+        "image_id": "ID_484ccbf88",
+        "label": 0
+      },
+      {
+        "study": "ID_65d6c69e33",
+        "image_id": "ID_cc2101df3",
+        "label": 0
+      },
+      {
+        "study": "ID_65d6c69e33",
+        "image_id": "ID_a1ee0be97",
+        "label": 0
+      },
+      {
+        "study": "ID_65d6c69e33",
+        "image_id": "ID_a65e3dcc4",
+        "label": 0
+      },
+      {
+        "study": "ID_65d6c69e33",
+        "image_id": "ID_429892542",
+        "label": 0
+      },
+      {
+        "study": "ID_65d6c69e33",
+        "image_id": "ID_82e03b10d",
+        "label": 0
+      },
+      {
+        "study": "ID_65d6c69e33",
+        "image_id": "ID_0696963d2",
+        "label": 0
+      },
+      {
+        "study": "ID_66cf0a999b",
+        "image_id": "ID_0df53b7a0",
+        "label": 0
+      },
+      {
+        "study": "ID_66cf0a999b",
+        "image_id": "ID_e1f640b98",
+        "label": 0
+      },
+      {
+        "study": "ID_66cf0a999b",
+        "image_id": "ID_7b47c4eea",
+        "label": 0
+      },
+      {
+        "study": "ID_66cf0a999b",
+        "image_id": "ID_6abee5168",
+        "label": 1
+      },
+      {
+        "study": "ID_66cf0a999b",
+        "image_id": "ID_1c2a20026",
+        "label": 1
+      },
+      {
+        "study": "ID_66cf0a999b",
+        "image_id": "ID_b62dde8d4",
+        "label": 1
+      },
+      {
+        "study": "ID_66cf0a999b",
+        "image_id": "ID_ee9301351",
+        "label": 0
+      },
+      {
+        "study": "ID_66cf0a999b",
+        "image_id": "ID_575338982",
+        "label": 0
+      },
+      {
+        "study": "ID_684fd5d6b0",
+        "image_id": "ID_9f531e7b4",
+        "label": 0
+      },
+      {
+        "study": "ID_684fd5d6b0",
+        "image_id": "ID_589fcc8e0",
+        "label": 0
+      },
+      {
+        "study": "ID_684fd5d6b0",
+        "image_id": "ID_545ec3e90",
+        "label": 0
+      },
+      {
+        "study": "ID_684fd5d6b0",
+        "image_id": "ID_729db651a",
+        "label": 0
+      },
+      {
+        "study": "ID_684fd5d6b0",
+        "image_id": "ID_b90f646b5",
+        "label": 0
+      },
+      {
+        "study": "ID_684fd5d6b0",
+        "image_id": "ID_f8ab8b653",
+        "label": 0
+      },
+      {
+        "study": "ID_684fd5d6b0",
+        "image_id": "ID_86256600d",
+        "label": 0
+      },
+      {
+        "study": "ID_684fd5d6b0",
+        "image_id": "ID_f84ced2dd",
+        "label": 0
+      },
+      {
+        "study": "ID_6bfd1684cd",
+        "image_id": "ID_3805fa18a",
+        "label": 0
+      },
+      {
+        "study": "ID_6bfd1684cd",
+        "image_id": "ID_8815c0c78",
+        "label": 0
+      },
+      {
+        "study": "ID_6bfd1684cd",
+        "image_id": "ID_02c869f29",
+        "label": 1
+      },
+      {
+        "study": "ID_6bfd1684cd",
+        "image_id": "ID_d7d2a1968",
+        "label": 1
+      },
+      {
+        "study": "ID_6bfd1684cd",
+        "image_id": "ID_d746c7de4",
+        "label": 1
+      },
+      {
+        "study": "ID_6bfd1684cd",
+        "image_id": "ID_dc4039705",
+        "label": 0
+      },
+      {
+        "study": "ID_6bfd1684cd",
+        "image_id": "ID_6ac24c902",
+        "label": 0
+      },
+      {
+        "study": "ID_6bfd1684cd",
+        "image_id": "ID_aa3e9ecd2",
+        "label": 0
+      },
+      {
+        "study": "ID_6cb2729eb5",
+        "image_id": "ID_52577d249",
+        "label": 0
+      },
+      {
+        "study": "ID_6cb2729eb5",
+        "image_id": "ID_4edb497ae",
+        "label": 0
+      },
+      {
+        "study": "ID_6cb2729eb5",
+        "image_id": "ID_7132759cb",
+        "label": 0
+      },
+      {
+        "study": "ID_6cb2729eb5",
+        "image_id": "ID_c380971cc",
+        "label": 0
+      },
+      {
+        "study": "ID_6cb2729eb5",
+        "image_id": "ID_b214aa310",
+        "label": 0
+      },
+      {
+        "study": "ID_6cb2729eb5",
+        "image_id": "ID_1f95638b7",
+        "label": 0
+      },
+      {
+        "study": "ID_6cb2729eb5",
+        "image_id": "ID_48c8b6960",
+        "label": 0
+      },
+      {
+        "study": "ID_6cb2729eb5",
+        "image_id": "ID_a48cfeca1",
+        "label": 0
+      },
+      {
+        "study": "ID_6d930b3820",
+        "image_id": "ID_78ff2512d",
+        "label": 0
+      },
+      {
+        "study": "ID_6d930b3820",
+        "image_id": "ID_7f5af920a",
+        "label": 0
+      },
+      {
+        "study": "ID_6d930b3820",
+        "image_id": "ID_a0cb98593",
+        "label": 0
+      },
+      {
+        "study": "ID_6d930b3820",
+        "image_id": "ID_138d749c6",
+        "label": 0
+      },
+      {
+        "study": "ID_6d930b3820",
+        "image_id": "ID_c0a014ae6",
+        "label": 0
+      },
+      {
+        "study": "ID_6d930b3820",
+        "image_id": "ID_f1b7e790c",
+        "label": 0
+      },
+      {
+        "study": "ID_6d930b3820",
+        "image_id": "ID_a2bf6843f",
+        "label": 0
+      },
+      {
+        "study": "ID_6d930b3820",
+        "image_id": "ID_7aa6adb82",
+        "label": 0
+      },
+      {
+        "study": "ID_6ee7f6a96b",
+        "image_id": "ID_815ea7fd4",
+        "label": 0
+      },
+      {
+        "study": "ID_6ee7f6a96b",
+        "image_id": "ID_46bf4b377",
+        "label": 0
+      },
+      {
+        "study": "ID_6ee7f6a96b",
+        "image_id": "ID_097668aa6",
+        "label": 0
+      },
+      {
+        "study": "ID_6ee7f6a96b",
+        "image_id": "ID_224e87337",
+        "label": 0
+      },
+      {
+        "study": "ID_6ee7f6a96b",
+        "image_id": "ID_3e5f650f3",
+        "label": 0
+      },
+      {
+        "study": "ID_6ee7f6a96b",
+        "image_id": "ID_1954a89df",
+        "label": 0
+      },
+      {
+        "study": "ID_6ee7f6a96b",
+        "image_id": "ID_2f5389479",
+        "label": 0
+      },
+      {
+        "study": "ID_6ee7f6a96b",
+        "image_id": "ID_4f8999bd6",
+        "label": 0
+      },
+      {
+        "study": "ID_6fec3aab50",
+        "image_id": "ID_dbdd01a08",
+        "label": 0
+      },
+      {
+        "study": "ID_6fec3aab50",
+        "image_id": "ID_dc87bd575",
+        "label": 0
+      },
+      {
+        "study": "ID_6fec3aab50",
+        "image_id": "ID_867e7e722",
+        "label": 1
+      },
+      {
+        "study": "ID_6fec3aab50",
+        "image_id": "ID_923b83bb6",
+        "label": 1
+      },
+      {
+        "study": "ID_6fec3aab50",
+        "image_id": "ID_c41e31689",
+        "label": 1
+      },
+      {
+        "study": "ID_6fec3aab50",
+        "image_id": "ID_efae26d10",
+        "label": 0
+      },
+      {
+        "study": "ID_6fec3aab50",
+        "image_id": "ID_e1d0d016c",
+        "label": 0
+      },
+      {
+        "study": "ID_6fec3aab50",
+        "image_id": "ID_f87fc6fcb",
+        "label": 0
+      },
+      {
+        "study": "ID_7165317c47",
+        "image_id": "ID_305dd7e47",
+        "label": 0
+      },
+      {
+        "study": "ID_7165317c47",
+        "image_id": "ID_b40d78e1a",
+        "label": 0
+      },
+      {
+        "study": "ID_7165317c47",
+        "image_id": "ID_b6bcc394f",
+        "label": 1
+      },
+      {
+        "study": "ID_7165317c47",
+        "image_id": "ID_d846aaa15",
+        "label": 1
+      },
+      {
+        "study": "ID_7165317c47",
+        "image_id": "ID_db1450ae0",
+        "label": 1
+      },
+      {
+        "study": "ID_7165317c47",
+        "image_id": "ID_11ecdfd40",
+        "label": 1
+      },
+      {
+        "study": "ID_7165317c47",
+        "image_id": "ID_c53dca200",
+        "label": 0
+      },
+      {
+        "study": "ID_7165317c47",
+        "image_id": "ID_02cf09419",
+        "label": 0
+      },
+      {
+        "study": "ID_7333f928be",
+        "image_id": "ID_c5b55d323",
+        "label": 0
+      },
+      {
+        "study": "ID_7333f928be",
+        "image_id": "ID_4cd7580b5",
+        "label": 0
+      },
+      {
+        "study": "ID_7333f928be",
+        "image_id": "ID_e2dad590e",
+        "label": 0
+      },
+      {
+        "study": "ID_7333f928be",
+        "image_id": "ID_1cc0ba778",
+        "label": 1
+      },
+      {
+        "study": "ID_7333f928be",
+        "image_id": "ID_62070c410",
+        "label": 1
+      },
+      {
+        "study": "ID_7333f928be",
+        "image_id": "ID_8ac7afef8",
+        "label": 1
+      },
+      {
+        "study": "ID_7333f928be",
+        "image_id": "ID_e8440dbab",
+        "label": 1
+      },
+      {
+        "study": "ID_7333f928be",
+        "image_id": "ID_5898adee3",
+        "label": 0
+      },
+      {
+        "study": "ID_7426efd17b",
+        "image_id": "ID_bb84ef7ac",
+        "label": 0
+      },
+      {
+        "study": "ID_7426efd17b",
+        "image_id": "ID_3cef864a4",
+        "label": 0
+      },
+      {
+        "study": "ID_7426efd17b",
+        "image_id": "ID_36fae7134",
+        "label": 1
+      },
+      {
+        "study": "ID_7426efd17b",
+        "image_id": "ID_989bf5e85",
+        "label": 1
+      },
+      {
+        "study": "ID_7426efd17b",
+        "image_id": "ID_5963a6e54",
+        "label": 1
+      },
+      {
+        "study": "ID_7426efd17b",
+        "image_id": "ID_7671193b4",
+        "label": 1
+      },
+      {
+        "study": "ID_7426efd17b",
+        "image_id": "ID_8752b8303",
+        "label": 0
+      },
+      {
+        "study": "ID_7426efd17b",
+        "image_id": "ID_b45011616",
+        "label": 0
+      },
+      {
+        "study": "ID_7506e3da00",
+        "image_id": "ID_fc8096be6",
+        "label": 0
+      },
+      {
+        "study": "ID_7506e3da00",
+        "image_id": "ID_92416d530",
+        "label": 0
+      },
+      {
+        "study": "ID_7506e3da00",
+        "image_id": "ID_ac782d43b",
+        "label": 0
+      },
+      {
+        "study": "ID_7506e3da00",
+        "image_id": "ID_e912e9bd3",
+        "label": 0
+      },
+      {
+        "study": "ID_7506e3da00",
+        "image_id": "ID_e4d344171",
+        "label": 0
+      },
+      {
+        "study": "ID_7506e3da00",
+        "image_id": "ID_634d0907c",
+        "label": 0
+      },
+      {
+        "study": "ID_7506e3da00",
+        "image_id": "ID_dea2989de",
+        "label": 0
+      },
+      {
+        "study": "ID_7506e3da00",
+        "image_id": "ID_a6650879b",
+        "label": 0
+      },
+      {
+        "study": "ID_7a3e46bce3",
+        "image_id": "ID_60dce3f64",
+        "label": 0
+      },
+      {
+        "study": "ID_7a3e46bce3",
+        "image_id": "ID_aa0680c10",
+        "label": 0
+      },
+      {
+        "study": "ID_7a3e46bce3",
+        "image_id": "ID_6f13e50be",
+        "label": 1
+      },
+      {
+        "study": "ID_7a3e46bce3",
+        "image_id": "ID_1dcb6a227",
+        "label": 1
+      },
+      {
+        "study": "ID_7a3e46bce3",
+        "image_id": "ID_164fbc128",
+        "label": 1
+      },
+      {
+        "study": "ID_7a3e46bce3",
+        "image_id": "ID_e1db79f85",
+        "label": 0
+      },
+      {
+        "study": "ID_7a3e46bce3",
+        "image_id": "ID_c05301c20",
+        "label": 0
+      },
+      {
+        "study": "ID_7a3e46bce3",
+        "image_id": "ID_ff3c06695",
+        "label": 0
+      },
+      {
+        "study": "ID_7b72f23129",
+        "image_id": "ID_57f844120",
+        "label": 0
+      },
+      {
+        "study": "ID_7b72f23129",
+        "image_id": "ID_3db022c65",
+        "label": 0
+      },
+      {
+        "study": "ID_7b72f23129",
+        "image_id": "ID_435825dd2",
+        "label": 0
+      },
+      {
+        "study": "ID_7b72f23129",
+        "image_id": "ID_1e863a747",
+        "label": 0
+      },
+      {
+        "study": "ID_7b72f23129",
+        "image_id": "ID_8e62e876b",
+        "label": 1
+      },
+      {
+        "study": "ID_7b72f23129",
+        "image_id": "ID_d237c4036",
+        "label": 1
+      },
+      {
+        "study": "ID_7b72f23129",
+        "image_id": "ID_79a906266",
+        "label": 0
+      },
+      {
+        "study": "ID_7b72f23129",
+        "image_id": "ID_258a977dd",
+        "label": 0
+      },
+      {
+        "study": "ID_82c6da9103",
+        "image_id": "ID_2a49b9e08",
+        "label": 0
+      },
+      {
+        "study": "ID_82c6da9103",
+        "image_id": "ID_0838bdf20",
+        "label": 0
+      },
+      {
+        "study": "ID_82c6da9103",
+        "image_id": "ID_e9f0bd849",
+        "label": 0
+      },
+      {
+        "study": "ID_82c6da9103",
+        "image_id": "ID_799ae2610",
+        "label": 0
+      },
+      {
+        "study": "ID_82c6da9103",
+        "image_id": "ID_f1124a8ad",
+        "label": 0
+      },
+      {
+        "study": "ID_82c6da9103",
+        "image_id": "ID_0fb8714a2",
+        "label": 0
+      },
+      {
+        "study": "ID_82c6da9103",
+        "image_id": "ID_290dbf8e2",
+        "label": 0
+      },
+      {
+        "study": "ID_82c6da9103",
+        "image_id": "ID_dec40ad76",
+        "label": 0
+      },
+      {
+        "study": "ID_872c7513b2",
+        "image_id": "ID_6fad58544",
+        "label": 0
+      },
+      {
+        "study": "ID_872c7513b2",
+        "image_id": "ID_4eb0e5ba8",
+        "label": 0
+      },
+      {
+        "study": "ID_872c7513b2",
+        "image_id": "ID_bcda9e8d3",
+        "label": 0
+      },
+      {
+        "study": "ID_872c7513b2",
+        "image_id": "ID_2ef20d592",
+        "label": 0
+      },
+      {
+        "study": "ID_872c7513b2",
+        "image_id": "ID_ae76494df",
+        "label": 1
+      },
+      {
+        "study": "ID_872c7513b2",
+        "image_id": "ID_5fbbac5c8",
+        "label": 0
+      },
+      {
+        "study": "ID_872c7513b2",
+        "image_id": "ID_8665c268c",
+        "label": 0
+      },
+      {
+        "study": "ID_872c7513b2",
+        "image_id": "ID_5d8cd0caa",
+        "label": 0
+      },
+      {
+        "study": "ID_89b140839e",
+        "image_id": "ID_61a770e1e",
+        "label": 0
+      },
+      {
+        "study": "ID_89b140839e",
+        "image_id": "ID_5209b675f",
+        "label": 0
+      },
+      {
+        "study": "ID_89b140839e",
+        "image_id": "ID_6146d41e4",
+        "label": 0
+      },
+      {
+        "study": "ID_89b140839e",
+        "image_id": "ID_7c2a38140",
+        "label": 0
+      },
+      {
+        "study": "ID_89b140839e",
+        "image_id": "ID_d3ea4f449",
+        "label": 0
+      },
+      {
+        "study": "ID_89b140839e",
+        "image_id": "ID_9f7fd6e53",
+        "label": 0
+      },
+      {
+        "study": "ID_89b140839e",
+        "image_id": "ID_beea0d0f2",
+        "label": 0
+      },
+      {
+        "study": "ID_89b140839e",
+        "image_id": "ID_3b2aaca8f",
+        "label": 0
+      },
+      {
+        "study": "ID_8b55fd3c97",
+        "image_id": "ID_e6192c359",
+        "label": 0
+      },
+      {
+        "study": "ID_8b55fd3c97",
+        "image_id": "ID_36bd81955",
+        "label": 0
+      },
+      {
+        "study": "ID_8b55fd3c97",
+        "image_id": "ID_e0a3b1d99",
+        "label": 0
+      },
+      {
+        "study": "ID_8b55fd3c97",
+        "image_id": "ID_7b90fb1c0",
+        "label": 1
+      },
+      {
+        "study": "ID_8b55fd3c97",
+        "image_id": "ID_441f16dd0",
+        "label": 1
+      },
+      {
+        "study": "ID_8b55fd3c97",
+        "image_id": "ID_4c0d3f238",
+        "label": 0
+      },
+      {
+        "study": "ID_8b55fd3c97",
+        "image_id": "ID_0ac5dcfe5",
+        "label": 0
+      },
+      {
+        "study": "ID_8b55fd3c97",
+        "image_id": "ID_2335892c5",
+        "label": 0
+      },
+      {
+        "study": "ID_8d69c3ed79",
+        "image_id": "ID_7105860da",
+        "label": 0
+      },
+      {
+        "study": "ID_8d69c3ed79",
+        "image_id": "ID_ecacf53e5",
+        "label": 0
+      },
+      {
+        "study": "ID_8d69c3ed79",
+        "image_id": "ID_c6e239b06",
+        "label": 1
+      },
+      {
+        "study": "ID_8d69c3ed79",
+        "image_id": "ID_add253fe1",
+        "label": 1
+      },
+      {
+        "study": "ID_8d69c3ed79",
+        "image_id": "ID_fd8758fba",
+        "label": 1
+      },
+      {
+        "study": "ID_8d69c3ed79",
+        "image_id": "ID_db456bda5",
+        "label": 1
+      },
+      {
+        "study": "ID_8d69c3ed79",
+        "image_id": "ID_6aee1f36c",
+        "label": 1
+      },
+      {
+        "study": "ID_8d69c3ed79",
+        "image_id": "ID_1ae34b2c5",
+        "label": 0
+      },
+      {
+        "study": "ID_902fe27575",
+        "image_id": "ID_126ef8e13",
+        "label": 0
+      },
+      {
+        "study": "ID_902fe27575",
+        "image_id": "ID_5811006fb",
+        "label": 0
+      },
+      {
+        "study": "ID_902fe27575",
+        "image_id": "ID_9bb51351f",
+        "label": 1
+      },
+      {
+        "study": "ID_902fe27575",
+        "image_id": "ID_00277150f",
+        "label": 1
+      },
+      {
+        "study": "ID_902fe27575",
+        "image_id": "ID_c18b92117",
+        "label": 1
+      },
+      {
+        "study": "ID_902fe27575",
+        "image_id": "ID_d6e16f022",
+        "label": 1
+      },
+      {
+        "study": "ID_902fe27575",
+        "image_id": "ID_86590f000",
+        "label": 1
+      },
+      {
+        "study": "ID_902fe27575",
+        "image_id": "ID_7f90f2af0",
+        "label": 0
+      },
+      {
+        "study": "ID_926d4a74b5",
+        "image_id": "ID_24b2673f2",
+        "label": 0
+      },
+      {
+        "study": "ID_926d4a74b5",
+        "image_id": "ID_25c70793a",
+        "label": 0
+      },
+      {
+        "study": "ID_926d4a74b5",
+        "image_id": "ID_787221c3c",
+        "label": 0
+      },
+      {
+        "study": "ID_926d4a74b5",
+        "image_id": "ID_12290638a",
+        "label": 0
+      },
+      {
+        "study": "ID_926d4a74b5",
+        "image_id": "ID_18de3c9e0",
+        "label": 0
+      },
+      {
+        "study": "ID_926d4a74b5",
+        "image_id": "ID_da77c9e1d",
+        "label": 0
+      },
+      {
+        "study": "ID_926d4a74b5",
+        "image_id": "ID_3d63b0857",
+        "label": 0
+      },
+      {
+        "study": "ID_926d4a74b5",
+        "image_id": "ID_7342803ff",
+        "label": 0
+      },
+      {
+        "study": "ID_956d4607c1",
+        "image_id": "ID_92d62d10f",
+        "label": 0
+      },
+      {
+        "study": "ID_956d4607c1",
+        "image_id": "ID_8a14c3924",
+        "label": 0
+      },
+      {
+        "study": "ID_956d4607c1",
+        "image_id": "ID_7dec3c6c5",
+        "label": 1
+      },
+      {
+        "study": "ID_956d4607c1",
+        "image_id": "ID_50b8ade08",
+        "label": 1
+      },
+      {
+        "study": "ID_956d4607c1",
+        "image_id": "ID_55f9131e3",
+        "label": 1
+      },
+      {
+        "study": "ID_956d4607c1",
+        "image_id": "ID_5e4fb02ee",
+        "label": 1
+      },
+      {
+        "study": "ID_956d4607c1",
+        "image_id": "ID_d4a339749",
+        "label": 1
+      },
+      {
+        "study": "ID_956d4607c1",
+        "image_id": "ID_ac95132d6",
+        "label": 0
+      },
+      {
+        "study": "ID_95cae29227",
+        "image_id": "ID_fe6cae717",
+        "label": 0
+      },
+      {
+        "study": "ID_95cae29227",
+        "image_id": "ID_534232d35",
+        "label": 0
+      },
+      {
+        "study": "ID_95cae29227",
+        "image_id": "ID_c2475865a",
+        "label": 1
+      },
+      {
+        "study": "ID_95cae29227",
+        "image_id": "ID_02676a4df",
+        "label": 1
+      },
+      {
+        "study": "ID_95cae29227",
+        "image_id": "ID_3b5c6ef90",
+        "label": 1
+      },
+      {
+        "study": "ID_95cae29227",
+        "image_id": "ID_c597ac856",
+        "label": 1
+      },
+      {
+        "study": "ID_95cae29227",
+        "image_id": "ID_d351171ec",
+        "label": 0
+      },
+      {
+        "study": "ID_95cae29227",
+        "image_id": "ID_0234626e3",
+        "label": 0
+      },
+      {
+        "study": "ID_97a9784efd",
+        "image_id": "ID_732e5750c",
+        "label": 0
+      },
+      {
+        "study": "ID_97a9784efd",
+        "image_id": "ID_a9abd36fd",
+        "label": 0
+      },
+      {
+        "study": "ID_97a9784efd",
+        "image_id": "ID_1c9c815a2",
+        "label": 0
+      },
+      {
+        "study": "ID_97a9784efd",
+        "image_id": "ID_456793ebc",
+        "label": 0
+      },
+      {
+        "study": "ID_97a9784efd",
+        "image_id": "ID_17cd0972a",
+        "label": 0
+      },
+      {
+        "study": "ID_97a9784efd",
+        "image_id": "ID_3d48a1b6e",
+        "label": 0
+      },
+      {
+        "study": "ID_97a9784efd",
+        "image_id": "ID_b22b79392",
+        "label": 0
+      },
+      {
+        "study": "ID_97a9784efd",
+        "image_id": "ID_9b29cde2a",
+        "label": 0
+      },
+      {
+        "study": "ID_97fa204770",
+        "image_id": "ID_142395b57",
+        "label": 0
+      },
+      {
+        "study": "ID_97fa204770",
+        "image_id": "ID_b688d2067",
+        "label": 0
+      },
+      {
+        "study": "ID_97fa204770",
+        "image_id": "ID_d52e5a106",
+        "label": 1
+      },
+      {
+        "study": "ID_97fa204770",
+        "image_id": "ID_23e6cc503",
+        "label": 1
+      },
+      {
+        "study": "ID_97fa204770",
+        "image_id": "ID_56c892109",
+        "label": 1
+      },
+      {
+        "study": "ID_97fa204770",
+        "image_id": "ID_55e5b3ff1",
+        "label": 1
+      },
+      {
+        "study": "ID_97fa204770",
+        "image_id": "ID_99db42c43",
+        "label": 1
+      },
+      {
+        "study": "ID_97fa204770",
+        "image_id": "ID_dc14187ce",
+        "label": 0
+      },
+      {
+        "study": "ID_980310975d",
+        "image_id": "ID_d6d31616a",
+        "label": 0
+      },
+      {
+        "study": "ID_980310975d",
+        "image_id": "ID_661adc7e0",
+        "label": 0
+      },
+      {
+        "study": "ID_980310975d",
+        "image_id": "ID_240aa8776",
+        "label": 0
+      },
+      {
+        "study": "ID_980310975d",
+        "image_id": "ID_bd7f9c60e",
+        "label": 0
+      },
+      {
+        "study": "ID_980310975d",
+        "image_id": "ID_104377026",
+        "label": 0
+      },
+      {
+        "study": "ID_980310975d",
+        "image_id": "ID_f99f9ddf4",
+        "label": 0
+      },
+      {
+        "study": "ID_980310975d",
+        "image_id": "ID_5c0605896",
+        "label": 0
+      },
+      {
+        "study": "ID_980310975d",
+        "image_id": "ID_df33a7c09",
+        "label": 0
+      },
+      {
+        "study": "ID_9962965a5e",
+        "image_id": "ID_a39502dea",
+        "label": 0
+      },
+      {
+        "study": "ID_9962965a5e",
+        "image_id": "ID_68b7c5710",
+        "label": 0
+      },
+      {
+        "study": "ID_9962965a5e",
+        "image_id": "ID_8d82ad9b8",
+        "label": 0
+      },
+      {
+        "study": "ID_9962965a5e",
+        "image_id": "ID_cb959367f",
+        "label": 0
+      },
+      {
+        "study": "ID_9962965a5e",
+        "image_id": "ID_5ffa5c01e",
+        "label": 0
+      },
+      {
+        "study": "ID_9962965a5e",
+        "image_id": "ID_7b8061935",
+        "label": 0
+      },
+      {
+        "study": "ID_9962965a5e",
+        "image_id": "ID_55682af82",
+        "label": 0
+      },
+      {
+        "study": "ID_9962965a5e",
+        "image_id": "ID_296f24b89",
+        "label": 0
+      },
+      {
+        "study": "ID_9a62364882",
+        "image_id": "ID_084eb96e4",
+        "label": 0
+      },
+      {
+        "study": "ID_9a62364882",
+        "image_id": "ID_a52757a2a",
+        "label": 0
+      },
+      {
+        "study": "ID_9a62364882",
+        "image_id": "ID_c88ec6a18",
+        "label": 1
+      },
+      {
+        "study": "ID_9a62364882",
+        "image_id": "ID_7bfe8da9d",
+        "label": 1
+      },
+      {
+        "study": "ID_9a62364882",
+        "image_id": "ID_5ac91400b",
+        "label": 1
+      },
+      {
+        "study": "ID_9a62364882",
+        "image_id": "ID_425a29134",
+        "label": 0
+      },
+      {
+        "study": "ID_9a62364882",
+        "image_id": "ID_6b84e8bf4",
+        "label": 0
+      },
+      {
+        "study": "ID_9a62364882",
+        "image_id": "ID_3b6bc6a24",
+        "label": 0
+      },
+      {
+        "study": "ID_9a9a392174",
+        "image_id": "ID_b095da502",
+        "label": 0
+      },
+      {
+        "study": "ID_9a9a392174",
+        "image_id": "ID_6e3ebcee9",
+        "label": 1
+      },
+      {
+        "study": "ID_9a9a392174",
+        "image_id": "ID_723a3556e",
+        "label": 1
+      },
+      {
+        "study": "ID_9a9a392174",
+        "image_id": "ID_630b7d2cf",
+        "label": 1
+      },
+      {
+        "study": "ID_9a9a392174",
+        "image_id": "ID_575b5e7d6",
+        "label": 1
+      },
+      {
+        "study": "ID_9a9a392174",
+        "image_id": "ID_1104473cf",
+        "label": 0
+      },
+      {
+        "study": "ID_9a9a392174",
+        "image_id": "ID_5fddb6d5b",
+        "label": 0
+      },
+      {
+        "study": "ID_9a9a392174",
+        "image_id": "ID_3476ce9a3",
+        "label": 0
+      },
+      {
+        "study": "ID_9c0d15d794",
+        "image_id": "ID_87362e5f0",
+        "label": 0
+      },
+      {
+        "study": "ID_9c0d15d794",
+        "image_id": "ID_978fbf024",
+        "label": 0
+      },
+      {
+        "study": "ID_9c0d15d794",
+        "image_id": "ID_eb8288f5a",
+        "label": 0
+      },
+      {
+        "study": "ID_9c0d15d794",
+        "image_id": "ID_9b974f484",
+        "label": 0
+      },
+      {
+        "study": "ID_9c0d15d794",
+        "image_id": "ID_47c69bb69",
+        "label": 0
+      },
+      {
+        "study": "ID_9c0d15d794",
+        "image_id": "ID_cee32e033",
+        "label": 0
+      },
+      {
+        "study": "ID_9c0d15d794",
+        "image_id": "ID_7d8d27659",
+        "label": 0
+      },
+      {
+        "study": "ID_9c0d15d794",
+        "image_id": "ID_9a2afa467",
+        "label": 0
+      },
+      {
+        "study": "ID_9d13906639",
+        "image_id": "ID_3b08b6177",
+        "label": 0
+      },
+      {
+        "study": "ID_9d13906639",
+        "image_id": "ID_612ed8b52",
+        "label": 0
+      },
+      {
+        "study": "ID_9d13906639",
+        "image_id": "ID_8d0029c47",
+        "label": 1
+      },
+      {
+        "study": "ID_9d13906639",
+        "image_id": "ID_d7992cd40",
+        "label": 1
+      },
+      {
+        "study": "ID_9d13906639",
+        "image_id": "ID_849bbe4c8",
+        "label": 0
+      },
+      {
+        "study": "ID_9d13906639",
+        "image_id": "ID_fba6eb820",
+        "label": 1
+      },
+      {
+        "study": "ID_9d13906639",
+        "image_id": "ID_8ffda64df",
+        "label": 1
+      },
+      {
+        "study": "ID_9d13906639",
+        "image_id": "ID_6f8d03e8a",
+        "label": 0
+      },
+      {
+        "study": "ID_9dec6ca42f",
+        "image_id": "ID_1f577b8a5",
+        "label": 0
+      },
+      {
+        "study": "ID_9dec6ca42f",
+        "image_id": "ID_314d9e86d",
+        "label": 0
+      },
+      {
+        "study": "ID_9dec6ca42f",
+        "image_id": "ID_55a2abd87",
+        "label": 0
+      },
+      {
+        "study": "ID_9dec6ca42f",
+        "image_id": "ID_2443f4cb0",
+        "label": 1
+      },
+      {
+        "study": "ID_9dec6ca42f",
+        "image_id": "ID_10fa2f149",
+        "label": 1
+      },
+      {
+        "study": "ID_9dec6ca42f",
+        "image_id": "ID_d3596d035",
+        "label": 1
+      },
+      {
+        "study": "ID_9dec6ca42f",
+        "image_id": "ID_128d4cb3e",
+        "label": 0
+      },
+      {
+        "study": "ID_9dec6ca42f",
+        "image_id": "ID_e7a978c53",
+        "label": 0
+      },
+      {
+        "study": "ID_9f83f81cfe",
+        "image_id": "ID_a9b004790",
+        "label": 0
+      },
+      {
+        "study": "ID_9f83f81cfe",
+        "image_id": "ID_d97b69df2",
+        "label": 0
+      },
+      {
+        "study": "ID_9f83f81cfe",
+        "image_id": "ID_48b823d44",
+        "label": 0
+      },
+      {
+        "study": "ID_9f83f81cfe",
+        "image_id": "ID_5fd272266",
+        "label": 0
+      },
+      {
+        "study": "ID_9f83f81cfe",
+        "image_id": "ID_7184e6c89",
+        "label": 0
+      },
+      {
+        "study": "ID_9f83f81cfe",
+        "image_id": "ID_3a23530e9",
+        "label": 0
+      },
+      {
+        "study": "ID_9f83f81cfe",
+        "image_id": "ID_7f57916b2",
+        "label": 0
+      },
+      {
+        "study": "ID_9f83f81cfe",
+        "image_id": "ID_f14e69aef",
+        "label": 0
+      },
+      {
+        "study": "ID_a262cac074",
+        "image_id": "ID_f073ed005",
+        "label": 0
+      },
+      {
+        "study": "ID_a262cac074",
+        "image_id": "ID_a375e7895",
+        "label": 0
+      },
+      {
+        "study": "ID_a262cac074",
+        "image_id": "ID_08360c8f1",
+        "label": 1
+      },
+      {
+        "study": "ID_a262cac074",
+        "image_id": "ID_bbd61e4db",
+        "label": 1
+      },
+      {
+        "study": "ID_a262cac074",
+        "image_id": "ID_44ef3c14c",
+        "label": 1
+      },
+      {
+        "study": "ID_a262cac074",
+        "image_id": "ID_9fc0b59e9",
+        "label": 1
+      },
+      {
+        "study": "ID_a262cac074",
+        "image_id": "ID_f0d8d7139",
+        "label": 0
+      },
+      {
+        "study": "ID_a262cac074",
+        "image_id": "ID_d805911ff",
+        "label": 0
+      },
+      {
+        "study": "ID_a2da9e3b19",
+        "image_id": "ID_df6e26d4f",
+        "label": 0
+      },
+      {
+        "study": "ID_a2da9e3b19",
+        "image_id": "ID_11ac88105",
+        "label": 0
+      },
+      {
+        "study": "ID_a2da9e3b19",
+        "image_id": "ID_0a07bc9bd",
+        "label": 1
+      },
+      {
+        "study": "ID_a2da9e3b19",
+        "image_id": "ID_d8e21968b",
+        "label": 1
+      },
+      {
+        "study": "ID_a2da9e3b19",
+        "image_id": "ID_1f159642f",
+        "label": 1
+      },
+      {
+        "study": "ID_a2da9e3b19",
+        "image_id": "ID_2578f6102",
+        "label": 1
+      },
+      {
+        "study": "ID_a2da9e3b19",
+        "image_id": "ID_f737b6dcb",
+        "label": 0
+      },
+      {
+        "study": "ID_a2da9e3b19",
+        "image_id": "ID_09e3c6e9a",
+        "label": 0
+      },
+      {
+        "study": "ID_a5169e55a1",
+        "image_id": "ID_14692a9e3",
+        "label": 0
+      },
+      {
+        "study": "ID_a5169e55a1",
+        "image_id": "ID_1ba4dfc07",
+        "label": 0
+      },
+      {
+        "study": "ID_a5169e55a1",
+        "image_id": "ID_90e7f57e2",
+        "label": 0
+      },
+      {
+        "study": "ID_a5169e55a1",
+        "image_id": "ID_5f0e3e3b7",
+        "label": 0
+      },
+      {
+        "study": "ID_a5169e55a1",
+        "image_id": "ID_e75bf95da",
+        "label": 0
+      },
+      {
+        "study": "ID_a5169e55a1",
+        "image_id": "ID_56fb83d64",
+        "label": 0
+      },
+      {
+        "study": "ID_a5169e55a1",
+        "image_id": "ID_94d8cf1ba",
+        "label": 0
+      },
+      {
+        "study": "ID_a5169e55a1",
+        "image_id": "ID_85d097a4b",
+        "label": 0
+      },
+      {
+        "study": "ID_a56ee65b9f",
+        "image_id": "ID_23ccc6868",
+        "label": 1
+      },
+      {
+        "study": "ID_a56ee65b9f",
+        "image_id": "ID_1828fda5d",
+        "label": 0
+      },
+      {
+        "study": "ID_a56ee65b9f",
+        "image_id": "ID_06e87af4d",
+        "label": 0
+      },
+      {
+        "study": "ID_a56ee65b9f",
+        "image_id": "ID_51b365f8e",
+        "label": 0
+      },
+      {
+        "study": "ID_a56ee65b9f",
+        "image_id": "ID_f8541644f",
+        "label": 0
+      },
+      {
+        "study": "ID_a56ee65b9f",
+        "image_id": "ID_b76f67a22",
+        "label": 0
+      },
+      {
+        "study": "ID_a56ee65b9f",
+        "image_id": "ID_1c0e4d0ea",
+        "label": 0
+      },
+      {
+        "study": "ID_a56ee65b9f",
+        "image_id": "ID_416ed4635",
+        "label": 0
+      },
+      {
+        "study": "ID_a7d452a9fd",
+        "image_id": "ID_128841800",
+        "label": 0
+      },
+      {
+        "study": "ID_a7d452a9fd",
+        "image_id": "ID_530431c45",
+        "label": 0
+      },
+      {
+        "study": "ID_a7d452a9fd",
+        "image_id": "ID_86aa1dd5d",
+        "label": 0
+      },
+      {
+        "study": "ID_a7d452a9fd",
+        "image_id": "ID_456837193",
+        "label": 0
+      },
+      {
+        "study": "ID_a7d452a9fd",
+        "image_id": "ID_cba19e2d6",
+        "label": 0
+      },
+      {
+        "study": "ID_a7d452a9fd",
+        "image_id": "ID_d866f5813",
+        "label": 0
+      },
+      {
+        "study": "ID_a7d452a9fd",
+        "image_id": "ID_ef8fbf0a4",
+        "label": 0
+      },
+      {
+        "study": "ID_a7d452a9fd",
+        "image_id": "ID_69d7477a8",
+        "label": 0
+      },
+      {
+        "study": "ID_a97e7369cd",
+        "image_id": "ID_d1fae7bef",
+        "label": 0
+      },
+      {
+        "study": "ID_a97e7369cd",
+        "image_id": "ID_f9df821b5",
+        "label": 0
+      },
+      {
+        "study": "ID_a97e7369cd",
+        "image_id": "ID_f2fd1a664",
+        "label": 1
+      },
+      {
+        "study": "ID_a97e7369cd",
+        "image_id": "ID_2f1093c46",
+        "label": 1
+      },
+      {
+        "study": "ID_a97e7369cd",
+        "image_id": "ID_6f333fb52",
+        "label": 1
+      },
+      {
+        "study": "ID_a97e7369cd",
+        "image_id": "ID_27d5a7d35",
+        "label": 0
+      },
+      {
+        "study": "ID_a97e7369cd",
+        "image_id": "ID_5bc027b13",
+        "label": 0
+      },
+      {
+        "study": "ID_a97e7369cd",
+        "image_id": "ID_33ba0cf79",
+        "label": 0
+      },
+      {
+        "study": "ID_aa3726459e",
+        "image_id": "ID_23556f62a",
+        "label": 0
+      },
+      {
+        "study": "ID_aa3726459e",
+        "image_id": "ID_cf81fa3c7",
+        "label": 0
+      },
+      {
+        "study": "ID_aa3726459e",
+        "image_id": "ID_b41517fd9",
+        "label": 0
+      },
+      {
+        "study": "ID_aa3726459e",
+        "image_id": "ID_04766ee8c",
+        "label": 0
+      },
+      {
+        "study": "ID_aa3726459e",
+        "image_id": "ID_5ab8476a0",
+        "label": 0
+      },
+      {
+        "study": "ID_aa3726459e",
+        "image_id": "ID_9c5bc5918",
+        "label": 0
+      },
+      {
+        "study": "ID_aa3726459e",
+        "image_id": "ID_88ad1a12a",
+        "label": 0
+      },
+      {
+        "study": "ID_aa3726459e",
+        "image_id": "ID_88d8a033e",
+        "label": 0
+      },
+      {
+        "study": "ID_aa98c54867",
+        "image_id": "ID_28225d988",
+        "label": 0
+      },
+      {
+        "study": "ID_aa98c54867",
+        "image_id": "ID_bf4fdbe0e",
+        "label": 0
+      },
+      {
+        "study": "ID_aa98c54867",
+        "image_id": "ID_a9a297e2f",
+        "label": 0
+      },
+      {
+        "study": "ID_aa98c54867",
+        "image_id": "ID_725d0aa41",
+        "label": 0
+      },
+      {
+        "study": "ID_aa98c54867",
+        "image_id": "ID_40f00128a",
+        "label": 0
+      },
+      {
+        "study": "ID_aa98c54867",
+        "image_id": "ID_be9861ad7",
+        "label": 0
+      },
+      {
+        "study": "ID_aa98c54867",
+        "image_id": "ID_0dfd561e8",
+        "label": 0
+      },
+      {
+        "study": "ID_aa98c54867",
+        "image_id": "ID_36b5ed404",
+        "label": 0
+      },
+      {
+        "study": "ID_aefe3eeb23",
+        "image_id": "ID_6fd6cf23f",
+        "label": 0
+      },
+      {
+        "study": "ID_aefe3eeb23",
+        "image_id": "ID_7e642d397",
+        "label": 0
+      },
+      {
+        "study": "ID_aefe3eeb23",
+        "image_id": "ID_e0801959e",
+        "label": 1
+      },
+      {
+        "study": "ID_aefe3eeb23",
+        "image_id": "ID_d04cf982e",
+        "label": 1
+      },
+      {
+        "study": "ID_aefe3eeb23",
+        "image_id": "ID_65d12f9d7",
+        "label": 0
+      },
+      {
+        "study": "ID_aefe3eeb23",
+        "image_id": "ID_f9206a2be",
+        "label": 0
+      },
+      {
+        "study": "ID_aefe3eeb23",
+        "image_id": "ID_4184e81a1",
+        "label": 0
+      },
+      {
+        "study": "ID_aefe3eeb23",
+        "image_id": "ID_bd69e39d6",
+        "label": 0
+      },
+      {
+        "study": "ID_af606c1d17",
+        "image_id": "ID_d117438e3",
+        "label": 0
+      },
+      {
+        "study": "ID_af606c1d17",
+        "image_id": "ID_6a3e018ae",
+        "label": 0
+      },
+      {
+        "study": "ID_af606c1d17",
+        "image_id": "ID_310eac43e",
+        "label": 0
+      },
+      {
+        "study": "ID_af606c1d17",
+        "image_id": "ID_07f38101e",
+        "label": 0
+      },
+      {
+        "study": "ID_af606c1d17",
+        "image_id": "ID_02e3c3810",
+        "label": 1
+      },
+      {
+        "study": "ID_af606c1d17",
+        "image_id": "ID_7887fe436",
+        "label": 0
+      },
+      {
+        "study": "ID_af606c1d17",
+        "image_id": "ID_db0219642",
+        "label": 0
+      },
+      {
+        "study": "ID_af606c1d17",
+        "image_id": "ID_78644d75c",
+        "label": 0
+      },
+      {
+        "study": "ID_b07a4fe58b",
+        "image_id": "ID_64123be43",
+        "label": 0
+      },
+      {
+        "study": "ID_b07a4fe58b",
+        "image_id": "ID_41169119d",
+        "label": 0
+      },
+      {
+        "study": "ID_b07a4fe58b",
+        "image_id": "ID_078a89ade",
+        "label": 0
+      },
+      {
+        "study": "ID_b07a4fe58b",
+        "image_id": "ID_c757994c1",
+        "label": 0
+      },
+      {
+        "study": "ID_b07a4fe58b",
+        "image_id": "ID_f0b42b648",
+        "label": 0
+      },
+      {
+        "study": "ID_b07a4fe58b",
+        "image_id": "ID_853d7000f",
+        "label": 0
+      },
+      {
+        "study": "ID_b07a4fe58b",
+        "image_id": "ID_0cec775e5",
+        "label": 0
+      },
+      {
+        "study": "ID_b07a4fe58b",
+        "image_id": "ID_747acc818",
+        "label": 0
+      },
+      {
+        "study": "ID_b2c0c835e6",
+        "image_id": "ID_c6a3c86bd",
+        "label": 0
+      },
+      {
+        "study": "ID_b2c0c835e6",
+        "image_id": "ID_880d6d6a5",
+        "label": 0
+      },
+      {
+        "study": "ID_b2c0c835e6",
+        "image_id": "ID_bfbf06d87",
+        "label": 0
+      },
+      {
+        "study": "ID_b2c0c835e6",
+        "image_id": "ID_995c16001",
+        "label": 0
+      },
+      {
+        "study": "ID_b2c0c835e6",
+        "image_id": "ID_f41ac1a4d",
+        "label": 0
+      },
+      {
+        "study": "ID_b2c0c835e6",
+        "image_id": "ID_6983f820f",
+        "label": 0
+      },
+      {
+        "study": "ID_b2c0c835e6",
+        "image_id": "ID_b3e87802e",
+        "label": 0
+      },
+      {
+        "study": "ID_b2c0c835e6",
+        "image_id": "ID_437f26dd4",
+        "label": 0
+      },
+      {
+        "study": "ID_b2eb4b0981",
+        "image_id": "ID_f5b312d8d",
+        "label": 0
+      },
+      {
+        "study": "ID_b2eb4b0981",
+        "image_id": "ID_819ab1432",
+        "label": 0
+      },
+      {
+        "study": "ID_b2eb4b0981",
+        "image_id": "ID_2fe49b404",
+        "label": 0
+      },
+      {
+        "study": "ID_b2eb4b0981",
+        "image_id": "ID_8bcd2a94f",
+        "label": 0
+      },
+      {
+        "study": "ID_b2eb4b0981",
+        "image_id": "ID_0d1e546ba",
+        "label": 0
+      },
+      {
+        "study": "ID_b2eb4b0981",
+        "image_id": "ID_4099ded41",
+        "label": 0
+      },
+      {
+        "study": "ID_b2eb4b0981",
+        "image_id": "ID_79c24581b",
+        "label": 0
+      },
+      {
+        "study": "ID_b2eb4b0981",
+        "image_id": "ID_ba0b5fd1c",
+        "label": 0
+      },
+      {
+        "study": "ID_b53d640a8c",
+        "image_id": "ID_a2986ce08",
+        "label": 0
+      },
+      {
+        "study": "ID_b53d640a8c",
+        "image_id": "ID_097eef903",
+        "label": 0
+      },
+      {
+        "study": "ID_b53d640a8c",
+        "image_id": "ID_5d8c4c25f",
+        "label": 0
+      },
+      {
+        "study": "ID_b53d640a8c",
+        "image_id": "ID_0f35b3f22",
+        "label": 0
+      },
+      {
+        "study": "ID_b53d640a8c",
+        "image_id": "ID_1fd264329",
+        "label": 0
+      },
+      {
+        "study": "ID_b53d640a8c",
+        "image_id": "ID_573344d29",
+        "label": 0
+      },
+      {
+        "study": "ID_b53d640a8c",
+        "image_id": "ID_c737d53eb",
+        "label": 0
+      },
+      {
+        "study": "ID_b53d640a8c",
+        "image_id": "ID_50e5fa884",
+        "label": 0
+      },
+      {
+        "study": "ID_b92ca9bc78",
+        "image_id": "ID_5db3881fd",
+        "label": 0
+      },
+      {
+        "study": "ID_b92ca9bc78",
+        "image_id": "ID_285cbd702",
+        "label": 0
+      },
+      {
+        "study": "ID_b92ca9bc78",
+        "image_id": "ID_eb0025d21",
+        "label": 1
+      },
+      {
+        "study": "ID_b92ca9bc78",
+        "image_id": "ID_3c46f8b6e",
+        "label": 1
+      },
+      {
+        "study": "ID_b92ca9bc78",
+        "image_id": "ID_00816c242",
+        "label": 1
+      },
+      {
+        "study": "ID_b92ca9bc78",
+        "image_id": "ID_8a72161f3",
+        "label": 1
+      },
+      {
+        "study": "ID_b92ca9bc78",
+        "image_id": "ID_280d0c3d8",
+        "label": 1
+      },
+      {
+        "study": "ID_b92ca9bc78",
+        "image_id": "ID_edc69729b",
+        "label": 0
+      },
+      {
+        "study": "ID_ba0d8af481",
+        "image_id": "ID_665cda959",
+        "label": 0
+      },
+      {
+        "study": "ID_ba0d8af481",
+        "image_id": "ID_2f5a3f75b",
+        "label": 0
+      },
+      {
+        "study": "ID_ba0d8af481",
+        "image_id": "ID_a41ecdfbd",
+        "label": 0
+      },
+      {
+        "study": "ID_ba0d8af481",
+        "image_id": "ID_0994529ca",
+        "label": 0
+      },
+      {
+        "study": "ID_ba0d8af481",
+        "image_id": "ID_c70dad58e",
+        "label": 0
+      },
+      {
+        "study": "ID_ba0d8af481",
+        "image_id": "ID_9a06f6909",
+        "label": 0
+      },
+      {
+        "study": "ID_ba0d8af481",
+        "image_id": "ID_1d18c0fac",
+        "label": 0
+      },
+      {
+        "study": "ID_ba0d8af481",
+        "image_id": "ID_ebf6b7e8f",
+        "label": 0
+      },
+      {
+        "study": "ID_bb525159f3",
+        "image_id": "ID_a3fe34bb8",
+        "label": 1
+      },
+      {
+        "study": "ID_bb525159f3",
+        "image_id": "ID_f16969508",
+        "label": 0
+      },
+      {
+        "study": "ID_bb525159f3",
+        "image_id": "ID_9090da858",
+        "label": 1
+      },
+      {
+        "study": "ID_bb525159f3",
+        "image_id": "ID_a0a27a2df",
+        "label": 1
+      },
+      {
+        "study": "ID_bb525159f3",
+        "image_id": "ID_7b05caaf1",
+        "label": 1
+      },
+      {
+        "study": "ID_bb525159f3",
+        "image_id": "ID_92fab7eb9",
+        "label": 1
+      },
+      {
+        "study": "ID_bb525159f3",
+        "image_id": "ID_1e22d4cf0",
+        "label": 1
+      },
+      {
+        "study": "ID_bb525159f3",
+        "image_id": "ID_5663e60c8",
+        "label": 0
+      },
+      {
+        "study": "ID_bdf771a620",
+        "image_id": "ID_47ca5fe64",
+        "label": 0
+      },
+      {
+        "study": "ID_bdf771a620",
+        "image_id": "ID_a7c6ae359",
+        "label": 0
+      },
+      {
+        "study": "ID_bdf771a620",
+        "image_id": "ID_756501c83",
+        "label": 0
+      },
+      {
+        "study": "ID_bdf771a620",
+        "image_id": "ID_6989a8c7e",
+        "label": 1
+      },
+      {
+        "study": "ID_bdf771a620",
+        "image_id": "ID_ab5ae414d",
+        "label": 1
+      },
+      {
+        "study": "ID_bdf771a620",
+        "image_id": "ID_daf4b4e02",
+        "label": 1
+      },
+      {
+        "study": "ID_bdf771a620",
+        "image_id": "ID_efe477414",
+        "label": 0
+      },
+      {
+        "study": "ID_bdf771a620",
+        "image_id": "ID_b12db2ff1",
+        "label": 0
+      },
+      {
+        "study": "ID_be3d149750",
+        "image_id": "ID_e2088982c",
+        "label": 0
+      },
+      {
+        "study": "ID_be3d149750",
+        "image_id": "ID_64dce9dc3",
+        "label": 0
+      },
+      {
+        "study": "ID_be3d149750",
+        "image_id": "ID_50e25653e",
+        "label": 0
+      },
+      {
+        "study": "ID_be3d149750",
+        "image_id": "ID_a9d74e798",
+        "label": 0
+      },
+      {
+        "study": "ID_be3d149750",
+        "image_id": "ID_cf83a2768",
+        "label": 0
+      },
+      {
+        "study": "ID_be3d149750",
+        "image_id": "ID_aa6709615",
+        "label": 0
+      },
+      {
+        "study": "ID_be3d149750",
+        "image_id": "ID_ccc87f04a",
+        "label": 0
+      },
+      {
+        "study": "ID_be3d149750",
+        "image_id": "ID_59770495d",
+        "label": 0
+      },
+      {
+        "study": "ID_c0a57f036a",
+        "image_id": "ID_5d0bdb8d3",
+        "label": 0
+      },
+      {
+        "study": "ID_c0a57f036a",
+        "image_id": "ID_d6eb13516",
+        "label": 0
+      },
+      {
+        "study": "ID_c0a57f036a",
+        "image_id": "ID_905a30c9b",
+        "label": 0
+      },
+      {
+        "study": "ID_c0a57f036a",
+        "image_id": "ID_317ee327e",
+        "label": 0
+      },
+      {
+        "study": "ID_c0a57f036a",
+        "image_id": "ID_627828b7e",
+        "label": 0
+      },
+      {
+        "study": "ID_c0a57f036a",
+        "image_id": "ID_4429d5657",
+        "label": 0
+      },
+      {
+        "study": "ID_c0a57f036a",
+        "image_id": "ID_7051b3f50",
+        "label": 0
+      },
+      {
+        "study": "ID_c0a57f036a",
+        "image_id": "ID_d1949b33d",
+        "label": 0
+      },
+      {
+        "study": "ID_c1876769b4",
+        "image_id": "ID_ba8144eab",
+        "label": 0
+      },
+      {
+        "study": "ID_c1876769b4",
+        "image_id": "ID_20bfe7e7a",
+        "label": 1
+      },
+      {
+        "study": "ID_c1876769b4",
+        "image_id": "ID_cfa4bfadf",
+        "label": 1
+      },
+      {
+        "study": "ID_c1876769b4",
+        "image_id": "ID_b6c2880d9",
+        "label": 1
+      },
+      {
+        "study": "ID_c1876769b4",
+        "image_id": "ID_e7349d20f",
+        "label": 1
+      },
+      {
+        "study": "ID_c1876769b4",
+        "image_id": "ID_8ea3bed3a",
+        "label": 1
+      },
+      {
+        "study": "ID_c1876769b4",
+        "image_id": "ID_f82e5b795",
+        "label": 1
+      },
+      {
+        "study": "ID_c1876769b4",
+        "image_id": "ID_9edbf888f",
+        "label": 0
+      },
+      {
+        "study": "ID_c3b9056586",
+        "image_id": "ID_b8867559a",
+        "label": 0
+      },
+      {
+        "study": "ID_c3b9056586",
+        "image_id": "ID_fe2fa2bb4",
+        "label": 0
+      },
+      {
+        "study": "ID_c3b9056586",
+        "image_id": "ID_9c12b18de",
+        "label": 0
+      },
+      {
+        "study": "ID_c3b9056586",
+        "image_id": "ID_2bf20e02b",
+        "label": 0
+      },
+      {
+        "study": "ID_c3b9056586",
+        "image_id": "ID_e5ed4d199",
+        "label": 0
+      },
+      {
+        "study": "ID_c3b9056586",
+        "image_id": "ID_b05e31d16",
+        "label": 0
+      },
+      {
+        "study": "ID_c3b9056586",
+        "image_id": "ID_ee762b167",
+        "label": 0
+      },
+      {
+        "study": "ID_c3b9056586",
+        "image_id": "ID_06c1ac1fe",
+        "label": 0
+      },
+      {
+        "study": "ID_c4e6122c2e",
+        "image_id": "ID_b2b23678d",
+        "label": 0
+      },
+      {
+        "study": "ID_c4e6122c2e",
+        "image_id": "ID_4fdfe2524",
+        "label": 0
+      },
+      {
+        "study": "ID_c4e6122c2e",
+        "image_id": "ID_ebee21cf6",
+        "label": 0
+      },
+      {
+        "study": "ID_c4e6122c2e",
+        "image_id": "ID_7887c6455",
+        "label": 1
+      },
+      {
+        "study": "ID_c4e6122c2e",
+        "image_id": "ID_6431be835",
+        "label": 1
+      },
+      {
+        "study": "ID_c4e6122c2e",
+        "image_id": "ID_d700e728c",
+        "label": 1
+      },
+      {
+        "study": "ID_c4e6122c2e",
+        "image_id": "ID_c238bf66f",
+        "label": 1
+      },
+      {
+        "study": "ID_c4e6122c2e",
+        "image_id": "ID_eb0771897",
+        "label": 0
+      },
+      {
+        "study": "ID_c5a33aa4d1",
+        "image_id": "ID_4a1c0320c",
+        "label": 0
+      },
+      {
+        "study": "ID_c5a33aa4d1",
+        "image_id": "ID_d21e85006",
+        "label": 0
+      },
+      {
+        "study": "ID_c5a33aa4d1",
+        "image_id": "ID_80afe4ace",
+        "label": 0
+      },
+      {
+        "study": "ID_c5a33aa4d1",
+        "image_id": "ID_0357b5325",
+        "label": 1
+      },
+      {
+        "study": "ID_c5a33aa4d1",
+        "image_id": "ID_4d7488bfd",
+        "label": 1
+      },
+      {
+        "study": "ID_c5a33aa4d1",
+        "image_id": "ID_3eb70ebfd",
+        "label": 1
+      },
+      {
+        "study": "ID_c5a33aa4d1",
+        "image_id": "ID_bbd299c2e",
+        "label": 1
+      },
+      {
+        "study": "ID_c5a33aa4d1",
+        "image_id": "ID_0e2b5f597",
+        "label": 0
+      },
+      {
+        "study": "ID_cbc35ac142",
+        "image_id": "ID_93f3028b4",
+        "label": 0
+      },
+      {
+        "study": "ID_cbc35ac142",
+        "image_id": "ID_587fcf427",
+        "label": 0
+      },
+      {
+        "study": "ID_cbc35ac142",
+        "image_id": "ID_b4b7454f9",
+        "label": 0
+      },
+      {
+        "study": "ID_cbc35ac142",
+        "image_id": "ID_257da78a9",
+        "label": 0
+      },
+      {
+        "study": "ID_cbc35ac142",
+        "image_id": "ID_d23cbc4e5",
+        "label": 0
+      },
+      {
+        "study": "ID_cbc35ac142",
+        "image_id": "ID_01df7e3e5",
+        "label": 0
+      },
+      {
+        "study": "ID_cbc35ac142",
+        "image_id": "ID_ab53062c1",
+        "label": 0
+      },
+      {
+        "study": "ID_cbc35ac142",
+        "image_id": "ID_7204a5c3c",
+        "label": 0
+      },
+      {
+        "study": "ID_d24ba7b592",
+        "image_id": "ID_2f01ed9c4",
+        "label": 0
+      },
+      {
+        "study": "ID_d24ba7b592",
+        "image_id": "ID_73bd6151c",
+        "label": 0
+      },
+      {
+        "study": "ID_d24ba7b592",
+        "image_id": "ID_0ad924249",
+        "label": 0
+      },
+      {
+        "study": "ID_d24ba7b592",
+        "image_id": "ID_246da0fb3",
+        "label": 0
+      },
+      {
+        "study": "ID_d24ba7b592",
+        "image_id": "ID_cd5f335ac",
+        "label": 0
+      },
+      {
+        "study": "ID_d24ba7b592",
+        "image_id": "ID_c804bc151",
+        "label": 0
+      },
+      {
+        "study": "ID_d24ba7b592",
+        "image_id": "ID_f0153c56a",
+        "label": 0
+      },
+      {
+        "study": "ID_d24ba7b592",
+        "image_id": "ID_12bbe97dd",
+        "label": 0
+      },
+      {
+        "study": "ID_d6e9dae022",
+        "image_id": "ID_ad1790a5b",
+        "label": 0
+      },
+      {
+        "study": "ID_d6e9dae022",
+        "image_id": "ID_6724f0a48",
+        "label": 0
+      },
+      {
+        "study": "ID_d6e9dae022",
+        "image_id": "ID_53e79a2ed",
+        "label": 0
+      },
+      {
+        "study": "ID_d6e9dae022",
+        "image_id": "ID_8a18eaa31",
+        "label": 0
+      },
+      {
+        "study": "ID_d6e9dae022",
+        "image_id": "ID_0d32c023d",
+        "label": 0
+      },
+      {
+        "study": "ID_d6e9dae022",
+        "image_id": "ID_fcc1d5143",
+        "label": 0
+      },
+      {
+        "study": "ID_d6e9dae022",
+        "image_id": "ID_c841570c9",
+        "label": 0
+      },
+      {
+        "study": "ID_d6e9dae022",
+        "image_id": "ID_801302459",
+        "label": 0
+      },
+      {
+        "study": "ID_dbc3b8c1c0",
+        "image_id": "ID_bb648b5b9",
+        "label": 0
+      },
+      {
+        "study": "ID_dbc3b8c1c0",
+        "image_id": "ID_51130d938",
+        "label": 0
+      },
+      {
+        "study": "ID_dbc3b8c1c0",
+        "image_id": "ID_63fd8d335",
+        "label": 1
+      },
+      {
+        "study": "ID_dbc3b8c1c0",
+        "image_id": "ID_8312af9ee",
+        "label": 1
+      },
+      {
+        "study": "ID_dbc3b8c1c0",
+        "image_id": "ID_912cce133",
+        "label": 1
+      },
+      {
+        "study": "ID_dbc3b8c1c0",
+        "image_id": "ID_54150d408",
+        "label": 0
+      },
+      {
+        "study": "ID_dbc3b8c1c0",
+        "image_id": "ID_04cf5eeee",
+        "label": 0
+      },
+      {
+        "study": "ID_dbc3b8c1c0",
+        "image_id": "ID_d1fe4d9c4",
+        "label": 0
+      },
+      {
+        "study": "ID_e0d0a5f299",
+        "image_id": "ID_18b062c2d",
+        "label": 0
+      },
+      {
+        "study": "ID_e0d0a5f299",
+        "image_id": "ID_013467307",
+        "label": 0
+      },
+      {
+        "study": "ID_e0d0a5f299",
+        "image_id": "ID_2c3ba83a9",
+        "label": 1
+      },
+      {
+        "study": "ID_e0d0a5f299",
+        "image_id": "ID_6167f045f",
+        "label": 1
+      },
+      {
+        "study": "ID_e0d0a5f299",
+        "image_id": "ID_25b089de6",
+        "label": 1
+      },
+      {
+        "study": "ID_e0d0a5f299",
+        "image_id": "ID_c1ba24e1d",
+        "label": 1
+      },
+      {
+        "study": "ID_e0d0a5f299",
+        "image_id": "ID_38d4760cf",
+        "label": 1
+      },
+      {
+        "study": "ID_e0d0a5f299",
+        "image_id": "ID_6eb8ebc9f",
+        "label": 0
+      },
+      {
+        "study": "ID_e13194281f",
+        "image_id": "ID_fe59e1a5f",
+        "label": 0
+      },
+      {
+        "study": "ID_e13194281f",
+        "image_id": "ID_1b755f040",
+        "label": 0
+      },
+      {
+        "study": "ID_e13194281f",
+        "image_id": "ID_59c56dec4",
+        "label": 0
+      },
+      {
+        "study": "ID_e13194281f",
+        "image_id": "ID_5db63c60d",
+        "label": 1
+      },
+      {
+        "study": "ID_e13194281f",
+        "image_id": "ID_b2e979d58",
+        "label": 1
+      },
+      {
+        "study": "ID_e13194281f",
+        "image_id": "ID_cc505c04f",
+        "label": 0
+      },
+      {
+        "study": "ID_e13194281f",
+        "image_id": "ID_1abafe6b2",
+        "label": 0
+      },
+      {
+        "study": "ID_e13194281f",
+        "image_id": "ID_46dba49c8",
+        "label": 0
+      },
+      {
+        "study": "ID_e28e1fd2ee",
+        "image_id": "ID_53c3eff6d",
+        "label": 1
+      },
+      {
+        "study": "ID_e28e1fd2ee",
+        "image_id": "ID_d45e55779",
+        "label": 0
+      },
+      {
+        "study": "ID_e28e1fd2ee",
+        "image_id": "ID_7eb634861",
+        "label": 1
+      },
+      {
+        "study": "ID_e28e1fd2ee",
+        "image_id": "ID_12d4b9b38",
+        "label": 0
+      },
+      {
+        "study": "ID_e28e1fd2ee",
+        "image_id": "ID_5fee30469",
+        "label": 0
+      },
+      {
+        "study": "ID_e28e1fd2ee",
+        "image_id": "ID_a6e4ee0ef",
+        "label": 0
+      },
+      {
+        "study": "ID_e28e1fd2ee",
+        "image_id": "ID_1a0030c8a",
+        "label": 0
+      },
+      {
+        "study": "ID_e28e1fd2ee",
+        "image_id": "ID_0e735c801",
+        "label": 0
+      },
+      {
+        "study": "ID_e468fee068",
+        "image_id": "ID_f22730d7b",
+        "label": 0
+      },
+      {
+        "study": "ID_e468fee068",
+        "image_id": "ID_21d4bd6f3",
+        "label": 0
+      },
+      {
+        "study": "ID_e468fee068",
+        "image_id": "ID_72dce7784",
+        "label": 1
+      },
+      {
+        "study": "ID_e468fee068",
+        "image_id": "ID_cef2af72d",
+        "label": 1
+      },
+      {
+        "study": "ID_e468fee068",
+        "image_id": "ID_a2f9ba4bf",
+        "label": 1
+      },
+      {
+        "study": "ID_e468fee068",
+        "image_id": "ID_1bc5771a7",
+        "label": 1
+      },
+      {
+        "study": "ID_e468fee068",
+        "image_id": "ID_3e60e696d",
+        "label": 1
+      },
+      {
+        "study": "ID_e468fee068",
+        "image_id": "ID_942e2f95b",
+        "label": 0
+      },
+      {
+        "study": "ID_e585d856f8",
+        "image_id": "ID_cb718f383",
+        "label": 0
+      },
+      {
+        "study": "ID_e585d856f8",
+        "image_id": "ID_ddebd063c",
+        "label": 0
+      },
+      {
+        "study": "ID_e585d856f8",
+        "image_id": "ID_18c65f537",
+        "label": 0
+      },
+      {
+        "study": "ID_e585d856f8",
+        "image_id": "ID_878a1e628",
+        "label": 0
+      },
+      {
+        "study": "ID_e585d856f8",
+        "image_id": "ID_b62b4cfb8",
+        "label": 1
+      },
+      {
+        "study": "ID_e585d856f8",
+        "image_id": "ID_b6715abba",
+        "label": 1
+      },
+      {
+        "study": "ID_e585d856f8",
+        "image_id": "ID_de1fd2b4f",
+        "label": 0
+      },
+      {
+        "study": "ID_e585d856f8",
+        "image_id": "ID_441d8f551",
+        "label": 0
+      },
+      {
+        "study": "ID_e639d72581",
+        "image_id": "ID_fb5a324ef",
+        "label": 0
+      },
+      {
+        "study": "ID_e639d72581",
+        "image_id": "ID_6540ec376",
+        "label": 0
+      },
+      {
+        "study": "ID_e639d72581",
+        "image_id": "ID_6b520baac",
+        "label": 0
+      },
+      {
+        "study": "ID_e639d72581",
+        "image_id": "ID_b4035df5f",
+        "label": 1
+      },
+      {
+        "study": "ID_e639d72581",
+        "image_id": "ID_00dc6dd97",
+        "label": 0
+      },
+      {
+        "study": "ID_e639d72581",
+        "image_id": "ID_7029bb7fd",
+        "label": 0
+      },
+      {
+        "study": "ID_e639d72581",
+        "image_id": "ID_5342b40a3",
+        "label": 0
+      },
+      {
+        "study": "ID_e639d72581",
+        "image_id": "ID_8feffef22",
+        "label": 0
+      },
+      {
+        "study": "ID_e7c45d478b",
+        "image_id": "ID_b5c61e4c5",
+        "label": 0
+      },
+      {
+        "study": "ID_e7c45d478b",
+        "image_id": "ID_f9db8f99c",
+        "label": 0
+      },
+      {
+        "study": "ID_e7c45d478b",
+        "image_id": "ID_e3adc0e4f",
+        "label": 0
+      },
+      {
+        "study": "ID_e7c45d478b",
+        "image_id": "ID_adda6b394",
+        "label": 0
+      },
+      {
+        "study": "ID_e7c45d478b",
+        "image_id": "ID_67daacba3",
+        "label": 0
+      },
+      {
+        "study": "ID_e7c45d478b",
+        "image_id": "ID_157c4f88b",
+        "label": 0
+      },
+      {
+        "study": "ID_e7c45d478b",
+        "image_id": "ID_57c40ff44",
+        "label": 0
+      },
+      {
+        "study": "ID_e7c45d478b",
+        "image_id": "ID_f1b447481",
+        "label": 0
+      },
+      {
+        "study": "ID_e8d8cf6ddb",
+        "image_id": "ID_3f74a7c27",
+        "label": 0
+      },
+      {
+        "study": "ID_e8d8cf6ddb",
+        "image_id": "ID_3ced1dea2",
+        "label": 0
+      },
+      {
+        "study": "ID_e8d8cf6ddb",
+        "image_id": "ID_afc6d535d",
+        "label": 0
+      },
+      {
+        "study": "ID_e8d8cf6ddb",
+        "image_id": "ID_4a6a916b7",
+        "label": 0
+      },
+      {
+        "study": "ID_e8d8cf6ddb",
+        "image_id": "ID_1e05a3306",
+        "label": 0
+      },
+      {
+        "study": "ID_e8d8cf6ddb",
+        "image_id": "ID_0d1c2c7e6",
+        "label": 0
+      },
+      {
+        "study": "ID_e8d8cf6ddb",
+        "image_id": "ID_4d0942fcb",
+        "label": 0
+      },
+      {
+        "study": "ID_e8d8cf6ddb",
+        "image_id": "ID_4db7ac6bf",
+        "label": 0
+      },
+      {
+        "study": "ID_e8e89732c0",
+        "image_id": "ID_4cbc46a10",
+        "label": 0
+      },
+      {
+        "study": "ID_e8e89732c0",
+        "image_id": "ID_445af1411",
+        "label": 0
+      },
+      {
+        "study": "ID_e8e89732c0",
+        "image_id": "ID_cc334dafa",
+        "label": 1
+      },
+      {
+        "study": "ID_e8e89732c0",
+        "image_id": "ID_c33a40b85",
+        "label": 1
+      },
+      {
+        "study": "ID_e8e89732c0",
+        "image_id": "ID_75f88a946",
+        "label": 1
+      },
+      {
+        "study": "ID_e8e89732c0",
+        "image_id": "ID_dce7c24b8",
+        "label": 0
+      },
+      {
+        "study": "ID_e8e89732c0",
+        "image_id": "ID_27c79291f",
+        "label": 0
+      },
+      {
+        "study": "ID_e8e89732c0",
+        "image_id": "ID_2e22ecd59",
+        "label": 0
+      },
+      {
+        "study": "ID_e907850712",
+        "image_id": "ID_ba9d2d54a",
+        "label": 0
+      },
+      {
+        "study": "ID_e907850712",
+        "image_id": "ID_a76c335d0",
+        "label": 0
+      },
+      {
+        "study": "ID_e907850712",
+        "image_id": "ID_59732d038",
+        "label": 0
+      },
+      {
+        "study": "ID_e907850712",
+        "image_id": "ID_c653380ea",
+        "label": 0
+      },
+      {
+        "study": "ID_e907850712",
+        "image_id": "ID_250ef7a99",
+        "label": 0
+      },
+      {
+        "study": "ID_e907850712",
+        "image_id": "ID_fbbbaf75d",
+        "label": 0
+      },
+      {
+        "study": "ID_e907850712",
+        "image_id": "ID_2bb9a272b",
+        "label": 0
+      },
+      {
+        "study": "ID_e907850712",
+        "image_id": "ID_f0a0f31ff",
+        "label": 0
+      },
+      {
+        "study": "ID_e945a491a1",
+        "image_id": "ID_b86810473",
+        "label": 0
+      },
+      {
+        "study": "ID_e945a491a1",
+        "image_id": "ID_13c717c44",
+        "label": 1
+      },
+      {
+        "study": "ID_e945a491a1",
+        "image_id": "ID_768a118a6",
+        "label": 1
+      },
+      {
+        "study": "ID_e945a491a1",
+        "image_id": "ID_0631c074a",
+        "label": 1
+      },
+      {
+        "study": "ID_e945a491a1",
+        "image_id": "ID_82a49fb23",
+        "label": 1
+      },
+      {
+        "study": "ID_e945a491a1",
+        "image_id": "ID_47763e29f",
+        "label": 1
+      },
+      {
+        "study": "ID_e945a491a1",
+        "image_id": "ID_3e0631520",
+        "label": 0
+      },
+      {
+        "study": "ID_e945a491a1",
+        "image_id": "ID_80f350e44",
+        "label": 0
+      },
+      {
+        "study": "ID_eb6ac657a6",
+        "image_id": "ID_ca3f2b3c6",
+        "label": 0
+      },
+      {
+        "study": "ID_eb6ac657a6",
+        "image_id": "ID_925fe7a2b",
+        "label": 0
+      },
+      {
+        "study": "ID_eb6ac657a6",
+        "image_id": "ID_92f8f747c",
+        "label": 1
+      },
+      {
+        "study": "ID_eb6ac657a6",
+        "image_id": "ID_e1fe74481",
+        "label": 1
+      },
+      {
+        "study": "ID_eb6ac657a6",
+        "image_id": "ID_0118df184",
+        "label": 1
+      },
+      {
+        "study": "ID_eb6ac657a6",
+        "image_id": "ID_12abd1ddc",
+        "label": 0
+      },
+      {
+        "study": "ID_eb6ac657a6",
+        "image_id": "ID_a1318c7ad",
+        "label": 0
+      },
+      {
+        "study": "ID_eb6ac657a6",
+        "image_id": "ID_69b10d9f6",
+        "label": 0
+      },
+      {
+        "study": "ID_ee7011120e",
+        "image_id": "ID_6a5a34a3a",
+        "label": 0
+      },
+      {
+        "study": "ID_ee7011120e",
+        "image_id": "ID_21250b6d6",
+        "label": 0
+      },
+      {
+        "study": "ID_ee7011120e",
+        "image_id": "ID_5e7e7b7b2",
+        "label": 0
+      },
+      {
+        "study": "ID_ee7011120e",
+        "image_id": "ID_aa6000af7",
+        "label": 0
+      },
+      {
+        "study": "ID_ee7011120e",
+        "image_id": "ID_c6b52cd7b",
+        "label": 0
+      },
+      {
+        "study": "ID_ee7011120e",
+        "image_id": "ID_851d99c81",
+        "label": 1
+      },
+      {
+        "study": "ID_ee7011120e",
+        "image_id": "ID_73d5ce0b9",
+        "label": 0
+      },
+      {
+        "study": "ID_ee7011120e",
+        "image_id": "ID_1dba18de5",
+        "label": 0
+      },
+      {
+        "study": "ID_efb4f5741e",
+        "image_id": "ID_744ec9563",
+        "label": 0
+      },
+      {
+        "study": "ID_efb4f5741e",
+        "image_id": "ID_4e5c87e10",
+        "label": 0
+      },
+      {
+        "study": "ID_efb4f5741e",
+        "image_id": "ID_1bb8324bf",
+        "label": 0
+      },
+      {
+        "study": "ID_efb4f5741e",
+        "image_id": "ID_a46c0e9e2",
+        "label": 1
+      },
+      {
+        "study": "ID_efb4f5741e",
+        "image_id": "ID_04bcff3d7",
+        "label": 1
+      },
+      {
+        "study": "ID_efb4f5741e",
+        "image_id": "ID_7a597a28f",
+        "label": 1
+      },
+      {
+        "study": "ID_efb4f5741e",
+        "image_id": "ID_27f1e1094",
+        "label": 0
+      },
+      {
+        "study": "ID_efb4f5741e",
+        "image_id": "ID_898bff993",
+        "label": 0
+      },
+      {
+        "study": "ID_f3acd9bd62",
+        "image_id": "ID_3eee37f4f",
+        "label": 0
+      },
+      {
+        "study": "ID_f3acd9bd62",
+        "image_id": "ID_cb5898531",
+        "label": 0
+      },
+      {
+        "study": "ID_f3acd9bd62",
+        "image_id": "ID_2e9aeee66",
+        "label": 1
+      },
+      {
+        "study": "ID_f3acd9bd62",
+        "image_id": "ID_a951ba828",
+        "label": 1
+      },
+      {
+        "study": "ID_f3acd9bd62",
+        "image_id": "ID_f00101e35",
+        "label": 1
+      },
+      {
+        "study": "ID_f3acd9bd62",
+        "image_id": "ID_9902f2d6b",
+        "label": 1
+      },
+      {
+        "study": "ID_f3acd9bd62",
+        "image_id": "ID_1e172f2d3",
+        "label": 1
+      },
+      {
+        "study": "ID_f3acd9bd62",
+        "image_id": "ID_d3b8eee28",
+        "label": 0
+      },
+      {
+        "study": "ID_f82826f909",
+        "image_id": "ID_9354b0891",
+        "label": 0
+      },
+      {
+        "study": "ID_f82826f909",
+        "image_id": "ID_e2576ed81",
+        "label": 0
+      },
+      {
+        "study": "ID_f82826f909",
+        "image_id": "ID_93e882065",
+        "label": 1
+      },
+      {
+        "study": "ID_f82826f909",
+        "image_id": "ID_11f06bdca",
+        "label": 1
+      },
+      {
+        "study": "ID_f82826f909",
+        "image_id": "ID_5133bcb2f",
+        "label": 1
+      },
+      {
+        "study": "ID_f82826f909",
+        "image_id": "ID_d57b30b25",
+        "label": 1
+      },
+      {
+        "study": "ID_f82826f909",
+        "image_id": "ID_4dd74f30d",
+        "label": 0
+      },
+      {
+        "study": "ID_f82826f909",
+        "image_id": "ID_24a828f1d",
+        "label": 0
+      },
+      {
+        "study": "ID_f86d986403",
+        "image_id": "ID_6662c5a48",
+        "label": 0
+      },
+      {
+        "study": "ID_f86d986403",
+        "image_id": "ID_54439184e",
+        "label": 0
+      },
+      {
+        "study": "ID_f86d986403",
+        "image_id": "ID_ad0912460",
+        "label": 0
+      },
+      {
+        "study": "ID_f86d986403",
+        "image_id": "ID_61eae1849",
+        "label": 0
+      },
+      {
+        "study": "ID_f86d986403",
+        "image_id": "ID_c03d2b2f4",
+        "label": 1
+      },
+      {
+        "study": "ID_f86d986403",
+        "image_id": "ID_7bef68efe",
+        "label": 1
+      },
+      {
+        "study": "ID_f86d986403",
+        "image_id": "ID_eb1873314",
+        "label": 0
+      },
+      {
+        "study": "ID_f86d986403",
+        "image_id": "ID_3e9a0b41c",
+        "label": 0
+      },
+      {
+        "study": "ID_f876680463",
+        "image_id": "ID_590daec77",
+        "label": 0
+      },
+      {
+        "study": "ID_f876680463",
+        "image_id": "ID_e9e55a08a",
+        "label": 0
+      },
+      {
+        "study": "ID_f876680463",
+        "image_id": "ID_bb0b8c23e",
+        "label": 0
+      },
+      {
+        "study": "ID_f876680463",
+        "image_id": "ID_009ca263e",
+        "label": 0
+      },
+      {
+        "study": "ID_f876680463",
+        "image_id": "ID_b1cf0d6df",
+        "label": 0
+      },
+      {
+        "study": "ID_f876680463",
+        "image_id": "ID_553c65c8a",
+        "label": 0
+      },
+      {
+        "study": "ID_f876680463",
+        "image_id": "ID_98be67d47",
+        "label": 0
+      },
+      {
+        "study": "ID_f876680463",
+        "image_id": "ID_c2cfc5b88",
+        "label": 0
+      },
+      {
+        "study": "ID_f9b124c901",
+        "image_id": "ID_d1368b361",
+        "label": 0
+      },
+      {
+        "study": "ID_f9b124c901",
+        "image_id": "ID_2d7c7c4fd",
+        "label": 0
+      },
+      {
+        "study": "ID_f9b124c901",
+        "image_id": "ID_c9ac6adab",
+        "label": 0
+      },
+      {
+        "study": "ID_f9b124c901",
+        "image_id": "ID_191ffa673",
+        "label": 1
+      },
+      {
+        "study": "ID_f9b124c901",
+        "image_id": "ID_99b3e874c",
+        "label": 1
+      },
+      {
+        "study": "ID_f9b124c901",
+        "image_id": "ID_20a9b96b6",
+        "label": 1
+      },
+      {
+        "study": "ID_f9b124c901",
+        "image_id": "ID_3bccb9966",
+        "label": 1
+      },
+      {
+        "study": "ID_f9b124c901",
+        "image_id": "ID_b1babf42b",
+        "label": 0
+      },
+      {
+        "study": "ID_fe7dab2602",
+        "image_id": "ID_da6f40cd4",
+        "label": 0
+      },
+      {
+        "study": "ID_fe7dab2602",
+        "image_id": "ID_8c134be8c",
+        "label": 0
+      },
+      {
+        "study": "ID_fe7dab2602",
+        "image_id": "ID_718b99a1a",
+        "label": 0
+      },
+      {
+        "study": "ID_fe7dab2602",
+        "image_id": "ID_305eabade",
+        "label": 0
+      },
+      {
+        "study": "ID_fe7dab2602",
+        "image_id": "ID_bee6ad3cd",
+        "label": 1
+      },
+      {
+        "study": "ID_fe7dab2602",
+        "image_id": "ID_cce0c4efc",
+        "label": 1
+      },
+      {
+        "study": "ID_fe7dab2602",
+        "image_id": "ID_15a9ac994",
+        "label": 0
+      },
+      {
+        "study": "ID_fe7dab2602",
+        "image_id": "ID_2d1c29ba7",
+        "label": 0
+      },
+      {
+        "study": "ID_fe884ac4c6",
+        "image_id": "ID_54c4f4a25",
+        "label": 0
+      },
+      {
+        "study": "ID_fe884ac4c6",
+        "image_id": "ID_c364bce19",
+        "label": 0
+      },
+      {
+        "study": "ID_fe884ac4c6",
+        "image_id": "ID_a43d1e871",
+        "label": 0
+      },
+      {
+        "study": "ID_fe884ac4c6",
+        "image_id": "ID_0a9ad2967",
+        "label": 1
+      },
+      {
+        "study": "ID_fe884ac4c6",
+        "image_id": "ID_84be2e364",
+        "label": 1
+      },
+      {
+        "study": "ID_fe884ac4c6",
+        "image_id": "ID_3c89e575a",
+        "label": 1
+      },
+      {
+        "study": "ID_fe884ac4c6",
+        "image_id": "ID_a7f62c3de",
+        "label": 0
+      },
+      {
+        "study": "ID_fe884ac4c6",
+        "image_id": "ID_cc5ead40b",
+        "label": 0
+      }
+    ]
+  },
+  "swaps": 5
+}

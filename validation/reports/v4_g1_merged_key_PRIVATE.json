@@ -1,0 +1,2407 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "seed": 20261101,
+  "n_second_labeller": 50,
+  "key": {
+    "R001": {
+      "variant": "a",
+      "source_row_id": 70,
+      "study": "ID_6ebf06f98d",
+      "index": "75",
+      "k": "1",
+      "seed": "3900078857"
+    },
+    "R002": {
+      "variant": "a",
+      "source_row_id": 49,
+      "study": "ID_53d2489477",
+      "index": "56",
+      "k": "1",
+      "seed": "2210152119"
+    },
+    "R003": {
+      "variant": "b",
+      "source_row_id": 0,
+      "study": "ID_17af0b70ff",
+      "index": "13",
+      "k": "0",
+      "seed": "1391836183"
+    },
+    "R004": {
+      "variant": "b",
+      "source_row_id": 109,
+      "study": "ID_b2f8f93508",
+      "index": "117",
+      "k": "1",
+      "seed": "2594361288"
+    },
+    "R005": {
+      "variant": "b",
+      "source_row_id": 107,
+      "study": "ID_af40e0b5b5",
+      "index": "113",
+      "k": "2",
+      "seed": "1078329060"
+    },
+    "R006": {
+      "variant": "b",
+      "source_row_id": 17,
+      "study": "ID_2a2a6c5da5",
+      "index": "24",
+      "k": "2",
+      "seed": "1198098257"
+    },
+    "R007": {
+      "variant": "a",
+      "source_row_id": 14,
+      "study": "ID_2881c3e02d",
+      "index": "22",
+      "k": "2",
+      "seed": "2154289176"
+    },
+    "R008": {
+      "variant": "b",
+      "source_row_id": 105,
+      "study": "ID_af40e0b5b5",
+      "index": "113",
+      "k": "0",
+      "seed": "3470341926"
+    },
+    "R009": {
+      "variant": "a",
+      "source_row_id": 21,
+      "study": "ID_2d37bacaa4",
+      "index": "27",
+      "k": "0",
+      "seed": "172993506"
+    },
+    "R010": {
+      "variant": "b",
+      "source_row_id": 56,
+      "study": "ID_5f8255bf40",
+      "index": "64",
+      "k": "2",
+      "seed": "418215593"
+    },
+    "R011": {
+      "variant": "a",
+      "source_row_id": 57,
+      "study": "ID_6423a3eee6",
+      "index": "66",
+      "k": "0",
+      "seed": "1204890408"
+    },
+    "R012": {
+      "variant": "a",
+      "source_row_id": 40,
+      "study": "ID_50139b65b8",
+      "index": "52",
+      "k": "1",
+      "seed": "1449977713"
+    },
+    "R013": {
+      "variant": "a",
+      "source_row_id": 8,
+      "study": "ID_1d3dccd091",
+      "index": "17",
+      "k": "2",
+      "seed": "1681102395"
+    },
+    "R014": {
+      "variant": "b",
+      "source_row_id": 47,
+      "study": "ID_50bcefbee2",
+      "index": "54",
+      "k": "2",
+      "seed": "1772564535"
+    },
+    "R015": {
+      "variant": "a",
+      "source_row_id": 121,
+      "study": "ID_c0e899cc25",
+      "index": "133",
+      "k": "1",
+      "seed": "3904324292"
+    },
+    "R016": {
+      "variant": "b",
+      "source_row_id": 3,
+      "study": "ID_1c008ff99e",
+      "index": "16",
+      "k": "0",
+      "seed": "2449191733"
+    },
+    "R017": {
+      "variant": "b",
+      "source_row_id": 18,
+      "study": "ID_2cddc7e23d",
+      "index": "26",
+      "k": "0",
+      "seed": "718304818"
+    },
+    "R018": {
+      "variant": "a",
+      "source_row_id": 130,
+      "study": "ID_d1828c4c2a",
+      "index": "146",
+      "k": "1",
+      "seed": "1986678366"
+    },
+    "R019": {
+      "variant": "a",
+      "source_row_id": 63,
+      "study": "ID_6deb7cb025",
+      "index": "73",
+      "k": "0",
+      "seed": "3158744657"
+    },
+    "R020": {
+      "variant": "b",
+      "source_row_id": 61,
+      "study": "ID_6b37836125",
+      "index": "69",
+      "k": "1",
+      "seed": "3511667207"
+    },
+    "R021": {
+      "variant": "a",
+      "source_row_id": 136,
+      "study": "ID_debc60a9ba",
+      "index": "158",
+      "k": "1",
+      "seed": "2210894937"
+    },
+    "R022": {
+      "variant": "b",
+      "source_row_id": 57,
+      "study": "ID_6423a3eee6",
+      "index": "66",
+      "k": "0",
+      "seed": "1204890408"
+    },
+    "R023": {
+      "variant": "b",
+      "source_row_id": 104,
+      "study": "ID_ae9c939e29",
+      "index": "112",
+      "k": "2",
+      "seed": "1207769217"
+    },
+    "R024": {
+      "variant": "a",
+      "source_row_id": 94,
+      "study": "ID_9b50d49025",
+      "index": "103",
+      "k": "1",
+      "seed": "118480742"
+    },
+    "R025": {
+      "variant": "b",
+      "source_row_id": 103,
+      "study": "ID_ae9c939e29",
+      "index": "112",
+      "k": "1",
+      "seed": "3663795971"
+    },
+    "R026": {
+      "variant": "a",
+      "source_row_id": 33,
+      "study": "ID_42f6513ebb",
+      "index": "43",
+      "k": "0",
+      "seed": "561221654"
+    },
+    "R027": {
+      "variant": "a",
+      "source_row_id": 96,
+      "study": "ID_9e8836df45",
+      "index": "105",
+      "k": "0",
+      "seed": "185885078"
+    },
+    "R028": {
+      "variant": "b",
+      "source_row_id": 146,
+      "study": "ID_e7cc0d0589",
+      "index": "163",
+      "k": "2",
+      "seed": "934722029"
+    },
+    "R029": {
+      "variant": "b",
+      "source_row_id": 43,
+      "study": "ID_50803716a6",
+      "index": "53",
+      "k": "1",
+      "seed": "1445493445"
+    },
+    "R030": {
+      "variant": "b",
+      "source_row_id": 123,
+      "study": "ID_c54f910db8",
+      "index": "137",
+      "k": "0",
+      "seed": "153402404"
+    },
+    "R031": {
+      "variant": "a",
+      "source_row_id": 1,
+      "study": "ID_17af0b70ff",
+      "index": "13",
+      "k": "1",
+      "seed": "3194993640"
+    },
+    "R032": {
+      "variant": "a",
+      "source_row_id": 115,
+      "study": "ID_b628f5dd20",
+      "index": "123",
+      "k": "1",
+      "seed": "705983483"
+    },
+    "R033": {
+      "variant": "b",
+      "source_row_id": 1,
+      "study": "ID_17af0b70ff",
+      "index": "13",
+      "k": "1",
+      "seed": "3194993640"
+    },
+    "R034": {
+      "variant": "b",
+      "source_row_id": 125,
+      "study": "ID_c54f910db8",
+      "index": "137",
+      "k": "2",
+      "seed": "1984827269"
+    },
+    "R035": {
+      "variant": "a",
+      "source_row_id": 106,
+      "study": "ID_af40e0b5b5",
+      "index": "113",
+      "k": "1",
+      "seed": "2802203374"
+    },
+    "R036": {
+      "variant": "a",
+      "source_row_id": 43,
+      "study": "ID_50803716a6",
+      "index": "53",
+      "k": "1",
+      "seed": "1445493445"
+    },
+    "R037": {
+      "variant": "a",
+      "source_row_id": 139,
+      "study": "ID_e4e1b239e4",
+      "index": "160",
+      "k": "1",
+      "seed": "2296837117"
+    },
+    "R038": {
+      "variant": "a",
+      "source_row_id": 53,
+      "study": "ID_58f96c6fee",
+      "index": "58",
+      "k": "2",
+      "seed": "1890077708"
+    },
+    "R039": {
+      "variant": "a",
+      "source_row_id": 2,
+      "study": "ID_17af0b70ff",
+      "index": "13",
+      "k": "2",
+      "seed": "1301881937"
+    },
+    "R040": {
+      "variant": "b",
+      "source_row_id": 70,
+      "study": "ID_6ebf06f98d",
+      "index": "75",
+      "k": "1",
+      "seed": "3900078857"
+    },
+    "R041": {
+      "variant": "b",
+      "source_row_id": 8,
+      "study": "ID_1d3dccd091",
+      "index": "17",
+      "k": "2",
+      "seed": "1681102395"
+    },
+    "R042": {
+      "variant": "a",
+      "source_row_id": 143,
+      "study": "ID_e52cb658d4",
+      "index": "161",
+      "k": "2",
+      "seed": "3088543976"
+    },
+    "R043": {
+      "variant": "b",
+      "source_row_id": 115,
+      "study": "ID_b628f5dd20",
+      "index": "123",
+      "k": "1",
+      "seed": "705983483"
+    },
+    "R044": {
+      "variant": "b",
+      "source_row_id": 76,
+      "study": "ID_7a391f2f63",
+      "index": "83",
+      "k": "1",
+      "seed": "2576002873"
+    },
+    "R045": {
+      "variant": "b",
+      "source_row_id": 139,
+      "study": "ID_e4e1b239e4",
+      "index": "160",
+      "k": "1",
+      "seed": "2296837117"
+    },
+    "R046": {
+      "variant": "a",
+      "source_row_id": 13,
+      "study": "ID_2881c3e02d",
+      "index": "22",
+      "k": "1",
+      "seed": "2663805202"
+    },
+    "R047": {
+      "variant": "b",
+      "source_row_id": 137,
+      "study": "ID_debc60a9ba",
+      "index": "158",
+      "k": "2",
+      "seed": "1739526398"
+    },
+    "R048": {
+      "variant": "a",
+      "source_row_id": 34,
+      "study": "ID_42f6513ebb",
+      "index": "43",
+      "k": "1",
+      "seed": "957958624"
+    },
+    "R049": {
+      "variant": "b",
+      "source_row_id": 86,
+      "study": "ID_92cb2d5deb",
+      "index": "95",
+      "k": "2",
+      "seed": "2706765507"
+    },
+    "R050": {
+      "variant": "b",
+      "source_row_id": 67,
+      "study": "ID_6e1d606cef",
+      "index": "74",
+      "k": "1",
+      "seed": "2116882112"
+    },
+    "R051": {
+      "variant": "b",
+      "source_row_id": 82,
+      "study": "ID_9108fc72be",
+      "index": "94",
+      "k": "1",
+      "seed": "301727972"
+    },
+    "R052": {
+      "variant": "a",
+      "source_row_id": 105,
+      "study": "ID_af40e0b5b5",
+      "index": "113",
+      "k": "0",
+      "seed": "3470341926"
+    },
+    "R053": {
+      "variant": "a",
+      "source_row_id": 85,
+      "study": "ID_92cb2d5deb",
+      "index": "95",
+      "k": "1",
+      "seed": "1325050722"
+    },
+    "R054": {
+      "variant": "b",
+      "source_row_id": 121,
+      "study": "ID_c0e899cc25",
+      "index": "133",
+      "k": "1",
+      "seed": "3904324292"
+    },
+    "R055": {
+      "variant": "b",
+      "source_row_id": 28,
+      "study": "ID_36552f426e",
+      "index": "32",
+      "k": "1",
+      "seed": "1221623406"
+    },
+    "R056": {
+      "variant": "a",
+      "source_row_id": 133,
+      "study": "ID_d8b185c637",
+      "index": "153",
+      "k": "1",
+      "seed": "2719417227"
+    },
+    "R057": {
+      "variant": "b",
+      "source_row_id": 108,
+      "study": "ID_b2f8f93508",
+      "index": "117",
+      "k": "0",
+      "seed": "1582844759"
+    },
+    "R058": {
+      "variant": "b",
+      "source_row_id": 84,
+      "study": "ID_92cb2d5deb",
+      "index": "95",
+      "k": "0",
+      "seed": "2698836899"
+    },
+    "R059": {
+      "variant": "a",
+      "source_row_id": 90,
+      "study": "ID_96c20c1812",
+      "index": "102",
+      "k": "0",
+      "seed": "3986286906"
+    },
+    "R060": {
+      "variant": "a",
+      "source_row_id": 81,
+      "study": "ID_9108fc72be",
+      "index": "94",
+      "k": "0",
+      "seed": "3265427981"
+    },
+    "R061": {
+      "variant": "b",
+      "source_row_id": 52,
+      "study": "ID_58f96c6fee",
+      "index": "58",
+      "k": "1",
+      "seed": "256077588"
+    },
+    "R062": {
+      "variant": "b",
+      "source_row_id": 145,
+      "study": "ID_e7cc0d0589",
+      "index": "163",
+      "k": "1",
+      "seed": "2573048073"
+    },
+    "R063": {
+      "variant": "b",
+      "source_row_id": 91,
+      "study": "ID_96c20c1812",
+      "index": "102",
+      "k": "1",
+      "seed": "1632094279"
+    },
+    "R064": {
+      "variant": "a",
+      "source_row_id": 42,
+      "study": "ID_50803716a6",
+      "index": "53",
+      "k": "0",
+      "seed": "507131382"
+    },
+    "R065": {
+      "variant": "a",
+      "source_row_id": 66,
+      "study": "ID_6e1d606cef",
+      "index": "74",
+      "k": "0",
+      "seed": "3811657334"
+    },
+    "R066": {
+      "variant": "a",
+      "source_row_id": 89,
+      "study": "ID_93da0ca5c6",
+      "index": "98",
+      "k": "2",
+      "seed": "4073952812"
+    },
+    "R067": {
+      "variant": "a",
+      "source_row_id": 87,
+      "study": "ID_93da0ca5c6",
+      "index": "98",
+      "k": "0",
+      "seed": "2125973088"
+    },
+    "R068": {
+      "variant": "a",
+      "source_row_id": 148,
+      "study": "ID_fbcdbe2a84",
+      "index": "179",
+      "k": "1",
+      "seed": "1860003735"
+    },
+    "R069": {
+      "variant": "b",
+      "source_row_id": 85,
+      "study": "ID_92cb2d5deb",
+      "index": "95",
+      "k": "1",
+      "seed": "1325050722"
+    },
+    "R070": {
+      "variant": "b",
+      "source_row_id": 10,
+      "study": "ID_284cf289d0",
+      "index": "21",
+      "k": "1",
+      "seed": "1636050079"
+    },
+    "R071": {
+      "variant": "b",
+      "source_row_id": 90,
+      "study": "ID_96c20c1812",
+      "index": "102",
+      "k": "0",
+      "seed": "3986286906"
+    },
+    "R072": {
+      "variant": "a",
+      "source_row_id": 28,
+      "study": "ID_36552f426e",
+      "index": "32",
+      "k": "1",
+      "seed": "1221623406"
+    },
+    "R073": {
+      "variant": "b",
+      "source_row_id": 30,
+      "study": "ID_3fa80bece1",
+      "index": "38",
+      "k": "0",
+      "seed": "1715015226"
+    },
+    "R074": {
+      "variant": "b",
+      "source_row_id": 120,
+      "study": "ID_c0e899cc25",
+      "index": "133",
+      "k": "0",
+      "seed": "2779604874"
+    },
+    "R075": {
+      "variant": "a",
+      "source_row_id": 31,
+      "study": "ID_3fa80bece1",
+      "index": "38",
+      "k": "1",
+      "seed": "3832282696"
+    },
+    "R076": {
+      "variant": "b",
+      "source_row_id": 78,
+      "study": "ID_7faea3621e",
+      "index": "87",
+      "k": "0",
+      "seed": "210621148"
+    },
+    "R077": {
+      "variant": "b",
+      "source_row_id": 110,
+      "study": "ID_b2f8f93508",
+      "index": "117",
+      "k": "2",
+      "seed": "2899911953"
+    },
+    "R078": {
+      "variant": "b",
+      "source_row_id": 79,
+      "study": "ID_7faea3621e",
+      "index": "87",
+      "k": "1",
+      "seed": "3182241874"
+    },
+    "R079": {
+      "variant": "b",
+      "source_row_id": 48,
+      "study": "ID_53d2489477",
+      "index": "56",
+      "k": "0",
+      "seed": "3721360386"
+    },
+    "R080": {
+      "variant": "b",
+      "source_row_id": 63,
+      "study": "ID_6deb7cb025",
+      "index": "73",
+      "k": "0",
+      "seed": "3158744657"
+    },
+    "R081": {
+      "variant": "b",
+      "source_row_id": 59,
+      "study": "ID_6423a3eee6",
+      "index": "66",
+      "k": "2",
+      "seed": "3158622323"
+    },
+    "R082": {
+      "variant": "b",
+      "source_row_id": 148,
+      "study": "ID_fbcdbe2a84",
+      "index": "179",
+      "k": "1",
+      "seed": "1860003735"
+    },
+    "R083": {
+      "variant": "a",
+      "source_row_id": 98,
+      "study": "ID_9e8836df45",
+      "index": "105",
+      "k": "2",
+      "seed": "3323826636"
+    },
+    "R084": {
+      "variant": "b",
+      "source_row_id": 112,
+      "study": "ID_b5b2ae5f2b",
+      "index": "122",
+      "k": "1",
+      "seed": "900836054"
+    },
+    "R085": {
+      "variant": "a",
+      "source_row_id": 144,
+      "study": "ID_e7cc0d0589",
+      "index": "163",
+      "k": "0",
+      "seed": "3141474297"
+    },
+    "R086": {
+      "variant": "a",
+      "source_row_id": 135,
+      "study": "ID_debc60a9ba",
+      "index": "158",
+      "k": "0",
+      "seed": "2242648420"
+    },
+    "R087": {
+      "variant": "b",
+      "source_row_id": 65,
+      "study": "ID_6deb7cb025",
+      "index": "73",
+      "k": "2",
+      "seed": "185660513"
+    },
+    "R088": {
+      "variant": "b",
+      "source_row_id": 113,
+      "study": "ID_b5b2ae5f2b",
+      "index": "122",
+      "k": "2",
+      "seed": "1143784664"
+    },
+    "R089": {
+      "variant": "a",
+      "source_row_id": 101,
+      "study": "ID_ae059b2554",
+      "index": "111",
+      "k": "2",
+      "seed": "1798651273"
+    },
+    "R090": {
+      "variant": "b",
+      "source_row_id": 16,
+      "study": "ID_2a2a6c5da5",
+      "index": "24",
+      "k": "1",
+      "seed": "2291160254"
+    },
+    "R091": {
+      "variant": "b",
+      "source_row_id": 96,
+      "study": "ID_9e8836df45",
+      "index": "105",
+      "k": "0",
+      "seed": "185885078"
+    },
+    "R092": {
+      "variant": "a",
+      "source_row_id": 46,
+      "study": "ID_50bcefbee2",
+      "index": "54",
+      "k": "1",
+      "seed": "3628433350"
+    },
+    "R093": {
+      "variant": "b",
+      "source_row_id": 140,
+      "study": "ID_e4e1b239e4",
+      "index": "160",
+      "k": "2",
+      "seed": "80162806"
+    },
+    "R094": {
+      "variant": "b",
+      "source_row_id": 141,
+      "study": "ID_e52cb658d4",
+      "index": "161",
+      "k": "0",
+      "seed": "2913401243"
+    },
+    "R095": {
+      "variant": "a",
+      "source_row_id": 78,
+      "study": "ID_7faea3621e",
+      "index": "87",
+      "k": "0",
+      "seed": "210621148"
+    },
+    "R096": {
+      "variant": "a",
+      "source_row_id": 56,
+      "study": "ID_5f8255bf40",
+      "index": "64",
+      "k": "2",
+      "seed": "418215593"
+    },
+    "R097": {
+      "variant": "b",
+      "source_row_id": 101,
+      "study": "ID_ae059b2554",
+      "index": "111",
+      "k": "2",
+      "seed": "1798651273"
+    },
+    "R098": {
+      "variant": "a",
+      "source_row_id": 45,
+      "study": "ID_50bcefbee2",
+      "index": "54",
+      "k": "0",
+      "seed": "2832378039"
+    },
+    "R099": {
+      "variant": "b",
+      "source_row_id": 22,
+      "study": "ID_2d37bacaa4",
+      "index": "27",
+      "k": "1",
+      "seed": "1320349958"
+    },
+    "R100": {
+      "variant": "b",
+      "source_row_id": 117,
+      "study": "ID_ba6286d01e",
+      "index": "128",
+      "k": "0",
+      "seed": "1021179546"
+    },
+    "R101": {
+      "variant": "b",
+      "source_row_id": 111,
+      "study": "ID_b5b2ae5f2b",
+      "index": "122",
+      "k": "0",
+      "seed": "3307896661"
+    },
+    "R102": {
+      "variant": "b",
+      "source_row_id": 98,
+      "study": "ID_9e8836df45",
+      "index": "105",
+      "k": "2",
+      "seed": "3323826636"
+    },
+    "R103": {
+      "variant": "a",
+      "source_row_id": 76,
+      "study": "ID_7a391f2f63",
+      "index": "83",
+      "k": "1",
+      "seed": "2576002873"
+    },
+    "R104": {
+      "variant": "a",
+      "source_row_id": 88,
+      "study": "ID_93da0ca5c6",
+      "index": "98",
+      "k": "1",
+      "seed": "4124377121"
+    },
+    "R105": {
+      "variant": "a",
+      "source_row_id": 39,
+      "study": "ID_50139b65b8",
+      "index": "52",
+      "k": "0",
+      "seed": "3002983823"
+    },
+    "R106": {
+      "variant": "a",
+      "source_row_id": 62,
+      "study": "ID_6b37836125",
+      "index": "69",
+      "k": "2",
+      "seed": "518524485"
+    },
+    "R107": {
+      "variant": "b",
+      "source_row_id": 114,
+      "study": "ID_b628f5dd20",
+      "index": "123",
+      "k": "0",
+      "seed": "1957950267"
+    },
+    "R108": {
+      "variant": "a",
+      "source_row_id": 125,
+      "study": "ID_c54f910db8",
+      "index": "137",
+      "k": "2",
+      "seed": "1984827269"
+    },
+    "R109": {
+      "variant": "a",
+      "source_row_id": 86,
+      "study": "ID_92cb2d5deb",
+      "index": "95",
+      "k": "2",
+      "seed": "2706765507"
+    },
+    "R110": {
+      "variant": "b",
+      "source_row_id": 136,
+      "study": "ID_debc60a9ba",
+      "index": "158",
+      "k": "1",
+      "seed": "2210894937"
+    },
+    "R111": {
+      "variant": "a",
+      "source_row_id": 93,
+      "study": "ID_9b50d49025",
+      "index": "103",
+      "k": "0",
+      "seed": "992714473"
+    },
+    "R112": {
+      "variant": "a",
+      "source_row_id": 137,
+      "study": "ID_debc60a9ba",
+      "index": "158",
+      "k": "2",
+      "seed": "1739526398"
+    },
+    "R113": {
+      "variant": "a",
+      "source_row_id": 68,
+      "study": "ID_6e1d606cef",
+      "index": "74",
+      "k": "2",
+      "seed": "1947651036"
+    },
+    "R114": {
+      "variant": "a",
+      "source_row_id": 82,
+      "study": "ID_9108fc72be",
+      "index": "94",
+      "k": "1",
+      "seed": "301727972"
+    },
+    "R115": {
+      "variant": "a",
+      "source_row_id": 127,
+      "study": "ID_c7627422d9",
+      "index": "140",
+      "k": "1",
+      "seed": "3005174517"
+    },
+    "R116": {
+      "variant": "a",
+      "source_row_id": 51,
+      "study": "ID_58f96c6fee",
+      "index": "58",
+      "k": "0",
+      "seed": "1017032127"
+    },
+    "R117": {
+      "variant": "b",
+      "source_row_id": 124,
+      "study": "ID_c54f910db8",
+      "index": "137",
+      "k": "1",
+      "seed": "1987393245"
+    },
+    "R118": {
+      "variant": "b",
+      "source_row_id": 20,
+      "study": "ID_2cddc7e23d",
+      "index": "26",
+      "k": "2",
+      "seed": "4101610201"
+    },
+    "R119": {
+      "variant": "a",
+      "source_row_id": 131,
+      "study": "ID_d1828c4c2a",
+      "index": "146",
+      "k": "2",
+      "seed": "1906013106"
+    },
+    "R120": {
+      "variant": "a",
+      "source_row_id": 119,
+      "study": "ID_ba6286d01e",
+      "index": "128",
+      "k": "2",
+      "seed": "1702605640"
+    },
+    "R121": {
+      "variant": "b",
+      "source_row_id": 58,
+      "study": "ID_6423a3eee6",
+      "index": "66",
+      "k": "1",
+      "seed": "412569964"
+    },
+    "R122": {
+      "variant": "a",
+      "source_row_id": 6,
+      "study": "ID_1d3dccd091",
+      "index": "17",
+      "k": "0",
+      "seed": "3107501303"
+    },
+    "R123": {
+      "variant": "a",
+      "source_row_id": 20,
+      "study": "ID_2cddc7e23d",
+      "index": "26",
+      "k": "2",
+      "seed": "4101610201"
+    },
+    "R124": {
+      "variant": "a",
+      "source_row_id": 64,
+      "study": "ID_6deb7cb025",
+      "index": "73",
+      "k": "1",
+      "seed": "1275947236"
+    },
+    "R125": {
+      "variant": "b",
+      "source_row_id": 23,
+      "study": "ID_2d37bacaa4",
+      "index": "27",
+      "k": "2",
+      "seed": "229948388"
+    },
+    "R126": {
+      "variant": "a",
+      "source_row_id": 52,
+      "study": "ID_58f96c6fee",
+      "index": "58",
+      "k": "1",
+      "seed": "256077588"
+    },
+    "R127": {
+      "variant": "a",
+      "source_row_id": 73,
+      "study": "ID_78a8e37c3b",
+      "index": "79",
+      "k": "1",
+      "seed": "1045722476"
+    },
+    "R128": {
+      "variant": "a",
+      "source_row_id": 71,
+      "study": "ID_6ebf06f98d",
+      "index": "75",
+      "k": "2",
+      "seed": "3068493541"
+    },
+    "R129": {
+      "variant": "b",
+      "source_row_id": 25,
+      "study": "ID_3634a47122",
+      "index": "31",
+      "k": "1",
+      "seed": "1690094352"
+    },
+    "R130": {
+      "variant": "a",
+      "source_row_id": 55,
+      "study": "ID_5f8255bf40",
+      "index": "64",
+      "k": "1",
+      "seed": "4294154725"
+    },
+    "R131": {
+      "variant": "b",
+      "source_row_id": 132,
+      "study": "ID_d8b185c637",
+      "index": "153",
+      "k": "0",
+      "seed": "3076803114"
+    },
+    "R132": {
+      "variant": "b",
+      "source_row_id": 118,
+      "study": "ID_ba6286d01e",
+      "index": "128",
+      "k": "1",
+      "seed": "1681139891"
+    },
+    "R133": {
+      "variant": "b",
+      "source_row_id": 69,
+      "study": "ID_6ebf06f98d",
+      "index": "75",
+      "k": "0",
+      "seed": "3574836551"
+    },
+    "R134": {
+      "variant": "a",
+      "source_row_id": 99,
+      "study": "ID_ae059b2554",
+      "index": "111",
+      "k": "0",
+      "seed": "4092316595"
+    },
+    "R135": {
+      "variant": "a",
+      "source_row_id": 48,
+      "study": "ID_53d2489477",
+      "index": "56",
+      "k": "0",
+      "seed": "3721360386"
+    },
+    "R136": {
+      "variant": "b",
+      "source_row_id": 12,
+      "study": "ID_2881c3e02d",
+      "index": "22",
+      "k": "0",
+      "seed": "3651821407"
+    },
+    "R137": {
+      "variant": "b",
+      "source_row_id": 74,
+      "study": "ID_78a8e37c3b",
+      "index": "79",
+      "k": "2",
+      "seed": "3182778493"
+    },
+    "R138": {
+      "variant": "a",
+      "source_row_id": 80,
+      "study": "ID_7faea3621e",
+      "index": "87",
+      "k": "2",
+      "seed": "541515914"
+    },
+    "R139": {
+      "variant": "a",
+      "source_row_id": 15,
+      "study": "ID_2a2a6c5da5",
+      "index": "24",
+      "k": "0",
+      "seed": "2219653755"
+    },
+    "R140": {
+      "variant": "a",
+      "source_row_id": 134,
+      "study": "ID_d8b185c637",
+      "index": "153",
+      "k": "2",
+      "seed": "1603123148"
+    },
+    "R141": {
+      "variant": "b",
+      "source_row_id": 97,
+      "study": "ID_9e8836df45",
+      "index": "105",
+      "k": "1",
+      "seed": "2700724941"
+    },
+    "R142": {
+      "variant": "b",
+      "source_row_id": 21,
+      "study": "ID_2d37bacaa4",
+      "index": "27",
+      "k": "0",
+      "seed": "172993506"
+    },
+    "R143": {
+      "variant": "a",
+      "source_row_id": 110,
+      "study": "ID_b2f8f93508",
+      "index": "117",
+      "k": "2",
+      "seed": "2899911953"
+    },
+    "R144": {
+      "variant": "b",
+      "source_row_id": 29,
+      "study": "ID_36552f426e",
+      "index": "32",
+      "k": "2",
+      "seed": "59578329"
+    },
+    "R145": {
+      "variant": "a",
+      "source_row_id": 27,
+      "study": "ID_36552f426e",
+      "index": "32",
+      "k": "0",
+      "seed": "2861577747"
+    },
+    "R146": {
+      "variant": "b",
+      "source_row_id": 133,
+      "study": "ID_d8b185c637",
+      "index": "153",
+      "k": "1",
+      "seed": "2719417227"
+    },
+    "R147": {
+      "variant": "b",
+      "source_row_id": 26,
+      "study": "ID_3634a47122",
+      "index": "31",
+      "k": "2",
+      "seed": "503200721"
+    },
+    "R148": {
+      "variant": "a",
+      "source_row_id": 35,
+      "study": "ID_42f6513ebb",
+      "index": "43",
+      "k": "2",
+      "seed": "2924780812"
+    },
+    "R149": {
+      "variant": "b",
+      "source_row_id": 129,
+      "study": "ID_d1828c4c2a",
+      "index": "146",
+      "k": "0",
+      "seed": "1513357050"
+    },
+    "R150": {
+      "variant": "b",
+      "source_row_id": 50,
+      "study": "ID_53d2489477",
+      "index": "56",
+      "k": "2",
+      "seed": "4084779627"
+    },
+    "R151": {
+      "variant": "b",
+      "source_row_id": 95,
+      "study": "ID_9b50d49025",
+      "index": "103",
+      "k": "2",
+      "seed": "1974717667"
+    },
+    "R152": {
+      "variant": "b",
+      "source_row_id": 83,
+      "study": "ID_9108fc72be",
+      "index": "94",
+      "k": "2",
+      "seed": "4164093343"
+    },
+    "R153": {
+      "variant": "a",
+      "source_row_id": 59,
+      "study": "ID_6423a3eee6",
+      "index": "66",
+      "k": "2",
+      "seed": "3158622323"
+    },
+    "R154": {
+      "variant": "b",
+      "source_row_id": 49,
+      "study": "ID_53d2489477",
+      "index": "56",
+      "k": "1",
+      "seed": "2210152119"
+    },
+    "R155": {
+      "variant": "b",
+      "source_row_id": 116,
+      "study": "ID_b628f5dd20",
+      "index": "123",
+      "k": "2",
+      "seed": "624509987"
+    },
+    "R156": {
+      "variant": "a",
+      "source_row_id": 123,
+      "study": "ID_c54f910db8",
+      "index": "137",
+      "k": "0",
+      "seed": "153402404"
+    },
+    "R157": {
+      "variant": "b",
+      "source_row_id": 149,
+      "study": "ID_fbcdbe2a84",
+      "index": "179",
+      "k": "2",
+      "seed": "3129209046"
+    },
+    "R158": {
+      "variant": "a",
+      "source_row_id": 108,
+      "study": "ID_b2f8f93508",
+      "index": "117",
+      "k": "0",
+      "seed": "1582844759"
+    },
+    "R159": {
+      "variant": "b",
+      "source_row_id": 144,
+      "study": "ID_e7cc0d0589",
+      "index": "163",
+      "k": "0",
+      "seed": "3141474297"
+    },
+    "R160": {
+      "variant": "a",
+      "source_row_id": 10,
+      "study": "ID_284cf289d0",
+      "index": "21",
+      "k": "1",
+      "seed": "1636050079"
+    },
+    "R161": {
+      "variant": "b",
+      "source_row_id": 14,
+      "study": "ID_2881c3e02d",
+      "index": "22",
+      "k": "2",
+      "seed": "2154289176"
+    },
+    "R162": {
+      "variant": "a",
+      "source_row_id": 104,
+      "study": "ID_ae9c939e29",
+      "index": "112",
+      "k": "2",
+      "seed": "1207769217"
+    },
+    "R163": {
+      "variant": "b",
+      "source_row_id": 131,
+      "study": "ID_d1828c4c2a",
+      "index": "146",
+      "k": "2",
+      "seed": "1906013106"
+    },
+    "R164": {
+      "variant": "b",
+      "source_row_id": 119,
+      "study": "ID_ba6286d01e",
+      "index": "128",
+      "k": "2",
+      "seed": "1702605640"
+    },
+    "R165": {
+      "variant": "b",
+      "source_row_id": 27,
+      "study": "ID_36552f426e",
+      "index": "32",
+      "k": "0",
+      "seed": "2861577747"
+    },
+    "R166": {
+      "variant": "a",
+      "source_row_id": 124,
+      "study": "ID_c54f910db8",
+      "index": "137",
+      "k": "1",
+      "seed": "1987393245"
+    },
+    "R167": {
+      "variant": "a",
+      "source_row_id": 129,
+      "study": "ID_d1828c4c2a",
+      "index": "146",
+      "k": "0",
+      "seed": "1513357050"
+    },
+    "R168": {
+      "variant": "a",
+      "source_row_id": 140,
+      "study": "ID_e4e1b239e4",
+      "index": "160",
+      "k": "2",
+      "seed": "80162806"
+    },
+    "R169": {
+      "variant": "b",
+      "source_row_id": 135,
+      "study": "ID_debc60a9ba",
+      "index": "158",
+      "k": "0",
+      "seed": "2242648420"
+    },
+    "R170": {
+      "variant": "b",
+      "source_row_id": 40,
+      "study": "ID_50139b65b8",
+      "index": "52",
+      "k": "1",
+      "seed": "1449977713"
+    },
+    "R171": {
+      "variant": "a",
+      "source_row_id": 3,
+      "study": "ID_1c008ff99e",
+      "index": "16",
+      "k": "0",
+      "seed": "2449191733"
+    },
+    "R172": {
+      "variant": "a",
+      "source_row_id": 4,
+      "study": "ID_1c008ff99e",
+      "index": "16",
+      "k": "1",
+      "seed": "3598596365"
+    },
+    "R173": {
+      "variant": "a",
+      "source_row_id": 9,
+      "study": "ID_284cf289d0",
+      "index": "21",
+      "k": "0",
+      "seed": "1884643357"
+    },
+    "R174": {
+      "variant": "b",
+      "source_row_id": 93,
+      "study": "ID_9b50d49025",
+      "index": "103",
+      "k": "0",
+      "seed": "992714473"
+    },
+    "R175": {
+      "variant": "b",
+      "source_row_id": 62,
+      "study": "ID_6b37836125",
+      "index": "69",
+      "k": "2",
+      "seed": "518524485"
+    },
+    "R176": {
+      "variant": "a",
+      "source_row_id": 75,
+      "study": "ID_7a391f2f63",
+      "index": "83",
+      "k": "0",
+      "seed": "1138545799"
+    },
+    "R177": {
+      "variant": "a",
+      "source_row_id": 72,
+      "study": "ID_78a8e37c3b",
+      "index": "79",
+      "k": "0",
+      "seed": "4155025643"
+    },
+    "R178": {
+      "variant": "b",
+      "source_row_id": 122,
+      "study": "ID_c0e899cc25",
+      "index": "133",
+      "k": "2",
+      "seed": "1881420397"
+    },
+    "R179": {
+      "variant": "b",
+      "source_row_id": 53,
+      "study": "ID_58f96c6fee",
+      "index": "58",
+      "k": "2",
+      "seed": "1890077708"
+    },
+    "R180": {
+      "variant": "a",
+      "source_row_id": 18,
+      "study": "ID_2cddc7e23d",
+      "index": "26",
+      "k": "0",
+      "seed": "718304818"
+    },
+    "R181": {
+      "variant": "a",
+      "source_row_id": 142,
+      "study": "ID_e52cb658d4",
+      "index": "161",
+      "k": "1",
+      "seed": "2446207944"
+    },
+    "R182": {
+      "variant": "a",
+      "source_row_id": 74,
+      "study": "ID_78a8e37c3b",
+      "index": "79",
+      "k": "2",
+      "seed": "3182778493"
+    },
+    "R183": {
+      "variant": "b",
+      "source_row_id": 75,
+      "study": "ID_7a391f2f63",
+      "index": "83",
+      "k": "0",
+      "seed": "1138545799"
+    },
+    "R184": {
+      "variant": "a",
+      "source_row_id": 67,
+      "study": "ID_6e1d606cef",
+      "index": "74",
+      "k": "1",
+      "seed": "2116882112"
+    },
+    "R185": {
+      "variant": "a",
+      "source_row_id": 111,
+      "study": "ID_b5b2ae5f2b",
+      "index": "122",
+      "k": "0",
+      "seed": "3307896661"
+    },
+    "R186": {
+      "variant": "a",
+      "source_row_id": 0,
+      "study": "ID_17af0b70ff",
+      "index": "13",
+      "k": "0",
+      "seed": "1391836183"
+    },
+    "R187": {
+      "variant": "a",
+      "source_row_id": 65,
+      "study": "ID_6deb7cb025",
+      "index": "73",
+      "k": "2",
+      "seed": "185660513"
+    },
+    "R188": {
+      "variant": "b",
+      "source_row_id": 19,
+      "study": "ID_2cddc7e23d",
+      "index": "26",
+      "k": "1",
+      "seed": "3416469071"
+    },
+    "R189": {
+      "variant": "b",
+      "source_row_id": 99,
+      "study": "ID_ae059b2554",
+      "index": "111",
+      "k": "0",
+      "seed": "4092316595"
+    },
+    "R190": {
+      "variant": "a",
+      "source_row_id": 97,
+      "study": "ID_9e8836df45",
+      "index": "105",
+      "k": "1",
+      "seed": "2700724941"
+    },
+    "R191": {
+      "variant": "a",
+      "source_row_id": 11,
+      "study": "ID_284cf289d0",
+      "index": "21",
+      "k": "2",
+      "seed": "4237417793"
+    },
+    "R192": {
+      "variant": "a",
+      "source_row_id": 146,
+      "study": "ID_e7cc0d0589",
+      "index": "163",
+      "k": "2",
+      "seed": "934722029"
+    },
+    "R193": {
+      "variant": "b",
+      "source_row_id": 5,
+      "study": "ID_1c008ff99e",
+      "index": "16",
+      "k": "2",
+      "seed": "804878420"
+    },
+    "R194": {
+      "variant": "a",
+      "source_row_id": 112,
+      "study": "ID_b5b2ae5f2b",
+      "index": "122",
+      "k": "1",
+      "seed": "900836054"
+    },
+    "R195": {
+      "variant": "b",
+      "source_row_id": 92,
+      "study": "ID_96c20c1812",
+      "index": "102",
+      "k": "2",
+      "seed": "2595322414"
+    },
+    "R196": {
+      "variant": "a",
+      "source_row_id": 37,
+      "study": "ID_4faa636d3e",
+      "index": "51",
+      "k": "1",
+      "seed": "1736420839"
+    },
+    "R197": {
+      "variant": "b",
+      "source_row_id": 128,
+      "study": "ID_c7627422d9",
+      "index": "140",
+      "k": "2",
+      "seed": "4001559649"
+    },
+    "R198": {
+      "variant": "b",
+      "source_row_id": 64,
+      "study": "ID_6deb7cb025",
+      "index": "73",
+      "k": "1",
+      "seed": "1275947236"
+    },
+    "R199": {
+      "variant": "b",
+      "source_row_id": 15,
+      "study": "ID_2a2a6c5da5",
+      "index": "24",
+      "k": "0",
+      "seed": "2219653755"
+    },
+    "R200": {
+      "variant": "a",
+      "source_row_id": 47,
+      "study": "ID_50bcefbee2",
+      "index": "54",
+      "k": "2",
+      "seed": "1772564535"
+    },
+    "R201": {
+      "variant": "a",
+      "source_row_id": 12,
+      "study": "ID_2881c3e02d",
+      "index": "22",
+      "k": "0",
+      "seed": "3651821407"
+    },
+    "R202": {
+      "variant": "b",
+      "source_row_id": 77,
+      "study": "ID_7a391f2f63",
+      "index": "83",
+      "k": "2",
+      "seed": "2271321274"
+    },
+    "R203": {
+      "variant": "b",
+      "source_row_id": 9,
+      "study": "ID_284cf289d0",
+      "index": "21",
+      "k": "0",
+      "seed": "1884643357"
+    },
+    "R204": {
+      "variant": "b",
+      "source_row_id": 13,
+      "study": "ID_2881c3e02d",
+      "index": "22",
+      "k": "1",
+      "seed": "2663805202"
+    },
+    "R205": {
+      "variant": "a",
+      "source_row_id": 103,
+      "study": "ID_ae9c939e29",
+      "index": "112",
+      "k": "1",
+      "seed": "3663795971"
+    },
+    "R206": {
+      "variant": "b",
+      "source_row_id": 72,
+      "study": "ID_78a8e37c3b",
+      "index": "79",
+      "k": "0",
+      "seed": "4155025643"
+    },
+    "R207": {
+      "variant": "b",
+      "source_row_id": 46,
+      "study": "ID_50bcefbee2",
+      "index": "54",
+      "k": "1",
+      "seed": "3628433350"
+    },
+    "R208": {
+      "variant": "a",
+      "source_row_id": 60,
+      "study": "ID_6b37836125",
+      "index": "69",
+      "k": "0",
+      "seed": "2511990869"
+    },
+    "R209": {
+      "variant": "a",
+      "source_row_id": 79,
+      "study": "ID_7faea3621e",
+      "index": "87",
+      "k": "1",
+      "seed": "3182241874"
+    },
+    "R210": {
+      "variant": "b",
+      "source_row_id": 41,
+      "study": "ID_50139b65b8",
+      "index": "52",
+      "k": "2",
+      "seed": "2457676773"
+    },
+    "R211": {
+      "variant": "a",
+      "source_row_id": 36,
+      "study": "ID_4faa636d3e",
+      "index": "51",
+      "k": "0",
+      "seed": "301961608"
+    },
+    "R212": {
+      "variant": "a",
+      "source_row_id": 118,
+      "study": "ID_ba6286d01e",
+      "index": "128",
+      "k": "1",
+      "seed": "1681139891"
+    },
+    "R213": {
+      "variant": "a",
+      "source_row_id": 149,
+      "study": "ID_fbcdbe2a84",
+      "index": "179",
+      "k": "2",
+      "seed": "3129209046"
+    },
+    "R214": {
+      "variant": "b",
+      "source_row_id": 142,
+      "study": "ID_e52cb658d4",
+      "index": "161",
+      "k": "1",
+      "seed": "2446207944"
+    },
+    "R215": {
+      "variant": "b",
+      "source_row_id": 147,
+      "study": "ID_fbcdbe2a84",
+      "index": "179",
+      "k": "0",
+      "seed": "823175518"
+    },
+    "R216": {
+      "variant": "a",
+      "source_row_id": 120,
+      "study": "ID_c0e899cc25",
+      "index": "133",
+      "k": "0",
+      "seed": "2779604874"
+    },
+    "R217": {
+      "variant": "a",
+      "source_row_id": 117,
+      "study": "ID_ba6286d01e",
+      "index": "128",
+      "k": "0",
+      "seed": "1021179546"
+    },
+    "R218": {
+      "variant": "a",
+      "source_row_id": 132,
+      "study": "ID_d8b185c637",
+      "index": "153",
+      "k": "0",
+      "seed": "3076803114"
+    },
+    "R219": {
+      "variant": "a",
+      "source_row_id": 100,
+      "study": "ID_ae059b2554",
+      "index": "111",
+      "k": "1",
+      "seed": "3730643971"
+    },
+    "R220": {
+      "variant": "a",
+      "source_row_id": 61,
+      "study": "ID_6b37836125",
+      "index": "69",
+      "k": "1",
+      "seed": "3511667207"
+    },
+    "R221": {
+      "variant": "b",
+      "source_row_id": 126,
+      "study": "ID_c7627422d9",
+      "index": "140",
+      "k": "0",
+      "seed": "2932961333"
+    },
+    "R222": {
+      "variant": "b",
+      "source_row_id": 89,
+      "study": "ID_93da0ca5c6",
+      "index": "98",
+      "k": "2",
+      "seed": "4073952812"
+    },
+    "R223": {
+      "variant": "b",
+      "source_row_id": 127,
+      "study": "ID_c7627422d9",
+      "index": "140",
+      "k": "1",
+      "seed": "3005174517"
+    },
+    "R224": {
+      "variant": "a",
+      "source_row_id": 50,
+      "study": "ID_53d2489477",
+      "index": "56",
+      "k": "2",
+      "seed": "4084779627"
+    },
+    "R225": {
+      "variant": "b",
+      "source_row_id": 36,
+      "study": "ID_4faa636d3e",
+      "index": "51",
+      "k": "0",
+      "seed": "301961608"
+    },
+    "R226": {
+      "variant": "b",
+      "source_row_id": 88,
+      "study": "ID_93da0ca5c6",
+      "index": "98",
+      "k": "1",
+      "seed": "4124377121"
+    },
+    "R227": {
+      "variant": "a",
+      "source_row_id": 58,
+      "study": "ID_6423a3eee6",
+      "index": "66",
+      "k": "1",
+      "seed": "412569964"
+    },
+    "R228": {
+      "variant": "b",
+      "source_row_id": 24,
+      "study": "ID_3634a47122",
+      "index": "31",
+      "k": "0",
+      "seed": "1002296351"
+    },
+    "R229": {
+      "variant": "a",
+      "source_row_id": 92,
+      "study": "ID_96c20c1812",
+      "index": "102",
+      "k": "2",
+      "seed": "2595322414"
+    },
+    "R230": {
+      "variant": "b",
+      "source_row_id": 2,
+      "study": "ID_17af0b70ff",
+      "index": "13",
+      "k": "2",
+      "seed": "1301881937"
+    },
+    "R231": {
+      "variant": "a",
+      "source_row_id": 126,
+      "study": "ID_c7627422d9",
+      "index": "140",
+      "k": "0",
+      "seed": "2932961333"
+    },
+    "R232": {
+      "variant": "b",
+      "source_row_id": 134,
+      "study": "ID_d8b185c637",
+      "index": "153",
+      "k": "2",
+      "seed": "1603123148"
+    },
+    "R233": {
+      "variant": "b",
+      "source_row_id": 4,
+      "study": "ID_1c008ff99e",
+      "index": "16",
+      "k": "1",
+      "seed": "3598596365"
+    },
+    "R234": {
+      "variant": "b",
+      "source_row_id": 11,
+      "study": "ID_284cf289d0",
+      "index": "21",
+      "k": "2",
+      "seed": "4237417793"
+    },
+    "R235": {
+      "variant": "b",
+      "source_row_id": 81,
+      "study": "ID_9108fc72be",
+      "index": "94",
+      "k": "0",
+      "seed": "3265427981"
+    },
+    "R236": {
+      "variant": "b",
+      "source_row_id": 42,
+      "study": "ID_50803716a6",
+      "index": "53",
+      "k": "0",
+      "seed": "507131382"
+    },
+    "R237": {
+      "variant": "a",
+      "source_row_id": 54,
+      "study": "ID_5f8255bf40",
+      "index": "64",
+      "k": "0",
+      "seed": "2261383327"
+    },
+    "R238": {
+      "variant": "a",
+      "source_row_id": 22,
+      "study": "ID_2d37bacaa4",
+      "index": "27",
+      "k": "1",
+      "seed": "1320349958"
+    },
+    "R239": {
+      "variant": "b",
+      "source_row_id": 35,
+      "study": "ID_42f6513ebb",
+      "index": "43",
+      "k": "2",
+      "seed": "2924780812"
+    },
+    "R240": {
+      "variant": "b",
+      "source_row_id": 100,
+      "study": "ID_ae059b2554",
+      "index": "111",
+      "k": "1",
+      "seed": "3730643971"
+    },
+    "R241": {
+      "variant": "b",
+      "source_row_id": 68,
+      "study": "ID_6e1d606cef",
+      "index": "74",
+      "k": "2",
+      "seed": "1947651036"
+    },
+    "R242": {
+      "variant": "a",
+      "source_row_id": 102,
+      "study": "ID_ae9c939e29",
+      "index": "112",
+      "k": "0",
+      "seed": "3063967847"
+    },
+    "R243": {
+      "variant": "b",
+      "source_row_id": 87,
+      "study": "ID_93da0ca5c6",
+      "index": "98",
+      "k": "0",
+      "seed": "2125973088"
+    },
+    "R244": {
+      "variant": "a",
+      "source_row_id": 122,
+      "study": "ID_c0e899cc25",
+      "index": "133",
+      "k": "2",
+      "seed": "1881420397"
+    },
+    "R245": {
+      "variant": "b",
+      "source_row_id": 6,
+      "study": "ID_1d3dccd091",
+      "index": "17",
+      "k": "0",
+      "seed": "3107501303"
+    },
+    "R246": {
+      "variant": "a",
+      "source_row_id": 113,
+      "study": "ID_b5b2ae5f2b",
+      "index": "122",
+      "k": "2",
+      "seed": "1143784664"
+    },
+    "R247": {
+      "variant": "a",
+      "source_row_id": 114,
+      "study": "ID_b628f5dd20",
+      "index": "123",
+      "k": "0",
+      "seed": "1957950267"
+    },
+    "R248": {
+      "variant": "a",
+      "source_row_id": 26,
+      "study": "ID_3634a47122",
+      "index": "31",
+      "k": "2",
+      "seed": "503200721"
+    },
+    "R249": {
+      "variant": "b",
+      "source_row_id": 33,
+      "study": "ID_42f6513ebb",
+      "index": "43",
+      "k": "0",
+      "seed": "561221654"
+    },
+    "R250": {
+      "variant": "b",
+      "source_row_id": 7,
+      "study": "ID_1d3dccd091",
+      "index": "17",
+      "k": "1",
+      "seed": "2378952646"
+    },
+    "R251": {
+      "variant": "a",
+      "source_row_id": 83,
+      "study": "ID_9108fc72be",
+      "index": "94",
+      "k": "2",
+      "seed": "4164093343"
+    },
+    "R252": {
+      "variant": "b",
+      "source_row_id": 106,
+      "study": "ID_af40e0b5b5",
+      "index": "113",
+      "k": "1",
+      "seed": "2802203374"
+    },
+    "R253": {
+      "variant": "a",
+      "source_row_id": 147,
+      "study": "ID_fbcdbe2a84",
+      "index": "179",
+      "k": "0",
+      "seed": "823175518"
+    },
+    "R254": {
+      "variant": "b",
+      "source_row_id": 80,
+      "study": "ID_7faea3621e",
+      "index": "87",
+      "k": "2",
+      "seed": "541515914"
+    },
+    "R255": {
+      "variant": "a",
+      "source_row_id": 138,
+      "study": "ID_e4e1b239e4",
+      "index": "160",
+      "k": "0",
+      "seed": "2913034919"
+    },
+    "R256": {
+      "variant": "a",
+      "source_row_id": 145,
+      "study": "ID_e7cc0d0589",
+      "index": "163",
+      "k": "1",
+      "seed": "2573048073"
+    },
+    "R257": {
+      "variant": "b",
+      "source_row_id": 37,
+      "study": "ID_4faa636d3e",
+      "index": "51",
+      "k": "1",
+      "seed": "1736420839"
+    },
+    "R258": {
+      "variant": "b",
+      "source_row_id": 94,
+      "study": "ID_9b50d49025",
+      "index": "103",
+      "k": "1",
+      "seed": "118480742"
+    },
+    "R259": {
+      "variant": "a",
+      "source_row_id": 38,
+      "study": "ID_4faa636d3e",
+      "index": "51",
+      "k": "2",
+      "seed": "3029182094"
+    },
+    "R260": {
+      "variant": "a",
+      "source_row_id": 44,
+      "study": "ID_50803716a6",
+      "index": "53",
+      "k": "2",
+      "seed": "3771959424"
+    },
+    "R261": {
+      "variant": "b",
+      "source_row_id": 32,
+      "study": "ID_3fa80bece1",
+      "index": "38",
+      "k": "2",
+      "seed": "2377098302"
+    },
+    "R262": {
+      "variant": "b",
+      "source_row_id": 138,
+      "study": "ID_e4e1b239e4",
+      "index": "160",
+      "k": "0",
+      "seed": "2913034919"
+    },
+    "R263": {
+      "variant": "a",
+      "source_row_id": 41,
+      "study": "ID_50139b65b8",
+      "index": "52",
+      "k": "2",
+      "seed": "2457676773"
+    },
+    "R264": {
+      "variant": "b",
+      "source_row_id": 44,
+      "study": "ID_50803716a6",
+      "index": "53",
+      "k": "2",
+      "seed": "3771959424"
+    },
+    "R265": {
+      "variant": "b",
+      "source_row_id": 31,
+      "study": "ID_3fa80bece1",
+      "index": "38",
+      "k": "1",
+      "seed": "3832282696"
+    },
+    "R266": {
+      "variant": "b",
+      "source_row_id": 34,
+      "study": "ID_42f6513ebb",
+      "index": "43",
+      "k": "1",
+      "seed": "957958624"
+    },
+    "R267": {
+      "variant": "a",
+      "source_row_id": 109,
+      "study": "ID_b2f8f93508",
+      "index": "117",
+      "k": "1",
+      "seed": "2594361288"
+    },
+    "R268": {
+      "variant": "a",
+      "source_row_id": 16,
+      "study": "ID_2a2a6c5da5",
+      "index": "24",
+      "k": "1",
+      "seed": "2291160254"
+    },
+    "R269": {
+      "variant": "a",
+      "source_row_id": 77,
+      "study": "ID_7a391f2f63",
+      "index": "83",
+      "k": "2",
+      "seed": "2271321274"
+    },
+    "R270": {
+      "variant": "b",
+      "source_row_id": 143,
+      "study": "ID_e52cb658d4",
+      "index": "161",
+      "k": "2",
+      "seed": "3088543976"
+    },
+    "R271": {
+      "variant": "b",
+      "source_row_id": 55,
+      "study": "ID_5f8255bf40",
+      "index": "64",
+      "k": "1",
+      "seed": "4294154725"
+    },
+    "R272": {
+      "variant": "a",
+      "source_row_id": 69,
+      "study": "ID_6ebf06f98d",
+      "index": "75",
+      "k": "0",
+      "seed": "3574836551"
+    },
+    "R273": {
+      "variant": "a",
+      "source_row_id": 5,
+      "study": "ID_1c008ff99e",
+      "index": "16",
+      "k": "2",
+      "seed": "804878420"
+    },
+    "R274": {
+      "variant": "b",
+      "source_row_id": 102,
+      "study": "ID_ae9c939e29",
+      "index": "112",
+      "k": "0",
+      "seed": "3063967847"
+    },
+    "R275": {
+      "variant": "a",
+      "source_row_id": 141,
+      "study": "ID_e52cb658d4",
+      "index": "161",
+      "k": "0",
+      "seed": "2913401243"
+    },
+    "R276": {
+      "variant": "a",
+      "source_row_id": 25,
+      "study": "ID_3634a47122",
+      "index": "31",
+      "k": "1",
+      "seed": "1690094352"
+    },
+    "R277": {
+      "variant": "a",
+      "source_row_id": 17,
+      "study": "ID_2a2a6c5da5",
+      "index": "24",
+      "k": "2",
+      "seed": "1198098257"
+    },
+    "R278": {
+      "variant": "b",
+      "source_row_id": 66,
+      "study": "ID_6e1d606cef",
+      "index": "74",
+      "k": "0",
+      "seed": "3811657334"
+    },
+    "R279": {
+      "variant": "a",
+      "source_row_id": 116,
+      "study": "ID_b628f5dd20",
+      "index": "123",
+      "k": "2",
+      "seed": "624509987"
+    },
+    "R280": {
+      "variant": "b",
+      "source_row_id": 45,
+      "study": "ID_50bcefbee2",
+      "index": "54",
+      "k": "0",
+      "seed": "2832378039"
+    },
+    "R281": {
+      "variant": "b",
+      "source_row_id": 39,
+      "study": "ID_50139b65b8",
+      "index": "52",
+      "k": "0",
+      "seed": "3002983823"
+    },
+    "R282": {
+      "variant": "a",
+      "source_row_id": 29,
+      "study": "ID_36552f426e",
+      "index": "32",
+      "k": "2",
+      "seed": "59578329"
+    },
+    "R283": {
+      "variant": "b",
+      "source_row_id": 38,
+      "study": "ID_4faa636d3e",
+      "index": "51",
+      "k": "2",
+      "seed": "3029182094"
+    },
+    "R284": {
+      "variant": "a",
+      "source_row_id": 95,
+      "study": "ID_9b50d49025",
+      "index": "103",
+      "k": "2",
+      "seed": "1974717667"
+    },
+    "R285": {
+      "variant": "a",
+      "source_row_id": 19,
+      "study": "ID_2cddc7e23d",
+      "index": "26",
+      "k": "1",
+      "seed": "3416469071"
+    },
+    "R286": {
+      "variant": "b",
+      "source_row_id": 54,
+      "study": "ID_5f8255bf40",
+      "index": "64",
+      "k": "0",
+      "seed": "2261383327"
+    },
+    "R287": {
+      "variant": "b",
+      "source_row_id": 60,
+      "study": "ID_6b37836125",
+      "index": "69",
+      "k": "0",
+      "seed": "2511990869"
+    },
+    "R288": {
+      "variant": "b",
+      "source_row_id": 73,
+      "study": "ID_78a8e37c3b",
+      "index": "79",
+      "k": "1",
+      "seed": "1045722476"
+    },
+    "R289": {
+      "variant": "b",
+      "source_row_id": 130,
+      "study": "ID_d1828c4c2a",
+      "index": "146",
+      "k": "1",
+      "seed": "1986678366"
+    },
+    "R290": {
+      "variant": "a",
+      "source_row_id": 84,
+      "study": "ID_92cb2d5deb",
+      "index": "95",
+      "k": "0",
+      "seed": "2698836899"
+    },
+    "R291": {
+      "variant": "a",
+      "source_row_id": 91,
+      "study": "ID_96c20c1812",
+      "index": "102",
+      "k": "1",
+      "seed": "1632094279"
+    },
+    "R292": {
+      "variant": "b",
+      "source_row_id": 51,
+      "study": "ID_58f96c6fee",
+      "index": "58",
+      "k": "0",
+      "seed": "1017032127"
+    },
+    "R293": {
+      "variant": "a",
+      "source_row_id": 128,
+      "study": "ID_c7627422d9",
+      "index": "140",
+      "k": "2",
+      "seed": "4001559649"
+    },
+    "R294": {
+      "variant": "a",
+      "source_row_id": 7,
+      "study": "ID_1d3dccd091",
+      "index": "17",
+      "k": "1",
+      "seed": "2378952646"
+    },
+    "R295": {
+      "variant": "a",
+      "source_row_id": 24,
+      "study": "ID_3634a47122",
+      "index": "31",
+      "k": "0",
+      "seed": "1002296351"
+    },
+    "R296": {
+      "variant": "a",
+      "source_row_id": 107,
+      "study": "ID_af40e0b5b5",
+      "index": "113",
+      "k": "2",
+      "seed": "1078329060"
+    },
+    "R297": {
+      "variant": "a",
+      "source_row_id": 23,
+      "study": "ID_2d37bacaa4",
+      "index": "27",
+      "k": "2",
+      "seed": "229948388"
+    },
+    "R298": {
+      "variant": "b",
+      "source_row_id": 71,
+      "study": "ID_6ebf06f98d",
+      "index": "75",
+      "k": "2",
+      "seed": "3068493541"
+    },
+    "R299": {
+      "variant": "a",
+      "source_row_id": 32,
+      "study": "ID_3fa80bece1",
+      "index": "38",
+      "k": "2",
+      "seed": "2377098302"
+    },
+    "R300": {
+      "variant": "a",
+      "source_row_id": 30,
+      "study": "ID_3fa80bece1",
+      "index": "38",
+      "k": "0",
+      "seed": "1715015226"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "status": "POST-HOC, EXPLORATORY (not pre-registered; does not change the frozen verdict)",
+  "comparison": "D2 (C1+C2+C4) vs B2 (predictive entropy)",
+  "testB_all_scans": {
+    "n_instances": 1080,
+    "n_scans": 120,
+    "by_review_rate": {
+      "0.05": {
+        "rel_reduction": 0.0,
+        "ci95": [
+          -0.027274799668416443,
+          0.03069167451968393
+        ]
+      },
+      "0.1": {
+        "rel_reduction": 0.052083333333333426,
+        "ci95": [
+          0.014023193577163424,
+          0.09509567630733272
+        ]
+      },
+      "0.2": {
+        "rel_reduction": 0.08403361344537809,
+        "ci95": [
+          0.027266584766584705,
+          0.13192098603430497
+        ]
+      },
+      "0.3": {
+        "rel_reduction": 0.09392265193370178,
+        "ci95": [
+          0.026592226725205392,
+          0.15677805522914232
+        ]
+      }
+    }
+  },
+  "testB_paired_auroc_diff_D2_minus_B2": {
+    "auroc_diff": 0.03549176988104796,
+    "ci95": [
+      0.011106033018287179,
+      0.06015903258062457
+    ],
+    "auroc_new": 0.7515932133659822,
+    "auroc_base": 0.7161014434849342,
+    "n": 1080,
+    "n_boot_used": 2000
+  },
+  "testA_paired_auroc_diff_D2_minus_B2": {
+    "auroc_diff": 0.07608129233976035,
+    "ci95": [
+      0.013091478280141813,
+      0.1479937467430954
+    ],
+    "auroc_new": 0.7962480458572173,
+    "auroc_base": 0.720166753517457,
+    "n": 120,
+    "n_boot_used": 2000
+  },
+  "note": "Test A/Bootstrap clusters = StudyInstanceUID. D2 uses no C3."
+}
