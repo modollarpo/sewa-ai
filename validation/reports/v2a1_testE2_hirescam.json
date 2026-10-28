@@ -1,0 +1,50 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "test": "E.2",
+  "title": "Masked HiResCAM Spatial Attribution Pointing Game (Exploratory)",
+  "baseline_test_e1_hit_rate": 0.11204838452968327,
+  "model_checkpoint": "classifier_v2a1.pt",
+  "target_layer": "features[5] (block 5, 10x10 resolution)",
+  "technique": "HiResCAM (element-wise gradient product) + Intracranial Head Masking",
+  "dataset": "BHX CQ500 bounding boxes (CC BY-SA 4.0)",
+  "n_studies_matched": 226,
+  "n_total_bboxes": 6283,
+  "n_hits": 2754,
+  "hit_rate": 0.43832564061753937,
+  "ci_lo": 0.3963672558490741,
+  "ci_hi": 0.4836713305994202,
+  "threshold": 0.55,
+  "verdict": "PARTIAL / NOT MET",
+  "by_label": {
+    "Intraventricular": {
+      "n_hits": 102,
+      "n_total": 558,
+      "hit_rate": 0.1827956989247312
+    },
+    "Intraparenchymal": {
+      "n_hits": 631,
+      "n_total": 1324,
+      "hit_rate": 0.47658610271903323
+    },
+    "Subarachnoid": {
+      "n_hits": 831,
+      "n_total": 1746,
+      "hit_rate": 0.47594501718213056
+    },
+    "Chronic": {
+      "n_hits": 460,
+      "n_total": 740,
+      "hit_rate": 0.6216216216216216
+    },
+    "Subdural": {
+      "n_hits": 706,
+      "n_total": 1849,
+      "hit_rate": 0.3818280151433207
+    },
+    "Epidural": {
+      "n_hits": 24,
+      "n_total": 66,
+      "hit_rate": 0.36363636363636365
+    }
+  }
+}

@@ -61,7 +61,7 @@ Perform a self-review before submitting any code:
 
 ---
 
-## 📋 Work State (2026-10-28 — Test E Grad-CAM pointing game evaluation, branch `main`)
+## 📋 Work State (2026-10-28 — Test E & E.2 Grad-CAM / HiResCAM evaluation, branch `main`)
 
 Governing pre-registration: `docs/evidence/preregistration_testE_gradcam.md` (committed in `8cb5b72`). Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Licence: **CC BY-SA 4.0** (BHX CQ500 bounding boxes); **CC BY-NC-SA 4.0** (CQ500 dataset).
 
@@ -73,6 +73,13 @@ Governing pre-registration: `docs/evidence/preregistration_testE_gradcam.md` (co
   - **By Subtype**: Chronic 14.86% (110/740), Subarachnoid 14.32% (250/1,746), Subdural 10.38% (192/1,849), Intraparenchymal 10.12% (134/1,324), Intraventricular 3.05% (17/558), Epidural 1.52% (1/66).
   - **Verdict**: **PARTIAL / NOT MET** (the Grad-CAM peak activation fell within the radiologist bounding box in 11.2% of annotated slice-bbox pairs, below the 55% threshold).
   - **Scientific Interpretation**: Expected for a classification-only model trained without bounding-box loss or spatial supervision. Grad-CAM identifies discriminative feature maps (e.g. ventricles, bone interfaces, skull symmetry) rather than tight lesion boundaries. This underscores the importance of the demo-mode label on explainability outputs.
+- **Test E.2 Algorithmic Optimization Executed (`step11b_hirescam_pointing.py`)**:
+  - `validation/reports/v2a1_testE2_hirescam.json` and formal report `docs/evidence/feasibility_report_testE2_hirescam.md`.
+  - **Technique**: Masked HiResCAM on block 5 (`features[5]`, $10\times10$ spatial grid) + Intracranial head masking. Eliminates global gradient averaging dilution and suppresses skull bone spikes.
+  - **Hit Rate**: **43.83%** (2,754 / 6,283) [95% CI: 39.64%, 48.37%] — **nearly 4× the baseline accuracy** (+32.6 percentage points / +291.4% relative gain).
+  - **By Subtype**: Chronic **62.16%** (460/740, **MET** $\ge 55\%$), Intraparenchymal **47.66%** (631/1,324), Subarachnoid **47.59%** (831/1,746), Subdural **38.18%** (706/1,849), Epidural **36.36%** (24/66, up from 1.52%), Intraventricular **18.28%** (102/558, up from 3.05%).
+- **Frontend Evidence Pages Synchronized (`ClinicalEvidencePage.tsx`, `ClinicalValidationPage.tsx`)**:
+  - Test E results published honestly to the public evidence ledger with audit disclosures. Committed and pushed in `9bf64d4`.
 
 ---
 
