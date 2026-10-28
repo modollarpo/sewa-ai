@@ -25,6 +25,10 @@ const STATUS = [
   { label:'AdaBN CQ500 AUROC',       value:'0.7596 (Zero-Label)',  color:C.normal },
   { label:'ICH Subtypes (Test J)',    value:'IPH 100% / EDH 100% / SDH 94%', color:C.normal },
   { label:'Noise & Blur (Test K)',    value:'K1-K3 MET / K4 PARTIAL', color:C.normal },
+  { label:'PTX NLP Gate (Test L)',     value:'Recall 100% / Demo Mode', color:C.amber },
+  { label:'TB NLP Gate (Test M)',      value:'ALL MET / Demo Mode',     color:C.normal },
+  { label:'PE NLP Gate (Test N)',      value:'ALL MET / Demo Mode',     color:C.normal },
+  { label:'Stroke Audit (Test O)',     value:'FPR 20.1% / Demo Mode',   color:C.amber },
   { label:'Drift Engine (Test H)',    value:'ALL 4 CRITERIA PASS',  color:C.normal },
   { label:'CQ500 Recalib (C.2)',      value:'AUROC 0.7578 (exploratory)', color:C.info },
 ];

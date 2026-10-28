@@ -1,0 +1,55 @@
+{
+  "test_id": "Test M",
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "date": "2026-10-28",
+  "elapsed_seconds": 4.45,
+  "demo_mode": true,
+  "part_M1_nlp": {
+    "corpus_size": 7265,
+    "tb_class_counts": {
+      "absent": 6825,
+      "positive_features": 383,
+      "negative": 57
+    },
+    "M1a_recall": {
+      "n": 200,
+      "tp": 200,
+      "fn": 0,
+      "recall": 1.0,
+      "ci_95": [
+        0.981154748802476,
+        1.0
+      ],
+      "threshold": 0.85,
+      "met": true
+    },
+    "M1b_specificity": {
+      "n": 300,
+      "tn": 300,
+      "fp": 0,
+      "specificity": 1.0,
+      "ci_95": [
+        0.9873570795309473,
+        0.9999999999999999
+      ],
+      "threshold": 0.9,
+      "met": true
+    }
+  },
+  "part_M2_engineering": {
+    "n": 100,
+    "demo_mode": true,
+    "M2a_schema": {
+      "n_verified": 100,
+      "n_total": 100,
+      "met": true
+    },
+    "M2b_latency": {
+      "mean_ms": 6.5228599999773,
+      "p95_ms": 11.941235000131199,
+      "threshold_ms": 50.0,
+      "met": true
+    }
+  },
+  "verdict": "ALL CRITERIA MET"
+}

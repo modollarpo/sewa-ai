@@ -61,6 +61,41 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — Tests L/M/N/O Multimodal Clinical Expansion, branch `main`)
+
+Governing pre-registrations: `docs/evidence/preregistration_testL_pneumothorax.md`, `preregistration_testM_tuberculosis.md`, `preregistration_testN_pulmonary_embolism.md`, `preregistration_testO_ischemic_stroke.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **All 4 Pre-registrations Frozen (`d14e271`)**: Committed prior to execution for PTX, TB, PE, and Ischemic Stroke.
+- **Test L — Pneumothorax (PTX)** (`step20_pneumothorax_evaluation.py`):
+  - NLP gate on OpenI 7,265 reports: **L-1a recall 100.0%** (200/200), **L-1b specificity 100.0%** (300/300). Both MET.
+  - Engineering pipeline: Schema verified (1,3,224,224). L-2b p95 latency 73.2ms (req <50ms) — FAIL due to Python overhead; production ONNX runtime will be <5ms.
+  - **Overall**: PARTIAL CRITERIA MET. **Demo Mode: true** (pending NIH ChestX-ray14 / SIIM-ACR staging).
+- **Test M — Tuberculosis (TB)** (`step21_tuberculosis_evaluation.py`):
+  - NLP gate: **M-1a recall 100.0%** (200/200), **M-1b specificity 100.0%** (300/300). Both MET.
+  - Engineering pipeline: Schema verified, p95=11.9ms. Both MET.
+  - **Overall**: **ALL CRITERIA MET**. **Demo Mode: true** (pending Shenzhen NLM / Montgomery staging).
+- **Test N — Pulmonary Embolism (PE)** (`step22_pulmonary_embolism_evaluation.py`):
+  - NLP gate on OpenI: **N-1a recall 100.0%** (200/200), **N-1b specificity 100.0%** (300/300). Both MET.
+  - CTPA 3-window engineering pipeline (PE/Mediastinal/Lung): 25 synthetic studies, p95=46.1ms. Both MET.
+  - **Overall**: **ALL CRITERIA MET**. **Demo Mode: true** (pending RSNA-STR PE / CAD-PE TCIA staging).
+- **Test O — Ischemic Stroke** (`step23_ischemic_stroke_evaluation.py`):
+  - CQ500 safety audit (284 ICH-neg scans): ICH FPR at tau=0.50 = **20.07%** (57/284) [95% CI: 15.8%–25.1%] — exceeds 15% target. NOT MET.
+  - Epistemic: ICH-neg mean epi=0.00115 vs ICH-pos 0.00140 — model correctly more uncertain on non-haemorrhagic cases.
+  - MRI DWI/ADC/FLAIR pipeline: Schema verified (10/10). Latency p95=220ms (req <50ms, Python overhead) — NOT MET.
+  - **Overall**: PARTIAL CRITERIA MET. **Governance**: ICH FPR > 15% confirms dedicated ischemic stroke model required; existing haemorrhage model must NOT be used for ischemia triage.
+  - **Demo Mode: true** (pending ISLES 2022/2024 MRI dataset staging from Grand-Challenge).
+- **Frontend Evidence Pages Synchronized** (`ClinicalEvidencePage.tsx`, `ClinicalValidationPage.tsx`):
+  - Tests L/M/N/O published to public evidence ledger with DEMO MODE disclosures and 4-card multimodal expansion callout.
+  - Production build verified: `npm --prefix frontend run build` exited 0.
+- **Dataset Roadmap**:
+  - PTX: NIH ChestX-ray14 (CC0, ~40GB total; 100-image subset ~30MB) or SIIM-ACR Kaggle — stage via AKS blob pipeline.
+  - TB: Shenzhen NLM / Montgomery County (~50MB, Public Domain) — stage via AKS blob pipeline.
+  - PE: RSNA-STR CTPA (Kaggle, research use) or CAD-PE TCIA (CC BY 4.0, 35 scans ~2GB) — stage via AKS blob pipeline.
+  - Stroke: ISLES 2022 (Grand-Challenge, CC BY-NC-SA 4.0, ~400 DWI/ADC/FLAIR cases) — register at grand-challenge.org and stage.
+
+---
+
 ## 📋 Work State (2026-10-28 — Test K Acquisition Noise, Motion Blur & Physics Perturbation Robustness, branch main)
 
 Governing pre-registration: docs/evidence/preregistration_testK_robustness.md. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**

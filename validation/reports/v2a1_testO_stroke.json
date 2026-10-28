@@ -1,0 +1,52 @@
+{
+  "test_id": "Test O",
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "date": "2026-10-28",
+  "elapsed_seconds": 204.15,
+  "demo_mode_mri": true,
+  "part_O1_cq500_audit": {
+    "n_ich_negative_studies": 284,
+    "n_ich_positive_studies": 202,
+    "n_infarct_series_bhx": 0,
+    "O1a_fpr": {
+      "tau": 0.5,
+      "fp": 57,
+      "n": 284,
+      "fpr": 0.2007042253521127,
+      "ci_95": [
+        0.1582561228004186,
+        0.25114094626258476
+      ],
+      "threshold": 0.15,
+      "met": false
+    },
+    "O1b_epistemic": {
+      "ich_negative_mean_epi": 0.00114523521060269,
+      "ich_positive_mean_epi": 0.0013954607828277653,
+      "ich_pos_higher_epi": true,
+      "note": "Ischemic scans have no ICH label; model should treat them as ICH-negative with appropriate uncertainty",
+      "met": true
+    }
+  },
+  "part_O2_mri_engineering": {
+    "n_studies": 10,
+    "sequences": [
+      "DWI (b=1000)",
+      "ADC map",
+      "FLAIR"
+    ],
+    "demo_mode": true,
+    "O2a_schema": {
+      "n_verified": 10,
+      "n_total": 10,
+      "met": true
+    },
+    "O2b_latency": {
+      "mean_ms": 142.90925999994215,
+      "p95_ms": 220.47708500008412,
+      "threshold_ms": 50.0,
+      "met": false
+    }
+  },
+  "verdict": "PARTIAL CRITERIA MET"
+}

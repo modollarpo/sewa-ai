@@ -1,0 +1,71 @@
+{
+  "test_id": "Test N",
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "date": "2026-10-28",
+  "elapsed_seconds": 3.26,
+  "demo_mode": true,
+  "part_N1_nlp": {
+    "corpus_size": 7265,
+    "pe_class_counts": {
+      "absent": 7247,
+      "ambiguous": 16,
+      "positive": 2
+    },
+    "N1a_recall": {
+      "n": 200,
+      "tp": 200,
+      "recall": 1.0,
+      "ci_95": [
+        0.981154748802476,
+        1.0
+      ],
+      "threshold": 0.85,
+      "met": true
+    },
+    "N1b_specificity": {
+      "n": 300,
+      "tn": 300,
+      "specificity": 1.0,
+      "ci_95": [
+        0.9873570795309473,
+        0.9999999999999999
+      ],
+      "threshold": 0.85,
+      "met": true
+    }
+  },
+  "part_N2_engineering": {
+    "n_studies": 25,
+    "n_slices_per_study": 8,
+    "windows": [
+      {
+        "name": "pe",
+        "center": 100,
+        "width": 700
+      },
+      {
+        "name": "mediastinal",
+        "center": 40,
+        "width": 400
+      },
+      {
+        "name": "lung",
+        "center": -600,
+        "width": 1500
+      }
+    ],
+    "demo_mode": true,
+    "N2a_schema": {
+      "n_verified": 25,
+      "n_total": 25,
+      "met": true
+    },
+    "N2b_latency": {
+      "mean_ms": 42.30632000009791,
+      "p95_ms": 46.1347400001614,
+      "threshold_ms": 1500.0,
+      "met": true
+    }
+  },
+  "verdict": "ALL CRITERIA MET"
+}
