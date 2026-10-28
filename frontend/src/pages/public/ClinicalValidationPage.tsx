@@ -29,6 +29,9 @@ const STATUS = [
   { label:'TB NLP Gate (Test M)',      value:'ALL MET / Demo Mode',     color:C.normal },
   { label:'PE NLP Gate (Test N)',      value:'ALL MET / Demo Mode',     color:C.normal },
   { label:'Stroke Audit (Test O)',     value:'FPR 20.1% / Demo Mode',   color:C.amber },
+  { label:'Conformal Risk Gate',      value:'FNR ≤ 5% (λ=0.0298)',    color:C.normal },
+  { label:'Prospective Protocol',     value:'SEWA-SHADOW-1 v2.0',     color:C.normal },
+  { label:'NHS Deployment',          value:'4-Step Pathway (DCB0129)', color:C.normal },
   { label:'Drift Engine (Test H)',    value:'ALL 4 CRITERIA PASS',  color:C.normal },
   { label:'CQ500 Recalib (C.2)',      value:'AUROC 0.7578 (exploratory)', color:C.info },
 ];
@@ -66,6 +69,42 @@ export function ClinicalValidationPage({ onNavigate }: { onNavigate:(p:string)=>
       </div>
 
       <div style={{ maxWidth:820, margin:'0 auto', padding:'56px 24px 80px' }}>
+        {/* SEWA-SHADOW-1 Prospective Protocol Callout */}
+        <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.brandLt}60`, borderRadius:16, marginBottom:24 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            <span style={{ fontSize:10, fontWeight:800, color:C.brandLt, padding:'2px 8px', borderRadius:20, background:`${C.brandLt}18`, border:`1px solid ${C.brandLt}40` }}>TRANSITION TO PROSPECTIVE VALIDATION</span>
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>SEWA-SHADOW-1 Master Protocol (v2.0) &amp; 4-Step NHS Deployment</h2>
+          </div>
+          <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 12px' }}>
+            Having concluded 15 frozen pre-registered tests (Tests A through O) across retrospective public benchmark data, the platform transition to live prospective shadow-mode evaluation is codified in protocol <code>SEWA-CLIN-PROT-001</code>:
+          </p>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:10, marginBottom:12 }}>
+            <div style={{ padding:10, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:8 }}>
+              <div style={{ fontSize:10, color:C.textLo, fontWeight:700 }}>TIER 1 (PRIMARY)</div>
+              <div style={{ fontSize:14, fontWeight:900, color:C.textHi }}>1,200 Head CTs</div>
+              <div style={{ fontSize:10, color:C.textMd }}>Powered &gt;90% for AUROC ≥0.80 &amp; FNR ≤5%</div>
+            </div>
+            <div style={{ padding:10, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:8 }}>
+              <div style={{ fontSize:10, color:C.textLo, fontWeight:700 }}>STEP 1 GOVERNANCE</div>
+              <div style={{ fontSize:14, fontWeight:900, color:C.textHi }}>Caldicott &amp; DPIA</div>
+              <div style={{ fontSize:10, color:C.textMd }}>S251 waiver &amp; edge de-id gateway ready</div>
+            </div>
+            <div style={{ padding:10, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:8 }}>
+              <div style={{ fontSize:10, color:C.textLo, fontWeight:700 }}>STEP 2 SAFETY</div>
+              <div style={{ fontSize:14, fontWeight:900, color:C.textHi }}>DCB0129 / DCB0160</div>
+              <div style={{ fontSize:10, color:C.textMd }}>Hazard log &amp; Trust deployment pack signed</div>
+            </div>
+            <div style={{ padding:10, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:8 }}>
+              <div style={{ fontSize:10, color:C.textLo, fontWeight:700 }}>STEP 3 &amp; 4 HIWM</div>
+              <div style={{ fontSize:14, fontWeight:900, color:C.textHi }}>SBRI &amp; AdaBN SOP</div>
+              <div style={{ fontSize:10, color:C.textMd }}>NICE Tier C &amp; scanner calibration ready</div>
+            </div>
+          </div>
+          <p style={{ fontSize:11, color:C.textLo, margin:0, fontStyle:'italic' }}>
+            Strictly non-interventional: zero clinical display or alert delivery to treating clinicians. 100% consultant radiologist sign-off maintained.
+          </p>
+        </div>
+
         <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.amber}40`, borderRadius:16, marginBottom:24 }}>
           <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:'0 0 10px' }}>Metacognition: INCONCLUSIVE</h2>
           <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:0 }}>

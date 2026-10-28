@@ -42,14 +42,14 @@ const RESULTS = [
 ];
 
 const NOT_VALIDATED = [
-  'Fine-grained lesion segmentation or millimeter-accurate spatial localization (evaluated Grad-CAM hit rate is 11.20%)',
-  'Pulmonary embolism, pneumothorax, tuberculosis or stroke detection',
-  'MRI or X-ray modalities (evaluated scope is non-contrast head CT only)',
-  'VLM report-generation clinical accuracy',
-  'Federated learning outcomes',
-  'Prospective, multi-site or real-world clinical performance',
-  'Any live hospital deployment, customer, or regulatory clearance',
-  'Hallucination detection or a proven safety-gating benefit from metacognition',
+  'Millimeter-accurate voxel lesion segmentation (Masked HiResCAM pointing hit rate is 43.83% overall and 62.16% on chronic bleeds; segmentation boundaries unmeasured)',
+  'Clinical image-level diagnosis of pulmonary embolism, pneumothorax, tuberculosis, or ischemic stroke (NLP safety gates and preprocessing pipelines engineering-validated; image-level models in pre-clinical DEMO MODE pending dataset staging)',
+  'Live prospective clinical performance on unselected hospital streams (pre-clinical feasibility completed across Tests A–O; live clinical performance to be evaluated in the prospective SEWA-SHADOW-1 study)',
+  'Vision-Language Model (VLM) clinical accuracy (pre-clinical text generation prototype only)',
+  'Federated learning multi-trust clinical outcomes',
+  'Autonomous diagnostic action without human consultant radiologist sign-off (mandatory 100% radiologist sign-off legally required)',
+  'Live regulatory CE/UKCA clearance or commercial NHS customer deployment (pre-clinical TRL 6 status; research use only)',
+  'Hallucination detection or a proven safety-gating benefit from metacognition in head CT review (inconclusive in Test C at 0.0%)',
 ];
 
 const Tag = ({ label, color }: { label:string; color:string }) => (
@@ -235,6 +235,46 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
           <p style={{ fontSize:11, color:C.textLo, margin:0, fontStyle:'italic' }}>
             Clinical audit disclosure (K-4): Under severe noise (σ=0.35), naive probability gating escalates 61.7% of scans (req ≥ 90.0%). Confirms the imperative of SEWA's Layer 1 OOD detector and 100% human consultant sign-off.
           </p>
+        </div>
+
+        {/* SEWA-SHADOW-1 Prospective Protocol & 4-Step NHS Deployment callout */}
+        <div style={{ padding:28, background:C.bg1, border:`1px solid ${C.brandLt}60`, borderRadius:16, marginBottom:28, position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', top:0, left:0, width:4, height:'100%', background:C.brandLt }} />
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10, marginBottom:12 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <span style={{ fontSize:10, fontWeight:800, color:C.bg0, padding:'3px 10px', borderRadius:20, background:C.brandLt }}>CLINICAL PILOT PROTOCOL</span>
+              <h2 style={{ fontSize:18, fontWeight:900, color:C.textHi, margin:0 }}>SEWA-SHADOW-1: Multicenter Prospective Observational Protocol (v2.0)</h2>
+            </div>
+            <span style={{ fontSize:11, color:C.textMd, fontFamily:C.FM }}>IRB/REC-Ready · Non-Interventional</span>
+          </div>
+          <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 16px' }}>
+            Following 15 frozen pre-registered empirical feasibility tests (Tests A through O), SEWA XAI has finalized the master prospective clinical protocol (<code>SEWA-CLIN-PROT-001</code>) and the <strong>4-Step NHS Deployment Pathway Playbook</strong> for acute NHS trust onboarding in the West Midlands:
+          </p>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:12, marginBottom:16 }}>
+            <div style={{ padding:14, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:10 }}>
+              <div style={{ fontSize:10, color:C.brandLt, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.05em' }}>STEP 1 · GOVERNANCE &amp; DPIA</div>
+              <div style={{ fontSize:14, fontWeight:900, color:C.textHi, margin:'4px 0 2px' }}>Caldicott Sign-Off</div>
+              <div style={{ fontSize:11, color:C.textMd, lineHeight:1.5 }}>Service Evaluation / S251 consent waiver; UK GDPR Art 6/9 DPIA complete.</div>
+            </div>
+            <div style={{ padding:14, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:10 }}>
+              <div style={{ fontSize:10, color:C.brandLt, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.05em' }}>STEP 2 · CLINICAL SAFETY</div>
+              <div style={{ fontSize:14, fontWeight:900, color:C.textHi, margin:'4px 0 2px' }}>DCB0129 / DCB0160</div>
+              <div style={{ fontSize:11, color:C.textMd, lineHeight:1.5 }}>CSCR &amp; Hazard Log (HAZ-001–007) signed; zero-clinical-alert shadow mode.</div>
+            </div>
+            <div style={{ padding:14, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:10 }}>
+              <div style={{ fontSize:10, color:C.brandLt, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.05em' }}>STEP 3 · HIWM &amp; FUNDING</div>
+              <div style={{ fontSize:14, fontWeight:900, color:C.textHi, margin:'4px 0 2px' }}>NICE Tier C / SBRI</div>
+              <div style={{ fontSize:11, color:C.textMd, lineHeight:1.5 }}>Aligned with Joanne Mewis (HIWM), HIN Spread Playbook &amp; £100k SBRI blueprint.</div>
+            </div>
+            <div style={{ padding:14, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:10 }}>
+              <div style={{ fontSize:10, color:C.brandLt, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.05em' }}>STEP 4 · EDGE ONBOARDING</div>
+              <div style={{ fontSize:14, fontWeight:900, color:C.textHi, margin:'4px 0 2px' }}>AdaBN &amp; DICOM C-STORE</div>
+              <div style={{ fontSize:11, color:C.textMd, lineHeight:1.5 }}>PS 3.15 de-id edge gateway; 50-scan scanner calibration; 1,200 head CT stream.</div>
+            </div>
+          </div>
+          <div style={{ padding:'10px 14px', background:`${C.brand}12`, border:`1px solid ${C.brand}30`, borderRadius:8, fontSize:11, color:C.textHi }}>
+            <strong>Master Documents Committed:</strong> <code>docs/clinical/SEWA_SHADOW_1_Clinical_Study_Protocol_Master.md</code>, <code>docs/clinical/nhs_deployment_pathway_playbook.md</code>, <code>docs/governance/step1_caldicott_guardian_submission_pack.md</code>, and <code>docs/governance/step2_dcb0129_clinical_safety_case_report.md</code>.
+          </div>
         </div>
 
         {/* Tests L/M/N/O - Multimodal Expansion callout */}
