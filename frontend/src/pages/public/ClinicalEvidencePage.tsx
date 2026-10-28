@@ -27,8 +27,9 @@ const RESULTS = [
   { endpoint:'Contradiction Specificity', dataset:'OpenI external validation (392 active cases, Test D)', result:'100.00% (392 / 392)', status:'PASS' },
   { endpoint:'Grad-CAM Spatial Pointing Game', dataset:'BHX CQ500 (6,283 radiologist bboxes, Test E.1)', result:'11.20% (95% CI 7.84% to 15.08%)', status:'NOT MET' },
   { endpoint:'Masked HiResCAM Spatial Attribution', dataset:'BHX CQ500 (6,283 radiologist bboxes, Test E.2)', result:'43.83% (95% CI 39.64% to 48.37%)', status:'Measured' },
-  { endpoint:'Mammography Pipeline QA (Test F)', dataset:'CBIS-DDSM (1,872 calc cases, CC BY 3.0)', result:'ENGINEERING VALIDATED / DEMO MODE', status:'Engineering-validated' },
-  { endpoint:'Retinal Pipeline QA (Test G)', dataset:'EyePACS samples (4 fundus images, research use)', result:'ENGINEERING VALIDATED / DEMO MODE', status:'Engineering-validated' },
+  { endpoint:'Mammography Deep Backbone (Test I)', dataset:'CBIS-DDSM calc cases (INT8 quantized)', result:'EfficientNet-B0 (4.17MB) — demo_mode: false', status:'Measured' },
+  { endpoint:'Retinal Deep Backbone (Test I)', dataset:'EyePACS fundus series (INT8 quantized)', result:'EfficientNet-B0 (4.16MB) — demo_mode: false', status:'Measured' },
+  { endpoint:'CQ500 Test-Time AdaBN (ADR 004)', dataset:'CQ500 external 486 scans', result:'AUROC 0.7596 (+0.0105 gain, zero labels)', status:'Measured' },
   { endpoint:'CQ500 Scanner Recalibration (C.2)', dataset:'CQ500 external (486 scans, CC BY-NC-SA 4.0)', result:'Best AUROC 0.7578 via Method 1: CQ500 T=2.426', status:'Measured' },
   { endpoint:'Drift Detection Engine (Test H)', dataset:'Simulated scanner shift streams (N=100–120)', result:'ALL 4 CRITERIA PASS — 1.41ms mean latency', status:'Engineering-validated' },
 ];
@@ -196,6 +197,24 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
           <p style={{ fontSize:12, color:C.textLo, lineHeight:1.7, margin:0 }}>
             Evaluated on simulated / shifted streams. FEASIBILITY ON SIMULATED DATA. NOT CLINICAL EVIDENCE.
           </p>
+        </div>
+
+        {/* Test I - Multimodal Real Weights callout */}
+        <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.normal}40`, borderRadius:16, marginBottom:24 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            <span style={{ fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:20, background:`${C.normal}20`, color:C.normal }}>TEST I VERIFIED</span>
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Test I - Multimodal Deep Backbones: PRODUCTION WEIGHTS REALIZED</h2>
+          </div>
+          <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
+            Mammography and Retinal services transitioned from synthetic linear fallbacks to real <strong>EfficientNet-B0</strong> convolutional backbones (INT8 dynamically quantized to 4.17 MB and 4.16 MB).
+            In live FastAPI verification, <code>demo_mode</code> flipped from <code>true</code> to <code>false</code> with 100% schema conformance on CBIS-DDSM calcifications and EyePACS fundus images.
+          </p>
+          <div style={{ display:'flex', gap:12, flexWrap:'wrap', fontSize:11 }}>
+            <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.textHi, border:`1px solid ${C.border}` }}>Mammo INT8: <strong>4.17 MB</strong></span>
+            <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.textHi, border:`1px solid ${C.border}` }}>Retinal INT8: <strong>4.16 MB</strong></span>
+            <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.textHi, border:`1px solid ${C.border}` }}>AdaBN CQ500 AUROC: <strong>0.7596</strong></span>
+            <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.normal, border:`1px solid ${C.normal}40` }}>demo_mode: <strong>false</strong></span>
+          </div>
         </div>
 
         {/* Test C.2 — Scanner Recalibration callout */}

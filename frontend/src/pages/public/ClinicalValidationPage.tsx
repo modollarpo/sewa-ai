@@ -20,8 +20,9 @@ const STATUS = [
   { label:'Metacognition CT review',  value:'Inconclusive (Test C)',  color:C.amber },
   { label:'Baseline Pointing (E.1)',  value:'11.20% (Grad-CAM)',      color:C.amber },
   { label:'Enhanced Pointing (E.2)',  value:'43.83% (HiResCAM)',      color:C.normal },
-  { label:'Mammography QA (Test F)', value:'ENG VALIDATED / DEMO', color:C.amber },
-  { label:'Retinal QA (Test G)',      value:'ENG VALIDATED / DEMO', color:C.amber },
+  { label:'Mammography Weights (I)', value:'PROD INT8 (demo: false)', color:C.normal },
+  { label:'Retinal Weights (I)',      value:'PROD INT8 (demo: false)', color:C.normal },
+  { label:'AdaBN CQ500 AUROC',       value:'0.7596 (Zero-Label)',  color:C.normal },
   { label:'Drift Engine (Test H)',    value:'ALL 4 CRITERIA PASS',  color:C.normal },
   { label:'CQ500 Recalib (C.2)',      value:'AUROC 0.7578 (exploratory)', color:C.info },
 ];

@@ -78,6 +78,10 @@ Governing pre-registration: `docs/evidence/preregistration_testI_multimodal_real
   - Live FastAPI TestClient verified: `/health` reports `status: "healthy"`, `demo_mode: false`, `backend: "onnx-int8"`.
   - `/predict` returns clinical schema with real probabilities, valid BI-RADS 0–5 / ICDR Grades 0–4, and `demo_mode: false`.
   - Both Dockerfiles updated with `COPY models ./models`.
+- **Frontend Evidence Ledger & Prospective Protocol Synchronized**:
+  - `ClinicalEvidencePage.tsx` and `ClinicalValidationPage.tsx` updated with Test I results, real INT8 footprints (4.17MB / 4.16MB), and AdaBN CQ500 AUROC (0.7596).
+  - Clean TypeScript build: `tsc --noEmit` exited 0 with 0 errors.
+  - Landed IRB-ready prospective observational protocol: `docs/clinical/prospective_observational_study_protocol.md` (SEWA-SHADOW-1: 1,200 head CT, 800 mammography, 600 retinal cases; FNR $\le 5\%$ split conformal gating).
 
 ---
 
