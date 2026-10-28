@@ -61,6 +61,35 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — HIWM Value Proposition Deck Realization & Slide-by-Slide Alignment, branch `main`)
+
+Governing artifacts: `docs/clinical/SEWA_XAI_Value_Proposition_Deck (1).pdf`, `docs/evidence/healthcare_value_proposition_hiwm.md`, `docs/evidence/healthcare_value_proposition_hiwm_deck.html`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Deck Structure & Styling Fully Preserved**:
+  - Re-generated the 11-slide PDF `docs/clinical/SEWA_XAI_Value_Proposition_Deck (1).pdf` using ReportLab (`scripts/generate_value_proposition_deck.py`), preserving the exact 960x540 landscape canvas, deep green (#050f0c) and light grey (#f4f8f7) backgrounds, teal accents (#408d7b), 3.5pt vertical card strips, and card grid arrangements.
+- **Slide 5 Sourced NHS Baseline Metrics Integrated**:
+  - Replaced the unresolved placeholder with verified NHS metrics: 2.5M emergency head CTs (NHS Digital DID, 7%–9% YoY), 29% consultant radiologist shortfall (RCR Census; 26% West Midlands vacancy), 120–240+ min out-of-hours queues, and £285M annual locum/teleradiology expenditure (£450–£600/neurological bed-day).
+- **Slide 7 Evidence to Date Updated (Tests A through I)**:
+  - RSNA internal AUROC (0.807) & CQ500 external AUROC (0.7468 baseline → 0.7596 with Zero-Label AdaBN adaptation, ADR 004).
+  - Test D Metacognition Negation Engine: 95.78% contradiction recall, 100.0% specificity across 7,265 real radiologist reports in 1.04ms.
+  - Split Conformal Risk Control: Guaranteed FNR $\le 5\%$ bound ($\lambda = 0.0298$, safely auto-clearing 12.7% normal scans).
+  - Masked HiResCAM (Test E.2): 43.83% pointing hit rate (62.16% on chronic ICH), eliminating raw Grad-CAM skull bone artifacts.
+  - Multimodal Real Weights (Test I): Real INT8 models for Mammography (4.17MB) & Retinal (4.16MB) active (`demo_mode: false`).
+- **Slide 8 & 9 Comparative Matrix & Pre-Registered Targets**:
+  - 7-dimension comparison matrix against FIFO PACS and commercial AI triage.
+  - Pre-registered endpoints: door-to-read reduced from 120–240m → $<30$m, clinical escalation reduced from 90–150m → $<45$m, out-of-hours escalation spend reduced by 15%–25%, safe clearing $\ge 10\%$ under FNR $\le 5\%$, and 100% continuous audit logging.
+- **Slide 11 Adoption & Spread Plan (Joanne Mewis Instructions Executed)**:
+  - Step 1: Innovation Academy (Regulatory Requirements, Funding, Evaluating).
+  - Step 2: NICE ESF Tier C mapping.
+  - Step 3: HIN Adoption and Spread Planning Playbook alignment.
+  - Step 4: Active funding applications (HIN/HIWM pipelines, SBRI, AI Award).
+  - Step 5: Prospective shadow-mode pilot (SEWA-SHADOW-1 protocol across West Midlands trusts).
+- **Cross-Format Synchronization**:
+  - Synchronized across the ReportLab PDF generator (`scripts/generate_value_proposition_deck.py`), the master PDF (`docs/clinical/SEWA_XAI_Value_Proposition_Deck (1).pdf`), the Markdown specification (`docs/evidence/healthcare_value_proposition_hiwm.md`), and the interactive HTML slide presentation (`docs/evidence/healthcare_value_proposition_hiwm_deck.html`).
+
+---
+
 ## 📋 Work State (2026-10-28 — Test I Multimodal Clinical Weight Realization, branch `main`)
 
 Governing pre-registration: `docs/evidence/preregistration_testI_multimodal_real_weights.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**

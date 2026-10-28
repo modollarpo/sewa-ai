@@ -401,12 +401,13 @@
       <div class="card-body">Emergency department crowding, 4-hour target breaches, bottlenecked out-of-hours reporting and heavy reliance on locum/teleradiology cover.</div>
     </div>
   </div>
-  <div style="background: #0a1b16; border: 1px solid #1a443a; border-radius: 8px; padding: 10px 16px;">
-    <div style="font-size: 11px; font-weight: 700; color: #5eead4; margin-bottom: 4px;">Sourced NHS Baseline Metrics (NHS Digital DID, RCR Census & GIRFT):</div>
-    <div style="font-size: 11px; color: #cbd5e1; line-height: 1.5;">
-      • <strong>Emergency CT Demand:</strong> Over <strong>2.5M emergency head CT scans</strong> per year in NHS England, growing at ~8% annually.<br>
-      • <strong>Radiology Workforce Deficit:</strong> <strong>29% UK consultant shortfall</strong> (RCR 2023/24 Census); West Midlands trusts average <strong>26% vacancy</strong>.<br>
-      • <strong>Turnaround Lag:</strong> Out-of-hours routine queue delay averages <strong>120–240+ minutes</strong>; locum/teleradiology costs exceed <strong>£285M annually</strong> in England.
+  <div style="background: #0a1b16; border: 1px solid #1a443a; border-radius: 8px; padding: 12px 18px;">
+    <div style="font-size: 11px; font-weight: 700; color: #5eead4; margin-bottom: 6px;">Sourced NHS Baseline Figures (NHS Digital DID, RCR Census & GIRFT):</div>
+    <div style="font-size: 11px; color: #cbd5e1; line-height: 1.6;">
+      • <strong>Emergency Head CT Demand:</strong> Over <strong>2.5 million emergency head CTs</strong> performed annually across NHS England (NHS Digital Diagnostic Imaging Dataset - DID), expanding at <strong>7%–9% year-on-year</strong>.<br>
+      • <strong>Workforce Crisis:</strong> Royal College of Radiologists (RCR) Clinical Radiology Census reports a <strong>29% UK consultant radiologist shortfall</strong> (projected to reach 39% by 2030); West Midlands acute trusts face acute vacancy rates averaging <strong>26%</strong>.<br>
+      • <strong>Turnaround Delays:</strong> Routine out-of-hours head CT queues delay acute intracranial haemorrhage (ICH) review by <strong>120 to 240+ minutes</strong>, breaching NICE stroke 60-minute imaging targets.<br>
+      • <strong>Economic Burden:</strong> Acute neurological bed-days cost the NHS <strong>£450–£600 per day</strong>; outsourced teleradiology and locum cover exceed <strong>£285 million annually</strong> in England.
     </div>
   </div>
   <div class="footer">
@@ -497,20 +498,27 @@
           <div style="font-size: 10px; color: #94a3b8; margin-top: 6px; text-align: center;">External: CQ500 + AdaBN</div>
         </div>
       </div>
-      <div style="font-size: 10.5px; color: #94a3b8; margin-top: 10px; line-height: 1.4;">
-        Zero-Label AdaBN adaptation (ADR 004) lifts external generalisation to <strong>0.7596</strong> without requiring site training labels.
+      <div style="font-size: 10px; color: #94a3b8; margin-top: 8px; line-height: 1.45;">
+        • <strong>AUROC Boost (AdaBN, ADR 004):</strong> 0.7468 → <strong>0.7596</strong> without requiring site training labels.<br>
+        • <strong>Temperature Scaling (Test C.2):</strong> ECE cut by 57% (0.0543 vs 0.1273 baseline).<br>
+        • <strong>Multimodal Real Weights (Test I):</strong> Mammography (<strong>4.17MB</strong>) & Retinal (<strong>4.16MB</strong>) INT8 models live (<code>demo_mode: false</code>).
       </div>
     </div>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      <div style="background: #071512; border: 1px solid #1a443a; border-radius: 8px; padding: 14px;">
-        <div style="font-size: 11px; font-weight: 700; color: #5eead4; text-transform: uppercase;">SAFETY & CONTRADICTION GATING (TEST D)</div>
-        <div style="font-size: 24px; font-weight: 900; color: #ffffff; margin: 4px 0;">95.78%</div>
-        <div style="font-size: 11px; color: #cbd5e1; line-height: 1.4;">
-          Contradiction recall with <strong>100% specificity</strong> against 7,265 radiologist reports (1.04ms). Conformal FNR bounded at ≤5%.
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="background: #071512; border: 1px solid #1a443a; border-radius: 8px; padding: 10px 14px;">
+        <div style="font-size: 10px; font-weight: 700; color: #5eead4; text-transform: uppercase;">SAFETY GATES (TESTS D & E.2)</div>
+        <div style="display: flex; align-items: baseline; gap: 10px; margin: 2px 0;">
+          <div style="font-size: 22px; font-weight: 900; color: #ffffff;">95.78%</div>
+          <div style="font-size: 11px; font-weight: 700; color: #2dd4bf;">Contradiction Recall (100.0% Specificity)</div>
+        </div>
+        <div style="font-size: 10px; color: #cbd5e1; line-height: 1.4;">
+          Evaluated across <strong>7,265 real radiologist reports</strong> (OpenI) in <strong>1.04ms</strong>.<br>
+          • <strong>Conformal Risk Control:</strong> Statistically guaranteed <strong>FNR ≤ 5%</strong> bound (λ=0.0298, safely clears 12.7% normal scans).<br>
+          • <strong>Masked HiResCAM (Test E.2):</strong> <strong>43.83% pointing hit rate</strong> (62.16% on chronic ICH), replacing misleading bone artifacts.
         </div>
       </div>
-      <div style="background: #071512; border: 1px solid #1a443a; border-radius: 8px; padding: 12px; font-size: 10.5px; color: #94a3b8; line-height: 1.4;">
-        <strong style="color:#ffffff;">How to read this:</strong> Feasibility benchmarks on public datasets. Demonstrates algorithm stability and safety gates prior to live clinical evaluation.
+      <div style="background: #071512; border: 1px solid #1a443a; border-radius: 8px; padding: 8px 12px; font-size: 9.5px; color: #94a3b8; line-height: 1.35;">
+        <strong style="color:#ffffff;">How to read this (Governance & Audit Transparency):</strong> Feasibility on public datasets. Raw safety gating reduction was 0.0% [-8.1%, +6.5%] (INCONCLUSIVE), directly motivating our split conformal risk control. Prospective pathway impact will be evaluated under protocol <strong>SEWA-SHADOW-1</strong>.
       </div>
     </div>
   </div>
