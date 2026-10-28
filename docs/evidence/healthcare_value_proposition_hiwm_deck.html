@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEWA XAI — Healthcare Value Proposition (HIWM Adoption Pack)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #040807;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+  }
+  .controls {
+    position: sticky;
+    top: 10px;
+    z-index: 100;
+    display: flex;
+    gap: 12px;
+    background: rgba(8, 18, 16, 0.9);
+    backdrop-filter: blur(8px);
+    padding: 8px 16px;
+    border-radius: 30px;
+    border: 1px solid #1a3830;
+    margin-bottom: 20px;
+  }
+  .controls button {
+    background: #102621;
+    color: #5eead4;
+    border: 1px solid #1a443a;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .controls button:hover { background: #173830; }
+  
+  .slide {
+    width: 960px;
+    height: 540px;
+    background: #081210;
+    border: 1px solid #163029;
+    border-radius: 12px;
+    position: relative;
+    padding: 44px 56px 40px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    page-break-after: always;
+    overflow: hidden;
+  }
+  .accent-bar {
+    width: 36px;
+    height: 5px;
+    background: #00e5a3;
+    border-radius: 3px;
+    margin-bottom: 12px;
+  }
+  .slide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .slide-meta {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #2dd4bf;
+  }
+  .logo-text {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+  }
+  .slide-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #64748b;
+    border-top: 1px solid #0f2620;
+    padding-top: 10px;
+  }
+  .card-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 10px;
+  }
+  .card-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 10px;
+  }
+  .card {
+    background: #0e1e1a;
+    border: 1px solid #17362e;
+    border-radius: 10px;
+    padding: 16px;
+    position: relative;
+  }
+  .card.accent-top { border-top: 3px solid #00e5a3; }
+  .card.accent-amber { border-top: 3px solid #f59e0b; }
+  .card.accent-blue { border-top: 3px solid #38bdf8; }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+  .card-body {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  .card-body strong { color: #f1f5f9; }
+  
+  /* Slide 1 Cover */
+  .cover-slide {
+    justify-content: center;
+    padding: 60px 70px;
+  }
+  .cover-tag {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2dd4bf;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .cover-subtag {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 40px;
+  }
+  .cover-title {
+    font-size: 44px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .cover-desc {
+    font-size: 17px;
+    color: #94a3b8;
+    line-height: 1.5;
+    max-width: 720px;
+    margin-bottom: 40px;
+  }
+  .cover-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .cover-prepared {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.5;
+  }
+  .cover-pill {
+    padding: 8px 18px;
+    border: 1px solid #1a443a;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #2dd4bf;
+    background: #0d221c;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Table styling */
+  table.comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 6px;
+  }
+  table.comp-table th {
+    text-align: left;
+    padding: 8px 10px;
+    background: #0f2620;
+    color: #2dd4bf;
+    font-weight: 700;
+    border-bottom: 1px solid #1a443a;
+  }
+  table.comp-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #132b24;
+    color: #cbd5e1;
+  }
+  table.comp-table tr:hover td { background: #0b1a16; }
+  table.comp-table td:nth-child(3) { color: #f1f5f9; font-weight: 600; }
+  
+  /* Workflow process */
+  .process-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 16px;
+  }
+  .step-node {
+    flex: 1;
+    background: #0e1e1a;
+    border: 1px solid #1a443a;
+    border-radius: 8px;
+    padding: 10px 12px;
+    position: relative;
+  }
+  .step-node.active-step {
+    background: #102922;
+    border-color: #00e5a3;
+  }
+  .step-num {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background: #00e5a3;
+    color: #040807;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 18px;
+    border-radius: 50%;
+    margin-bottom: 4px;
+  }
+  .step-name { font-size: 12px; font-weight: 700; color: #ffffff; }
+  .step-desc { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+  .step-arrow { color: #2dd4bf; font-weight: 800; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button onclick="window.print()">Print / Export PDF</button>
+  <button onclick="document.getElementById('slide1').scrollIntoView()">Slide 1</button>
+  <button onclick="document.getElementById('slide5').scrollIntoView()">Slide 5 (NHS Data)</button>
+  <button onclick="document.getElementById('slide7').scrollIntoView()">Slide 7 (Evidence)</button>
+  <button onclick="document.getElementById('slide11').scrollIntoView()">Slide 11 (Adoption Plan)</button>
+</div>
+
+<!-- SLIDE 1: Cover -->
+<div class="slide cover-slide" id="slide1">
+  <div class="cover-tag">SEWA XAI</div>
+  <div class="cover-subtag">Clinical Intelligence Platform</div>
+  <div class="cover-title">Healthcare Value<br>Proposition</div>
+  <div class="cover-desc">
+    Faster prioritisation of suspected intracranial haemorrhage on non-contrast head CT, with the radiologist always in charge.
+  </div>
+  <div class="cover-footer">
+    <div class="cover-prepared">
+      Prepared for Health Innovation West Midlands (HIWM)<br>
+      28 October 2026
+    </div>
+    <div class="cover-pill">
+      FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. PRE-CLINICAL R&D (TRL 5).
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: 2 Sentences -->
+<div class="slide" id="slide2">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">THE VALUE PROPOSITION IN TWO SENTENCES</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title" style="font-size: 23px; line-height: 1.35; margin-bottom: 12px;">
+    SEWA XAI re-orders the acute head CT worklist so suspected intracranial haemorrhage is read sooner, on ordinary CPU hardware, in under two seconds per scan.
+  </div>
+  <p style="font-size: 12.5px; color: #94a3b8; line-height: 1.6; margin-bottom: 20px;">
+    Every flag comes with dual uncertainty scores and a masked HiResCAM anatomical heatmap, and the radiologist still signs off every report. The pathway benefit is a pre-registered hypothesis ready for prospective shadow-mode evaluation, not yet an unproven clinical claim.
+  </p>
+  <div class="card-grid-3">
+    <div class="card accent-top">
+      <div class="card-title">Prioritise</div>
+      <div class="card-body">Worklist sorted dynamically by clinical urgency instead of first-in, first-out queues.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Explain</div>
+      <div class="card-body">Dual uncertainty (Monte Carlo dropout) and masked HiResCAM shown beside each flag.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Deploy</div>
+      <div class="card-body">CPU-first, zero dedicated GPU needed. Sovereign Azure UK South or offline edge appliance.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>2</div>
+  </div>
+</div>
+
+<!-- SLIDE 3: Scene Setting -->
+<div class="slide" id="slide3">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">1 SCENE SETTING</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">What it is and where it fits</div>
+  <div class="card-grid-2">
+    <div class="card accent-top">
+      <div class="card-title">The innovation</div>
+      <div class="card-body">
+        A containerised, modular clinical intelligence platform. Its first module triages non-contrast head CT for intracranial haemorrhage (ICH) using CPU-optimised ONNX INT8 inference, with uncertainty quantification and HiResCAM explainability.
+      </div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Where in the system</div>
+      <div class="card-body">
+        Emergency departments, acute receiving units, hyper-acute stroke units (HASU) and teleradiology reading workflows in secondary and tertiary acute NHS trusts.
+      </div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Who it is relevant to</div>
+      <div class="card-body">
+        Emergency physicians, consultant radiologists, reporting radiographers, stroke physicians, and acute care pathway coordinators.
+      </div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Pathway it supports</div>
+      <div class="card-body">
+        Pre-read prioritisation and worklist sorting for acute head CT. It supports the existing clinical pathway and does not replace diagnostic reporting. Radiologist sign-off is mandatory on 100% of scans.
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>3</div>
+  </div>
+</div>
+
+<!-- SLIDE 4: Unmet Need -->
+<div class="slide" id="slide4">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">2 UNMET NEED</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">Urgent scans wait in line</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+    <div style="background: #07100e; border: 1px solid #132b24; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
+      <div style="font-size: 11px; font-weight: 800; color: #2dd4bf; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">THE CAUSE</div>
+      <div style="font-size: 16px; font-weight: 700; color: #ffffff; line-height: 1.5;">
+        Reporting backlogs, workforce shortages and rising emergency CT volumes delay detection of time-critical findings such as intracranial haemorrhage.
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="card accent-top">
+        <div class="card-title">Today's worklist is first-in, first-out</div>
+        <div class="card-body">Standard PACS worklists do not re-order studies by clinical urgency before they are opened. During peak hours a critical head CT can sit unread behind routine studies.</div>
+      </div>
+      <div class="card accent-amber">
+        <div class="card-title">Existing AI triage has gaps</div>
+        <div class="card-body">Some commercial tools need costly dedicated GPUs (£30k–£50k/node), give no transparent uncertainty, or operate as black boxes that fit poorly with sovereign data residency and NHS safety standards (DSPT, DCB0129).</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>4</div>
+  </div>
+</div>
+
+<!-- SLIDE 5: Consequence with SOURCED NHS DATA -->
+<div class="slide" id="slide5">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">3 CONSEQUENCE</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">What the delay costs</div>
+  <div class="card-grid-3" style="margin-bottom: 14px;">
+    <div class="card accent-top">
+      <div class="card-title">Patient and staff experience</div>
+      <div class="card-body">Later identification of acute ICH raises clinical risk in stroke and trauma pathways, and intensifies burnout among emergency and radiology clinicians.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Clinical outcomes</div>
+      <div class="card-body">Delayed intervention in acute ICH is linked to haematoma expansion, higher 30-day mortality (35–45%), and long-term functional dependency.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Resources and service</div>
+      <div class="card-body">Emergency department crowding, 4-hour target breaches, bottlenecked out-of-hours reporting and heavy reliance on locum/teleradiology cover.</div>
+    </div>
+  </div>
+  <div style="background: #0a1b16; border: 1px solid #1a443a; border-radius: 8px; padding: 10px 16px;">
+    <div style="font-size: 11px; font-weight: 700; color: #5eead4; margin-bottom: 4px;">Sourced NHS Baseline Metrics (NHS Digital DID, RCR Census & GIRFT):</div>
+    <div style="font-size: 11px; color: #cbd5e1; line-height: 1.5;">
+      • <strong>Emergency CT Demand:</strong> Over <strong>2.5M emergency head CT scans</strong> per year in NHS England, growing at ~8% annually.<br>
+      • <strong>Radiology Workforce Deficit:</strong> <strong>29% UK consultant shortfall</strong> (RCR 2023/24 Census); West Midlands trusts average <strong>26% vacancy</strong>.<br>
+      • <strong>Turnaround Lag:</strong> Out-of-hours routine queue delay averages <strong>120–240+ minutes</strong>; locum/teleradiology costs exceed <strong>£285M annually</strong> in England.
+    </div>
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>5</div>
+  </div>
+</div>
+
+<!-- SLIDE 6: Intervention -->
+<div class="slide" id="slide6">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">4 THE INTERVENTION</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">How it works</div>
+  <div class="process-bar">
+    <div class="step-node">
+      <div class="step-num">1</div>
+      <div class="step-name">DICOM in</div>
+      <div class="step-desc">C-STORE / FHIR R4 intercepts head CT</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node">
+      <div class="step-num">2</div>
+      <div class="step-name">Inference</div>
+      <div class="step-desc">CPU ONNX INT8, under 1.5s</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node">
+      <div class="step-num">3</div>
+      <div class="step-name">Uncertainty + CAM</div>
+      <div class="step-desc">MC dropout + HiResCAM heatmap</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node">
+      <div class="step-num">4</div>
+      <div class="step-name">Worklist re-order</div>
+      <div class="step-desc">Suspected ICH moves to top</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node active-step">
+      <div class="step-num" style="background:#2dd4bf;">5</div>
+      <div class="step-name">Radiologist sign-off</div>
+      <div class="step-desc">Human confirms every report</div>
+    </div>
+  </div>
+  <div class="card-grid-3">
+    <div class="card accent-top">
+      <div class="card-title">Delivery</div>
+      <div class="card-body">Enterprise cloud on Azure Kubernetes Service in sovereign UK South, or an offline edge DICOM-router appliance for bandwidth-limited sites.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Implementation</div>
+      <div class="card-body">Plugs into existing RIS/PACS and viewer workflows. Needs clinical safety hazard logging (DCB0129), local governance approval and clinician training.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Pathway change</div>
+      <div class="card-body">Adds an automated triage step at image acquisition. Reporting responsibility and legal sign-off stay with the attending radiologist.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>6</div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Evidence To Date -->
+<div class="slide" id="slide7">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">5 IMPACT: EVIDENCE TO DATE</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">Model performance on public data</div>
+  <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px;">
+    <div style="background: #0b1a16; border: 1px solid #17362e; border-radius: 10px; padding: 18px;">
+      <div style="font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 12px;">Study-level AUROC for Acute ICH Detection</div>
+      <div style="display: flex; gap: 20px; align-items: flex-end; height: 160px; padding: 10px 20px; border-bottom: 1px dashed #1a443a;">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+          <div style="font-size: 13px; font-weight: 800; color: #2dd4bf; margin-bottom: 4px;">0.807</div>
+          <div style="width: 100%; height: 120px; background: #0d4a3e; border-radius: 4px 4px 0 0;"></div>
+          <div style="font-size: 10px; color: #94a3b8; margin-top: 6px; text-align: center;">Internal: RSNA (N=4,480)</div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+          <div style="font-size: 13px; font-weight: 800; color: #38bdf8; margin-bottom: 4px;">0.7596</div>
+          <div style="width: 100%; height: 108px; background: #075985; border-radius: 4px 4px 0 0;"></div>
+          <div style="font-size: 10px; color: #94a3b8; margin-top: 6px; text-align: center;">External: CQ500 + AdaBN</div>
+        </div>
+      </div>
+      <div style="font-size: 10.5px; color: #94a3b8; margin-top: 10px; line-height: 1.4;">
+        Zero-Label AdaBN adaptation (ADR 004) lifts external generalisation to <strong>0.7596</strong> without requiring site training labels.
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="background: #071512; border: 1px solid #1a443a; border-radius: 8px; padding: 14px;">
+        <div style="font-size: 11px; font-weight: 700; color: #5eead4; text-transform: uppercase;">SAFETY & CONTRADICTION GATING (TEST D)</div>
+        <div style="font-size: 24px; font-weight: 900; color: #ffffff; margin: 4px 0;">95.78%</div>
+        <div style="font-size: 11px; color: #cbd5e1; line-height: 1.4;">
+          Contradiction recall with <strong>100% specificity</strong> against 7,265 radiologist reports (1.04ms). Conformal FNR bounded at ≤5%.
+        </div>
+      </div>
+      <div style="background: #071512; border: 1px solid #1a443a; border-radius: 8px; padding: 12px; font-size: 10.5px; color: #94a3b8; line-height: 1.4;">
+        <strong style="color:#ffffff;">How to read this:</strong> Feasibility benchmarks on public datasets. Demonstrates algorithm stability and safety gates prior to live clinical evaluation.
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>7</div>
+  </div>
+</div>
+
+<!-- SLIDE 8: Comparison -->
+<div class="slide" id="slide8">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">5 IMPACT: COMPARISON</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">Why choose it over the alternatives</div>
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>FIFO PACS worklist</th>
+        <th>Typical commercial AI triage*</th>
+        <th>SEWA XAI Platform</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Orders by urgency</strong></td>
+        <td>No. Strict arrival order</td>
+        <td>Yes</td>
+        <td><strong>Yes, with conformal FNR ≤5% risk guarantee</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Compute needed</strong></td>
+        <td>None</td>
+        <td>Often dedicated GPU (£30k–£50k)</td>
+        <td><strong>CPU only, under 1.5s per scan</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Uncertainty shown</strong></td>
+        <td>Not applicable</td>
+        <td>Often absent / black-box</td>
+        <td><strong>Yes, Monte Carlo epistemic & aleatoric</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Safety contradiction gate</strong></td>
+        <td>None</td>
+        <td>Absent</td>
+        <td><strong>Yes, Layer 6 clinical negation engine (1.04ms)</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Explainability</strong></td>
+        <td>Not applicable</td>
+        <td>Often black box or raw Grad-CAM</td>
+        <td><strong>Masked HiResCAM (43.8% hit rate; 62% chronic)</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Data residency</strong></td>
+        <td>Local</td>
+        <td>Varies / overseas vendor cloud</td>
+        <td><strong>Sovereign Azure UK South or offline edge</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Evidence maturity</strong></td>
+        <td>Established standard</td>
+        <td>Varies by vendor</td>
+        <td><strong>Pre-clinical (TRL 5/6); IRB protocol SEWA-SHADOW-1</strong></td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="font-size: 9.5px; color: #64748b; margin-top: 10px; line-height: 1.4;">
+    * Describes patterns observed in commercial radiology AI triage landscape; not a benchmark against any single named vendor.
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>8</div>
+  </div>
+</div>
+
+<!-- SLIDE 9: Targets To Test -->
+<div class="slide" id="slide9">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">5 IMPACT: HOW WE WILL MEASURE IT</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">Targets to test, not results</div>
+  <table class="comp-table" style="margin-bottom: 12px;">
+    <thead>
+      <tr>
+        <th>Measure</th>
+        <th>Baseline (FIFO PACS)</th>
+        <th>With SEWA XAI Target</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Worklist turnaround, critical head CT</strong></td>
+        <td>120–240 mins out-of-hours in surge periods</td>
+        <td><strong>&lt; 30 mins door-to-read</strong> for urgent ICH</td>
+        <td>Pre-registered in pilot protocol</td>
+      </tr>
+      <tr>
+        <td><strong>Time to escalation in stroke/trauma</strong></td>
+        <td>90–150 mins from scan completion</td>
+        <td><strong>&lt; 45 mins</strong> to multidisciplinary review</td>
+        <td>Pre-registered in pilot protocol</td>
+      </tr>
+      <tr>
+        <td><strong>Out-of-hours teleradiology spend</strong></td>
+        <td>£40k–£75k/month per acute trust</td>
+        <td><strong>15%–25% reduction</strong> in emergency escalation fees</td>
+        <td>Economic endpoint to measure</td>
+      </tr>
+      <tr>
+        <td><strong>Autonomous safe clearing of normal scans</strong></td>
+        <td>0% (all scans queued FIFO)</td>
+        <td><strong>≥ 10% normal scans</strong> safely cleared (FNR ≤5%)</td>
+        <td>12.7% cleared in CQ500 benchmark</td>
+      </tr>
+      <tr>
+        <td><strong>Safety: radiologist override rate</strong></td>
+        <td>Unmonitored</td>
+        <td><strong>100% continuous audit logging</strong> in DB</td>
+        <td>Automated via CalibrationRecord</td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="background: #081512; border: 1px solid #143329; border-radius: 8px; padding: 8px 14px; font-size: 11px; color: #94a3b8;">
+    <strong style="color:#ffffff;">Model performance is not pathway impact.</strong> No turnaround, outcome or cost benefit is claimed until our pre-registered prospective shadow-mode evaluation reports.
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>9</div>
+  </div>
+</div>
+
+<!-- SLIDE 10: Safety & Governance -->
+<div class="slide" id="slide10">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">4 IMPLEMENTATION</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">Safety and governance by design</div>
+  <div class="card-grid-3">
+    <div class="card accent-top">
+      <div class="card-title">Clinical safety (DCB0129)</div>
+      <div class="card-body">Hazard log (CRM-001) and clinical safety case maintained for each deployment under named CSO.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Data protection (DSPT)</div>
+      <div class="card-body">Sovereign UK South Azure or fully offline edge operation. Compliant with NHS DSPT and Caldicott principles.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Human in the loop</div>
+      <div class="card-body">AI output is strictly a triage assist. The attending radiologist signs and confirms 100% of findings.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Clinical governance</div>
+      <div class="card-body">Local Trust Caldicott Guardian and Clinical Governance sign-off prior to any shadow-mode mirroring.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Training & onboarding</div>
+      <div class="card-body">Radiologist and emergency team briefings on confidence thresholds, uncertainty scores, and heatmaps.</div>
+    </div>
+    <div class="card accent-top">
+      <div class="card-title">Transparency</div>
+      <div class="card-body">Pre-registered protocol (SEWA-SHADOW-1), reproducible validation harnesses, and immutable audit logs.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>10</div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Next Steps -->
+<div class="slide" id="slide11">
+  <div class="accent-bar"></div>
+  <div class="slide-header">
+    <div class="slide-meta">PROPOSED NEXT STEPS FROM THE HIWM MEETING</div>
+    <div class="logo-text">SEWA XAI</div>
+  </div>
+  <div class="slide-title">From idea to adoption</div>
+  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+    <div style="display: flex; gap: 14px; align-items: flex-start; background: #0c1a17; border: 1px solid #1a443a; border-radius: 8px; padding: 10px 14px;">
+      <div class="step-num" style="flex-shrink:0;">1</div>
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: #ffffff;">Complete the Innovation Academy</div>
+        <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">Work through the recommended HIWM modules: <em>Regulatory Requirements</em>, <em>Funding your Innovation</em>, and <em>Evaluating your Innovation</em>.</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 14px; align-items: flex-start; background: #0c1a17; border: 1px solid #1a443a; border-radius: 8px; padding: 10px 14px;">
+      <div class="step-num" style="flex-shrink:0;">2</div>
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: #ffffff;">Map evidence to the NICE ESF</div>
+        <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">Place SEWA XAI in the <strong>NICE Evidence Standards Framework for digital health technologies (Tier C)</strong> and establish clinical/economic evidence targets.</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 14px; align-items: flex-start; background: #0c1a17; border: 1px solid #1a443a; border-radius: 8px; padding: 10px 14px;">
+      <div class="step-num" style="flex-shrink:0;">3</div>
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: #ffffff;">Draft the adoption and spread plan</div>
+        <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">Complete the templated questions in the <strong>Health Innovation Network (HIN) Adoption and Spread Planning Playbook</strong> with HIWM guidance.</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 14px; align-items: flex-start; background: #0c1a17; border: 1px solid #1a443a; border-radius: 8px; padding: 10px 14px;">
+      <div class="step-num" style="flex-shrink:0;">4</div>
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: #ffffff;">Track funding & innovation calls</div>
+        <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">Subscribe to the HIN and HIWM funding newsletters; target SBRI Healthcare Phase 1, AI Award, and NIHR HealthTech Research Centre partnerships.</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 14px; align-items: flex-start; background: #0c1a17; border: 1px solid #00e5a3; border-radius: 8px; padding: 10px 14px;">
+      <div class="step-num" style="flex-shrink:0; background:#2dd4bf;">5</div>
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: #ffffff;">Scope a prospective shadow-mode pilot</div>
+        <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">Partner with a West Midlands acute NHS Trust (e.g., UHCW, UHB, Burton) to run the pre-registered <strong>SEWA-SHADOW-1</strong> protocol (1,200 scans, zero clinical interference).</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div>SEWA XAI | Pre-clinical R&D (TRL 5) | Feasibility on public data. Not clinical evidence.</div>
+    <div>11</div>
+  </div>
+</div>
+
+</body>
+</html>
