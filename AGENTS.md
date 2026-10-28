@@ -61,6 +61,23 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — Patent Gap Analysis & IP Strategy Assessment GB2609706.3, branch `main`)
+
+Governing patent document: `docs/evidence/Filing Receipt published with OLFI (2).pdf` (Application GB2609706.3, filed 25 April 2026). Report: `docs/evidence/patent_gap_analysis.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Patent Document Analysis**:
+  - Extracted and verified UKIPO filing receipt for **GB2609706.3** (*"Sovereign Multi-Engine Clinical AI Platform for Automated Diagnostic Triage and Safety Assurance"*).
+  - Applicant: STOREGRILL INC LTD; Inventor: Dolapo Ariyo; 21 pages description; 10 claims.
+  - Critical discovery: Application fee (£130) and search request (£180) are **unpaid**, with hard UKIPO statutory deadline of **25 April 2027**. This is also the exact 12-month priority cutoff for international PCT filings.
+- **Coverage Gap & Inventions Assessment**:
+  - Found that post-filing innovations from empirical tests (Split Conformal Risk Control FNR $\le 5\%$, Zero-Label AdaBN, Relative Mahalanobis OOD, Masked HiResCAM, physics noise monotonicity) represent high-priority patentable subject matter not explicitly covered in the initial 10 claims.
+  - Authored comprehensive gap analysis and strategic recommendation: `docs/evidence/patent_gap_analysis.md`.
+  - Drafted unified 7-layer defense method claim for attorney review.
+  - Strategic verdict: Do not abandon; consolidate via Rule 19/s.117 amendment to description + file international PCT claiming priority before 25 April 2027.
+
+---
+
 ## 📋 Work State (2026-10-28 — Tests L/M/N/O Multimodal Clinical Expansion, branch `main`)
 
 Governing pre-registrations: `docs/evidence/preregistration_testL_pneumothorax.md`, `preregistration_testM_tuberculosis.md`, `preregistration_testN_pulmonary_embolism.md`, `preregistration_testO_ischemic_stroke.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
