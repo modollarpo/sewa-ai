@@ -1,0 +1,215 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "licence": "CC BY-NC-SA 4.0",
+  "date": "2026-10-28",
+  "model": "v2a1 EfficientNet-B0 (frozen; no retraining)",
+  "cq500_scans": 486,
+  "baseline_testC": {
+    "name": "Baseline (RSNA T=0.887)",
+    "temperature": 0.7984,
+    "study_auroc": 0.7468,
+    "ece": 0.1273,
+    "brier": 0.2123,
+    "error_auroc_d2": 0.6611,
+    "error_auroc_b2": 0.6578,
+    "safety_reduction_20": 0.02,
+    "ci95_20": [
+      -0.0533,
+      0.0891
+    ],
+    "rates": {
+      "0.05": {
+        "rel_reduction": -0.015037593984962466,
+        "ci95": [
+          -0.058952941176470465,
+          0.016688596491228027
+        ],
+        "passes": false
+      },
+      "0.1": {
+        "rel_reduction": -0.03278688524590142,
+        "ci95": [
+          -0.08397303274595123,
+          0.0169718523002422
+        ],
+        "passes": false
+      },
+      "0.2": {
+        "rel_reduction": 0.019999999999999938,
+        "ci95": [
+          -0.05328215667311403,
+          0.08910891089108917
+        ],
+        "passes": false
+      },
+      "0.3": {
+        "rel_reduction": -0.05333333333333336,
+        "ci95": [
+          -0.16457084760273977,
+          0.057238675958188386
+        ],
+        "passes": false
+      }
+    },
+    "pass_20": false
+  },
+  "method1_cq500_temp": {
+    "name": "Method 1: CQ500 T=2.426",
+    "temperature": 2.4259,
+    "study_auroc": 0.7578,
+    "ece": 0.0543,
+    "brier": 0.1927,
+    "error_auroc_d2": 0.6559,
+    "error_auroc_b2": 0.6507,
+    "safety_reduction_20": 0.0103,
+    "ci95_20": [
+      -0.0919,
+      0.0622
+    ],
+    "rates": {
+      "0.05": {
+        "rel_reduction": -0.00781250000000003,
+        "ci95": [
+          -0.047668240850059,
+          0.03761567379988428
+        ],
+        "passes": false
+      },
+      "0.1": {
+        "rel_reduction": -0.03448275862068967,
+        "ci95": [
+          -0.07827285176309477,
+          0.03206956521739123
+        ],
+        "passes": false
+      },
+      "0.2": {
+        "rel_reduction": 0.010309278350515504,
+        "ci95": [
+          -0.09186639772187938,
+          0.06219099878062302
+        ],
+        "passes": false
+      },
+      "0.3": {
+        "rel_reduction": 0.025000000000000095,
+        "ci95": [
+          -0.07710843373493984,
+          0.13157894736842118
+        ],
+        "passes": false
+      }
+    },
+    "pass_20": false
+  },
+  "method2_channel_std": {
+    "name": "Method 2: Channel Standardization",
+    "temperature": 0.7984,
+    "study_auroc": 0.5348,
+    "ece": 0.5575,
+    "brier": 0.5531,
+    "error_auroc_d2": 0.5306,
+    "error_auroc_b2": 0.5348,
+    "safety_reduction_20": 0.0045,
+    "ci95_20": [
+      -0.0188,
+      0.0284
+    ],
+    "rates": {
+      "0.05": {
+        "rel_reduction": 0.007518796992481233,
+        "ci95": [
+          -0.0109539928906738,
+          0.016443165380906646
+        ],
+        "passes": false
+      },
+      "0.1": {
+        "rel_reduction": 0.0,
+        "ci95": [
+          -0.020661157024793354,
+          0.023172810086872678
+        ],
+        "passes": false
+      },
+      "0.2": {
+        "rel_reduction": 0.004464285714285731,
+        "ci95": [
+          -0.01879248088360245,
+          0.028439404197698012
+        ],
+        "passes": false
+      },
+      "0.3": {
+        "rel_reduction": -0.010362694300518175,
+        "ci95": [
+          -0.052931387608807015,
+          0.019633110976349254
+        ],
+        "passes": false
+      }
+    },
+    "pass_20": false
+  },
+  "method3_combined": {
+    "name": "Method 3: Std + T=20.085",
+    "temperature": 20.0854,
+    "study_auroc": 0.5336,
+    "ece": 0.1227,
+    "brier": 0.2577,
+    "error_auroc_d2": 0.5304,
+    "error_auroc_b2": 0.5313,
+    "safety_reduction_20": 0.0044,
+    "ci95_20": [
+      -0.0269,
+      0.052
+    ],
+    "rates": {
+      "0.05": {
+        "rel_reduction": 0.0037593984962404087,
+        "ci95": [
+          -0.011159865489940166,
+          0.0212803951367782
+        ],
+        "passes": false
+      },
+      "0.1": {
+        "rel_reduction": 0.0039999999999997945,
+        "ci95": [
+          -0.0197728069616219,
+          0.023260356104651252
+        ],
+        "passes": false
+      },
+      "0.2": {
+        "rel_reduction": 0.004444444444444462,
+        "ci95": [
+          -0.02690092165898613,
+          0.05196514012303494
+        ],
+        "passes": false
+      },
+      "0.3": {
+        "rel_reduction": -0.005154639175257752,
+        "ci95": [
+          -0.03598522167487685,
+          0.043060483870967774
+        ],
+        "passes": false
+      }
+    },
+    "pass_20": false
+  },
+  "best_method_by_auroc": "Method 1: CQ500 T=2.426",
+  "comparison": {
+    "baseline_auroc": 0.7468,
+    "best_auroc": 0.7578,
+    "delta_auroc": 0.011,
+    "baseline_ece": 0.1273,
+    "best_ece": 0.0543,
+    "safety_reduction_baseline": 0.02,
+    "safety_reduction_best": 0.02
+  },
+  "verdict": "EXPLORATORY RECALIBRATION COMPLETE",
+  "elapsed_s": 1067.1
+}

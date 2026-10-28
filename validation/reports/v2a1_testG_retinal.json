@@ -1,0 +1,442 @@
+{
+  "test": "G",
+  "name": "Retinal Pipeline Feasibility",
+  "mark": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "mode": "ENGINEERING VALIDATED / DEMO MODE",
+  "dataset": "EyePACS Samples (Kaggle / research use, 4 images)",
+  "date": "2026-10-28",
+  "3a_loading": {
+    "n_expected": 4,
+    "n_loaded": 4,
+    "records": [
+      {
+        "filename": "10000_left.jpeg",
+        "exists": true,
+        "shape": [
+          2448,
+          3264,
+          3
+        ],
+        "mode": "RGB"
+      },
+      {
+        "filename": "10000_right.jpeg",
+        "exists": true,
+        "shape": [
+          2448,
+          3264,
+          3
+        ],
+        "mode": "RGB"
+      },
+      {
+        "filename": "10001_left.jpeg",
+        "exists": true,
+        "shape": [
+          3168,
+          4752,
+          3
+        ],
+        "mode": "RGB"
+      },
+      {
+        "filename": "10001_right.jpeg",
+        "exists": true,
+        "shape": [
+          3168,
+          4752,
+          3
+        ],
+        "mode": "RGB"
+      }
+    ],
+    "pass": true
+  },
+  "3b_preprocessing": {
+    "n_processed": 4,
+    "records": [
+      {
+        "filename": "10000_left.jpeg",
+        "shape": [
+          3,
+          224,
+          224
+        ],
+        "dtype": "float32",
+        "vmin": -2.118,
+        "vmax": 1.393,
+        "shape_ok": true,
+        "dtype_ok": true,
+        "range_ok": true,
+        "valid": true
+      },
+      {
+        "filename": "10000_right.jpeg",
+        "shape": [
+          3,
+          224,
+          224
+        ],
+        "dtype": "float32",
+        "vmin": -2.118,
+        "vmax": 1.787,
+        "shape_ok": true,
+        "dtype_ok": true,
+        "range_ok": true,
+        "valid": true
+      },
+      {
+        "filename": "10001_left.jpeg",
+        "shape": [
+          3,
+          224,
+          224
+        ],
+        "dtype": "float32",
+        "vmin": -2.118,
+        "vmax": 2.64,
+        "shape_ok": true,
+        "dtype_ok": true,
+        "range_ok": true,
+        "valid": true
+      },
+      {
+        "filename": "10001_right.jpeg",
+        "shape": [
+          3,
+          224,
+          224
+        ],
+        "dtype": "float32",
+        "vmin": -2.118,
+        "vmax": 2.448,
+        "shape_ok": true,
+        "dtype_ok": true,
+        "range_ok": true,
+        "valid": true
+      }
+    ],
+    "pass": true
+  },
+  "3c_inference": {
+    "demo_onnx_path": "C:\\Users\\USER\\AppData\\Local\\Temp\\tmpa0km6v9g\\retinal_demo_test.onnx",
+    "per_image_latencies_ms": [
+      1.6,
+      1.83,
+      1.83,
+      1.44
+    ],
+    "mean_latency_ms": 1.675,
+    "latency_ok": true,
+    "schema_ok": true,
+    "demo_mode_ok": true,
+    "sample_responses": [
+      {
+        "scan_id": "10000_left",
+        "primary_finding": "Wet AMD",
+        "snomed_code": "238735001",
+        "urgency": "URGENT",
+        "confidence": 0.6536,
+        "dr_grade": null,
+        "eye": "LEFT",
+        "all_findings": [
+          {
+            "finding": "Normal Retina",
+            "confidence": 0.2219
+          },
+          {
+            "finding": "Diabetic Retinopathy (No DR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Diabetic Retinopathy (Mild NPDR)",
+            "confidence": 0.1009
+          },
+          {
+            "finding": "Diabetic Retinopathy (Moderate NPDR)",
+            "confidence": 0.0201
+          },
+          {
+            "finding": "Diabetic Retinopathy (Severe NPDR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Diabetic Retinopathy (PDR)",
+            "confidence": 0.0006
+          },
+          {
+            "finding": "Glaucoma Suspect",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Primary Open-Angle Glaucoma",
+            "confidence": 0.0002
+          },
+          {
+            "finding": "Dry AMD",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Wet AMD",
+            "confidence": 0.6536
+          },
+          {
+            "finding": "Hypertensive Retinopathy",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Retinal Vein Occlusion",
+            "confidence": 0.0026
+          },
+          {
+            "finding": "Retinal Artery Occlusion",
+            "confidence": 0.0
+          }
+        ],
+        "inference_ms": 1,
+        "model_version": "v1.0.0",
+        "backend": "demo",
+        "demo_mode": true,
+        "recommendation": "Demo output (URGENT). NOT CLINICAL EVIDENCE."
+      },
+      {
+        "scan_id": "10000_right",
+        "primary_finding": "Wet AMD",
+        "snomed_code": "238735001",
+        "urgency": "URGENT",
+        "confidence": 0.9495,
+        "dr_grade": null,
+        "eye": "RIGHT",
+        "all_findings": [
+          {
+            "finding": "Normal Retina",
+            "confidence": 0.0018
+          },
+          {
+            "finding": "Diabetic Retinopathy (No DR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Diabetic Retinopathy (Mild NPDR)",
+            "confidence": 0.0103
+          },
+          {
+            "finding": "Diabetic Retinopathy (Moderate NPDR)",
+            "confidence": 0.0363
+          },
+          {
+            "finding": "Diabetic Retinopathy (Severe NPDR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Diabetic Retinopathy (PDR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Glaucoma Suspect",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Primary Open-Angle Glaucoma",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Dry AMD",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Wet AMD",
+            "confidence": 0.9495
+          },
+          {
+            "finding": "Hypertensive Retinopathy",
+            "confidence": 0.0001
+          },
+          {
+            "finding": "Retinal Vein Occlusion",
+            "confidence": 0.002
+          },
+          {
+            "finding": "Retinal Artery Occlusion",
+            "confidence": 0.0
+          }
+        ],
+        "inference_ms": 1,
+        "model_version": "v1.0.0",
+        "backend": "demo",
+        "demo_mode": true,
+        "recommendation": "Demo output (URGENT). NOT CLINICAL EVIDENCE."
+      },
+      {
+        "scan_id": "10001_left",
+        "primary_finding": "Wet AMD",
+        "snomed_code": "238735001",
+        "urgency": "URGENT",
+        "confidence": 0.9745,
+        "dr_grade": null,
+        "eye": "LEFT",
+        "all_findings": [
+          {
+            "finding": "Normal Retina",
+            "confidence": 0.0019
+          },
+          {
+            "finding": "Diabetic Retinopathy (No DR)",
+            "confidence": 0.0205
+          },
+          {
+            "finding": "Diabetic Retinopathy (Mild NPDR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Diabetic Retinopathy (Moderate NPDR)",
+            "confidence": 0.0002
+          },
+          {
+            "finding": "Diabetic Retinopathy (Severe NPDR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Diabetic Retinopathy (PDR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Glaucoma Suspect",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Primary Open-Angle Glaucoma",
+            "confidence": 0.0002
+          },
+          {
+            "finding": "Dry AMD",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Wet AMD",
+            "confidence": 0.9745
+          },
+          {
+            "finding": "Hypertensive Retinopathy",
+            "confidence": 0.0024
+          },
+          {
+            "finding": "Retinal Vein Occlusion",
+            "confidence": 0.0002
+          },
+          {
+            "finding": "Retinal Artery Occlusion",
+            "confidence": 0.0
+          }
+        ],
+        "inference_ms": 1,
+        "model_version": "v1.0.0",
+        "backend": "demo",
+        "demo_mode": true,
+        "recommendation": "Demo output (URGENT). NOT CLINICAL EVIDENCE."
+      },
+      {
+        "scan_id": "10001_right",
+        "primary_finding": "Wet AMD",
+        "snomed_code": "238735001",
+        "urgency": "URGENT",
+        "confidence": 0.9768,
+        "dr_grade": null,
+        "eye": "RIGHT",
+        "all_findings": [
+          {
+            "finding": "Normal Retina",
+            "confidence": 0.0129
+          },
+          {
+            "finding": "Diabetic Retinopathy (No DR)",
+            "confidence": 0.0015
+          },
+          {
+            "finding": "Diabetic Retinopathy (Mild NPDR)",
+            "confidence": 0.0004
+          },
+          {
+            "finding": "Diabetic Retinopathy (Moderate NPDR)",
+            "confidence": 0.0026
+          },
+          {
+            "finding": "Diabetic Retinopathy (Severe NPDR)",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Diabetic Retinopathy (PDR)",
+            "confidence": 0.0002
+          },
+          {
+            "finding": "Glaucoma Suspect",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Primary Open-Angle Glaucoma",
+            "confidence": 0.0001
+          },
+          {
+            "finding": "Dry AMD",
+            "confidence": 0.0
+          },
+          {
+            "finding": "Wet AMD",
+            "confidence": 0.9768
+          },
+          {
+            "finding": "Hypertensive Retinopathy",
+            "confidence": 0.0051
+          },
+          {
+            "finding": "Retinal Vein Occlusion",
+            "confidence": 0.0003
+          },
+          {
+            "finding": "Retinal Artery Occlusion",
+            "confidence": 0.0001
+          }
+        ],
+        "inference_ms": 1,
+        "model_version": "v1.0.0",
+        "backend": "demo",
+        "demo_mode": true,
+        "recommendation": "Demo output (URGENT). NOT CLINICAL EVIDENCE."
+      }
+    ],
+    "pass": true
+  },
+  "3d_mappings": {
+    "dr_mappings": [
+      {
+        "condition": "Diabetic Retinopathy (No DR)",
+        "grade": "Grade 0",
+        "valid": true
+      },
+      {
+        "condition": "Diabetic Retinopathy (Mild NPDR)",
+        "grade": "Grade 1",
+        "valid": true
+      },
+      {
+        "condition": "Diabetic Retinopathy (Moderate NPDR)",
+        "grade": "Grade 2",
+        "valid": true
+      },
+      {
+        "condition": "Diabetic Retinopathy (Severe NPDR)",
+        "grade": "Grade 3",
+        "valid": true
+      },
+      {
+        "condition": "Diabetic Retinopathy (PDR)",
+        "grade": "Grade 4",
+        "valid": true
+      }
+    ],
+    "urgent_count": 5,
+    "pass": true
+  },
+  "verdict": "ENGINEERING VALIDATED / DEMO MODE",
+  "elapsed_s": 4.68
+}

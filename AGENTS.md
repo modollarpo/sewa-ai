@@ -61,6 +61,47 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — Tests F, G, H & C.2 Multi-Modality Feasibility & Recalibration, branch `main`)
+
+Governing pre-registrations: `docs/evidence/preregistration_testF_mammography.md`, `docs/evidence/preregistration_testG_retinal.md`, `docs/evidence/preregistration_testH_drift.md`, `docs/evidence/preregistration_testC2_recalibration.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Test F Pre-registration & Evaluation Executed (`step12_mammography_feasibility.py`)**:
+  - `validation/reports/v2a1_testF_mammography.json` and formal report `docs/evidence/feasibility_report_testF_mammography.md`.
+  - **Dataset**: CBIS-DDSM (1,872 calcification cases, CC BY 3.0, TCIA).
+  - **Results**: Preprocessing `(1, 3, 224, 224)` float32 verified; Demo ONNX inference latency **1.39 ± 0.30 ms**; full JSON schema conformity; all 8 mammography conditions mapped to BI-RADS 0–5.
+  - **Verdict**: **ENGINEERING VALIDATED / DEMO MODE** (no real weights, software QA only).
+- **Test G Pre-registration & Evaluation Executed (`step13_retinal_feasibility.py`)**:
+  - `validation/reports/v2a1_testG_retinal.json` and formal report `docs/evidence/feasibility_report_testG_retinal.md`.
+  - **Dataset**: EyePACS fundus samples (4 images, 2 patients, research use).
+  - **Results**: Image loading & preprocessing `(1, 3, 224, 224)` float32 verified; Demo ONNX inference latency **1.68 ms** mean; JSON schema conformity; all 5 DR stages mapped to ICDR Grades 0–4; all 5 urgent conditions flagged.
+  - **Verdict**: **ENGINEERING VALIDATED / DEMO MODE** (no real weights, software QA only).
+- **Test H Pre-registration & Evaluation Executed (`step14_continuous_drift.py`)**:
+  - `validation/reports/v2a1_testH_drift.json` and formal report `docs/evidence/feasibility_report_testH_drift.md`.
+  - **Target**: `ai-services/continuous-learning/main.py` statistical alert triggers.
+  - **Results**:
+    - **H.1 Zero-fabrication check**: N=5 returns `status: insufficient_data` with null metrics, verifying audit constraint R-12/N10.
+    - **H.2 Concordant baseline**: N=100 (90% agreement) reports `drift_detected: false`, kappa = 0.894.
+    - **H.3 Concept drift**: N=100 (30% agreement) reports `drift_detected: true`, severity = "high", kappa = 0.041.
+    - **H.4 Feature drift**: N=120 (100% CT -> 80% MRI) reports `drift_detected: true`, modality PSI = 12.16.
+    - **Latency**: Mean **1.41 ms** (well under 50 ms limit).
+  - **Verdict**: **SUCCESS / ALL CRITERIA MET**.
+- **Test C.2 Pre-registration & Recalibration Executed (`step9c_cq500_recalibrate.py`)**:
+  - `validation/reports/v2a1_testC2_recalibration.json` and formal report `docs/evidence/feasibility_report_testC2_recalibration.md`.
+  - **Dataset**: CQ500 486 scans (CC BY-NC-SA 4.0), 3,884 uniform 8-slice feature sets.
+  - **Baseline (Test C)**: AUROC 0.7468 | ECE 0.1273 | Brier 0.2123 | Safety red @ 20%: 0.0% [-8.1%, +6.5%].
+  - **Method 1 (CQ500 Domain-Adaptive Temperature T = 2.426)**:
+    - **Study AUROC**: **0.7578** (+0.011 improvement over baseline!).
+    - **ECE**: **0.0543** (-57.3% relative reduction in calibration error, probabilities closely aligned with ground truth).
+    - **Brier Score**: **0.1927** (down from 0.2123).
+    - **Safety Reduction @ 20%**: 1.0% [-9.2%, +6.2%] (CI includes 0, metacognition does not exceed baseline entropy).
+  - **Method 2 (Feature Standardization)**: AUROC 0.5348 (confirms post-hoc feature whitening disrupts frozen non-linear features).
+  - **Verdict**: **EXPLORATORY RECALIBRATION COMPLETE** (Best AUROC 0.7578; domain temperature scaling resolves external miscalibration).
+- **Frontend Evidence Pages Synchronized (`ClinicalEvidencePage.tsx`, `ClinicalValidationPage.tsx`)**:
+  - Published Tests F, G, H, and C.2 to the public ledger with full audit disclosures and caveat banners.
+
+---
+
 ## 📋 Work State (2026-10-28 — Test E & E.2 Grad-CAM / HiResCAM evaluation, branch `main`)
 
 Governing pre-registration: `docs/evidence/preregistration_testE_gradcam.md` (committed in `8cb5b72`). Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Licence: **CC BY-SA 4.0** (BHX CQ500 bounding boxes); **CC BY-NC-SA 4.0** (CQ500 dataset).

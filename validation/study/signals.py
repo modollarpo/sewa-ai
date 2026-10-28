@@ -82,6 +82,6 @@ class MahalanobisOOD:
         out = np.full(len(feats), np.inf)
         for c in (0, 1):
             diff = feats - self.means_[c]
-            m = np.einsum("ij,jk,ik->i", diff, self.prec_, diff)
+            m = np.sum((diff @ self.prec_) * diff, axis=1)
             out = np.minimum(out, m)
         return np.sqrt(np.clip(out, 0, None))

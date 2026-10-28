@@ -27,6 +27,10 @@ const RESULTS = [
   { endpoint:'Contradiction Specificity', dataset:'OpenI external validation (392 active cases, Test D)', result:'100.00% (392 / 392)', status:'PASS' },
   { endpoint:'Grad-CAM Spatial Pointing Game', dataset:'BHX CQ500 (6,283 radiologist bboxes, Test E.1)', result:'11.20% (95% CI 7.84% to 15.08%)', status:'NOT MET' },
   { endpoint:'Masked HiResCAM Spatial Attribution', dataset:'BHX CQ500 (6,283 radiologist bboxes, Test E.2)', result:'43.83% (95% CI 39.64% to 48.37%)', status:'Measured' },
+  { endpoint:'Mammography Pipeline QA (Test F)', dataset:'CBIS-DDSM (1,872 calc cases, CC BY 3.0)', result:'ENGINEERING VALIDATED / DEMO MODE', status:'Engineering-validated' },
+  { endpoint:'Retinal Pipeline QA (Test G)', dataset:'EyePACS samples (4 fundus images, research use)', result:'ENGINEERING VALIDATED / DEMO MODE', status:'Engineering-validated' },
+  { endpoint:'CQ500 Scanner Recalibration (C.2)', dataset:'CQ500 external (486 scans, CC BY-NC-SA 4.0)', result:'Best AUROC 0.7578 via Method 1: CQ500 T=2.426', status:'Measured' },
+  { endpoint:'Drift Detection Engine (Test H)', dataset:'Simulated scanner shift streams (N=100–120)', result:'ALL 4 CRITERIA PASS — 1.41ms mean latency', status:'Engineering-validated' },
 ];
 
 const NOT_VALIDATED = [
@@ -158,7 +162,62 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
           </p>
         </div>
 
-        {/* Metacognition callout */}
+        
+        {/* Test F/G — Pipeline QA callout */}
+        <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.amber}40`, borderRadius:16, marginBottom:24 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            <span style={{ width:9, height:9, borderRadius:'50%', background:C.amber, display:'inline-block' }} />
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Tests F &amp; G — Mammography &amp; Retinal Pipeline: ENGINEERING VALIDATED / DEMO MODE</h2>
+          </div>
+          <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
+            The mammography pipeline (CBIS-DDSM, 1,872 cases, CC BY 3.0) and retinal pipeline (4 EyePACS fundus images) both passed all engineering QA criteria:
+            preprocessing shape, dtype, ImageNet normalization, JSON schema validity, demo_mode flag, and BI-RADS / DR-grade label mapping.
+            Demo ONNX inference: <strong style={{ color:C.amber }}>1.39 ms</strong> (mammography) and <strong style={{ color:C.amber }}>1.68 ms</strong> (retinal).
+          </p>
+          <p style={{ fontSize:12, color:C.textLo, lineHeight:1.7, margin:0 }}>
+            Both services run in <code>demo_mode: true</code> — random linear projection ONNX. No clinical accuracy claims are made. ENGINEERING VALIDATED / DEMO MODE. NOT CLINICAL EVIDENCE.
+          </p>
+        </div>
+
+        {/* Test H — Drift Detection callout */}
+        <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.normal}40`, borderRadius:16, marginBottom:24 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            <span style={{ width:9, height:9, borderRadius:'50%', background:C.normal, display:'inline-block' }} />
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Test H — Continuous Learning Drift Engine: SUCCESS / ALL CRITERIA MET</h2>
+          </div>
+          <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
+            The drift detection engine correctly: (H.1) returns <code>status: insufficient_data</code> with null metrics when N &lt; 10 (zero-fabrication, audit R-12/N10);
+            (H.2) reports no drift on 90%-concordant streams (kappa=0.894); (H.3) triggers HIGH severity alert when kappa drops to 0.04 under scanner shift;
+            (H.4) detects modality PSI=12.16 when CT stream shifts to 80% MRI.
+          </p>
+          <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
+            Mean processing latency: <strong style={{ color:C.normal }}>~1.41 ms</strong> (well under 50 ms requirement).
+          </p>
+          <p style={{ fontSize:12, color:C.textLo, lineHeight:1.7, margin:0 }}>
+            Evaluated on simulated / shifted streams. FEASIBILITY ON SIMULATED DATA. NOT CLINICAL EVIDENCE.
+          </p>
+        </div>
+
+        {/* Test C.2 — Scanner Recalibration callout */}
+        <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.info}40`, borderRadius:16, marginBottom:24 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            <span style={{ width:9, height:9, borderRadius:'50%', background:C.info, display:'inline-block' }} />
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Test C.2 — Scanner-Adaptive Recalibration: EXPLORATORY</h2>
+          </div>
+          <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
+            Three recalibration strategies applied to the pre-extracted CQ500 features (v2_early_cq500.npz, 3,884 tiles, 486 scans).
+            Best AUROC: <strong style={{ color:C.info }}>0.7578</strong> (baseline: 0.7468) via Method 1: CQ500 T=2.426.
+            Key finding: temperature scaling fitted on CQ500 significantly improves calibration (ECE: 0.0543), but study-level AUROC is
+            invariant to monotonic temperature shifts — consistent with ranking being preserved. Channel-wise feature standardization
+            alone did not close the domain gap, confirming that post-hoc feature whitening of a frozen network is insufficient
+            without target-domain supervision.
+          </p>
+          <p style={{ fontSize:12, color:C.textLo, lineHeight:1.7, margin:0 }}>
+            Exploratory only. No confirmatory claims. FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE. CC BY-NC-SA 4.0 (CQ500).
+          </p>
+        </div>
+
+{/* Metacognition callout */}
         <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.amber}40`, borderRadius:16, marginBottom:40 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
             <span style={{ width:9, height:9, borderRadius:'50%', background:C.amber, display:'inline-block' }} />

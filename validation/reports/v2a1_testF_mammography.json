@@ -1,0 +1,186 @@
+{
+  "test": "F",
+  "name": "Mammography Pipeline Feasibility",
+  "mark": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "mode": "ENGINEERING VALIDATED / DEMO MODE",
+  "dataset": "CBIS-DDSM (CC BY 3.0, TCIA)",
+  "date": "2026-10-28",
+  "3a_metadata": {
+    "n_rows": 1872,
+    "n_patients": 753,
+    "label_counts": {
+      "MALIGNANT": 673,
+      "BENIGN": 658,
+      "BENIGN_WITHOUT_CALLBACK": 541
+    },
+    "label_fractions_pct": {
+      "MALIGNANT": 35.95,
+      "BENIGN": 35.15,
+      "BENIGN_WITHOUT_CALLBACK": 28.9
+    },
+    "assessment_distribution": {
+      "0": 76,
+      "2": 553,
+      "3": 113,
+      "4": 931,
+      "5": 199
+    },
+    "density_distribution": {
+      "0": 2,
+      "1": 199,
+      "2": 616,
+      "3": 654,
+      "4": 401
+    },
+    "top10_calc_types": {
+      "PLEOMORPHIC": 813,
+      "AMORPHOUS": 181,
+      "PUNCTATE": 132,
+      "LUCENT_CENTER": 110,
+      "FINE_LINEAR_BRANCHING": 102,
+      "VASCULAR": 90,
+      "COARSE": 39,
+      "PLEOMORPHIC-FINE_LINEAR_BRANCHING": 31,
+      "ROUND_AND_REGULAR-LUCENT_CENTER": 31,
+      "PUNCTATE-PLEOMORPHIC": 30
+    },
+    "missing_required_cols": [],
+    "pass": true
+  },
+  "3b_preprocessing": {
+    "original_shape": [
+      4728,
+      3064,
+      3
+    ],
+    "output_shape": [
+      3,
+      224,
+      224
+    ],
+    "output_dtype": "float32",
+    "value_min": -2.1179,
+    "value_max": 2.64,
+    "shape_ok": true,
+    "dtype_ok": true,
+    "range_ok": true,
+    "pass": true
+  },
+  "3c_inference": {
+    "demo_onnx_path": "C:\\Users\\USER\\AppData\\Local\\Temp\\tmp8rf1gu7k\\mammography_demo_test.onnx",
+    "mean_latency_ms": 1.39,
+    "std_latency_ms": 0.296,
+    "latency_ok": true,
+    "schema_ok": true,
+    "demo_mode_ok": true,
+    "all_findings_count": 8,
+    "findings_count_ok": true,
+    "sample_response": {
+      "scan_id": "TEST-0001",
+      "primary_finding": "Normal Breast Tissue",
+      "snomed_code": "37155004",
+      "urgency": "ROUTINE",
+      "confidence": 0.9823,
+      "birads_category": "BI-RADS 1",
+      "laterality": "RIGHT",
+      "view": "CC",
+      "all_findings": [
+        {
+          "finding": "Normal Breast Tissue",
+          "confidence": 0.9823
+        },
+        {
+          "finding": "Benign Mass",
+          "confidence": 0.0
+        },
+        {
+          "finding": "Malignant Mass",
+          "confidence": 0.0031
+        },
+        {
+          "finding": "Benign Calcifications",
+          "confidence": 0.0142
+        },
+        {
+          "finding": "Malignant Calcifications",
+          "confidence": 0.0
+        },
+        {
+          "finding": "Architectural Distortion",
+          "confidence": 0.0003
+        },
+        {
+          "finding": "Asymmetry",
+          "confidence": 0.0
+        },
+        {
+          "finding": "Lymphadenopathy",
+          "confidence": 0.0
+        }
+      ],
+      "inference_ms": 1,
+      "model_version": "v1.0.0",
+      "backend": "demo",
+      "demo_mode": true,
+      "recommendation": "Demo output \u2014 BI-RADS 1. NOT CLINICAL EVIDENCE."
+    },
+    "pass": true
+  },
+  "3d_birads_mapping": {
+    "n_conditions": 8,
+    "n_mapped": 8,
+    "mapping_results": [
+      {
+        "finding": "Normal Breast Tissue",
+        "confidence_used": 0.95,
+        "birads_assigned": "BI-RADS 1",
+        "valid": true
+      },
+      {
+        "finding": "Benign Mass",
+        "confidence_used": 0.92,
+        "birads_assigned": "BI-RADS 2",
+        "valid": true
+      },
+      {
+        "finding": "Malignant Mass",
+        "confidence_used": 0.85,
+        "birads_assigned": "BI-RADS 5",
+        "valid": true
+      },
+      {
+        "finding": "Benign Calcifications",
+        "confidence_used": 0.91,
+        "birads_assigned": "BI-RADS 2",
+        "valid": true
+      },
+      {
+        "finding": "Malignant Calcifications",
+        "confidence_used": 0.75,
+        "birads_assigned": "BI-RADS 4",
+        "valid": true
+      },
+      {
+        "finding": "Architectural Distortion",
+        "confidence_used": 0.7,
+        "birads_assigned": "BI-RADS 4",
+        "valid": true
+      },
+      {
+        "finding": "Asymmetry",
+        "confidence_used": 0.6,
+        "birads_assigned": "BI-RADS 0",
+        "valid": true
+      },
+      {
+        "finding": "Lymphadenopathy",
+        "confidence_used": 0.65,
+        "birads_assigned": "BI-RADS 0",
+        "valid": true
+      }
+    ],
+    "pass": true
+  },
+  "verdict": "ENGINEERING VALIDATED / DEMO MODE",
+  "elapsed_s": 12.87
+}

@@ -1,0 +1,104 @@
+{
+  "marking": "FEASIBILITY ON SIMULATED & SHIFTED DATA. NOT CLINICAL EVIDENCE.",
+  "test": "H",
+  "name": "Continuous Learning Drift Detection Engine",
+  "date": "2026-10-28",
+  "verdict": "SUCCESS / ALL CRITERIA MET",
+  "latency_pass": true,
+  "avg_latency_ms": 1.41,
+  "tests": {
+    "H1_zero_fabrication": {
+      "scenario": "N=5 (<10 threshold)",
+      "result": {
+        "drift_detected": false,
+        "status": "insufficient_data",
+        "reason": "fewer than 10 corrections (5); drift not estimable",
+        "kappa": null,
+        "psi": null,
+        "avg_confidence_wrong": null,
+        "error_rate": null,
+        "sample_size": 5
+      },
+      "pass": true
+    },
+    "H2_concordant_baseline": {
+      "scenario": "Concordant baseline (90% agreement, N=100)",
+      "result": {
+        "drift_detected": false,
+        "status": "ok",
+        "kappa": 0.894,
+        "psi": 0.199,
+        "avg_confidence_wrong": 0.4974,
+        "error_rate": 0.05,
+        "sample_size": 100,
+        "modality_dist": {
+          "CT": 1.0
+        },
+        "body_part_dist": {
+          "HEAD": 1.0
+        },
+        "severity": "none"
+      },
+      "latency_ms": 1.94,
+      "pass": true
+    },
+    "H3_concept_drift": {
+      "scenario": "Severe discordance / concept drift (N=100)",
+      "result": {
+        "drift_detected": true,
+        "status": "ok",
+        "kappa": 0.0408,
+        "psi": 0.2441,
+        "avg_confidence_wrong": 0.4815,
+        "error_rate": 0.87,
+        "sample_size": 100,
+        "modality_dist": {
+          "CT": 1.0
+        },
+        "body_part_dist": {
+          "HEAD": 1.0
+        },
+        "severity": "high"
+      },
+      "latency_ms": 1.84,
+      "pass": true
+    },
+    "H4_feature_drift": {
+      "scenario": "Feature shift: 100% CT -> 80% MRI (N=120)",
+      "result": {
+        "psi_modality": 12.1614,
+        "psi_body_part": 0.0,
+        "psi_severity": 0.0,
+        "modality_shift": {
+          "baseline": {
+            "CT": 1.0
+          },
+          "current": {
+            "MRI": 0.8,
+            "CT": 0.2
+          }
+        },
+        "body_part_shift": {
+          "baseline": {
+            "HEAD": 1.0
+          },
+          "current": {
+            "HEAD": 1.0
+          }
+        },
+        "severity_shift": {
+          "baseline": {
+            "NORMAL": 1.0
+          },
+          "current": {
+            "NORMAL": 1.0
+          }
+        },
+        "drift_detected": true
+      },
+      "latency_ms": 0.46,
+      "pass": true
+    }
+  },
+  "elapsed_s": 0.05
+}
