@@ -61,6 +61,28 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — External Safety Gap Resolution, ADR 004 & Deployment Documentation, branch `main`)
+
+Governing documents: `docs/azure-deployment-executive-summary.md`, `docs/adr/004-target-domain-adaptation.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Deployment Documentation & Executive Summary (`docs/azure-deployment-executive-summary.md`)**:
+  - Comprehensive report detailing live AKS Sweden Central deployment (25 microservices running, 0 crash-loops, live endpoints `app.sewaxai.health` and `api.sewaxai.health`).
+  - Consolidated ledger of all prospective empirical benchmarks (Tests A through H) with audit caveats and demo-mode labeling.
+- **Empirical Failure Analysis of Feature Standardization (Methods 2 & 3 in Test C.2)**:
+  - Identified root cause of AUROC collapse (0.5348): channel z-scoring compressed input variance by ~40× relative to frozen BatchNorm running variance ($\sigma^2 \approx 51.59$), pinning SiLU activations into a narrow linear regime.
+  - Demonstrated that Moment-Matching preserves representations (AUROC 0.7528 vs 0.7491 raw).
+- **Split Conformal Risk Control Benchmark (CQ500)**:
+  - 100 calibration / 386 test split with target $\text{FNR} \le 5\%$.
+  - Calibrated threshold $\lambda = 0.0298$; Test FNR = 6.79% (Missed 11/162); routes 87.3% to radiologist; safely auto-clears 12.7% normal scans.
+- **Architectural Specification Landed (`docs/adr/004-target-domain-adaptation.md`)**:
+  - 4-pillar target-domain adaptation framework: (1) Zero-Label AdaBN, (2) Relative Mahalanobis Distance, (3) Split Conformal Risk Control, (4) Streaming Continuous Retraining Loop.
+  - **Empirical Validation of AdaBN & Relative Mahalanobis (`step16_test_adabn_relmahal.py`)**:
+    - AdaBN boosts external CQ500 study AUROC from **0.7491 to 0.7596** (+0.0105 gain) without labels.
+    - Relative Mahalanobis Distance (RMD) boosts study error-detection AUROC from **0.5256 to 0.5798** (+5.4 percentage points over standard Mahalanobis $C_2$).
+
+---
+
 ## 📋 Work State (2026-10-28 — Tests F, G, H & C.2 Multi-Modality Feasibility & Recalibration, branch `main`)
 
 Governing pre-registrations: `docs/evidence/preregistration_testF_mammography.md`, `docs/evidence/preregistration_testG_retinal.md`, `docs/evidence/preregistration_testH_drift.md`, `docs/evidence/preregistration_testC2_recalibration.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
