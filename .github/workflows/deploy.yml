@@ -476,7 +476,7 @@ jobs:
           curl -f https://api.sewaxai.health/health
           curl -f https://api.sewaxai.health/api/v1/status/services
       - name: Notify Slack on success
-        if: success()
+        if: success() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.26.0
         continue-on-error: true
         with:
