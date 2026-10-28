@@ -82,6 +82,12 @@ Governing patent document: `docs/evidence/Filing Receipt published with OLFI (2)
   - Formal Adobe PDF document built: [`docs/patent/UK_Patent_Application_2_Specification_and_Claims.pdf`](file:///c:/sewa_extract/docs/patent/UK_Patent_Application_2_Specification_and_Claims.pdf) (22.9 KB).
   - Claims 1 to 20 incorporate Split Conformal Risk Control (FNR $\le \alpha$), Zero-Label AdaBN, Relative Mahalanobis OOD, Masked HiResCAM, physics noise monotonicity, sovereign edge INT8, and database-level clinician sign-off constraints.
   - Priority claimed from **GB2609706.3** (25 April 2026) under Section 5(2) Patents Act 1977 / Article 4 Paris Convention.
+- **Formal UKIPO Patent Drawings Built (FIG. 1 through FIG. 8)**:
+  - Adheres strictly to **UKIPO Patents Rules 2007 Schedule 2** (black line art, standard patent reference numerals, clear flow and block diagrams).
+  - High-res vector/drawings generated in [`docs/patent/figures/`](file:///c:/sewa_extract/docs/patent/figures/) (`fig1_architecture.png` to `fig8_multimodal_expansion.png`).
+  - Standalone formal drawings PDF compiled: [`docs/patent/UK_Patent_Application_2_Formal_Drawings.pdf`](file:///c:/sewa_extract/docs/patent/UK_Patent_Application_2_Formal_Drawings.pdf) (8 sheets, 2.35 MB).
+  - Word document with embedded drawings built: [`docs/patent/UK_Patent_Application_2_With_Drawings.docx`](file:///c:/sewa_extract/docs/patent/UK_Patent_Application_2_With_Drawings.docx) (1.95 MB).
+  - Master consolidated specification + drawings PDF built: [`docs/patent/UK_Patent_Application_2_With_Drawings.pdf`](file:///c:/sewa_extract/docs/patent/UK_Patent_Application_2_With_Drawings.pdf) (2.38 MB).
 
 ---
 
