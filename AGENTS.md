@@ -76,6 +76,12 @@ Governing patent document: `docs/evidence/Filing Receipt published with OLFI (2)
   - **Legally Valid Solution**: File a **second UK application** or **international PCT application** within the 12-month Paris Convention priority window (on or before **25 April 2027**) claiming priority from GB2609706.3 under **Section 5(2)**. This confers senior priority (25 April 2026) for Claims 1–10 and split priority (filing date) for the new statistical gating and adaptation methods (Claims 11–15).
   - Authored comprehensive gap analysis and strategic recommendation: `docs/evidence/patent_gap_analysis.md`.
   - Audited `Claims OPI.docx` and drafted dependent Claims 11–15 for attorney review.
+- **Second UK National Patent Application Authored & Built**:
+  - Full statutory specification & 20-claim portfolio authored in [`docs/patent/UK_Patent_Application_2_Specification_and_Claims.md`](file:///c:/sewa_extract/docs/patent/UK_Patent_Application_2_Specification_and_Claims.md).
+  - Formal Microsoft Word format built: [`docs/patent/UK_Patent_Application_2_Specification_and_Claims.docx`](file:///c:/sewa_extract/docs/patent/UK_Patent_Application_2_Specification_and_Claims.docx) (45.8 KB).
+  - Formal Adobe PDF document built: [`docs/patent/UK_Patent_Application_2_Specification_and_Claims.pdf`](file:///c:/sewa_extract/docs/patent/UK_Patent_Application_2_Specification_and_Claims.pdf) (22.9 KB).
+  - Claims 1 to 20 incorporate Split Conformal Risk Control (FNR $\le \alpha$), Zero-Label AdaBN, Relative Mahalanobis OOD, Masked HiResCAM, physics noise monotonicity, sovereign edge INT8, and database-level clinician sign-off constraints.
+  - Priority claimed from **GB2609706.3** (25 April 2026) under Section 5(2) Patents Act 1977 / Article 4 Paris Convention.
 
 ---
 
