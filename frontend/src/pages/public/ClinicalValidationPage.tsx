@@ -13,11 +13,11 @@ const C = {
 
 const STATUS = [
   { label:'Development stage',        value:'Pre-clinical (TRL 5)',   color:C.info },
-  { label:'Validated scope',          value:'ICH triage, head CT',    color:C.normal },
   { label:'Internal ICH AUROC',       value:'0.807 (RSNA)',           color:C.normal },
   { label:'External ICH AUROC',       value:'0.7468 (CQ500)',         color:C.normal },
-  { label:'Metacognition safety gain',value:'Inconclusive',           color:C.amber },
-  { label:'Live hospital deployments',value:'0',                      color:C.amber },
+  { label:'Contradiction Recall (D)', value:'95.78% (OpenI)',         color:C.normal },
+  { label:'Contradiction Specificity',value:'100.00% (OpenI)',        color:C.normal },
+  { label:'Metacognition CT review',  value:'Inconclusive (Test C)',  color:C.amber },
 ];
 
 export function ClinicalValidationPage({ onNavigate }: { onNavigate:(p:string)=>void }) {

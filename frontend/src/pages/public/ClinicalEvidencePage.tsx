@@ -22,7 +22,9 @@ const LEGEND = [
 const RESULTS = [
   { endpoint:'ICH AUROC — internal', dataset:'RSNA ICH (study-level)', result:'0.807', status:'Measured' },
   { endpoint:'ICH AUROC — external', dataset:'CQ500 (486 scans, 3-radiologist majority)', result:'0.7468', status:'Measured' },
-  { endpoint:'Safety reduction at 20% review', dataset:'Pre-registered metacognition composite vs baseline', result:'0.0% (95% CI -8.1% to +6.5%)', status:'INCONCLUSIVE' },
+  { endpoint:'Safety reduction at 20% review', dataset:'Head CT metacognition composite vs baseline (Test C)', result:'0.0% (95% CI -8.1% to +6.5%)', status:'INCONCLUSIVE' },
+  { endpoint:'Report Contradiction Recall', dataset:'OpenI external validation (7,265 paired reports, Test D)', result:'95.78% (95% CI 95.39% to 96.15%)', status:'PASS' },
+  { endpoint:'Contradiction Specificity', dataset:'OpenI external validation (392 active cases, Test D)', result:'100.00% (392 / 392)', status:'PASS' },
 ];
 
 const NOT_VALIDATED = [
@@ -109,7 +111,21 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
           </table>
         </div>
 
-        {/* Metacognition callout */}
+                {/* Test D Metacognition Contradiction Detection */}
+        <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.normal}40`, borderRadius:16, marginBottom:40 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            <span style={{ width:9, height:9, borderRadius:'50%', background:C.normal, display:'inline-block' }} />
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Test D Metacognition Contradiction Gate: PASS (95.78% Recall, 100% Specificity)</h2>
+          </div>
+          <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
+            Pre-registered external evaluation on <strong style={{ color:C.textHi }}>7,265 real radiologist clinical reports</strong> from OpenI (Indiana University). Layer 6 contradiction detection caught <strong style={{ color:C.normal }}>95.78%</strong> of clinical contradictions (99.16% pneumothorax, 94.66% pleural effusion, 90.23% cardiomegaly) while achieving <strong style={{ color:C.normal }}>100.00% specificity</strong> on genuine positive findings, operating at 1.04ms CPU latency.
+          </p>
+          <p style={{ fontSize:12, color:C.textLo, lineHeight:1.7, margin:0 }}>
+            Marking: Feasibility on public data. Not clinical evidence. Pre-registered in preregistration_testD_openi.md.
+          </p>
+        </div>
+
+{/* Metacognition callout */}
         <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.amber}40`, borderRadius:16, marginBottom:40 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
             <span style={{ width:9, height:9, borderRadius:'50%', background:C.amber, display:'inline-block' }} />

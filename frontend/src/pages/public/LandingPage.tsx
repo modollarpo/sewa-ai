@@ -18,7 +18,7 @@ const FEATURES: { id:string; icon:string; title:string; desc:string; tag:string;
   { id:'triage-ai',        icon:'⚡', title:'ICH Triage Engine', desc:'Head CT only. Study-level ICH AUROC 0.807 internal (RSNA) and 0.7468 external (CQ500, 486 scans). Pre-registered; research use only.', tag:'Triage Engine', status:'validated' },
   { id:'uncertainty-ai',   icon:'🎯', title:'Uncertainty Engine', desc:'Monte Carlo dropout confidence estimation flags low-confidence scans for human review. Engineering-validated; clinical impact not yet measured.', tag:'Safety', status:'engineering' },
   { id:'explainable-ai',   icon:'🔍', title:'Explainability (Grad-CAM)', desc:'Grad-CAM attribution visualises the image regions influencing a model output. Engineering-validated; clinical utility not yet measured.', tag:'Explainability', status:'engineering' },
-  { id:'metacognition-ai', icon:'🧠', title:'Metacognition (Research)', desc:'Experimental self-evaluation signals under active validation. At a 20% review rate the pre-registered result was inconclusive (0.0%, 95% CI -8.1% to +6.5%). No hallucination-detection claim.', tag:'Research', status:'research' },
+  { id:'metacognition-ai', icon:'🧠', title:'Metacognition (Research)', desc:'Layer 6 clinical report contradiction detection achieved 95.78% recall (100% specificity) across 7,265 OpenI reports; head CT review-reduction was inconclusive (0.0%). Research use only.', tag:'Research', status:'research' },
   { id:'vision-language-ai', icon:'📋', title:'VLM Report Generator', desc:'Vision-Language Model service implemented in code; generates structured report templates. Clinical accuracy unmeasured.', tag:'Reporting', status:'research' },
   { id:'specialized-ai',   icon:'🔬', title:'Pathology, Mammography & Retinal AI', desc:'Microservices implemented for H&E pathology, breast cancer screening, and diabetic retinopathy grading on CPU. Unvalidated clinically.', tag:'Specialized AI', status:'research' },
 ];
@@ -31,7 +31,7 @@ const ARCHITECTURE_NOTES = [
 const STATS = [
   { value:'0.75',  label:'External ICH AUROC (CQ500, 486 scans)', icon:'🎯' },
   { value:'0.81',  label:'Internal ICH AUROC (RSNA)',             icon:'📊' },
-  { value:'<2s',   label:'Median inference target (CPU)',          icon:'⚡' },
+  { value:'95.8%', label:'Contradiction Recall (OpenI, 7,265)',    icon:'🛡️' },
   { value:'TRL 5', label:'Validation stage',                      icon:'✅' },
 ];
 

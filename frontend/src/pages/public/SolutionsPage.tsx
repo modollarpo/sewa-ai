@@ -17,7 +17,7 @@ const ENGINES = [
     description:'Our ONNX Runtime triage model analyses CT, MRI, and X-ray scans across 14 pathology classes. The triage engine is designed to fire before a radiologist opens a case — ensuring critical findings reach the right clinician as quickly as possible.',
     conditions:['Intracranial Haemorrhage (ICH)','Large Vessel Occlusion (LVO) / Stroke','Pulmonary Embolism (PE)','Pneumothorax','Aortic Dissection','Rib Fractures','Pleural Effusion','Pneumonia / COVID-19','Tuberculosis','Spinal Cord Compression','Liver Lesions','Renal Calculi','Appendicitis','Bowel Obstruction'],
     metrics:[
-      { label:'AUC-ROC (ICH)', value:'Not yet measured' },
+      { label:'AUC-ROC (ICH)', value:'0.807 int / 0.7468 ext' },
       { label:'Sensitivity (PE)', value:'Not yet measured' },
       { label:'Inference time', value:'<2s (target)' },
       { label:'Modalities', value:'CT · MRI · XR · US' },
@@ -43,7 +43,7 @@ const ENGINES = [
     description:'Our advanced metacognition pipeline evaluates every AI result before it reaches a clinician. It checks internal consistency, cross-references against clinical rules, and assigns a layer-wise reliability status to every output. No hallucination-detection claim is made; results from a pre-registered evaluation were inconclusive.',
     conditions:['Anatomical consistency checks','Physiologically impossible combinations','Contradictions with prior scans','Clinical rule violations (e.g. ICH without hyperdensity)','Report-finding misalignment','Uncertainty-confidence contradiction'],
     metrics:[
-      { label:'Hallucination catch rate', value:'Not validated' },
+      { label:'Contradiction recall (Test D)', value:'95.78% (100% spec)' },
       { label:'False escalation reduction', value:'Under evaluation' },
       { label:'Reliability status', value:'Layer-wise PASS/FAIL/FLAG' },
       { label:'Avg latency added', value:'180ms (target)' },
