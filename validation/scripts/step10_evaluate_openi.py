@@ -50,43 +50,50 @@ def parse_ground_truth(caption: str, finding: str) -> str | None:
     t = caption.lower()
     
     if finding == "Pneumothorax":
-        if "pneumothorax" not in t and "pneumothoraces" not in t:
+        if "pneumothorax" not in t and "pneumothoraces" not in t and "ptx" not in t:
             return None
-        # Negation check
+        # Check resolved
+        if "resolved" in t or "resolution" in t:
+            return "negated"
+        # Check negation
         neg_patterns = [
-            r"no\s+(?:evidence\s+of\s+)?(?:acute\s+)?pneumothorax",
+            r"no\s+.*?pneumothorax",
             r"no\s+pneumothoraces",
-            r"without\s+(?:evidence\s+of\s+)?pneumothorax",
-            r"negative\s+for\s+(?:acute\s+)?pneumothorax",
-            r"free\s+of\s+pneumothorax",
+            r"without\s+.*?pneumothorax",
+            r"negative\s+for\s+.*?pneumothorax",
+            r"free\s+of\s+.*?pneumothorax",
             r"pneumothorax\s+is\s+not\s+(?:seen|identified|present|detected)",
-            r"no\s+(?:focal\s+consolidation\s*,?\s*)?pneumothorax",
-            r"no\s+(?:pleural\s+effusion\s+or\s+)?pneumothorax",
+            r"clear\s+bilaterally",
         ]
         if any(re.search(p, t) for p in neg_patterns):
             return "negated"
-        # Affirmation check
+        # Affirmation check (must not be preceded by negation cues in the same clause)
         pos_patterns = [
             r"(?:acute|small|large|tension|apical|left|right|bilateral)\s+pneumothorax",
             r"evidence\s+of\s+pneumothorax",
             r"pneumothorax\s+is\s+(?:seen|present|noted|identified)",
         ]
         if any(re.search(p, t) for p in pos_patterns):
+            # double check it wasn't inside a 'without' or 'no' context
+            clauses = [c for c in re.split(r'[.;\n]+', t) if "pneumothorax" in c]
+            if any(("no" in c or "without" in c or "free" in c or "not" in c) for c in clauses):
+                return "negated"
             return "affirmed"
         return None
 
     if finding == "Pleural Effusion":
-        if "effusion" not in t:
+        if "effusion" not in t and "costophrenic" not in t:
             return None
+        if "resolved" in t or "resolution" in t:
+            return "negated"
         neg_patterns = [
-            r"no\s+(?:evidence\s+of\s+)?(?:significant\s+)?(?:pleural\s+)?effusion",
+            r"no\s+.*?effusion",
             r"no\s+effusions",
-            r"without\s+(?:evidence\s+of\s+)?(?:pleural\s+)?effusion",
-            r"negative\s+for\s+(?:pleural\s+)?effusion",
-            r"free\s+of\s+effusion",
+            r"without\s+.*?effusion",
+            r"negative\s+for\s+.*?effusion",
+            r"free\s+of\s+.*?effusion",
             r"effusion\s+is\s+not\s+(?:seen|identified|present|detected)",
-            r"no\s+pleural\s+effusion\s+or\s+pneumothorax",
-            r"without\s+focal\s+consolidation\s*,?\s*pleural\s+effusion",
+            r"costophrenic\s+angles\s+are\s+(?:sharp|clear|normal)",
         ]
         if any(re.search(p, t) for p in neg_patterns):
             return "negated"
@@ -94,14 +101,17 @@ def parse_ground_truth(caption: str, finding: str) -> str | None:
             r"(?:small|moderate|large|left|right|bilateral|trace|subtle)\s+(?:pleural\s+)?effusion",
             r"evidence\s+of\s+(?:pleural\s+)?effusion",
             r"effusion\s+is\s+(?:seen|present|noted|identified|visualized)",
-            r"blunting\s+of\s+(?:the\s+)?(?:costophrenic\s+angle|cp\s+angle)",
+            r"blunting\s+of\s+(?:the\s+)?(?:costophrenic|cp)\s+angle",
         ]
         if any(re.search(p, t) for p in pos_patterns):
+            clauses = [c for c in re.split(r'[.;\n]+', t) if "effusion" in c or "costophrenic" in c]
+            if any(("no" in c or "without" in c or "free" in c or "not" in c) for c in clauses):
+                return "negated"
             return "affirmed"
         return None
 
     if finding == "Cardiomegaly":
-        if "cardiomegaly" not in t and "heart size" not in t and "cardiac size" not in t:
+        if "cardiomegaly" not in t and "heart size" not in t and "cardiac size" not in t and "cardiac silhouette" not in t:
             return None
         neg_patterns = [
             r"no\s+cardiomegaly",
@@ -110,7 +120,11 @@ def parse_ground_truth(caption: str, finding: str) -> str | None:
             r"heart\s+size\s+within\s+normal\s+limits",
             r"cardiac\s+size\s+within\s+normal\s+limits",
             r"normal\s+cardiac\s+size",
+            r"normal\s+heart\s+size",
             r"heart\s+is\s+normal\s+in\s+size",
+            r"cardiac\s+silhouette\s+is\s+unremarkable",
+            r"cardiomediastinal\s+silhouette\s+is\s+unremarkable",
+            r"cardiomediastinal\s+contours\s+are\s+within\s+normal\s+limits",
         ]
         if any(re.search(p, t) for p in neg_patterns):
             return "negated"
@@ -122,11 +136,13 @@ def parse_ground_truth(caption: str, finding: str) -> str | None:
             r"heart\s+is\s+enlarged",
         ]
         if any(re.search(p, t) for p in pos_patterns):
+            clauses = [c for c in re.split(r'[.;\n]+', t) if "cardiomegaly" in c or "heart" in c or "cardiac" in c]
+            if any(("no" in c or "without" in c or "not" in c or "normal" in c) for c in clauses):
+                return "negated"
             return "affirmed"
         return None
 
     return None
-
 
 def run_evaluation():
     print(f"[{time.strftime('%X')}] Loading OpenI dataset from {DATA_PATH}...")

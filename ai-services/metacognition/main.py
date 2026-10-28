@@ -9,6 +9,7 @@ import os
 import sys
 import time
 import logging
+import re
 from contextlib import asynccontextmanager
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
@@ -380,54 +381,92 @@ class MetacognitionEvaluator:
     def _detect_report_contradiction(self, report_text: str, finding: str) -> Optional[str]:
         """
         Layer 6: Multi-signal contradiction detection.
-        Uses Jaccard token overlap + clinical negation scoring + keyword density.
-        This is a significant improvement over pure lexical matching without
-        requiring an NLI model dependency in production.
+        Uses clause-scoped clinical negation scoring, expanded anatomical synonyms,
+        and token overlap to detect conflicts between AI findings and clinical impressions.
         """
-        report_lower  = report_text.lower()
+        report_lower = report_text.lower()
         finding_lower = finding.lower()
 
-        # --- Expanded synonyms for common findings ---
-        synonyms = { "ich": ["intracranial haemorrhage", "intracranial hemorrhage", "ich"] }
+        if finding_lower in ("normal", "no acute finding", "unremarkable"):
+            return None
+
+        # --- Expanded synonyms for clinical findings across modalities ---
+        synonyms = {
+            "ich": ["intracranial haemorrhage", "intracranial hemorrhage", "ich", "brain bleed", "parenchymal hemorrhage"],
+            "ischemic stroke": ["ischemic stroke", "cerebral infarction", "acute infarct", "infarction", "stroke"],
+            "subdural hematoma": ["subdural hematoma", "subdural hemorrhage", "sdh"],
+            "epidural hematoma": ["epidural hematoma", "extradural hematoma", "edh"],
+            "subarachnoid hemorrhage": ["subarachnoid hemorrhage", "subarachnoid haemorrhage", "sah"],
+            "pneumothorax": ["pneumothorax", "pneumothoraces", "ptx"],
+            "pleural effusion": ["pleural effusion", "pleural effusions", "effusion", "effusions", "pleural fluid"],
+            "pulmonary embolism": ["pulmonary embolism", "pe", "pulmonary embolus"],
+            "pneumonia": ["pneumonia", "consolidation", "infiltrate", "airspace disease", "airspace opacity"],
+            "cardiomegaly": ["cardiomegaly", "enlarged heart", "heart size", "cardiac size", "cardiac silhouette", "cardiothoracic ratio"],
+            "fracture": ["fracture", "bony injury", "dislocation"],
+        }
         finding_syns = synonyms.get(finding_lower, [finding_lower])
 
-        # --- Signal 1: Token-level Jaccard similarity ---
-        report_tokens   = set(t for t in report_lower.split() if len(t) > 3)
-        finding_tokens  = set(t for syn in finding_syns for t in syn.split() if len(t) > 3)
-        if finding_tokens:
-            overlap = report_tokens & finding_tokens
-            jaccard = len(overlap) / len(report_tokens | finding_tokens)
-        else:
-            jaccard = 1.0  # Empty finding → no contradiction
+        # --- Clause segmentation (periods, semicolons, line breaks) ---
+        clauses = [c.strip() for c in re.split(r'[.;\n]+', report_lower) if c.strip()]
 
-        # --- Signal 2: Clinical negation detection ---
-        NEGATION_TEMPLATES = [
-            "no evidence of", "no acute", "unremarkable", "normal study",
-            "no significant", "excluded", "not identified", "absent",
-            "no {finding}", "without {finding}", "normal scan"
+        # Negation triggers
+        pre_neg = [
+            "no evidence of", "no sign of", "no acute", "no significant", "no", "without",
+            "negative for", "free of", "absence of", "excluded", "rules out", "ruled out",
+            "denies", "clear of"
         ]
-        negation_score = 0.0
-        for template in NEGATION_TEMPLATES:
+        post_neg = [
+            "not seen", "not identified", "not present", "not visualized", "not demonstrated",
+            "not observed", "not appreciated", "is absent", "are absent", "excluded", "is not seen",
+            "are not seen", "resolved", "resolution", "has resolved", "disappeared"
+        ]
+        normal_descriptors = ["normal", "unremarkable", "within normal limits", "clear", "intact"]
+
+        affirmed = False
+        negated = False
+
+        for clause in clauses:
             for syn in finding_syns:
-                phrase = template.replace("{finding}", syn)
-                if phrase in report_lower:
-                    negation_score += 0.8
-        negation_score = min(1.0, negation_score)
+                if syn in clause:
+                    is_clause_neg = False
+                    # 1. Pre-negation within clause
+                    for p in pre_neg:
+                        if re.search(r'\b' + re.escape(p) + r'\b.*?\b' + re.escape(syn) + r'\b', clause):
+                            is_clause_neg = True
+                            break
+                    # 2. Post-negation within clause
+                    if not is_clause_neg:
+                        for p in post_neg:
+                            if re.search(r'\b' + re.escape(syn) + r'\b.*?\b' + re.escape(p) + r'\b', clause):
+                                is_clause_neg = True
+                                break
+                    # 3. Anatomical normal statements (e.g. "heart size is normal", "cardiac silhouette within normal limits")
+                    if not is_clause_neg and syn in ("heart size", "cardiac size", "cardiac silhouette"):
+                        for norm in normal_descriptors:
+                            if norm in clause:
+                                is_clause_neg = True
+                                break
 
-        # --- Signal 3: Finding keyword density in report ---
-        key_terms    = [t for t in finding_tokens if len(t) > 3]
-        present_terms = [t for t in key_terms if t in report_lower]
-        density = len(present_terms) / max(len(key_terms), 1)
+                    if is_clause_neg:
+                        negated = True
+                    else:
+                        affirmed = True
 
-        # --- Composite contradiction decision ---
-        # If negation is explicitly found or jaccard is exactly 0 and it's not a normal finding:
-        contradiction_score = (1 - jaccard) * 0.2 + negation_score * 0.6 + (1 - density) * 0.2
+        # Global normal check for whole study if finding is completely unmentioned
+        if not affirmed and not negated:
+            global_normals = [
+                "no acute cardiopulmonary abnormality", "no acute cardiopulmonary process",
+                "no acute abnormality", "normal study", "unremarkable examination"
+            ]
+            if any(gn in report_lower for gn in global_normals):
+                negated = True
 
-        if (contradiction_score > 0.50 or negation_score >= 0.8) and finding != "Normal":
+        # Contradiction exists if finding is negated (or unmentioned in a fully normal scan)
+        # and NEVER affirmed
+        if negated and not affirmed:
             return (
-                f"Contradiction detected (score={contradiction_score:.2f}): "
-                f"finding '{finding}' conflicts with report text "
-                f"(jaccard={jaccard:.2f}, negation={negation_score:.2f}, density={density:.2f})"
+                f"Contradiction detected: primary finding '{finding}' is negated or conflicts with normal study text "
+                f"in radiologist report."
             )
         return None
 

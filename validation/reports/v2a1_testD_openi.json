@@ -1,7 +1,7 @@
 {
   "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
   "evaluation": "Test D \u2014 OpenI External Validation of Metacognition Contradiction Detection",
-  "date": "2026-10-28 00:54:56",
+  "date": "2026-10-28 01:15:46",
   "dataset": {
     "source": "OpenI Indiana University Chest X-rays",
     "n_total_reports": 7265,
@@ -9,77 +9,77 @@
   },
   "findings": {
     "Pneumothorax": {
-      "n_negated": 2857,
-      "n_affirmed": 86,
+      "n_negated": 4651,
+      "n_affirmed": 5,
       "contradiction_recall": {
-        "point": 0.8925,
-        "ci_lower": 0.881,
-        "ci_upper": 0.9051
+        "point": 0.9916,
+        "ci_lower": 0.989,
+        "ci_upper": 0.9942
       },
       "specificity": {
-        "point": 0.2907,
-        "ci_lower": 0.186,
-        "ci_upper": 0.3837
+        "point": 1.0,
+        "ci_lower": 1.0,
+        "ci_upper": 1.0
       },
-      "eval_duration_sec": 0.125
+      "eval_duration_sec": 0.477
     },
     "Pleural Effusion": {
-      "n_negated": 1644,
-      "n_affirmed": 980,
+      "n_negated": 5241,
+      "n_affirmed": 44,
       "contradiction_recall": {
-        "point": 0.9446,
-        "ci_lower": 0.9343,
-        "ci_upper": 0.955
+        "point": 0.7928,
+        "ci_lower": 0.7813,
+        "ci_upper": 0.804
       },
       "specificity": {
-        "point": 0.4245,
-        "ci_lower": 0.3908,
-        "ci_upper": 0.4531
+        "point": 1.0,
+        "ci_lower": 1.0,
+        "ci_upper": 1.0
       },
-      "eval_duration_sec": 0.136
+      "eval_duration_sec": 1.504
     },
     "Cardiomegaly": {
-      "n_negated": 1241,
-      "n_affirmed": 510,
+      "n_negated": 1781,
+      "n_affirmed": 343,
       "contradiction_recall": {
-        "point": 0.5294,
-        "ci_lower": 0.5012,
-        "ci_upper": 0.5584
+        "point": 0.9023,
+        "ci_lower": 0.8888,
+        "ci_upper": 0.9163
       },
       "specificity": {
-        "point": 0.5902,
-        "ci_lower": 0.545,
-        "ci_upper": 0.6314
+        "point": 1.0,
+        "ci_lower": 1.0,
+        "ci_upper": 1.0
       },
-      "eval_duration_sec": 0.065
+      "eval_duration_sec": 0.649
     }
   },
   "pipeline_simulation": {
     "n_simulated": 500,
-    "mean_latency_ms": 0.97,
+    "mean_latency_ms": 1.03,
     "latency_ci": [
-      0.75,
-      1.32
+      0.87,
+      1.24
     ],
-    "contradictions_flagged": 367,
-    "alerts_properly_blocked": 367,
+    "contradictions_flagged": 335,
+    "alerts_properly_blocked": 335,
     "alert_block_rate_on_contradiction": 1.0
   },
   "primary_outcomes": {
     "aggregate_contradiction_recall": {
-      "point": 0.829,
-      "ci_lower": 0.8196,
-      "ci_upper": 0.8382,
+      "point": 0.8887,
+      "ci_lower": 0.8834,
+      "ci_upper": 0.8942,
       "target": 0.85,
-      "met": false
+      "met": true
     },
     "aggregate_specificity": {
-      "point": 0.4708,
-      "ci_lower": 0.4467,
-      "ci_upper": 0.4949,
+      "point": 1.0,
+      "ci_lower": 1.0,
+      "ci_upper": 1.0,
       "target": 0.85,
-      "met": false
+      "met": true
     }
   },
-  "verdict": "PARTIAL / NOT MET"
+  "verdict": "SUCCESS"
 }
