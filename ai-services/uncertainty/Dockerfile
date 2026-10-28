@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /install /usr/local
 ARG CACHE_BUST=dev
 RUN echo "cachebust-$CACHE_BUST"
-COPY main.py model.py ./
+COPY main.py model.py window_coherence.py window_sensitivity.yaml ./
 COPY shared ./shared
 COPY utils ./utils
 
