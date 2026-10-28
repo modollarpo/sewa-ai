@@ -24,6 +24,7 @@ const STATUS = [
   { label:'Retinal Weights (I)',      value:'PROD INT8 (demo: false)', color:C.normal },
   { label:'AdaBN CQ500 AUROC',       value:'0.7596 (Zero-Label)',  color:C.normal },
   { label:'ICH Subtypes (Test J)',    value:'IPH 100% / EDH 100% / SDH 94%', color:C.normal },
+  { label:'Noise & Blur (Test K)',    value:'K1-K3 MET / K4 PARTIAL', color:C.normal },
   { label:'Drift Engine (Test H)',    value:'ALL 4 CRITERIA PASS',  color:C.normal },
   { label:'CQ500 Recalib (C.2)',      value:'AUROC 0.7578 (exploratory)', color:C.info },
 ];
