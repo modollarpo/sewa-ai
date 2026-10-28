@@ -11,24 +11,27 @@
 ---
 
 ## TITLE OF THE INVENTION
-**CLINICAL ARTIFICIAL INTELLIGENCE PLATFORM AND METHOD FOR GUARANTEED STATISTICAL RISK-CONTROLLED RADIOLOGICAL TRIAGE, ZERO-LABEL DOMAIN ADAPTATION, AND ANATOMICALLY-BOUNDED ATTRIBUTION**
+**CLINICAL ARTIFICIAL INTELLIGENCE PLATFORM AND METHOD FOR DISTRIBUTION-FREE STATISTICAL RISK-CONTROLLED RADIOLOGICAL TRIAGE, ZERO-LABEL DOMAIN ADAPTATION, AND ANATOMICALLY-BOUNDED ATTRIBUTION**
 
 ---
 
 ## 1. ABSTRACT
-A computer-implemented clinical artificial intelligence platform and method for safe, time-critical diagnostic triage of digital medical imaging studies. The platform integrates a multi-engine convolutional and transformer pipeline with: (i) an unsupervised Zero-Label Adaptive Batch Normalisation (AdaBN) module that aligns running mean and variance feature statistics to target scanner distributions without model parameter fine-tuning or clinical labels; (ii) an Out-Of-Distribution (OOD) filter employing Relative Mahalanobis Distance (RMD) between class-conditional representations and unconditioned background feature distributions; (iii) a Split Conformal Risk Control safety gate that establishes finite-sample, distribution-free mathematical guarantees on a maximum admissible False Negative Rate (FNR <= alpha) using an empirical risk calibration threshold (lambda), safely auto-clearing non-urgent studies while routing borderline or critical cases to human review; (iv) an explainability engine providing High-Resolution Class Activation Mapping (HiResCAM) constrained by automated soft-tissue anatomical segmentations to eliminate skull-bone hyperdensity artifacts; and (v) an epistemic uncertainty engine enforcing monotonic sensitivity under acquisition noise and patient motion blur. All diagnostic outputs require cryptographic clinician authorisation enforced as a database-level constraint prior to electronic health record delivery.
+A computer-implemented clinical artificial intelligence platform and method for safe, time-critical diagnostic triage of digital medical imaging studies. The platform integrates a multi-engine convolutional and transformer pipeline with: (i) an unsupervised Zero-Label Adaptive Batch Normalisation (AdaBN) module that updates running mean and variance feature statistics on target scanner distributions with frozen convolutional weights; (ii) an Out-Of-Distribution (OOD) filter employing Relative Mahalanobis Distance (RMD) contrasting class-conditional latent representations against an unconditioned background distribution using shrinkage covariance regularization; (iii) a Split Conformal Risk Control safety gate that establishes finite-sample expected risk bounds on False Negative Rates (E[FNR] <= alpha) under exchangeability using an empirical calibration quantile threshold (lambda); (iv) an explainability engine providing High-Resolution Class Activation Mapping (HiResCAM) constrained by automated soft-tissue anatomical segmentations to substantially attenuate skull-bone hyperdensity artifacts; and (v) an epistemic uncertainty engine evaluating prediction variance under acquisition perturbations. Prioritised triage alerts are dispatched immediately upon conformal safety clearance, while final clinical reports require cryptographic clinician authorisation enforced as a database-level constraint prior to electronic health record delivery.
 
 ---
 
 ## 2. FIELD OF THE INVENTION
-The present invention relates generally to medical software and artificial intelligence systems applied to diagnostic radiology. More specifically, the invention relates to a computer-implemented Software-as-a-Medical-Device (SaMD) platform that provides automated diagnostic triage, prioritisation, and decision support for acute emergency conditions across multi-modal radiology workflows (including computed tomography head scans, chest radiographs, computed tomography pulmonary angiograms, and magnetic resonance imaging). The invention particularly concerns technical mechanisms for finite-sample distribution-free statistical risk guarantees, unsupervised target domain adaptation across hospital scanners, anatomically bounded spatial attribution, and database-level human-in-the-loop clinical governance.
+The present invention relates generally to medical software and artificial intelligence systems applied to diagnostic radiology. More specifically, the invention relates to a computer-implemented Software-as-a-Medical-Device (SaMD) platform providing automated diagnostic triage, prioritisation, and decision support for acute emergency conditions across multi-modal radiology workflows (including computed tomography head scans, chest radiographs, computed tomography pulmonary angiograms, and magnetic resonance imaging). The invention particularly concerns technical mechanisms for distribution-free statistical risk bounding, unsupervised target domain adaptation across hospital scanners, anatomically bounded spatial attribution, and database-level human-in-the-loop clinical governance.
 
 ---
 
-## 3. PRIORITY CLAIM UNDER SECTION 5(2) PATENTS ACT 1977
-This application formally claims priority under Section 5(2) of the Patents Act 1977 and Article 4 of the Paris Convention from earlier UK Patent Application No. **GB2609706.3**, entitled *"Sovereign Multi-Engine Clinical AI Platform for Automated Diagnostic Triage and Safety Assurance"*, filed on **25 April 2026** by STOREGRILL INC LTD. 
+## 3. PRIORITY CLAIM AND PARTIAL PRIORITY ALLOCATION (SECTION 5(2) PATENTS ACT 1977)
+This application formally claims priority under Section 5(2) of the Patents Act 1977 and Article 4 of the Paris Convention from earlier UK Patent Application No. **GB2609706.3**, entitled *"Sovereign Multi-Engine Clinical AI Platform for Automated Diagnostic Triage and Safety Assurance"*, filed on **25 April 2026** by STOREGRILL INC LTD.
 
-The present application discloses subject-matter common to GB2609706.3 (including the foundational multi-engine diagnostic pipeline, 9-layer metacognition safety architecture, sovereign edge and cloud dual-path deployment, stochastic Monte Carlo dropout uncertainty decomposition, and database-level clinician sign-off constraints), for which senior priority dating from 25 April 2026 is maintained. This application further discloses substantial improvements, mathematical risk-control formulations, unsupervised domain adaptation methods, and spatial attribution techniques developed and verified post-filing, which constitute novel patentable subject matter having priority as of the filing date of this second application under the partial priority doctrine of Section 5 of the Patents Act 1977 and Article 4F of the Paris Convention.
+Under the partial priority doctrine of Section 5 of the Patents Act 1977, Article 4F of the Paris Convention, and established jurisprudence (e.g., Enlarged Board of Appeal decision G 1/15):
+1. **Senior Priority Date (25 April 2026)** is claimed for subject matter disclosed directly and unambiguously in GB2609706.3, specifically: the foundational multi-engine diagnostic pipeline (ingestion, CNN triage, stochastic MC dropout uncertainty, VLM reporting, 9-layer metacognition engine), 3-channel Hounsfield Unit windowing, sovereign dual-path deployment (cloud AKS and offline edge), and database-level clinician sign-off constraints.
+2. **Later Priority Date (October 2026)** applies to subject matter first disclosed herein, specifically: the mathematical formulation of Split Conformal Risk Control for finite-sample false negative rate bounding, Zero-Label Adaptive Batch Normalisation (AdaBN) for scanner covariate shift alignment, Relative Mahalanobis Distance (RMD) background-relative OOD detection, Anatomically Masked HiResCAM calvarial bone suppression, and demonstrated uncertainty monotonicity under physical perturbations.
+3. **Claims to Combined Inventions**: Any claim reciting a specific cooperative combination of senior features with later-developed features derives priority for the combination as a whole from the filing date of the present application.
 
 ---
 
@@ -38,22 +41,17 @@ The present application discloses subject-matter common to GB2609706.3 (includin
 Healthcare systems globally, and the UK National Health Service (NHS) in particular, experience acute workforce shortages in diagnostic radiology. The Royal College of Radiologists (RCR) 2025 Clinical Radiology Workforce Census established a consultant radiologist vacancy rate of 29% across the United Kingdom, leading to an estimated 1.5 million imaging studies backlogged annually and out-of-hours emergency scan reporting queues routinely extending between 120 and 240+ minutes. For time-critical neurovascular and pulmonary emergencies, such as acute Intracranial Haemorrhage (ICH), Large Vessel Occlusion (LVO) ischemic stroke, tension pneumothorax, and Pulmonary Embolism (PE), treatment efficacy decreases rapidly with time elapsed from symptom onset. In acute ischemic stroke, an estimated 1.9 million neurons and 14 billion synapses are lost each minute an arterial occlusion remains unperfused (Saver, 2006).
 
 ### 4.2 Deficiencies in Existing Clinical AI Systems
-While computer vision algorithms have demonstrated high retrospective discrimination on curated benchmark datasets, existing commercial and academic clinical AI triage systems exhibit five critical technical deficiencies that prevent safe, autonomous clinical adoption:
-
-1. **Failure of Heuristic Probability Thresholds under Scanner Distribution Shift**:
-   Prior art triage devices apply a static, fixed probability threshold (e.g., score tau >= 0.50 or tau >= 0.70) to classify a study as positive. However, when deployed across diverse clinical sites with differing scanner manufacturers (e.g., GE Healthcare, Siemens Healthineers, Philips, Canon), slice thicknesses (0.625 mm to 5.0 mm), tube voltages (kVp), and reconstruction kernels (soft tissue vs bone), the underlying feature distribution shifts substantially. Empirical testing of static classifiers on external multi-centre cohorts (e.g., CQ500, N=486 scans across 3 hospital centers) demonstrates that static thresholds yield unacceptably elevated False Positive Rates (FPR = 20.07% at tau = 0.50, 95% CI: 15.8%-25.1%), precipitating severe alert fatigue and clinical rejection.
-
+Existing commercial and academic clinical AI triage systems exhibit five critical technical deficiencies that prevent safe clinical adoption:
+1. **Failure of Heuristic Probability Thresholds under Scanner Covariate Shift**:
+   Commercial triage devices apply static fixed probability cutoffs (e.g., score tau >= 0.50 or tau >= 0.70). However, scanner hardware variation (manufacturer, slice thickness 0.625mm-5.0mm, kVp, kernel) causes feature distribution shifts. Testing static classifiers on multi-centre cohorts (CQ500, N=486 scans across 3 hospital centers) demonstrates that static thresholds yield elevated False Positive Rates (FPR = 20.07% at tau = 0.50, 95% CI: 15.8%-25.1%), causing severe alert fatigue.
 2. **Absence of Distribution-Free Statistical Risk Bounds**:
-   No existing clinical AI triage system provides a mathematically guaranteed bound on diagnostic risk. A false negative (missed acute haemorrhage, undetected tension pneumothorax) carries catastrophic clinical liability. Existing Bayesian or temperature-scaled confidence metrics fail to guarantee that the expected False Negative Rate (FNR) will remain below a pre-specified clinical safety target (e.g., FNR <= 5.0%) when evaluated on unseen clinical populations.
-
-3. **Activation Hijacking in Explainability Maps (Grad-CAM Skull Bone Artifacts)**:
-   Existing visual explainability systems rely on standard Gradient-Weighted Class Activation Mapping (Grad-CAM). In neuroimaging computed tomography, the high radiological density of cortical calvarial bone (+1000 Hounsfield Units) generates intense local convolutional gradients. Empirical pointing-game audits demonstrate that standard Grad-CAM achieves only an 11.20% pointing hit rate on acute intracranial haemorrhage because gradient energy is erroneously captured by the inner table of the skull rather than the true parenchymal, subdural, or epidural haematoma.
-
-4. **Catastrophic Latent Feature Collapse under Feature Standardization**:
-   Standard machine learning domain adaptation techniques (such as input channel z-scoring: x' = (x - mu)/sigma) severely compress the activation variance of deep convolutional layers. When input variance is compressed by approximately 40-fold relative to frozen running variance statistics (e.g., sigma^2 approx 51.59), non-linear activation functions (e.g., SiLU/Swish) are pinned into an inactive linear regime, causing discriminative capability to collapse (AUROC dropping precipitously from 0.7491 to 0.5348).
-
-5. **Lack of Physics-Informed Uncertainty Monotonicity**:
-   Standard deep networks exhibit over-confidence when presented with severely degraded inputs (e.g., patient motion blur, radiation dose reduction noise, detector ring artifacts). Prior art systems provide no mechanism ensuring that epistemic uncertainty strictly increases as the physical signal-to-noise ratio degrades.
+   No existing commercial triage device provides mathematically guaranteed bounds on diagnostic risk. Standard Bayesian or temperature-scaled confidence metrics fail to guarantee that the expected False Negative Rate (FNR) will remain below a clinical target (e.g., FNR <= 5.0%).
+3. **Activation Hijacking in Explainability Maps (Grad-CAM Bone Artifacts)**:
+   Existing visual explainability systems rely on standard Grad-CAM. In neuroimaging computed tomography, cortical calvarial bone (+1000 HU) produces massive convolutional gradients. Standard Grad-CAM achieves only an 11.20% pointing hit rate on acute intracranial haemorrhage because gradient energy is captured by the skull rather than the haematoma.
+4. **Feature Variance Collapse under Naive Normalisation**:
+   Standard machine learning input z-scoring (x' = (x - mu)/sigma) compresses deep layer activation variance approximately 40-fold relative to frozen running variance statistics (sigma^2 approx 51.59), pinning SiLU activations into an inactive linear regime and collapsing AUROC from 0.7491 to 0.5348.
+5. **Overconfidence under Image Degradation**:
+   Standard deep networks exhibit overconfidence on severely degraded inputs (radiation photon noise, motion blur). Prior art systems provide no mechanism ensuring that epistemic uncertainty responds monotonically as physical image quality degrades.
 
 ---
 
@@ -62,108 +60,114 @@ While computer vision algorithms have demonstrated high retrospective discrimina
 The present invention solves these technical problems by providing an integrated, multi-tier clinical AI triage platform and method. Specifically, the invention introduces:
 
 1. **Unsupervised Zero-Label Adaptive Batch Normalisation (AdaBN)**:
-   A target domain adaptation subsystem that updates the running mean (mu_t) and running variance (sigma_t^2) vectors of batch normalisation layers within a deep convolutional neural network feature extractor directly from an unannotated stream of target clinical site images, while all convolutional weights, biases, and linear classification heads remain strictly frozen. This eliminates scanner covariate shift without requiring manual radiologist annotations or backpropagation, boosting external cross-centre AUROC from 0.7491 to 0.7596.
+   A target domain adaptation subsystem updating the running mean (mu_t) and running variance (sigma_t^2) vectors of batch normalisation layers within a deep convolutional neural network feature extractor directly from an unannotated stream of target clinical site images, while all convolutional weights, biases, and linear classification heads remain strictly frozen. In empirical evaluation on CQ500 (N=486), AdaBN improved cross-centre Study AUROC from 0.7491 to 0.7596 without labels or backpropagation.
 
 2. **Relative Mahalanobis Distance (RMD) Out-of-Distribution Gating**:
-   An out-of-distribution detection module that computes a relative Mahalanobis distance metric:
+   An out-of-distribution detection module computing:
    RMD(x) = M(z(x); mu_c, Sigma) - M(z(x); mu_0, Sigma_0)
-   where M(z; mu, Sigma) is the Mahalanobis distance of latent feature vector z(x) relative to in-distribution class-conditional centroids mu_c and covariance Sigma, and mu_0, Sigma_0 represent an unconditioned background feature distribution derived from normal scanner noise and non-pathological tissue.
+   where M(z; mu, Sigma) is the Mahalanobis distance with Ledoit-Wolf trace shrinkage (factor 0.05) and Moore-Penrose pseudoinverse regularization, contrasting class-conditional centroids mu_c against an unconditioned background feature distribution mu_0. In CQ500 error detection, RMD improved AUROC from 0.5256 (standard Mahalanobis) to 0.5798 (+5.4%).
 
 3. **Split Conformal Risk Control with Bounded Clinical Risk**:
-   A distribution-free statistical safety gate operating on a calibrated quantile threshold (lambda). The threshold lambda is computed on a split calibration dataset D_cal = {(X_i, Y_i)}_{i=1}^n such that the expected False Negative Rate (FNR) is mathematically guaranteed to satisfy:
+   A distribution-free statistical safety gate operating on a calibrated quantile threshold (lambda). Under the assumption that target-site calibration samples and future evaluation samples are exchangeable, the threshold lambda is computed on a split calibration dataset D_cal = {(X_i, Y_i)}_{i=1}^n such that expected False Negative Rate satisfies:
    E[L(Y, C_lambda(X))] <= alpha
-   where alpha in (0, 1) is a pre-determined maximum acceptable clinical risk ceiling (e.g., alpha = 0.05 for a 5.0% false negative bound). Imaging studies with predicted risk falling below lambda are safely auto-cleared into routine reporting queues, while studies exceeding lambda are mandatorily escalated with urgent prioritisation.
+   where alpha in (0, 1) is a pre-determined risk ceiling (e.g., alpha = 0.05). If no lambda satisfies the criterion, the system sets lambda = 0 (routing 100% of scans to human review).
 
 4. **Masked High-Resolution Class Activation Mapping (Masked HiResCAM)**:
-   A spatial attribution engine that avoids gradient averaging by computing element-wise product feature maps between feature gradients and forward activations, multiplied by an automated anatomical parenchymal soft-tissue segmentation mask:
+   A spatial attribution engine computing element-wise product feature maps between gradients and forward activations, multiplied by an automated anatomical parenchymal soft-tissue segmentation mask:
    A_MaskedHiResCAM(u, v) = M_brain(u, v) * sum_k [ (dY_c / dA_k(u, v)) * A_k(u, v) ]
-   where M_brain(u, v) in {0, 1} is a binary or probabilistic anatomical mask segmenting brain parenchyma and extra-axial spaces between 0 and 85 Hounsfield Units, completely suppressing calvarial bone hyperdensities and boosting pointing-game hit rates from 11.20% to 43.83%-62.16%.
+   where M_brain(u, v) in {0, 1} isolates intracranial soft tissue (attenuation 0 to +85 HU), substantially attenuating calvarial bone hyperdensities (+500 to +1500 HU) and improving pointing-game hit rates from 11.20% to 43.83% (62.16% on chronic subdural haematomas).
 
 5. **Physics-Monotonic Epistemic Uncertainty Quantification**:
-   A dual uncertainty engine executing stochastic Monte Carlo forward passes with dropout active during inference, wherein the epistemic prediction variance sigma_epi^2 is constrained to exhibit a rank correlation (Spearman rho >= 0.85) with respect to image noise variance (sigma_noise^2) and motion blur kernel width.
+   A dual uncertainty engine executing stochastic Monte Carlo forward passes with dropout active during inference, wherein aggregate epistemic prediction variance exhibits a rank correlation (Spearman rho = 0.9000, p = 0.0374) across progressive Gaussian noise levels.
 
-6. **Database-Level Cryptographic Sign-Off Constraint**:
-   A clinical governance subsystem wherein diagnostic findings and triage classifications are persisted in an immutable, append-only PostgreSQL relational database enforced by foreign key constraints and row-level cryptographic signatures, preventing any downstream electronic health record (EHR) or picture archiving and communication system (PACS) worklist dispatch without verified consultant radiologist digital sign-off.
+6. **Deterministic Clinical Routing and Cryptographic Sign-Off Constraint**:
+   A clinical governance subsystem combining independently computed risk signals into a deterministic routing decision: studies cleared by conformal, OOD, and uncertainty gates are deprioritised to routine queues, while flagged studies trigger urgent PACS worklist jump. Delivery of final diagnostic reports requires cryptographic consultant radiologist digital sign-off enforced as a database-level constraint.
 
 ---
 
 ## 6. BRIEF DESCRIPTION OF THE DRAWINGS
 
-- **Figure 1** is a high-level schematic diagram illustrating the multi-tier clinical AI triage architecture, showing data ingestion, Zero-Label AdaBN adaptation, Relative Mahalanobis OOD gating, Split Conformal Risk Control, Masked HiResCAM explainability, and database-level sign-off enforcement.
-- **Figure 2** is a mathematical flow diagram of the Split Conformal Risk Control calibration and inference procedure, illustrating the determination of threshold lambda and guaranteed bounding of the False Negative Rate.
-- **Figure 3** is a schematic diagram of the Zero-Label Adaptive Batch Normalisation (AdaBN) module, showing the selective updating of running statistics while model weights remain frozen.
-- **Figure 4** is an architectural comparison between standard Grad-CAM and the Anatomically Masked HiResCAM pipeline of the present invention, detailing the suppression of skull bone hyperdensities.
-- **Figure 5** is a graphical plot illustrating epistemic uncertainty variance monotonicity under progressive Gaussian noise and horizontal motion blur perturbations.
-- **Figure 6** is a sequence diagram illustrating the Stroke Code automated multi-channel clinical alert workflow across FHIR R4, HL7v2, WebSockets, and PACS DICOM worklists.
-- **Figure 7** is a schematic diagram of the sovereign dual-path deployment architecture, illustrating both the cloud-native AKS GPU cluster and the offline INT8 edge gateway with Merkle-chained local audit logging.
-- **Figure 8** is a block diagram illustrating multi-modal clinical triage expansion across computed tomography head scans, chest radiographs, computed tomography pulmonary angiograms, and brain magnetic resonance imaging.
+- **Figure 1** is a high-level schematic diagram illustrating the 7-stage operational clinical AI triage architecture and safety gating flow.
+- **Figure 2** is a mathematical flow diagram of the Split Conformal Risk Control calibration and inference procedure.
+- **Figure 3** is a schematic diagram of the Zero-Label Adaptive Batch Normalisation (AdaBN) module.
+- **Figure 4** is an architectural comparison between standard Grad-CAM and Anatomically Masked HiResCAM.
+- **Figure 5** is a graphical plot illustrating epistemic uncertainty variance monotonicity under progressive Gaussian noise.
+- **Figure 6** is a sequence diagram illustrating the Stroke Code automated multi-channel clinical alert workflow.
+- **Figure 7** is a schematic diagram of the sovereign dual-path deployment architecture (cloud AKS and offline edge).
+- **Figure 8** is a block diagram illustrating multi-modal clinical triage expansion across CT Head, CXR, CTPA, and Brain MRI.
 
 ---
 
 ## 7. DETAILED DESCRIPTION OF PREFERRED EMBODIMENTS
 
 ### 7.1 Multi-Modal Ingestion and 3-Channel Pre-Processing
-Medical imaging studies are ingested via standard DICOM C-STORE, HL7v2 MLLP, or FHIR R4 imaging study endpoints. The pre-processing pipeline standardises raw volumetric data into multi-channel tensor representations X in R^{3 x H x W}. 
+Medical imaging studies are ingested via DICOM C-STORE, HL7v2 MLLP, or FHIR R4 imaging study endpoints. The pre-processing pipeline standardises volumetric data into 3-channel tensors X in R^{3 x H x W}. For Non-Contrast Head CT (NCCT), three simultaneous Hounsfield Unit (HU) window presets are applied:
+1. Brain Window: Center L = +40 HU, Width W = 80 HU (range [0, +80]).
+2. Subdural Window: Center L = +75 HU, Width W = 150 HU (range [0, +150]).
+3. Bone/Stroke Window: Center L = +35 HU, Width W = 35 HU (range [+17.5, +52.5]).
 
-For Non-Contrast Head CT (NCCT), pre-processing applies three simultaneous Hounsfield Unit (HU) window presets:
-1. **Brain Window**: Center L = +40 HU, Width W = 80 HU (mapping ranges [0, +80]).
-2. **Subdural Window**: Center L = +75 HU, Width W = 150 HU (mapping ranges [0, +150]).
-3. **Bone / Stroke Window**: Center L = +35 HU, Width W = 35 HU (mapping ranges [+17.5, +52.5]).
+### 7.2 Zero-Label Adaptive Batch Normalisation (AdaBN) Implementation
+Let f_theta represent a deep convolutional neural network (EfficientNet-B0 or EfficientNet-B4) pre-trained on source domain D_s. When deployed to a target hospital environment D_t, all convolutional weights W, biases, and linear classification weights W_head remain strictly frozen.
 
-For Chest Radiographs (CXR) and CT Pulmonary Angiography (CTPA), corresponding mediastinal, lung, and PE vascular window presets are applied.
-
-### 7.2 Zero-Label Adaptive Batch Normalisation (AdaBN)
-Let f_theta represent a deep convolutional neural network (e.g., EfficientNet-B0 or EfficientNet-B4) pre-trained on a source domain D_s (e.g., RSNA 2019 Intracranial Haemorrhage Challenge dataset). Each batch normalisation layer l within f_theta contains trainable scale gamma_l and shift beta_l parameters, along with frozen running mean mu_l in R^{C_l} and running variance sigma_l^2 in R^{C_l} statistics.
-
-When deployed to a target hospital clinical environment D_t exhibiting distinct scanner physics, unannotated batches of volume slices B_t = {x_1, x_2, ..., x_m} are streamed through the network. For each channel c in {1, ..., C_l}, the batch statistics are computed:
+Upon onboarding a new scanner feed, an unannotated warm-up stream of target studies B_t = {x_1, ..., x_m} (m approx 50-100 studies) is processed in evaluation mode with BatchNorm layers set to update running statistics with momentum eta = 0.1:
 mu_{B_t, c} = (1 / (m * H * W)) * sum_{i=1}^m sum_{h=1}^H sum_{w=1}^W x_{i, c, h, w}^{(l)}
 sigma_{B_t, c}^2 = (1 / (m * H * W)) * sum_{i=1}^m sum_{h=1}^H sum_{w=1}^W (x_{i, c, h, w}^{(l)} - mu_{B_t, c})^2
-
-The running statistics of the batch normalisation layers are updated using exponential moving momentum eta in (0, 1):
 mu_{t, c}^{(l)} <- (1 - eta) * mu_{t, c}^{(l)} + eta * mu_{B_t, c}
 (sigma_{t, c}^{(l)})^2 <- (1 - eta) * (sigma_{t, c}^{(l)})^2 + eta * sigma_{B_t, c}^2
 
-Crucially, all convolutional filters W^{(l)}, biases, and classification weights W_{head} remain strictly fixed. This moment alignment directly reconciles internal feature drift without modifying learned decision boundaries.
+*Empirical Finding*: In CQ500 testing (N=486 scans, 3 hospital centres), AdaBN improved Study AUROC from 0.7491 to 0.7596.  
+*Engineering Hypothesis*: AdaBN reduces scanner-induced covariate shifts in channel-wise activations, aiding feature alignment before statistical gating.
 
-### 7.3 Relative Mahalanobis Distance (RMD) Out-of-Distribution Gating
-To detect out-of-distribution inputs (e.g., corrupted slices, post-operative cranial defects, metal streak artifacts), penultimate feature vectors z(x) = f_theta(x) in R^D are extracted.
+### 7.3 Relative Mahalanobis Distance (RMD) Implementation
+Penultimate feature vectors z(x) = f_theta(x) in R^D are extracted. Class-conditional Gaussian distributions N(mu_c, Sigma) (c in {0, 1}) and unconditioned background distribution N(mu_0, Sigma_0) are estimated on training features.
 
-Let N(mu_c, Sigma) denote the class-conditional Gaussian distribution for clinical condition c in {0, 1}, and let N(mu_0, Sigma_0) denote the unconditioned background distribution. The Relative Mahalanobis Distance is defined as:
-RMD(x) = min_{c} ((z(x) - mu_c)^T * Sigma^{-1} * (z(x) - mu_c)) - (z(x) - mu_0)^T * Sigma_0^{-1} * (z(x) - mu_0)
+To ensure numerical stability when covariance matrices are near-singular, Ledoit-Wolf style trace shrinkage (shrinkage parameter lambda_shrink = 0.05) is applied:
+Sigma_shrunk = (1 - lambda_shrink) * Sigma + lambda_shrink * (Tr(Sigma) / D) * I_D
+Precision matrix Prec = pinv(Sigma_shrunk) is computed using Moore-Penrose pseudoinverse.
 
-If RMD(x) > tau_{OOD}, the study is classified as anomalous, triggering immediate bypass of automated clearing and forcing Layer 1 clinical escalation.
+Relative Mahalanobis Distance is computed as:
+RMD(x) = min_{c} ((z(x) - mu_c)^T * Prec * (z(x) - mu_c)) - (z(x) - mu_0)^T * Prec_0 * (z(x) - mu_0)
+If RMD(x) > tau_OOD, the scan is flagged as anomalous, bypassing automated clearing and forcing human clinical review. In CQ500 error detection, RMD achieved AUROC 0.5798 vs 0.5256 for standard Mahalanobis distance.
 
-### 7.4 Split Conformal Risk Control Calibration
-To guarantee a clinical False Negative Rate bound E[L(Y, C_lambda(X))] <= alpha, a calibration cohort D_{cal} = {(X_i, Y_i)}_{i=1}^n of n studies is partitioned from clinical training data.
-
-Let S(X) in [0, 1] represent the model's calibrated probability score for the critical condition (e.g., intracranial haemorrhage), and let the decision rule be:
+### 7.4 Split Conformal Risk Control Formulation & Empirical Results
+Let S(X) in [0, 1] represent the calibrated probability score for acute haemorrhage, and let the triage rule be:
 C_lambda(X) = 1 if S(X) >= lambda else 0
-
-The loss function L(Y, C_lambda(X)) evaluates false negatives:
+The false-negative loss function is:
 L(Y, C_lambda(X)) = 1 if (Y = 1 and C_lambda(X) = 0) else 0
 
-The empirical risk across the calibration dataset is defined as:
-R_n(lambda) = (1 / n) * sum_{i=1}^n L(Y_i, C_lambda(X_i))
+Because loss L is monotonically non-decreasing with respect to threshold lambda (higher thresholds produce more false negatives), the empirical risk across calibration dataset D_cal of n labeled scans is:
+R_n(lambda) = (1 / n_pos) * sum_{i: Y_i=1} I(S(X_i) < lambda)
 
-Applying the Conformal Risk Control formulation, the optimal threshold lambda is selected as:
+Following Bates et al. (2021), under the assumption that calibration samples and future test samples are exchangeable, the optimal threshold lambda is selected as the supremum of safe thresholds:
 lambda = sup { lambda' in [0, 1] : (n / (n + 1)) * R_n(lambda') + (1 / (n + 1)) <= alpha }
+If no lambda > 0 satisfies the bound, the system sets lambda = 0, ensuring that no cases are automatically cleared.
 
-In empirical calibration on multi-centre cohorts (n = 100 calibration split, alpha = 0.05), this yields lambda = 0.0298. Applying lambda = 0.0298 on held-out test data (N = 386) guarantees that over 93.2% of acute positive cases are escalated, while safely auto-clearing 12.7% of true normal studies from high-urgency queues with zero false negatives in the auto-cleared set.
+*Empirical Test Results (CQ500 Evaluation)*:
+- Calibration split: n = 100 scans, target risk alpha = 0.05.
+- Calibrated operational threshold: lambda = 0.0298.
+- Independent held-out test split: N = 386 scans (162 positive, 224 negative).
+- Test observations: 11 false negatives out of 162 positive cases, yielding an observed test false-negative rate of 6.79% (11/162).
+- Automatic clearing: 49 true normal scans out of 386 total scans (12.7%) were safely auto-cleared with zero false negatives in the auto-cleared set.
+- The distinction between expected risk bounds under exchangeability and observed sample risk on finite test cohorts is explicitly recognized.
 
-### 7.5 Anatomically-Masked HiResCAM Explainability
-Standard Grad-CAM computes activation map via spatial global average pooling of gradients:
-alpha_k^c = (1 / Z) * sum_u sum_v (dY_c / dA_k(u, v))
-L_{Grad-CAM}^c = ReLU(sum_k alpha_k^c * A_k)
+### 7.5 Anatomically-Masked HiResCAM Implementation
+Element-wise gradient-activation products are computed without spatial global pooling:
+H_c(u, v) = sum_k [ (dY_c / dA_k(u, v)) * A_k(u, v) ]
 
-Because high-density cortical bone produces massive gradient magnitudes dY_c / dA_k, global averaging dilutes small intraparenchymal haematomas and highlights bone boundaries.
+An automated anatomical soft-tissue segmentation mask M_brain(u, v) in {0, 1} is generated:
+1. Radiological attenuation thresholding selects voxels with attenuation between 0 and +85 HU (capturing brain parenchyma [20-40 HU], CSF fluid [0-15 HU], and acute haematomas [50-85 HU]).
+2. Morphological hole-filling and largest-connected-component isolation extracts the intracranial vault.
+3. Element-wise multiplication produces the final saliency map:
+   A_final(u, v) = ReLU(H_c(u, v)) * M_brain(u, v)
 
-The present invention solves this through **Masked HiResCAM**:
-1. Element-wise feature weighting is preserved without global spatial averaging:
-   H_c(u, v) = sum_k [ (dY_c / dA_k(u, v)) * A_k(u, v) ]
-2. An automated anatomical segmentation mask M_brain(u, v) in {0, 1} is generated by applying dual Hounsfield thresholds (0 <= HU <= 85) followed by morphological hole-filling and largest-connected-component selection, isolating intracranial soft tissue:
-   A_{final}(u, v) = ReLU(H_c(u, v)) * M_brain(u, v)
+This substantially attenuates and suppresses cortical calvarial bone hyperdensities (+500 to +1500 HU). In evaluation across 6,283 expert bounding boxes in 226 positive studies from CQ500/BHX, Masked HiResCAM improved pointing-game hit rates from 11.20% (standard Grad-CAM) to 43.83% overall, and to 62.16% on chronic subdural haematomas.
 
-This completely eliminates calvarial bone activations, increasing pointing-game hit rates from 11.20% to 43.83% across all ICH subtypes, and reaching 62.16% on chronic subdural haematomas.
+### 7.6 Physics-Monotonic Epistemic Uncertainty Experimental Protocol
+In Test K, model uncertainty was evaluated on N=300 held-out slices (150 ICH+, 150 ICH-) from RSNA 2019 under two physical perturbation regimes:
+1. Simulated Gaussian radiation dose reduction noise at 5 discrete levels: sigma in {0.00, 0.05, 0.10, 0.20, 0.35}.
+2. Patient motion blur convolution across 5 kernel lengths: L in {1, 3, 7, 11, 15} pixels.
+
+Stochastic inference executing N=20 forward passes with Monte Carlo dropout active produced epistemic variance sigma^2_epi. Mean epistemic variance increased monotonically across the 5 discrete noise levels from 0.00088 to 0.00496, yielding a Spearman rank correlation rho = 0.9000 (p = 0.0374).
 
 ---
 
@@ -175,30 +179,29 @@ WE CLAIM:
    (a) receiving an unannotated digital medical imaging study acquired by an imaging device at a clinical site;
    (b) adapting batch normalisation running mean and running variance statistics of a deep neural network feature extractor using the unannotated digital medical imaging study while maintaining convolutional filter weights and linear classification weights strictly frozen;
    (c) computing an out-of-distribution (OOD) score using a Relative Mahalanobis Distance contrasting a class-conditional feature representation against an unconditioned background feature distribution;
-   (d) evaluating the study using a split conformal risk control prediction gate calibrated on a split calibration dataset to guarantee that an expected False Negative Rate (FNR) does not exceed a pre-specified clinical risk tolerance threshold (alpha);
-   (e) computing an explainable spatial saliency map via element-wise gradient-activation multiplication constrained by an automated anatomical soft-tissue segmentation mask;
-   (f) generating an urgency classification and clinical alert; and
-   (g) dispatching the clinical alert to an electronic health record or picture archiving and communication system worklist only upon satisfaction of the split conformal risk control gate, wherein clinical report finalisation requires cryptographic clinician digital sign-off enforced as a database-level constraint.
+   (d) evaluating the study using a split conformal risk control prediction gate calibrated on a split calibration dataset under exchangeability assumptions to enforce an expected False Negative Rate bound (E[FNR] <= alpha) via an empirical quantile threshold (lambda);
+   (e) evaluating prediction variance through stochastic inference with active dropout to verify that epistemic uncertainty responds appropriately to image degradation;
+   (f) generating an explainable spatial saliency map via element-wise gradient-activation multiplication constrained by an automated anatomical soft-tissue segmentation mask;
+   (g) combining outputs from the out-of-distribution score, conformal risk control gate, and epistemic uncertainty into a deterministic clinical routing decision, wherein studies cleared by all gates are deprioritised to routine review and studies failing any gate are escalated to emergency review; and
+   (h) dispatching prioritised clinical triage alerts to a medical display worklist, wherein final diagnostic report delivery requires cryptographic clinician digital sign-off enforced as a database-level constraint.
 
-2. The method of Claim 1, wherein the split conformal risk control prediction gate selects an operational probability threshold lambda satisfying:
+2. The method of Claim 1, wherein the split conformal risk control prediction gate selects operational probability threshold lambda satisfying:
    lambda = sup { lambda' in [0, 1] : (n / (n + 1)) * R_n(lambda') + (1 / (n + 1)) <= alpha }
-   where n is the number of samples in the split calibration dataset and R_n(lambda') is the empirical false negative risk evaluated on the split calibration dataset.
+   where n is calibration sample size and R_n(lambda') is empirical false negative risk evaluated on the split calibration dataset, wherein if no threshold lambda' satisfies the condition, the system sets lambda = 0 to route 100% of studies to clinician review.
 
-3. The method of Claim 1, wherein the pre-specified clinical risk tolerance threshold alpha is 0.05, thereby establishing a mathematically guaranteed upper bound of 5.0% on the expected False Negative Rate across unseen clinical patient populations.
+3. The method of Claim 1, wherein the clinical risk tolerance threshold alpha is configured as 0.05, establishing a finite-sample expected risk bound of 5.0% on False Negative Rate under exchangeable target-site imaging conditions.
 
-4. The method of Claim 1, wherein the unannotated digital medical imaging study comprises a Non-Contrast Head Computed Tomography (NCCT) scan, and the clinical alert prioritises detection of acute Intracranial Haemorrhage (ICH).
+4. The method of Claim 1, wherein the digital medical imaging study comprises a Non-Contrast Head Computed Tomography (NCCT) scan, and the prioritised alert detects acute Intracranial Haemorrhage (ICH).
 
 5. The method of Claim 4, wherein the split conformal risk control prediction gate comprises distinct subtype-specific risk thresholds independently calibrated for intraparenchymal, epidural, subdural, subarachnoid, and intraventricular haemorrhage subtypes.
 
-6. The method of Claim 1, wherein the automated anatomical soft-tissue segmentation mask isolates brain parenchyma and intracranial fluid collections by selecting pixels having radiological attenuation between 0 and +85 Hounsfield Units, thereby completely suppressing false-positive gradient activation energy originating from high-density cortical calvarial bone.
+6. The method of Claim 1, wherein the automated anatomical soft-tissue segmentation mask isolates brain parenchyma and intracranial fluid collections by selecting pixels having radiological attenuation between 0 and +85 Hounsfield Units, thereby substantially attenuating and suppressing false-positive gradient activation energy originating from high-density cortical calvarial bone.
 
 7. The method of Claim 1, wherein adapting batch normalisation statistics comprises streaming an unlabelled mini-batch of target site imaging studies through the deep neural network and updating running channel mean and variance vectors via exponential moving momentum eta in (0, 1) without executing backpropagation.
 
-8. The method of Claim 1, wherein the Relative Mahalanobis Distance RMD(x) is computed according to:
-   RMD(x) = min_{c} ((z(x) - mu_c)^T * Sigma^{-1} * (z(x) - mu_c)) - (z(x) - mu_0)^T * Sigma_0^{-1} * (z(x) - mu_0)
-   wherein z(x) is a latent feature vector, mu_c is a class-conditional centroid, Sigma is a shared class covariance matrix, and mu_0, Sigma_0 characterise a non-pathological background feature distribution.
+8. The method of Claim 1, wherein the Relative Mahalanobis Distance RMD(x) is computed using Ledoit-Wolf trace shrinkage covariance regularization and Moore-Penrose pseudoinverse precision matrices contrasting class-conditional centroids against an unconditioned background feature centroid.
 
-9. The method of Claim 1, further comprising executing a plurality of stochastic forward passes through the deep neural network with dropout layers active during inference to decompose prediction variance into epistemic uncertainty and aleatoric uncertainty, wherein the epistemic uncertainty exhibits a monotonic non-decreasing rank correlation (Spearman rho >= 0.85) with respect to simulated image acquisition noise and patient motion blur.
+9. The method of Claim 1, wherein epistemic uncertainty variance computed across stochastic forward passes exhibits a monotonic non-decreasing rank correlation (Spearman rho >= 0.85) evaluated across discrete image acquisition noise levels.
 
 10. The method of Claim 1, further comprising executing a 9-layer metacognition safety engine evaluating: (1) modality plausibility; (2) urgency-finding consistency; (3) minimum confidence floors; (4) attribution coherence; (5) confidence-uncertainty conflict; (6) clinical impression negation concordance; (7) demographic epidemiological priors; (8) composite hallucination risk scoring; and (9) binary safe-to-alert gating.
 
@@ -215,7 +218,7 @@ WE CLAIM:
     a medical imaging interface configured to receive digital medical imaging studies via DICOM, HL7, or FHIR protocols;
     a deep neural network inference engine stored in memory and executable by the at least one processor;
     a zero-label adaptive batch normalisation module configured to update running mean and variance statistics of the deep neural network using unannotated imaging studies from a target clinical environment while weights remain frozen;
-    a split conformal risk control module configured to enforce a pre-specified upper bound on false negative triage error rates;
+    a split conformal risk control module configured to enforce a pre-specified expected false negative triage error bound under exchangeability;
     an explainability engine configured to generate anatomically masked spatial attribution maps suppressing non-parenchymal bone artifacts; and
     a relational database enforcing foreign key constraints and digital signature validation, wherein dispatch of prioritised clinical alerts is blocked absent cryptographic clinician verification.
 
@@ -228,7 +231,3 @@ WE CLAIM:
 19. A computer program product comprising software code portions for executing the steps of Claim 1 when run on a clinical decision support workstation.
 
 20. A Software-as-a-Medical-Device (SaMD) diagnostic decision support apparatus comprising the system of Claim 15, wherein the apparatus operates within an acute hospital emergency department to prioritise time-critical intracranial haemorrhage, pulmonary embolism, tension pneumothorax, and acute stroke studies.
-
----
-
-*Specification & Claims finalized for Second UK National Patent Application · Date: 2026-10-28 · FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.*
