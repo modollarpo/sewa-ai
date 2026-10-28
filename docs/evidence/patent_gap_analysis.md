@@ -37,23 +37,82 @@ The document **`Claims OPI.docx`** contains the exact 10 claims filed with the U
 
 ---
 
-## 3. Direct Recommendation: Do We Need a Second Patent?
+## 3. UK Added-Matter Rules (Section 76(2) Patents Act 1977) — Critical Legal Reality
 
-### ⚠️ Critical Finding
-Because **GB2609706.3 has not yet been searched or examined**, and the **18-month publication date has not passed** (~October 2027), you have a rare window under UK and international patent law:
+> [!CAUTION]
+> **You CANNOT simply amend the existing GB2609706.3 description to add new inventions!**
+> Under **Section 76(2) of the UK Patents Act 1977** (and European Patent Convention **Article 123(2)**):
+> *"No amendment of an application for a patent shall be allowed... if it results in the application disclosing matter extending beyond that disclosed in the application as filed."*
 
-1. **You DO NOT need to spend money on a completely separate initial UK patent application today.**
-   Filing a completely separate patent would give your new inventions a **priority date of late 2026/2027**, losing the advantage of the **March/April 2026 priority date** established by GB2609706.3.
-2. **Instead, you should FILE AN AMENDMENT / ADDITION to GB2609706.3**:
-   * Under UKIPO Rules (Rule 19 / s.117 before publication), update the specification to formally incorporate the mathematics and results of Split Conformal Risk Control, Zero-Label AdaBN, and Masked HiResCAM.
-   * Add new dependent claims (Claims 11–16).
-3. **Consolidate Everything into the PCT International Application before 25 April 2027**:
-   * File your international PCT patent application on or before **25 April 2027** claiming priority back to **GB2609706.3**.
-   * In the PCT application, include the 10 original claims **plus** the 5 new post-April 2026 claims as an integrated portfolio.
+### Why an Amendment or Divisional Cannot Add Post-Filing Inventions:
+1. **The *Bonzel* Test (*Bonzel v Intervention Products [1991] RPC 553*)**:
+   Under UK case law, an examiner or court compares the application as filed against the proposed amendment. If the amendment discloses technical information not **directly and unambiguously derivable** from the original 21-page specification, it is void for **added matter**.
+2. **Text Audit of GB2609706.3**:
+   A string audit of `Claims OPI.docx` confirms that the terms `conformal`, `adabn`, `adaptive batch`, `hirescam`, and `relative mahalanobis` appear **zero times** in the application as filed on 25 April 2026.
+3. **Divisional Applications (Section 15(4))**:
+   Section 76(1) applies equally to divisionals. A divisional cannot introduce subject-matter that extends beyond the parent application as filed.
 
 ---
 
-## 4. Draft New Claims (To Provide to Your Patent Attorney)
+## 4. The Legally Valid Pathway: Priority Under Section 5(2) & Paris Convention
+
+Because Section 76(2) prohibits adding matter to GB2609706.3, the **only legally valid mechanism** to protect the post-April 2026 breakthroughs while retaining your April 2026 priority date is **filing a NEW application claiming priority under Section 5(2) / Paris Convention Art. 4**:
+
+```
+                       ┌──────────────────────────────────────────────┐
+                       │ GB2609706.3 Filed: 25 April 2026             │
+                       │ (Core: 4 Engines, 9-Layer Metacognition,     │
+                       │  Sovereign Edge, MC Dropout, Claims 1-10)    │
+                       └──────────────────────┬───────────────────────┘
+                                              │
+                      Within 12-Month Window  │ (Deadline: 25 April 2027)
+                      Paris Convention Art. 4 │ Patents Act 1977 s.5(2)
+                                              ▼
+          ┌──────────────────────────────────────────────────────────────────┐
+          │ NEW APPLICATION (PCT or 2nd UK Application) Filed by 25 Apr 2027  │
+          │ Contains: GB2609706.3 Disclosure + New Inventions                │
+          │ (Split Conformal Risk, Zero-Label AdaBN, Masked HiResCAM, RMD)   │
+          └───────────────────────────────┬──────────────────────────────────┘
+                                          │
+            ┌─────────────────────────────┴─────────────────────────────┐
+            ▼                                                           ▼
+┌──────────────────────────────────────┐    ┌──────────────────────────────────────┐
+│ Claims 1–10 (Foundational System)    │    │ Claims 11–15 (Post-Filing Additions) │
+│ Priority Date: 25 April 2026         │    │ Priority Date: April 2027 (Filing)   │
+│ Protected against post-2026 art      │    │ Protected under split-priority       │
+└──────────────────────────────────────┘    └──────────────────────────────────────┘
+```
+
+### The Two Strategic Options Available:
+
+#### Option 1: Dual UK Prosecution + International PCT (Recommended)
+1. **Maintain GB2609706.3**: Pay the £130 application fee and £180 search fee before **25 April 2027**. Prosecute Claims 1–10 as filed to obtain an early granted UK patent on the foundational platform.
+2. **File a 2nd UK Patent Application (or PCT)** before **25 April 2027**:
+   * File a new patent application disclosing the complete system (GB2609706.3 disclosure **plus** the complete technical specifications and test evidence for Conformal Risk Control, Zero-Label AdaBN, and Masked HiResCAM).
+   * Formally claim priority from GB2609706.3 under Section 5(2).
+   * **Result under Partial Priority (s.5 / EPC Art. 88)**: The core system retains its senior priority date of **25 April 2026**, while the new statistical gating and adaptation methods receive their own filing priority date.
+
+#### Option 2: Consolidate Directly into a PCT Application before 25 April 2027
+* File a single international PCT application before **25 April 2027** claiming priority from GB2609706.3.
+* The PCT specification includes both the original 21-page disclosure and the new technical chapters.
+* GB2609706.3 can either be kept alive to grant in the UK or allowed to lapse once the PCT enters the UK national phase at 30/31 months.
+
+---
+
+## 5. Public Disclosure & Novelty Warning
+
+> [!WARNING]
+> **Prior Public Disclosure Destroys Patentability for New Matter!**
+> Because the new matter (Conformal Risk Control $\lambda = 0.0298$, Zero-Label AdaBN, Masked HiResCAM) will have an **April 2027 priority date**, any enabling public disclosure made **before that new filing** is novelty-destroying under **Section 2(2) Patents Act 1977**:
+> - Public git repositories with full mathematical formulas or open-source implementations.
+> - Published academic papers or preprints (arXiv/medRxiv) detailing the exact algorithms.
+> - Unprotected conference presentations or marketing materials disclosing the technical mechanism.
+>
+> **Action**: Ensure all code, test reports, and technical descriptions of the post-April 2026 algorithms remain protected by confidentiality/commercial terms or file the second UK application **immediately** before publishing any research paper.
+
+---
+
+## 6. Draft New Claims (To Provide to Your Patent Attorney)
 
 Add these proposed claims as Claims 11–15 to your application:
 

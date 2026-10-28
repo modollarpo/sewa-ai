@@ -70,11 +70,12 @@ Governing patent document: `docs/evidence/Filing Receipt published with OLFI (2)
   - Extracted and verified UKIPO filing receipt for **GB2609706.3** (*"Sovereign Multi-Engine Clinical AI Platform for Automated Diagnostic Triage and Safety Assurance"*).
   - Applicant: STOREGRILL INC LTD; Inventor: Dolapo Ariyo; 21 pages description; 10 claims.
   - Critical discovery: Application fee (£130) and search request (£180) are **unpaid**, with hard UKIPO statutory deadline of **25 April 2027**. This is also the exact 12-month priority cutoff for international PCT filings.
-- **Coverage Gap & Inventions Assessment**:
-  - Found that post-filing innovations from empirical tests (Split Conformal Risk Control FNR $\le 5\%$, Zero-Label AdaBN, Relative Mahalanobis OOD, Masked HiResCAM, physics noise monotonicity) represent high-priority patentable subject matter not explicitly covered in the initial 10 claims.
+- **Coverage Gap & Inventions Assessment (UK Added-Matter Analysis)**:
+  - Found that post-filing innovations from empirical tests (Split Conformal Risk Control FNR $\le 5\%$, Zero-Label AdaBN, Relative Mahalanobis OOD, Masked HiResCAM, physics noise monotonicity) appear 0 times in `Claims OPI.docx`.
+  - **UK Added-Matter Constraint**: Under **Section 76(2) of the UK Patents Act 1977** (and *Bonzel* test), you **cannot** amend GB2609706.3 to add new technical disclosure; such amendments are strictly void.
+  - **Legally Valid Solution**: File a **second UK application** or **international PCT application** within the 12-month Paris Convention priority window (on or before **25 April 2027**) claiming priority from GB2609706.3 under **Section 5(2)**. This confers senior priority (25 April 2026) for Claims 1–10 and split priority (filing date) for the new statistical gating and adaptation methods (Claims 11–15).
   - Authored comprehensive gap analysis and strategic recommendation: `docs/evidence/patent_gap_analysis.md`.
-  - Drafted unified 7-layer defense method claim for attorney review.
-  - Strategic verdict: Do not abandon; consolidate via Rule 19/s.117 amendment to description + file international PCT claiming priority before 25 April 2027.
+  - Audited `Claims OPI.docx` and drafted dependent Claims 11–15 for attorney review.
 
 ---
 
