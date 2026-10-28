@@ -1,0 +1,58 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "test": "E",
+  "title": "Grad-CAM Spatial Attribution Pointing Game",
+  "preregistration_commit": "8cb5b72",
+  "model_checkpoint": "classifier_v2a1.pt",
+  "dataset": "BHX CQ500 bounding boxes (CC BY-SA 4.0)",
+  "n_studies_matched": 226,
+  "n_uid_not_mapped": 0,
+  "n_cam_mass_excluded": 0,
+  "n_total_bboxes": 6283,
+  "n_hits": 704,
+  "hit_rate": 0.11204838452968327,
+  "ci_lo": 0.07841725424287911,
+  "ci_hi": 0.15076371241656467,
+  "threshold": 0.55,
+  "verdict": "PARTIAL / NOT MET",
+  "ci_verdict": "NOT MET",
+  "by_label": {
+    "Intraventricular": {
+      "n_hits": 17,
+      "n_total": 558,
+      "hit_rate": 0.03046594982078853
+    },
+    "Intraparenchymal": {
+      "n_hits": 134,
+      "n_total": 1324,
+      "hit_rate": 0.10120845921450151
+    },
+    "Subarachnoid": {
+      "n_hits": 250,
+      "n_total": 1746,
+      "hit_rate": 0.143184421534937
+    },
+    "Chronic": {
+      "n_hits": 110,
+      "n_total": 740,
+      "hit_rate": 0.14864864864864866
+    },
+    "Subdural": {
+      "n_hits": 192,
+      "n_total": 1849,
+      "hit_rate": 0.10383991346673878
+    },
+    "Epidural": {
+      "n_hits": 1,
+      "n_total": 66,
+      "hit_rate": 0.015151515151515152
+    }
+  },
+  "methodology_notes": [
+    "Rank-based UID\u2192scan mapping (pre-registered limitation): BHX StudyInstanceUIDs sorted ascending, CQ500 scan names sorted numerically, matched by rank.",
+    "Grad-CAM computed on late network (features[3:9]) last Conv2dNormActivation.",
+    "CAM interpolated bilinearly from 5\u00d75 to 512\u00d7512 DICOM pixel space.",
+    "Per-study bootstrap CI (10,000 resamples, seed=42).",
+    "Hit criterion: any of the 8 uniform slices has its CAM argmax inside the bbox."
+  ]
+}

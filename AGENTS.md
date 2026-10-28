@@ -61,6 +61,21 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — Test E Grad-CAM pointing game evaluation, branch `main`)
+
+Governing pre-registration: `docs/evidence/preregistration_testE_gradcam.md` (committed in `8cb5b72`). Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Licence: **CC BY-SA 4.0** (BHX CQ500 bounding boxes); **CC BY-NC-SA 4.0** (CQ500 dataset).
+
+### ✅ Completed
+- **Test E Pre-registration Frozen (`8cb5b72`)**: `docs/evidence/preregistration_testE_gradcam.md` committed prior to evaluation. Evaluates spatial coherence of Grad-CAM heatmaps against 6,283 radiologist bounding boxes across 226 CQ500 studies.
+- **Test E Pointing Game Executed (`step11_gradcam_pointing.py`)**:
+  - `validation/reports/v2a1_testE_gradcam.json` and formal report `docs/evidence/feasibility_report_testE_gradcam.md`.
+  - **Hit Rate**: **11.20%** (704 / 6,283) [95% CI: 7.84%, 15.08%] vs. pre-registered threshold $\ge 55\%$.
+  - **By Subtype**: Chronic 14.86% (110/740), Subarachnoid 14.32% (250/1,746), Subdural 10.38% (192/1,849), Intraparenchymal 10.12% (134/1,324), Intraventricular 3.05% (17/558), Epidural 1.52% (1/66).
+  - **Verdict**: **PARTIAL / NOT MET** (the Grad-CAM peak activation fell within the radiologist bounding box in 11.2% of annotated slice-bbox pairs, below the 55% threshold).
+  - **Scientific Interpretation**: Expected for a classification-only model trained without bounding-box loss or spatial supervision. Grad-CAM identifies discriminative feature maps (e.g. ventricles, bone interfaces, skull symmetry) rather than tight lesion boundaries. This underscores the importance of the demo-mode label on explainability outputs.
+
+---
+
 ## 📋 Work State (2026-10-28 — Test D OpenI external evaluation, branch `main`)
 
 Governing pre-registration: `docs/evidence/preregistration_testD_openi.md` (committed in `5f9d873`). Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** Licence: **Public Domain / NLM terms** (OpenI Indiana University reports).
