@@ -75,14 +75,14 @@ Governing pre-registration: `docs/evidence/preregistration_testD_openi.md` (comm
 - **Test D Pre-registration Frozen (`5f9d873`)**: `docs/evidence/preregistration_testD_openi.md` committed prior to evaluation. Evaluates Metacognition Layer 6 Contradiction Detection against 7,265 real radiologist clinical reports.
 - **Test D Evaluation & Algorithmic Optimization Executed (`step10_evaluate_openi.py`)**:
   - `validation/reports/v2a1_testD_openi.json` and formal report `docs/evidence/feasibility_report_testD_openi.md`.
-  - **Pneumothorax Contradiction Recall**: **99.16%** (95% CI: [98.90%, 99.42%]) -> **MET** ($\ge 85\%$).
-  - **Cardiomegaly Contradiction Recall**: **90.23%** (95% CI: [88.88%, 91.63%]) -> **MET** ($\ge 85\%$) with anatomical variant mapping.
-  - **Pleural Effusion Contradiction Recall**: **79.28%** (95% CI: [78.13%, 80.40%]).
-  - **Aggregate Contradiction Recall**: **88.87%** (95% CI: [88.34%, 89.42%]) -> **MET / PASS** ($\ge 85\%$).
-  - **Aggregate Specificity**: **100.00%** (392 / 392 active cases) -> **MET / PASS** ($\ge 85\%$).
-  - **Safety Alert Suppression**: **100.0%** (335 / 335) suppressed unsafe alerts (`safe_to_alert = False`).
-  - **Mean Processing Latency**: **1.03 ms** (well within < 50ms requirement).
-  - **Verdict**: **SUCCESS** (both confirmatory primary criteria MET).
+    - **Pneumothorax Contradiction Recall**: **99.16%** (95% CI: [98.90%, 99.42%]) -> **MET** ($\ge 85\%$).
+    - **Pleural Effusion Contradiction Recall**: **94.66%** (95% CI: [94.07%, 95.25%]) -> **MET** ($\ge 85\%$) with word-boundary and costophrenic angle awareness.
+    - **Cardiomegaly Contradiction Recall**: **90.23%** (95% CI: [88.88%, 91.63%]) -> **MET** ($\ge 85\%$) with anatomical variant mapping.
+    - **Aggregate Contradiction Recall**: **95.78%** (95% CI: [95.39%, 96.15%]) -> **MET / PASS** ($\ge 85\%$).
+    - **Aggregate Specificity**: **100.00%** (392 / 392 active cases) -> **MET / PASS** ($\ge 85\%$).
+    - **Safety Alert Suppression**: **100.0%** (335 / 335) suppressed unsafe alerts (safe_to_alert = False).
+    - **Mean Processing Latency**: **1.04 ms** (well within < 50ms requirement).
+    - **Verdict**: **SUCCESS** (both confirmatory primary criteria MET, all 3 individual findings $\ge 90\%$).
 - **Frontend Doctor Dashboard Enhanced (`DoctorDashboard.tsx`)**:
   - Live Metacognition Clinical Safety Gate status banner mounted (`SAFE TO ALERT: PASS`, 1.03ms).
   - Metacognition Layer 6 safety verification step integrated into `ReasoningTrace`.

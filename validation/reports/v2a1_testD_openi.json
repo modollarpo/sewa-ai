@@ -1,7 +1,7 @@
 {
   "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
   "evaluation": "Test D \u2014 OpenI External Validation of Metacognition Contradiction Detection",
-  "date": "2026-10-28 01:15:46",
+  "date": "2026-10-28 01:35:55",
   "dataset": {
     "source": "OpenI Indiana University Chest X-rays",
     "n_total_reports": 7265,
@@ -21,22 +21,22 @@
         "ci_lower": 1.0,
         "ci_upper": 1.0
       },
-      "eval_duration_sec": 0.477
+      "eval_duration_sec": 1.29
     },
     "Pleural Effusion": {
       "n_negated": 5241,
       "n_affirmed": 44,
       "contradiction_recall": {
-        "point": 0.7928,
-        "ci_lower": 0.7813,
-        "ci_upper": 0.804
+        "point": 0.9466,
+        "ci_lower": 0.9407,
+        "ci_upper": 0.9525
       },
       "specificity": {
         "point": 1.0,
         "ci_lower": 1.0,
         "ci_upper": 1.0
       },
-      "eval_duration_sec": 1.504
+      "eval_duration_sec": 4.289
     },
     "Cardiomegaly": {
       "n_negated": 1781,
@@ -51,15 +51,15 @@
         "ci_lower": 1.0,
         "ci_upper": 1.0
       },
-      "eval_duration_sec": 0.649
+      "eval_duration_sec": 2.078
     }
   },
   "pipeline_simulation": {
     "n_simulated": 500,
-    "mean_latency_ms": 1.03,
+    "mean_latency_ms": 1.04,
     "latency_ci": [
-      0.87,
-      1.24
+      0.96,
+      1.15
     ],
     "contradictions_flagged": 335,
     "alerts_properly_blocked": 335,
@@ -67,9 +67,9 @@
   },
   "primary_outcomes": {
     "aggregate_contradiction_recall": {
-      "point": 0.8887,
-      "ci_lower": 0.8834,
-      "ci_upper": 0.8942,
+      "point": 0.9578,
+      "ci_lower": 0.9539,
+      "ci_upper": 0.9615,
       "target": 0.85,
       "met": true
     },

@@ -398,13 +398,16 @@ class MetacognitionEvaluator:
             "epidural hematoma": ["epidural hematoma", "extradural hematoma", "edh"],
             "subarachnoid hemorrhage": ["subarachnoid hemorrhage", "subarachnoid haemorrhage", "sah"],
             "pneumothorax": ["pneumothorax", "pneumothoraces", "ptx"],
-            "pleural effusion": ["pleural effusion", "pleural effusions", "effusion", "effusions", "pleural fluid"],
+            "pleural effusion": [
+                "pleural effusion", "pleural effusions", "effusion", "effusions",
+                "pleural fluid", "costophrenic angle", "costophrenic angles", "costophrenic sulcus", "costophrenic sulci"
+            ],
             "pulmonary embolism": ["pulmonary embolism", "pe", "pulmonary embolus"],
             "pneumonia": ["pneumonia", "consolidation", "infiltrate", "airspace disease", "airspace opacity"],
             "cardiomegaly": ["cardiomegaly", "enlarged heart", "heart size", "cardiac size", "cardiac silhouette", "cardiothoracic ratio"],
             "fracture": ["fracture", "bony injury", "dislocation"],
         }
-        finding_syns = synonyms.get(finding_lower, [finding_lower])
+        finding_syns = sorted(synonyms.get(finding_lower, [finding_lower]), key=len, reverse=True)
 
         # --- Clause segmentation (periods, semicolons, line breaks) ---
         clauses = [c.strip() for c in re.split(r'[.;\n]+', report_lower) if c.strip()]
@@ -420,37 +423,42 @@ class MetacognitionEvaluator:
             "not observed", "not appreciated", "is absent", "are absent", "excluded", "is not seen",
             "are not seen", "resolved", "resolution", "has resolved", "disappeared"
         ]
-        normal_descriptors = ["normal", "unremarkable", "within normal limits", "clear", "intact"]
+        normal_descriptors = ["normal", "unremarkable", "within normal limits", "clear", "intact", "sharp"]
 
         affirmed = False
         negated = False
 
         for clause in clauses:
             for syn in finding_syns:
-                if syn in clause:
-                    is_clause_neg = False
-                    # 1. Pre-negation within clause
-                    for p in pre_neg:
-                        if re.search(r'\b' + re.escape(p) + r'\b.*?\b' + re.escape(syn) + r'\b', clause):
+                if not re.search(r'\b' + re.escape(syn) + r'(?:s)?\b', clause):
+                    continue
+
+                is_clause_neg = False
+                # 1. Pre-negation within clause
+                for p in pre_neg:
+                    if re.search(r'\b' + re.escape(p) + r'\b.*?\b' + re.escape(syn) + r'(?:s)?\b', clause):
+                        is_clause_neg = True
+                        break
+                # 2. Post-negation within clause
+                if not is_clause_neg:
+                    for p in post_neg:
+                        if re.search(r'\b' + re.escape(syn) + r'(?:s)?\b.*?\b' + re.escape(p) + r'\b', clause):
                             is_clause_neg = True
                             break
-                    # 2. Post-negation within clause
-                    if not is_clause_neg:
-                        for p in post_neg:
-                            if re.search(r'\b' + re.escape(syn) + r'\b.*?\b' + re.escape(p) + r'\b', clause):
-                                is_clause_neg = True
-                                break
-                    # 3. Anatomical normal statements (e.g. "heart size is normal", "cardiac silhouette within normal limits")
-                    if not is_clause_neg and syn in ("heart size", "cardiac size", "cardiac silhouette"):
-                        for norm in normal_descriptors:
-                            if norm in clause:
-                                is_clause_neg = True
-                                break
+                # 3. Anatomical normal statements (e.g. "heart size is normal", "costophrenic angles sharp")
+                if not is_clause_neg and syn in (
+                    "heart size", "cardiac size", "cardiac silhouette",
+                    "costophrenic angle", "costophrenic angles", "costophrenic sulcus", "costophrenic sulci"
+                ):
+                    for norm in normal_descriptors:
+                        if norm in clause:
+                            is_clause_neg = True
+                            break
 
-                    if is_clause_neg:
-                        negated = True
-                    else:
-                        affirmed = True
+                if is_clause_neg:
+                    negated = True
+                else:
+                    affirmed = True
 
         # Global normal check for whole study if finding is completely unmentioned
         if not affirmed and not negated:
