@@ -87,6 +87,13 @@ Governing pre-registration: `docs/evidence/preregistration_testD_openi.md` (comm
   - Live Metacognition Clinical Safety Gate status banner mounted (`SAFE TO ALERT: PASS`, 1.03ms).
   - Metacognition Layer 6 safety verification step integrated into `ReasoningTrace`.
 
+### ✅ Production Re-deployment Succeeded (2026-10-28)
+- **Frontend Live (main-e264d7f)**: Evidence pages updated with Test D (95.78% contradiction recall, 100% specificity) and Test C (0.7468 AUROC) results. 3/3 pods Running.
+- **Metacognition Live (main-9dbd5a6e)**: Layer 6 clause-scoped clinical negation engine deployed. 2/2 pods Running.
+- **Uncertainty Fixed & Live (main-056dcd7)**: Added missing window_coherence.py & yaml to Dockerfile; crash-loop resolved. 2/2 pods Running.
+- **CI/CD Pipeline Fixed (main-3b6c406)**: Added conditional check to skip Slack notification step cleanly when webhook secret is unset.
+- **Cluster Status**: All 25 microservice pods in namespace sewa-ai are 1/1 Running with 0 restarts. Both https://app.sewaxai.health and https://api.sewaxai.health/health return HTTP 200.
+
 ### 🔜 Next
 - Delete temporary ACR repository `sewa-validation` from Azure Cloud Shell.
 - Decide on git push / archive for branch `fix/patent-aligned`.
