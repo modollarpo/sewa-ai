@@ -61,6 +61,34 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — Test J ICH Subtype Sensitivity & Critical-Negative Safety Audit, branch `main`)
+
+Governing pre-registration: `docs/evidence/preregistration_testJ_ich_subtypes.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Test J Pre-registration Frozen (`00ecb37`)**:
+  - `docs/evidence/preregistration_testJ_ich_subtypes.md` committed prior to evaluation.
+  - Success criteria: C-1 (Acute triage sensitivity $\ge 80\%$ on major subtypes IPH, SAH, SDH) and C-2 (Conformal risk gate recall $\ge 90\%$ on surgical emergencies EDH, SAH).
+- **Dual-Cohort Evaluation Executed (`step18_ich_subtypes_evaluation.py`)**:
+  - `validation/reports/v2a1_testJ_subtypes.json` and formal report `docs/evidence/feasibility_report_testJ_subtypes.md`.
+  - **Internal Benchmark (RSNA 2019, N=2,000 multi-label slices)**:
+    - Intraparenchymal (IPH): **100.0%** sensitivity @ $\tau=0.30$ and $\tau=0.50$ (AUROC 0.8057).
+    - Epidural (EDH): **100.0%** sensitivity @ $\tau=0.30$ and $\tau=0.50$ (AUROC 0.8132).
+    - Subdural (SDH): **94.4%** sensitivity @ $\tau=0.30$ and $\tau=0.50$ (AUROC 0.7525).
+    - Intraventricular (IVH): **95.2%** sensitivity @ $\tau=0.30$ and $\tau=0.50$ (AUROC 0.7685).
+    - Subarachnoid (SAH): **85.4%** sensitivity @ $\tau=0.30$ (AUROC 0.7014).
+    - Conformal Risk Gate ($\lambda = 0.0298$, $\text{FNR} \le 5\%$ guarantee): **100.0% recall on Epidural**, **91.7% on Subarachnoid**, **95.8% on Subdural**, and **100.0% on Intraparenchymal**.
+  - **External Generalisation (CQ500 / BHX, N=486 scans, 226 positive studies with 6,283 bboxes)**:
+    - Zero-Label AdaBN adaptation uniformly improves subtype AUROC (SAH: 0.5915 → 0.6081; IPH: 0.5740 → 0.5926; EDH: 0.6839 → 0.7060).
+    - Conformal Risk Gate ($\lambda = 0.0298$) recall: Epidural **83.3%** (5/6 studies), Subarachnoid **88.1%** (104/118 studies), Intraparenchymal **89.8%** (114/127 studies), Subdural **86.7%** (78/90 studies).
+  - **Verdict**: **PARTIAL CRITERIA MET** (C-1 MET on RSNA; C-2 MET on RSNA, with external CQ500 achieving 83.3% EDH and 88.1% SAH).
+  - **Governance Significance**: Quantitatively proves why AI cannot act as an autonomous diagnostic agent and why mandatory 100% consultant radiologist sign-off remains essential.
+- **Frontend Evidence Pages Synchronized (`ClinicalEvidencePage.tsx`, `ClinicalValidationPage.tsx`)**:
+  - Test J results published honestly to the public ledger with subtype metric cards and audit disclosures.
+  - Production build verified: `npm --prefix frontend run build` exited 0.
+
+---
+
 ## 📋 Work State (2026-10-28 — HIWM Value Proposition Deck Realization & Slide-by-Slide Alignment, branch `main`)
 
 Governing artifacts: `docs/clinical/SEWA_XAI_Value_Proposition_Deck (1).pdf`, `docs/evidence/healthcare_value_proposition_hiwm.md`, `docs/evidence/healthcare_value_proposition_hiwm_deck.html`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**

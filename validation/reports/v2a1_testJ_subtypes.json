@@ -1,0 +1,643 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "test_id": "Test J",
+  "title": "Acute ICH Subtype Diagnostic Sensitivity & Critical-Negative Safety Audit",
+  "pre_registration": "docs/evidence/preregistration_testJ_ich_subtypes.md",
+  "timestamp": "2026-10-28 10:08:24 UTC",
+  "elapsed_seconds": 417.03,
+  "thresholds": {
+    "tau_default": 0.5,
+    "tau_triage": 0.3,
+    "lambda_crc": 0.0298
+  },
+  "rsna_benchmark_cohort": {
+    "overall": {
+      "n_total": 2000,
+      "n_negatives": 1849,
+      "n_positives_any": 151,
+      "specificity_at_0_50": 0.5332612222823148,
+      "specificity_at_0_30": 0.513250405624662,
+      "overall_auroc": 0.7400939831446387
+    },
+    "subtypes": {
+      "epidural": {
+        "n_positives": 4,
+        "n_negatives_ref": 1849,
+        "auroc": 0.813209843158464,
+        "sensitivity_at_0_50": {
+          "tp": 4,
+          "fn": 0,
+          "sensitivity": 1.0,
+          "ci_95": [
+            0.5101101796138527,
+            1.0
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 4,
+          "fn": 0,
+          "sensitivity": 1.0,
+          "ci_95": [
+            0.5101101796138527,
+            1.0
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 4,
+          "fn": 0,
+          "recall": 1.0,
+          "missed_cases": 0,
+          "ci_95": [
+            0.5101101796138527,
+            1.0
+          ]
+        }
+      },
+      "intraparenchymal": {
+        "n_positives": 43,
+        "n_negatives_ref": 1849,
+        "auroc": 0.8057277975524169,
+        "sensitivity_at_0_50": {
+          "tp": 43,
+          "fn": 0,
+          "sensitivity": 1.0,
+          "ci_95": [
+            0.9179905028744122,
+            1.0
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 43,
+          "fn": 0,
+          "sensitivity": 1.0,
+          "ci_95": [
+            0.9179905028744122,
+            1.0
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 43,
+          "fn": 0,
+          "recall": 1.0,
+          "missed_cases": 0,
+          "ci_95": [
+            0.9179905028744122,
+            1.0
+          ]
+        }
+      },
+      "intraventricular": {
+        "n_positives": 42,
+        "n_negatives_ref": 1849,
+        "auroc": 0.7685106492569986,
+        "sensitivity_at_0_50": {
+          "tp": 40,
+          "fn": 2,
+          "sensitivity": 0.9523809523809523,
+          "ci_95": [
+            0.8421017890334725,
+            0.9868424445257729
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 40,
+          "fn": 2,
+          "sensitivity": 0.9523809523809523,
+          "ci_95": [
+            0.8421017890334725,
+            0.9868424445257729
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 40,
+          "fn": 2,
+          "recall": 0.9523809523809523,
+          "missed_cases": 2,
+          "ci_95": [
+            0.8421017890334725,
+            0.9868424445257729
+          ]
+        }
+      },
+      "subarachnoid": {
+        "n_positives": 48,
+        "n_negatives_ref": 1849,
+        "auroc": 0.701392644672796,
+        "sensitivity_at_0_50": {
+          "tp": 41,
+          "fn": 7,
+          "sensitivity": 0.8541666666666666,
+          "ci_95": [
+            0.7283285340373556,
+            0.9275174050461968
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 41,
+          "fn": 7,
+          "sensitivity": 0.8541666666666666,
+          "ci_95": [
+            0.7283285340373556,
+            0.9275174050461968
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 44,
+          "fn": 4,
+          "recall": 0.9166666666666666,
+          "missed_cases": 4,
+          "ci_95": [
+            0.8044672734732475,
+            0.9671161842721082
+          ]
+        }
+      },
+      "subdural": {
+        "n_positives": 72,
+        "n_negatives_ref": 1849,
+        "auroc": 0.7525163752178354,
+        "sensitivity_at_0_50": {
+          "tp": 68,
+          "fn": 4,
+          "sensitivity": 0.9444444444444444,
+          "ci_95": [
+            0.8656800531894259,
+            0.9781857449583843
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 68,
+          "fn": 4,
+          "sensitivity": 0.9444444444444444,
+          "ci_95": [
+            0.8656800531894259,
+            0.9781857449583843
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 69,
+          "fn": 3,
+          "recall": 0.9583333333333334,
+          "missed_cases": 3,
+          "ci_95": [
+            0.8845074404276414,
+            0.985729163912288
+          ]
+        }
+      },
+      "any": {
+        "n_positives": 151,
+        "n_negatives_ref": 1849,
+        "auroc": 0.7400939831446387,
+        "sensitivity_at_0_50": {
+          "tp": 140,
+          "fn": 11,
+          "sensitivity": 0.9271523178807947,
+          "ci_95": [
+            0.8742714110970897,
+            0.9588388811652018
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 140,
+          "fn": 11,
+          "sensitivity": 0.9271523178807947,
+          "ci_95": [
+            0.8742714110970897,
+            0.9588388811652018
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 144,
+          "fn": 7,
+          "recall": 0.9536423841059603,
+          "missed_cases": 7,
+          "ci_95": [
+            0.9074105121725123,
+            0.977365534648681
+          ]
+        }
+      }
+    }
+  },
+  "cq500_external_cohort": {
+    "baseline": {
+      "Intraparenchymal": {
+        "n_positives": 127,
+        "n_negatives_ref": 284,
+        "auroc": 0.5739581332821202,
+        "sensitivity_at_0_50": {
+          "tp": 42,
+          "fn": 85,
+          "sensitivity": 0.33070866141732286,
+          "ci_95": [
+            0.2549129227997458,
+            0.4164450281077067
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 62,
+          "fn": 65,
+          "sensitivity": 0.4881889763779528,
+          "ci_95": [
+            0.40288583330682093,
+            0.5741856516402106
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 109,
+          "fn": 18,
+          "recall": 0.8582677165354331,
+          "missed_cases": 18,
+          "ci_95": [
+            0.7870691805014578,
+            0.9084291094385848
+          ]
+        }
+      },
+      "Subarachnoid": {
+        "n_positives": 118,
+        "n_negatives_ref": 284,
+        "auroc": 0.5915332705586942,
+        "sensitivity_at_0_50": {
+          "tp": 37,
+          "fn": 81,
+          "sensitivity": 0.3135593220338983,
+          "ci_95": [
+            0.23685004625888373,
+            0.40202488132058367
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 61,
+          "fn": 57,
+          "sensitivity": 0.5169491525423728,
+          "ci_95": [
+            0.42768325936853085,
+            0.6051462926696993
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 106,
+          "fn": 12,
+          "recall": 0.8983050847457628,
+          "missed_cases": 12,
+          "ci_95": [
+            0.8306301026167331,
+            0.9408643702816772
+          ]
+        }
+      },
+      "Subdural": {
+        "n_positives": 90,
+        "n_negatives_ref": 284,
+        "auroc": 0.5900533721494421,
+        "sensitivity_at_0_50": {
+          "tp": 32,
+          "fn": 58,
+          "sensitivity": 0.35555555555555557,
+          "ci_95": [
+            0.2644388564250526,
+            0.4584980559565688
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 48,
+          "fn": 42,
+          "sensitivity": 0.5333333333333333,
+          "ci_95": [
+            0.43102207671708137,
+            0.6329155588871598
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 77,
+          "fn": 13,
+          "recall": 0.8555555555555555,
+          "missed_cases": 13,
+          "ci_95": [
+            0.7684014247950153,
+            0.9136000216502242
+          ]
+        }
+      },
+      "Intraventricular": {
+        "n_positives": 43,
+        "n_negatives_ref": 284,
+        "auroc": 0.6282633876860021,
+        "sensitivity_at_0_50": {
+          "tp": 16,
+          "fn": 27,
+          "sensitivity": 0.37209302325581395,
+          "ci_95": [
+            0.24376361149389975,
+            0.521401608701018
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 25,
+          "fn": 18,
+          "sensitivity": 0.5813953488372093,
+          "ci_95": [
+            0.4332860633236499,
+            0.7161542510977661
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 37,
+          "fn": 6,
+          "recall": 0.8604651162790697,
+          "missed_cases": 6,
+          "ci_95": [
+            0.7273644396456049,
+            0.9344426670778085
+          ]
+        }
+      },
+      "Chronic": {
+        "n_positives": 32,
+        "n_negatives_ref": 284,
+        "auroc": 0.6055582061068703,
+        "sensitivity_at_0_50": {
+          "tp": 10,
+          "fn": 22,
+          "sensitivity": 0.3125,
+          "ci_95": [
+            0.1795256260078454,
+            0.48566642743423516
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 18,
+          "fn": 14,
+          "sensitivity": 0.5625,
+          "ci_95": [
+            0.3932562312189064,
+            0.7183464176337334
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 29,
+          "fn": 3,
+          "recall": 0.90625,
+          "missed_cases": 3,
+          "ci_95": [
+            0.7578188339685694,
+            0.9675983835735895
+          ]
+        }
+      },
+      "Epidural": {
+        "n_positives": 6,
+        "n_negatives_ref": 284,
+        "auroc": 0.6839285714285714,
+        "sensitivity_at_0_50": {
+          "tp": 3,
+          "fn": 3,
+          "sensitivity": 0.5,
+          "ci_95": [
+            0.1876166936607192,
+            0.8123833063392808
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 5,
+          "fn": 1,
+          "sensitivity": 0.8333333333333334,
+          "ci_95": [
+            0.43649790959495943,
+            0.9699465435264778
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 5,
+          "fn": 1,
+          "recall": 0.8333333333333334,
+          "missed_cases": 1,
+          "ci_95": [
+            0.43649790959495943,
+            0.9699465435264778
+          ]
+        }
+      }
+    },
+    "adabn_adapted": {
+      "Intraparenchymal": {
+        "n_positives": 127,
+        "n_negatives_ref": 284,
+        "auroc": 0.5926253120798924,
+        "sensitivity_at_0_50": {
+          "tp": 55,
+          "fn": 72,
+          "sensitivity": 0.4330708661417323,
+          "ci_95": [
+            0.3501110405640389,
+            0.5199607074691401
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 77,
+          "fn": 50,
+          "sensitivity": 0.6062992125984252,
+          "ci_95": [
+            0.5194055675472364,
+            0.6869510679294795
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 114,
+          "fn": 13,
+          "recall": 0.8976377952755905,
+          "missed_cases": 13,
+          "ci_95": [
+            0.8327282977052712,
+            0.939198375744666
+          ]
+        }
+      },
+      "Subarachnoid": {
+        "n_positives": 118,
+        "n_negatives_ref": 284,
+        "auroc": 0.6080900816070307,
+        "sensitivity_at_0_50": {
+          "tp": 49,
+          "fn": 69,
+          "sensitivity": 0.4152542372881356,
+          "ci_95": [
+            0.33038891670159576,
+            0.5054633231072531
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 78,
+          "fn": 40,
+          "sensitivity": 0.6610169491525424,
+          "ci_95": [
+            0.5717357973902333,
+            0.740144946972954
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 104,
+          "fn": 14,
+          "recall": 0.8813559322033898,
+          "missed_cases": 14,
+          "ci_95": [
+            0.8106690535642463,
+            0.9279958672959338
+          ]
+        }
+      },
+      "Subdural": {
+        "n_positives": 90,
+        "n_negatives_ref": 284,
+        "auroc": 0.6058224163027657,
+        "sensitivity_at_0_50": {
+          "tp": 40,
+          "fn": 50,
+          "sensitivity": 0.4444444444444444,
+          "ci_95": [
+            0.34615674359150206,
+            0.5472805304014292
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 57,
+          "fn": 33,
+          "sensitivity": 0.6333333333333333,
+          "ci_95": [
+            0.5302232599152817,
+            0.7255272825016831
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 78,
+          "fn": 12,
+          "recall": 0.8666666666666667,
+          "missed_cases": 12,
+          "ci_95": [
+            0.7812608970178565,
+            0.9220530946287968
+          ]
+        }
+      },
+      "Intraventricular": {
+        "n_positives": 43,
+        "n_negatives_ref": 284,
+        "auroc": 0.5963646083934777,
+        "sensitivity_at_0_50": {
+          "tp": 19,
+          "fn": 24,
+          "sensitivity": 0.4418604651162791,
+          "ci_95": [
+            0.3043333464511372,
+            0.58892357181928
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 27,
+          "fn": 16,
+          "sensitivity": 0.627906976744186,
+          "ci_95": [
+            0.47859839129898196,
+            0.7562363885061003
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 37,
+          "fn": 6,
+          "recall": 0.8604651162790697,
+          "missed_cases": 6,
+          "ci_95": [
+            0.7273644396456049,
+            0.9344426670778085
+          ]
+        }
+      },
+      "Chronic": {
+        "n_positives": 32,
+        "n_negatives_ref": 284,
+        "auroc": 0.5979246183206107,
+        "sensitivity_at_0_50": {
+          "tp": 15,
+          "fn": 17,
+          "sensitivity": 0.46875,
+          "ci_95": [
+            0.30869415563984715,
+            0.635504519933833
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 20,
+          "fn": 12,
+          "sensitivity": 0.625,
+          "ci_95": [
+            0.4525444129166595,
+            0.7706608847886202
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 28,
+          "fn": 4,
+          "recall": 0.875,
+          "missed_cases": 4,
+          "ci_95": [
+            0.719317326099671,
+            0.9502985670161679
+          ]
+        }
+      },
+      "Epidural": {
+        "n_positives": 6,
+        "n_negatives_ref": 284,
+        "auroc": 0.7059523809523809,
+        "sensitivity_at_0_50": {
+          "tp": 4,
+          "fn": 2,
+          "sensitivity": 0.6666666666666666,
+          "ci_95": [
+            0.29999386762817765,
+            0.9032283589325407
+          ]
+        },
+        "sensitivity_at_0_30": {
+          "tp": 5,
+          "fn": 1,
+          "sensitivity": 0.8333333333333334,
+          "ci_95": [
+            0.43649790959495943,
+            0.9699465435264778
+          ]
+        },
+        "conformal_risk_gate_recall": {
+          "tp": 5,
+          "fn": 1,
+          "recall": 0.8333333333333334,
+          "missed_cases": 1,
+          "ci_95": [
+            0.43649790959495943,
+            0.9699465435264778
+          ]
+        }
+      }
+    }
+  },
+  "success_criteria": {
+    "C1_acute_triage_major_subtypes": {
+      "threshold": ">= 80.0%",
+      "rsna_iph": 1.0,
+      "rsna_sah": 0.8541666666666666,
+      "rsna_sdh": 0.9444444444444444,
+      "status": "MET"
+    },
+    "C2_conformal_surgical_recall": {
+      "threshold": ">= 90.0%",
+      "rsna_edh": 1.0,
+      "rsna_sah": 0.9166666666666666,
+      "cq500_edh": 0.8333333333333334,
+      "cq500_sah": 0.8813559322033898,
+      "status": "NOT MET"
+    }
+  },
+  "verdict": "PARTIAL CRITERIA MET"
+}
