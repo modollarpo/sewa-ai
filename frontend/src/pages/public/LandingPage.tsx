@@ -32,7 +32,7 @@ const STATS = [
   { value:'0.75',  label:'External ICH AUROC (CQ500, 486 scans)', icon:'🎯' },
   { value:'0.81',  label:'Internal ICH AUROC (RSNA)',             icon:'📊' },
   { value:'95.8%', label:'Contradiction Recall (OpenI, 7,265)',    icon:'🛡️' },
-  { value:'TRL 5', label:'Validation stage',                      icon:'✅' },
+  { value:'1.04ms', label:'CPU Safety Gate Latency',              icon:'⚡' },
 ];
 
 const COMPLIANCE = [
