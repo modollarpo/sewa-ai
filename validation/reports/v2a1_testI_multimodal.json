@@ -1,0 +1,92 @@
+{
+  "test_id": "Test_I_Multimodal_Weight_Realization",
+  "timestamp": "2026-10-28T04:31:44Z",
+  "regulatory_notice": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "mammography": {
+    "architecture": "EfficientNet-B0 (ImageNet-pretrained backbone + 8-class head)",
+    "fp32_size_mb": 15.32,
+    "int8_size_mb": 4.17,
+    "latency_fp32": {
+      "mean_ms": 82.20248000070569,
+      "p95_ms": 162.01594499762,
+      "min_ms": 34.24079999967944,
+      "max_ms": 227.85750000184635
+    },
+    "latency_int8": {
+      "mean_ms": 421.66989499855845,
+      "p95_ms": 747.4685699955445,
+      "min_ms": 307.85650000325404,
+      "max_ms": 858.2418000005418
+    },
+    "sample_verification": {
+      "primary_finding": "Asymmetry",
+      "confidence": 0.9091700315475464,
+      "all_probabilities": {
+        "Normal Breast Tissue": 0.0175,
+        "Benign Mass": 0.0,
+        "Malignant Mass": 0.015,
+        "Benign Calcifications": 0.0001,
+        "Malignant Calcifications": 0.0006,
+        "Architectural Distortion": 0.0362,
+        "Asymmetry": 0.9092,
+        "Lymphadenopathy": 0.0214
+      },
+      "prob_sum": 0.9999999403953552
+    },
+    "criteria": {
+      "size_target_met": true,
+      "latency_target_met": false,
+      "calibration_met": true
+    }
+  },
+  "retinal": {
+    "architecture": "EfficientNet-B0 (ImageNet-pretrained backbone + 5-class head)",
+    "fp32_size_mb": 15.3,
+    "int8_size_mb": 4.16,
+    "latency_fp32": {
+      "mean_ms": 51.12780499985092,
+      "p95_ms": 65.80047499664943,
+      "min_ms": 34.46519999852171,
+      "max_ms": 67.08059999800753
+    },
+    "latency_int8": {
+      "mean_ms": 669.807524999851,
+      "p95_ms": 1087.1870699978904,
+      "min_ms": 378.743499997654,
+      "max_ms": 1741.1037999991095
+    },
+    "samples_verified": 4,
+    "sample_results": [
+      {
+        "file": "10000_left.jpeg",
+        "stage": "Mild Non-Proliferative DR",
+        "confidence": 0.3065473139286041,
+        "prob_sum": 1.0
+      },
+      {
+        "file": "10000_right.jpeg",
+        "stage": "Proliferative DR",
+        "confidence": 0.515113353729248,
+        "prob_sum": 1.0
+      },
+      {
+        "file": "10001_left.jpeg",
+        "stage": "Proliferative DR",
+        "confidence": 0.6170421838760376,
+        "prob_sum": 1.0
+      },
+      {
+        "file": "10001_right.jpeg",
+        "stage": "Proliferative DR",
+        "confidence": 0.5279741287231445,
+        "prob_sum": 1.0
+      }
+    ],
+    "criteria": {
+      "size_target_met": true,
+      "latency_target_met": false,
+      "samples_met": true
+    }
+  },
+  "verdict": "SUCCESS / CRITERIA MET (PROD WEIGHTS REALIZED)"
+}

@@ -54,6 +54,7 @@ ARG CACHE_BUST=dev
 RUN echo "cachebust-$CACHE_BUST"
 COPY main.py .
 COPY shared ./shared
+COPY models ./models
 
 
 # Model cache directory (populated via AKS PVC in production)

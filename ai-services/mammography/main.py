@@ -110,9 +110,10 @@ async def lifespan(app: FastAPI):
     global _batch_queue, ACTIVE_BACKEND, DEMO_MODE
 
     model_path = _resolve_model()
-    if model_path == INT8_MODEL:
+    local_models = Path(__file__).parent / "models"
+    if model_path in (INT8_MODEL, local_models / f"mammography_{MODEL_VERSION}_int8.onnx"):
         ACTIVE_BACKEND = "onnx-int8"
-    elif model_path == FP32_MODEL:
+    elif model_path in (FP32_MODEL, local_models / f"mammography_{MODEL_VERSION}.onnx"):
         ACTIVE_BACKEND = "onnx-fp32"
     else:
         ACTIVE_BACKEND = "demo"
@@ -139,12 +140,21 @@ async def lifespan(app: FastAPI):
 
 
 def _resolve_model() -> Path:
+    local_dir = Path(__file__).parent / "models"
+    local_int8 = local_dir / f"mammography_{MODEL_VERSION}_int8.onnx"
+    local_fp32 = local_dir / f"mammography_{MODEL_VERSION}.onnx"
     if INT8_MODEL.exists():
         logger.info(f"[Mammography] Using INT8 ONNX: {INT8_MODEL}")
         return INT8_MODEL
+    if local_int8.exists():
+        logger.info(f"[Mammography] Using local INT8 ONNX: {local_int8}")
+        return local_int8
     if FP32_MODEL.exists():
         logger.info(f"[Mammography] Using FP32 ONNX (INT8 not found): {FP32_MODEL}")
         return FP32_MODEL
+    if local_fp32.exists():
+        logger.info(f"[Mammography] Using local FP32 ONNX: {local_fp32}")
+        return local_fp32
     logger.warning("[Mammography] No model found — creating demo ONNX")
     return _create_demo_onnx()
 

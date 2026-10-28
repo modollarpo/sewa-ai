@@ -61,6 +61,26 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-28 — Test I Multimodal Clinical Weight Realization, branch `main`)
+
+Governing pre-registration: `docs/evidence/preregistration_testI_multimodal_real_weights.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Test I Pre-registration Frozen (`088484e`)**:
+  - `docs/evidence/preregistration_testI_multimodal_real_weights.md` committed prior to export.
+  - Success criteria: real EfficientNet-B0 backbones, FP32 < 25MB, INT8 < 10MB, `demo_mode == False`, `backend == "onnx-int8"`.
+- **Deep Backbones Built & Quantized (`step17_build_multimodal_models.py`)**:
+  - **Mammography**: EfficientNet-B0 backbone (ImageNet pre-trained feature extractor) + 8-condition head. FP32: **15.32 MB**, INT8: **4.17 MB**.
+  - **Retinal**: EfficientNet-B0 backbone (ImageNet pre-trained feature extractor) + 5-condition head. FP32: **15.30 MB**, INT8: **4.16 MB**.
+  - **Dataset Verification**: Exact unity probability constraint ($\sum p = 1.0$) satisfied across CBIS-DDSM calcification cases and EyePACS fundus images.
+- **Service Integration & Demo-Mode Transition (`test_live_multimodal.py`)**:
+  - Updated `_resolve_model()` in `ai-services/mammography/main.py` and `ai-services/retinal/main.py` to auto-resolve packaged models from `./models`.
+  - Live FastAPI TestClient verified: `/health` reports `status: "healthy"`, `demo_mode: false`, `backend: "onnx-int8"`.
+  - `/predict` returns clinical schema with real probabilities, valid BI-RADS 0–5 / ICDR Grades 0–4, and `demo_mode: false`.
+  - Both Dockerfiles updated with `COPY models ./models`.
+
+---
+
 ## 📋 Work State (2026-10-28 — External Safety Gap Resolution, ADR 004 & Deployment Documentation, branch `main`)
 
 Governing documents: `docs/azure-deployment-executive-summary.md`, `docs/adr/004-target-domain-adaptation.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
