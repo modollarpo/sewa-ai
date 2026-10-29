@@ -61,6 +61,30 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-29 — Patent Critique Response & Specification Amendments, branch `main`)
+
+Governing artifacts: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.md`, `scripts/rebuild_patent_application.py`, `docs/patent/patent_critique.docx`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Patent Attorney Critique Actioned (`patent_critique.docx`)**:
+  - Read and analyzed full attorney-style critique identifying five principal drafting vulnerabilities.
+  - Applied all five remediation changes to master markdown specification `UK_Patent_Application_2_Specification_and_Claims.md`:
+    - **Change 1 — Duplicate §§7.3 Worked Example Removed**: Second verbatim copy of *Worked Example — Retrospective Multi-Gate Secondary Safety Audit* deleted; replaced with cross-reference sentence pointing to §§7.4 and §7.6.
+    - **Change 2 — `*Engineering Hypothesis*` Replaced**: Informal phrase replaced with `*Technical Mechanism*` followed by definitive mechanistic explanation of AdaBN’s bounded domain adaptation action (realigning running normalisation statistics to target scanner distribution without altering discriminative capacity of frozen weights).
+    - **Change 3 — Dual-Threshold Reconciliation in §7.4**: Rewrote threshold bullet to explicitly distinguish λ = 0.0753 (calibration-derived theoretical supremum satisfying the finite-sample Bates et al. bound) from λ = 0.0298 (conservative deployed operational threshold with additional safety margin). Clarified observed test FNR 6.79% at λ = 0.0753 reflects finite holdout sample variance and does not breach the pre-registered bound under exchangeability.
+    - **Change 4 — Claim 9 Redrafted as Active Technical Control**: Replaced passive statistical observation (*“rho = 0.9000 was observed”*) with active mechanism claim: *monitoring epistemic variance across N MC-Dropout passes; detecting decoupling from expected noise-response; automatically escalating on failure*. Retained experimental evidence as a confirming embodiment.
+    - **Change 5 — Claim 21 Added (Narrow HiResCAM Fallback Independent Claim)**: New independent claim covering: HiResCAM computation without global pooling; HU-threshold parenchymal mask generation (0 to +85 HU); element-wise mask application suppressing calvarial bone gradients; and normalisation to produce bone-artifact-suppressed saliency overlay, with pointing-game improvement (11.20% → 43.83%) as measurable technical effect.
+    - **Duplicate §7.4 Audit Bullet Removed**: Second identical *Exploratory multi-gate secondary audit* bullet in §7.4 deleted; one canonical occurrence retained.
+  - All 8 verification checks PASS in rebuilt DOCX.
+  - Rebuilt all 5 statutory patent assets:
+    - Master Markdown: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.md` (36.8 KB)
+    - Spec-only Word DOCX: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.docx` (48.8 KB)
+    - Spec-only ReportLab PDF: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.pdf` (45.4 KB)
+    - Master Consolidated Word DOCX with Figures 1–8: `docs/patent/UK_Patent_Application_2_With_Drawings.docx` (1905.1 KB, 8 drawings verified)
+    - Master Consolidated PDF with Figures 1–8: `docs/patent/UK_Patent_Application_2_With_Drawings.pdf` (2350.2 KB)
+
+---
+
 ## 📋 Work State (2026-10-29 — Automated Sign-Off Negative Tests, Four-Case Failure Analysis & Protocol Freeze, branch `main`)
 
 Governing artifacts: `backend/src/__tests__/signoffEnforcement.test.ts`, `validation/scripts/failure_analysis_fn_cases.py`, `validation/reports/v2a1_four_fn_failure_analysis.json`, `docs/evidence/failure_analysis_four_fn_cases.md`, `docs/evidence/evaluation_protocol_freeze.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
