@@ -80,10 +80,10 @@ Governing artifacts: `validation/scripts/score_discrepancy_reconciliation.py`, `
   - The 49 true-negative auto-cleared studies used to derive $	au_{	ext{ood}} = 52.05$ and the 6 FN studies are disjoint (TN vs FN).
   - However, because the 49 TN studies were selected within the same 486-study CQ500 cohort, $	au_{	ext{ood}}$ is a **within-sample exploratory threshold**, not an independent external validation.
 - **Secondary Safety Gate Evaluation Calibrated**:
-  - 2 of 6 FN studies (CQ500-CT-415 and CQ500-CT-43) produced RMD scores exceeding $	au_{	ext{ood}}$, triggering escalation due to anomalous latent representations.
-  - 4 of 6 FN studies (CQ500-CT-385, CQ500-CT-278, CQ500-CT-426, CQ500-CT-196) were **not** flagged by either OOD or epistemic gates, and constitute designated failure-analysis cases for subsequent safety iterations.
-  - Single-gate classifier FNR of 3.70% (6/162) remains unchanged. An OOD flag is not equated with guaranteed clinical error prevention.
-  - Empirical finding reinforces that automated triage cannot replace mandatory 100% consultant radiologist sign-off (Claim 1(h)).
+  - 2 of 6 FN studies (CQ500-CT-415 and CQ500-CT-43) produced RMD scores exceeding $\tau_{\text{ood}}$, triggering escalation due to anomalous latent representations.
+  - In this exploratory evaluation, 4 of 6 classifier false negatives (CQ500-CT-385, CQ500-CT-278, CQ500-CT-426, CQ500-CT-196) were not flagged by either evaluated secondary gate. These results show that the tested gates did not intercept every observed false negative and require further evaluation on independent data.
+  - Single-gate classifier FNR of 3.70% (6/162) remains unchanged.
+  - **Consultant Radiologist Sign-Off Verification**: Distinguished tested software enforcement from architectural specification. Software enforcement is verified via role-based access control (`backend/src/controllers/reportController.ts#L88`), human review acknowledgment gating (`#L101`), downstream transmission suppression (HL7/FHIR/PDF blocked prior to sign), and the PostgreSQL CHECK constraint `report_approved_requires_signature` (`backend/prisma/migrations/20261010000000_...`). Client-side hardware PKI smartcard signing remains an architectural specification.
 - **Institutional Patent Portfolio Rebuilt (All 5 Statutory Assets)**:
   - Specification §7.3 and §7.4 updated with calibrated worked examples addressing score duality, within-sample thresholding, and the 4 unflagged cases.
   - Rebuilt and verified:

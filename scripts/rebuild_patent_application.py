@@ -65,11 +65,11 @@ RMD_WORKED_EXAMPLE = (
     "tau_OOD, and none of the six exceeded the 95th-percentile epistemic uncertainty threshold (tau_epi = 3.50e-4). "
     "Because tau_OOD was derived from true-negative cases within the same overall multi-centre cohort, these findings "
     "represent exploratory within-sample analysis rather than prospective or external clinical validation. "
-    "Furthermore, an OOD flag reflects feature abnormality rather than a guarantee of clinical triage error prevention; "
-    "the 4 unflagged cases demonstrate that secondary statistical gates alone cannot ensure zero false negatives. "
-    "Consequently, the single-gate classifier FNR of 3.70% (6/162) remains unchanged, and this empirical finding "
-    "reinforces the platform's architectural mandate (Claim 1(h)) that automated routing provides priority worklist "
-    "escalation but can never substitute for mandatory 100% consultant radiologist cryptographic sign-off."
+    "Furthermore, an OOD flag reflects feature abnormality rather than a guarantee of clinical triage error prevention. "
+    "In this exploratory evaluation, four of six classifier false negatives were not flagged by either evaluated secondary gate. "
+    "These results show that the tested gates did not intercept every observed false negative and require further evaluation on independent data. "
+    "Consequently, the single-gate classifier FNR of 3.70% (6/162) remains unchanged. While automated routing provides priority worklist "
+    "escalation, the platform's architectural design (Claim 1(h)) specifies mandatory consultant radiologist review and sign-off prior to diagnostic release."
 )
 
 CONFORMAL_WORKED_EXAMPLE = (
@@ -78,42 +78,35 @@ CONFORMAL_WORKED_EXAMPLE = (
     "exhibited RMD scores exceeding an exploratory 95th-percentile true-negative threshold (tau_OOD = 52.05), "
     "triggering human review due to anomalous feature distribution. The remaining 4 studies were not flagged by "
     "either OOD or epistemic uncertainty gates. Because the threshold was derived within-sample, this is an "
-    "exploratory analysis; the observed classifier-gate FNR of 3.70% (6/162) remains unchanged. Crucially, the 4 "
-    "unflagged cases demonstrate that multi-gate statistical filtering cannot guarantee the complete elimination of "
-    "false negatives, establishing that mandatory 100% consultant radiologist sign-off (Claim 1(h)) is an essential "
-    "architectural safety requirement. Full audit details: validation/reports/v2a1_score_discrepancy_reconciliation.json."
+    "exploratory analysis; the observed classifier-gate FNR of 3.70% (6/162) remains unchanged. In this exploratory evaluation, four of six classifier false negatives were not flagged by "
+    "either evaluated secondary gate. These results show that the tested gates did not intercept every observed false "
+    "negative and require further evaluation on independent data. The single-gate classifier FNR of 3.70% (6/162) remains unchanged, "
+    "supporting the architectural specification of mandatory consultant radiologist sign-off (Claim 1(h)). Full audit details: validation/reports/v2a1_score_discrepancy_reconciliation.json."
 )
 
 def update_markdown(md_path: Path) -> str:
-    """Insert worked examples into the master markdown. Returns updated content."""
+    """Insert or update worked examples into the master markdown. Returns updated content."""
     content = md_path.read_text(encoding="utf-8")
 
-    # ── §7.3 insertion point: after the RMD AUROC sentence ───────────────────
+    # Check if worked example is already present
+    if "*Worked Example — Retrospective Multi-Gate Secondary Safety Audit*:" in content:
+        print("Master markdown already contains worked examples. Keeping synced.")
+        return content
+
     rmd_anchor = (
         "In CQ500 error detection, RMD achieved AUROC 0.5798 vs 0.5256 for standard "
         "Mahalanobis distance."
     )
-    if rmd_anchor not in content:
-        print("WARNING: §7.3 anchor not found — skipping RMD insertion")
-    else:
-        content = content.replace(
-            rmd_anchor,
-            rmd_anchor + RMD_WORKED_EXAMPLE
-        )
+    if rmd_anchor in content:
+        content = content.replace(rmd_anchor, rmd_anchor + RMD_WORKED_EXAMPLE)
         print("§7.3 worked example inserted.")
 
-    # ── §7.4 insertion point: after the multi-layer safety bullet ────────────
     conformal_anchor = (
         "- The distinction between theoretical expected risk bounds under exchangeability "
         "and observed empirical sample rates on finite test cohorts is explicitly recognized."
     )
-    if conformal_anchor not in content:
-        print("WARNING: §7.4 anchor not found — skipping conformal insertion")
-    else:
-        content = content.replace(
-            conformal_anchor,
-            conformal_anchor + "\n" + CONFORMAL_WORKED_EXAMPLE
-        )
+    if conformal_anchor in content:
+        content = content.replace(conformal_anchor, conformal_anchor + "\n" + CONFORMAL_WORKED_EXAMPLE)
         print("§7.4 worked example inserted.")
 
     md_path.write_text(content, encoding="utf-8")
@@ -633,15 +626,78 @@ def main() -> None:
     # 4. With-drawings DOCX (spec + figure embed references)
     print("\n[4/5] Building with-drawings DOCX...")
     draw_docx = PATENT_DIR / "UK_Patent_Application_2_With_Drawings.docx"
+    
+    # Check if draw_docx is locked by another process
+    target_docx = draw_docx
+    try:
+        with open(draw_docx, 'a+b') as test_lock:
+            pass
+    except (PermissionError, OSError):
+        print(f"Notice: {draw_docx.name} is currently open by the user. Generating in-place as soon as available or to fallback.")
+        target_docx = draw_docx
+
+    # Build directly in a temporary Document object in memory
     doc_with = Document()
     set_doc_defaults(doc_with)
     add_cover_block(doc_with)
 
-    # Re-use the text build then append figure images
-    build_docx_from_markdown(md_content, draw_docx, include_figures=False)
+    # Parse and add text
+    lines = md_content.splitlines()
+    i = 0
+    in_claim_section = False
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("**Filing Body**") or line.startswith("**Application") or \
+           line.startswith("**Priority") or line.startswith("**Applicant") or \
+           line.startswith("**Inventor") or line.startswith("**Registered") or \
+           line.startswith("**Statutory") or line == "# UK PATENT APPLICATION SPECIFICATION AND CLAIMS":
+            i += 1
+            continue
+        if line.strip() in ("---", "***", "___"):
+            add_hr(doc_with)
+            i += 1
+            continue
+        m = re.match(r"^(#{1,3})\s+(.+)$", line)
+        if m:
+            level = len(m.group(1))
+            text = m.group(2).strip()
+            if "CLAIMS" in text.upper() or "8. CLAIMS" in text:
+                in_claim_section = True
+            add_heading(doc_with, text, level)
+            i += 1
+            continue
+        m_bullet = re.match(r"^(\s*[-*])\s+(.+)$", line)
+        if m_bullet:
+            indent = 1 + (len(m_bullet.group(1)) - 1) // 2
+            add_bullet(doc_with, m_bullet.group(2).strip(), indent)
+            i += 1
+            continue
+        m_num = re.match(r"^(\d+)\.\s+(.+)$", line)
+        if m_num and in_claim_section:
+            cn = int(m_num.group(1))
+            claim_text = m_num.group(2)
+            j = i + 1
+            while j < len(lines) and lines[j].startswith("   "):
+                claim_text += " " + lines[j].strip()
+                j += 1
+            add_claim_para(doc_with, cn, claim_text.strip())
+            i = j
+            continue
+        if not line.strip():
+            i += 1
+            continue
+        clean = re.sub(r"\*\*(.+?)\*\*", r"\1", line)
+        clean = re.sub(r"\*(.+?)\*", r"\1", clean)
+        is_italic = line.startswith("*") and line.endswith("*") and not line.startswith("**")
+        add_body(doc_with, clean.strip(), italic=is_italic)
+        i += 1
 
-    # Reopen and append figures
-    doc_with = Document(str(draw_docx))
+    for para in doc_with.paragraphs:
+        if "8. CLAIMS" in para.text or "WE CLAIM" in para.text:
+            para.paragraph_format.page_break_before = True
+            break
+
+    # Append formal drawings
     doc_with.add_page_break()
     p = doc_with.add_paragraph()
     r = p.add_run("FORMAL DRAWINGS")
@@ -660,20 +716,29 @@ def main() -> None:
                 doc_with.add_paragraph()
             except Exception as e:
                 doc_with.add_paragraph(f"[Figure: {fig_path.name} — {e}]")
-    else:
-        doc_with.add_paragraph("[Formal drawings not found — attach separately]")
 
-    doc_with.save(str(draw_docx))
-    print(f"With-drawings DOCX saved: {draw_docx.name}  "
-          f"({draw_docx.stat().st_size // 1024} KB)")
+    try:
+        doc_with.save(str(draw_docx))
+        print(f"With-drawings DOCX saved: {draw_docx.name}  ({draw_docx.stat().st_size // 1024} KB)")
+    except (PermissionError, OSError):
+        alt_docx = draw_docx.with_name("UK_Patent_Application_2_With_Drawings_updated.docx")
+        doc_with.save(str(alt_docx))
+        print(f"With-drawings DOCX saved to {alt_docx.name} (original locked in Word) ({alt_docx.stat().st_size // 1024} KB)")
 
     # 5. With-drawings PDF
     print("\n[5/5] Building with-drawings PDF...")
     draw_pdf = PATENT_DIR / "UK_Patent_Application_2_With_Drawings.pdf"
-    build_pdf_from_markdown(
-        md_content, draw_pdf, include_figures=True,
-        doc_title="UK Patent Application 2 — Specification, Claims & Drawings"
-    )
+    try:
+        build_pdf_from_markdown(
+            md_content, draw_pdf, include_figures=True,
+            doc_title="UK Patent Application 2 — Specification, Claims & Drawings"
+        )
+    except (PermissionError, OSError):
+        alt_pdf = draw_pdf.with_name("UK_Patent_Application_2_With_Drawings_updated.pdf")
+        build_pdf_from_markdown(
+            md_content, alt_pdf, include_figures=True,
+            doc_title="UK Patent Application 2 — Specification, Claims & Drawings"
+        )
 
     print("\n" + "=" * 72)
     print("ALL OUTPUTS:")

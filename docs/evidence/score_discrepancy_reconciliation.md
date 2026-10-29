@@ -93,23 +93,55 @@ N = 30 passes. Two independent runs (seeds 42 and 99).
 
 ---
 
-## 6. Failure Analysis: 4 Unintercepted FN Studies
+## 6. Failure Analysis: 4 Unflagged False-Negative Cases
 
-The following studies evaded all three gates (classifier, OOD, epistemic):
+> [!IMPORTANT]
+> In this exploratory evaluation, four of six classifier false negatives were not flagged by either evaluated secondary gate. These results show that the tested gates did not intercept every observed false negative and require further evaluation on independent data. They do not prove that secondary gates can never eliminate false negatives, but they confirm that secondary gates cannot be assumed to provide complete error coverage without independent validation.
 
-| Study ID | Classifier Score | OOD Score (RMD) | Epi Variance | Notes |
+The following studies were not escalated by any of the three evaluated gates (classifier, OOD, epistemic):
+
+| Study ID | Classifier Score (MAX / TOP-3) | OOD Score (RMD) | Epi Variance | Reference Subtype / Annotations |
 |---|---|---|---|---|
-| CQ500-CT-385 | 0.005078 | 32.43 | 1.79e-05 | All gates passed (no escalation) |
-| CQ500-CT-278 | 0.001166 | 41.01 | 1.32e-06 | All gates passed (no escalation) |
-| CQ500-CT-426 | 0.003299 | 46.58 | 4.97e-06 | All gates passed (no escalation) |
-| CQ500-CT-196 | 0.001212 | 47.40 | 8.29e-07 | All gates passed (no escalation) |
+| **CQ500-CT-385** | 0.00962 / 0.00508 | 32.43 | 1.79e-05 | Consensus ICH positive (majority vote) |
+| **CQ500-CT-278** | 0.00246 / 0.00117 | 41.01 | 1.32e-06 | Consensus ICH positive (majority vote) |
+| **CQ500-CT-426** | 0.00627 / 0.00330 | 46.58 | 4.97e-06 | Consensus ICH positive (majority vote) |
+| **CQ500-CT-196** | 0.00166 / 0.00121 | 47.40 | 8.29e-07 | Subdural (11 bounding box annotations) |
 
-**Recommended next steps for these 4 cases:**
-1. Inspect raw DICOM images for radiological characteristics (haemorrhage subtype, density, volume).
-2. Evaluate whether subtype-specific conformal thresholds (Claim 5) would change routing.
-3. Pre-register and execute a prospective multi-gate calibration on an independent dataset before making any joint-gate FNR claim.
+### Contextual Findings for Flagged Cases:
+- **CQ500-CT-43** (RMD = 64.31 > 52.05): 50 expert bounding box annotations across Subdural (24), Subarachnoid (18), and Intraparenchymal (8) compartments — extensive multi-compartment blood volume with marked latent feature divergence.
+- **CQ500-CT-415** (RMD = 55.54 > 52.05): Consensus ICH positive — latent feature representation triggered OOD threshold.
 
 ---
 
-*Elapsed: 168.7s*  
+## 7. Consultant Sign-Off Enforcement Code Audit
+
+The user requested a code-level verification distinguishing tested software enforcement from architectural specification.
+
+### Implemented & Tested Software Enforcement:
+1. **Application-Level Role Barrier (`backend/src/controllers/reportController.ts#L88-L90`)**:
+   - `signReport` endpoint (`POST /api/v1/reports/:id/sign`) strictly checks user role:
+     `if (!['radiologist', 'admin', 'superadmin'].includes(role)) throw new AppError('Only radiologists can sign reports', 403);`
+2. **Safety Flag Acknowledgment Gate (`backend/src/controllers/reportController.ts#L101-L116`)**:
+   - If `report.scan.requiresHumanReview` is true (e.g. escalated by AI safety gates or OOD filters), signing is blocked with a 403 status code unless an authorized clinician explicitly acknowledges the review flag (`acknowledgeReview: true`).
+3. **Immutability of Signed Reports (`backend/src/controllers/reportController.ts#L72`)**:
+   - Modifications are prohibited once signed: `if (existing.status === 'approved') throw new AppError('Cannot modify a signed report. An addendum must be created instead.', 403);`
+4. **Relational Database CHECK Constraint (`backend/prisma/migrations/20261010000000_.../migration.sql#L13-L18`)**:
+   - PostgreSQL engine-level guarantee:
+     ```sql
+     ALTER TABLE "Report" ADD CONSTRAINT "report_approved_requires_signature"
+       CHECK (
+         status NOT IN ('approved', 'signed')
+         OR ("signedBy" IS NOT NULL AND "signedAt" IS NOT NULL)
+       ) NOT VALID;
+     ```
+   - Physically rejects any DB row write with status `approved` or `signed` if `signedBy` or `signedAt` is NULL.
+5. **Downstream Delivery Suppression**:
+   - Clinical PDF generation (`generateClinicalPDF`), FHIR R4 DiagnosticReport synchronization, HL7v2 `ORU^R01` dispatch, and patient notifications are all physically nested inside `signReport` and cannot be triggered on unsigned draft reports.
+
+### Distinction from Architectural Specification:
+- **Tested Enforcement**: Server-side user identity verification, database check constraint, review acknowledgment barrier, and downstream transmission suppression.
+- **Architectural Specification / Future SaMD Target**: Client-side hardware PKI / smartcard private-key cryptographic signing directly embedded into the binary PDF document prior to API submission. The patent specification claims this broader architectural requirement, while the current codebase implements the database and application-level barriers.
+
+---
+
 *FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.*
