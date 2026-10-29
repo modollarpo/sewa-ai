@@ -27,8 +27,8 @@ const RESULTS = [
   { endpoint:'Contradiction Specificity', dataset:'OpenI external validation (392 active cases, Test D)', result:'100.00% (392 / 392)', status:'PASS' },
   { endpoint:'Grad-CAM Spatial Pointing Game', dataset:'BHX CQ500 (6,283 radiologist bboxes, Test E.1)', result:'11.20% (95% CI 7.84% to 15.08%)', status:'NOT MET' },
   { endpoint:'Masked HiResCAM Spatial Attribution', dataset:'BHX CQ500 (6,283 radiologist bboxes, Test E.2)', result:'43.83% (95% CI 39.64% to 48.37%)', status:'Measured' },
-  { endpoint:'Mammography Deep Backbone (Test I)', dataset:'CBIS-DDSM calc cases (INT8 quantized)', result:'EfficientNet-B0 (4.17MB) — demo_mode: false', status:'Measured' },
-  { endpoint:'Retinal Deep Backbone (Test I)', dataset:'EyePACS fundus series (INT8 quantized)', result:'EfficientNet-B0 (4.16MB) — demo_mode: false', status:'Measured' },
+  { endpoint:'Mammography Deep Backbone (Test I)', dataset:'CBIS-DDSM calc cases (INT8 quantized)', result:'EfficientNet-B0 (4.17MB, demo_mode: false) — Pre-clinical feasibility', status:'Measured' },
+  { endpoint:'Retinal Deep Backbone (Test I)', dataset:'EyePACS fundus series (INT8 quantized)', result:'EfficientNet-B0 (4.16MB, demo_mode: false) — Pre-clinical feasibility', status:'Measured' },
   { endpoint:'CQ500 Test-Time AdaBN (ADR 004)', dataset:'CQ500 external 486 scans', result:'AUROC 0.7596 (+0.0105 gain, zero labels)', status:'Measured' },
   { endpoint:'ICH Subtype Sensitivity (Test J)', dataset:'RSNA 2019 Multi-Label Benchmark (N=2,000)', result:'IPH: 100.0%, EDH: 100.0%, SDH: 94.4%, IVH: 95.2%, SAH: 85.4%', status:'PASS' },
   { endpoint:'Perturbation Robustness (Test K)', dataset:'RSNA 2019 test set (N=300 slices, physics stress)', result:'Noise K-1 MET (AUROC 0.8013 @ σ=0.10), Blur K-2 MET (0.8083 @ L=7), Monotonicity K-3 MET (rs=0.9000)', status:'PARTIAL' },
@@ -175,15 +175,15 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
         <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.amber}40`, borderRadius:16, marginBottom:24 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
             <span style={{ width:9, height:9, borderRadius:'50%', background:C.amber, display:'inline-block' }} />
-            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Tests F &amp; G — Mammography &amp; Retinal Pipeline: ENGINEERING VALIDATED / DEMO MODE</h2>
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Tests F &amp; G — Initial Mammography &amp; Retinal Pipeline Baseline (Historical)</h2>
           </div>
           <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
-            The mammography pipeline (CBIS-DDSM, 1,872 cases, CC BY 3.0) and retinal pipeline (4 EyePACS fundus images) both passed all engineering QA criteria:
+            In baseline tests F &amp; G, the mammography pipeline (CBIS-DDSM, 1,872 cases, CC BY 3.0) and retinal pipeline (4 EyePACS fundus images) passed all initial engineering QA criteria:
             preprocessing shape, dtype, ImageNet normalization, JSON schema validity, demo_mode flag, and BI-RADS / DR-grade label mapping.
-            Demo ONNX inference: <strong style={{ color:C.amber }}>1.39 ms</strong> (mammography) and <strong style={{ color:C.amber }}>1.68 ms</strong> (retinal).
+            Initial pipeline inference: <strong style={{ color:C.amber }}>1.39 ms</strong> (mammography) and <strong style={{ color:C.amber }}>1.68 ms</strong> (retinal).
           </p>
           <p style={{ fontSize:12, color:C.textLo, lineHeight:1.7, margin:0 }}>
-            Both services run in <code>demo_mode: true</code> — random linear projection ONNX. No clinical accuracy claims are made. ENGINEERING VALIDATED / DEMO MODE. NOT CLINICAL EVIDENCE.
+            *Configuration note*: Tests F &amp; G operated as an initial pipeline testbed with synthetic linear projections (<code>demo_mode: true</code>). On 28 Oct 2026, Test I packaged real pre-trained EfficientNet-B0 INT8 weights (<code>demo_mode: false</code>) for pre-clinical feasibility. Neither configuration constitutes prospective clinical evidence.
           </p>
         </div>
 
@@ -227,13 +227,13 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
               <div style={{ fontSize:10, color:C.textMd }}>Resilient to 7px head movement (MET)</div>
             </div>
             <div style={{ padding:12, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:8 }}>
-              <div style={{ fontSize:11, color:C.textLo, fontWeight:700 }}>UNCERTAINTY MONOTONICITY (K-3)</div>
+              <div style={{ fontSize:11, color:C.textLo, fontWeight:700 }}>UNCERTAINTY UNDER NOISE (K-3)</div>
               <div style={{ fontSize:16, fontWeight:900, color:C.textHi, fontFamily:C.FM }}>r_s = 0.9000</div>
-              <div style={{ fontSize:10, color:C.textMd }}>Spearman rank correlation p=0.037 (MET)</div>
+              <div style={{ fontSize:10, color:C.textMd }}>Positive rank association (p=0.0374, 5 levels)</div>
             </div>
           </div>
           <p style={{ fontSize:11, color:C.textLo, margin:0, fontStyle:'italic' }}>
-            Clinical audit disclosure (K-4): Under severe noise (σ=0.35), naive probability gating escalates 61.7% of scans (req ≥ 90.0%). Confirms the imperative of SEWA's Layer 1 OOD detector and 100% human consultant sign-off.
+            Audit disclosure (K-3 &amp; K-4): Under simulated Gaussian dose noise, epistemic variance showed a positive rank association across five aggregate noise levels (Spearman ρ = 0.9000, p = 0.0374). This result describes an aggregate trend and does not establish strict monotonicity at individual slices or guarantee detection of all distribution shifts. Under severe noise (σ=0.35), naive probability gating escalates 61.7% of scans, reinforcing the necessity of Layer 1 OOD detection and mandatory 100% consultant sign-off.
           </p>
         </div>
 
@@ -340,25 +340,28 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
             </div>
           </div>
           <p style={{ fontSize:11, color:C.textLo, margin:0, fontStyle:'italic' }}>
-            Clinical audit note: Conformal risk control catches 88.1% of external SAH cases; 11.9% subtle sulcal bleeds require consultant review. Mandates human radiologist sign-off on 100% of cases.
+            Conformal risk control audit: In retrospective CQ500 evaluation (n_cal=100, N_test=386), the conservative operating threshold λ = 0.0298 produced an observed false-negative rate of 3.70% (6/162 positive studies; calibration bound 0.0347 ≤ 0.05), catching 88.1% of external SAH cases. At the calibrated threshold λ = 0.0753, observed test FNR was 6.79% (11/162). These are retrospective public data observations under specified exchangeability assumptions, not prospective clinical evidence.
           </p>
         </div>
 
         {/* Test I - Multimodal Real Weights callout */}
         <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.normal}40`, borderRadius:16, marginBottom:24 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-            <span style={{ fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:20, background:`${C.normal}20`, color:C.normal }}>TEST I VERIFIED</span>
-            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Test I - Multimodal Deep Backbones: PRODUCTION WEIGHTS REALIZED</h2>
+            <span style={{ fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:20, background:`${C.normal}20`, color:C.normal }}>TEST I FEASIBILITY</span>
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Test I - Multimodal Deep Backbones: INT8 CONVOLUTIONAL WEIGHTS PACKAGED</h2>
           </div>
           <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
-            Mammography and Retinal services transitioned from synthetic linear fallbacks to real <strong>EfficientNet-B0</strong> convolutional backbones (INT8 dynamically quantized to 4.17 MB and 4.16 MB).
-            In live FastAPI verification, <code>demo_mode</code> flipped from <code>true</code> to <code>false</code> with 100% schema conformance on CBIS-DDSM calcifications and EyePACS fundus images.
+            Mammography and Retinal services transitioned from synthetic linear fallbacks to pre-trained <strong>EfficientNet-B0</strong> convolutional backbones (INT8 dynamically quantized to 4.17 MB and 4.16 MB).
+            In live FastAPI TestClient verification, <code>demo_mode</code> flipped from <code>true</code> to <code>false</code> with 100% schema conformance on sample CBIS-DDSM calcifications and EyePACS fundus images.
+          </p>
+          <p style={{ fontSize:11, color:C.textLo, lineHeight:1.6, margin:'0 0 10px', fontStyle:'italic' }}>
+            *Maturity qualification*: While convolutional backbones contain real pre-trained INT8 parameters rather than random projections, these models are pre-clinical feasibility prototypes evaluated on retrospective public benchmarks. They have not undergone multi-centre clinical validation or prospective hospital testing.
           </p>
           <div style={{ display:'flex', gap:12, flexWrap:'wrap', fontSize:11 }}>
             <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.textHi, border:`1px solid ${C.border}` }}>Mammo INT8: <strong>4.17 MB</strong></span>
             <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.textHi, border:`1px solid ${C.border}` }}>Retinal INT8: <strong>4.16 MB</strong></span>
             <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.textHi, border:`1px solid ${C.border}` }}>AdaBN CQ500 AUROC: <strong>0.7596</strong></span>
-            <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.normal, border:`1px solid ${C.normal}40` }}>demo_mode: <strong>false</strong></span>
+            <span style={{ padding:'4px 10px', background:C.bg1, borderRadius:6, color:C.normal, border:`1px solid ${C.normal}40` }}>demo_mode: <strong>false (pre-clinical)</strong></span>
           </div>
         </div>
 
