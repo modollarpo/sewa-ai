@@ -75,6 +75,13 @@ Governing artifacts: `docs/patent/UK_Patent_Application_2_Specification_and_Clai
     - **Change 4 — Claim 9 Redrafted as Active Technical Control**: Replaced passive statistical observation (*“rho = 0.9000 was observed”*) with active mechanism claim: *monitoring epistemic variance across N MC-Dropout passes; detecting decoupling from expected noise-response; automatically escalating on failure*. Retained experimental evidence as a confirming embodiment.
     - **Change 5 — Claim 21 Added (Narrow HiResCAM Fallback Independent Claim)**: New independent claim covering: HiResCAM computation without global pooling; HU-threshold parenchymal mask generation (0 to +85 HU); element-wise mask application suppressing calvarial bone gradients; and normalisation to produce bone-artifact-suppressed saliency overlay, with pointing-game improvement (11.20% → 43.83%) as measurable technical effect.
     - **Duplicate §7.4 Audit Bullet Removed**: Second identical *Exploratory multi-gate secondary audit* bullet in §7.4 deleted; one canonical occurrence retained.
+    - **Change 6 — The Synergy Problem Resolved (Section 5.7, Section 7.7, Claim 22)**:
+      - Addressed attorney critique Vulnerability 1 (*Inventive Step / Pozzoli synergy challenge*): reframed the combination not as an empirical claim of seamless/total catch-all protection (which was undermined by the candid 2/6 multi-gate audit), but as a closed-loop system of **functional interdependencies and mutual operational preconditioning**:
+        (1) AdaBN provides test-time domain adaptation across scanner variations, preserving the *exchangeability assumption* required for the finite-sample Split Conformal Risk Control guarantee;
+        (2) AdaBN standardizes the latent activation manifold prior to RMD out-of-distribution evaluation, preventing scanner-specific hardware variations from perturbing background-relative covariance calculations;
+        (3) Anatomically-Masked HiResCAM directly feeds skull-suppressed saliency heatmaps to Layer 4 (attribution coherence) of the 9-layer metacognition safety engine, preventing bone gradient artifacts from triggering erroneous plausibility rejections;
+        (4) Complementary failure-mode partitioning separates in-distribution calibration risk control, out-of-distribution detection, and physical sensor/acquisition noise monitoring.
+      - Authored **Claim 22** specifically claiming this four-way functional interdependence between AdaBN, Conformal exchangeability, RMD stability, and Masked HiResCAM/Metacognition coupling.
   - All 8 verification checks PASS in rebuilt DOCX.
   - Rebuilt all 5 statutory patent assets:
     - Master Markdown: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.md` (36.8 KB)
