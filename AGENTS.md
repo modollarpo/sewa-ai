@@ -67,16 +67,20 @@ Governing patent documents: `docs/patent/UK_Patent_Application_2_Specification_a
 
 ### ✅ Completed
 - **Mathematical Reconciliation of Split Conformal Risk Control (`conformal_reconciliation_audit.py`)**:
-  - Reconciled **Conditional vs. Unconditional FNR**: Clarified that ADR 004 and downstream validation pipelines evaluate empirical conditional risk $R_n(\lambda) = \frac{1}{n_{\text{pos}}} \sum_{i: Y_i=1} \mathbb{I}(S(X_i) < \lambda)$ (denominator $n_{\text{pos}}$), which bounds expected conditional false-negative rate $\mathbb{E}[\text{FNR}_{\text{cond}}] \le \alpha$ among positive cases, rather than the unconditioned joint probability bounded by the general Bates et al. (2021) theorem ($\mathbb{E}[L] = \pi \cdot R_n(\lambda)$).
+  - Reconciled **Conditional vs. Unconditional FNR & Sample Size**: Resolved the sample size parameterization by evaluating the Bates et al. (2021) finite-sample bound directly over the conditional positive calibration sample ($n_{\text{pos}} = 40$), where $\text{bound}_{\text{cond}} = \frac{n_{\text{pos}}}{n_{\text{pos}}+1} R_{n_{\text{pos}}}(\lambda) + \frac{1}{n_{\text{pos}}+1}$. For $k=1$ false negative in calibration ($1/40 = 0.025$), the exact finite-sample bound is $\frac{40}{41}(0.025) + \frac{1}{41} = \frac{2}{41} \approx 4.88\% \le 0.05$ (5.0%).
   - Clarified **Supremum vs. Infimum Threshold Selection**: Proved that for non-decreasing loss $L = \mathbb{I}(Y=1 \land S(X) < \lambda)$, the safe set is a closed interval $[0, \lambda^*]$; the supremum $\sup\{\lambda' : \text{bound} \le \alpha\}$ selects the maximum operational auto-clearing threshold, identical to the infimum of the complement unsafe set $\inf\{\lambda' : \text{bound} > \alpha\}$ written in ADR 004.
-  - Full reproducible study-level evaluation executed on CQ500 ($N=486$ studies, $3,884$ slices; $n_{\text{cal}}=100$ calibration, $N_{\text{test}}=386$ holdout):
-    - Calibrated conditional threshold: $\lambda = 0.0753$ ($\le 0.05$ target risk bound); observed test FNR $= 6.79\%$ (11 FNs / 162 positive studies).
-    - Conservative deployed operating threshold: $\lambda = 0.0298$ (calibration bound $= 0.0347 \le 0.05$); observed test FNR $= 3.70\%$ (6 FNs / 162 positive studies; 33 scans auto-cleared).
-    - Full case-level routing table generated and logged to `validation/reports/conformal_routing_table.csv` (386 rows with ground-truth, probability scores, auto-clear and gate flags).
+  - Full reproducible study-level evaluation executed on CQ500 ($N=486$ studies, $3,884$ slices; $n_{\text{cal}}=100$ calibration with $n_{\text{pos}}=40$, $N_{\text{test}}=386$ holdout with $N_{\text{pos}}=162$):
+    - Calibrated conditional threshold: $\lambda = 0.0753$ (calibration bound $4.88\% \le 0.05$); observed test FNR $= 6.79\%$ (11 FNs / 162 positive studies; 52 scans auto-cleared).
+    - Conservative deployed operating threshold: $\lambda = 0.0298$ (calibration bound $4.88\% \le 0.05$); observed test FNR $= 3.70\%$ (6 FNs / 162 positive studies; 33 scans auto-cleared).
+    - Case-level operational routing confirmed: In the single-gate evaluation, all 33 scans scoring $< 0.0298$ (27 TNs, 6 FNs) were marked for auto-clearing by the classifier, directly achieving the $3.70\% \le 5.0\%$ target ceiling without relying on unmeasured secondary catch claims.
+    - Full case-level routing table logged to `validation/reports/conformal_routing_table.csv` (386 rows).
 - **Test E.2 Pointing Game Metric Unit Confirmed**:
   - Code audit of `step11b_hirescam_pointing.py` confirmed iteration per bounding box row (`study_df.iterrows()`), establishing that the $43.83\%$ hit rate ($2,754$ hits / $6,283$ bboxes) is strictly evaluated **per expert bounding box annotation** across $226$ positive studies.
+  - Confirmed that the 95% bootstrap CI ($[38.4\%, 49.3\%]$) uses **study-clustered bootstrap** (`bootstrap_hit_rate(study_hits)` resamples studies with replacement).
 - **Physics Noise Monotonicity Softened in Claim 9**:
   - Replaced universal strict monotonicity assertions with experimental positive Spearman rank correlation ($\rho = 0.9000, p = 0.0374$) over five discrete simulated Gaussian noise levels ($\sigma \in \{0.00, 0.05, 0.10, 0.20, 0.35\}$), accurately reflecting the slight non-monotone drop observed at extreme noise ($\sigma=0.35$).
+- **Transductive AdaBN Evaluation Setting Disclosed**:
+  - Explicitly disclosed that AdaBN adaptation utilizes an unlabelled stream of target clinical site images to re-estimate running batch normalization moments (a test-time transductive unsupervised domain adaptation setting); no target labels or convolutional weight gradients are utilized.
 - **Statutory Filing Portfolio Fully Synchronized & Recompiled**:
   - Master Markdown specification (`UK_Patent_Application_2_Specification_and_Claims.md`).
   - Spec-only clean submission Word DOCX (`UK_Patent_Application_2_Specification_and_Claims.docx`).

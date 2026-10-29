@@ -117,6 +117,7 @@ mu_{t, c}^{(l)} <- (1 - eta) * mu_{t, c}^{(l)} + eta * mu_{B_t, c}
 
 *Empirical Finding*: In CQ500 testing (N=486 scans, 3 hospital centres), AdaBN improved Study AUROC from 0.7491 to 0.7596.  
 *Engineering Hypothesis*: AdaBN reduces scanner-induced covariate shifts in channel-wise activations, aiding feature alignment before statistical gating.
+*Evaluation Protocol Disclosure*: AdaBN adaptation utilizes an unlabelled stream of target clinical site images to re-estimate running batch normalization moments (a test-time transductive unsupervised domain adaptation setting); no target labels or convolutional weight gradients are utilized.
 
 ### 7.3 Relative Mahalanobis Distance (RMD) Implementation
 Penultimate feature vectors z(x) = f_theta(x) in R^D are extracted. Class-conditional Gaussian distributions N(mu_c, Sigma) (c in {0, 1}) and unconditioned background distribution N(mu_0, Sigma_0) are estimated on training features.
@@ -144,17 +145,17 @@ E[L(X,Y)] = pi * R_n(lambda)
 The implementation uses n_pos denominator (conditional FNR), which provides a tighter calibrated bound for the clinically relevant quantity: the fraction of haemorrhagic studies that would be missed.
 
 Following Bates et al. (2021), under the assumption that calibration samples and future test samples are exchangeable, the optimal threshold lambda is selected as the supremum of safe thresholds:
-lambda = sup { lambda' in [0, 1] : (n / (n + 1)) * R_n(lambda') + (1 / (n + 1)) <= alpha }
+lambda = sup { lambda' in [0, 1] : (n_pos / (n_pos + 1)) * R_n(lambda') + (1 / (n_pos + 1)) <= alpha }
 For a monotonically non-decreasing loss, the safe set {lambda' : bound(lambda') <= alpha} is a closed interval [0, lambda*]. The supremum (lambda*) is the most aggressive threshold satisfying the bound, maximising the proportion of studies safely auto-cleared. Note: an equivalent formulation is inf{lambda' : bound(lambda') > alpha}, which produces the identical value.
 If no lambda > 0 satisfies the bound, the system sets lambda = 0, ensuring that no cases are automatically cleared.
 
 *Empirical Test Results (CQ500 Evaluation)*:
 - Calibration split: n = 100 scans (40 positive, 60 negative), target risk alpha = 0.05.
-- Calibrated conditional operational threshold: lambda = 0.0753 (calibrated to enforce E[FNR_cond] <= 0.05); conservative deployed operating threshold: lambda = 0.0298 (bound = 0.0347 <= 0.05).
+- Calibrated conditional operational threshold: lambda = 0.0753 (calibrated to enforce E[FNR_cond] <= 0.05); conservative deployed operating threshold: lambda = 0.0298 (conditional bound = 0.0488 <= 0.05 evaluated with n_pos = 40).
 - Independent held-out test split: N = 386 scans (162 positive, 224 negative).
 - Test observations at calibrated threshold (lambda = 0.0753): 11 false negatives out of 162 positive cases, yielding an observed test conditional false-negative rate of 6.79% (11/162, within expected finite-sample variance of the 5.0% bound).
 - Test observations at conservative threshold (lambda = 0.0298): 6 false negatives out of 162 positive cases, yielding an observed test conditional false-negative rate of 3.70% (6/162).
-- Multi-layer safety escalation: All studies with classifier score below lambda are evaluated by secondary Layer 1 (Relative Mahalanobis OOD) and Layer 2 (epistemic uncertainty) gates prior to automated clearance; cases failing secondary gates are escalated to human review, preventing isolated classifier misclassifications from proceeding unreviewed.
+- Multi-layer safety escalation: In the evaluated single-gate configuration, 33 studies scored below lambda = 0.0298 (comprising 27 true negatives and 6 false negatives), yielding an observed test conditional false-negative rate of 3.70% (6/162), which directly meets the pre-registered 5.0% risk ceiling without requiring secondary intervention. In the deployed multi-layer architecture, all studies scored below lambda are additionally screened by Layer 1 (Relative Mahalanobis OOD) and Layer 2 (epistemic uncertainty) prior to clinical clearing, providing defense-in-depth against anomalous or out-of-distribution inputs.
 - The distinction between theoretical expected risk bounds under exchangeability and observed empirical sample rates on finite test cohorts is explicitly recognized.
 
 ### 7.5 Anatomically-Masked HiResCAM Implementation
@@ -193,7 +194,7 @@ WE CLAIM:
    (h) dispatching prioritised clinical triage alerts to a medical display worklist, wherein final diagnostic report delivery requires cryptographic clinician digital sign-off enforced as a database-level constraint.
 
 2. The method of Claim 1, wherein the split conformal risk control prediction gate selects operational probability threshold lambda satisfying:
-   lambda = sup { lambda' in [0, 1] : (n / (n + 1)) * R_n(lambda') + (1 / (n + 1)) <= alpha }
+   lambda = sup { lambda' in [0, 1] : (n_pos / (n_pos + 1)) * R_n(lambda') + (1 / (n_pos + 1)) <= alpha }
    where n is calibration sample size, n_pos is the number of positive-class calibration studies, and R_n(lambda') is the empirical conditional false-negative rate:
    R_n(lambda') = (1 / n_pos) * sum_{i: Y_i=1} I(S(X_i) < lambda')
    wherein if no threshold lambda' satisfies the condition, the system sets lambda = 0 to route 100% of studies to clinician review; the supremum formulation equivalently represents the infimum of the complement set of unsafe thresholds for a monotonically non-decreasing loss function.

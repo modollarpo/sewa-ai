@@ -12,7 +12,7 @@
     "lambda_adr004_cited": 0.0298,
     "fnr_cond_at_cited_lambda": 0.025,
     "fnr_uncond_at_cited_lambda": 0.01,
-    "bound_cond_at_cited_lambda": 0.0347,
+    "bound_cond_at_cited_lambda": 0.0488,
     "bound_uncond_at_cited_lambda": 0.0198
   },
   "test_at_conditional_threshold": {
@@ -70,7 +70,7 @@
   "patent_claim_reconciliation": {
     "claim_2_sup_formulation": "CORRECT \u2014 sup{safe set} equals inf{complement set} for monotone loss.",
     "claim_3_fnr_5pct": "The 5% risk bound is computed with n_positive denominator (conditional FNR) as implemented in ADR 004. This is the conditional false-negative rate E[I(C_\u03bb=0) | Y=1]. The Bates et al. (2021) theorem bounds the unconditional risk E[L(X,Y)] = P(Y=1) * conditional_FNR. The specification Section 7.4 has been updated to make this distinction explicit.",
-    "claim_recommended_language": "...wherein the empirical risk R_n(\u03bb) is defined as the conditional false-negative rate among positive calibration studies: R_n(\u03bb) = (1/n_pos) \u03a3_{i: Y_i=1} I(S(X_i) < \u03bb), with the bound selected as \u03bb = sup{ \u03bb' : (n/(n+1)) R_n(\u03bb') + 1/(n+1) \u2264 \u03b1 }."
+    "claim_recommended_language": "...wherein the empirical risk R_{n_pos}(\u03bb) is defined as the conditional false-negative rate among positive calibration studies: R_{n_pos}(\u03bb) = (1/n_pos) \u03a3_{i: Y_i=1} I(S(X_i) < \u03bb), with the operational threshold selected as \u03bb = sup{ \u03bb' : (n_pos/(n_pos+1)) R_{n_pos}(\u03bb') + 1/(n_pos+1) \u2264 \u03b1 }."
   },
   "pointing_game_e2_clarification": {
     "metric_unit": "PER-BOUNDING-BOX (not per-slice)",

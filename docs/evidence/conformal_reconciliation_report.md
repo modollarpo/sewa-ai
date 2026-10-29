@@ -31,9 +31,9 @@ differ by a factor of `0.400`.
 
 | Definition | Calibrated λ | Bound at λ ≤ α? |
 |---|---|---|
-| Conditional FNR (ADR 004 implementation) | **0.0753** | 0.0347 ≤ 0.05 |
+| Conditional FNR (ADR 004 implementation) | **0.0753** | 0.0488 ≤ 0.05 |
 | Unconditional FNR (Bates theorem) | **0.1990** | 0.0198 ≤ 0.05 |
-| Cited ADR 004 value | **0.0298** | cond=0.0347, uncond=0.0198 |
+| Cited ADR 004 value | **0.0298** | cond=0.0488, uncond=0.0198 |
 
 ### Implication for Patent Claims
 

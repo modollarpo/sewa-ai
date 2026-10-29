@@ -169,12 +169,12 @@ def compute_conformal(y_cal: np.ndarray,
 
     for lam in lambdas:
         false_negatives = float(np.sum((y_cal == 1) & (s_cal < lam)))
-        # Conditional FNR: denominator = n_positive
+        # Conditional FNR: denominator and sample size = n_positive
         r_cond = false_negatives / n_pos if n_pos > 0 else 0.0
-        # Unconditional FNR: denominator = n_total
+        # Unconditional FNR: denominator and sample size = n_total
         r_uncond = false_negatives / n
 
-        bound_cond = (n / (n + 1)) * r_cond + 1 / (n + 1)
+        bound_cond = (n_pos / (n_pos + 1)) * r_cond + 1 / (n_pos + 1)
         bound_uncond = (n / (n + 1)) * r_uncond + 1 / (n + 1)
 
         fnr_cond_values.append(r_cond)
@@ -386,11 +386,11 @@ def main() -> None:
                 "has been updated to make this distinction explicit."
             ),
             "claim_recommended_language": (
-                "...wherein the empirical risk R_n(λ) is defined as the "
+                "...wherein the empirical risk R_{n_pos}(λ) is defined as the "
                 "conditional false-negative rate among positive calibration studies: "
-                "R_n(λ) = (1/n_pos) Σ_{i: Y_i=1} I(S(X_i) < λ), "
-                "with the bound selected as "
-                "λ = sup{ λ' : (n/(n+1)) R_n(λ') + 1/(n+1) ≤ α }."
+                "R_{n_pos}(λ) = (1/n_pos) Σ_{i: Y_i=1} I(S(X_i) < λ), "
+                "with the operational threshold selected as "
+                "λ = sup{ λ' : (n_pos/(n_pos+1)) R_{n_pos}(λ') + 1/(n_pos+1) ≤ α }."
             ),
         },
         "pointing_game_e2_clarification": {
