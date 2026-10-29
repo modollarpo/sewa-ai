@@ -29,7 +29,7 @@ const RESULTS = [
   { endpoint:'Masked HiResCAM Spatial Attribution', dataset:'BHX CQ500 (6,283 radiologist bboxes, Test E.2)', result:'43.83% (95% CI 39.64% to 48.37%)', status:'Measured' },
   { endpoint:'Mammography Deep Backbone (Test I)', dataset:'CBIS-DDSM calc cases (INT8 quantized)', result:'EfficientNet-B0 (4.17MB) — Pre-clinical feasibility (packaged weights; not clinically validated)', status:'Engineering-validated' },
   { endpoint:'Retinal Deep Backbone (Test I)', dataset:'EyePACS fundus series (INT8 quantized)', result:'EfficientNet-B0 (4.16MB) — Pre-clinical feasibility (packaged weights; not clinically validated)', status:'Engineering-validated' },
-  { endpoint:'CQ500 Test-Time AdaBN (ADR 004)', dataset:'CQ500 external 486 scans', result:'AUROC 0.7596 (+0.0105 gain, zero labels)', status:'Measured' },
+  { endpoint:'CQ500 Test-Time AdaBN (ADR 004)', dataset:'CQ500 external 486 scans (transductive adaptation)', result:'AUROC 0.7596 (+0.0105 gain; unlabelled batchnorm re-estimation)', status:'Measured' },
   { endpoint:'ICH Subtype Sensitivity (Test J)', dataset:'RSNA 2019 Multi-Label Benchmark (N=2,000)', result:'IPH: 100.0%, EDH: 100.0%, SDH: 94.4%, IVH: 95.2%, SAH: 85.4%', status:'PASS' },
   { endpoint:'Perturbation Robustness (Test K)', dataset:'RSNA 2019 test set (N=300 slices, physics stress)', result:'Noise K-1 MET (AUROC 0.8013 @ σ=0.10), Blur K-2 MET (0.8083 @ L=7), Monotonicity K-3 MET (rs=0.9000)', status:'PARTIAL' },
   { endpoint:'Surgical Recall on Subtypes (Test J)', dataset:'CQ500 External Cohort (EDH N=6, SAH N=118)', result:'Epidural: 83.3% (5/6), SAH: 88.1% (104/118) @ λ=0.0298 (Zero-Label AdaBN)', status:'Measured' },
@@ -341,12 +341,18 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
             </div>
           </div>
           <div style={{ padding:14, background:C.bg1, border:`1px solid ${C.border}`, borderRadius:8, marginBottom:10 }}>
-            <div style={{ fontSize:11, color:C.brandLt, fontWeight:700, marginBottom:4 }}>RETROSPECTIVE THRESHOLD EVALUATION &amp; ROUTING AUDIT (CQ500)</div>
+            <div style={{ fontSize:11, color:C.brandLt, fontWeight:700, marginBottom:6 }}>RETROSPECTIVE CONDITIONAL FALSE-NEGATIVE EVALUATION &amp; ROUTING AUDIT (CQ500)</div>
             <p style={{ fontSize:11, color:C.textMd, lineHeight:1.6, margin:'0 0 6px' }}>
-              In a retrospective CQ500 evaluation with 100 calibration studies (40 positive) and 386 holdout studies (162 positive), the operating threshold λ = 0.0298 produced an observed false-negative rate of 3.70% (6/162 positive holdout studies; 96.3% sensitivity). At the calibrated threshold λ = 0.0753, the observed holdout FNR was 6.79% (11/162).
+              In a retrospective CQ500 evaluation comprising 386 holdout studies, including 162 positive studies, the classifier-only threshold &lambda; = 0.0298 produced an observed false-negative rate of 3.70% (6/162). Of the 33 studies below the threshold, 27 were true negatives and six were false negatives. At &lambda; = 0.0753, the observed holdout FNR was 6.79% (11/162).
             </p>
-            <p style={{ fontSize:11, color:C.textLo, lineHeight:1.5, margin:0, fontStyle:'italic' }}>
-              *Case routing &amp; statistical qualification*: At λ = 0.0298, 33 of 386 holdout studies (8.6%) scored below threshold (27 true negatives, 6 false negatives). Under single-gate evaluation without secondary interception, all 33 were auto-cleared. Secondary safety-gate interception across these 6 specific cases is unmeasured. These results describe performance on the evaluated retrospective cohort under specified exchangeability assumptions and do not establish prospective clinical performance or guarantee error bounds across hospitals. The formal conditional-risk bound remains subject to independent mathematical verification.
+            <p style={{ fontSize:11, color:C.amber, lineHeight:1.6, margin:'0 0 6px', fontWeight:600 }}>
+              All six false-negative studies passed the classifier-only auto-clear gate in this evaluation. The reported result is an empirical measurement on the evaluated retrospective cohort; it does not establish prospective clinical performance or demonstrate that additional safety gates would have intercepted these cases.
+            </p>
+            <p style={{ fontSize:11, color:C.textLo, lineHeight:1.5, margin:'0 0 6px', fontStyle:'italic' }}>
+              A conditional-risk calibration calculation using 40 positive calibration studies and one calibration false negative yields 2/41 (approximately 4.88%) under the stated formula. The theoretical justification and scope of the resulting risk guarantee should be verified independently before this value is interpreted as a formal statistical guarantee.
+            </p>
+            <p style={{ fontSize:10, color:C.textLo, lineHeight:1.4, margin:0, fontStyle:'italic' }}>
+              *Transductive adaptation setting*: AdaBN adaptation utilized unlabelled images across all 486 CQ500 scans to update BatchNorm running statistics. This represents transductive unsupervised domain adaptation rather than evaluation on an untouched target cohort.
             </p>
           </div>
         </div>
