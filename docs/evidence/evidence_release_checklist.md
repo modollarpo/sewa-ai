@@ -27,7 +27,7 @@ The objective of this checklist is to separate public wording from technical ver
 | **2** | **Retrospective Holdout FNR** | CQ500 Holdout ($N=386$, $N_{\text{pos}}=162$) | Observed FNR $3.70\%$ (6/162) @ $\lambda=0.0298$; $6.79\%$ (11/162) @ $\lambda=0.0753$ | Reproducible study-level script `conformal_reconciliation_audit.py` | **VERIFIED & AUDITED** |
 | **3** | **SAH Subtype Provenance & Protocol** | CQ500 External Cohort ($N=486$; $N_{\text{SAH}}=118$) | Recall $88.1\%$ (104/118) @ $\lambda=0.0298$ (Zero-Label AdaBN) | Audit of 4-question protocol (selection, overlap, threshold timing, decision rule) via `step18_ich_subtypes_evaluation.py` | **VERIFIED & DOCUMENTED** |
 | **4** | **Classifier Gate Auto-Clear Routing** | CQ500 Holdout ($N=386$) | 33 auto-cleared (27 TNs, 6 FNs); 0 secondary interceptions measured | Full study routing audit via `conformal_routing_table.csv` | **DISCLOSED HONESTLY** |
-| **5** | **Multi-Gate FN Safety Interception** | 6 missed positive scans (`CQ500-CT-385`, `415`, `278`, `426`, `196`, `43`) | Measure whether OOD (Layer 1) or Epistemic (Layer 2) intercept the 6 FNs | Execute multi-gate simulation script `audit_fn_safety_interception.py` | **PENDING EXECUTION** |
+| **5** | **Multi-Gate FN Safety Interception** | 6 missed positive scans (`CQ500-CT-385`, `415`, `278`, `426`, `196`, `43`) | Measure whether OOD (Layer 1) or Epistemic (Layer 2) intercept the 6 FNs | Execute multi-gate simulation script `audit_fn_safety_interception.py` | **EXECUTED — 2/6 ESCALATED BY OOD GATE (CQ500-CT-415, CQ500-CT-43); 4/6 NOT CAUGHT BY ANY GATE. See alidation/reports/v2a1_fn_safety_interception.json and docs/evidence/feasibility_report_fn_safety_interception.md.** |
 | **6** | **Transductive AdaBN Setting** | CQ500 ($N=486$ unlabelled CT scans) | Target AUROC $0.7596$ (+0.0105 gain) | Document that all 486 scans contributed unlabelled images to running BatchNorm moments | **DISCLOSED & LABELED** |
 | **7** | **Maturity & TRL 5 vs TRL 6** | Frontend pages & API responses | TRL 5 Pre-clinical current; TRL 6 target prospective | Full-repo regex audit for stale claims of achieved TRL 6 or clinical validation | **VERIFIED & FROZEN** |
 | **8** | **Patent Priority & Claims Boundaries** | GB2609706.3 (25 April 2026) vs Application 2 (Oct 2026) | Senior priority Claims 1–10; filing date priority Claims 11–20 | Patent attorney formal review under UK Patents Act 1977 s.5(2) and s.76(2) | **SUBMISSION-READY FOR COUNSEL** |
@@ -65,7 +65,17 @@ The reported $88.1\%$ sensitivity ($104/118$ studies) on Subarachnoid Haemorrhag
   4. `CQ500-CT-426` (score $0.006272$)
   5. `CQ500-CT-196` (score $0.001659$)
   6. `CQ500-CT-43`  (score $0.021809$)
-- **Action Required:** Author and run `validation/scripts/audit_fn_safety_interception.py` to test whether Layer 1 (Relative Mahalanobis OOD distance $> \tau_{\text{ood}}$) or Layer 2 (Monte Carlo Dropout epistemic variance $> \tau_{\text{epi}}$) would have escalated these 6 specific cases. Disclose the empirical catch count transparently.
+- **Multi-Gate Interception Audit — EXECUTED** (`validation/scripts/audit_fn_safety_interception.py`):
+  - Gate thresholds: tau_ood = 52.05 (95th pctl of 49 TN auto-cleared studies); tau_epi = 3.50e-4 (95th pctl of 49 TN auto-cleared studies).
+  - **CQ500-CT-415** (classifier score 0.0037): OOD score = 55.54 > tau_ood — **ESCALATED by OOD gate**.
+  - **CQ500-CT-43** (classifier score 0.0096): OOD score = 64.31 > tau_ood — **ESCALATED by OOD gate**.
+  - CQ500-CT-385 (score 0.0051): OOD = 32.43, Epi = 1.79e-5 — NOT escalated by any gate.
+  - CQ500-CT-278 (score 0.0012): OOD = 41.01, Epi = 1.32e-6 — NOT escalated by any gate.
+  - CQ500-CT-426 (score 0.0033): OOD = 46.58, Epi = 4.97e-6 — NOT escalated by any gate.
+  - CQ500-CT-196 (score 0.0012): OOD = 47.40, Epi = 8.29e-7 — NOT escalated by any gate.
+  - **Summary: 2/6 FN studies would have been escalated by the OOD gate; 4/6 not caught by any secondary gate.**
+  - **Governance:** Separate retrospective analysis only. Classifier-gate FNR 3.70% (6/162) unchanged. No joint multi-gate FNR claim without independent pre-registered calibration.
+  - Outputs: `validation/reports/v2a1_fn_safety_interception.json` | `docs/evidence/feasibility_report_fn_safety_interception.md`
 
 ---
 
