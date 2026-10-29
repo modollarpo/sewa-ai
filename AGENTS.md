@@ -61,6 +61,35 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-29 — Automated Sign-Off Negative Tests, Four-Case Failure Analysis & Protocol Freeze, branch `main`)
+
+Governing artifacts: `backend/src/__tests__/signoffEnforcement.test.ts`, `validation/scripts/failure_analysis_fn_cases.py`, `validation/reports/v2a1_four_fn_failure_analysis.json`, `docs/evidence/failure_analysis_four_fn_cases.md`, `docs/evidence/evaluation_protocol_freeze.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Automated Negative Verification of Consultant Sign-Off Enforcement (`signoffEnforcement.test.ts`)**:
+  - Authored and executed automated integration suite with 22 rigorous negative & edge cases (`PASS src/__tests__/signoffEnforcement.test.ts`, 22/22 passed).
+  - **RBAC & Role Enforcement**: Verified HTTP 403 rejection across 6 unauthorized roles (`patient`, `nurse`, `technician`, `clinician`, `researcher`, `viewer`) at both controller (`signReport`) and route middleware (`authorize`) boundaries.
+  - **AI Review Gating**: Verified that reports with scans flagged for review (`requiresHumanReview: true`) are strictly blocked (HTTP 403) unless explicitly acknowledged via `acknowledgeReview: true`.
+  - **Cross-Tenant Intrusion Prevention**: Verified rejection (HTTP 404/403) when attempting to sign or download reports belonging to foreign tenants.
+  - **Post-Sign Immutability**: Verified rejection (HTTP 403) when attempting to update or mutate reports in `approved` status; verified HTTP 409 rejection on double-signing attempts.
+  - **Downstream Artifact Suppression**: Proven that across every rejection branch, no clinical artifacts escape: `generateClinicalPDF`, `createFHIRDiagnosticReport`, `sendHL7ORU`, socket alerts, SMS notifications, and scan clearance are 100% suppressed.
+  - **Database CHECK Constraint**: Verified SQL-level constraint logic requiring non-null `signedBy` and `signedAt` whenever `status = 'approved'`.
+- **In-Depth Failure Analysis on the Four Unintercepted FN Cases (`failure_analysis_four_fn_cases.md`)**:
+  - Investigated `CQ500-CT-196`, `CQ500-CT-385`, `CQ500-CT-278`, and `CQ500-CT-426` at slice level across all 8 slices each.
+  - Confirmed that under **both** MAX and TOP-3 MEAN aggregation, every single slice in all four studies scores $< \lambda = 0.0298$; the false negatives reflect low base convolutional activations, not aggregation artifacts.
+  - Identified failure modes:
+    - `CQ500-CT-196`: Focal deep parenchymal petechial hyperdensity (6 BHX annotations) with low contrast against surrounding gray matter; feature representations clustered in in-distribution normal parenchymal space ($RMD = 47.40 < 52.05$), with low epistemic variance ($8.29 \times 10^{-7}$).
+    - `CQ500-CT-385`: Cortical sulcal Subarachnoid Haemorrhage (14 BHX annotations) with partial volume averaging against CSF and bone; embodies the known SAH sensitivity challenge ($RMD = 32.43$).
+    - `CQ500-CT-278`: Polytrauma multi-compartment blood (54 IPH, 132 SAH, 143 SDH) thinly dispersed without a dominant dense hematoma; 8-slice sampling diluted slice scores ($RMD = 41.01$).
+    - `CQ500-CT-426`: Subacute/petechial intraparenchymal contusion (14 BHX annotations) with attenuated Hounsfield density ($RMD = 46.58$).
+  - Actionable engineering countermeasures formulated: 2.5D/3D volumetric sequence aggregation (Transformer/Bi-LSTM), dedicated SAH sulcal hyperattenuation head, and gradient-norm OOD augmentation.
+- **Prospective Evaluation Protocol Freeze (`evaluation_protocol_freeze.md`)**:
+  - Pre-registered all experimental parameters before independent validation: checkpoint `classifier_v2a1.pt`, 3-channel windowing, TOP-3 slice MEAN aggregation, operating thresholds ($\lambda = 0.0298$, $\lambda = 0.0753$), OOD shrinkage/reference parameters, and fixed seed (`torch.manual_seed(42)`) for MC-Dropout ($N=30$).
+- **Statutory Drawings DOCX Lock Cleared**:
+  - Replaced `docs/patent/UK_Patent_Application_2_With_Drawings.docx` with updated drawings version and cleared temporary file.
+
+---
+
 ## 📋 Work State (2026-10-29 — Score Discrepancy Reconciliation & Institutional Patent Rebuild, branch `main`)
 
 Governing artifacts: `validation/scripts/score_discrepancy_reconciliation.py`, `validation/reports/v2a1_score_discrepancy_reconciliation.json`, `docs/evidence/score_discrepancy_reconciliation.md`, `scripts/rebuild_patent_application.py`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**

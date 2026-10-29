@@ -1,0 +1,314 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "title": "SEWA AI \u2014 Four-Case False Negative In-Depth Failure Analysis",
+  "evaluation_setting": "Exploratory Retrospective Evaluation on CQ500 External Validation Cohort",
+  "conformal_operating_threshold": 0.0298,
+  "ood_threshold": 52.0463,
+  "epistemic_threshold": 0.0003496,
+  "exact_governing_statement": "In this exploratory evaluation, four of six classifier false negatives were not flagged by either evaluated secondary gate. These results show that the tested gates did not intercept every observed false negative and require further evaluation on independent data.",
+  "cases": [
+    {
+      "study_id": "CQ500-CT-196",
+      "ground_truth_label": 1,
+      "primary_subtype": "Intraparenchymal (focal/low volume)",
+      "bhx_annotations": {
+        "Chronic": 0,
+        "Epidural": 0,
+        "Intraparenchymal": 6,
+        "Intraventricular": 0,
+        "Subarachnoid": 0,
+        "Subdural": 0
+      },
+      "slice_count": 8,
+      "slices": [
+        {
+          "slice_id": "CQ500-CT-196_sl00",
+          "probability": 1.773989453113245e-07,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-196_sl01",
+          "probability": 0.00030139004229567945,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-196_sl02",
+          "probability": 0.0004222870047669858,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-196_sl03",
+          "probability": 0.000308401882648468,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-196_sl04",
+          "probability": 0.0011187413474544883,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-196_sl05",
+          "probability": 6.0110785852884874e-05,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-196_sl06",
+          "probability": 0.0016588246216997504,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-196_sl07",
+          "probability": 0.0008573650266043842,
+          "below_lambda": true
+        }
+      ],
+      "aggregation_scores": {
+        "max_slice_probability": 0.0016588246216997504,
+        "top3_mean_probability": 0.0012116436652528744,
+        "all_slices_mean_probability": 0.0005909122992306948,
+        "lambda_crc": 0.0298,
+        "below_lambda_under_all_aggregations": true
+      },
+      "secondary_gates": {
+        "ood_relative_mahalanobis": 47.399515326859955,
+        "ood_threshold_tau": 52.0463,
+        "ood_escalated": false,
+        "epistemic_variance": 8.293126256812122e-07,
+        "epistemic_threshold_tau": 0.0003496,
+        "epistemic_escalated": false,
+        "interception_status": "NOT INTERCEPTED"
+      },
+      "radiologic_findings": "Focal deep parenchymal petechial hyperdensity (6 BHX annotations). Attenuation contrast against gray matter was insufficient to trigger high feature activations.",
+      "computer_vision_failure_mode": "Low feature norm; slice representations clustered in central in-distribution normal parenchyma subspace, escaping OOD distance threshold (RMD=47.40 < 52.05). Low MC-Dropout variance (8.29e-7) indicates strong certainty in background prediction."
+    },
+    {
+      "study_id": "CQ500-CT-385",
+      "ground_truth_label": 1,
+      "primary_subtype": "Subarachnoid Haemorrhage (SAH)",
+      "bhx_annotations": {
+        "Chronic": 0,
+        "Epidural": 0,
+        "Intraparenchymal": 0,
+        "Intraventricular": 0,
+        "Subarachnoid": 14,
+        "Subdural": 0
+      },
+      "slice_count": 8,
+      "slices": [
+        {
+          "slice_id": "CQ500-CT-385_sl00",
+          "probability": 0.009621472097933292,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-385_sl01",
+          "probability": 1.04264217952732e-05,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-385_sl02",
+          "probability": 2.117468369533526e-07,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-385_sl03",
+          "probability": 0.00047243229346349835,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-385_sl04",
+          "probability": 0.0007269834168255329,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-385_sl05",
+          "probability": 0.004886179696768522,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-385_sl06",
+          "probability": 0.0003343505959492177,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-385_sl07",
+          "probability": 5.226030452831765e-07,
+          "below_lambda": true
+        }
+      ],
+      "aggregation_scores": {
+        "max_slice_probability": 0.009621472097933292,
+        "top3_mean_probability": 0.005078211737175782,
+        "all_slices_mean_probability": 0.002006572438403964,
+        "lambda_crc": 0.0298,
+        "below_lambda_under_all_aggregations": true
+      },
+      "secondary_gates": {
+        "ood_relative_mahalanobis": 32.431201384638676,
+        "ood_threshold_tau": 52.0463,
+        "ood_escalated": false,
+        "epistemic_variance": 1.7903707892464906e-05,
+        "epistemic_threshold_tau": 0.0003496,
+        "epistemic_escalated": false,
+        "interception_status": "NOT INTERCEPTED"
+      },
+      "radiologic_findings": "Subarachnoid blood distributed along cortical sulci (14 BHX annotations). Thin layering of blood in sulci with partial volume averaging against adjacent cortical bone and CSF.",
+      "computer_vision_failure_mode": "Sulcal effacement without discrete large intraparenchymal mass effect. Consistent with known external challenge on SAH recall (88.1% vs 96.3% overall). Feature vector remained close to in-distribution baseline (RMD=32.43)."
+    },
+    {
+      "study_id": "CQ500-CT-278",
+      "ground_truth_label": 1,
+      "primary_subtype": "Multi-compartment Complex Trauma (IPH + SAH + SDH)",
+      "bhx_annotations": {
+        "Chronic": 0,
+        "Epidural": 0,
+        "Intraparenchymal": 54,
+        "Intraventricular": 0,
+        "Subarachnoid": 132,
+        "Subdural": 143
+      },
+      "slice_count": 8,
+      "slices": [
+        {
+          "slice_id": "CQ500-CT-278_sl00",
+          "probability": 3.363202267792076e-05,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-278_sl01",
+          "probability": 1.6566586964472663e-06,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-278_sl02",
+          "probability": 0.0007823611376807094,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-278_sl03",
+          "probability": 9.89554882835364e-06,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-278_sl04",
+          "probability": 0.00026016487390734255,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-278_sl05",
+          "probability": 0.00014192168600857258,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-278_sl06",
+          "probability": 0.002455158391967416,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-278_sl07",
+          "probability": 4.264806285902978e-09,
+          "below_lambda": true
+        }
+      ],
+      "aggregation_scores": {
+        "max_slice_probability": 0.002455158391967416,
+        "top3_mean_probability": 0.001165894801185156,
+        "all_slices_mean_probability": 0.0004605993162840605,
+        "lambda_crc": 0.0298,
+        "below_lambda_under_all_aggregations": true
+      },
+      "secondary_gates": {
+        "ood_relative_mahalanobis": 41.008452912046245,
+        "ood_threshold_tau": 52.0463,
+        "ood_escalated": false,
+        "epistemic_variance": 1.321309461506054e-06,
+        "epistemic_threshold_tau": 0.0003496,
+        "epistemic_escalated": false,
+        "interception_status": "NOT INTERCEPTED"
+      },
+      "radiologic_findings": "Dispersed polytrauma haemorrhage (54 IPH, 132 SAH, 143 SDH annotations). Extensive multi-compartment blood spread across convexities and sulci.",
+      "computer_vision_failure_mode": "Dispersed diffuse distribution without a single dominant hyperdense contiguous focus. The 8 selected slices sampled regions where partial voluming diluted the max slice probability (max=0.00246, top-3 mean=0.00117). Epistemic variance (1.32e-6) was suppressed."
+    },
+    {
+      "study_id": "CQ500-CT-426",
+      "ground_truth_label": 1,
+      "primary_subtype": "Intraparenchymal (subacute / petechial)",
+      "bhx_annotations": {
+        "Chronic": 0,
+        "Epidural": 0,
+        "Intraparenchymal": 14,
+        "Intraventricular": 0,
+        "Subarachnoid": 0,
+        "Subdural": 0
+      },
+      "slice_count": 8,
+      "slices": [
+        {
+          "slice_id": "CQ500-CT-426_sl00",
+          "probability": 3.368964098626748e-05,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-426_sl01",
+          "probability": 3.7370634231592703e-07,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-426_sl02",
+          "probability": 8.837853116006045e-09,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-426_sl03",
+          "probability": 0.0023453249596059322,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-426_sl04",
+          "probability": 0.00627179816365242,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-426_sl05",
+          "probability": 0.001278671552427113,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-426_sl06",
+          "probability": 6.175791440909961e-06,
+          "below_lambda": true
+        },
+        {
+          "slice_id": "CQ500-CT-426_sl07",
+          "probability": 0.00035579694667831063,
+          "below_lambda": true
+        }
+      ],
+      "aggregation_scores": {
+        "max_slice_probability": 0.00627179816365242,
+        "top3_mean_probability": 0.0032985982252284884,
+        "all_slices_mean_probability": 0.001286479877308011,
+        "lambda_crc": 0.0298,
+        "below_lambda_under_all_aggregations": true
+      },
+      "secondary_gates": {
+        "ood_relative_mahalanobis": 46.57804535233405,
+        "ood_threshold_tau": 52.0463,
+        "ood_escalated": false,
+        "epistemic_variance": 4.966670386075977e-06,
+        "epistemic_threshold_tau": 0.0003496,
+        "epistemic_escalated": false,
+        "interception_status": "NOT INTERCEPTED"
+      },
+      "radiologic_findings": "Intraparenchymal haemorrhagic focus (14 BHX annotations). Borderline attenuation (+50 to +60 HU) typical of subacute or small contusion.",
+      "computer_vision_failure_mode": "Attenuated gradient activation. Classifier logits were suppressed below zero across all slices (max slice prob=0.00627). Secondary gates found representations typical of standard head CT scans (RMD=46.58, epi=4.97e-6)."
+    }
+  ],
+  "engineering_countermeasures": [
+    "Volumetric 3D context aggregation across full slice stack (Transformer/Bi-LSTM) to replace 2D slice independence",
+    "Dedicated sulcal/cisternal subarachnoid haemorrhage (SAH) spatial detector",
+    "Multi-scale feature pyramid pooling to preserve petechial / small focal intraparenchymal lesions",
+    "Out-of-distribution distance metric refinement incorporating slice-level gradient norms rather than purely pooled penultimate activations",
+    "Strict adherence to consultant radiologist sign-off workflow as ultimate clinical backstop"
+  ]
+}
