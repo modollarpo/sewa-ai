@@ -61,6 +61,26 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-29 — Public Evidence Pages Harmonisation, FNR/SAH Metric Separation & CI Trigger Optimisation, branch `main`)
+
+Governing documents: `frontend/src/pages/public/ClinicalEvidencePage.tsx`, `LandingPage.tsx`, `docs/evidence/conformal_reconciliation_report.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Public Evidence Page Wording Harmonised (`ClinicalEvidencePage.tsx`, `LandingPage.tsx`)**:
+  - **FNR Calibration & Retrospective Holdout Wording**: Replaced claims of an independently established formal conditional guarantee with calibrated retrospective evaluation wording under exchangeability assumptions. At $\lambda = 0.0298$, observed holdout FNR is $3.70\%$ ($6/162$ positive studies, $96.3\%$ sensitivity); at $\lambda = 0.0753$, observed holdout FNR is $6.79\%$ ($11/162$). Disclosed that the mathematical derivation of the conditional bound is under formal review.
+  - **Overall FNR Separated from SAH Subtype Recall**: Explicitly distinguished overall holdout FNR ($3.70\%$, all ICH subtypes combined) from Subarachnoid Haemorrhage (SAH) detection ($88.1\%$ sensitivity, $104/118$ studies detected at $\lambda = 0.0298$ with Zero-Label AdaBN adaptation on external CQ500). Stated clearly that the overall $3.70\%$ FNR does not apply to SAH specifically ($11.9\%$ SAH-specific FNR).
+  - **Case Routing Audit for the 6 False Negatives**: Transparently documented that in single-gate classifier threshold evaluation at $\lambda = 0.0298$, all 33 scans scoring $< 0.0298$ ($27$ TNs, $6$ FNs) were routed to auto-clear; secondary OOD and epistemic safety interception on these specific $6$ cases was not measured in that single-gate evaluation.
+  - **Pre-Clinical Maturity Framework & TRL Harmonisation**:
+    - Mammography and Retinal models: Explicitly qualified that `demo_mode: false` denotes an internal software execution configuration (pre-trained EfficientNet-B0 INT8 weights packaged locally) and does not signify clinical validation or suitability for patient diagnostic use.
+    - TRL 5 vs. TRL 6: Consistently defined current status as **Pre-clinical (TRL 5)**, with TRL 6 strictly designated as the **planned target** under the prospective observational protocol `SEWA-SHADOW-1`.
+  - Frontend production build verified: `npm --prefix frontend run build` completed cleanly (0 errors, 1m 34s).
+- **GitHub Actions Trigger Optimisation (`deploy.yml`, `ci-cd.yml`)**:
+  - Root-caused instant Action failures (`The job was not started because an Actions budget is preventing further use`): previous push triggered >33 parallel runner jobs without path filters.
+  - Configured `paths-ignore` for `docs/**`, `*.md`, `validation/reports/**`, `scripts/**`, `.gitignore`, `LICENSE` on both workflows.
+  - Clean CI pipeline runs confirmed green: Run `40822221304` (`SEWA AI CI/CD Pipeline`, 7m 43s) and `40822221251` (`SEWA AI — CI/CD Pipeline`, 9m 30s) both completed with $100\%$ success.
+
+---
+
 ## 📋 Work State (2026-10-29 — Second UK Patent Application Legal & Mathematical Reconciliation, branch `main`)
 
 Governing patent documents: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.md`, `docs/evidence/conformal_reconciliation_report.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
