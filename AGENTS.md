@@ -82,6 +82,14 @@ Governing artifacts: `docs/patent/UK_Patent_Application_2_Specification_and_Clai
         (3) Anatomically-Masked HiResCAM directly feeds skull-suppressed saliency heatmaps to Layer 4 (attribution coherence) of the 9-layer metacognition safety engine, preventing bone gradient artifacts from triggering erroneous plausibility rejections;
         (4) Complementary failure-mode partitioning separates in-distribution calibration risk control, out-of-distribution detection, and physical sensor/acquisition noise monitoring.
       - Authored **Claim 22** specifically claiming this four-way functional interdependence between AdaBN, Conformal exchangeability, RMD stability, and Masked HiResCAM/Metacognition coupling.
+    - **Change 7 — Delta Assessment Review Remediation (ew_patent_critique_review.docx\)**:
+      - **Claims 1(d) & 2 Reconciled with §7.4**: Amended Claim 1(d) and Claim 2 to formally cover the theoretical supremum (λ_sup = 0.0753) or an operational threshold strictly less than said supremum (λ <= λ_sup, e.g. λ = 0.0298) providing an additional clinical safety margin.
+      - **Claim 9 Defect Fixed**: Replaced 'measured image acquisition noise level' (which lacked physical detector support) with 'simulated or detected image acquisition degradation'; stripped empirical Spearman correlation numbers (rho = 0.9000, p = 0.0374) from claim body.
+      - **Claim 21 Tightened & Harmonized**: Removed empirical pointing-game hit-rate tail (11.20% -> 43.83%); specified 'final convolutional feature map layer'; harmonized bone window to +500 to +2000 HU across §7.5, Claim 6, and Claim 21.
+      - **Dependent Claims 23–25 Added**: Added Claim 23 (morphological hole-filling & intracranial vault isolation), Claim 24 (ReLU-then-multiply ordering), and Claim 25 (parenchyma 20–40 HU, CSF 0–15 HU, acute haematoma 50–85 HU).
+      - **Independent Coupling Claim 26 Added**: Authored standalone independent system claim covering the co-designed pipeline (AdaBN -> RMD -> Split Conformal -> Masked HiResCAM -> Metacognition -> Clinical Dispatch), providing an independent fallback.
+      - **Synergy Section §7.7 Obviousness Trap Defused**: Softened rhetoric from 'standard fix' phrasing to multi-objective structural co-design and cross-layer operational preconditioning.
+      - **Statutory Formatting Cleaned**: Removed 'STOREGRILL INC LTD — CONFIDENTIAL' footer from ReportLab PDF in favor of official 'UK PATENT APPLICATION — S.14 PA 1977'.
   - All 8 verification checks PASS in rebuilt DOCX.
   - Rebuilt all 5 statutory patent assets:
     - Master Markdown: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.md` (36.8 KB)

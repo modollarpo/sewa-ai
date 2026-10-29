@@ -430,7 +430,7 @@ def _header_footer(canvas, doc, title: str) -> None:
     canvas.line(MARGIN, MARGIN * 0.85, PAGE_W - MARGIN, MARGIN * 0.85)
     canvas.drawString(MARGIN, MARGIN * 0.55, "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.")
     canvas.drawCentredString(PAGE_W / 2, MARGIN * 0.55, f"Page {doc.page}")
-    canvas.drawRightString(PAGE_W - MARGIN, MARGIN * 0.55, "STOREGRILL INC LTD — CONFIDENTIAL")
+    canvas.drawRightString(PAGE_W - MARGIN, MARGIN * 0.55, "UK PATENT APPLICATION — S.14 PA 1977")
     canvas.restoreState()
 
 
