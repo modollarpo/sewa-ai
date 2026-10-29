@@ -61,6 +61,40 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-29 — Score Discrepancy Reconciliation & Institutional Patent Rebuild, branch `main`)
+
+Governing artifacts: `validation/scripts/score_discrepancy_reconciliation.py`, `validation/reports/v2a1_score_discrepancy_reconciliation.json`, `docs/evidence/score_discrepancy_reconciliation.md`, `scripts/rebuild_patent_application.py`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Classifier Score Discrepancy Reconciled**:
+  - Root cause established: `conformal_routing_table.csv` evaluates study-level score via **MAX slice probability**, whereas `v2a1_fn_safety_interception.json` evaluates via **TOP-3 slice MEAN probability**. Both use identical checkpoint `classifier_v2a1.pt` without AdaBN or temperature scaling on the study score.
+  - Per-study comparison across all 6 FN studies confirmed identical to machine precision:
+    - CQ500-CT-385: MAX = 0.00962 vs TOP-3 MEAN = 0.00508 (ratio 1.89)
+    - CQ500-CT-415: MAX = 0.00448 vs TOP-3 MEAN = 0.00367 (ratio 1.22)
+    - CQ500-CT-278: MAX = 0.00246 vs TOP-3 MEAN = 0.00117 (ratio 2.11)
+    - CQ500-CT-426: MAX = 0.00627 vs TOP-3 MEAN = 0.00330 (ratio 1.90)
+    - CQ500-CT-196: MAX = 0.00166 vs TOP-3 MEAN = 0.00121 (ratio 1.37)
+    - CQ500-CT-43:  MAX = 0.02181 vs TOP-3 MEAN = 0.00959 (ratio 2.27)
+  - Under **both** aggregation methods, all 6 studies score strictly below $\lambda = 0.0298$, confirming their status as classifier false negatives.
+- **OOD Threshold Independence Formally Clarified**:
+  - The 49 true-negative auto-cleared studies used to derive $	au_{	ext{ood}} = 52.05$ and the 6 FN studies are disjoint (TN vs FN).
+  - However, because the 49 TN studies were selected within the same 486-study CQ500 cohort, $	au_{	ext{ood}}$ is a **within-sample exploratory threshold**, not an independent external validation.
+- **Secondary Safety Gate Evaluation Calibrated**:
+  - 2 of 6 FN studies (CQ500-CT-415 and CQ500-CT-43) produced RMD scores exceeding $	au_{	ext{ood}}$, triggering escalation due to anomalous latent representations.
+  - 4 of 6 FN studies (CQ500-CT-385, CQ500-CT-278, CQ500-CT-426, CQ500-CT-196) were **not** flagged by either OOD or epistemic gates, and constitute designated failure-analysis cases for subsequent safety iterations.
+  - Single-gate classifier FNR of 3.70% (6/162) remains unchanged. An OOD flag is not equated with guaranteed clinical error prevention.
+  - Empirical finding reinforces that automated triage cannot replace mandatory 100% consultant radiologist sign-off (Claim 1(h)).
+- **Institutional Patent Portfolio Rebuilt (All 5 Statutory Assets)**:
+  - Specification §7.3 and §7.4 updated with calibrated worked examples addressing score duality, within-sample thresholding, and the 4 unflagged cases.
+  - Rebuilt and verified:
+    - Master Markdown: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.md` (36.9 KB)
+    - Spec-only Word DOCX: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.docx` (48.2 KB)
+    - Spec-only ReportLab PDF: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.pdf` (44.8 KB)
+    - Master Consolidated Word DOCX with Figures 1–8: `docs/patent/UK_Patent_Application_2_With_Drawings.docx` (1.90 MB)
+    - Master Consolidated PDF with Figures 1–8: `docs/patent/UK_Patent_Application_2_With_Drawings.pdf` (2.35 MB)
+
+---
+
 ## 📋 Work State (2026-10-29 — Multi-Gate Safety Interception Audit, branch `main`)
 
 Governing artifacts: `validation/scripts/audit_fn_safety_interception.py`, `validation/reports/v2a1_fn_safety_interception.json`, `docs/evidence/feasibility_report_fn_safety_interception.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**

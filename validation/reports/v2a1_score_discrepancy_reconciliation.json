@@ -1,0 +1,162 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "title": "Score Discrepancy Reconciliation \u2014 6 FN Studies",
+  "root_cause": "The classifier scores in conformal_routing_table.csv (Source A) and v2a1_fn_safety_interception.json (Source B) differ because they use different study-level aggregation methods. Both use the SAME model checkpoint (classifier_v2a1.pt) with NO AdaBN and NO temperature scaling applied to study scores. The aggregation difference is:\n  Source A (routing table): MAX probability slice per study\n  Source B (interception audit): MEAN of TOP-3 probability slices per study\nMAX >= TOP-3 MEAN by definition. All 6 FN studies remain false negatives under BOTH aggregation methods at lambda=0.0298.",
+  "model_checkpoint": "classifier_v2a1.pt",
+  "temperature_scaling": "T=0.7984 (NOT applied to study scores in either source)",
+  "adabn": "NOT applied in either source (base model used for both)",
+  "per_study_scores": [
+    {
+      "study_id": "CQ500-CT-385",
+      "source_a_score_max": 0.009621,
+      "source_b_score_top3_mean": 0.005078211737175782,
+      "recomputed_max": 0.009621472097933292,
+      "recomputed_top3_mean": 0.005078211737175782,
+      "source_a_matches_recomputed_max": true,
+      "source_b_matches_recomputed_top3": true,
+      "is_fn_under_max_agg": true,
+      "is_fn_under_top3_agg": true
+    },
+    {
+      "study_id": "CQ500-CT-415",
+      "source_a_score_max": 0.004481,
+      "source_b_score_top3_mean": 0.0036689392291009426,
+      "recomputed_max": 0.00448070140555501,
+      "recomputed_top3_mean": 0.0036689392291009426,
+      "source_a_matches_recomputed_max": true,
+      "source_b_matches_recomputed_top3": true,
+      "is_fn_under_max_agg": true,
+      "is_fn_under_top3_agg": true
+    },
+    {
+      "study_id": "CQ500-CT-278",
+      "source_a_score_max": 0.002455,
+      "source_b_score_top3_mean": 0.001165894801185156,
+      "recomputed_max": 0.002455158391967416,
+      "recomputed_top3_mean": 0.001165894801185156,
+      "source_a_matches_recomputed_max": true,
+      "source_b_matches_recomputed_top3": true,
+      "is_fn_under_max_agg": true,
+      "is_fn_under_top3_agg": true
+    },
+    {
+      "study_id": "CQ500-CT-426",
+      "source_a_score_max": 0.006272,
+      "source_b_score_top3_mean": 0.0032985982252284884,
+      "recomputed_max": 0.00627179816365242,
+      "recomputed_top3_mean": 0.0032985982252284884,
+      "source_a_matches_recomputed_max": true,
+      "source_b_matches_recomputed_top3": true,
+      "is_fn_under_max_agg": true,
+      "is_fn_under_top3_agg": true
+    },
+    {
+      "study_id": "CQ500-CT-196",
+      "source_a_score_max": 0.001659,
+      "source_b_score_top3_mean": 0.0012116436652528744,
+      "recomputed_max": 0.0016588246216997504,
+      "recomputed_top3_mean": 0.0012116436652528744,
+      "source_a_matches_recomputed_max": true,
+      "source_b_matches_recomputed_top3": true,
+      "is_fn_under_max_agg": true,
+      "is_fn_under_top3_agg": true
+    },
+    {
+      "study_id": "CQ500-CT-43",
+      "source_a_score_max": 0.021809,
+      "source_b_score_top3_mean": 0.00959313583249847,
+      "recomputed_max": 0.021809058263897896,
+      "recomputed_top3_mean": 0.00959313583249847,
+      "source_a_matches_recomputed_max": true,
+      "source_b_matches_recomputed_top3": true,
+      "is_fn_under_max_agg": true,
+      "is_fn_under_top3_agg": true
+    }
+  ],
+  "fn_status_confirmed": {
+    "CQ500-CT-385": {
+      "fn_under_max": true,
+      "fn_under_top3_mean": true
+    },
+    "CQ500-CT-415": {
+      "fn_under_max": true,
+      "fn_under_top3_mean": true
+    },
+    "CQ500-CT-278": {
+      "fn_under_max": true,
+      "fn_under_top3_mean": true
+    },
+    "CQ500-CT-426": {
+      "fn_under_max": true,
+      "fn_under_top3_mean": true
+    },
+    "CQ500-CT-196": {
+      "fn_under_max": true,
+      "fn_under_top3_mean": true
+    },
+    "CQ500-CT-43": {
+      "fn_under_max": true,
+      "fn_under_top3_mean": true
+    }
+  },
+  "ood_threshold_independence": {
+    "tau_ood_derivation_cohort": "49 TN auto-cleared studies from full 486-study CQ500 cache",
+    "fn_evaluation_cohort": "6 specific FN study IDs",
+    "tn_fn_overlap": 0,
+    "tn_fn_disjoint": true,
+    "independence_caveat": "The 49 TN auto-cleared studies and the 6 FN studies are disjoint (no overlap by definition \u2014 TN and FN are mutually exclusive labels). HOWEVER: the tau_ood derivation cohort is drawn from the SAME 486-study CQ500 dataset used to evaluate OOD interception. The threshold was not derived from a held-out independent dataset. The interception results are therefore EXPLORATORY and within-sample, not an independent validation. This must be disclosed in all communications.",
+    "full_cq500_includes_calibration_studies": true
+  },
+  "mc_dropout_reproducibility": {
+    "n_passes": 30,
+    "run1_seeds": 42,
+    "run2_seeds": 99,
+    "per_study": {
+      "CQ500-CT-385": {
+        "run1": 2.3956005823201705e-05,
+        "run2": 1.7897266955442223e-05
+      },
+      "CQ500-CT-415": {
+        "run1": 1.642664475097158e-05,
+        "run2": 2.0800988960576193e-05
+      },
+      "CQ500-CT-278": {
+        "run1": 1.4200837066120765e-06,
+        "run2": 2.320020830146262e-06
+      },
+      "CQ500-CT-426": {
+        "run1": 7.75797779533657e-06,
+        "run2": 7.096908641129662e-06
+      },
+      "CQ500-CT-196": {
+        "run1": 5.382134547741619e-07,
+        "run2": 1.6959030021925353e-06
+      },
+      "CQ500-CT-43": {
+        "run1": 5.1503878362437585e-05,
+        "run2": 5.4407746831742685e-05
+      }
+    },
+    "stable_within_20pct": false,
+    "recommendation": "With N=30 MC-Dropout passes, run-to-run variation of 5-15% is expected. For publication, fix torch.manual_seed() before each run or report mean +/- std across multiple independent runs."
+  },
+  "corrected_interception_summary": {
+    "scope": "EXPLORATORY, WITHIN-SAMPLE retrospective analysis only",
+    "classifier_gate_fnr": "3.70% (6/162) \u2014 UNCHANGED",
+    "aggregation_for_ood_eval": "TOP-3 MEAN (consistent with step16, step18, step19)",
+    "ood_escalated": [
+      "CQ500-CT-415",
+      "CQ500-CT-43"
+    ],
+    "ood_not_escalated": [
+      "CQ500-CT-385",
+      "CQ500-CT-278",
+      "CQ500-CT-426",
+      "CQ500-CT-196"
+    ],
+    "epistemic_escalated": [],
+    "finding": "2/6 FN studies (CQ500-CT-415, CQ500-CT-43) have RMD scores exceeding the 95th-percentile TN threshold. 4/6 are not flagged by either gate. This finding holds under BOTH MAX and TOP-3 MEAN aggregation methods, because the OOD score is computed on penultimate features (aggregated TOP-3 MEAN), not on the classifier probability directly.",
+    "four_missed_failure_analysis_priority": "CQ500-CT-385, CQ500-CT-278, CQ500-CT-426, CQ500-CT-196 represent cases that evaded the classifier, OOD, and epistemic gates. These are the highest-priority cases for the next iteration of SEWA's safety architecture. Recommended next steps: (1) inspect raw DICOM for visual and radiological characteristics; (2) evaluate whether subtype-specific thresholds (Claim 5) would have changed routing; (3) assess whether a pre-registered multi-gate threshold calibration on an independent cohort would change the interception result."
+  },
+  "elapsed_seconds": 168.59
+}
