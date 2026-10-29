@@ -190,26 +190,20 @@ In Test K, model uncertainty was evaluated on N=300 held-out slices (150 ICH+, 1
 Stochastic inference executing N=20 forward passes with Monte Carlo dropout active produced epistemic variance sigma^2_epi. Mean epistemic variance increased monotonically across the 5 discrete noise levels from 0.00088 to 0.00496, yielding a Spearman rank correlation rho = 0.9000 (p = 0.0374).
 
 ### 7.7 Technical Synergy and Functional Coupling Across Pipeline Stages
-The technical integers of the present invention are co-designed to provide cross-layer operational stability, wherein upstream modules precondition the feature representations and data domains ingested by downstream statistical and governance mechanisms:
+The technical elements of the present invention may be co-designed in a particular arrangement to provide cross-layer operational stability. In such an arrangement, upstream modules precondition the feature representations and data domains ingested by downstream statistical and governance mechanisms:
 
-1. *Feature Standardization Prior to Conformal Risk Control*:
-Split Conformal Risk Control (Bates et al., 2021) provides a theoretical guarantee that expected conditional False Negative Rate satisfies E[FNR_cond] <= alpha when inference instances are statistically consistent with the split calibration distribution D_cal. In heterogeneous multi-scanner clinical workflows, hardware differences (slice thickness, kVp, reconstruction filters) introduce severe channel-wise activation shifts. Rather than modifying convolutional filter weights (which would disrupt pre-trained discriminative feature boundaries), the platform applies Zero-Label AdaBN to adapt running normalisation statistics directly on an unlabelled target stream. This standardizes internal activation moments across scanner fleets, mitigating covariate-induced distribution drift prior to threshold evaluation by the conformal prediction gate.
+1. *Feature Standardization in Relation to Conformal Risk Control*:
+Split Conformal Risk Control provides a basis for bounding expected conditional False Negative Rate under the assumption that calibration and inference instances are exchangeable. In heterogeneous multi-scanner clinical workflows, hardware differences can introduce channel-wise activation shifts. Rather than modifying convolutional filter weights, the platform may apply Zero-Label AdaBN to adapt running normalisation statistics on an unlabelled target stream to mitigate covariate-induced distribution drift prior to threshold evaluation by the conformal prediction gate.
 
-2. *Latent Manifold Regularization for Relative Mahalanobis Distance (RMD) Gating*:
-The Relative Mahalanobis Distance metric RMD(x) = min_c M(z(x); mu_c, Sigma) - M(z(x); mu_0, Sigma_0) evaluates penultimate feature representations z(x) relative to an unconditioned background centroid mu_0. In the absence of target feature standardization, acquisition hardware differences introduce non-pathological shifts into the background distance M(z(x); mu_0, Sigma_0), artificially inflating OOD scores and causing false escalations. By executing AdaBN in upstream convolutional layers, the penultimate latent space is regularized prior to covariance estimation, ensuring that trace-shrunk precision matrices isolate true pathological anomalies rather than hardware-induced covariate shifts.
+2. *Latent Manifold Considerations for Relative Mahalanobis Distance (RMD) Gating*:
+The Relative Mahalanobis Distance metric evaluates penultimate feature representations relative to an unconditioned background centroid. Acquisition hardware differences may introduce non-pathological shifts; executing AdaBN in upstream convolutional layers may regularize the latent space prior to covariance estimation, helping to isolate pathological anomalies from hardware-induced variation.
 
-3. *Attribution Filtering Coupled to Automated Metacognitive Gating*:
-In neuroimaging computed tomography, cortical calvarial bone (+500 to +2000 HU) generates steep backpropagated gradients that monopolize unmasked class activation maps. In the present platform, the Anatomically-Masked HiResCAM module computes element-wise gradient-activation products across final convolutional feature maps and applies an automated soft-tissue mask (0 to +85 HU). Crucially, this filtered attribution map is not solely an end-user display artifact; it serves as a direct computational input to Layer 4 (Attribution Coherence) of the automated 9-layer metacognition safety engine. By suppressing calvarial bone gradient hijacking before metacognitive plausibility analysis, the masking directly enables downstream automated verification of whether model focus aligns with parenchymal soft tissue, preventing spurious triage rejections.
+3. *Attribution Artifact Suppression for Metacognitive Verification*:
+Anatomically-Masked HiResCAM removes high-attenuation calvarial bone gradient artifacts via an intracranial parenchymal mask before spatial attribution maps are ingested by the metacognition safety engine, reducing the risk of cranial hyperdensities triggering spurious plausibility escalations.
 
 4. *Complementary Failure-Mode Partitioning*:
-The multi-tiered architecture partitions clinical safety oversight across structurally orthogonal failure modes:
-- Conformal Risk Control bounds statistical false-negative risk on in-distribution inputs;
-- Relative Mahalanobis Distance detects representations falling outside the known latent manifold;
-- Monte Carlo Dropout uncertainty evaluation monitors sensitivity to physical image degradation; and
-- Cryptographic database constraints prevent unapproved report transmission.
-The retrospective multi-gate audit (§7.3, §7.4)—in which secondary gates intercepted 2 of 6 false negatives while 4 remained unflagged—empirically demonstrates that these secondary mechanisms operate on distinct failure modes rather than forming an impenetrable, single-point barrier. The technical synergy of the platform resides in this co-designed defense-in-depth and the functional preconditioning between stages, rather than in an unsupported claim of absolute empirical error eradication.
+The integrated architecture is intended to provide defense-in-depth: conformal risk control addresses in-distribution calibration risk under exchangeability, RMD addresses certain latent representation shifts, epistemic uncertainty addresses aspects of physical sensor degradation, and database-level constraints address clinical release governance. Retrospective audit data showing that secondary gates intercepted 2 of 6 observed false negatives indicates the gates are complementary rather than comprehensive; accordingly, mandatory human review remains required.
 
----
 
 ## 8. CLAIMS
 
@@ -223,7 +217,7 @@ WE CLAIM:
    (e) evaluating prediction variance through stochastic inference with active dropout to verify that epistemic uncertainty responds appropriately to image degradation;
    (f) generating an explainable spatial saliency map via element-wise gradient-activation multiplication constrained by an automated anatomical soft-tissue segmentation mask;
    (g) combining outputs from the out-of-distribution score, conformal risk control gate, and epistemic uncertainty into a deterministic clinical routing decision, wherein studies cleared by all gates are deprioritised to routine review and studies failing any gate are escalated to emergency review; and
-   (h) dispatching prioritised clinical triage alerts to a medical display worklist, wherein final diagnostic report delivery requires cryptographic clinician digital sign-off enforced as a database-level constraint.
+   (h) dispatching prioritised clinical triage alerts to a medical display worklist, wherein final diagnostic report delivery requires authorised clinician sign-off enforced as a database-level constraint requiring signature metadata (signedBy, signedAt).
 
 2. The method of Claim 1, wherein the split conformal risk control prediction gate selects operational probability threshold lambda as a theoretical supremum threshold lambda_sup satisfying:
    lambda_sup = sup { lambda' in [0, 1] : (n_pos / (n_pos + 1)) * R_n(lambda') + (1 / (n_pos + 1)) <= alpha }
@@ -244,7 +238,7 @@ WE CLAIM:
 
 8. The method of Claim 1, wherein the Relative Mahalanobis Distance RMD(x) is computed using Ledoit-Wolf trace shrinkage covariance regularization and Moore-Penrose pseudoinverse precision matrices contrasting class-conditional centroids against an unconditioned background feature centroid.
 
-9. The method of Claim 1, further comprising: monitoring epistemic uncertainty variance across N stochastic Monte Carlo Dropout forward passes; detecting when said epistemic variance fails to exhibit an increasing response to simulated or detected image acquisition degradation; and upon detecting such a failure of the expected noise-response behaviour, automatically escalating the associated scan to mandatory human clinical review, thereby providing a physics-grounded sensor integrity check that alerts the clinical routing system when uncertainty estimates decouple from physical imaging degradation.
+9. The method of Claim 1, further comprising: monitoring epistemic uncertainty variance across a plurality of stochastic Monte Carlo Dropout forward passes; detecting when said epistemic uncertainty variance fails to exhibit an increasing response to simulated or detected image acquisition degradation; and upon detecting such a failure of the expected noise-response behaviour, automatically escalating the associated scan to mandatory human clinical review, thereby providing a physics-grounded sensor integrity check that alerts the clinical routing system when uncertainty estimates decouple from acquisition degradation.
 
 10. The method of Claim 1, further comprising executing a 9-layer metacognition safety engine evaluating: (1) modality plausibility; (2) urgency-finding consistency; (3) minimum confidence floors; (4) attribution coherence; (5) confidence-uncertainty conflict; (6) clinical impression negation concordance; (7) demographic epidemiological priors; (8) composite hallucination risk scoring; and (9) binary safe-to-alert gating.
 
@@ -263,7 +257,7 @@ WE CLAIM:
     a zero-label adaptive batch normalisation module configured to update running mean and variance statistics of the deep neural network using unannotated imaging studies from a target clinical environment while weights remain frozen;
     a split conformal risk control module configured to enforce a pre-specified expected false negative triage error bound under exchangeability;
     an explainability engine configured to generate anatomically masked spatial attribution maps suppressing non-parenchymal bone artifacts; and
-    a relational database enforcing foreign key constraints and digital signature validation, wherein dispatch of prioritised clinical alerts is blocked absent cryptographic clinician verification.
+    a relational database enforcing foreign key constraints and signature metadata validation, wherein dispatch of prioritised clinical alerts is blocked absent authorised clinician sign-off recorded with signature metadata.
 
 16. The system of Claim 15, configured as an offline edge gateway comprising an INT8-quantised convolutional neural network operable without external internet connectivity, a local Merkle-chained audit log, and a cellular modem configured for fallback SMS emergency alert dispatch.
 
@@ -277,20 +271,27 @@ WE CLAIM:
 
 21. A computer-implemented method for generating a clinically interpretable attribution map for deep neural network-based intracranial haemorrhage detection in non-contrast computed tomography (CT) imaging, the method comprising:
     computing element-wise gradient-weighted class activation mapping (HiResCAM) over a final convolutional feature map layer of a convolutional neural network by multiplying element-wise the gradient of a predicted class score with respect to each spatial feature map activation by the corresponding activation value, without global spatial pooling;
-    generating a parenchymal anatomical mask by thresholding CT voxels to a Hounsfield Unit range of 0 to +85 HU, thereby excluding calvarial bone (+500 to +2000 HU) and air (below -100 HU) from the attribution domain;
+    generating a parenchymal anatomical mask by thresholding CT voxels to a Hounsfield Unit range of 0 to +85 HU, thereby excluding calvarial bone (+500 to +1500 HU) and air (below -100 HU) from the attribution domain;
     applying said parenchymal mask to said HiResCAM activation map by element-wise multiplication, thereby suppressing gradient contributions from high-attenuation bone structures that do not contribute to haemorrhage pathology; and
-    normalizing the resulting masked attribution map to produce a bone-artifact-suppressed saliency overlay for radiological review.
+    normalising the resulting masked attribution map to produce a bone-artifact-suppressed saliency overlay for radiological review.
 
 22. The method of Claim 1, wherein:
-    (a) adapting batch normalisation statistics via zero-label adaptive batch normalisation in step (b) dynamically standardizes internal feature map distributions across target scanner acquisitions prior to evaluating the split conformal risk control prediction gate of step (d);
-    (b) the out-of-distribution score of step (c) is computed over penultimate feature vectors extracted following said batch normalisation adaptation, thereby preventing scanner-induced covariate shifts from distorting background-relative Mahalanobis distance calculation; and
-    (c) the explainable spatial saliency map generated in step (f) is coupled to a multi-layer metacognition engine to verify attribution coherence against segmented soft-tissue intracranial structures, thereby preventing calvarial bone gradient hijacking from corrupting downstream clinical routing decisions.
+    (a) adapting batch normalisation statistics via zero-label adaptive batch normalisation in step (b) standardizes internal feature map distributions across target scanner acquisitions in relation to the split conformal risk control prediction gate of step (d);
+    (b) the out-of-distribution score of step (c) is computed over penultimate feature vectors extracted following said batch normalisation adaptation, so that scanner-induced covariate shifts are less likely to distort background-relative Mahalanobis distance calculation; and
+    (c) the explainable spatial saliency map generated in step (f) is coupled to a multi-layer metacognition engine to verify attribution coherence against segmented soft-tissue intracranial structures to reduce the risk of calvarial bone gradient artifacts corrupting downstream clinical routing decisions.
 
 23. The method of Claim 21, wherein generating the parenchymal anatomical mask further comprises executing morphological hole-filling and largest-connected-component isolation to segment an intracranial vault.
 
 24. The method of Claim 21, wherein applying the parenchymal mask comprises applying a rectified linear unit (ReLU) activation to unpooled element-wise gradient-activation product feature maps prior to element-wise multiplication with the parenchymal anatomical mask.
 
 25. The method of Claim 21, wherein the thresholding defines intracranial soft-tissue sub-ranges comprising brain parenchyma (20 to 40 HU), cerebrospinal fluid (0 to 15 HU), and acute haematoma (50 to 85 HU).
+
+26. A computer-implemented system for safe diagnostic triage, comprising:
+   (a) an adaptive batch normalisation module configured to update running mean and variance of a frozen-feature-extractor on unlabelled target images;
+   (b) a relative Mahalanobis distance module configured to compute an out-of-distribution score over feature representations produced following adaptation in (a);
+   (c) a split conformal risk control module configured to apply a threshold calibrated under exchangeability to bound conditional false-negative rate among positive studies;
+   (d) an anatomically masked HiResCAM module configured to generate bone-artifact-suppressed attribution maps; and
+   (e) a clinical routing module configured to combine outputs of (b),(c),(d) with database-enforced authorisation to gate dispatch of prioritised alerts, wherein the modules are co-arranged such that adaptation (a) conditions the representations used by (b),(c) and masked attribution (d) conditions inputs to metacognitive verification. parenchyma (20 to 40 HU), cerebrospinal fluid (0 to 15 HU), and acute haematoma (50 to 85 HU).
 
 26. A clinical artificial intelligence computing system for distribution-free risk-controlled radiological triage, comprising:
     at least one hardware processor;
