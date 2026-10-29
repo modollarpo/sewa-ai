@@ -22,7 +22,7 @@ from io import BytesIO
 import docx
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.enum.style import WD_STYLE_TYPE
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
@@ -41,6 +41,18 @@ from reportlab.platypus.tableofcontents import TableOfContents
 
 ROOT = Path(__file__).resolve().parents[1]
 PATENT_DIR = ROOT / "docs" / "patent"
+
+DRAWING_CAPTIONS = {
+    "fig1_architecture.png": "FIG. 1: HIGH-LEVEL SYSTEM ARCHITECTURE & 7-LAYER SAFETY PIPELINE",
+    "fig2_conformal_calibration.png": "FIG. 2: SPLIT CONFORMAL RISK CONTROL CALIBRATION & INFERENCE",
+    "fig3_adabn_mechanism.png": "FIG. 3: ZERO-LABEL ADAPTIVE BATCH NORMALISATION (AdaBN)",
+    "fig4_masked_hirescam.png": "FIG. 4: ANATOMICALLY MASKED HiResCAM ATTRIBUTION",
+    "fig5_uncertainty_monotonicity.png": "FIG. 5: EPISTEMIC UNCERTAINTY VARIANCE MONOTONICITY",
+    "fig6_stroke_code_dispatch.png": "FIG. 6: STROKE CODE AUTOMATED MULTI-CHANNEL DISPATCH",
+    "fig7_sovereign_deployment.png": "FIG. 7: SOVEREIGN DUAL-PATH DEPLOYMENT ARCHITECTURE",
+    "fig8_multimodal_expansion.png": "FIG. 8: MULTI-MODAL EMERGENCY RADIOLOGY TRIAGE PIPELINE",
+}
+
 FIGURES_DIR = PATENT_DIR / "figures"
 SPEC_MD = PATENT_DIR / "UK_Patent_Application_2_Specification_and_Claims.md"
 
@@ -560,21 +572,16 @@ def build_pdf_from_markdown(md_content: str, out_path: Path,
 
     # If figures requested, append them after spec
     if include_figures and FIGURES_DIR.exists():
-        story.append(PageBreak())
-        story.append(Paragraph("FORMAL DRAWINGS", s["title"]))
-        hr()
         fig_files = sorted(FIGURES_DIR.glob("*.png"))
-        for fig_path in fig_files:
-            try:
-                img = RLImage(str(fig_path), width=BODY_W * 0.9, height=BODY_W * 0.65)
-                story.append(KeepTogether([
-                    img,
-                    Spacer(1, 0.3 * cm),
-                    Paragraph(fig_path.stem.replace("_", " ").upper(), s["marking"]),
-                    Spacer(1, 0.5 * cm),
-                ]))
-            except Exception as e:
-                story.append(Paragraph(f"[Figure: {fig_path.name} — {e}]", s["marking"]))
+        for idx, fig_path in enumerate(fig_files):
+            story.append(PageBreak())
+            cap_text = DRAWING_CAPTIONS.get(fig_path.name, fig_path.stem.replace("_", " ").upper())
+            story.append(Paragraph(f"PATENT DRAWINGS SHEET {idx+1}/{len(fig_files)} — {cap_text}", s["h3"]))
+            story.append(Spacer(1, 0.3 * cm))
+            # Image aspect ratio 2036 x 2601 (height/width = 1.277)
+            # 13.5 cm width * 1.277 = 17.24 cm height fits page without clipping
+            img = RLImage(str(fig_path), width=13.5 * cm, height=17.24 * cm)
+            story.append(img)
 
     def first_page(canvas, doc):
         _header_footer(canvas, doc, doc_title)
@@ -698,24 +705,36 @@ def main() -> None:
             break
 
     # Append formal drawings
-    doc_with.add_page_break()
-    p = doc_with.add_paragraph()
-    r = p.add_run("FORMAL DRAWINGS")
-    r.bold = True; r.font.size = Pt(14); r.font.name = "Times New Roman"
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
     if FIGURES_DIR.exists():
         fig_files = sorted(FIGURES_DIR.glob("*.png"))
-        for fig_path in fig_files:
-            try:
-                doc_with.add_picture(str(fig_path), width=Inches(5.8))
-                cap = doc_with.add_paragraph(fig_path.stem.replace("_", " ").upper())
-                cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                cap.runs[0].font.size = Pt(9)
-                cap.runs[0].font.name = "Times New Roman"
-                doc_with.add_paragraph()
-            except Exception as e:
-                doc_with.add_paragraph(f"[Figure: {fig_path.name} — {e}]")
+        for idx, fig_path in enumerate(fig_files):
+            doc_with.add_page_break()
+
+            cap_text = DRAWING_CAPTIONS.get(fig_path.name, fig_path.stem.replace("_", " ").upper())
+
+            # Header paragraph with single spacing
+            p_hdr = doc_with.add_paragraph()
+            p_hdr.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_hdr.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+            p_hdr.paragraph_format.line_spacing = 1.0
+            p_hdr.paragraph_format.space_before = Pt(0)
+            p_hdr.paragraph_format.space_after = Pt(6)
+            r_hdr = p_hdr.add_run(f"PATENT DRAWINGS SHEET {idx+1}/{len(fig_files)}\n{cap_text}")
+            r_hdr.bold = True
+            r_hdr.font.size = Pt(11)
+            r_hdr.font.name = "Times New Roman"
+
+            # Image paragraph with CRITICAL SINGLE LINE SPACING to prevent Word 16pt clipping
+            p_img = doc_with.add_paragraph()
+            p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_img.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+            p_img.paragraph_format.line_spacing = 1.0
+            p_img.paragraph_format.space_before = Pt(0)
+            p_img.paragraph_format.space_after = Pt(0)
+
+            run_img = p_img.add_run()
+            # 5.4 inches width (height = 5.4 * 2601 / 2036 = 6.89 inches)
+            run_img.add_picture(str(fig_path), width=Inches(5.4))
 
     try:
         doc_with.save(str(draw_docx))
