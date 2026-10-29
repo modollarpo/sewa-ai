@@ -61,6 +61,28 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-29 — Multi-Gate Safety Interception Audit, branch `main`)
+
+Governing artifacts: `validation/scripts/audit_fn_safety_interception.py`, `validation/reports/v2a1_fn_safety_interception.json`, `docs/evidence/feasibility_report_fn_safety_interception.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Multi-Gate Safety Interception Audit — Item 5 of Checklist (Commit `ae4ec47`)**:
+  - Authored and executed `validation/scripts/audit_fn_safety_interception.py` on the 6 classifier-gate false-negative studies at λ = 0.0298.
+  - Gate thresholds derived from 95th percentile of 49 confirmed-TN auto-cleared studies: τ_ood = 52.05 (Relative Mahalanobis OOD); τ_epi = 3.50×10⁻⁴ (MC-Dropout epistemic variance, N=30 passes).
+  - **Per-study results:**
+    - CQ500-CT-415 (score 0.0037): OOD = 55.54 > τ_ood → **ESCALATED by OOD gate**.
+    - CQ500-CT-43 (score 0.0096): OOD = 64.31 > τ_ood → **ESCALATED by OOD gate**.
+    - CQ500-CT-385 (score 0.0051): OOD = 32.43, Epi = 1.79×10⁻⁵ → NOT escalated.
+    - CQ500-CT-278 (score 0.0012): OOD = 41.01, Epi = 1.32×10⁻⁶ → NOT escalated.
+    - CQ500-CT-426 (score 0.0033): OOD = 46.58, Epi = 4.97×10⁻⁶ → NOT escalated.
+    - CQ500-CT-196 (score 0.0012): OOD = 47.40, Epi = 8.29×10⁻⁷ → NOT escalated.
+  - **Summary: 2/6 FN studies escalated by OOD gate; 4/6 not caught by any secondary gate.**
+  - Classifier-gate FNR of 3.70% (6/162) unchanged — this is a SEPARATE retrospective analysis.
+  - `docs/evidence/evidence_release_checklist.md` Item 5 updated from PENDING EXECUTION → EXECUTED.
+  - All 8 checklist items now resolved (Items 1 & 8 require human action; Items 2–7 fully executed).
+
+---
+
 ## 📋 Work State (2026-10-29 — Public Evidence Pages Harmonisation, FNR/SAH Metric Separation & CI Trigger Optimisation, branch `main`)
 
 Governing documents: `frontend/src/pages/public/ClinicalEvidencePage.tsx`, `LandingPage.tsx`, `docs/evidence/conformal_reconciliation_report.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
