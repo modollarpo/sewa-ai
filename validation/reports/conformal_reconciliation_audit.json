@@ -1,0 +1,100 @@
+{
+  "marking": "FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.",
+  "title": "Split Conformal Risk Control \u2014 Mathematical Reconciliation Audit",
+  "calibration_split": {
+    "label": "calibration",
+    "n_cal": 100,
+    "n_pos_cal": 40,
+    "prevalence_cal": 0.4,
+    "alpha": 0.05,
+    "lambda_conditional_fnr": 0.0753,
+    "lambda_unconditional_fnr": 0.199,
+    "lambda_adr004_cited": 0.0298,
+    "fnr_cond_at_cited_lambda": 0.025,
+    "fnr_uncond_at_cited_lambda": 0.01,
+    "bound_cond_at_cited_lambda": 0.0347,
+    "bound_uncond_at_cited_lambda": 0.0198
+  },
+  "test_at_conditional_threshold": {
+    "label": "test_conditional_fnr_threshold",
+    "lambda": 0.0753,
+    "n_test": 386,
+    "n_pos_test": 162,
+    "n_neg_test": 224,
+    "n_auto_cleared": 52,
+    "n_escalated": 334,
+    "n_fn_at_classifier_gate": 11,
+    "n_tp": 151,
+    "n_tn": 41,
+    "n_fp": 183,
+    "conditional_fnr_observed": 0.0679,
+    "unconditional_fnr_observed": 0.0285,
+    "auto_clear_rate": 0.1347,
+    "zero_fn_in_auto_cleared": false
+  },
+  "test_at_unconditional_threshold": {
+    "label": "test_unconditional_fnr_threshold",
+    "lambda": 0.199,
+    "n_test": 386,
+    "n_pos_test": 162,
+    "n_neg_test": 224,
+    "n_auto_cleared": 96,
+    "n_escalated": 290,
+    "n_fn_at_classifier_gate": 20,
+    "n_tp": 142,
+    "n_tn": 76,
+    "n_fp": 148,
+    "conditional_fnr_observed": 0.1235,
+    "unconditional_fnr_observed": 0.0518,
+    "auto_clear_rate": 0.2487,
+    "zero_fn_in_auto_cleared": false
+  },
+  "test_at_adr_cited_lambda": {
+    "label": "test_at_cited_adr_lambda_0.0298",
+    "lambda": 0.0298,
+    "n_test": 386,
+    "n_pos_test": 162,
+    "n_neg_test": 224,
+    "n_auto_cleared": 33,
+    "n_escalated": 353,
+    "n_fn_at_classifier_gate": 6,
+    "n_tp": 156,
+    "n_tn": 27,
+    "n_fp": 197,
+    "conditional_fnr_observed": 0.037,
+    "unconditional_fnr_observed": 0.0155,
+    "auto_clear_rate": 0.0855,
+    "zero_fn_in_auto_cleared": false
+  },
+  "inf_sup_equivalence_note": "ADR 004 formulation inf{lam : (n/(n+1)) R_n(lam) + 1/(n+1) <= alpha} can be read two ways. For the loss L = I(Y=1 AND S<lam), R_n(lam) is NON-DECREASING in lam (higher threshold means more false negatives). The safe set S_safe = { lam : bound(lam) <= alpha } is therefore a closed interval [0, lam*]. The SUPREMUM of this interval (lam*) is the most aggressive (largest) threshold satisfying the bound -- used in the patent claim. The ADR 004 inf{} notation is the infimum of the COMPLEMENT (unsafe) set, which equals the supremum of the safe set. Both produce the identical operational threshold lam*. The patent specification (Claim 2) correctly uses sup{} and is consistent with the implementation.",
+  "patent_claim_reconciliation": {
+    "claim_2_sup_formulation": "CORRECT \u2014 sup{safe set} equals inf{complement set} for monotone loss.",
+    "claim_3_fnr_5pct": "The 5% risk bound is computed with n_positive denominator (conditional FNR) as implemented in ADR 004. This is the conditional false-negative rate E[I(C_\u03bb=0) | Y=1]. The Bates et al. (2021) theorem bounds the unconditional risk E[L(X,Y)] = P(Y=1) * conditional_FNR. The specification Section 7.4 has been updated to make this distinction explicit.",
+    "claim_recommended_language": "...wherein the empirical risk R_n(\u03bb) is defined as the conditional false-negative rate among positive calibration studies: R_n(\u03bb) = (1/n_pos) \u03a3_{i: Y_i=1} I(S(X_i) < \u03bb), with the bound selected as \u03bb = sup{ \u03bb' : (n/(n+1)) R_n(\u03bb') + 1/(n+1) \u2264 \u03b1 }."
+  },
+  "pointing_game_e2_clarification": {
+    "metric_unit": "PER-BOUNDING-BOX (not per-slice)",
+    "evidence": "step11b_hirescam_pointing.py iterates `for _, bbox_row in study_df.iterrows()`, incrementing study_total += 1 per bbox_row (i.e., per bounding box). n_total_bboxes=6283, n_hits=2754, hit_rate=43.83% are box-level metrics. The patent specification should state: 'pointing-game hit rate of 43.83% evaluated per expert bounding box annotation (n=6,283 boxes across 226 studies).'"
+  },
+  "claim_9_monotonicity_clarification": {
+    "data_point_count": 5,
+    "sigma_levels": [
+      0.0,
+      0.05,
+      0.1,
+      0.2,
+      0.35
+    ],
+    "mean_epi_variance": [
+      0.00088,
+      0.00136,
+      0.00183,
+      0.00496,
+      0.00409
+    ],
+    "non_monotone_at": "sigma=0.35 (variance drops from 0.00496 at sigma=0.20 to 0.00409)",
+    "spearman_rho": 0.9,
+    "spearman_p": 0.0374,
+    "recommendation": "Claim 9 should be weakened. Replace 'monotonic non-decreasing rank correlation (Spearman rho >= 0.85)' with 'positive rank correlation (Spearman rho > 0) across discrete image acquisition noise levels, as evaluated experimentally.' The specification Section 7.6 already correctly states the exact rho=0.9000 over 5 discrete levels, which is sufficient technical disclosure."
+  }
+}

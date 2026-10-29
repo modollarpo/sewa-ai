@@ -36,7 +36,7 @@ def parse_markdown(path):
         text = f.read()
     return text
 
-def build_docx(md_text, out_path):
+def build_docx(md_text, out_path, embed_figures=True):
     doc = docx.Document()
     for s in doc.sections:
         s.top_margin = Inches(1)
@@ -76,25 +76,26 @@ def build_docx(md_text, out_path):
             p = doc.add_paragraph(line_s)
             p.paragraph_format.space_after = Pt(3)
 
-    # Append Drawings Section to DOCX
-    doc.add_page_break()
-    doc.add_heading("9. FORMAL PATENT DRAWINGS (FIGURES 1 TO 8)", level=1)
-    for fname, caption in FIGURES:
-        img_path = os.path.join(FIG_DIR, fname)
-        if os.path.exists(img_path):
-            p_cap = doc.add_paragraph()
-            r_cap = p_cap.add_run(caption)
-            r_cap.bold = True
-            r_cap.font.size = Pt(10)
-            p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            doc.add_picture(img_path, width=Inches(6.0))
-            p_space = doc.add_paragraph()
-            p_space.paragraph_format.space_after = Pt(12)
+    # Append Drawings Section to DOCX if requested
+    if embed_figures:
+        doc.add_page_break()
+        doc.add_heading("9. FORMAL PATENT DRAWINGS (FIGURES 1 TO 8)", level=1)
+        for fname, caption in FIGURES:
+            img_path = os.path.join(FIG_DIR, fname)
+            if os.path.exists(img_path):
+                p_cap = doc.add_paragraph()
+                r_cap = p_cap.add_run(caption)
+                r_cap.bold = True
+                r_cap.font.size = Pt(10)
+                p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                doc.add_picture(img_path, width=Inches(6.0))
+                p_space = doc.add_paragraph()
+                p_space.paragraph_format.space_after = Pt(12)
 
     doc.save(out_path)
     print(f"Generated DOCX with embedded figures: {out_path}")
 
-def build_pdf(md_text, out_path):
+def build_pdf(md_text, out_path, embed_figures=True):
     doc = SimpleDocTemplate(out_path, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     styles = getSampleStyleSheet()
 
@@ -133,25 +134,30 @@ def build_pdf(md_text, out_path):
             clean = line_s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             story.append(Paragraph(clean, body_style))
 
-    # Append Drawings to PDF
-    story.append(PageBreak())
-    story.append(Paragraph("9. FORMAL PATENT DRAWINGS (FIGURES 1 TO 8)", h1_style))
-    story.append(Spacer(1, 8))
+    # Append Drawings to PDF if requested
+    if embed_figures:
+        story.append(PageBreak())
+        story.append(Paragraph("9. FORMAL PATENT DRAWINGS (FIGURES 1 TO 8)", h1_style))
+        story.append(Spacer(1, 8))
 
-    for idx, (fname, caption) in enumerate(FIGURES):
-        img_path = os.path.join(FIG_DIR, fname)
-        if os.path.exists(img_path):
-            story.append(Paragraph(f"<b>PATENT DRAWINGS SHEET {idx+1}/{len(FIGURES)}</b> — {caption}", fig_head_style))
-            story.append(Spacer(1, 6))
-            story.append(RLImage(img_path, width=500, height=640))
-            if idx < len(FIGURES) - 1:
-                story.append(PageBreak())
+        for idx, (fname, caption) in enumerate(FIGURES):
+            img_path = os.path.join(FIG_DIR, fname)
+            if os.path.exists(img_path):
+                story.append(Paragraph(f"<b>PATENT DRAWINGS SHEET {idx+1}/{len(FIGURES)}</b> — {caption}", fig_head_style))
+                story.append(Spacer(1, 6))
+                story.append(RLImage(img_path, width=500, height=640))
+                if idx < len(FIGURES) - 1:
+                    story.append(PageBreak())
 
     doc.build(story)
     print(f"Generated PDF with embedded figures: {out_path}")
 
 if __name__ == '__main__':
     md = parse_markdown(MD_PATH)
-    build_docx(md, DOCX_PATH)
-    build_pdf(md, PDF_PATH)
+    # 1. Spec only (clean text for official formal submission)
+    build_docx(md, 'docs/patent/UK_Patent_Application_2_Specification_and_Claims.docx', embed_figures=False)
+    build_pdf(md, 'docs/patent/UK_Patent_Application_2_Specification_and_Claims.pdf', embed_figures=False)
+    # 2. Consolidated master document with drawings
+    build_docx(md, DOCX_PATH, embed_figures=True)
+    build_pdf(md, PDF_PATH, embed_figures=True)
     print("Patent generation complete.")

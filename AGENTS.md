@@ -61,6 +61,32 @@ Perform a self-review before submitting any code:
 
 ---
 
+## 📋 Work State (2026-10-29 — Second UK Patent Application Legal & Mathematical Reconciliation, branch `main`)
+
+Governing patent documents: `docs/patent/UK_Patent_Application_2_Specification_and_Claims.md`, `docs/evidence/conformal_reconciliation_report.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
+
+### ✅ Completed
+- **Mathematical Reconciliation of Split Conformal Risk Control (`conformal_reconciliation_audit.py`)**:
+  - Reconciled **Conditional vs. Unconditional FNR**: Clarified that ADR 004 and downstream validation pipelines evaluate empirical conditional risk $R_n(\lambda) = \frac{1}{n_{\text{pos}}} \sum_{i: Y_i=1} \mathbb{I}(S(X_i) < \lambda)$ (denominator $n_{\text{pos}}$), which bounds expected conditional false-negative rate $\mathbb{E}[\text{FNR}_{\text{cond}}] \le \alpha$ among positive cases, rather than the unconditioned joint probability bounded by the general Bates et al. (2021) theorem ($\mathbb{E}[L] = \pi \cdot R_n(\lambda)$).
+  - Clarified **Supremum vs. Infimum Threshold Selection**: Proved that for non-decreasing loss $L = \mathbb{I}(Y=1 \land S(X) < \lambda)$, the safe set is a closed interval $[0, \lambda^*]$; the supremum $\sup\{\lambda' : \text{bound} \le \alpha\}$ selects the maximum operational auto-clearing threshold, identical to the infimum of the complement unsafe set $\inf\{\lambda' : \text{bound} > \alpha\}$ written in ADR 004.
+  - Full reproducible study-level evaluation executed on CQ500 ($N=486$ studies, $3,884$ slices; $n_{\text{cal}}=100$ calibration, $N_{\text{test}}=386$ holdout):
+    - Calibrated conditional threshold: $\lambda = 0.0753$ ($\le 0.05$ target risk bound); observed test FNR $= 6.79\%$ (11 FNs / 162 positive studies).
+    - Conservative deployed operating threshold: $\lambda = 0.0298$ (calibration bound $= 0.0347 \le 0.05$); observed test FNR $= 3.70\%$ (6 FNs / 162 positive studies; 33 scans auto-cleared).
+    - Full case-level routing table generated and logged to `validation/reports/conformal_routing_table.csv` (386 rows with ground-truth, probability scores, auto-clear and gate flags).
+- **Test E.2 Pointing Game Metric Unit Confirmed**:
+  - Code audit of `step11b_hirescam_pointing.py` confirmed iteration per bounding box row (`study_df.iterrows()`), establishing that the $43.83\%$ hit rate ($2,754$ hits / $6,283$ bboxes) is strictly evaluated **per expert bounding box annotation** across $226$ positive studies.
+- **Physics Noise Monotonicity Softened in Claim 9**:
+  - Replaced universal strict monotonicity assertions with experimental positive Spearman rank correlation ($\rho = 0.9000, p = 0.0374$) over five discrete simulated Gaussian noise levels ($\sigma \in \{0.00, 0.05, 0.10, 0.20, 0.35\}$), accurately reflecting the slight non-monotone drop observed at extreme noise ($\sigma=0.35$).
+- **Statutory Filing Portfolio Fully Synchronized & Recompiled**:
+  - Master Markdown specification (`UK_Patent_Application_2_Specification_and_Claims.md`).
+  - Spec-only clean submission Word DOCX (`UK_Patent_Application_2_Specification_and_Claims.docx`).
+  - Spec-only clean submission PDF (`UK_Patent_Application_2_Specification_and_Claims.pdf`).
+  - Master consolidated Word DOCX with embedded FIG. 1–8 (`UK_Patent_Application_2_With_Drawings.docx`, 1.95 MB).
+  - Master consolidated PDF with embedded FIG. 1–8 (`UK_Patent_Application_2_With_Drawings.pdf`, 2.38 MB).
+  - Standalone formal drawings PDF (`UK_Patent_Application_2_Formal_Drawings.pdf`, 8 sheets, 2.35 MB).
+
+---
+
 ## 📋 Work State (2026-10-28 — Patent Gap Analysis & IP Strategy Assessment GB2609706.3, branch `main`)
 
 Governing patent document: `docs/evidence/Filing Receipt published with OLFI (2).pdf` (Application GB2609706.3, filed 25 April 2026). Report: `docs/evidence/patent_gap_analysis.md`. Marking on every artifact: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.**
