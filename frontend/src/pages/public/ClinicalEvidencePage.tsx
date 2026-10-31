@@ -30,9 +30,9 @@ const RESULTS = [
   { endpoint:'Mammography Deep Backbone (Test I)', dataset:'CBIS-DDSM calc cases (INT8 quantized)', result:'EfficientNet-B0 (4.17MB) — Pre-clinical feasibility (packaged weights; not clinically validated)', status:'Engineering-validated' },
   { endpoint:'Retinal Deep Backbone (Test I)', dataset:'EyePACS fundus series (INT8 quantized)', result:'EfficientNet-B0 (4.16MB) — Pre-clinical feasibility (packaged weights; not clinically validated)', status:'Engineering-validated' },
   { endpoint:'CQ500 Test-Time AdaBN (ADR 004)', dataset:'CQ500 external 486 scans (transductive adaptation)', result:'AUROC 0.7596 (+0.0105 gain; unlabelled batchnorm re-estimation)', status:'Measured' },
-  { endpoint:'ICH Subtype Sensitivity (Test J)', dataset:'RSNA 2019 Multi-Label Benchmark (N=2,000)', result:'IPH: 100.0%, EDH: 100.0%, SDH: 94.4%, IVH: 95.2%, SAH: 85.4%', status:'PASS' },
+  { endpoint:'ICH Subtype Sensitivity (Test J)', dataset:'RSNA 2019 Multi-Label Benchmark (N=2,000) — internal/public benchmark', result:'IPH: 100.0%, EDH: 100.0%, SDH: 94.4%, IVH: 95.2%, SAH: 85.4% (RSNA cohort)', status:'Public-data evaluated' },
   { endpoint:'Perturbation Robustness (Test K)', dataset:'RSNA 2019 test set (N=300 slices, physics stress)', result:'Noise K-1 MET (AUROC 0.8013 @ σ=0.10), Blur K-2 MET (0.8083 @ L=7), Monotonicity K-3 MET (rs=0.9000)', status:'PARTIAL' },
-  { endpoint:'Surgical Recall on Subtypes (Test J)', dataset:'CQ500 External Cohort (EDH N=6, SAH N=118)', result:'Epidural: 83.3% (5/6), SAH: 88.1% (104/118) @ λ=0.0298 (Zero-Label AdaBN)', status:'Measured' },
+  { endpoint:'Surgical Recall on Subtypes (Test J)', dataset:'CQ500 External Cohort (EDH N=6, SAH N=118)', result:'IPH: 89.8%, EDH: 83.3% (5/6), SDH: 86.7%, SAH: 88.1% (104/118) @ λ=0.0298 (Zero-Label AdaBN, transductive)', status:'Measured' },
   { endpoint:'Retrospective Threshold FNR (Test C/J)', dataset:'CQ500 Holdout (N=386, 162 ICH positive)', result:'Observed FNR 3.70% (6/162) @ λ=0.0298; 6.79% (11/162) @ λ=0.0753 (cal n=100)', status:'Measured' },
   { endpoint:'CQ500 Scanner Recalibration (C.2)', dataset:'CQ500 external (486 scans, CC BY-NC-SA 4.0)', result:'Best AUROC 0.7578 via Method 1: CQ500 T=2.426', status:'Measured' },
   { endpoint:'Drift Detection Engine (Test H)', dataset:'Simulated scanner shift streams (N=100–120)', result:'ALL 4 CRITERIA PASS — 1.41ms mean latency', status:'Engineering-validated' },
@@ -249,7 +249,7 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
             <span style={{ fontSize:11, color:C.textMd, fontFamily:C.FM }}>IRB/REC-Ready · Non-Interventional</span>
           </div>
           <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 16px' }}>
-            Following 15 frozen pre-registered empirical feasibility tests (Tests A through O), SEWA XAI has finalized the master prospective clinical protocol (<code>SEWA-CLIN-PROT-001</code>) and the <strong>4-Step NHS Deployment Pathway Playbook</strong> for acute NHS trust onboarding in the West Midlands:
+            Following 15 frozen pre-registered empirical feasibility tests (Tests A through O), SEWA XAI has prepared the master prospective clinical protocol (<code>SEWA-CLIN-PROT-001</code>) and the <strong>4-Step NHS Deployment Pathway Playbook</strong> for planned evaluation. A prospective clinical study (<strong>SEWA-SHADOW-1</strong>) is proposed but has not yet commenced; trust participation and approvals remain subject to confirmation:
           </p>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:12, marginBottom:16 }}>
             <div style={{ padding:14, background:C.bg2, border:`1px solid ${C.border}`, borderRadius:10 }}>
@@ -318,7 +318,7 @@ export function ClinicalEvidencePage({ onNavigate }: { onNavigate: (p: string) =
         <div style={{ padding:24, background:C.bg2, border:`1px solid ${C.normal}40`, borderRadius:16, marginBottom:24 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
             <span style={{ fontSize:10, fontWeight:800, color:C.normal, padding:'2px 8px', borderRadius:20, background:`${C.normal}18`, border:`1px solid ${C.normal}40` }}>TEST J VERIFIED</span>
-            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Test J - Acute ICH Subtype Diagnostic Sensitivity: HIGH SURGICAL RECALL</h2>
+            <h2 style={{ fontSize:16, fontWeight:800, color:C.textHi, margin:0 }}>Test J - Acute ICH Subtype Diagnostic Sensitivity: Public-data Evaluation (RSNA + CQ500)</h2>
           </div>
           <p style={{ fontSize:13, color:C.textMd, lineHeight:1.8, margin:'0 0 10px' }}>
             Multi-subtype evaluation across both RSNA 2019 (N=2,000) and CQ500 / BHX (N=486 scans, 226 annotated ICH studies):
