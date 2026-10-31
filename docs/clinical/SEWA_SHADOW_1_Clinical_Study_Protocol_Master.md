@@ -6,7 +6,7 @@
 **Study Phase**: Pre-Market Prospective Observational Clinical Validation (TRL 6 / Non-Significant Risk)  
 **Governing Principle**: **FEASIBILITY ON PUBLIC DATA. NOT CLINICAL EVIDENCE.** (Transitioning to Prospective NHS Clinical Verification)  
 **Version**: 2.0 (Master Release, 2026-10-28)  
-**Target Sponsoring Institution**: SEWA AI Health Technologies Ltd in partnership with West Midlands Academic Health Science Network / Health Innovation West Midlands (HIWM)  
+**Target Sponsoring Institution**: SEWA AI a Storegrill Inc Ltd in partnership with West Midlands Academic Health Science Network / Health Innovation West Midlands (HIWM)  
 **Target Clinical Sites**: Acute NHS Foundation Trusts across the West Midlands (e.g., University Hospitals Birmingham NHS Foundation Trust, University Hospitals Coventry & Warwickshire NHS Trust)
 
 ---

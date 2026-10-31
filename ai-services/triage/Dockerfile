@@ -56,7 +56,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /install /usr/local
 
 # Copy source (explicit paths — bulk 'COPY . .' hits a stale ACR quick-build layer cache)
-COPY main.py model.py /app/
+COPY main.py model.py safety_gating.py explainability_masked.py calibration_api.py model_registry.py registry_api.py drift_integration.py feature_extractor.py /app/
 COPY shared /app/shared
 COPY utils /app/utils
 

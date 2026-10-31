@@ -217,7 +217,7 @@ WE CLAIM:
    (e) evaluating prediction variance through stochastic inference with active dropout to verify that epistemic uncertainty responds appropriately to image degradation;
    (f) generating an explainable spatial saliency map via element-wise gradient-activation multiplication constrained by an automated anatomical soft-tissue segmentation mask;
    (g) combining outputs from the out-of-distribution score, conformal risk control gate, and epistemic uncertainty into a deterministic clinical routing decision, wherein studies cleared by all gates are deprioritised to routine review and studies failing any gate are escalated to emergency review; and
-   (h) dispatching prioritised clinical triage alerts to a medical display worklist, wherein final diagnostic report delivery requires authorised clinician sign-off enforced as a database-level constraint requiring signature metadata (signedBy, signedAt).
+   (h) dispatching prioritised clinical triage alerts to a physical medical display worklist on a PACS/radiology workstation, wherein final diagnostic report delivery requires authorised clinician sign-off enforced as a database-level constraint requiring signature metadata (signedBy, signedAt).
 
 2. The method of Claim 1, wherein the split conformal risk control prediction gate selects operational probability threshold lambda as a theoretical supremum threshold lambda_sup satisfying:
    lambda_sup = sup { lambda' in [0, 1] : (n_pos / (n_pos + 1)) * R_n(lambda') + (1 / (n_pos + 1)) <= alpha }
@@ -250,9 +250,9 @@ WE CLAIM:
 
 14. The method of Claim 1, wherein all clinical triage decisions, conformal scores, explainability maps, and clinician sign-off actions are logged to an immutable audit trail using SHA-256 hash chaining and periodic Merkle tree verification.
 
-15. A clinical artificial intelligence computing system for automated diagnostic triage and safety assurance, comprising:
-    at least one hardware processor;
-    a medical imaging interface configured to receive digital medical imaging studies via DICOM, HL7, or FHIR protocols;
+15. A clinical artificial intelligence computing apparatus for automated diagnostic triage and safety assurance, comprising physical hardware components:
+    at least one hardware processor coupled to a physical medical imaging interface and to a PACS/worklist server;
+    a medical imaging interface configured to receive digital medical imaging studies via DICOM, HL7, or FHIR protocols from physical imaging scanners and Picture Archiving and Communication System (PACS) servers;
     a deep neural network inference engine stored in memory and executable by the at least one processor;
     a zero-label adaptive batch normalisation module configured to update running mean and variance statistics of the deep neural network using unannotated imaging studies from a target clinical environment while weights remain frozen;
     a split conformal risk control module configured to enforce a pre-specified expected false negative triage error bound under exchangeability;
@@ -294,7 +294,7 @@ WE CLAIM:
    (e) a clinical routing module configured to combine outputs of (b),(c),(d) with database-enforced authorisation to gate dispatch of prioritised alerts, wherein the modules are co-arranged such that adaptation (a) conditions the representations used by (b),(c) and masked attribution (d) conditions inputs to metacognitive verification. parenchyma (20 to 40 HU), cerebrospinal fluid (0 to 15 HU), and acute haematoma (50 to 85 HU).
 
 26. A clinical artificial intelligence computing system for distribution-free risk-controlled radiological triage, comprising:
-    at least one hardware processor;
+    at least one hardware processor coupled to a physical medical imaging interface and to a PACS/worklist server;
     a medical imaging interface configured to receive non-contrast computed tomography imaging studies;
     a deep convolutional neural network feature extractor stored in memory and executable by the at least one processor;
     a zero-label adaptive batch normalisation module configured to update running mean and variance statistics of batch normalisation layers within the feature extractor using unannotated imaging studies from a target clinical scanner while convolutional filter weights remain frozen;

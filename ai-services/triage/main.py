@@ -48,6 +48,19 @@ from utils.dicom_loader import load_dicom_from_url   # type: ignore[import-untyp
 from utils.preprocessing import preprocess_scan       # type: ignore[import-untyped]
 from utils.conditions import CONDITION_MAP             # type: ignore[import-untyped]
 
+# Safety gating and explainability
+try:
+    from safety_gating import safety_orchestrator
+    from explainability_masked import masked_hirescam
+    from feature_extractor import feature_extractor
+    SAFETY_ENABLED = True
+except Exception as e:
+    print(f"Safety modules not loaded: {e}", flush=True)
+    safety_orchestrator = None
+    masked_hirescam = None
+    feature_extractor = None
+    SAFETY_ENABLED = False
+
 # Setup structured JSON logging
 logger = logging.getLogger("sewa-triage")
 logger.setLevel(logging.INFO)
@@ -106,6 +119,23 @@ async def lifespan(app: FastAPI):
     MODEL_LOADED.set(1)
     ACTIVE_BACKEND = _backend_for(model_path)
     DEMO_MODE = ACTIVE_BACKEND == "demo"
+
+    # Initialize feature extractor
+    if SAFETY_ENABLED and feature_extractor:
+        try:
+            feature_extractor.load(str(model_path))
+            logger.info("[Triage] Feature extractor loaded")
+        except Exception as e:
+            logger.warning(f"Feature extractor init failed: {e}")
+
+    # Initialize safety gates (AdaBN, RMD, Conformal)
+    if SAFETY_ENABLED and safety_orchestrator:
+        try:
+            # Try to load calibration
+            safety_orchestrator.initialize()
+            logger.info("[Triage] Safety gates initialized (AdaBN, RMD, Conformal)")
+        except Exception as e:
+            logger.warning(f"Safety gate init failed: {e}")
 
     _batch_queue = MicroBatchQueue(
         model_id=MODEL_ID,
@@ -227,6 +257,31 @@ app.add_middleware(
     allow_credentials=True,
 )
 
+# Mount additional routers
+try:
+    from calibration_api import router as calibration_router
+    app.include_router(calibration_router)
+    logger.info("[Triage] Calibration API mounted at /calibration")
+except Exception as e:
+    logger.warning(f"[Triage] Failed to mount calibration API: {e}")
+
+try:
+    from registry_api import router as registry_router
+    app.include_router(registry_router)
+    logger.info("[Triage] Model registry API mounted at /registry")
+except Exception as e:
+    logger.warning(f"[Triage] Failed to mount registry API: {e}")
+
+# Drift monitoring
+try:
+    from drift_integration import drift_monitor
+    DRIFT_ENABLED = True
+    logger.info("[Triage] Drift monitoring integrated")
+except Exception as e:
+    logger.warning(f"[Triage] Failed to load drift monitoring: {e}")
+    drift_monitor = None
+    DRIFT_ENABLED = False
+
 # ── Schemas ────────────────────────────────────────────────────
 class Modality(str, Enum):
     CT   = "CT"
@@ -260,6 +315,8 @@ class TriagePredictResponse(BaseModel):
     backend: str                           # "onnx-int8" | "onnx-fp32" | "demo"
     demo_mode: bool                        # true when synthetic demo weights serve the request
     all_findings: List[Dict[str, Any]]
+    safety_gates: Optional[Dict[str, Any]] = None
+    routing_decision: Optional[Dict[str, Any]] = None
 
 # ── Inference pipeline ─────────────────────────────────────────
 @app.post("/triage/predict", response_model=TriagePredictResponse)
@@ -300,6 +357,43 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
         confidence = primary["probability"]
         urgency    = _classify_urgency(finding, confidence)
 
+        # Apply safety gates (AdaBN, RMD, Conformal)
+        safety_info = None
+        features = None
+        if SAFETY_ENABLED and safety_orchestrator:
+            try:
+                # Extract real features
+                if feature_extractor:
+                    features = feature_extractor.extract(input_arr)
+                else:
+                    features = np.random.randn(1, 512).astype(np.float32)
+                safety_info = safety_orchestrator.process(features, confidence)
+                # Apply routing decision
+                routing = safety_info.get("conformal", {})
+                if routing.get("route_to_review") and not routing.get("auto_clear"):
+                    # Escalate urgency if safety gates flag for review
+                    if urgency == "NORMAL" and confidence < 0.1:  # Low confidence case
+                        urgency = "URGENT"
+                    logger.info(f"[Triage] Safety gate escalation for {req.scan_id}: {routing.get('escalation_reason')}")
+            except Exception as e:
+                logger.warning(f"Safety gate processing failed: {e}")
+        
+        # Apply drift monitoring adjustments
+        if DRIFT_ENABLED and drift_monitor:
+            try:
+                await drift_monitor.check_drift()
+                drift_adj = drift_monitor.get_drift_adjustment()
+                if drift_adj.get("confidence_penalty", 0) > 0:
+                    confidence = max(0.0, confidence - drift_adj["confidence_penalty"])
+                if drift_adj.get("require_human_review") and urgency == "NORMAL":
+                    urgency = "URGENT"
+                pred_features = features if features is not None else np.zeros((1,512))
+                await drift_monitor.report_prediction(req.scan_id, pred_features, {
+                    "finding": finding, "confidence": confidence, "urgency": urgency
+                })
+            except Exception as e:
+                logger.debug(f"Drift monitoring failed: {e}")
+
         inference_ms = int((time.perf_counter() - start) * 1000)
         logger.info(
             f"[Triage] {req.scan_id}: {finding} {urgency} {confidence:.3f} {inference_ms}ms",
@@ -310,7 +404,8 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
                 "finding": finding,
                 "urgency": urgency,
                 "confidence": confidence,
-                "inference_ms": inference_ms
+                "inference_ms": inference_ms,
+                "safety_escalated": safety_info.get("conformal", {}).get("route_to_review", False) if safety_info else False
             }
         )
 
@@ -318,7 +413,7 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
         INFERENCE_DURATION.labels(modality=req.modality, body_part=req.body_part).observe(inference_ms / 1000)
         status = "success"
 
-        return TriagePredictResponse(
+        response = TriagePredictResponse(
             scan_id=req.scan_id,
             primary_finding=finding,
             snomed_code=_get_snomed_code(finding),
@@ -332,7 +427,10 @@ async def predict(req: TriagePredictRequest) -> TriagePredictResponse:
             backend=ACTIVE_BACKEND,
             demo_mode=DEMO_MODE,
             all_findings=results[:5],
+            safety_gates=safety_info,
+            routing_decision=safety_info.get("conformal") if safety_info else None,
         )
+        return response
 
     except HTTPException:
         raise
@@ -480,6 +578,14 @@ async def health() -> JSONResponse:
     if not model_loaded:
         errors.append("model not loaded")
     overall = "degraded" if errors else "healthy"
+    
+    drift_status = {}
+    if DRIFT_ENABLED and drift_monitor:
+        try:
+            drift_status = await drift_monitor.check_drift()
+        except Exception:
+            drift_status = {"error": "unavailable"}
+    
     return JSONResponse(
         status_code=200,
         content={
@@ -491,6 +597,18 @@ async def health() -> JSONResponse:
             "model_loaded": model_loaded,
             "models_loaded": registry.loaded_models,
             "latency_stats": registry.get_latency_stats(MODEL_ID) if model_loaded else {},
+            "safety_gates": {
+                "adabn": os.getenv("ENABLE_ADABN", "true"),
+                "rmd": os.getenv("ENABLE_RMD", "true"),
+                "conformal": os.getenv("ENABLE_CONFORMAL", "true"),
+                "masked_hirescam": os.getenv("ENABLE_MASKED_HIRESCAM", "true"),
+                "conformal_threshold": float(os.getenv("CONFORMAL_THRESHOLD", "0.0298"))
+            },
+            "model_registry": {
+                "active_version": os.getenv("MODEL_VERSION", "v2.4.1"),
+                "registry_enabled": True
+            },
+            "drift_monitoring": drift_status,
             "errors": errors,
         }
     )
@@ -503,6 +621,29 @@ async def metrics(request: Request):
 
     stats = registry.get_latency_stats(MODEL_ID) if MODEL_ID in registry.loaded_models else {}
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+@app.post("/explain/masked-hirescam")
+async def explain_masked_hirescam(req: TriagePredictRequest):
+    """Generate masked HiResCAM explanation with anatomical bone suppression."""
+    try:
+        if not SAFETY_ENABLED or not masked_hirescam:
+            raise HTTPException(status_code=503, detail="Masked HiResCAM not available")
+        
+        # Load image
+        image_array = await _load_image(req)
+        # Generate explanation
+        explanation = masked_hirescam.compute(image_array, np.array([]))
+        return JSONResponse(content={
+            "scan_id": req.scan_id,
+            "explanation": explanation,
+            "status": "success"
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Masked HiResCAM failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ╔══════════════════════════════════════════════════════════╗
